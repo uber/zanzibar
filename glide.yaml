@@ -1,0 +1,35 @@
+package: github.com/uber/zanzibar
+import:
+- package: gopkg.in/validator.v2
+  version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
+- package: gopkg.in/yaml.v2
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
+- package: github.com/mailru/easyjson
+  version: 9d6630dc8c577b56cb9687a9cf9e8578aca7298a
+  subpackages:
+  - buffer
+  - jlexer
+  - jwriter
+- package: github.com/uber-go/zap
+  version: a5783ee4b216a927da8f839c45cfbf9d694e1467
+- package: github.com/pkg/errors
+  version: ^0.8.0
+- package: github.com/uber-go/atomic
+  version: ^1.0.0
+- package: github.com/apache/thrift
+  version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
+  subpackages:
+  - lib/go/thrift
+- package: github.com/uber-go/tally
+  version: 19715ce22dfc24b4fb4019f8606ce7f2d5b0304f
+- package: github.com/julienschmidt/httprouter
+  version: v1.1
+testImports:
+- package: github.com/stretchr/testify
+  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
+  subpackages:
+  - assert
+- package: github.com/kardianos/osext
+  version: c2c54e542fb797ad986b31721e1baedf214ca413
+- package: go.uber.org/thriftrw
+  version: v1.0.0
