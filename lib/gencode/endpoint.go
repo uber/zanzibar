@@ -33,8 +33,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"code.uber.internal/rt/edge-gateway"
-	{{.DownstreamService}}Client "code.uber.internal/rt/edge-gateway/clients/{{.DownstreamService}}"
+	"code.uber.internal/example/example-gateway"
+	{{.DownstreamService}}Client "code.uber.internal/example/example-gateway/clients/{{.DownstreamService}}"
 
 	"github.com/pkg/errors"
 )

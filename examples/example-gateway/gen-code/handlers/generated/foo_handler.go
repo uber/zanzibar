@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"code.uber.internal/rt/edge-gateway"
-	generatedClient "code.uber.internal/rt/edge-gateway/clients/generated"
+	"code.uber.internal/example/example-gateway"
+	generatedClient "code.uber.internal/example/example-gateway/clients/generated"
 
 	"github.com/pkg/errors"
 )
@@ -61,6 +61,8 @@ func HandleFooRequest(
 func convertToClient(
 	body *Foo,
 ) *generatedClient.Generated {
-	// TODO(sindelar): Implement this for more complex mappings.
+	clientBody := &generatedClient.Generated
+    // TODO(sindelar): Add field mappings here.
+    return body
 	}
 }
