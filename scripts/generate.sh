@@ -34,3 +34,8 @@ done
     #sed -E "/^package (\w)+$/a\ // @generated/" "$file" > "$file"
     #git clean -qf '*.bak'
 #done
+
+echo "Generating Endpoint Handlers"
+for file in $(find "$PREFIX/gen-code/uber/zanzibar/endpoints" -name "*.go" | grep -v "versioncheck.go"); do
+    go run lib/gencode/endpoint.go $PREFIX/endpoints test
+done

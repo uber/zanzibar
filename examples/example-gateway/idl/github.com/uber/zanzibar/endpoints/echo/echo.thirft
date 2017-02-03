@@ -1,0 +1,19 @@
+namespace java com.uber.zanzibar.services.echo
+
+include "../../exception.thrift"
+
+service Echo {
+    string echoString(
+        1: required string message
+    ) throws (
+        1: exception.BadRequest badRequest (zanzibar.http.status = "400")
+        2: exception.Unauthenticated unauthenticated (zanzibar.http.status = "401")
+        3: exception.RateLimited rateLimited (zanzibar.http.status = "429")
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/echo/string"
+        zanzibar.http.status = "200"
+        zanzibar.meta = "TokenAuth,Client"
+        zanzibar.handler = "echo.echoString"
+    )
+}
