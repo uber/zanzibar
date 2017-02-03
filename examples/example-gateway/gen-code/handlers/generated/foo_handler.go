@@ -1,11 +1,11 @@
-package test
+package generated
 
 import (
 	"io/ioutil"
 	"net/http"
 
 	"code.uber.internal/rt/edge-gateway"
-	testClient "code.uber.internal/rt/edge-gateway/clients/test"
+	generatedClient "code.uber.internal/rt/edge-gateway/clients/generated"
 
 	"github.com/pkg/errors"
 )
@@ -19,7 +19,7 @@ func HandleFooRequest(
 		return
 	}
 
-	var body testClient.foo
+	var body generatedClient.Foo
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -28,7 +28,7 @@ func HandleFooRequest(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := g.Clients.test.test(&body, h)
+	clientResp, err := g.Clients.generated.Generated(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -59,8 +59,8 @@ func HandleFooRequest(
 }
 
 func convertToClient(
-	body *foo,
-) *testClient.test {
+	body *Foo,
+) *generatedClient.Generated {
 	// TODO(sindelar): Implement this for more complex mappings.
 	}
 }

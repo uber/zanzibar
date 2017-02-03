@@ -7,7 +7,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/google_now"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/health"
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/foo/foo"
+	"github.com/uber/zanzibar/examples/example-gateway/gen-code/handlers/generated"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -80,12 +80,12 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 
 	router.Register(
-		"POST", "/foo",
+		"POST", "/generated",
 		makeEndpoint(
 			g,
+			"generated",
 			"foo",
-			"echo",
-			foo.HandleAddCredentials,
+			generated.HandleFooRequest,
 		),
 	)
 }

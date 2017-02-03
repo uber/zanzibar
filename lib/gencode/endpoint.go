@@ -48,7 +48,7 @@ func Handle{{.MyHandler | Title}}Request(
 		return
 	}
 
-	var body {{.DownstreamService}}Client.{{.MyHandler}}
+	var body {{.DownstreamService}}Client.{{.MyHandler | Title}}
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -57,7 +57,7 @@ func Handle{{.MyHandler | Title}}Request(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := g.Clients.{{.DownstreamService}}.{{.DownstreamMethod}}(&body, h)
+	clientResp, err := g.Clients.{{.DownstreamService}}.{{.DownstreamMethod | Title}}(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -88,8 +88,8 @@ func Handle{{.MyHandler | Title}}Request(
 }
 
 func convertToClient(
-	body *{{.MyHandler}},
-) *{{.DownstreamService}}Client.{{.DownstreamMethod}} {
+	body *{{.MyHandler | Title}},
+) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}} {
 	// TODO(sindelar): Implement this for more complex mappings.
 	}
 }
