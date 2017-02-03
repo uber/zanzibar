@@ -29,7 +29,7 @@ func (c *Client) AddCredential(r *AddCredentialRequest, h http.Header) (*http.Re
 	if h != nil {
 		req.Header = h
 	}
-
+	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req)
 }
 

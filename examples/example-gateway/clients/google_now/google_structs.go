@@ -6,8 +6,3 @@ package googleNow
 type AddCredentialRequest struct {
 	AuthCode string `json:"authCode"`
 }
-
-// AddCredentialResponse is the response for AddCredential.
-type AddCredentialResponse struct {
-	StatusCode int `json:"statusCode"`
-}

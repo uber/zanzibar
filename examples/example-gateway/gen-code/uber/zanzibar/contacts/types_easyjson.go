@@ -2,10 +2,6 @@
 
 package contacts
 
-// @generated
-
-// @generated
-
 import (
 	json "encoding/json"
 	easyjson "github.com/mailru/easyjson"

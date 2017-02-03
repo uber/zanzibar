@@ -2,8 +2,6 @@
 
 package contacts
 
-// @generated
-
 import (
 	json "encoding/json"
 	fmt "fmt"

@@ -49,13 +49,30 @@ func HandleAddCredentials(
 		return
 	}
 
-	var clientRespBody googleNowClient.AddCredentialResponse
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-		inc.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
+	if !isOKResponse(clientResp.StatusCode, []int{200, 202, 204}) {
+		inc.SendErrorString(clientResp.StatusCode, string(b))
 		return
 	}
 
+	// No need to unmarshal here because we expect empty body being returned.
+	// Add following code if the body is not empty.
+	//
+	// var clientRespBody rtnowClient.AddCredentialResponse
+	// if err := clientRespBody.UnmarshalJSON(b); err != nil {
+	// 	inc.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
+	// 	return
+	// }
+
 	// TODO(zw): map clientRespBody to endpoint response body if needed.
 	// Here we take shortcut since the response body doesn't change.
-	inc.WriteJSONBytes(clientResp.StatusCode, b)
+	inc.WriteJSONBytes(clientResp.StatusCode, nil)
+}
+
+func isOKResponse(statusCode int, okResponses []int) bool {
+	for _, r := range okResponses {
+		if statusCode == r {
+			return true
+		}
+	}
+	return false
 }
