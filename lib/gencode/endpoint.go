@@ -90,7 +90,9 @@ func Handle{{.MyHandler | Title}}Request(
 func convertToClient(
 	body *{{.MyHandler | Title}},
 ) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}} {
-	// TODO(sindelar): Implement this for more complex mappings.
+	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}
+    // TODO(sindelar): Add field mappings here.
+    return body
 	}
 }
 `
