@@ -60,10 +60,6 @@ imports:
   version: b023316084b4c85403a82782d4ffeff89b09cceb
   subpackages:
   - wire
-  - compile
-  - ast
-  - idl
-  - idl/internal
 - name: golang.org/x/sys
   version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
