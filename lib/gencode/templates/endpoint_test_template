@@ -1,3 +1,5 @@
+{{/* template to render gateway http endpoint tests */}}
+
 package {{.MyHandler}}_test
 
 import (

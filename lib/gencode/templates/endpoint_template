@@ -1,4 +1,6 @@
-`package {{.Package}}
+{{/* template to render gateway http endpoint code */}}
+
+package {{.Package}}
 
 import (
 	"io/ioutil"
@@ -66,4 +68,3 @@ func convertToClient(
     return body
 	}
 }
-`

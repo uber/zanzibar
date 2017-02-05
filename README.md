@@ -9,3 +9,10 @@ see this [guide](https://engdocs.uberinternal.com/engdocs/index.html).
  - `make bins`; generates binaries for local dev
  - `make examples/example-gateway/example-gateway`; generates example binary
 
+ ## Building a service
+
+ - Create  
+ -
+ -
+ -
+

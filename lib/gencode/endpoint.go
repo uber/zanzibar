@@ -21,10 +21,12 @@
 package main
 
 import (
+	"build"
 	"fmt"
 	"os"
 	"strings"
 	"text/template"
+	"path/filepath"
 )
 
 var tpl = `package {{.Package}}
@@ -108,7 +110,16 @@ func main() {
 		"Title": strings.Title,
 	}
 
-	tt := template.Must(template.New("Handler").Funcs(funcMap).Parse(tpl))
+	// Hacky way to find the template directory, is there a better way to do this?
+	importPath := "github.com/uber/rt/edge-gateway/lib/gencode" // modify to match import path of main
+	p, err := build.Default.Import(importPath, "", build.FindOnly)
+	if err != nil {
+		// handle error
+	}
+	templatePath := filepath.Join(p.Dir, "templates/endpoint_template")
+
+	//templatePath, _ := filepath.Abs("lib/gencode/templates/endpoint_template")
+	tt := template.Must(template.New("Handler").Funcs(funcMap).ParseFiles(templatePath))
     prefix := os.Args[1]
 
     // Iterate over all passed in endpoints.
@@ -141,6 +152,8 @@ func main() {
 			file.Close()
 
             // Build a test file with benchmarking to validate the endpoint.
+            // In the future, refactor this into a test runner instead of generating test
+			// files for each endpoint.
         	testCase := template.Must(template.New("Handler").Funcs(funcMap).Parse(testTemplate))
 			dest = endpointDir + string(os.PathSeparator) + strings.ToLower(handlers[j]) + "_handler_test.go"
 			file, err = os.Create(dest)
