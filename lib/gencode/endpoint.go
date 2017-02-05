@@ -21,8 +21,8 @@
 package main
 
 import (
-	"build"
 	"fmt"
+	"go/build"
 	"os"
 	"strings"
 	"text/template"
@@ -111,16 +111,29 @@ func main() {
 	}
 
 	// Hacky way to find the template directory, is there a better way to do this?
-	importPath := "github.com/uber/rt/edge-gateway/lib/gencode" // modify to match import path of main
+	importPath := "github.com/uber/zanzibar/lib/gencode" // modify to match import path of main
 	p, err := build.Default.Import(importPath, "", build.FindOnly)
 	if err != nil {
+		panic(fmt.Sprintf("Could not create build path for endpoint generation: %s", err))
 		// handle error
 	}
 	templatePath := filepath.Join(p.Dir, "templates/endpoint_template")
 
 	//templatePath, _ := filepath.Abs("lib/gencode/templates/endpoint_template")
+	//var templatePaths [1]string
+	//templatePaths[0] = templatePath
+
+    //b, err := ioutil.ReadFile(templatePath) // just pass the file name
+    //if err != nil {
+    //    fmt.Print(err)
+    //}
+    //str := string(b) // convert content to a 'string'
+    //fmt.Println(str) // print the content as a 'string'
+
 	tt := template.Must(template.New("Handler").Funcs(funcMap).ParseFiles(templatePath))
     prefix := os.Args[1]
+
+	fmt.Printf("Template %s\n", tt)
 
     // Iterate over all passed in endpoints.
 	for i := 2; i < len(os.Args); i++ {
@@ -147,14 +160,15 @@ func main() {
 				"DownstreamService": downstreamService,
 				"DownstreamMethod": downstreamMethod,
 			}
-			tt.Execute(file, vals)
+			tt.ExecuteTemplate(file, "Handler", vals)
 
 			file.Close()
 
             // Build a test file with benchmarking to validate the endpoint.
             // In the future, refactor this into a test runner instead of generating test
 			// files for each endpoint.
-        	testCase := template.Must(template.New("Handler").Funcs(funcMap).Parse(testTemplate))
+        	testCase := template.Must(template.New("HandlerTests").Funcs(funcMap).Parse(testTemplate))
+			fmt.Printf("Template %s\n", testCase)
 			dest = endpointDir + string(os.PathSeparator) + strings.ToLower(handlers[j]) + "_handler_test.go"
 			file, err = os.Create(dest)
 			if err != nil {
