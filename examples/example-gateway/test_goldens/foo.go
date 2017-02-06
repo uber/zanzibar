@@ -1,4 +1,10 @@
 package test_goldens
 
-var request = ""
-var response = ""
+var endpointHttpMethod = "POST"
+var endpointPath = "/generated/foo"
+var endpointRequest = "{\\\"testrequest\\\"}"
+var endpointResponse = "{\\\"testrequest\\\"}"
+var clientHttpMethod = "POST"
+var clientPath = "/foo"
+var clientRequest = "{\\\"testrequest\\\"}"
+var clientResponse = "{\\\"statusCode\\\":200}"

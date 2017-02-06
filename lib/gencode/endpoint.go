@@ -64,6 +64,7 @@ func main() {
 		os.Mkdir(endpointDir, 0755)
 		// PLACEHOLDER, REPLACE WITH HANDLERS FROM GENERATED CODE.
 		// Read all handlers for an endpoint and generate each.
+
 		handlers := []string{"foo"}
 		for j := 0; j < len(handlers); j++ {
 			dest := endpointDir + string(os.PathSeparator) + strings.ToLower(handlers[j]) + "_handler.go"
@@ -72,6 +73,7 @@ func main() {
 				fmt.Printf("Could not create %s: %s (skip)\n", dest, err)
 				continue
 			}
+
 			// TODO(sindelar): Use an endpoint to client map.
 			downstreamService := endpoint
 			downstreamMethod := os.Args[i]
@@ -94,11 +96,13 @@ func main() {
 			}
 
 			// TODO(sindelar): Read from golden file.
-			var clientResponse = "{\"statusCode\":200}"
+			
+			var clientResponse = "{\\\"statusCode\\\":200}"
 			var endpointPath = "/googlenow/add-credentials"
 			var endpointHttpMethod = "POST"
 			var clientPath = "/add-credentials"
 			var clientHttpMethod = "POST"
+			var endpointRequest = "{\\\"testrequest\\\"}"
 
 			vals = map[string]string{
 				"MyHandler":          handlers[j],
@@ -110,6 +114,7 @@ func main() {
 				"ClientPath":         clientPath,
 				"ClientHttpMethod":   clientHttpMethod,
 				"ClientResponse":     clientResponse,
+				"EndpointRequest": 	  endpointRequest,
 			}
 			testCaseTemplate.Execute(file, vals)
 

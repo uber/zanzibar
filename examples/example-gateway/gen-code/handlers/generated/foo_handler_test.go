@@ -19,7 +19,7 @@ import (
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-var benchBytes = []byte(<no value>})
+var benchBytes = []byte("{\"testrequest\"}")
 
 type testCase struct {
 	Counter      int
@@ -52,12 +52,12 @@ func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
 
     generated := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		if _, err := w.Write([]byte({"statusCode":200})); err != nil {
+		if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		testCase.Counter++
 	}
-	testCase.Backend.HandleFunc(POST, /add-credentials, generated)
+	testCase.Backend.HandleFunc("POST", "/add-credentials", generated)
 
 	config := &config.Config{}
 	config.Clients.GoogleNow.IP = "127.0.0.1"
@@ -79,7 +79,7 @@ func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
 	return testCase, nil
 }
 
-func Benchmark<no value>Foo(b *testing.B) {
+func BenchmarkGeneratedFoo(b *testing.B) {
 	testCase, err := newTestCase(nil, true)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
@@ -117,7 +117,7 @@ func Benchmark<no value>Foo(b *testing.B) {
 	b.StartTimer()
 }
 
-func TestAddCredentials(t *testing.T) {
+func TestFoo(t *testing.T) {
 	testCase, err := newTestCase(t, false)
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -127,7 +127,7 @@ func TestAddCredentials(t *testing.T) {
 	assert.NotNil(t, testCase.TestGateway, "gateway exists")
 
 	res, err := testCase.TestGateway.MakeRequest(
-		POST, /googlenow/add-credentials, bytes.NewReader(benchBytes),
+		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

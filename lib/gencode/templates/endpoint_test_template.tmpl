@@ -19,7 +19,7 @@ import (
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-var benchBytes = []byte({{.EndpointInput}}})
+var benchBytes = []byte("{{.EndpointRequest}}")
 
 type testCase struct {
 	Counter      int
@@ -52,12 +52,12 @@ func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
 
     {{.DownstreamMethod}} := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		if _, err := w.Write([]byte({{.ClientResponse}})); err != nil {
+		if _, err := w.Write([]byte("{{.ClientResponse}}")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		testCase.Counter++
 	}
-	testCase.Backend.HandleFunc({{.ClientHttpMethod}}, {{.ClientPath}}, {{.DownstreamMethod}})
+	testCase.Backend.HandleFunc("{{.ClientHttpMethod}}", "{{.ClientPath}}", {{.DownstreamMethod}})
 
 	config := &config.Config{}
 	config.Clients.GoogleNow.IP = "127.0.0.1"
@@ -79,7 +79,7 @@ func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
 	return testCase, nil
 }
 
-func Benchmark{{.MyEndpoint}}{{.MyHandler | Title}}(b *testing.B) {
+func Benchmark{{.DownstreamService | Title}}{{.MyHandler | Title}}(b *testing.B) {
 	testCase, err := newTestCase(nil, true)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
@@ -117,7 +117,7 @@ func Benchmark{{.MyEndpoint}}{{.MyHandler | Title}}(b *testing.B) {
 	b.StartTimer()
 }
 
-func TestAddCredentials(t *testing.T) {
+func Test{{.MyHandler | Title}}(t *testing.T) {
 	testCase, err := newTestCase(t, false)
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -127,7 +127,7 @@ func TestAddCredentials(t *testing.T) {
 	assert.NotNil(t, testCase.TestGateway, "gateway exists")
 
 	res, err := testCase.TestGateway.MakeRequest(
-		{{.EndpointHttpMethod}}, {{.EndpointPath}}, bytes.NewReader(benchBytes),
+		"{{.EndpointHttpMethod}}", "{{.EndpointPath}}", bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

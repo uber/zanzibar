@@ -20,10 +20,12 @@ echo "Generating JSON Marshal/Unmarshal"
 for file in $(find "$PREFIX/gen-code" -name "*.go" | grep -v "versioncheck.go"); do
     ./scripts/easy_json/easy_json "$file"
 done
+
 #for file in $(find "$PREFIX/gen-code" -name "*_easyjson.go"); do
     #sed -E "/^package (\w)+$/a\ // @generated/" "$file" > "$file"
     #git clean -qf '*.bak'
 #done
+
 
 echo "Generating JSON Marshal/Unmarshal for rest"
 for file in $(find "$PREFIX" -name "*_structs.go"); do
