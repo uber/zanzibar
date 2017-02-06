@@ -40,5 +40,5 @@ done
 echo "Generating Endpoint Handlers"
 mkdir "$PREFIX/gen-code/handlers"
 for file in $(find "$PREFIX/gen-code/uber/zanzibar/endpoints" -name "*.go" | grep -v "versioncheck.go"); do
-    go run lib/gencode/endpoint.go $PREFIX/gen-code/handlers generated
+    go run lib/gencode/endpoint.go $PREFIX/gen-code/handlers file
 done

@@ -27,6 +27,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/uber/zanzibar/lib/gencode"
 )
 
 func main() {
@@ -63,12 +65,28 @@ func main() {
 		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
 		os.Mkdir(endpointDir, 0755)
 
-		// PLACEHOLDER, REPLACE WITH HANDLERS FROM GENERATED CODE.
-		// Read all handlers for an endpoint and generate each.
-		ServiceSpec()
+		h := &gencode.PackageHelper{
+			ThriftRootDir:   os.Args[i],
+			TypeFileRootDir: "",
+			TargetGenDir:    endpointDir,
+		}
 
+		thrift := endpoint
+		m, err := gencode.NewModuleSpec(thrift, h)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to parse thrift file: %s", err))
+		}
+		if len(m.Services) == 0 {
+			panic(fmt.Sprintf("No services build from %s", thrift))
+		}
+		if len(m.Services) > 0 {
+			panic(fmt.Sprintf("Only 1 service allowed per endpoint: %s", thrift))
+		}
+
+		// Generate handlers and test files for each method
+		// handlers := m.Services[0].Methods
 		handlers := []string{"foo"}
-		fmt.Printf("Methods for %s: %s \n", endpoint, handlers)
+		fmt.Printf("Methods for %s: %s \n", endpoint, m.Services[0].Methods)
 
 		for j := 0; j < len(handlers); j++ {
 			dest := endpointDir + string(os.PathSeparator) + strings.ToLower(handlers[j]) + "_handler.go"
@@ -100,7 +118,7 @@ func main() {
 			}
 
 			// TODO(sindelar): Read from golden file.
-			
+
 			var clientResponse = "{\\\"statusCode\\\":200}"
 			var endpointPath = "/googlenow/add-credentials"
 			var endpointHttpMethod = "POST"
@@ -118,11 +136,15 @@ func main() {
 				"ClientPath":         clientPath,
 				"ClientHttpMethod":   clientHttpMethod,
 				"ClientResponse":     clientResponse,
-				"EndpointRequest": 	  endpointRequest,
+				"EndpointRequest":    endpointRequest,
 			}
 			testCaseTemplate.Execute(file, vals)
 
 			file.Close()
 		}
 	}
+}
+
+func GenerateHandler(method gencode.MethodSpec, h *gencode.PackageHelper) {
+	return
 }
