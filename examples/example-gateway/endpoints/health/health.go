@@ -5,12 +5,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// JSONResponse ...
-type JSONResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-}
-
 // HandleHealthRequest for the health request
 func HandleHealthRequest(
 	inc *zanzibar.IncomingMessage,

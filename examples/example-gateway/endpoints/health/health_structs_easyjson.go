@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson53c2c5caDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(in *jlexer.Lexer, out *JSONResponse) {
+func easyjson11da19ddDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(in *jlexer.Lexer, out *JSONResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +50,7 @@ func easyjson53c2c5caDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsH
 		in.Consumed()
 	}
 }
-func easyjson53c2c5caEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(out *jwriter.Writer, in JSONResponse) {
+func easyjson11da19ddEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(out *jwriter.Writer, in JSONResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -72,23 +72,23 @@ func easyjson53c2c5caEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsH
 // MarshalJSON supports json.Marshaler interface
 func (v JSONResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson53c2c5caEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(&w, v)
+	easyjson11da19ddEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v JSONResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson53c2c5caEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(w, v)
+	easyjson11da19ddEncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *JSONResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson53c2c5caDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(&r, v)
+	easyjson11da19ddDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *JSONResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson53c2c5caDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(l, v)
+	easyjson11da19ddDecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsHealth(l, v)
 }
