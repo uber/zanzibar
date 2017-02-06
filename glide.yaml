@@ -24,12 +24,11 @@ import:
   version: 19715ce22dfc24b4fb4019f8606ce7f2d5b0304f
 - package: github.com/julienschmidt/httprouter
   version: v1.1
-testImports:
-- package: github.com/stretchr/testify
-  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
-  subpackages:
-  - assert
 - package: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - package: go.uber.org/thriftrw
   version: v1.0.0
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
