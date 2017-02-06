@@ -12,7 +12,6 @@ see this [guide](https://engdocs.uberinternal.com/engdocs/index.html).
  ## Building a service:
 
  - Create an endpoint definition in idl/github.com/uber/zanzibar/endpoints
- - `make generate`; build definitions and marshalling code
+ - `make generate`; build definitions and marshalling code (WIP)
  - Register the endpoint in service/endpoints/register.go
- - Add example inputs and outputs for the endpoints and downstream services in test_goldens/
- - `make test`; verify new endpoint behaviour against test_goldens
+ - `make test`; 

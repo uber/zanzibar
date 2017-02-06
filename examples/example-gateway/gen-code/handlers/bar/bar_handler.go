@@ -1,22 +1,22 @@
-{{/* template to render gateway http endpoint code */}}
+
 /*
 * CODE GENERATED AUTOMATICALLY
 * THIS FILE SHOULD NOT BE EDITED BY HAND
 */
 
-package {{.Package}}
+package bar
 
 import (
 	"io/ioutil"
 	"net/http"
 
 	"code.uber.internal/example/example-gateway"
-	{{.DownstreamService}}Client "code.uber.internal/example/example-gateway/clients/{{.DownstreamService}}"
+	barClient "code.uber.internal/example/example-gateway/clients/bar"
 
 	"github.com/pkg/errors"
 )
 
-func Handle{{.MyHandler | Title}}Request(
+func HandleBarRequest(
 	inc *gateway.IncomingMessage,
 	gateway *gateway.EdgeGateway,
 ) {
@@ -25,7 +25,7 @@ func Handle{{.MyHandler | Title}}Request(
 		return
 	}
 
-	var body {{.DownstreamService}}Client.{{.MyHandler | Title}}
+	var body barClient.Bar
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -34,7 +34,7 @@ func Handle{{.MyHandler | Title}}Request(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := g.Clients.{{.DownstreamService}}.{{.DownstreamMethod | Title}}(&body, h)
+	clientResp, err := g.Clients.bar.Bar(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -65,11 +65,11 @@ func Handle{{.MyHandler | Title}}Request(
 }
 
 func convertToClient(
-	body *{{.MyHandler | Title}},
-) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}} {
+	body *Bar,
+) *barClient.Bar {
     // TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}()
+	clientBody := &barClient.Bar()
     return clientBody
 	}
 }
