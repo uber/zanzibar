@@ -8,6 +8,7 @@
 *.html
 .tmp/
 .gen/
+.vscode/
 /vendor
 /standalone
 /workspace
