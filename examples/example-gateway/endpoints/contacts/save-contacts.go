@@ -1,7 +1,5 @@
 package contacts
 
-//go:generate easyjson -all $GOFILE
-
 import (
 	errors "github.com/pkg/errors"
 	"github.com/uber-go/zap"

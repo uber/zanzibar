@@ -1,7 +1,5 @@
 package health
 
-//go:generate easyjson -all $GOFILE
-
 import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/runtime"

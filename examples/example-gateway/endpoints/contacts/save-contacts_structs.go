@@ -1,7 +1,5 @@
 package contacts
 
-//go:generate easyjson -all $GOFILE
-
 // ContactFragment ...
 type ContactFragment struct {
 	Type string `json:"type"`
