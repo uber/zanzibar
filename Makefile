@@ -52,7 +52,7 @@ verify_deps:
 	@[ ! -s deps.log ]
 
 .PHONY: generate
-generate:
+generate: scripts/easy_json/easy_json
 	@bash ./scripts/generate.sh
 
 .PHONY: test
@@ -63,6 +63,9 @@ test: verify_deps generate lint
 .PHONY: bench
 bench:
 	time go test -run _NONE_ -bench . -benchmem -benchtime 7s -cpu 2 ./test/...
+
+scripts/easy_json/easy_json: $(GO_FILES)
+	go build -o $@ $(dir ./$@)
 
 $(PROGS): $(GO_FILES)
 	@echo Building $@
@@ -85,6 +88,7 @@ go-docs:
 .PHONY: clean-easyjson
 clean-easyjson:
 	find . -name "*_easyjson.go" -delete
+	find . -name "*.bak" -delete
 	find . -name "easyjson-bootstrap*.go" -delete
 
 .PHONY: kill-dead-benchmarks
@@ -135,8 +139,12 @@ view-gocov:
 view-cover:
 	go tool cover -html=./coverage/cover.out
 
+.PHONY: clean-vendor
+clean-vendor:
+	rm -rf ./vendor
+
 .PHONY: clean
-clean: clean-easyjson clean-cover
+clean: clean-easyjson clean-cover clean-vendor
 	go clean
 	rm -f $(PROGS)
 
