@@ -62,10 +62,14 @@ func main() {
 		endpoint := os.Args[i]
 		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
 		os.Mkdir(endpointDir, 0755)
+
 		// PLACEHOLDER, REPLACE WITH HANDLERS FROM GENERATED CODE.
 		// Read all handlers for an endpoint and generate each.
+		ServiceSpec()
 
 		handlers := []string{"foo"}
+		fmt.Printf("Methods for %s: %s \n", endpoint, handlers)
+
 		for j := 0; j < len(handlers); j++ {
 			dest := endpointDir + string(os.PathSeparator) + strings.ToLower(handlers[j]) + "_handler.go"
 			file, err := os.Create(dest)
