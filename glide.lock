@@ -56,10 +56,18 @@ imports:
   - m3/thriftudp
 - name: github.com/uber-go/zap
   version: a5783ee4b216a927da8f839c45cfbf9d694e1467
+- name: github.com/uber/zanzibar
+  version: c5050ada93b0fbe37608b126c791bcbc3a60a7d3
+  subpackages:
+  - examples/example-gateway/gen-code/handlers/generated
 - name: go.uber.org/thriftrw
   version: b023316084b4c85403a82782d4ffeff89b09cceb
   subpackages:
   - wire
+  - compile
+  - ast
+  - idl
+  - idl/internal
 - name: golang.org/x/sys
   version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
