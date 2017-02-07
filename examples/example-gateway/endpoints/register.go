@@ -80,11 +80,11 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 
 	router.Register(
-		"POST", "/generated",
+		"POST", "/bar",
 		makeEndpoint(
 			g,
-			"generated",
-			"foo",
+			"bar",
+			"bar",
 			bar.HandleBarRequest,
 		),
 	)
