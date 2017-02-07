@@ -10,21 +10,26 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	{{.DownstreamService}}Client "github.com/uber/zanzibar/examples/example-gateway/clients/{{.DownstreamService}}"
-
 	"github.com/pkg/errors"
+	"github.com/uber-go/zap"
+	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{.DownstreamService}}Client "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/{{.DownstreamService}}/{{.DownstreamService}}"
+	{{.MyHandler}} "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar"
 )
 
 func Handle{{.MyHandler | Title}}Request(
-	inc *gateway.IncomingMessage,
-	gateway *gateway.EdgeGateway,
+	inc *zanzibar.IncomingMessage,
+	g *zanzibar.Gateway,
+	clients *clients.Clients,
 ) {
 	rawBody, ok := inc.ReadAll()
 	if !ok {
 		return
 	}
 
-	var body {{.DownstreamService}}Client.{{.MyHandler | Title}}
+	var body {{.MyHandler}}.{{.MyHandler | Title}}Request
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -33,7 +38,7 @@ func Handle{{.MyHandler | Title}}Request(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := g.Clients.{{.DownstreamService}}.{{.DownstreamMethod | Title}}(&body, h)
+	clientResp, err := clients.{{.DownstreamService}}.{{.DownstreamMethod | Title}}(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -60,15 +65,24 @@ func Handle{{.MyHandler | Title}}Request(
 	}
 
 	// TODO(sindelar): Apply response filtering and translation.
-	inc.CopyJSON(res.Res.StatusCode, res.Res.Body)
+	inc.CopyJSON(clientResp.Res.StatusCode, clientResp.Res.Body)
 }
 
 func convertToClient(
-	body *{{.MyHandler | Title}},
-) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}} {
+	body *{{.MyHandler | Title}}.{{.MyHandler}}Request,
+) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}Request {
     // TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}()
+	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}Request()
     return clientBody
+}
+
+
+func isOKResponse(statusCode int, okResponses []int) bool {
+	for _, r := range okResponses {
+		if statusCode == r {
+			return true
+		}
 	}
+	return false
 }

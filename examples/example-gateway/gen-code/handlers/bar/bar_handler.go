@@ -10,22 +10,26 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/client/bar"
-	//"code.uber.internal/example/example-gateway/clients/bar"
-
 	"github.com/pkg/errors"
+	"github.com/uber-go/zap"
+	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar"
+	bar "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar"
 )
 
 func HandleBarRequest(
-	inc *gateway.IncomingMessage,
-	gateway *gateway.EdgeGateway,
+	inc *zanzibar.IncomingMessage,
+	g *zanzibar.Gateway,
+	clients *clients.Clients,
 ) {
 	rawBody, ok := inc.ReadAll()
 	if !ok {
 		return
 	}
 
-	var body barClient.Bar
+	var body bar.BarRequest
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -34,7 +38,7 @@ func HandleBarRequest(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := g.Clients.bar.Bar(&body, h)
+	clientResp, err := clients.bar.Bar(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -61,15 +65,24 @@ func HandleBarRequest(
 	}
 
 	// TODO(sindelar): Apply response filtering and translation.
-	inc.CopyJSON(res.Res.StatusCode, res.Res.Body)
+	inc.CopyJSON(clientResp.Res.StatusCode, clientResp.Res.Body)
 }
 
 func convertToClient(
-	body *Bar,
-) *barClient.Bar {
+	body *Bar.barRequest,
+) *barClient.BarRequest {
     // TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &barClient.Bar()
+	clientBody := &barClient.BarRequest()
     return clientBody
+}
+
+
+func isOKResponse(statusCode int, okResponses []int) bool {
+	for _, r := range okResponses {
+		if statusCode == r {
+			return true
+		}
 	}
+	return false
 }
