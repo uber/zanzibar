@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package gencode
 
 import (
 	"fmt"
@@ -29,66 +29,11 @@ import (
 	"text/template"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/lib/gencode"
 )
 
-func main() {
-	funcMap := template.FuncMap{
-		"Title": strings.Title,
-	}
-
-	// Hacky way to find the template directory. Switch to use zw's template helpers
-	// once they are landed.
-	importPath := "github.com/uber/zanzibar/lib/gencode"
-	p, err := build.Default.Import(importPath, "", build.FindOnly)
-	if err != nil {
-		panic(fmt.Sprintf("Could not create build path for endpoint generation: %s", err))
-	}
-	templatePath := filepath.Join(p.Dir, "templates/endpoint_template.tmpl")
-	handlerTemplate, err := template.New("endpoint_template.tmpl").Funcs(funcMap).ParseFiles(templatePath)
-	if err != nil {
-		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
-	}
-
-	// Build a test file with benchmarking to validate the endpoint.
-	// In the future, refactor this into a test runner instead of generating test
-	// files for each endpoint.
-	testCaseTemplatePath := filepath.Join(p.Dir, "templates/endpoint_test_template.tmpl")
-	testCaseTemplate, err := template.New("endpoint_test_template.tmpl").Funcs(funcMap).ParseFiles(testCaseTemplatePath)
-	if err != nil {
-		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
-	}
-
-	prefix := os.Args[1]
-	// Iterate over all passed in endpoints.
-	for i := 2; i < len(os.Args); i++ {
-		//endpoint := os.Args[i]
-		endpoint := "bar"
-		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
-		os.Mkdir(endpointDir, 0755)
-
-		// Generate handlers and test files for each method
-		m, err := BuildModuleSpecForEndpoint(endpointDir)
-		if err != nil {
-			fmt.Printf("Could not create endpoint specs for %s: %s \n", os.Args[i], err)
-			continue
-		}
-		handlers := m.Services[0].Methods
-
-		for j := 0; j < len(handlers); j++ {
-			// TODO: Why is ModuleSpec creating methods for error response
-			// like "missingArg"
-			// fmt.Printf("Found %s %s \n", handlers[j].EndpointName, handlers[j].Name)
-			if (handlers[j].Name == "bar") {
-				GenerateHandler(handlers[j], handlerTemplate, endpointDir)
-				GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
-			}
-		}
-	}
-}
-
-func BuildModuleSpecForEndpoint(endpointDir string) (*gencode.ModuleSpec, error) {
-	h := &gencode.PackageHelper{
+// BuildModuleSpecForEndpoint builds the module spec for an endpoint.
+func BuildModuleSpecForEndpoint(endpointDir string) (*ModuleSpec, error) {
+	h := &PackageHelper{
 		ThriftRootDir:   "examples/example-gateway/idl/github.com/uber/zanzibar/endpoints",
 		TypeFileRootDir: "examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar",
 		TargetGenDir:    endpointDir,
@@ -100,7 +45,7 @@ func BuildModuleSpecForEndpoint(endpointDir string) (*gencode.ModuleSpec, error)
 	}
 	thrift := filepath.Join(p.Dir, "zanzibar/endpoints/bar/bar.thrift")
 
-	m, err := gencode.NewModuleSpec(thrift, h)
+	m, err := NewModuleSpec(thrift, h)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse thrift file.")
 	}
@@ -110,7 +55,8 @@ func BuildModuleSpecForEndpoint(endpointDir string) (*gencode.ModuleSpec, error)
 	return m, nil
 }
 
-func GenerateHandler(method *gencode.MethodSpec, tmpl *template.Template, endpointDir string) {
+// GenerateHandler builds the generated code in endpointDir for a handler from a spec and template.
+func GenerateHandler(method *MethodSpec, tmpl *template.Template, endpointDir string) {
 	// MethodSpec containes the handler name as endpoint.handler
 	endpointName := strings.Split(method.EndpointName, ".")[0]
 	handlerName := strings.Split(method.Name, ".")[0]
@@ -137,7 +83,8 @@ func GenerateHandler(method *gencode.MethodSpec, tmpl *template.Template, endpoi
 	return
 }
 
-func GenerateTestCase(method *gencode.MethodSpec, tmpl *template.Template, endpointDir string) {
+// GenerateTestCase builds the generated test and benchmarking code in endpointDir for a handler from a spec and template.
+func GenerateTestCase(method *MethodSpec, tmpl *template.Template, endpointDir string) {
 	endpointName := strings.Split(method.EndpointName, ".")[0]
 	handlerName := strings.Split(method.Name, ".")[0]
 	dest := endpointDir + string(os.PathSeparator) + strings.ToLower(handlerName) + "_handler_test.go"
@@ -151,12 +98,12 @@ func GenerateTestCase(method *gencode.MethodSpec, tmpl *template.Template, endpo
 	downstreamService := endpointName
 	downstreamMethod := handlerName
 
-	// TODO(sindelar): Read from golden file.
+	// TODO(sindelar): Dummy data, read from golden file.
 	var clientResponse = "{\\\"statusCode\\\":200}"
 	var endpointPath = "/googlenow/add-credentials"
-	var endpointHttpMethod = "POST"
+	var endpointHTTPMethod = "POST"
 	var clientPath = "/add-credentials"
-	var clientHttpMethod = "POST"
+	var clientHTTPMethod = "POST"
 	var endpointRequest = "{\\\"testrequest\\\"}"
 
 	vals := map[string]string{
@@ -165,9 +112,9 @@ func GenerateTestCase(method *gencode.MethodSpec, tmpl *template.Template, endpo
 		"DownstreamService":  downstreamService,
 		"DownstreamMethod":   downstreamMethod,
 		"EndpointPath":       endpointPath,
-		"EndpointHttpMethod": endpointHttpMethod,
+		"EndpointHttpMethod": endpointHTTPMethod,
 		"ClientPath":         clientPath,
-		"ClientHttpMethod":   clientHttpMethod,
+		"ClientHttpMethod":   clientHTTPMethod,
 		"ClientResponse":     clientResponse,
 		"EndpointRequest":    endpointRequest,
 	}
