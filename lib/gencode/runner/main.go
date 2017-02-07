@@ -62,12 +62,13 @@ func main() {
 	// Iterate over all passed in endpoints.
 	for i := 2; i < len(os.Args); i++ {
 		//endpoint := os.Args[i]
-		endpoint := "bar"
+		endpoint := "bar" //os.Args[i]
 		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
 		os.Mkdir(endpointDir, 0755)
 
 		// Generate handlers and test files for each method
-		m, err := gencode.BuildModuleSpecForEndpoint(endpointDir)
+		//		m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, "zanzibar/endpoints/bar/bar.thrift")
+		m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, os.Args[i])
 		if err != nil {
 			fmt.Printf("Could not create endpoint specs for %s: %s \n", os.Args[i], err)
 			continue

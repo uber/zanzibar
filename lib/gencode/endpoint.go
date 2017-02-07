@@ -32,7 +32,7 @@ import (
 )
 
 // BuildModuleSpecForEndpoint builds the module spec for an endpoint.
-func BuildModuleSpecForEndpoint(endpointDir string) (*ModuleSpec, error) {
+func BuildModuleSpecForEndpoint(endpointDir string, endpointThriftPath string) (*ModuleSpec, error) {
 	h := &PackageHelper{
 		ThriftRootDir:   "examples/example-gateway/idl/github.com/uber/zanzibar/endpoints",
 		TypeFileRootDir: "examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar",
@@ -43,7 +43,7 @@ func BuildModuleSpecForEndpoint(endpointDir string) (*ModuleSpec, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not create build path for endpoint generation.")
 	}
-	thrift := filepath.Join(p.Dir, "zanzibar/endpoints/bar/bar.thrift")
+	thrift := filepath.Join(p.Dir, endpointThriftPath)
 
 	m, err := NewModuleSpec(thrift, h)
 	if err != nil {
