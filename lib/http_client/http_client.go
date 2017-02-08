@@ -23,8 +23,13 @@ package httpClient
 import "net/http"
 
 // HTTPClient defines a http client.
-// TODO(zw): move it to another package.
 type HTTPClient struct {
 	Client  *http.Client
 	BaseURL string
+}
+
+// Options to create a new http client
+type Options struct {
+	IP   string
+	Port int32
 }

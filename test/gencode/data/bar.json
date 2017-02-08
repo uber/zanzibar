@@ -1,0 +1,149 @@
+{
+	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+	"PackageName": "bar",
+	"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+	"IncludedPackages": [
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+	],
+	"Services": [
+		{
+			"Name": "Foo",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"Methods": [
+				{
+					"Name": "argNotStruct",
+					"HTTPMethod": "POST",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/arg-not-struct-path",
+					"Headers": null,
+					"RequestType": "argNotStructHTTPRequest",
+					"ResponseType": "",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": [
+						{
+							"Type": "string",
+							"Name": "request",
+							"Annotations": null
+						}
+					]
+				},
+				{
+					"Name": "bar",
+					"HTTPMethod": "POST",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/bar-path",
+					"Headers": null,
+					"RequestType": "barHTTPRequest",
+					"ResponseType": "BarResponse",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": [
+						{
+							"Type": "BarRequest",
+							"Name": "request",
+							"Annotations": null
+						}
+					]
+				},
+				{
+					"Name": "missingArg",
+					"HTTPMethod": "GET",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/missing-arg-path",
+					"Headers": null,
+					"RequestType": "",
+					"ResponseType": "BarResponse",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": null
+				},
+				{
+					"Name": "noRequest",
+					"HTTPMethod": "GET",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/no-request-path",
+					"Headers": null,
+					"RequestType": "",
+					"ResponseType": "BarResponse",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": null
+				},
+				{
+					"Name": "tooManyArgs",
+					"HTTPMethod": "POST",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/too-many-args-path",
+					"Headers": null,
+					"RequestType": "tooManyArgsHTTPRequest",
+					"ResponseType": "BarResponse",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": [
+						{
+							"Type": "BarRequest",
+							"Name": "request",
+							"Annotations": null
+						},
+						{
+							"Type": "foo.FooStruct",
+							"Name": "foo",
+							"Annotations": null
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,87 @@
+{{- /* template to render edge gateway http client code */ -}}
+{{- /* TODO(zw): refactor it to two templates */ -}}
+package {{.PackageName}}
+
+import (
+	"bytes"
+	"net/http"
+	"strconv"
+
+	"github.com/uber/zanzibar/lib/http_client"
+    {{range $idx, $pkg := .IncludedPackages -}}    "{{$pkg}}"
+    {{- end}}
+)
+
+{{range .Services}}
+{{- $clientName := title .Name | printf "%sClient" -}}
+// {{$clientName}} is the http client for service {{.Name}}.
+type {{$clientName}} httpClient.HTTPClient
+
+// NewClient returns a new http client for service {{.Name}}.
+func NewClient(opts *httpClient.Options) *Client {
+	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+	return &Client{
+		Client: &http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives:   false,
+				MaxIdleConns:        500,
+				MaxIdleConnsPerHost: 500,
+			},
+		},
+		BaseURL: baseURL,
+	}
+}
+
+{{/*  ========================= Method =========================  */ -}}
+
+{{range .Methods}}
+{{if len .RequestStruct | ne 0}} {{- /* generate struct to wrap request args*/ -}}
+// {{.RequestType}} is the http body type for endpoint {{.Name}}.
+type {{.RequestType}} struct {
+{{range .RequestStruct}} {{- printf "    %s %s\n" (title .Name) .Type -}}
+{{end -}}
+}{{end -}}
+
+{{- if ne .RequestType ""}}
+{{/* template for having request http body */}}
+// {{title .Name}} calls "{{.HTTPPath}}" endpoint.
+func (c *{{$clientName}}) {{title .Name}}(r *{{.RequestType}}, h http.Header) (*http.Response, error) {
+	// Generate full URL.
+	fullURL := c.BaseURL + "{{.HTTPPath}}"
+
+	rawBody, err := r.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, bytes.NewReader(rawBody))
+	if err != nil {
+		return nil, err
+	}
+	if h != nil {
+		req.Header = h
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return c.Client.Do(req)
+}
+
+{{else}} {{/* template for having http body */ -}}
+
+// {{title .Name}} calls "{{.HTTPPath}}" endpoint.
+func (c *{{$clientName}}) {{title .Name}}(h http.Header) (*http.Response, error) {
+	// Generate full URL.
+	fullURL := c.BaseURL + "{{.HTTPPath}}"
+
+	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	if h != nil {
+		req.Header = h
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return c.Client.Do(req)
+}
+{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
+{{end}} {{- /* <range .Methods> */ -}}
+{{end}} {{- /* <range .Services> */ -}}

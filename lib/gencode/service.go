@@ -21,69 +21,102 @@
 package gencode
 
 import (
+	"sort"
+
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
 
 // ModuleSpec collects the service specifications from thrift file.
 type ModuleSpec struct {
-	Services []*ServiceSpec
+	// Source thrift file to generate the code.
+	ThriftFile string
+	// Go package name, generated base on module name.
+	PackageName string
+	// Go file path, generated from thrift file.
+	GoFilePath string
+	// Generated imports
+	IncludedPackages []string
+	Services         []*ServiceSpec
 }
 
 // ServiceSpec specifies a service.
 type ServiceSpec struct {
 	// Service name
 	Name string
-	// Go package name, generated base on module name.
-	PackageName string
-	// Go file path, generated from thrift file and service name.
-	FilePath string
 	// Source thrift file to generate the code.
 	ThriftFile string
-	// Generated imports
-	IncludedPackages []string
 	// List of methods/endpoints of the service
 	Methods []*MethodSpec
 }
 
 // NewModuleSpec returns a specification for a thrift module
-func NewModuleSpec(thrift string, h *PackageHelper) (*ModuleSpec, error) {
+func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, error) {
 	module, err := compile.Compile(thrift)
 	if err != nil {
-		return nil, errors.Wrap(err, "can't parse thrift file")
+		return nil, errors.Wrap(err, "failed parse thrift file")
 	}
-	moduleSpec := new(ModuleSpec)
-	for _, s := range module.Services {
-		serviceSpec, err := NewServiceSpec(module.GetName(), s, h)
-		if err != nil {
-			return nil, err
-		}
-		for _, pkg := range module.Includes {
-			if e := serviceSpec.addImports(pkg.Module.ThriftPath, h); e != nil {
-				return nil, errors.Wrapf(e, "can't add import %s", pkg.Module.ThriftPath)
-			}
-		}
-		moduleSpec.Services = append(moduleSpec.Services, serviceSpec)
+	targetPath, err := packageHelper.TargetGenPath(module.ThriftPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate target path")
+	}
+	moduleSpec := &ModuleSpec{
+		ThriftFile:  module.ThriftPath,
+		PackageName: module.GetName(),
+		GoFilePath:  targetPath,
+	}
+	if err := moduleSpec.AddImports(module, packageHelper); err != nil {
+		return nil, err
+	}
+	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
+		return nil, err
 	}
 	return moduleSpec, nil
 }
 
-// NewServiceSpec creates a service specification from given thrift file path.
-func NewServiceSpec(packageName string, spec *compile.ServiceSpec, packageHelper *PackageHelper) (*ServiceSpec, error) {
-	filePath, err := packageHelper.TargetGenPath(spec.File)
-	if err != nil {
-		return nil, err
+// AddImports adds imported Go packages in ModuleSpec in alphabetical order.
+func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageHelper) error {
+	for _, pkg := range module.Includes {
+		if err := ms.addAnImport(pkg.Module.ThriftPath, packageHelper); err != nil {
+			return errors.Wrapf(err, "can't add import %s", pkg.Module.ThriftPath)
+		}
 	}
-	serviceSpec := &ServiceSpec{
-		Name:        spec.Name,
-		PackageName: packageName,
-		ThriftFile:  spec.File,
-		FilePath:    filePath,
+	sort.Strings(ms.IncludedPackages)
+	return nil
+}
+
+// AddServices adds services in ModuleSpec in alphabetical order of service names.
+func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *PackageHelper) error {
+	names := make([]string, 0, len(module.Services))
+	for name := range module.Services {
+		names = append(names, name)
 	}
-	for _, f := range spec.Functions {
-		method, err := serviceSpec.NewMethod(f, packageHelper)
+	sort.Strings(names)
+	for _, name := range names {
+		serviceSpec, err := NewServiceSpec(module.Services[name], packageHelper)
 		if err != nil {
-			return nil, errors.Wrapf(err, "service %s method %s", spec.Name, f.MethodName())
+			return err
+		}
+		ms.Services = append(ms.Services, serviceSpec)
+	}
+	return nil
+}
+
+// NewServiceSpec creates a service specification from given thrift file path.
+func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*ServiceSpec, error) {
+	serviceSpec := &ServiceSpec{
+		Name:       spec.Name,
+		ThriftFile: spec.File,
+	}
+	funcNames := make([]string, 0, len(spec.Functions))
+	for name := range spec.Functions {
+		funcNames = append(funcNames, name)
+	}
+	sort.Strings(funcNames)
+	for _, funcName := range funcNames {
+		method, err := serviceSpec.NewMethod(spec.Functions[funcName], packageHelper)
+		if err != nil {
+			return nil, errors.Wrapf(err, "service %s method %s", spec.Name, funcName)
 		}
 		serviceSpec.Methods = append(serviceSpec.Methods, method)
 	}
@@ -116,22 +149,25 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 	if err = method.setRequestType(s.ThriftFile, funcSpec, packageHelper); err != nil {
 		return nil, err
 	}
+	if method.HTTPMethod == "GET" && method.RequestType != "" {
+		return nil, errors.Errorf("invalid annotation: HTTP GET method with body type")
+	}
 	return method, nil
 }
 
-func (s *ServiceSpec) addImports(thriftPath string, h *PackageHelper) error {
-	if thriftPath == s.ThriftFile {
+func (ms *ModuleSpec) addAnImport(thriftPath string, packageHelper *PackageHelper) error {
+	if thriftPath == ms.ThriftFile {
 		return nil
 	}
-	newPkg, err := h.TypeImportPath(thriftPath)
+	newPkg, err := packageHelper.TypeImportPath(thriftPath)
 	if err != nil {
 		return err
 	}
-	for _, pkg := range s.IncludedPackages {
+	for _, pkg := range ms.IncludedPackages {
 		if newPkg == pkg {
 			return nil
 		}
 	}
-	s.IncludedPackages = append(s.IncludedPackages, newPkg)
+	ms.IncludedPackages = append(ms.IncludedPackages, newPkg)
 	return nil
 }

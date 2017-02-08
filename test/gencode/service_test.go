@@ -22,43 +22,28 @@ package gencode_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"reflect"
-	"sort"
+	"flag"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/lib/gencode"
+	"github.com/uber/zanzibar/lib/testhelper"
 )
 
-type MethodSlice []*gencode.MethodSpec
+var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with expected response.")
 
-func (s MethodSlice) Len() int {
-	return len(s)
-}
-
-func (s MethodSlice) Less(i, j int) bool {
-	return s[i].Name < s[j].Name
-}
-
-func (s MethodSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
+const parsedBarFile = "data/bar.json"
 
 func TestModuleSpec(t *testing.T) {
 	barThrift := "../../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
 	m, err := gencode.NewModuleSpec(barThrift, newPackageHelper())
 	assert.NoError(t, err, "unable to parse the thrift file")
-	b, err := ioutil.ReadFile("bar.json")
-	assert.NoError(t, err, "unable to read the json file")
-	exp := new(gencode.ModuleSpec)
-	err = json.Unmarshal(b, exp)
-	assert.NoError(t, err, "unable to unmarshal expected file")
-	assert.True(t, strings.HasSuffix(m.Services[0].ThriftFile, exp.Services[0].ThriftFile), "the ThriftFile should have relative path as in exp")
-	exp.Services[0].ThriftFile = m.Services[0].ThriftFile
-
-	sort.Sort(MethodSlice(exp.Services[0].Methods))
-	sort.Sort(MethodSlice(m.Services[0].Methods))
-	assert.True(t, reflect.DeepEqual(*exp, *m), "unexpected generated module spec: exp=\n%+v, actual=\n%+v", exp.Services[0], m.Services[0])
+	// Converts the thrift file paths to relative path for easy comparison.
+	index := strings.Index(m.ThriftFile, "zanzibar")
+	m.ThriftFile = m.ThriftFile[index:]
+	m.Services[0].ThriftFile = m.Services[0].ThriftFile[index:]
+	actual, err := json.MarshalIndent(m, "", "\t")
+	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
+	testhelper.CompareGoldenFile(t, parsedBarFile, actual, *updateGoldenFile)
 }
