@@ -58,6 +58,7 @@ func main() {
 		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
 	}
 
+	fail := false
 	prefix := os.Args[1]
 	// Iterate over all passed in endpoints.
 	for i := 2; i < len(os.Args); i++ {
@@ -71,6 +72,7 @@ func main() {
 		//m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, os.Args[i])
 		if err != nil {
 			fmt.Printf("Could not create endpoint specs for %s: %s \n", os.Args[i], err)
+			fail = true
 			continue
 		}
 		handlers := m.Services[0].Methods
@@ -84,5 +86,9 @@ func main() {
 				gencode.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
 			}
 		}
+	}
+
+	if fail {
+		os.Exit(1)
 	}
 }

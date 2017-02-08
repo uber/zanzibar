@@ -49,6 +49,7 @@ func BuildModuleSpecForEndpoint(endpointDir string, endpointThriftPath string) (
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse thrift file.")
 	}
+
 	if len(m.Services) == 0 {
 		return nil, errors.Errorf("No services build from %s", thrift)
 	}
