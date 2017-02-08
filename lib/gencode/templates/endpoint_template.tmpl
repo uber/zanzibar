@@ -20,7 +20,7 @@ import (
 
 func Handle{{.MyHandler | Title}}Request(
 	inc *zanzibar.IncomingMessage,
-	g *zanzibar.Gateway,
+	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	rawBody, ok := inc.ReadAll()
@@ -68,11 +68,11 @@ func Handle{{.MyHandler | Title}}Request(
 }
 
 func convertToClient(
-	body *{{.MyHandler | Title}}.{{.MyHandler}}Request,
+	body *{{.MyHandler}}.{{.MyHandler | Title}}Request,
 ) *{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}Request {
 	// TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}Request()
+	clientBody := &{{.DownstreamService}}Client.{{.DownstreamMethod | Title}}Request{}
 	return clientBody
 }
 

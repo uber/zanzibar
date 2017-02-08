@@ -20,7 +20,7 @@ import (
 
 func HandleBarRequest(
 	inc *zanzibar.IncomingMessage,
-	g *zanzibar.Gateway,
+	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	rawBody, ok := inc.ReadAll()
@@ -68,11 +68,11 @@ func HandleBarRequest(
 }
 
 func convertToClient(
-	body *Bar.barRequest,
+	body *bar.BarRequest,
 ) *barClient.BarRequest {
 	// TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &barClient.BarRequest()
+	clientBody := &barClient.BarRequest{}
 	return clientBody
 }
 
