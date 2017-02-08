@@ -49,6 +49,12 @@ func main() {
 		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
 	}
 
+	clientTemplatePath := filepath.Join(p.Dir, "templates/http_client.tmpl")
+	clientTemplate, err := gencode.NewTemplate(clientTemplatePath)
+	if err != nil {
+		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)
+	}
+
 	// Build a test file with benchmarking to validate the endpoint.
 	// In the future, refactor this into a test runner instead of generating test
 	// files for each endpoint.
@@ -66,6 +72,27 @@ func main() {
 		endpoint := fileParts[len(fileParts)-2]
 		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
 		os.Mkdir(endpointDir, 0755)
+
+		os.Mkdir("examples/example-gateway/gen-code/clients", 0755)
+		h := &gencode.PackageHelper{
+			ThriftRootDir:   "examples/example-gateway/idl/github.com",
+			TypeFileRootDir: "examples/example-gateway/gen-code",
+			TargetGenDir:    "examples/example-gateway/gen-code/clients",
+		}
+		// Hack: only do bar...
+		_, err := clientTemplate.GenerateClientFile(
+			filepath.Join(
+				p.Dir, "..", "..", "examples", "example-gateway",
+				"idl", "github.com", "uber", "zanzibar", "clients",
+				"bar", "bar.thrift",
+			),
+			h,
+		)
+		if err != nil {
+			fmt.Printf("Could not create client specs for %s: %s \n", os.Args[i], err)
+			fail = true
+			continue
+		}
 
 		// Generate handlers and test files for each method
 		m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, "zanzibar/endpoints/"+endpoint+string(os.PathSeparator)+endpoint+".thrift")
