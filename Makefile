@@ -44,19 +44,19 @@ lint:
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
 	@[ ! -s lint.log ]
 
-.PHONY: verify_deps
-verify_deps:
-	@rm -f deps.log
-	@echo "Verifying dependency conflicts"
-	@glide -q update 2>&1 | tee -a deps.log
-	@[ ! -s deps.log ]
+# .PHONY: verify_deps
+# verify_deps:
+# 	@rm -f deps.log
+# 	@echo "Verifying dependency conflicts"
+# 	@glide -q update 2>&1 | tee -a deps.log
+# 	@[ ! -s deps.log ]
 
 .PHONY: generate
 generate: scripts/easy_json/easy_json
 	@bash ./scripts/generate.sh
 
 .PHONY: test
-test: verify_deps generate lint
+test: generate lint
 	go test ./test/...
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
