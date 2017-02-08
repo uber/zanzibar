@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
 	"github.com/uber/zanzibar/runtime"
 )
 
-// BarClient is the http client for service Foo.
+// BarClient is the http client for service Bar.
 type BarClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service Bar.

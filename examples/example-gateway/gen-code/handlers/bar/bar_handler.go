@@ -6,6 +6,7 @@
 package bar
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 
@@ -19,6 +20,7 @@ import (
 )
 
 func HandleBarRequest(
+	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,

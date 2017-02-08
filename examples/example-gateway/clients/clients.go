@@ -4,7 +4,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/clients/google_now"
 	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/clients/uber/zanzibar/clients/bar"
-	"github.com/uber/zanzibar/lib/http_client"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // Clients datastructure that holds all the generated clients
@@ -19,7 +19,7 @@ type Clients struct {
 type Options struct {
 	Contacts  contactsClient.Options
 	GoogleNow googleNow.Options
-	Bar       httpClient.Options
+	Bar       zanzibar.HTTPClientOptions
 }
 
 // CreateClients will make all clients

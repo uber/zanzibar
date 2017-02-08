@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/lib/http_client"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // BarClient is the http client for service Bar.
-type BarClient httpClient.HTTPClient
+type BarClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service Bar.
-func NewClient(opts *httpClient.Options) *BarClient {
+func NewClient(opts *zanzibar.HTTPClientOptions) *BarClient {
 	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
 	return &BarClient{
 		Client: &http.Client{
