@@ -27,10 +27,10 @@ done
     #git clean -qf '*.bak'
 #done
 
-echo "Generating JSON Marshal/Unmarshal for rest"
-for file in $(find "$PREFIX" -name "*_structs.go"); do
-    ./scripts/easy_json/easy_json "$file"
-done
+# echo "Generating JSON Marshal/Unmarshal for rest"
+# for file in $(find "$PREFIX" -name "*_structs.go"); do
+#     ./scripts/easy_json/easy_json "$file"
+# done
 
 #for file in $(find "$PREFIX" -name "*_easyjson.go"); do
     #sed -E "/^package (\w)+$/a\ // @generated/" "$file" > "$file"

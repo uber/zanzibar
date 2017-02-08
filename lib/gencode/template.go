@@ -32,6 +32,7 @@ import (
 
 var funcMap = tmpl.FuncMap{
 	"title": strings.Title,
+	"Title": strings.Title,
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.
@@ -43,7 +44,7 @@ type Template struct {
 func NewTemplate(templatePattern string) (*Template, error) {
 	t, err := tmpl.New("main").Funcs(funcMap).ParseGlob(templatePattern)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse tempalte files")
+		return nil, errors.Wrap(err, "failed to parse template files")
 	}
 	return &Template{
 		template: t,
@@ -60,20 +61,54 @@ func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (string, 
 	if len(m.Services) == 0 {
 		return "", errors.Errorf("no service is found in thrift file %s", thrift)
 	}
-	file, err := openFileOrCreate(m.GoFilePath)
+
+	err = t.execTemplateAndFmt("http_client.tmpl", m.GoFilePath, m)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to open file: ", err)
+		return "", err
 	}
-	if err := t.template.ExecuteTemplate(file, "http_client.tmpl", m); err != nil {
-		return "", errors.Wrapf(err, "failed to execute tempalte files for thrift %s", thrift)
+
+	baseName := filepath.Base(m.GoFilePath)
+	structsName := filepath.Dir(m.GoFilePath) + "/" +
+		baseName[:len(baseName)-3] + "_structs.go"
+
+	err = t.execTemplateAndFmt("http_client_structs.tmpl", structsName, m)
+	if err != nil {
+		return "", err
 	}
-	if err := exec.Command("gofmt", "-s", "-w", "-e", m.GoFilePath).Run(); err != nil {
-		return "", errors.Wrapf(err, "failed to gofmt file: %s", m.GoFilePath)
-	}
-	if err := file.Close(); err != nil {
-		return "", errors.Wrap(err, "failed to close file")
-	}
+
 	return m.GoFilePath, nil
+}
+
+func (t *Template) execTemplateAndFmt(templName string, filePath string, m *ModuleSpec) error {
+	file, err := openFileOrCreate(filePath)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open file: ", err)
+	}
+	if err := t.template.ExecuteTemplate(file, templName, m); err != nil {
+		return errors.Wrapf(err, "failed to execute template files for file %s", file)
+	}
+
+	gofmtCmd := exec.Command("gofmt", "-s", "-w", "-e", filePath)
+	gofmtCmd.Stdout = os.Stdout
+	gofmtCmd.Stderr = os.Stderr
+
+	if err := gofmtCmd.Run(); err != nil {
+		return errors.Wrapf(err, "failed to gofmt file: %s", filePath)
+	}
+
+	goimportsCmd := exec.Command("goimports", "-w", "-e", filePath)
+	goimportsCmd.Stdout = os.Stdout
+	goimportsCmd.Stderr = os.Stderr
+
+	if err := goimportsCmd.Run(); err != nil {
+		return errors.Wrapf(err, "failed to goimports file: %s", filePath)
+	}
+
+	if err := file.Close(); err != nil {
+		return errors.Wrap(err, "failed to close file")
+	}
+
+	return nil
 }
 
 func openFileOrCreate(file string) (*os.File, error) {

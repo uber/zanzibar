@@ -81,7 +81,13 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 			return errors.Wrapf(err, "can't add import %s", pkg.Module.ThriftPath)
 		}
 	}
+
+	if err := ms.addAnImport(ms.ThriftFile, packageHelper); err != nil {
+		return errors.Wrapf(err, "can't add import %s", ms.ThriftFile)
+	}
+
 	sort.Strings(ms.IncludedPackages)
+
 	return nil
 }
 
@@ -156,9 +162,6 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 }
 
 func (ms *ModuleSpec) addAnImport(thriftPath string, packageHelper *PackageHelper) error {
-	if thriftPath == ms.ThriftFile {
-		return nil
-	}
 	newPkg, err := packageHelper.TypeImportPath(thriftPath)
 	if err != nil {
 		return err

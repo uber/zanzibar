@@ -49,7 +49,7 @@ func main() {
 		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
 	}
 
-	clientTemplatePath := filepath.Join(p.Dir, "templates/http_client.tmpl")
+	clientTemplatePath := filepath.Join(p.Dir, "templates/*.tmpl")
 	clientTemplate, err := gencode.NewTemplate(clientTemplatePath)
 	if err != nil {
 		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)

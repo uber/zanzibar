@@ -21,7 +21,7 @@ exception BarException {
   1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
 
-service Foo {
+service Bar {
   BarResponse bar (
     1: required BarRequest request
   ) throws (

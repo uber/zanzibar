@@ -1,21 +1,20 @@
-package bar
+package barClient
 
 import (
 	"bytes"
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
 	"github.com/uber/zanzibar/lib/http_client"
 )
 
-// FooClient is the http client for service Foo.
-type FooClient httpClient.HTTPClient
+// BarClient is the http client for service Bar.
+type BarClient httpClient.HTTPClient
 
-// NewClient returns a new http client for service Foo.
-func NewClient(opts *httpClient.Options) *Client {
+// NewClient returns a new http client for service Bar.
+func NewClient(opts *httpClient.Options) *BarClient {
 	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
-	return &Client{
+	return &BarClient{
 		Client: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
@@ -27,13 +26,8 @@ func NewClient(opts *httpClient.Options) *Client {
 	}
 }
 
-// argNotStructHTTPRequest is the http body type for endpoint argNotStruct.
-type argNotStructHTTPRequest struct {
-	Request string
-}
-
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
-func (c *FooClient) ArgNotStruct(r *argNotStructHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) ArgNotStruct(r *argNotStructHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/arg-not-struct-path"
 
@@ -53,13 +47,8 @@ func (c *FooClient) ArgNotStruct(r *argNotStructHTTPRequest, h http.Header) (*ht
 	return c.Client.Do(req)
 }
 
-// barHTTPRequest is the http body type for endpoint bar.
-type barHTTPRequest struct {
-	Request BarRequest
-}
-
 // Bar calls "/bar-path" endpoint.
-func (c *FooClient) Bar(r *barHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) Bar(r *barHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/bar-path"
 
@@ -80,7 +69,7 @@ func (c *FooClient) Bar(r *barHTTPRequest, h http.Header) (*http.Response, error
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
-func (c *FooClient) MissingArg(h http.Header) (*http.Response, error) {
+func (c *BarClient) MissingArg(h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/missing-arg-path"
 
@@ -96,7 +85,7 @@ func (c *FooClient) MissingArg(h http.Header) (*http.Response, error) {
 }
 
 // NoRequest calls "/no-request-path" endpoint.
-func (c *FooClient) NoRequest(h http.Header) (*http.Response, error) {
+func (c *BarClient) NoRequest(h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/no-request-path"
 
@@ -111,14 +100,8 @@ func (c *FooClient) NoRequest(h http.Header) (*http.Response, error) {
 	return c.Client.Do(req)
 }
 
-// tooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
-type tooManyArgsHTTPRequest struct {
-	Request BarRequest
-	Foo     foo.FooStruct
-}
-
 // TooManyArgs calls "/too-many-args-path" endpoint.
-func (c *FooClient) TooManyArgs(r *tooManyArgsHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) TooManyArgs(r *tooManyArgsHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/too-many-args-path"
 
