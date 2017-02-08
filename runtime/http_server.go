@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package httpServer
+package zanzibar
 
 import (
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -42,14 +41,6 @@ type HTTPServer struct {
 
 	RealPort int32
 	RealAddr string
-}
-
-// NewHTTPServer allocate a http server
-func NewHTTPServer(server *http.Server, logger zap.Logger) *HTTPServer {
-	return &HTTPServer{
-		Server: server,
-		Logger: logger,
-	}
 }
 
 // JustListen will only listen on port and query real addr
@@ -82,8 +73,6 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 		server.Logger.Error("Error http serving",
 			zap.String("error", err.Error()),
 		)
-		os.Exit(1)
-		return
 	}
 
 	waitGroup.Done()

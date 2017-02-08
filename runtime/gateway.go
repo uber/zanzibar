@@ -33,7 +33,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/lib/http_server"
 )
 
 // Clients interface is a placeholder for the generated clients
@@ -77,7 +76,7 @@ type Gateway struct {
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
-	server            *httpServer.HTTPServer
+	server            *HTTPServer
 
 	// clients?
 	//	- logger
@@ -94,13 +93,20 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 		panic("opts.MetricsBackend required")
 	}
 
+	if opts.Clients == nil {
+		panic("opts.Clients required")
+	}
+
 	gateway := &Gateway{
 		IP:        opts.IP,
 		Port:      opts.Port,
 		WaitGroup: &sync.WaitGroup{},
+		Clients:   opts.Clients,
 
 		metricsBackend: opts.MetricsBackend,
 	}
+
+	gateway.router = NewRouter(gateway)
 
 	if err := gateway.setupLogger(&opts.Logger); err != nil {
 		return nil, err
@@ -110,18 +116,9 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 		return nil, err
 	}
 
-	gateway.router = NewRouter(gateway)
-
-	gateway.server = httpServer.NewHTTPServer(&http.Server{
-		Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
-		Handler: gateway.router,
-	}, gateway.Logger)
-
-	if opts.Clients == nil {
-		panic("clients required")
+	if err := gateway.setupHTTPServer(); err != nil {
+		return nil, err
 	}
-
-	gateway.Clients = opts.Clients
 
 	return gateway, nil
 }
@@ -259,5 +256,17 @@ func (gateway *Gateway) setupLogger(opts *LoggerOptions) error {
 		),
 		output,
 	)
+	return nil
+}
+
+func (gateway *Gateway) setupHTTPServer() error {
+	gateway.server = &HTTPServer{
+		Server: &http.Server{
+			Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
+			Handler: gateway.router,
+		},
+		Logger: gateway.Logger,
+	}
+
 	return nil
 }

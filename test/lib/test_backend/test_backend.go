@@ -29,12 +29,12 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	zap "github.com/uber-go/zap"
-	httpServer "github.com/uber/zanzibar/lib/http_server"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // TestBackend will pretend to be a http backend
 type TestBackend struct {
-	Server    *httpServer.HTTPServer
+	Server    *zanzibar.HTTPServer
 	IP        string
 	Port      int32
 	RealPort  int32
@@ -89,10 +89,13 @@ func CreateBackend(port int32) *TestBackend {
 
 	testLogger := zap.New(zap.NewJSONEncoder())
 
-	backend.Server = httpServer.NewHTTPServer(&http.Server{
-		Addr:    backend.IP + ":" + strconv.Itoa(int(port)),
-		Handler: backend.router,
-	}, testLogger)
+	backend.Server = &zanzibar.HTTPServer{
+		Server: &http.Server{
+			Addr:    backend.IP + ":" + strconv.Itoa(int(port)),
+			Handler: backend.router,
+		},
+		Logger: testLogger,
+	}
 
 	return backend
 }
