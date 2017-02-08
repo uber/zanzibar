@@ -14,7 +14,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar"
+	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/clients/uber/zanzibar/clients/bar"
 	bar "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar"
 )
 
@@ -37,7 +37,7 @@ func HandleBarRequest(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := clients.Bar.Bar(&body, h)
+	clientResp, err := clients.Bar.Bar(clientBody, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -64,15 +64,15 @@ func HandleBarRequest(
 	}
 
 	// TODO(sindelar): Apply response filtering and translation.
-	inc.CopyJSON(clientResp.Res.StatusCode, clientResp.Res.Body)
+	inc.CopyJSON(clientResp.StatusCode, clientResp.Body)
 }
 
 func convertToClient(
 	body *bar.BarRequest,
-) *barClient.BarRequest {
+) *barClient.BarHTTPRequest {
 	// TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
-	clientBody := &barClient.BarRequest{}
+	clientBody := &barClient.BarHTTPRequest{}
 	return clientBody
 }
 
