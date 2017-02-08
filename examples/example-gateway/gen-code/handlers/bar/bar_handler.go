@@ -37,7 +37,7 @@ func HandleBarRequest(
 	h.Set("x-uber-uuid", inc.Header.Get("x-uber-uuid"))
 
 	clientBody := convertToClient(&body)
-	clientResp, err := clients.bar.Bar(&body, h)
+	clientResp, err := clients.Bar.Bar(&body, h)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
