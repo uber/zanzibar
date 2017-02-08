@@ -57,7 +57,7 @@ func BuildModuleSpecForEndpoint(endpointDir string, endpointThriftPath string) (
 }
 
 // GenerateHandler builds the generated code in endpointDir for a handler from a spec and template.
-func GenerateHandler(method *MethodSpec, tmpl *template.Template, endpointDir string) {
+func GenerateHandler(method *MethodSpec, tmpl *template.Template, endpointDir string) error {
 	// MethodSpec containes the handler name as endpoint.handler
 	endpointName := strings.Split(method.EndpointName, ".")[0]
 	handlerName := strings.Split(method.Name, ".")[0]
@@ -65,7 +65,7 @@ func GenerateHandler(method *MethodSpec, tmpl *template.Template, endpointDir st
 	file, err := os.Create(dest)
 	if err != nil {
 		fmt.Printf("Could not create %s: %s (skip)\n", dest, err)
-		return
+		return err
 	}
 
 	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
@@ -78,21 +78,27 @@ func GenerateHandler(method *MethodSpec, tmpl *template.Template, endpointDir st
 		"DownstreamService": downstreamService,
 		"DownstreamMethod":  downstreamMethod,
 	}
-	tmpl.ExecuteTemplate(file, "endpoint_template.tmpl", vals)
+	err = tmpl.ExecuteTemplate(file, "endpoint_template.tmpl", vals)
+	if err != nil {
+		return errors.Wrapf(err, "could not exec template on file: %s", file)
+	}
 
-	file.Close()
-	return
+	err = file.Close()
+	if err != nil {
+		return errors.Wrapf(err, "could not close file: %s", file)
+	}
+	return nil
 }
 
 // GenerateTestCase builds the generated test and benchmarking code in endpointDir for a handler from a spec and template.
-func GenerateTestCase(method *MethodSpec, tmpl *template.Template, endpointDir string) {
+func GenerateTestCase(method *MethodSpec, tmpl *template.Template, endpointDir string) error {
 	endpointName := strings.Split(method.EndpointName, ".")[0]
 	handlerName := strings.Split(method.Name, ".")[0]
 	dest := endpointDir + string(os.PathSeparator) + strings.ToLower(handlerName) + "_handler_test.go"
 	file, err := os.Create(dest)
 	if err != nil {
 		fmt.Printf("Could not create %s: %s (skip)\n", dest, err)
-		return
+		return err
 	}
 
 	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
@@ -119,8 +125,14 @@ func GenerateTestCase(method *MethodSpec, tmpl *template.Template, endpointDir s
 		"ClientResponse":     clientResponse,
 		"EndpointRequest":    endpointRequest,
 	}
-	tmpl.Execute(file, vals)
+	err = tmpl.Execute(file, vals)
+	if err != nil {
+		return errors.Wrapf(err, "Could not execute test template: %s", file)
+	}
 
-	file.Close()
-	return
+	err = file.Close()
+	if err != nil {
+		return errors.Wrapf(err, "Could")
+	}
+	return nil
 }

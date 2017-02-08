@@ -90,7 +90,7 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 }
 
 func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSpec, h *PackageHelper) (string, error) {
-	requestType := f.Name + "HTTPRequest"
+	requestType := strings.Title(f.Name) + "HTTPRequest"
 	ms.RequestStruct = make([]StructSpec, len(f.ArgsSpec))
 	for i, arg := range f.ArgsSpec {
 		typeName, err := h.TypeFullName(curThriftFile, arg.Type)

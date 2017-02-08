@@ -71,9 +71,15 @@ func main() {
 		fileParts := strings.Split(os.Args[i], string(os.PathSeparator))
 		endpoint := fileParts[len(fileParts)-2]
 		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
-		os.Mkdir(endpointDir, 0755)
+		err = os.Mkdir(endpointDir, 0755)
+		if err != nil {
+			panic(err)
+		}
 
-		os.Mkdir("examples/example-gateway/gen-code/clients", 0755)
+		err = os.Mkdir("examples/example-gateway/gen-code/clients", 0755)
+		if err != nil {
+			panic(err)
+		}
 		h := &gencode.PackageHelper{
 			ThriftRootDir:   "examples/example-gateway/idl/github.com",
 			TypeFileRootDir: "examples/example-gateway/gen-code",
@@ -109,8 +115,18 @@ func main() {
 			// like "missingArg"
 			// fmt.Printf("Found %s %s \n", handlers[j].EndpointName, handlers[j].Name)
 			if handlers[j].Name == "bar" {
-				gencode.GenerateHandler(handlers[j], handlerTemplate, endpointDir)
-				gencode.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
+				err = gencode.GenerateHandler(handlers[j], handlerTemplate, endpointDir)
+				if err != nil {
+					fmt.Printf("Could not create handler specs for %s: %s \n", os.Args[i], err)
+					fail = true
+					continue
+				}
+				err = gencode.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
+				if err != nil {
+					fmt.Printf("Could not create tests specs for %s: %s \n", os.Args[i], err)
+					fail = true
+					continue
+				}
 			}
 		}
 	}

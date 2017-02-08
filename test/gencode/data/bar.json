@@ -3,11 +3,12 @@
 	"PackageName": "bar",
 	"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
 	"IncludedPackages": [
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
 	],
 	"Services": [
 		{
-			"Name": "Foo",
+			"Name": "Bar",
 			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 			"Methods": [
 				{
@@ -16,7 +17,7 @@
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/arg-not-struct-path",
 					"Headers": null,
-					"RequestType": "argNotStructHTTPRequest",
+					"RequestType": "ArgNotStructHTTPRequest",
 					"ResponseType": "",
 					"OKStatusCode": [
 						{
@@ -44,8 +45,8 @@
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar-path",
 					"Headers": null,
-					"RequestType": "barHTTPRequest",
-					"ResponseType": "BarResponse",
+					"RequestType": "BarHTTPRequest",
+					"ResponseType": "bar.BarResponse",
 					"OKStatusCode": [
 						{
 							"Code": 200,
@@ -60,7 +61,7 @@
 					],
 					"RequestStruct": [
 						{
-							"Type": "BarRequest",
+							"Type": "bar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						}
@@ -73,7 +74,7 @@
 					"HTTPPath": "/missing-arg-path",
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "BarResponse",
+					"ResponseType": "bar.BarResponse",
 					"OKStatusCode": [
 						{
 							"Code": 200,
@@ -95,7 +96,7 @@
 					"HTTPPath": "/no-request-path",
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "BarResponse",
+					"ResponseType": "bar.BarResponse",
 					"OKStatusCode": [
 						{
 							"Code": 200,
@@ -116,8 +117,8 @@
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/too-many-args-path",
 					"Headers": null,
-					"RequestType": "tooManyArgsHTTPRequest",
-					"ResponseType": "BarResponse",
+					"RequestType": "TooManyArgsHTTPRequest",
+					"ResponseType": "bar.BarResponse",
 					"OKStatusCode": [
 						{
 							"Code": 200,
@@ -132,7 +133,7 @@
 					],
 					"RequestStruct": [
 						{
-							"Type": "BarRequest",
+							"Type": "bar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						},

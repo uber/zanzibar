@@ -27,7 +27,7 @@ func NewClient(opts *httpClient.Options) *BarClient {
 }
 
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
-func (c *BarClient) ArgNotStruct(r *argNotStructHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) ArgNotStruct(r *ArgNotStructHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/arg-not-struct-path"
 
@@ -48,7 +48,7 @@ func (c *BarClient) ArgNotStruct(r *argNotStructHTTPRequest, h http.Header) (*ht
 }
 
 // Bar calls "/bar-path" endpoint.
-func (c *BarClient) Bar(r *barHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) Bar(r *BarHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/bar-path"
 
@@ -101,7 +101,7 @@ func (c *BarClient) NoRequest(h http.Header) (*http.Response, error) {
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
-func (c *BarClient) TooManyArgs(r *tooManyArgsHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *BarClient) TooManyArgs(r *TooManyArgsHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/too-many-args-path"
 

@@ -5,18 +5,18 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
 )
 
-// argNotStructHTTPRequest is the http body type for endpoint argNotStruct.
-type argNotStructHTTPRequest struct {
+// ArgNotStructHTTPRequest is the http body type for endpoint argNotStruct.
+type ArgNotStructHTTPRequest struct {
 	Request string
 }
 
-// barHTTPRequest is the http body type for endpoint bar.
-type barHTTPRequest struct {
+// BarHTTPRequest is the http body type for endpoint bar.
+type BarHTTPRequest struct {
 	Request bar.BarRequest
 }
 
-// tooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
-type tooManyArgsHTTPRequest struct {
+// TooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
+type TooManyArgsHTTPRequest struct {
 	Request bar.BarRequest
 	Foo     foo.FooStruct
 }
