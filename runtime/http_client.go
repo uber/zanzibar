@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package httpClient
+package zanzibar
 
 import "net/http"
 
@@ -28,8 +28,8 @@ type HTTPClient struct {
 	BaseURL string
 }
 
-// Options to create a new http client
-type Options struct {
+// HTTPClientOptions to create a new http client
+type HTTPClientOptions struct {
 	IP   string
 	Port int32
 }

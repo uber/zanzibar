@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/lib/http_client"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client is the http client for googleNow.
-type Client httpClient.HTTPClient
+type Client zanzibar.HTTPClient
 
 // AddCredential calls "/add-credentials" endpoint.
 func (c *Client) AddCredential(ctx context.Context, r *AddCredentialRequest, h http.Header) (*http.Response, error) {

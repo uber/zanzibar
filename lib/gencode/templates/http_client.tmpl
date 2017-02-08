@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/lib/http_client"
+	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	"{{$pkg}}"
 	{{end}}
@@ -16,10 +16,10 @@ import (
 {{range .Services}}
 {{- $clientName := title .Name | printf "%sClient" -}}
 // {{$clientName}} is the http client for service {{.Name}}.
-type {{$clientName}} httpClient.HTTPClient
+type {{$clientName}} zanzibar.HTTPClient
 
 // NewClient returns a new http client for service {{.Name}}.
-func NewClient(opts *httpClient.Options) *{{$clientName}} {
+func NewClient(opts *zanzibar.HTTPClientOptions) *{{$clientName}} {
 	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
 	return &{{$clientName}}{
 		Client: &http.Client{
