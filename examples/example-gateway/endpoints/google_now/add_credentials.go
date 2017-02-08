@@ -1,18 +1,19 @@
 package googleNow
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	googleNowClient "github.com/uber/zanzibar/examples/example-gateway/clients/google_now"
 	"github.com/uber/zanzibar/runtime"
-
-	"github.com/pkg/errors"
 )
 
 // HandleAddCredentials handles /googlenow/add-credentials
 func HandleAddCredentials(
+	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
@@ -31,7 +32,7 @@ func HandleAddCredentials(
 	h := make(http.Header)
 	h.Set("x-uuid", inc.Header.Get("x-uuid"))
 
-	clientResp, err := clients.GoogleNow.AddCredential(&body, h)
+	clientResp, err := clients.GoogleNow.AddCredential(ctx, &body, h)
 	if err != nil {
 		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return

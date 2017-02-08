@@ -2,6 +2,7 @@ package googleNow
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,7 @@ import (
 type Client httpClient.HTTPClient
 
 // AddCredential calls "/add-credentials" endpoint.
-func (c *Client) AddCredential(r *AddCredentialRequest, h http.Header) (*http.Response, error) {
+func (c *Client) AddCredential(ctx context.Context, r *AddCredentialRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	// TODO(zw): this URL never change, should not be allocated every time in generated code.
 	fullURL := c.BaseURL + "/add-credentials"
@@ -30,7 +31,7 @@ func (c *Client) AddCredential(r *AddCredentialRequest, h http.Header) (*http.Re
 		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req)
+	return c.Client.Do(req.WithContext(ctx))
 }
 
 // Options to create a new googleNow client

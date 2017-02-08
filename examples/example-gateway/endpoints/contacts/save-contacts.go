@@ -1,7 +1,9 @@
 package contacts
 
 import (
-	errors "github.com/pkg/errors"
+	"context"
+
+	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	contactsClient "github.com/uber/zanzibar/examples/example-gateway/clients/contacts"
@@ -10,6 +12,7 @@ import (
 
 // HandleSaveContactsRequest "/contacts/:userUUID/contacts"
 func HandleSaveContactsRequest(
+	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
@@ -34,7 +37,7 @@ func HandleSaveContactsRequest(
 	body.AppVersion = inc.Header.Get("x-uber-client-version")
 
 	clientBody := convertToClient(&body)
-	res, err := clients.Contacts.SaveContacts(clientBody)
+	res, err := clients.Contacts.SaveContacts(ctx, clientBody)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

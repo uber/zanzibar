@@ -1,12 +1,15 @@
 package health
 
 import (
+	"context"
+
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/runtime"
 )
 
 // HandleHealthRequest for the health request
 func HandleHealthRequest(
+	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,

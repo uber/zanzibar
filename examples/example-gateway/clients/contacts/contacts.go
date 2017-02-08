@@ -2,6 +2,7 @@ package contactsClient
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"strconv"
 )
@@ -18,9 +19,7 @@ type SaveContactsResponse struct {
 }
 
 // SaveContacts will call POST /:uuid/contacts
-func (contacts *ContactsClient) SaveContacts(
-	save *SaveContactsRequest,
-) (*SaveContactsResponse, error) {
+func (contacts *ContactsClient) SaveContacts(ctx context.Context, save *SaveContactsRequest) (*SaveContactsResponse, error) {
 	fullURL := contacts.baseURL + "/" + save.UserUUID + "/contacts"
 	method := "POST"
 
@@ -34,7 +33,7 @@ func (contacts *ContactsClient) SaveContacts(
 		return nil, err
 	}
 
-	res, err := contacts.httpClient.Do(req)
+	res, err := contacts.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

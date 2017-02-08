@@ -21,8 +21,8 @@
 package zanzibar
 
 import (
+	"context"
 	"net/http"
-
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -96,7 +96,7 @@ var knownStatusCodes = []int{
 }
 
 // HandlerFn is a func that handles IncomingMessage
-type HandlerFn func(inc *IncomingMessage, gateway *Gateway)
+type HandlerFn func(context.Context, *IncomingMessage, *Gateway)
 
 // EndpointMetrics contains pre allocated metrics structures
 // These are pre-allocated to cache tags maps and for performance
@@ -159,7 +159,7 @@ func (endpoint *Endpoint) HandleRequest(
 	inc := NewIncomingMessage(w, r, params, endpoint)
 
 	fn := endpoint.HandlerFn
-	fn(inc, endpoint.gateway)
+	fn(r.Context(), inc, endpoint.gateway)
 }
 
 // Router data structure to handle and register endpoints

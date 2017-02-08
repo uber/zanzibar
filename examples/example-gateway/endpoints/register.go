@@ -1,6 +1,8 @@
 package endpoints
 
 import (
+	"context"
+
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/google_now"
@@ -9,6 +11,7 @@ import (
 )
 
 type handlerFn func(
+	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
@@ -19,11 +22,9 @@ type myEndpoint struct {
 	Clients   *clients.Clients
 }
 
-func (endpoint *myEndpoint) handle(
-	inc *zanzibar.IncomingMessage, g *zanzibar.Gateway,
-) {
+func (endpoint *myEndpoint) handle(ctx context.Context, inc *zanzibar.IncomingMessage, g *zanzibar.Gateway) {
 	fn := endpoint.HandlerFn
-	fn(inc, g, endpoint.Clients)
+	fn(ctx, inc, g, endpoint.Clients)
 }
 
 func makeEndpoint(
