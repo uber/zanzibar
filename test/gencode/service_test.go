@@ -28,7 +28,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/lib/gencode"
-	"github.com/uber/zanzibar/lib/testhelper"
 )
 
 var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with expected response.")
@@ -45,5 +44,5 @@ func TestModuleSpec(t *testing.T) {
 	m.Services[0].ThriftFile = m.Services[0].ThriftFile[index:]
 	actual, err := json.MarshalIndent(m, "", "\t")
 	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
-	testhelper.CompareGoldenFile(t, parsedBarFile, actual, *updateGoldenFile)
+	CompareGoldenFile(t, parsedBarFile, actual, *updateGoldenFile)
 }

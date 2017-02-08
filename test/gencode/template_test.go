@@ -28,7 +28,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/lib/gencode"
-	"github.com/uber/zanzibar/lib/testhelper"
 )
 
 const clientGenFile = "data/bar_client.gogen"
@@ -55,6 +54,6 @@ func TestGenerate(t *testing.T) {
 	if !assert.NoError(t, err, "failed to read genereated file %s", err) {
 		return
 	}
-	testhelper.CompareGoldenFile(t, clientGenFile, b, *updateGoldenFile)
+	CompareGoldenFile(t, clientGenFile, b, *updateGoldenFile)
 	assert.NoError(t, os.RemoveAll(tmpDir), "failed to clean temporary directory")
 }
