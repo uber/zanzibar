@@ -1,7 +1,7 @@
 
 
 PKGS = $(shell glide novendor)
-PKG_FILES = benchmarks examples lib runtime test
+PKG_FILES = benchmarks codegen examples runtime test
 
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \

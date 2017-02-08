@@ -35,7 +35,7 @@ done
 echo "Generating Endpoint Handlers"
 mkdir "$PREFIX/gen-code/handlers"
 for file in $(find "$PREFIX/gen-code/uber/zanzibar/endpoints/bar" -name "types.go" | grep -v "versioncheck.go"); do
-    go run lib/gencode/runner/main.go $PREFIX/gen-code/handlers $file
+    go run codegen/runner/main.go $PREFIX/gen-code/handlers $file
 done
 
 echo "Generating JSON Marshal/Unmarshal for rest"

@@ -27,13 +27,13 @@ import (
 	"io/ioutil"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/lib/gencode"
+	"github.com/uber/zanzibar/codegen"
 )
 
 const clientGenFile = "data/bar_client.gogen"
 
 func TestGenerate(t *testing.T) {
-	tmpl, err := gencode.NewTemplate("../../lib/gencode/templates/*.tmpl")
+	tmpl, err := gencode.NewTemplate("../../codegen/templates/*.tmpl")
 	if !assert.NoError(t, err, "failed to create template %s", err) {
 		return
 	}

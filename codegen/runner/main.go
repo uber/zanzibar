@@ -28,7 +28,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/uber/zanzibar/lib/gencode"
+	"github.com/uber/zanzibar/codegen"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 
 	// Hacky way to find the template directory. Switch to use zw's template helpers
 	// once they are landed.
-	importPath := "github.com/uber/zanzibar/lib/gencode"
+	importPath := "github.com/uber/zanzibar/codegen"
 	p, err := build.Default.Import(importPath, "", build.FindOnly)
 	if err != nil {
 		panic(fmt.Sprintf("Could not create build path for endpoint generation: %s", err))
@@ -88,7 +88,7 @@ func main() {
 		// Hack: only do bar...
 		_, err := clientTemplate.GenerateClientFile(
 			filepath.Join(
-				p.Dir, "..", "..", "examples", "example-gateway",
+				p.Dir, "..", "examples", "example-gateway",
 				"idl", "github.com", "uber", "zanzibar", "clients",
 				"bar", "bar.thrift",
 			),

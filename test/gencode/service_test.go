@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/lib/gencode"
+	"github.com/uber/zanzibar/codegen"
 )
 
 var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with expected response.")
