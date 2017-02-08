@@ -1,8 +1,7 @@
-
 /*
-* CODE GENERATED AUTOMATICALLY
-* THIS FILE SHOULD NOT BE EDITED BY HAND
-*/
+ * CODE GENERATED AUTOMATICALLY
+ * THIS FILE SHOULD NOT BE EDITED BY HAND
+ */
 
 package bar_test
 
@@ -50,7 +49,7 @@ func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
 		return nil, err
 	}
 
-    bar := func(w http.ResponseWriter, r *http.Request) {
+	bar := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
 			t.Fatal("can't write fake response")

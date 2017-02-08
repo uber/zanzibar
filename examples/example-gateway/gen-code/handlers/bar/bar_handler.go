@@ -1,8 +1,7 @@
-
 /*
-* CODE GENERATED AUTOMATICALLY
-* THIS FILE SHOULD NOT BE EDITED BY HAND
-*/
+ * CODE GENERATED AUTOMATICALLY
+ * THIS FILE SHOULD NOT BE EDITED BY HAND
+ */
 
 package bar
 
@@ -42,7 +41,7 @@ func HandleBarRequest(
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
-		)		
+		)
 		inc.SendError(500, errors.Wrap(err, "Could not make client request:"))
 		return
 	}
@@ -71,12 +70,11 @@ func HandleBarRequest(
 func convertToClient(
 	body *Bar.barRequest,
 ) *barClient.BarRequest {
-    // TODO(sindelar): Add field mappings here. Cannot rely
+	// TODO(sindelar): Add field mappings here. Cannot rely
 	// on Go 1.8 casting for all conversions.
 	clientBody := &barClient.BarRequest()
-    return clientBody
+	return clientBody
 }
-
 
 func isOKResponse(statusCode int, okResponses []int) bool {
 	for _, r := range okResponses {
