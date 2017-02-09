@@ -1,15 +1,15 @@
 {
-	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
 	"PackageName": "bar",
-	"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+	"GoFilePath": "examples/example-gateway/target/uber/zanzibar/endpoints/bar/bar.go",
 	"IncludedPackages": [
-		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar",
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/foo/foo"
 	],
 	"Services": [
 		{
 			"Name": "Bar",
-			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
 			"Methods": [
 				{
 					"Name": "argNotStruct",
@@ -37,7 +37,53 @@
 							"Name": "request",
 							"Annotations": null
 						}
-					]
+					],
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"PackageName": "bar",
+						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "argNotStruct",
+										"HTTPMethod": "POST",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/arg-not-struct-path",
+										"Headers": null,
+										"RequestType": "ArgNotStructHTTPRequest",
+										"ResponseType": "",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": [
+											{
+												"Type": "string",
+												"Name": "request",
+												"Annotations": null
+											}
+										],
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
 				},
 				{
 					"Name": "bar",
@@ -65,7 +111,53 @@
 							"Name": "request",
 							"Annotations": null
 						}
-					]
+					],
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"PackageName": "bar",
+						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "bar",
+										"HTTPMethod": "POST",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/bar-path",
+										"Headers": null,
+										"RequestType": "BarHTTPRequest",
+										"ResponseType": "bar.BarResponse",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": [
+											{
+												"Type": "bar.BarRequest",
+												"Name": "request",
+												"Annotations": null
+											}
+										],
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
 				},
 				{
 					"Name": "missingArg",
@@ -87,7 +179,47 @@
 							"Message": "barException"
 						}
 					],
-					"RequestStruct": null
+					"RequestStruct": null,
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"PackageName": "bar",
+						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "missingArg",
+										"HTTPMethod": "GET",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/missing-arg-path",
+										"Headers": null,
+										"RequestType": "",
+										"ResponseType": "bar.BarResponse",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": null,
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
 				},
 				{
 					"Name": "noRequest",
@@ -109,7 +241,47 @@
 							"Message": "barException"
 						}
 					],
-					"RequestStruct": null
+					"RequestStruct": null,
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"PackageName": "bar",
+						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "noRequest",
+										"HTTPMethod": "GET",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/no-request-path",
+										"Headers": null,
+										"RequestType": "",
+										"ResponseType": "bar.BarResponse",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": null,
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
 				},
 				{
 					"Name": "tooManyArgs",
@@ -142,7 +314,58 @@
 							"Name": "foo",
 							"Annotations": null
 						}
-					]
+					],
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"PackageName": "bar",
+						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "tooManyArgs",
+										"HTTPMethod": "POST",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/too-many-args-path",
+										"Headers": null,
+										"RequestType": "TooManyArgsHTTPRequest",
+										"ResponseType": "bar.BarResponse",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": [
+											{
+												"Type": "bar.BarRequest",
+												"Name": "request",
+												"Annotations": null
+											},
+											{
+												"Type": "foo.FooStruct",
+												"Name": "foo",
+												"Annotations": null
+											}
+										],
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
 				}
 			]
 		}

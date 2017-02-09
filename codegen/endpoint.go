@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode
+package codegen
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ import (
 // BuildModuleSpecForEndpoint builds the module spec for an endpoint.
 func BuildModuleSpecForEndpoint(endpointDir string, endpointThriftPath string) (*ModuleSpec, error) {
 	h := &PackageHelper{
-		ThriftRootDir:   "examples/example-gateway/idl/github.com/uber/zanzibar/endpoints",
+		ThriftRootDir:   "examples/example-gateway/idl/github.com",
 		TypeFileRootDir: "examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar",
 		TargetGenDir:    endpointDir,
 	}

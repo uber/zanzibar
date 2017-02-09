@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode_test
+package codegen_test
 
 import (
 	"testing"
@@ -29,8 +29,8 @@ import (
 
 var fooThrift = "/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.thrift"
 
-func newPackageHelper() *gencode.PackageHelper {
-	return &gencode.PackageHelper{
+func newPackageHelper() *codegen.PackageHelper {
+	return &codegen.PackageHelper{
 		ThriftRootDir:   "examples/example-gateway/idl/github.com",
 		TypeFileRootDir: "examples/example-gateway/gen-code",
 		TargetGenDir:    "examples/example-gateway/target/",

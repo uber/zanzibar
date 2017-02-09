@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode
+package codegen
 
 import (
 	"path"
@@ -69,7 +69,7 @@ func (p PackageHelper) TargetGenPath(thrift string) (string, error) {
 	root := path.Clean(p.ThriftRootDir)
 	idx := strings.Index(thrift, root)
 	if idx == -1 {
-		return "", errors.Errorf("file %s is not in thrift dir", thrift)
+		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, root)
 	}
 	goFile := strings.Replace(thrift[idx+len(root):], ".thrift", ".go", -1)
 	return path.Join(p.TargetGenDir, goFile), nil

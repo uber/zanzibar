@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode_test
+package codegen_test
 
 import (
 	"os"
@@ -33,7 +33,7 @@ import (
 const clientGenFile = "data/bar_client.gogen"
 
 func TestGenerate(t *testing.T) {
-	tmpl, err := gencode.NewTemplate("../../codegen/templates/*.tmpl")
+	tmpl, err := codegen.NewTemplate("../../codegen/templates/*.tmpl")
 	if !assert.NoError(t, err, "failed to create template %s", err) {
 		return
 	}
@@ -41,7 +41,7 @@ func TestGenerate(t *testing.T) {
 	if !assert.NoError(t, err, "failed to create tmp dir") {
 		return
 	}
-	pkgHelper := &gencode.PackageHelper{
+	pkgHelper := &codegen.PackageHelper{
 		ThriftRootDir:   "examples/example-gateway/idl/github.com",
 		TypeFileRootDir: "examples/example-gateway/gen-code",
 		TargetGenDir:    tmpDir,

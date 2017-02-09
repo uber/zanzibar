@@ -18,9 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode
+package codegen
 
 import (
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -43,6 +45,8 @@ type MethodSpec struct {
 	ExceptionStatusCode []StatusCode
 	// Additional struct generated from the bundle of request args.
 	RequestStruct []StructSpec
+	// The downstream service method annotated by 'zanzibar.http.downstream'.
+	Downstream *ModuleSpec
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -63,9 +67,10 @@ const (
 	antHTTPPath        = "zanzibar.http.path"
 	antHTTPStatus      = "zanzibar.http.status"
 	antHTTPReqDefBoxed = "zanzibar.http.req.def"
+	antHTTPHeaders     = "zanzibar.http.headers"
+	antHTTPDownstream  = "zanzibar.http.downstream"
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
-	antHTTPHeaders     = "zanzibar.http.headers"
 )
 
 // setRequestType sets the request type of the method specification. If the
@@ -146,6 +151,50 @@ func (ms *MethodSpec) setExceptionStatusCode(resultSpec *compile.ResultSpec) err
 			Message: e.Name,
 		}
 	}
+	return nil
+}
+
+func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packageHelper *PackageHelper) error {
+	if downstreamLink == "" {
+		return nil
+	}
+	parts := strings.Split(downstreamLink, "::")
+	if len(parts) != 3 {
+		return errors.Errorf("downstream annotation should be in the form of 'zanzibar.http.downstream = <relative thrift path>::<service>::<method>', but get %s", downstreamLink)
+	}
+	downstreamFile := path.Join(filepath.Dir(curfile), parts[0])
+	downstreamModule, err := NewModuleSpec(downstreamFile, packageHelper)
+	if err != nil {
+		return errors.Wrapf(err, "failed to parse the downstream module: %s", downstreamFile)
+	}
+	var downstreamService *ServiceSpec
+	for _, service := range downstreamModule.Services {
+		if service.Name == parts[1] {
+			downstreamService = service
+			break
+		}
+	}
+	if downstreamService == nil {
+		return errors.Errorf("Downstream service '%s' is not found in '%s'", parts[1], downstreamLink)
+	}
+	var downstreamMethod *MethodSpec
+	for _, method := range downstreamService.Methods {
+		if method.Name == parts[2] {
+			downstreamMethod = method
+			break
+		}
+	}
+	if downstreamMethod == nil {
+		return errors.Errorf("Downstream method is not found: %s", downstreamLink)
+	}
+	// Remove irrelevant services and methods.
+	downstreamService.Methods = []*MethodSpec{
+		downstreamMethod,
+	}
+	downstreamModule.Services = []*ServiceSpec{
+		downstreamService,
+	}
+	ms.Downstream = downstreamModule
 	return nil
 }
 

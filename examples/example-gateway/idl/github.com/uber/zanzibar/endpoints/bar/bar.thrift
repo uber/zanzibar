@@ -31,6 +31,7 @@ service Bar {
     zanzibar.http.path = "/bar-path"
     zanzibar.http.status = "200"
     zanzibar.http.req.def.boxed = "true"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::bar"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -42,6 +43,7 @@ service Bar {
     zanzibar.http.path = "/no-request-path"
     zanzibar.http.status = "200"
     zanzibar.http.req.def.boxed = "false"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::noRequest"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -54,6 +56,7 @@ service Bar {
     zanzibar.http.status = "200"
     zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::missingArg"
     zanzibar.handler = "bar.baz"
   )
   BarResponse tooManyArgs (
@@ -65,6 +68,7 @@ service Bar {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/too-many-args-path"
     zanzibar.http.status = "200"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::tooManyArgs"
     zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
@@ -78,6 +82,7 @@ service Bar {
     zanzibar.http.path = "/arg-not-struct-path"
     zanzibar.http.status = "200"
     zanzibar.http.req.def.boxed = "false"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::argNotStruct"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )

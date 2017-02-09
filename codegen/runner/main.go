@@ -50,7 +50,7 @@ func main() {
 	}
 
 	clientTemplatePath := filepath.Join(p.Dir, "templates/*.tmpl")
-	clientTemplate, err := gencode.NewTemplate(clientTemplatePath)
+	clientTemplate, err := codegen.NewTemplate(clientTemplatePath)
 	if err != nil {
 		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)
 	}
@@ -80,7 +80,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		h := &gencode.PackageHelper{
+		h := &codegen.PackageHelper{
 			ThriftRootDir:   "examples/example-gateway/idl/github.com",
 			TypeFileRootDir: "examples/example-gateway/gen-code",
 			TargetGenDir:    "examples/example-gateway/gen-code/clients",
@@ -101,8 +101,8 @@ func main() {
 		}
 
 		// Generate handlers and test files for each method
-		m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, "zanzibar/endpoints/"+endpoint+string(os.PathSeparator)+endpoint+".thrift")
-		//m, err := gencode.BuildModuleSpecForEndpoint(endpointDir, os.Args[i])
+		m, err := codegen.BuildModuleSpecForEndpoint(endpointDir, "zanzibar/endpoints/"+endpoint+string(os.PathSeparator)+endpoint+".thrift")
+		//m, err := codegen.BuildModuleSpecForEndpoint(endpointDir, os.Args[i])
 		if err != nil {
 			fmt.Printf("Could not create endpoint specs for %s: %s \n", os.Args[i], err)
 			fail = true
@@ -115,13 +115,13 @@ func main() {
 			// like "missingArg"
 			// fmt.Printf("Found %s %s \n", handlers[j].EndpointName, handlers[j].Name)
 			if handlers[j].Name == "bar" {
-				err = gencode.GenerateHandler(handlers[j], handlerTemplate, endpointDir)
+				err = codegen.GenerateHandler(handlers[j], handlerTemplate, endpointDir)
 				if err != nil {
 					fmt.Printf("Could not create handler specs for %s: %s \n", os.Args[i], err)
 					fail = true
 					continue
 				}
-				err = gencode.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
+				err = codegen.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
 				if err != nil {
 					fmt.Printf("Could not create tests specs for %s: %s \n", os.Args[i], err)
 					fail = true

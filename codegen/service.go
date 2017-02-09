@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode
+package codegen
 
 import (
 	"sort"
@@ -143,6 +143,9 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 	}
 	method.EndpointName = funcSpec.Annotations[antHandler]
 	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
+	if err := method.setDownstream(funcSpec.Annotations[antHTTPDownstream], s.ThriftFile, packageHelper); err != nil {
+		return nil, err
+	}
 	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {
 		return nil, err
 	}

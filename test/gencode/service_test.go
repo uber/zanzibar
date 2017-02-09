@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package gencode_test
+package codegen_test
 
 import (
 	"encoding/json"
@@ -35,14 +35,24 @@ var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with
 const parsedBarFile = "data/bar.json"
 
 func TestModuleSpec(t *testing.T) {
-	barThrift := "../../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
-	m, err := gencode.NewModuleSpec(barThrift, newPackageHelper())
+	barThrift := "../../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
+	m, err := codegen.NewModuleSpec(barThrift, newPackageHelper())
 	assert.NoError(t, err, "unable to parse the thrift file")
-	// Converts the thrift file paths to relative path for easy comparison.
-	index := strings.Index(m.ThriftFile, "zanzibar")
-	m.ThriftFile = m.ThriftFile[index:]
-	m.Services[0].ThriftFile = m.Services[0].ThriftFile[index:]
+	convertThriftPathToRelative(m)
 	actual, err := json.MarshalIndent(m, "", "\t")
 	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
 	CompareGoldenFile(t, parsedBarFile, actual, *updateGoldenFile)
+}
+
+func convertThriftPathToRelative(m *codegen.ModuleSpec) {
+	index := strings.Index(m.ThriftFile, "zanzibar")
+	m.ThriftFile = m.ThriftFile[index:]
+	for _, service := range m.Services {
+		service.ThriftFile = service.ThriftFile[index:]
+		for _, method := range service.Methods {
+			if method.Downstream != nil {
+				convertThriftPathToRelative(method.Downstream)
+			}
+		}
+	}
 }

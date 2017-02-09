@@ -39,6 +39,12 @@ for file in $(find "$PREFIX/gen-code/uber/zanzibar/endpoints/bar" -name "types.g
 done
 
 echo "Generating JSON Marshal/Unmarshal for rest"
-for file in $(find "$PREFIX" -name "*_structs.go"); do
+for file in $(find "$PREFIX/gen-code" -name "*_structs.go"); do
+    ./scripts/easy_json/easy_json "$file"
+done
+for file in $(find "$PREFIX/clients" -name "*_structs.go"); do
+    ./scripts/easy_json/easy_json "$file"
+done
+for file in $(find "$PREFIX/endpoints" -name "*_structs.go"); do
     ./scripts/easy_json/easy_json "$file"
 done
