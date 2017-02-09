@@ -31,6 +31,10 @@ type Config struct {
 			FlushInterval time.Duration `yaml:"flushInterval,omitempty"`
 		}
 	}
+	TChannel struct {
+		ServiceName string `yaml:"serviceName,omitempty"`
+		ProcessName string `yaml:"processName,omitempty"`
+	}
 	Clients struct {
 		Contacts  HTTPClientConfig
 		GoogleNow HTTPClientConfig

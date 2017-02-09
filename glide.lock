@@ -1,5 +1,5 @@
-hash: d33ceb5bd8443457536869779a4c3ad04cdf29424cd3791c8666aa636389a1f1
-updated: 2017-02-07T17:09:13.464832805-08:00
+hash: 686ae93beeeb9c6057f1c20784275c27ba6eddf11f627f2f8e8dc1b81c85c64e
+updated: 2017-02-09T13:11:48.90290275-08:00
 imports:
 - name: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
@@ -28,6 +28,8 @@ imports:
   - bootstrap
   - gen
   - parser
+- name: github.com/opentracing/opentracing-go
+  version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -60,6 +62,14 @@ imports:
   version: c5050ada93b0fbe37608b126c791bcbc3a60a7d3
   subpackages:
   - examples/example-gateway/gen-code/handlers/generated
+- name: github.com/uber/tchannel-go
+  version: b37e49259935b20c23ba817b3b364740a55be202
+  subpackages:
+  - internal/argreader
+  - relay
+  - tnet
+  - trand
+  - typed
 - name: go.uber.org/thriftrw
   version: b023316084b4c85403a82782d4ffeff89b09cceb
   subpackages:
@@ -68,6 +78,10 @@ imports:
   - ast
   - idl
   - idl/internal
+- name: golang.org/x/net
+  version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
+  subpackages:
+  - context
 - name: golang.org/x/sys
   version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:

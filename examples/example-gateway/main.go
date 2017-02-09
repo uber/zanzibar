@@ -92,12 +92,16 @@ func main() {
 			FlushInterval: gatewayConfig.Metrics.Tally.FlushInterval,
 			Service:       gatewayConfig.Metrics.Tally.Service,
 		},
+		TChannel: zanzibar.TChannelOptions{
+			ServiceName: gatewayConfig.TChannel.ServiceName,
+			ProcessName: gatewayConfig.TChannel.ProcessName,
+		},
 
 		Clients:        clients,
 		MetricsBackend: m3Backend,
 	})
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 
 	err = server.Bootstrap(endpoints.Register)

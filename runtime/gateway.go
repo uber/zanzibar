@@ -50,12 +50,19 @@ type MetricsOptions struct {
 	Service       string
 }
 
+// TChannelOptions ...
+type TChannelOptions struct {
+	ServiceName string
+	ProcessName string
+}
+
 // Options configures the gateway
 type Options struct {
-	IP      string
-	Port    int32
-	Logger  LoggerOptions
-	Metrics MetricsOptions
+	IP       string
+	Port     int32
+	Logger   LoggerOptions
+	Metrics  MetricsOptions
+	TChannel TChannelOptions
 
 	Clients        Clients
 	MetricsBackend tally.CachedStatsReporter
@@ -72,12 +79,12 @@ type Gateway struct {
 	Logger      zap.Logger
 	MetricScope tally.Scope
 
-	router            *Router
-	loggerFile        *os.File
-	metricScopeCloser io.Closer
-	metricsBackend    tally.CachedStatsReporter
-	server            *HTTPServer
-
+	router             *Router
+	loggerFile         *os.File
+	metricScopeCloser  io.Closer
+	metricsBackend     tally.CachedStatsReporter
+	server             *HTTPServer
+	tchannelConnection *TChannelConnection
 	// clients?
 	//	- logger
 	//	- statsd
@@ -117,6 +124,10 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 	}
 
 	if err := gateway.setupHTTPServer(); err != nil {
+		return nil, err
+	}
+
+	if err := gateway.setupTChannelConnection(&opts.TChannel); err != nil {
 		return nil, err
 	}
 
@@ -268,5 +279,24 @@ func (gateway *Gateway) setupHTTPServer() error {
 		Logger: gateway.Logger,
 	}
 
+	return nil
+}
+
+func (gateway *Gateway) setupTChannelConnection(opts *TChannelOptions) error {
+	if opts == nil {
+		return errors.New("TChannelOptions were nil")
+	}
+
+	tchannelConnection, err := NewTChannel(
+		&TChannelConnectionOptions{
+			ServiceName: opts.ServiceName,
+			ProcessName: opts.ProcessName,
+		})
+
+	if err != nil {
+		return err
+	}
+
+	gateway.tchannelConnection = tchannelConnection
 	return nil
 }

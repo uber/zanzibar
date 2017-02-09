@@ -17,6 +17,10 @@ metrics:
     service: example-gateway
     flushInterval: 500ms
 
+tchannel:
+  serviceName: example-gateway
+  processName: example-gateway
+
 clients:
   contacts:
     port: 4000
