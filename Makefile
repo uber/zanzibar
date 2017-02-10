@@ -16,6 +16,8 @@ PROGS = examples/example-gateway/example-gateway \
 
 .PHONY: install
 install:
+	@echo "Mounting git pre-push hook"
+	cp .git-pre-push-hook .git/hooks/pre-push
 	@echo "Installing Glide and locked dependencies..."
 	glide --version || go get -u -f github.com/Masterminds/glide
 	glide install
