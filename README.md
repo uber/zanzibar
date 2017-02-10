@@ -1,17 +1,44 @@
-## Documentation
-To learn how to document your project on [EngDocs](https://engdocs.uberinternal.com),
-see this [guide](https://engdocs.uberinternal.com/engdocs/index.html).
+## zanzibar
 
-## Some make targets:
+A build system & runtime component to generate configuration driven gateways. Edit
 
- - `make install`; install dependencies
- - `make test`; run tests
- - `make bins`; generates binaries for local dev
- - `make examples/example-gateway/example-gateway`; generates example binary
+## Installation
 
- ## Building a service:
+```
+mkdir -p $GOPATH/src/github.com/uber
+git clone git@github.com:uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
+cd $GOPATH/src/github.com/uber/zanzibar
+make install
+```
 
- - Create an endpoint definition in idl/github.com/uber/zanzibar/endpoints
- - `make generate`; build definitions and marshalling code (WIP)
- - Register the endpoint in service/endpoints/register.go
- - `make test`; 
+## Running the tests
+
+```
+make test
+```
+
+## Running the server
+
+```
+make run
+# Logs are in /var/log/example-gateway/example-gateway.log
+```
+
+## Adding new dependencies
+
+We use glide @ 0.12.3 to add dependencies.
+
+Download [glide @ 0.12.3](https://github.com/Masterminds/glide/releases)
+and make sure it's available in your path
+
+If we want to add a dependency:
+
+ - Add a new section to the glide.yaml with your package and version
+ - run `glide up --quick`
+ - check in the `glide.yaml` and `glide.lock`
+
+If you want to update a dependency:
+
+ - Change the `version` field in the `glide.yaml`
+ - run `glide up --quick`
+ - check in the `glide.yaml` and `glide.lock`
