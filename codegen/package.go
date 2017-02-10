@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -31,11 +32,24 @@ import (
 // PackageHelper manages the mapping from thrift file to generated type code and service code.
 type PackageHelper struct {
 	// The root directory containing thrift files.
-	ThriftRootDir string
+	thriftRootDir string
 	// The root directory where all files of go types are generated.
-	TypeFileRootDir string
+	typeFileRootDir string
 	// The directory to put the generated service code.
-	TargetGenDir string
+	targetGenDir string
+}
+
+// NewPackageHelper creates a package helper.
+func NewPackageHelper(thriftRootDir, typeFileRootDir, targetGenDir string) (*PackageHelper, error) {
+	genDir, err := filepath.Abs(targetGenDir)
+	if err != nil {
+		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
+	}
+	return &PackageHelper{
+		thriftRootDir:   path.Clean(thriftRootDir),
+		typeFileRootDir: typeFileRootDir,
+		targetGenDir:    genDir,
+	}, nil
 }
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.
@@ -43,19 +57,31 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	root := path.Clean(p.ThriftRootDir)
+	idx := strings.Index(thrift, p.thriftRootDir)
+	if idx == -1 {
+		return "", errors.Errorf("file %s is not in thrift dir", thrift)
+	}
+	return path.Join("github.com/uber/zanzibar", p.typeFileRootDir, thrift[idx+len(p.thriftRootDir):len(thrift)-7]), nil
+}
+
+// PackageGenPath returns the Go package path for generated code from a thrift file.
+func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
+	if !strings.HasSuffix(thrift, ".thrift") {
+		return "", errors.Errorf("file %s is not .thrift", thrift)
+	}
+	root := path.Clean(p.thriftRootDir)
 	idx := strings.Index(thrift, root)
 	if idx == -1 {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
 	}
-	return path.Join("github.com/uber/zanzibar", p.TypeFileRootDir, thrift[idx+len(root):len(thrift)-7]), nil
+	dirUnderZanzibar := p.targetGenDir[strings.Index(p.targetGenDir, "zanzibar"):]
+	return path.Join("github.com/uber/", dirUnderZanzibar, thrift[idx+len(root):len(thrift)-7]), nil
 }
 
 // TypePackageName returns the package name that defines the type.
 func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
-
 	}
 	file := path.Base(thrift)
 	return file[:len(file)-7], nil
@@ -66,13 +92,12 @@ func (p PackageHelper) TargetGenPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	root := path.Clean(p.ThriftRootDir)
-	idx := strings.Index(thrift, root)
+	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
-		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, root)
+		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, p.thriftRootDir)
 	}
-	goFile := strings.Replace(thrift[idx+len(root):], ".thrift", ".go", -1)
-	return path.Join(p.TargetGenDir, goFile), nil
+	goFile := strings.Replace(thrift[idx+len(p.thriftRootDir):], ".thrift", ".go", -1)
+	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TypeFullName returns the referred Go type name in generated code from curThriftFile.
@@ -85,10 +110,6 @@ func (p PackageHelper) TypeFullName(curThriftFile string, typeSpec compile.TypeS
 	if tfile == "" {
 		return typeSpec.ThriftName(), nil
 	}
-
-	// if tfile == curThriftFile || tfile == "" {
-	// 	return typeSpec.ThriftName(), nil
-	// }
 
 	pkg, err := p.TypePackageName(tfile)
 	if err != nil {

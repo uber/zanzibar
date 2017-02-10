@@ -1,8 +1,10 @@
 {
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/endpoints/bar/bar",
 	"PackageName": "bar",
-	"GoFilePath": "examples/example-gateway/target/uber/zanzibar/endpoints/bar/bar.go",
+	"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/endpoints/bar/bar.go",
 	"IncludedPackages": [
+		"github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/foo/foo"
 	],
@@ -40,8 +42,9 @@
 					],
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -114,8 +117,9 @@
 					],
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -182,8 +186,9 @@
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -244,8 +249,9 @@
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -317,8 +323,9 @@
 					],
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "examples/example-gateway/target/uber/zanzibar/clients/bar/bar.go",
+						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"

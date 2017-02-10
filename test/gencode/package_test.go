@@ -21,6 +21,7 @@
 package codegen_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,16 +30,20 @@ import (
 
 var fooThrift = "/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.thrift"
 
-func newPackageHelper() *codegen.PackageHelper {
-	return &codegen.PackageHelper{
-		ThriftRootDir:   "examples/example-gateway/idl/github.com",
-		TypeFileRootDir: "examples/example-gateway/gen-code",
-		TargetGenDir:    "examples/example-gateway/target/",
+func newPackageHelper(t *testing.T) *codegen.PackageHelper {
+	h, err := codegen.NewPackageHelper(
+		"examples/example-gateway/idl/github.com",
+		"examples/example-gateway/gen-code",
+		tmpDir,
+	)
+	if !assert.NoError(t, err, "failed to create package helper") {
+		return nil
 	}
+	return h
 }
 
 func TestImportPath(t *testing.T) {
-	h := newPackageHelper()
+	h := newPackageHelper(t)
 	p, err := h.TypeImportPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo", p, "wrong type import path")
@@ -49,7 +54,7 @@ func TestImportPath(t *testing.T) {
 }
 
 func TestTypePackageName(t *testing.T) {
-	h := newPackageHelper()
+	h := newPackageHelper(t)
 	packageName, err := h.TypePackageName(fooThrift)
 	assert.Nil(t, err, "should not return error")
 	assert.Equal(t, "foo", packageName, "wrong package name")
@@ -57,13 +62,27 @@ func TestTypePackageName(t *testing.T) {
 	assert.Error(t, err, "should return error for not a thrift file")
 }
 
-func TestGenPath(t *testing.T) {
-	h := newPackageHelper()
+func TestFileGenPath(t *testing.T) {
+	h := newPackageHelper(t)
 	p, err := h.TargetGenPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "examples/example-gateway/target/uber/zanzibar/clients/foo/foo.go", p, "wrong generated code path")
+	exp, err := filepath.Abs("../../.tmp_gen/uber/zanzibar/clients/foo/foo.go")
+	assert.NoError(t, err, "expected path is not valid")
+	assert.Equal(t, exp, p, "wrong generated code path")
 	_, err = h.TargetGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
 	_, err = h.TargetGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
+	assert.Error(t, err, "should return error for not in IDL dir")
+}
+
+func TestPackageGenPath(t *testing.T) {
+	h := newPackageHelper(t)
+	p, err := h.PackageGenPath(fooThrift)
+	assert.Nil(t, err, "should not return error")
+	exp := "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/foo/foo"
+	assert.Equal(t, exp, p, "wrong generated Go package path")
+	_, err = h.PackageGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
+	assert.Error(t, err, "should return error for not a thrift file")
+	_, err = h.PackageGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
 	assert.Error(t, err, "should return error for not in IDL dir")
 }

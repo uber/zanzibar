@@ -52,7 +52,7 @@ func NewTemplate(templatePattern string) (*Template, error) {
 }
 
 // GenerateClientFile generates Go http code for services defined in thrift file.
-// It returns the path of generated file or error.
+// It returns the path of generated file or an error.
 func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (string, error) {
 	m, err := NewModuleSpec(thrift, h)
 	if err != nil {
@@ -76,6 +76,23 @@ func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (string, 
 		return "", err
 	}
 
+	return m.GoFilePath, nil
+}
+
+// GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
+// thrift file. It returns the path of generated file or an error.
+func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (string, error) {
+	m, err := NewModuleSpec(thrift, h)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to parse thrift file:")
+	}
+	if len(m.Services) == 0 {
+		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+	}
+	err = t.execTemplateAndFmt("endpoint.tmpl", m.GoFilePath, m)
+	if err != nil {
+		return "", err
+	}
 	return m.GoFilePath, nil
 }
 

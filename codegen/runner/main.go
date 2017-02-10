@@ -80,13 +80,18 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		h := &codegen.PackageHelper{
-			ThriftRootDir:   "examples/example-gateway/idl/github.com",
-			TypeFileRootDir: "examples/example-gateway/gen-code",
-			TargetGenDir:    "examples/example-gateway/gen-code/clients",
+		h, err := codegen.NewPackageHelper(
+			"examples/example-gateway/idl/github.com",
+			"examples/example-gateway/gen-code",
+			"examples/example-gateway/gen-code/clients",
+		)
+		if err != nil {
+			fmt.Printf("Could not create package helper for %s: %s \n", os.Args[i], err)
+			fail = true
+			continue
 		}
 		// Hack: only do bar...
-		_, err := clientTemplate.GenerateClientFile(
+		_, err = clientTemplate.GenerateClientFile(
 			filepath.Join(
 				p.Dir, "..", "examples", "example-gateway",
 				"idl", "github.com", "uber", "zanzibar", "clients",

@@ -31,6 +31,8 @@ import (
 type ModuleSpec struct {
 	// Source thrift file to generate the code.
 	ThriftFile string
+	// Go package path of this module.
+	GoPackage string
 	// Go package name, generated base on module name.
 	PackageName string
 	// Go file path, generated from thrift file.
@@ -60,15 +62,20 @@ func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, er
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate target path")
 	}
+	targetPackage, err := packageHelper.PackageGenPath(module.ThriftPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate target package path")
+	}
 	moduleSpec := &ModuleSpec{
 		ThriftFile:  module.ThriftPath,
+		GoPackage:   targetPackage,
 		PackageName: module.GetName(),
 		GoFilePath:  targetPath,
 	}
-	if err := moduleSpec.AddImports(module, packageHelper); err != nil {
+	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
 		return nil, err
 	}
-	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
+	if err := moduleSpec.AddImports(module, packageHelper); err != nil {
 		return nil, err
 	}
 	return moduleSpec, nil
@@ -77,17 +84,24 @@ func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, er
 // AddImports adds imported Go packages in ModuleSpec in alphabetical order.
 func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageHelper) error {
 	for _, pkg := range module.Includes {
-		if err := ms.addAnImport(pkg.Module.ThriftPath, packageHelper); err != nil {
+		if err := ms.addTypeImport(pkg.Module.ThriftPath, packageHelper); err != nil {
 			return errors.Wrapf(err, "can't add import %s", pkg.Module.ThriftPath)
 		}
 	}
 
-	if err := ms.addAnImport(ms.ThriftFile, packageHelper); err != nil {
+	if err := ms.addTypeImport(ms.ThriftFile, packageHelper); err != nil {
 		return errors.Wrapf(err, "can't add import %s", ms.ThriftFile)
 	}
 
+	// Adds imports for downstream services.
+	for _, service := range ms.Services {
+		for _, method := range service.Methods {
+			if d := method.Downstream; d != nil && !ms.isPackageIncluded(d.GoPackage) {
+				ms.IncludedPackages = append(ms.IncludedPackages, method.Downstream.GoPackage)
+			}
+		}
+	}
 	sort.Strings(ms.IncludedPackages)
-
 	return nil
 }
 
@@ -164,16 +178,22 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 	return method, nil
 }
 
-func (ms *ModuleSpec) addAnImport(thriftPath string, packageHelper *PackageHelper) error {
+func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {
 	newPkg, err := packageHelper.TypeImportPath(thriftPath)
 	if err != nil {
 		return err
 	}
-	for _, pkg := range ms.IncludedPackages {
-		if newPkg == pkg {
-			return nil
+	if !ms.isPackageIncluded(newPkg) {
+		ms.IncludedPackages = append(ms.IncludedPackages, newPkg)
+	}
+	return nil
+}
+
+func (ms *ModuleSpec) isPackageIncluded(pkg string) bool {
+	for _, includedPkg := range ms.IncludedPackages {
+		if pkg == includedPkg {
+			return true
 		}
 	}
-	ms.IncludedPackages = append(ms.IncludedPackages, newPkg)
-	return nil
+	return false
 }

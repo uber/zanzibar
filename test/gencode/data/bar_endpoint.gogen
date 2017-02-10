@@ -1,0 +1,8 @@
+/*
+ * CODE GENERATED AUTOMATICALLY
+ * THIS FILE SHOULD NOT BE EDITED BY HAND
+ */
+
+package bar
+
+import "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar"

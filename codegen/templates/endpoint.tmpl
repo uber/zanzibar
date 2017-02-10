@@ -1,0 +1,21 @@
+{{/* template to render gateway http endpoint code */}}/*
+ * CODE GENERATED AUTOMATICALLY
+ * THIS FILE SHOULD NOT BE EDITED BY HAND
+ */
+
+package {{.PackageName}}
+
+import (
+	"context"
+	"io/ioutil"
+	"net/http"
+
+	"github.com/pkg/errors"
+	"github.com/uber-go/zap"
+	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	"{{$pkg}}"
+	{{end}}
+)

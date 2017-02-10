@@ -33,10 +33,13 @@ import (
 
 // BuildModuleSpecForEndpoint builds the module spec for an endpoint.
 func BuildModuleSpecForEndpoint(endpointDir string, endpointThriftPath string) (*ModuleSpec, error) {
-	h := &PackageHelper{
-		ThriftRootDir:   "examples/example-gateway/idl/github.com",
-		TypeFileRootDir: "examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar",
-		TargetGenDir:    endpointDir,
+	h, err := NewPackageHelper(
+		"examples/example-gateway/idl/github.com",
+		"examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar",
+		endpointDir,
+	)
+	if err != nil {
+		return nil, err
 	}
 	importPath := "github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/"
 	p, err := build.Default.Import(importPath, "", build.FindOnly)
