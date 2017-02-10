@@ -101,7 +101,7 @@ func main() {
 		MetricsBackend: m3Backend,
 	})
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 
 	err = server.Bootstrap(endpoints.Register)
