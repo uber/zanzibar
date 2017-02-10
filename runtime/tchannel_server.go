@@ -29,7 +29,7 @@ import (
 	"github.com/uber/tchannel-go"
 )
 
-// TChannel wraps a standard tchannel.Chanel, but improves
+// TChannelServer wraps a standard tchannel.Channel, but improves
 // interoperability with the tchannel client and other dependencies related to
 // zanzibar
 type TChannelServer struct {
