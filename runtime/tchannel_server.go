@@ -21,24 +21,24 @@
 package zanzibar
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
 )
 
-// TChannelConnection wraps a stanadrd tchannel.Chanel, but improves
+// TChannel wraps a standard tchannel.Chanel, but improves
 // interoperability with the tchannel client and other dependencies related to
 // zanzibar
-type TChannelConnection struct {
+type TChannelServer struct {
 	*tchannel.Channel
 	Logger zap.Logger
 }
 
-// TChannelConnectionOptions are used to initialize the TChannel wrapper struct
-type TChannelConnectionOptions struct {
+// TChannelServerOptions are used to initialize the TChannel wrapper struct
+type TChannelServerOptions struct {
 	DefaultConnectionOptions tchannel.ConnectionOptions
 	Logger                   zap.Logger
 	OnPeerStatusChanged      func(*tchannel.Peer)
@@ -51,8 +51,8 @@ type TChannelConnectionOptions struct {
 	Tracer                   opentracing.Tracer
 }
 
-// NewTChannel allocates a new TChannel wrapper struct
-func NewTChannel(opts *TChannelConnectionOptions) (*TChannelConnection, error) {
+// NewTChannelServer allocates a new TChannel wrapper struct
+func NewTChannelServer(opts *TChannelServerOptions) (*TChannelServer, error) {
 	channel, err := tchannel.NewChannel(
 		opts.ServiceName,
 		&tchannel.ChannelOptions{
@@ -67,12 +67,12 @@ func NewTChannel(opts *TChannelConnectionOptions) (*TChannelConnection, error) {
 		})
 
 	if err != nil {
-		return nil, fmt.Errorf(
+		return nil, errors.Errorf(
 			"Error creating TChannel Connection:\n    %s",
-			err.Error())
+			err)
 	}
 
-	return &TChannelConnection{
+	return &TChannelServer{
 		Channel: channel,
 		Logger:  opts.Logger,
 	}, nil

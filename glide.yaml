@@ -29,6 +29,7 @@ import:
 - package: go.uber.org/thriftrw
   version: v1.0.0
 - package: github.com/uber/tchannel-go
+  version: v1.3.0
 - package: github.com/opentracing/opentracing-go
 - package: golang.org/x/net
 testImport:

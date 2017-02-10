@@ -79,12 +79,12 @@ type Gateway struct {
 	Logger      zap.Logger
 	MetricScope tally.Scope
 
-	router             *Router
-	loggerFile         *os.File
-	metricScopeCloser  io.Closer
-	metricsBackend     tally.CachedStatsReporter
-	server             *HTTPServer
-	tchannelConnection *TChannelConnection
+	router            *Router
+	loggerFile        *os.File
+	metricScopeCloser io.Closer
+	metricsBackend    tally.CachedStatsReporter
+	server            *HTTPServer
+	tchannelServer    *TChannelServer
 	// clients?
 	//	- logger
 	//	- statsd
@@ -127,7 +127,7 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 		return nil, err
 	}
 
-	if err := gateway.setupTChannelConnection(&opts.TChannel); err != nil {
+	if err := gateway.setupTChannel(&opts.TChannel); err != nil {
 		return nil, err
 	}
 
@@ -282,13 +282,13 @@ func (gateway *Gateway) setupHTTPServer() error {
 	return nil
 }
 
-func (gateway *Gateway) setupTChannelConnection(opts *TChannelOptions) error {
+func (gateway *Gateway) setupTChannel(opts *TChannelOptions) error {
 	if opts == nil {
 		return errors.New("TChannelOptions were nil")
 	}
 
-	tchannelConnection, err := NewTChannel(
-		&TChannelConnectionOptions{
+	tchannelServer, err := NewTChannelServer(
+		&TChannelServerOptions{
 			ServiceName: opts.ServiceName,
 			ProcessName: opts.ProcessName,
 		})
@@ -297,6 +297,6 @@ func (gateway *Gateway) setupTChannelConnection(opts *TChannelOptions) error {
 		return err
 	}
 
-	gateway.tchannelConnection = tchannelConnection
+	gateway.tchannelServer = tchannelServer
 	return nil
 }
