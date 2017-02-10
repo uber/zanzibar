@@ -68,7 +68,7 @@ func NewTChannelServer(opts *TChannelServerOptions) (*TChannelServer, error) {
 
 	if err != nil {
 		return nil, errors.Errorf(
-			"Error creating TChannel Connection:\n    %s",
+			"Error creating TChannel Server:\n    %s",
 			err)
 	}
 

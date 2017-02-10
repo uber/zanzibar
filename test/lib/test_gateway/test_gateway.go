@@ -138,6 +138,8 @@ func CreateGateway(
 	t *testing.T, config *config.Config, opts *Options,
 ) (*TestGateway, error) {
 	config.IP = "127.0.0.1"
+	config.TChannel.ServiceName = "test-gateway"
+	config.TChannel.ProcessName = "test-gateway"
 
 	countMetrics := false
 	if opts != nil {

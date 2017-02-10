@@ -144,6 +144,10 @@ func TestStartGateway(t *testing.T) {
 			FlushInterval: gatewayConfig.Metrics.Tally.FlushInterval,
 			Service:       gatewayConfig.Metrics.Tally.Service,
 		},
+		TChannel: zanzibar.TChannelOptions{
+			ServiceName: gatewayConfig.TChannel.ServiceName,
+			ProcessName: gatewayConfig.TChannel.ProcessName,
+		},
 
 		Clients:        clients,
 		MetricsBackend: m3Backend,

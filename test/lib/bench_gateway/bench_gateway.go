@@ -47,6 +47,8 @@ type BenchGateway struct {
 func CreateGateway(config *config.Config) (*BenchGateway, error) {
 	config.IP = "127.0.0.1"
 	config.Port = 0
+	config.TChannel.ServiceName = "bench-gateway"
+	config.TChannel.ProcessName = "bench-gateway"
 	config.Metrics.M3.HostPort = "127.0.0.1:8053"
 	config.Metrics.Tally.Service = "bench-example-gateway"
 	config.Metrics.M3.FlushInterval = 500 * time.Millisecond
