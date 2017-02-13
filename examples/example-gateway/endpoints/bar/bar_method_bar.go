@@ -15,10 +15,11 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/clients/uber/zanzibar/clients/bar"
-	bar "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar"
+	barClient "github.com/uber/zanzibar/examples/example-gateway/clients/bar"
+	bar "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
+// HandleBarRequest handles request
 func HandleBarRequest(
 	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
