@@ -55,6 +55,7 @@ lint:
 
 .PHONY: generate
 generate: scripts/easy_json/easy_json
+	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
 .PHONY: test
