@@ -35,6 +35,7 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		"examples/example-gateway/idl/github.com",
 		"examples/example-gateway/gen-code",
 		tmpDir,
+		"examples/example-gateway/idl/github.com/uber/zanzibar",
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {
 		return nil
@@ -71,7 +72,17 @@ func TestFileGenPath(t *testing.T) {
 	assert.Equal(t, exp, p, "wrong generated code path")
 	_, err = h.TargetGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
-	_, err = h.TargetGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
+	_, err = h.TargetClientPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
+	assert.Error(t, err, "should return error for not in IDL dir")
+
+func TestGenPath(t *testing.T) {
+	h := newPackageHelper()
+	p, err := h.TargetClientPath(fooThrift)
+	assert.Nil(t, err, "should not return error")
+	assert.Equal(t, h.TargetGenDir+"/clients/foo/foo.go", p, "wrong generated code path")
+	_, err = h.TargetClientPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
+	assert.Error(t, err, "should return error for not a thrift file")
+	_, err = h.TargetClientPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
 	assert.Error(t, err, "should return error for not in IDL dir")
 }
 
