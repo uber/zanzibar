@@ -45,7 +45,6 @@ func main() {
 		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)
 	}
 
-	thriftRootDir := "examples/example-gateway/idl/github.com/uber/zanzibar"
 	h, err := codegen.NewPackageHelper(
 		"examples/example-gateway/idl",
 		"examples/example-gateway/gen-code",
@@ -53,7 +52,6 @@ func main() {
 		"examples/example-gateway/idl/github.com/uber/zanzibar",
 	)
 	if err != nil {
-		fmt.Printf("Could not create package helper for %s: %s \n", os.Args[i], err)
 		panic(err)
 	}
 
@@ -73,11 +71,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		h, err := codegen.NewPackageHelper(
-			"examples/example-gateway/idl/github.com",
-			"examples/example-gateway/gen-code",
-			"examples/example-gateway/gen-code/clients",
-		)
 
 		// Hack: only do bar...
 		_, err = clientTemplate.GenerateClientFile(

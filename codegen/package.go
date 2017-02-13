@@ -123,7 +123,7 @@ func (p PackageHelper) TargetClientPath(thrift string) (string, error) {
 	}
 
 	goFile := strings.Replace(fileName, ".thrift", ".go", -1)
-	return path.Join(p.TargetGenDir, goFile), nil
+	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TargetClientStructPath returns the path for any structs needed for
@@ -134,7 +134,7 @@ func (p PackageHelper) TargetClientStructPath(thrift string) (string, error) {
 		return "", err
 	}
 	goFile := strings.Replace(fileName, ".thrift", "_structs.go", -1)
-	return path.Join(p.TargetGenDir, goFile), nil
+	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TargetEndpointPath returns the path for the endpoint handler based
@@ -149,7 +149,7 @@ func (p PackageHelper) TargetEndpointPath(
 
 	fileEnding := "_method_" + methodName + ".go"
 	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
-	return path.Join(p.TargetGenDir, goFile), nil
+	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TargetEndpointTestPath returns the path for the endpoint test based
@@ -164,7 +164,7 @@ func (p PackageHelper) TargetEndpointTestPath(
 
 	fileEnding := "_method_" + methodName + "_test.go"
 	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
-	return path.Join(p.TargetGenDir, goFile), nil
+	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TargetEndpointPath

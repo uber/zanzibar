@@ -41,7 +41,7 @@ func TestModuleSpec(t *testing.T) {
 	convertThriftPathToRelative(m)
 	actual, err := json.MarshalIndent(m, "", "\t")
 	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
-	CompareGoldenFile(t, parsedBarFile, actual, true)
+	CompareGoldenFile(t, parsedBarFile, actual, *updateGoldenFile)
 }
 
 func convertThriftPathToRelative(m *codegen.ModuleSpec) {

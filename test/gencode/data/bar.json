@@ -2,7 +2,8 @@
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
 	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/endpoints/bar/bar",
 	"PackageName": "bar",
-	"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/endpoints/bar/bar.go",
+	"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar.go",
+	"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar_structs.go",
 	"IncludedPackages": [
 		"github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar",
@@ -44,7 +45,8 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
+						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -119,7 +121,8 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
+						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -188,7 +191,8 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
+						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -251,7 +255,8 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
+						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
@@ -325,7 +330,8 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
 						"PackageName": "bar",
-						"GoFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar.go",
+						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
 							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"

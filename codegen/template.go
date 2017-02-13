@@ -217,11 +217,18 @@ func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (string
 	if len(m.Services) == 0 {
 		return "", errors.Errorf("no service is found in thrift file %s", thrift)
 	}
-	err = t.execTemplateAndFmt("endpoint.tmpl", m.GoFilePath, m)
+
+	// TODO: method name ??
+	dest, err := h.TargetEndpointPath(thrift, "")
+	if err != nil {
+		return "", errors.Wrap(err, "Could not generate endpoint path")
+	}
+
+	err = t.execTemplateAndFmt("endpoint.tmpl", dest, m)
 	if err != nil {
 		return "", err
 	}
-	return m.GoFilePath, nil
+	return dest, nil
 }
 
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
