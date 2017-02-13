@@ -33,6 +33,8 @@ import (
 type PackageHelper struct {
 	// The root directory containing thrift files.
 	thriftRootDir string
+	// The root directory just for the gateway thrift files.
+	gatewayThriftRootDir string
 	// The root directory where all files of go types are generated.
 	typeFileRootDir string
 	// The directory to put the generated service code.
@@ -40,15 +42,21 @@ type PackageHelper struct {
 }
 
 // NewPackageHelper creates a package helper.
-func NewPackageHelper(thriftRootDir, typeFileRootDir, targetGenDir string) (*PackageHelper, error) {
+func NewPackageHelper(
+	thriftRootDir string,
+	typeFileRootDir string,
+	targetGenDir string,
+	gatewayThriftRootDir string,
+) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
 	if err != nil {
 		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
 	}
 	return &PackageHelper{
-		thriftRootDir:   path.Clean(thriftRootDir),
-		typeFileRootDir: typeFileRootDir,
-		targetGenDir:    genDir,
+		thriftRootDir:        path.Clean(thriftRootDir),
+		typeFileRootDir:      typeFileRootDir,
+		gatewayThriftRootDir: path.Clean(gatewayThriftRootDir),
+		targetGenDir:         genDir,
 	}, nil
 }
 
@@ -61,7 +69,11 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 	if idx == -1 {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
 	}
-	return path.Join("github.com/uber/zanzibar", p.typeFileRootDir, thrift[idx+len(p.thriftRootDir):len(thrift)-7]), nil
+	return path.Join(
+		"github.com/uber/zanzibar",
+		p.typeFileRootDir,
+		thrift[idx+len(p.thriftRootDir):len(thrift)-7],
+	), nil
 }
 
 // PackageGenPath returns the Go package path for generated code from a thrift file.
@@ -75,7 +87,11 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
 	}
 	dirUnderZanzibar := p.targetGenDir[strings.Index(p.targetGenDir, "zanzibar"):]
-	return path.Join("github.com/uber/", dirUnderZanzibar, thrift[idx+len(root):len(thrift)-7]), nil
+	return path.Join(
+		"github.com/uber/",
+		dirUnderZanzibar,
+		thrift[idx+len(root):len(thrift)-7],
+	), nil
 }
 
 // TypePackageName returns the package name that defines the type.
@@ -87,18 +103,71 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	return file[:len(file)-7], nil
 }
 
-// TargetGenPath returns the path for generated file for services in a thrift file.
-func (p PackageHelper) TargetGenPath(thrift string) (string, error) {
+func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	idx := strings.Index(thrift, p.thriftRootDir)
+	root := path.Clean(p.gatewayThriftRootDir)
+	idx := strings.Index(thrift, root)
 	if idx == -1 {
 		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, p.thriftRootDir)
 	}
-	goFile := strings.Replace(thrift[idx+len(p.thriftRootDir):], ".thrift", ".go", -1)
-	return path.Join(p.targetGenDir, goFile), nil
+	return thrift[idx+len(root):], nil
 }
+
+// TargetClientPath returns the path for generated file for services in a thrift file.
+func (p PackageHelper) TargetClientPath(thrift string) (string, error) {
+	fileName, err := p.getRelativeFileName(thrift)
+	if err != nil {
+		return "", err
+	}
+
+	goFile := strings.Replace(fileName, ".thrift", ".go", -1)
+	return path.Join(p.TargetGenDir, goFile), nil
+}
+
+// TargetClientStructPath returns the path for any structs needed for
+// a generated client based on thrift file.
+func (p PackageHelper) TargetClientStructPath(thrift string) (string, error) {
+	fileName, err := p.getRelativeFileName(thrift)
+	if err != nil {
+		return "", err
+	}
+	goFile := strings.Replace(fileName, ".thrift", "_structs.go", -1)
+	return path.Join(p.TargetGenDir, goFile), nil
+}
+
+// TargetEndpointPath returns the path for the endpoint handler based
+// on the thrift file and method name
+func (p PackageHelper) TargetEndpointPath(
+	thrift string, methodName string,
+) (string, error) {
+	fileName, err := p.getRelativeFileName(thrift)
+	if err != nil {
+		return "", err
+	}
+
+	fileEnding := "_method_" + methodName + ".go"
+	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
+	return path.Join(p.TargetGenDir, goFile), nil
+}
+
+// TargetEndpointTestPath returns the path for the endpoint test based
+// on the thrift file and method name
+func (p PackageHelper) TargetEndpointTestPath(
+	thrift string, methodName string,
+) (string, error) {
+	fileName, err := p.getRelativeFileName(thrift)
+	if err != nil {
+		return "", err
+	}
+
+	fileEnding := "_method_" + methodName + "_test.go"
+	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
+	return path.Join(p.TargetGenDir, goFile), nil
+}
+
+// TargetEndpointPath
 
 // TypeFullName returns the referred Go type name in generated code from curThriftFile.
 func (p PackageHelper) TypeFullName(curThriftFile string, typeSpec compile.TypeSpec) (string, error) {
