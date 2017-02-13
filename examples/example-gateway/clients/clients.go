@@ -1,9 +1,9 @@
 package clients
 
 import (
+	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/clients/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/clients/google_now"
-	barClient "github.com/uber/zanzibar/examples/example-gateway/gen-code/clients/uber/zanzibar/clients/bar"
 	"github.com/uber/zanzibar/runtime"
 )
 

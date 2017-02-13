@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/google_now"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/health"
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/handlers/bar"
 	"github.com/uber/zanzibar/runtime"
 )
 
