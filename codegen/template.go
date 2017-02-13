@@ -62,21 +62,149 @@ func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (string, 
 		return "", errors.Errorf("no service is found in thrift file %s", thrift)
 	}
 
-	err = t.execTemplateAndFmt("http_client.tmpl", m.GoFilePath, m)
+	err = t.execTemplateAndFmt("http_client.tmpl", m.GoClientFilePath, m)
 	if err != nil {
 		return "", err
 	}
 
-	baseName := filepath.Base(m.GoFilePath)
-	structsName := filepath.Dir(m.GoFilePath) + "/" +
-		baseName[:len(baseName)-3] + "_structs.go"
-
-	err = t.execTemplateAndFmt("http_client_structs.tmpl", structsName, m)
+	err = t.execTemplateAndFmt(
+		"http_client_structs.tmpl", m.GoClientStructsFilePath, m,
+	)
 	if err != nil {
 		return "", err
 	}
 
-	return m.GoFilePath, nil
+	return m.GoClientFilePath, nil
+}
+
+// GenerateHandlerFile generates Go http code for endpoint.
+func (t *Template) GenerateHandlerFile(
+	thrift string, h *PackageHelper, methodName string,
+) (string, error) {
+	m, err := NewModuleSpec(thrift, h)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed to parse thrift file.")
+	}
+	if len(m.Services) == 0 {
+		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+	}
+
+	if len(m.Services) != 1 {
+		panic("TODO: Do not support multiple services in thrift file yet.")
+	}
+
+	service := m.Services[0]
+	var method *MethodSpec
+	for _, v := range service.Methods {
+		if v.Name == methodName {
+			method = v
+			break
+		}
+	}
+
+	if method == nil {
+		return "", errors.Errorf(
+			"could not find method name %s in thrift file %s",
+			methodName, thrift,
+		)
+	}
+
+	endpointName := strings.Split(method.EndpointName, ".")[0]
+	handlerName := strings.Split(method.Name, ".")[0]
+	dest, err := h.TargetEndpointPath(thrift, methodName)
+	if err != nil {
+		return "", errors.Wrap(err, "Could not generate endpoint path")
+	}
+
+	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
+	downstreamService := endpointName
+	downstreamMethod := handlerName
+
+	vals := map[string]string{
+		"MyHandler":         handlerName,
+		"Package":           endpointName,
+		"DownstreamService": downstreamService,
+		"DownstreamMethod":  downstreamMethod,
+	}
+
+	err = t.execTemplateAndFmt("endpoint_template.tmpl", dest, vals)
+	if err != nil {
+		return "", err
+	}
+
+	return dest, nil
+}
+
+// GenerateHandlerTestFile generates Go http code for endpoint test.
+func (t *Template) GenerateHandlerTestFile(
+	thrift string, h *PackageHelper, methodName string,
+) (string, error) {
+	m, err := NewModuleSpec(thrift, h)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed to parse thrift file.")
+	}
+	if len(m.Services) == 0 {
+		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+	}
+
+	if len(m.Services) != 1 {
+		panic("TODO: Do not support multiple services in thrift file yet.")
+	}
+
+	service := m.Services[0]
+	var method *MethodSpec
+	for _, v := range service.Methods {
+		if v.Name == methodName {
+			method = v
+			break
+		}
+	}
+
+	if method == nil {
+		return "", errors.Errorf(
+			"could not find method name %s in thrift file %s",
+			methodName, thrift,
+		)
+	}
+
+	endpointName := strings.Split(method.EndpointName, ".")[0]
+	handlerName := strings.Split(method.Name, ".")[0]
+	dest, err := h.TargetEndpointTestPath(thrift, methodName)
+	if err != nil {
+		return "", errors.Wrap(err, "Could not generate endpoint path")
+	}
+
+	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
+	downstreamService := endpointName
+	downstreamMethod := handlerName
+
+	// TODO(sindelar): Dummy data, read from golden file.
+	var clientResponse = "{\\\"statusCode\\\":200}"
+	var endpointPath = "/googlenow/add-credentials"
+	var endpointHTTPMethod = "POST"
+	var clientPath = "/add-credentials"
+	var clientHTTPMethod = "POST"
+	var endpointRequest = "{\\\"testrequest\\\"}"
+
+	vals := map[string]string{
+		"MyHandler":          handlerName,
+		"Package":            endpointName,
+		"DownstreamService":  downstreamService,
+		"DownstreamMethod":   downstreamMethod,
+		"EndpointPath":       endpointPath,
+		"EndpointHttpMethod": endpointHTTPMethod,
+		"ClientPath":         clientPath,
+		"ClientHttpMethod":   clientHTTPMethod,
+		"ClientResponse":     clientResponse,
+		"EndpointRequest":    endpointRequest,
+	}
+
+	err = t.execTemplateAndFmt("endpoint_test_template.tmpl", dest, vals)
+	if err != nil {
+		return "", err
+	}
+
+	return dest, nil
 }
 
 // GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
@@ -96,12 +224,12 @@ func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (string
 	return m.GoFilePath, nil
 }
 
-func (t *Template) execTemplateAndFmt(templName string, filePath string, m *ModuleSpec) error {
+func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open file: ", err)
 	}
-	if err := t.template.ExecuteTemplate(file, templName, m); err != nil {
+	if err := t.template.ExecuteTemplate(file, templName, data); err != nil {
 		return errors.Wrapf(err, "failed to execute template files for file %s", file)
 	}
 

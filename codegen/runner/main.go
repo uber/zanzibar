@@ -26,27 +26,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/uber/zanzibar/codegen"
 )
 
 func main() {
-	funcMap := template.FuncMap{
-		"Title": strings.Title,
-	}
-
 	// Hacky way to find the template directory. Switch to use zw's template helpers
 	// once they are landed.
 	importPath := "github.com/uber/zanzibar/codegen"
 	p, err := build.Default.Import(importPath, "", build.FindOnly)
 	if err != nil {
 		panic(fmt.Sprintf("Could not create build path for endpoint generation: %s", err))
-	}
-	templatePath := filepath.Join(p.Dir, "templates/endpoint_template.tmpl")
-	handlerTemplate, err := template.New("endpoint_template.tmpl").Funcs(funcMap).ParseFiles(templatePath)
-	if err != nil {
-		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
 	}
 
 	clientTemplatePath := filepath.Join(p.Dir, "templates/*.tmpl")
@@ -55,13 +45,16 @@ func main() {
 		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)
 	}
 
-	// Build a test file with benchmarking to validate the endpoint.
-	// In the future, refactor this into a test runner instead of generating test
-	// files for each endpoint.
-	testCaseTemplatePath := filepath.Join(p.Dir, "templates/endpoint_test_template.tmpl")
-	testCaseTemplate, err := template.New("endpoint_test_template.tmpl").Funcs(funcMap).ParseFiles(testCaseTemplatePath)
+	thriftRootDir := "examples/example-gateway/idl/github.com/uber/zanzibar"
+	h, err := codegen.NewPackageHelper(
+		"examples/example-gateway/idl",
+		"examples/example-gateway/gen-code",
+		"examples/example-gateway",
+		"examples/example-gateway/idl/github.com/uber/zanzibar",
+	)
 	if err != nil {
-		fmt.Printf("Could not create template %s: %s (skip)\n", templatePath, err)
+		fmt.Printf("Could not create package helper for %s: %s \n", os.Args[i], err)
+		panic(err)
 	}
 
 	fail := false
@@ -85,11 +78,7 @@ func main() {
 			"examples/example-gateway/gen-code",
 			"examples/example-gateway/gen-code/clients",
 		)
-		if err != nil {
-			fmt.Printf("Could not create package helper for %s: %s \n", os.Args[i], err)
-			fail = true
-			continue
-		}
+
 		// Hack: only do bar...
 		_, err = clientTemplate.GenerateClientFile(
 			filepath.Join(
@@ -100,39 +89,48 @@ func main() {
 			h,
 		)
 		if err != nil {
-			fmt.Printf("Could not create client specs for %s: %s \n", os.Args[i], err)
+			fmt.Printf(
+				"Could not create client specs for %s: %s \n",
+				os.Args[i], err,
+			)
 			fail = true
 			continue
 		}
 
-		// Generate handlers and test files for each method
-		m, err := codegen.BuildModuleSpecForEndpoint(endpointDir, "zanzibar/endpoints/"+endpoint+string(os.PathSeparator)+endpoint+".thrift")
-		//m, err := codegen.BuildModuleSpecForEndpoint(endpointDir, os.Args[i])
+		_, err = clientTemplate.GenerateHandlerFile(
+			filepath.Join(
+				p.Dir, "..", "examples", "example-gateway",
+				"idl", "github.com", "uber", "zanzibar", "endpoints",
+				"bar", "bar.thrift",
+			),
+			h,
+			"bar",
+		)
 		if err != nil {
-			fmt.Printf("Could not create endpoint specs for %s: %s \n", os.Args[i], err)
+			fmt.Printf(
+				"Could not create handler specs for %s: %s \n",
+				os.Args[i], err,
+			)
 			fail = true
 			continue
 		}
-		handlers := m.Services[0].Methods
 
-		for j := 0; j < len(handlers); j++ {
-			// TODO: Why is ModuleSpec creating methods for error response
-			// like "missingArg"
-			// fmt.Printf("Found %s %s \n", handlers[j].EndpointName, handlers[j].Name)
-			if handlers[j].Name == "bar" {
-				err = codegen.GenerateHandler(handlers[j], handlerTemplate, endpointDir)
-				if err != nil {
-					fmt.Printf("Could not create handler specs for %s: %s \n", os.Args[i], err)
-					fail = true
-					continue
-				}
-				err = codegen.GenerateTestCase(handlers[j], testCaseTemplate, endpointDir)
-				if err != nil {
-					fmt.Printf("Could not create tests specs for %s: %s \n", os.Args[i], err)
-					fail = true
-					continue
-				}
-			}
+		_, err = clientTemplate.GenerateHandlerTestFile(
+			filepath.Join(
+				p.Dir, "..", "examples", "example-gateway",
+				"idl", "github.com", "uber", "zanzibar", "endpoints",
+				"bar", "bar.thrift",
+			),
+			h,
+			"bar",
+		)
+		if err != nil {
+			fmt.Printf(
+				"Could not create tests specs for %s: %s \n",
+				os.Args[i], err,
+			)
+			fail = true
+			continue
 		}
 	}
 

@@ -15,10 +15,11 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	{{.DownstreamService}}Client "github.com/uber/zanzibar/examples/example-gateway/gen-code/clients/uber/zanzibar/clients/{{.DownstreamService}}"
-	{{.MyHandler}} "github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar"
+	{{.DownstreamService}}Client "github.com/uber/zanzibar/examples/example-gateway/clients/{{.DownstreamService}}"
+	{{.MyHandler}} "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
+// Handle{{.MyHandler | Title}}Request handles request
 func Handle{{.MyHandler | Title}}Request(
 	ctx context.Context,
 	inc *zanzibar.IncomingMessage,
