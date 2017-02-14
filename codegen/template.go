@@ -180,12 +180,13 @@ func (t *Template) GenerateHandlerTestFile(
 
 	// TODO(sindelar): Dummy data, read from golden file.
 	var clientResponse = "{\\\"statusCode\\\":200}"
-	var endpointPath = "/googlenow/add-credentials"
+	var endpointPath = "/bar/bar-path"
 	var endpointHTTPMethod = "POST"
-	var clientPath = "/add-credentials"
+	var clientPath = "/bar-path"
 	var clientHTTPMethod = "POST"
-	var endpointRequest = "{\\\"testrequest\\\"}"
-	var clientName = "GoogleNow"
+	var clientName = "Bar"
+	var endpointRequest = "{\\\"stringField\\\":\\\"field\\\"," +
+		"\\\"boolField\\\":true}"
 
 	vals := map[string]string{
 		"MyHandler":          handlerName,
