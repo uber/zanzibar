@@ -101,12 +101,12 @@ func main() {
 		MetricsBackend: m3Backend,
 	})
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 
 	err = server.Bootstrap(endpoints.Register)
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 
 	server.Logger.Info("Started EdgeGateway",
