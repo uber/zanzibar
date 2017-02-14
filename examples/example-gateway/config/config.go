@@ -38,5 +38,6 @@ type Config struct {
 	Clients struct {
 		Contacts  HTTPClientConfig
 		GoogleNow HTTPClientConfig
+		Bar       HTTPClientConfig
 	}
 }

@@ -60,7 +60,8 @@ generate: scripts/easy_json/easy_json
 
 .PHONY: test
 test: generate lint
-	go test ./test/...
+	go test ./test/... | grep -v '\[no test files\]'
+	go test ./examples/example-gateway/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
 .PHONY: bench
