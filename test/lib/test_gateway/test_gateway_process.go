@@ -76,7 +76,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	}
 	gateway.cmd.Env = append(
 		[]string{
-			"UBER_CONFIG_DIR=" + tempConfigDir,
+			"CONFIG_DIR=" + tempConfigDir,
 			"GATEWAY_RUN_CHILD_PROCESS_TEST=1",
 		},
 		os.Environ()...,

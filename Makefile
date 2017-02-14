@@ -80,8 +80,8 @@ bins: generate $(PROGS)
 .PHONY: run
 run: examples/example-gateway/example-gateway
 	cd ./examples/example-gateway; \
-		UBER_ENVIRONMENT=production \
-		UBER_CONFIG_DIR=./config \
+		ENVIRONMENT=production \
+		CONFIG_DIR=./config \
 		./example-gateway
 
 .PHONY: go-docs

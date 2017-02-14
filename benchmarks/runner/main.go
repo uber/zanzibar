@@ -103,8 +103,8 @@ func spawnGateway(dirName string) *exec.Cmd {
 		dirName, "..", "..", "examples", "example-gateway", "example-gateway",
 	)
 	gatewayCmd := exec.Command("taskset", "-c", "0,3", mainGatewayPath)
-	gatewayCmd.Env = append(os.Environ(), "UBER_CONFIG_DIR="+uberConfigDir)
-	gatewayCmd.Env = append(gatewayCmd.Env, "UBER_ENVIRONMENT=production")
+	gatewayCmd.Env = append(os.Environ(), "CONFIG_DIR="+uberConfigDir)
+	gatewayCmd.Env = append(gatewayCmd.Env, "ENVIRONMENT=production")
 	gatewayCmd.Stderr = os.Stderr
 	gatewayCmd.Stdout = os.Stdout
 

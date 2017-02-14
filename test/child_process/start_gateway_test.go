@@ -71,7 +71,7 @@ func listenOnSignals() {
 }
 
 func loadConfig(config *config.Config) error {
-	configRoot := os.Getenv("UBER_CONFIG_DIR")
+	configRoot := os.Getenv("CONFIG_DIR")
 	filePath := path.Join(configRoot, "production.yaml")
 
 	data, err := ioutil.ReadFile(filePath)
