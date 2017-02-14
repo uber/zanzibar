@@ -206,8 +206,6 @@ func (inc *IncomingMessage) WriteHeader(statusCode int) {
 // WriteString helper just writes a string to the response
 func (inc *IncomingMessage) writeString(text string) {
 	inc.writeBytes([]byte(text))
-
-	inc.finish()
 }
 
 // NotFound helper to make request NotFound
