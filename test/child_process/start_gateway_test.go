@@ -106,6 +106,8 @@ func TestStartGateway(t *testing.T) {
 	clientOpts.Contacts.Port = gatewayConfig.Clients.Contacts.Port
 	clientOpts.GoogleNow.IP = gatewayConfig.Clients.GoogleNow.IP
 	clientOpts.GoogleNow.Port = gatewayConfig.Clients.GoogleNow.Port
+	clientOpts.Bar.IP = gatewayConfig.Clients.Bar.IP
+	clientOpts.Bar.Port = gatewayConfig.Clients.Bar.Port
 	clients := clients.CreateClients(clientOpts)
 
 	m3FlushIntervalConfig := gatewayConfig.Metrics.M3.FlushInterval
