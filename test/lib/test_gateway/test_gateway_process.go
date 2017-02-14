@@ -155,12 +155,7 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 func (gateway *ChildProcessGateway) copyToStdout(src io.Reader) {
 	reader := bufio.NewReader(src)
 
-	for true {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break
-		}
-
+	for line, err := reader.ReadString('\n'); err != nil; {
 		if line == "PASS\n" {
 			continue
 		} else if strings.Index(line, "coverage:") == 0 {
