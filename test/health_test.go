@@ -108,8 +108,10 @@ func TestHealthMetrics(t *testing.T) {
 	}
 	defer gateway.Close()
 
+	cgateway := gateway.(*testGateway.ChildProcessGateway)
+
 	// Expect three metrics
-	gateway.MetricsWaitGroup.Add(3)
+	cgateway.MetricsWaitGroup.Add(3)
 
 	res, err := gateway.MakeRequest("GET", "/health", nil)
 	if !assert.NoError(t, err, "got http error") {
@@ -118,8 +120,8 @@ func TestHealthMetrics(t *testing.T) {
 
 	assert.Equal(t, res.Status, "200 OK", "got http 200")
 
-	gateway.MetricsWaitGroup.Wait()
-	metrics := gateway.M3Service.GetMetrics()
+	cgateway.MetricsWaitGroup.Wait()
+	metrics := cgateway.M3Service.GetMetrics()
 	sort.Sort(SortMetricByName(metrics))
 
 	assert.Equal(t, len(metrics), 3, "expected one metric")

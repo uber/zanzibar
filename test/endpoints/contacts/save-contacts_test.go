@@ -28,84 +28,35 @@ import (
 
 	"net/http"
 
-	assert "github.com/stretchr/testify/assert"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
-	contacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/config"
+	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	"github.com/uber/zanzibar/test/lib/bench_gateway"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 var benchBytes = []byte("{\"contacts\":[{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}}],\"appType\":\"MY_APP\"}")
 
-type testCase struct {
-	Counter      int
-	IsBench      bool
-	Backend      *testBackend.TestBackend
-	TestGateway  *testGateway.TestGateway
-	BenchGateway *benchGateway.BenchGateway
-}
-
-func (testCase *testCase) Close() {
-	testCase.Backend.Close()
-
-	if testCase.IsBench {
-		testCase.BenchGateway.Close()
-	} else {
-		testCase.TestGateway.Close()
-	}
-}
-
-func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
-	testCase := &testCase{
-		IsBench: isBench,
-	}
-
-	testCase.Backend = testBackend.CreateBackend(0)
-	err := testCase.Backend.Bootstrap()
-	if err != nil {
-		return nil, err
-	}
-
-	handleContacts := func(w http.ResponseWriter, r *http.Request) {
-		testCase.Counter++
-		w.WriteHeader(202)
-	}
-	testCase.Backend.HandleFunc("POST", "/foo/contacts", handleContacts)
-
-	config := &config.Config{}
-	config.Clients.Contacts.IP = "127.0.0.1"
-	config.Clients.Contacts.Port = testCase.Backend.RealPort
-
-	if testCase.IsBench {
-		gateway, err := benchGateway.CreateGateway(config)
-		if err != nil {
-			return nil, err
-		}
-		testCase.BenchGateway = gateway
-	} else {
-		gateway, err := testGateway.CreateGateway(t, config, nil)
-		if err != nil {
-			return nil, err
-		}
-		testCase.TestGateway = gateway
-	}
-	return testCase, nil
-}
-
 func BenchmarkSaveContacts(b *testing.B) {
-	testCase, err := newTestCase(nil, true)
+	config := &config.Config{}
+	gateway, err := benchGateway.CreateGateway(config)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
+
+	gateway.Backends()["Contacts"].HandleFunc(
+		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(202)
+		},
+	)
 
 	b.ResetTimer()
 
 	// b.SetParallelism(100)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			res, err := testCase.BenchGateway.MakeRequest(
+			res, err := gateway.MakeRequest(
 				"POST", "/contacts/foo/contacts",
 				bytes.NewReader(benchBytes),
 			)
@@ -127,25 +78,33 @@ func BenchmarkSaveContacts(b *testing.B) {
 	})
 
 	b.StopTimer()
-	testCase.Close()
+	gateway.Close()
 	b.StartTimer()
 }
 
 func TestSaveContactsCall(t *testing.T) {
-	testCase, err := newTestCase(t, false)
+	var counter int = 0
+
+	config := &config.Config{}
+	gateway, err := testGateway.CreateGateway(t, config, nil)
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
-	defer testCase.Close()
+	defer gateway.Close()
 
-	assert.NotNil(t, testCase.TestGateway, "gateway exists")
+	gateway.Backends()["Contacts"].HandleFunc(
+		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
+			counter++
+			w.WriteHeader(202)
+		},
+	)
 
 	saveContacts := &contacts.SaveContactsRequest{
 		Contacts: []*contacts.Contact{},
 	}
 	rawBody, _ := saveContacts.MarshalJSON()
 
-	res, err := testCase.TestGateway.MakeRequest(
+	res, err := gateway.MakeRequest(
 		"POST", "/contacts/foo/contacts", bytes.NewReader(rawBody),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -153,5 +112,5 @@ func TestSaveContactsCall(t *testing.T) {
 	}
 
 	assert.Equal(t, "202 Accepted", res.Status)
-	assert.Equal(t, 1, testCase.Counter)
+	assert.Equal(t, 1, counter)
 }

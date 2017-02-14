@@ -42,7 +42,7 @@ func TestBootstrapError(t *testing.T) {
 	assert.NotNil(t, gateway1, "gateway exists")
 
 	config2 := &config.Config{}
-	config2.Port = int32(gateway1.RealPort)
+	config2.Port = int32(gateway1.GetPort())
 	gateway2, err := testGateway.CreateGateway(t, config2, &testGateway.Options{
 		LogWhitelist: map[string]bool{
 			"Error listening on port": true,

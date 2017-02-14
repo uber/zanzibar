@@ -22,90 +22,43 @@ package google_now_test
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
-	assert "github.com/stretchr/testify/assert"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/examples/example-gateway/config"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/test/lib/bench_gateway"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 
-type testCase struct {
-	Counter      int
-	IsBench      bool
-	Backend      *testBackend.TestBackend
-	TestGateway  *testGateway.TestGateway
-	BenchGateway *benchGateway.BenchGateway
-}
-
-func (testCase *testCase) Close() {
-	testCase.Backend.Close()
-
-	if testCase.IsBench {
-		testCase.BenchGateway.Close()
-	} else {
-		testCase.TestGateway.Close()
-	}
-}
-
-func newTestCase(t *testing.T, isBench bool) (*testCase, error) {
-	testCase := &testCase{
-		IsBench: isBench,
-	}
-
-	testCase.Backend = testBackend.CreateBackend(0)
-	err := testCase.Backend.Bootstrap()
-	if err != nil {
-		return nil, err
-	}
-
-	addCredentials := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
-			t.Fatal("can't write fake response")
-		}
-		testCase.Counter++
-	}
-	testCase.Backend.HandleFunc("POST", "/add-credentials", addCredentials)
-
-	config := &config.Config{}
-	config.Clients.GoogleNow.IP = "127.0.0.1"
-	config.Clients.GoogleNow.Port = testCase.Backend.RealPort
-
-	if testCase.IsBench {
-		gateway, err := benchGateway.CreateGateway(config)
-		if err != nil {
-			return nil, err
-		}
-		testCase.BenchGateway = gateway
-	} else {
-		gateway, err := testGateway.CreateGateway(t, config, nil)
-		if err != nil {
-			return nil, err
-		}
-		testCase.TestGateway = gateway
-	}
-	return testCase, nil
-}
-
 func BenchmarkRtnowAddCredentials(b *testing.B) {
-	testCase, err := newTestCase(nil, true)
+	config := &config.Config{}
+	gateway, err := benchGateway.CreateGateway(config)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
+
+	gateway.Backends()["GoogleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				panic(errors.New("can't write fake response"))
+			}
+		},
+	)
 
 	b.ResetTimer()
 
 	// b.SetParallelism(100)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			res, err := testCase.BenchGateway.MakeRequest(
+			res, err := gateway.MakeRequest(
 				"POST", "/googlenow/add-credentials",
 				bytes.NewReader(benchBytes),
 			)
@@ -127,20 +80,31 @@ func BenchmarkRtnowAddCredentials(b *testing.B) {
 	})
 
 	b.StopTimer()
-	testCase.Close()
+	gateway.Close()
 	b.StartTimer()
 }
 
 func TestAddCredentials(t *testing.T) {
-	testCase, err := newTestCase(t, false)
+	var counter int = 0
+
+	config := &config.Config{}
+	gateway, err := testGateway.CreateGateway(t, config, nil)
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
-	defer testCase.Close()
+	defer gateway.Close()
 
-	assert.NotNil(t, testCase.TestGateway, "gateway exists")
+	gateway.Backends()["GoogleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
 
-	res, err := testCase.TestGateway.MakeRequest(
+	res, err := gateway.MakeRequest(
 		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -148,5 +112,5 @@ func TestAddCredentials(t *testing.T) {
 	}
 
 	assert.Equal(t, "200 OK", res.Status)
-	assert.Equal(t, 1, testCase.Counter)
+	assert.Equal(t, 1, counter)
 }
