@@ -27,7 +27,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 
@@ -60,7 +59,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	gateway.binaryFileInfo = info
 
 	args := []string{
-		"-c", "0", gateway.binaryFileInfo.binaryFile,
+		gateway.binaryFileInfo.binaryFile,
 	}
 
 	if os.Getenv("COVER_ON") == "1" {
@@ -69,11 +68,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 		)
 	}
 
-	if runtime.GOOS == "linux" {
-		gateway.cmd = exec.Command("taskset", args...)
-	} else {
-		gateway.cmd = exec.Command(args[2], args[3:]...)
-	}
+	gateway.cmd = exec.Command(args[0], args[1:]...)
 	tempConfigDir, err := writeConfigToFile(config)
 	if err != nil {
 		gateway.Close()

@@ -27,7 +27,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"runtime"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -148,10 +147,7 @@ func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 
 	allPackagesString := strings.Join(allPackages, ",")
 
-	args := []string{
-		"-c", "0", "go", "test", "-v",
-		"-c", "-o", binaryFile,
-	}
+	args := []string{"test", "-v", "-c", "-o", binaryFile}
 	if os.Getenv("COVER_ON") == "1" {
 		args = append(args,
 			"-cover", "-coverprofile", coverProfileFile,
@@ -160,12 +156,7 @@ func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 
 	args = append(args, mainTestPath)
 
-	var testGenCmd *exec.Cmd
-	if runtime.GOOS == "linux" {
-		testGenCmd = exec.Command("taskset", args...)
-	} else {
-		testGenCmd = exec.Command(args[2], args[3:]...)
-	}
+	testGenCmd := exec.Command("go", args...)
 
 	// testGenCmd.Stderr = os.Stderr
 	// testGenCmd.Stdout = os.Stdout
