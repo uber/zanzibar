@@ -99,6 +99,11 @@ func makeRandStr() (string, error) {
 	return randStr, nil
 }
 
+func getProjectDir() string {
+	goPath := os.Getenv("GOPATH")
+	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+}
+
 func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 	if cachedBinaryFile != nil {
 		return cachedBinaryFile, nil

@@ -28,9 +28,11 @@ import (
 
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
-	endpoints "github.com/uber/zanzibar/examples/example-gateway/endpoints"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/examples/example-gateway/config"
+	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
+	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/test/lib/test_backend"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -40,11 +42,18 @@ const defaultM3FlushInterval = 500 * time.Millisecond
 // BenchGateway for testing
 type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
-	httpClient    *http.Client
+
+	backends   map[string]*testBackend.TestBackend
+	httpClient *http.Client
 }
 
 // CreateGateway bootstrap gateway for testing
-func CreateGateway(config *config.Config) (*BenchGateway, error) {
+func CreateGateway(config *config.Config) (testGateway.TestGateway, error) {
+	backends, err := testBackend.BuildBackends(config)
+	if err != nil {
+		return nil, err
+	}
+
 	config.IP = "127.0.0.1"
 	config.Port = 0
 	config.TChannel.ServiceName = "bench-gateway"
@@ -62,6 +71,7 @@ func CreateGateway(config *config.Config) (*BenchGateway, error) {
 				MaxIdleConnsPerHost: 500,
 			},
 		},
+		backends: backends,
 	}
 
 	clientOpts := &clients.Options{}
@@ -103,6 +113,10 @@ func CreateGateway(config *config.Config) (*BenchGateway, error) {
 			FlushInterval: config.Metrics.Tally.FlushInterval,
 			Service:       config.Metrics.Tally.Service,
 		},
+		TChannel: zanzibar.TChannelOptions{
+			ServiceName: config.TChannel.ServiceName,
+			ProcessName: config.TChannel.ProcessName,
+		},
 
 		Clients:        clients,
 		MetricsBackend: m3Backend,
@@ -117,6 +131,16 @@ func CreateGateway(config *config.Config) (*BenchGateway, error) {
 	}
 
 	return benchGateway, nil
+}
+
+// GetPort ...
+func (gateway *BenchGateway) GetPort() int {
+	return int(gateway.ActualGateway.RealPort)
+}
+
+// Backends ...
+func (gateway *BenchGateway) Backends() map[string]*testBackend.TestBackend {
+	return gateway.backends
 }
 
 // MakeRequest helper

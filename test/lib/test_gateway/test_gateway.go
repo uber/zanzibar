@@ -21,18 +21,10 @@
 package testGateway
 
 import (
-	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"os/exec"
-	"path"
-	"regexp"
-	"runtime"
-	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 	"testing"
@@ -42,15 +34,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally/m3"
 	config "github.com/uber/zanzibar/examples/example-gateway/config"
+	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
 )
 
-var realAddrRegex = regexp.MustCompile(
-	`"realAddr":"([0-9\.\:]+)"`,
-)
+// TestGateway interface
+type TestGateway interface {
+	MakeRequest(
+		method string, url string, body io.Reader,
+	) (*http.Response, error)
+	Backends() map[string]*testBackend.TestBackend
+	GetPort() int
+	Close()
+}
 
-// TestGateway for testing
-type TestGateway struct {
+// ChildProcessGateway for testing
+type ChildProcessGateway struct {
 	cmd            *exec.Cmd
 	binaryFileInfo *testBinaryInfo
 	jsonLines      []string
@@ -58,6 +57,7 @@ type TestGateway struct {
 	opts           *Options
 	httpClient     *http.Client
 	m3Server       *testM3Server.FakeM3Server
+	backends       map[string]*testBackend.TestBackend
 
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup sync.WaitGroup
@@ -66,87 +66,38 @@ type TestGateway struct {
 	RealPort         int
 }
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
-}
-
-// MalformedStdoutError is used when the child process has unexpected stdout
-type MalformedStdoutError struct {
-	Type       string
-	StdoutLine string
-	Message    string
-}
-
-func (err *MalformedStdoutError) Error() string {
-	return err.Message
-}
-
-func readAddrFromStdout(testGateway *TestGateway, reader *bufio.Reader) error {
-	line1, err := reader.ReadString('\n')
-	if err != nil {
-		return err
-	}
-
-	if line1[0] == '{' {
-		testGateway.jsonLines = append(testGateway.jsonLines, line1)
-	}
-
-	_, err = os.Stdout.WriteString(line1)
-	if err != nil {
-		return err
-	}
-
-	m := realAddrRegex.FindStringSubmatch(line1)
-	if m == nil {
-		return &MalformedStdoutError{
-			Type:       "malformed.stdout",
-			StdoutLine: line1,
-			Message: fmt.Sprintf(
-				"Could not find RealAddr in server stdout: %s",
-				line1,
-			),
-		}
-	}
-
-	testGateway.RealAddr = m[1]
-	indexOfSep := strings.LastIndex(testGateway.RealAddr, ":")
-	if indexOfSep != -1 {
-		host := testGateway.RealAddr[0:indexOfSep]
-		port := testGateway.RealAddr[indexOfSep+1:]
-		portNum, err := strconv.Atoi(port)
-
-		testGateway.RealHost = host
-		if err != nil {
-			testGateway.RealPort = -1
-		} else {
-			testGateway.RealPort = portNum
-		}
-	}
-
-	return nil
-}
-
 // Options used to create TestGateway
 type Options struct {
 	LogWhitelist map[string]bool
 	CountMetrics bool
 }
 
-// CreateGateway bootstrap gateway for testing
-func CreateGateway(
-	t *testing.T, config *config.Config, opts *Options,
-) (*TestGateway, error) {
-	config.IP = "127.0.0.1"
-	config.TChannel.ServiceName = "test-gateway"
-	config.TChannel.ProcessName = "test-gateway"
-
+func (gateway *ChildProcessGateway) setupMetrics(
+	t *testing.T, opts *Options,
+) {
 	countMetrics := false
 	if opts != nil {
 		countMetrics = opts.CountMetrics
 	}
 
-	testGateway := &TestGateway{
+	gateway.m3Server = testM3Server.NewFakeM3Server(
+		t, &gateway.MetricsWaitGroup,
+		false, countMetrics, metrics.Compact,
+	)
+	gateway.M3Service = gateway.m3Server.Service
+	go gateway.m3Server.Serve()
+}
+
+// CreateGateway bootstrap gateway for testing
+func CreateGateway(
+	t *testing.T, config *config.Config, opts *Options,
+) (TestGateway, error) {
+	backends, err := testBackend.BuildBackends(config)
+	if err != nil {
+		return nil, err
+	}
+
+	testGateway := &ChildProcessGateway{
 		test: t, opts: opts,
 		httpClient: &http.Client{
 			Transport: &http.Transport{
@@ -155,109 +106,29 @@ func CreateGateway(
 				MaxIdleConnsPerHost: 500,
 			},
 		},
+		backends: backends,
 	}
-	testGateway.m3Server = testM3Server.NewFakeM3Server(
-		t, &testGateway.MetricsWaitGroup,
-		false, countMetrics, metrics.Compact,
-	)
-	testGateway.M3Service = testGateway.m3Server.Service
-	go testGateway.m3Server.Serve()
 
+	testGateway.setupMetrics(t, opts)
+
+	config.IP = "127.0.0.1"
+	config.TChannel.ServiceName = "test-gateway"
+	config.TChannel.ProcessName = "test-gateway"
 	config.Metrics.M3.HostPort = testGateway.m3Server.Addr
 	config.Metrics.Tally.Service = "test-example-gateway"
 	config.Metrics.M3.FlushInterval = 10 * time.Millisecond
 	config.Metrics.Tally.FlushInterval = 10 * time.Millisecond
 
-	info, err := createTestBinaryFile(config)
+	err = testGateway.createAndSpawnChild(config)
 	if err != nil {
 		return nil, err
 	}
-
-	testGateway.binaryFileInfo = info
-
-	args := []string{
-		"-c", "0", testGateway.binaryFileInfo.binaryFile,
-	}
-
-	if os.Getenv("COVER_ON") == "1" {
-		args = append(args,
-			"-test.coverprofile", info.coverProfileFile,
-		)
-	}
-
-	if runtime.GOOS == "linux" {
-		testGateway.cmd = exec.Command("taskset", args...)
-	} else {
-		testGateway.cmd = exec.Command(args[2], args[3:]...)
-	}
-	tempConfigDir, err := writeConfigToFile(config)
-	if err != nil {
-		testGateway.Close()
-		return nil, err
-	}
-	testGateway.cmd.Env = append(
-		[]string{
-			"UBER_CONFIG_DIR=" + tempConfigDir,
-			"GATEWAY_RUN_CHILD_PROCESS_TEST=1",
-		},
-		os.Environ()...,
-	)
-	testGateway.cmd.Stderr = os.Stderr
-
-	cmdStdout, err := testGateway.cmd.StdoutPipe()
-	if err != nil {
-		testGateway.Close()
-		return nil, err
-	}
-
-	err = testGateway.cmd.Start()
-	if err != nil {
-		testGateway.Close()
-		return nil, err
-	}
-
-	reader := bufio.NewReader(cmdStdout)
-
-	err = readAddrFromStdout(testGateway, reader)
-	if err != nil {
-		testGateway.Close()
-		return nil, err
-	}
-
-	go testGateway.copyToStdout(cmdStdout)
 
 	return testGateway, nil
 }
 
-func (gateway *TestGateway) copyToStdout(src io.Reader) {
-	reader := bufio.NewReader(src)
-
-	for true {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break
-		}
-
-		if line == "PASS\n" {
-			continue
-		} else if strings.Index(line, "coverage:") == 0 {
-			continue
-		}
-
-		if line[0] == '{' {
-			gateway.jsonLines = append(gateway.jsonLines, line)
-		}
-
-		_, err = os.Stdout.WriteString(line)
-		if err != nil {
-			// TODO: betterer...
-			panic(err)
-		}
-	}
-}
-
 // MakeRequest helper
-func (gateway *TestGateway) MakeRequest(
+func (gateway *ChildProcessGateway) MakeRequest(
 	method string, url string, body io.Reader,
 ) (*http.Response, error) {
 	client := gateway.httpClient
@@ -273,8 +144,18 @@ func (gateway *TestGateway) MakeRequest(
 	return client.Do(req)
 }
 
+// Backends returns the backends
+func (gateway *ChildProcessGateway) Backends() map[string]*testBackend.TestBackend {
+	return gateway.backends
+}
+
+// GetPort ...
+func (gateway *ChildProcessGateway) GetPort() int {
+	return gateway.RealPort
+}
+
 // Close test gateway
-func (gateway *TestGateway) Close() {
+func (gateway *ChildProcessGateway) Close() {
 	if gateway.cmd != nil {
 		err := syscall.Kill(gateway.cmd.Process.Pid, syscall.SIGUSR2)
 		if err != nil {
