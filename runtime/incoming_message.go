@@ -135,6 +135,12 @@ func (inc *IncomingMessage) SendError(statusCode int, err error) {
 
 // SendErrorString helper to send an error string
 func (inc *IncomingMessage) SendErrorString(statusCode int, err string) {
+	inc.gateway.Logger.Warn(
+		"Sending error for endpoint request",
+		zap.String("error", err),
+		zap.String("path", inc.URL.Path),
+	)
+
 	inc.writeHeader(statusCode)
 	inc.writeString(err)
 
