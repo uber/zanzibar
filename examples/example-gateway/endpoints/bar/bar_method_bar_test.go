@@ -15,7 +15,7 @@ import (
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-var benchBytes = []byte("{\"testrequest\"}")
+var benchBytes = []byte("{\"stringField\":\"field\",\"boolField\":true}")
 
 func TestBar(t *testing.T) {
 	var counter int = 0
@@ -34,12 +34,12 @@ func TestBar(t *testing.T) {
 		}
 		counter++
 	}
-	gateway.Backends()["GoogleNow"].HandleFunc(
-		"POST", "/add-credentials", bar,
+	gateway.Backends()["Bar"].HandleFunc(
+		"POST", "/bar-path", bar,
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytes),
+		"POST", "/bar/bar-path", bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
