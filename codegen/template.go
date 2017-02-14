@@ -185,6 +185,7 @@ func (t *Template) GenerateHandlerTestFile(
 	var clientPath = "/add-credentials"
 	var clientHTTPMethod = "POST"
 	var endpointRequest = "{\\\"testrequest\\\"}"
+	var clientName = "GoogleNow"
 
 	vals := map[string]string{
 		"MyHandler":          handlerName,
@@ -194,6 +195,7 @@ func (t *Template) GenerateHandlerTestFile(
 		"EndpointPath":       endpointPath,
 		"EndpointHttpMethod": endpointHTTPMethod,
 		"ClientPath":         clientPath,
+		"ClientName":         clientName,
 		"ClientHttpMethod":   clientHTTPMethod,
 		"ClientResponse":     clientResponse,
 		"EndpointRequest":    endpointRequest,
