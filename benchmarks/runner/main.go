@@ -80,7 +80,6 @@ func writeConfig(gatewayConfig *config.Config) string {
 }
 
 func spawnGateway(dirName string) *exec.Cmd {
-
 	logTempDir, err := ioutil.TempDir("", "zanzibar-log-file")
 	if err != nil {
 		panic(err)
@@ -94,6 +93,8 @@ func spawnGateway(dirName string) *exec.Cmd {
 	gatewayConfig.Port = 8093
 	gatewayConfig.Metrics.M3.HostPort = "127.0.0.1:8053"
 	gatewayConfig.Metrics.Tally.Service = "bench-zanzibar"
+	gatewayConfig.TChannel.ServiceName = "bench-zanzibar"
+	gatewayConfig.TChannel.ProcessName = "bench-zanzibar"
 
 	tempConfigDir := writeConfig(gatewayConfig)
 	uberConfigDir := tempConfigDir
