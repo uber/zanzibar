@@ -25,14 +25,13 @@ import (
 
 	"encoding/json"
 
+	"github.com/pkg/errors"
 	assert "github.com/stretchr/testify/assert"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func TestBootstrapError(t *testing.T) {
-	config1 := &config.Config{}
-	gateway1, err := testGateway.CreateGateway(t, config1, nil)
+	gateway1, err := testGateway.CreateGateway(t, nil, nil)
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
 	}
@@ -41,8 +40,8 @@ func TestBootstrapError(t *testing.T) {
 
 	assert.NotNil(t, gateway1, "gateway exists")
 
-	config2 := &config.Config{}
-	config2.Port = int32(gateway1.GetPort())
+	config2 := map[string]interface{}{}
+	config2["port"] = int32(gateway1.GetPort())
 	gateway2, err := testGateway.CreateGateway(t, config2, &testGateway.Options{
 		LogWhitelist: map[string]bool{
 			"Error listening on port": true,
@@ -52,7 +51,7 @@ func TestBootstrapError(t *testing.T) {
 	assert.Error(t, err, "expected err creating server")
 	assert.Nil(t, gateway2, "expected no gateway")
 
-	switch err := err.(type) {
+	switch err := errors.Cause(err).(type) {
 	case *testGateway.MalformedStdoutError:
 		var lineStruct struct {
 			Msg   string

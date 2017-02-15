@@ -25,16 +25,14 @@ import (
 	"sort"
 	"testing"
 
-	assert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	m3 "github.com/uber-go/tally/m3/thrift"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/bench_gateway"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func TestHealthCall(t *testing.T) {
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, nil)
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
 	}
@@ -51,8 +49,7 @@ func TestHealthCall(t *testing.T) {
 }
 
 func BenchmarkHealthCall(b *testing.B) {
-	config := &config.Config{}
-	gateway, err := benchGateway.CreateGateway(config)
+	gateway, err := benchGateway.CreateGateway(nil, nil)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
@@ -99,8 +96,7 @@ func (a SortMetricByName) Less(i, j int) bool {
 }
 
 func TestHealthMetrics(t *testing.T) {
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, &testGateway.Options{
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics: true,
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
@@ -129,7 +125,7 @@ func TestHealthMetrics(t *testing.T) {
 	latencyMetric := metrics[0]
 
 	assert.Equal(t,
-		"test-example-gateway.production.all-workers.inbound.calls.latency",
+		"test-gateway.production.all-workers.inbound.calls.latency",
 		latencyMetric.GetName(),
 		"expected correct name",
 	)
@@ -160,7 +156,7 @@ func TestHealthMetrics(t *testing.T) {
 	recvdMetric := metrics[1]
 
 	assert.Equal(t,
-		"test-example-gateway.production.all-workers.inbound.calls.recvd",
+		"test-gateway.production.all-workers.inbound.calls.recvd",
 		recvdMetric.GetName(),
 		"expected correct name",
 	)
@@ -189,7 +185,7 @@ func TestHealthMetrics(t *testing.T) {
 	statusCodeMetric := metrics[2]
 
 	assert.Equal(t,
-		"test-example-gateway.production.all-workers.inbound.calls.status.200",
+		"test-gateway.production.all-workers.inbound.calls.status.200",
 		statusCodeMetric.GetName(),
 		"expected correct name",
 	)

@@ -21,15 +21,12 @@
 package save_contacts_test
 
 import (
+	"bytes"
 	"io/ioutil"
+	"net/http"
 	"testing"
 
-	"bytes"
-
-	"net/http"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -38,14 +35,15 @@ import (
 var benchBytes = []byte("{\"contacts\":[{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}}],\"appType\":\"MY_APP\"}")
 
 func BenchmarkSaveContacts(b *testing.B) {
-	config := &config.Config{}
-	gateway, err := benchGateway.CreateGateway(config)
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownBackends: []string{"contacts"},
+	})
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
 
-	gateway.Backends()["Contacts"].HandleFunc(
+	gateway.Backends()["contacts"].HandleFunc(
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(202)
 		},
@@ -85,14 +83,15 @@ func BenchmarkSaveContacts(b *testing.B) {
 func TestSaveContactsCall(t *testing.T) {
 	var counter int = 0
 
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"contacts"},
+	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["Contacts"].HandleFunc(
+	gateway.Backends()["contacts"].HandleFunc(
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			counter++
 			w.WriteHeader(202)

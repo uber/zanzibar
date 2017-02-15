@@ -27,8 +27,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/uber/zanzibar/examples/example-gateway/config"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -37,14 +35,15 @@ import (
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 
 func BenchmarkRtnowAddCredentials(b *testing.B) {
-	config := &config.Config{}
-	gateway, err := benchGateway.CreateGateway(config)
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+	})
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
 
-	gateway.Backends()["GoogleNow"].HandleFunc(
+	gateway.Backends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
@@ -87,14 +86,15 @@ func BenchmarkRtnowAddCredentials(b *testing.B) {
 func TestAddCredentials(t *testing.T) {
 	var counter int = 0
 
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["GoogleNow"].HandleFunc(
+	gateway.Backends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
