@@ -16,8 +16,11 @@ import (
 type GoogleNowClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service GoogleNow.
-func NewClient(opts *zanzibar.HTTPClientOptions) *GoogleNowClient {
-	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+func NewClient(config *zanzibar.StaticConfig) *GoogleNowClient {
+	ip := config.GetString("clients.bar.ip")
+	port := config.GetInt("clients.bar.port")
+
+	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &GoogleNowClient{
 		Client: &http.Client{
 			Transport: &http.Transport{
