@@ -19,6 +19,15 @@ make test
 
 ## Running the server
 
+First create log dir...
+
+```
+sudo mkdir -p /var/log/my-gateway
+sudo chown $USER /var/log/my-gateway
+chmod 755 /var/log/my-gateway
+```
+
+
 ```
 make run
 # Logs are in /var/log/example-gateway/example-gateway.log
