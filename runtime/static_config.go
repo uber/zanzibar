@@ -26,6 +26,8 @@ import (
 
 	"encoding/json"
 
+	"os"
+
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 )
@@ -47,13 +49,14 @@ type StaticConfig struct {
 	destroyed    bool
 }
 
-// NewStaticConfig allocates a static config instance
+// NewStaticConfigOrDie allocates a static config instance
 // StaticConfig takes two args, files and seedConfig.
 //
 // files is required and must be a list of file paths.
+// The later files overwrite keys from earlier files.
 //
 // The seedConfig is optional and will be used to overwrite
-// configuration key value pairs if present.
+// configuration json files if present.
 //
 // The files must be a list of JSON files. Each file must be a flat object of
 // key, value pairs. It's recommended that you use keys like:
@@ -67,7 +70,7 @@ type StaticConfig struct {
 // }
 //
 // To organize your configuration file.
-func NewStaticConfig(
+func NewStaticConfigOrDie(
 	files []string, seedConfig map[string]interface{},
 ) *StaticConfig {
 	config := &StaticConfig{
@@ -81,8 +84,12 @@ func NewStaticConfig(
 	return config
 }
 
-// GetBoolean returns the value as a boolean or panics.
-func (conf *StaticConfig) GetBoolean(key string) bool {
+// MustGetBoolean returns the value as a boolean or panics.
+func (conf *StaticConfig) MustGetBoolean(key string) bool {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+	}
+
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(bool)
 	}
@@ -105,8 +112,12 @@ func (conf *StaticConfig) GetBoolean(key string) bool {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// GetFloat returns the value as a float or panics.
-func (conf *StaticConfig) GetFloat(key string) float64 {
+// MustGetFloat returns the value as a float or panics.
+func (conf *StaticConfig) MustGetFloat(key string) float64 {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+	}
+
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(float64)
 	}
@@ -129,8 +140,12 @@ func (conf *StaticConfig) GetFloat(key string) float64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// GetInt returns the value as a float or panics.
-func (conf *StaticConfig) GetInt(key string) int64 {
+// MustGetInt returns the value as a float or panics.
+func (conf *StaticConfig) MustGetInt(key string) int64 {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+	}
+
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(int64)
 	}
@@ -153,8 +168,12 @@ func (conf *StaticConfig) GetInt(key string) int64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// GetString returns the value as a float or panics.
-func (conf *StaticConfig) GetString(key string) string {
+// MustGetString returns the value as a float or panics.
+func (conf *StaticConfig) MustGetString(key string) string {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+	}
+
 	if value, contains := conf.seedConfig[key]; contains {
 		return value.(string)
 	}
@@ -177,10 +196,14 @@ func (conf *StaticConfig) GetString(key string) string {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// GetStruct reads the value into an interface{} or panics.
+// MustGetStruct reads the value into an interface{} or panics.
 // Recommended that this is used with pointers to structs
-// GetStruct() will call json.Unmarshal(bytes, ptr) under the hood.
-func (conf *StaticConfig) GetStruct(key string, ptr interface{}) {
+// MustGetStruct() will call json.Unmarshal(bytes, ptr) under the hood.
+func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+	}
+
 	if v, contains := conf.seedConfig[key]; contains {
 		rv := reflect.ValueOf(ptr)
 		if rv.Kind() != reflect.Ptr || rv.IsNil() {
@@ -203,11 +226,11 @@ func (conf *StaticConfig) GetStruct(key string, ptr interface{}) {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// Set a value in the config, useful for tests.
+// SetOrDie a value in the config, useful for tests.
 // Keys you set must not exist in the JSON files
 // Set() will panic if the key exists or if frozen.
 // Strongly recommended not to be used for production code.
-func (conf *StaticConfig) Set(key string, value interface{}) {
+func (conf *StaticConfig) SetOrDie(key string, value interface{}) {
 	if conf.frozen {
 		panic(errors.Errorf("Cannot set(%s) because frozen", key))
 	}
@@ -234,14 +257,15 @@ func (conf *StaticConfig) Freeze() {
 // This allows you to terminate the configuration phase and gives you
 // confidence that your application is now officially bootstrapped.
 func (conf *StaticConfig) Destroy() {
+	conf.destroyed = true
 	conf.frozen = true
 	conf.configValues = map[string]StaticConfigValue{}
 	conf.seedConfig = map[string]interface{}{}
 }
 
-// Inspect returns the entire config object.
+// InspectOrDie returns the entire config object.
 // This should not be mutated and should only be used for inspection or debugging
-func (conf *StaticConfig) Inspect() map[string]interface{} {
+func (conf *StaticConfig) InspectOrDie() map[string]interface{} {
 	result := map[string]interface{}{}
 
 	for k, v := range conf.configValues {
@@ -304,8 +328,13 @@ func (conf *StaticConfig) assignConfigValues(values []map[string]StaticConfigVal
 func (conf *StaticConfig) parseFile(fileName string) map[string]StaticConfigValue {
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		// Ignore missing files
-		return nil
+		if os.IsNotExist(err) {
+			// Ignore missing files
+			return nil
+		}
+
+		// If the ReadFile() failed then just panic out.
+		panic(err)
 	}
 
 	var object = map[string]StaticConfigValue{}
