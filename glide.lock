@@ -1,16 +1,18 @@
-hash: 686ae93beeeb9c6057f1c20784275c27ba6eddf11f627f2f8e8dc1b81c85c64e
-updated: 2017-02-09T13:11:48.90290275-08:00
+hash: a4bb0649dd2dd0a9ec66a79a98af31a978488839baf2de9f643480f1cc5b4b8c
+updated: 2017-02-13T19:07:17.542188056-08:00
 imports:
 - name: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
   subpackages:
   - lib/go/thrift
+- name: github.com/buger/jsonparser
+  version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/cactus/go-statsd-client
   version: 91c326c3f7bd20f0226d3d1c289dd9f8ce28d33d
   subpackages:
   - statsd
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/facebookgo/clock
@@ -22,18 +24,21 @@ imports:
 - name: github.com/mailru/easyjson
   version: 9d6630dc8c577b56cb9687a9cf9e8578aca7298a
   subpackages:
+  - bootstrap
   - buffer
+  - gen
   - jlexer
   - jwriter
-  - bootstrap
-  - gen
   - parser
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
+  subpackages:
+  - ext
+  - log
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
 - name: github.com/Sirupsen/logrus
@@ -52,18 +57,14 @@ imports:
   subpackages:
   - m3
   - m3/customtransports
-  - m3/thrift
   - m3/idgeneration
   - m3/pool
+  - m3/thrift
   - m3/thriftudp
 - name: github.com/uber-go/zap
   version: a5783ee4b216a927da8f839c45cfbf9d694e1467
-- name: github.com/uber/zanzibar
-  version: c5050ada93b0fbe37608b126c791bcbc3a60a7d3
-  subpackages:
-  - examples/example-gateway/gen-code/handlers/generated
 - name: github.com/uber/tchannel-go
-  version: b37e49259935b20c23ba817b3b364740a55be202
+  version: 79387824978f91318be3bfb43ae12e04c38cfe97
   subpackages:
   - internal/argreader
   - relay
@@ -73,11 +74,11 @@ imports:
 - name: go.uber.org/thriftrw
   version: b023316084b4c85403a82782d4ffeff89b09cceb
   subpackages:
-  - wire
-  - compile
   - ast
+  - compile
   - idl
   - idl/internal
+  - wire
 - name: golang.org/x/net
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
   subpackages:
@@ -90,4 +91,4 @@ imports:
   version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-devImports: []
+testImports: []
