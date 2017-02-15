@@ -86,17 +86,17 @@ func spawnGateway(dirName string) *exec.Cmd {
 		panic(err)
 	}
 
-	config := map[string]interface{}{}
-
-	config["ip"] = "127.0.0.1"
-	config["port"] = 8093
-	config["tchannel.serviceName"] = "bench-gateway"
-	config["tchannel.processName"] = "bench-gateway"
-	config["metrics.m3.hostPort"] = "127.0.0.1:8053"
-	config["metrics.tally.service"] = "bench-gateway"
-	config["logger.fileName"] = path.Join(logTempDir, "zanzibar.log")
-	config["clients.contacts.port"] = 8092
-	config["clients.contacts.ip"] = "127.0.0.1"
+	config := map[string]interface{}{
+		"ip":                    "127.0.0.1",
+		"port":                  8093,
+		"tchannel.serviceName":  "bench-gateway",
+		"tchannel.processName":  "bench-gateway",
+		"metrics.m3.hostPort":   "127.0.0.1:8053",
+		"metrics.tally.service": "bench-gateway",
+		"logger.fileName":       path.Join(logTempDir, "zanzibar.log"),
+		"clients.contacts.port": 8092,
+		"clients.contacts.ip":   "127.0.0.1",
+	}
 
 	tempConfigDir, err := writeConfigToFile(config)
 	if err != nil {
