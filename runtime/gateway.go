@@ -80,8 +80,8 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		IP:        config.GetString("ip"),
-		Port:      int32(config.GetInt("port")),
+		IP:        config.MustGetString("ip"),
+		Port:      int32(config.MustGetInt("port")),
 		WaitGroup: &sync.WaitGroup{},
 		Clients:   opts.Clients,
 
@@ -177,10 +177,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 	// TODO: decide what default tags we want...
 	defaultTags := &map[string]string{}
 
-	prefix := config.GetString("metrics.tally.service") +
+	prefix := config.MustGetString("metrics.tally.service") +
 		".production.all-workers"
 
-	flushIntervalConfig := config.GetInt("metrics.tally.flushInterval")
+	flushIntervalConfig := config.MustGetInt("metrics.tally.flushInterval")
 
 	scope, closer := tally.NewCachedRootScope(
 		prefix,
@@ -202,8 +202,8 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		zap.Output(os.Stderr),
 	)
 
-	loggerFileName := config.GetString("logger.fileName")
-	loggerOutput := config.GetString("logger.output")
+	loggerFileName := config.MustGetString("logger.fileName")
+	loggerOutput := config.MustGetString("logger.output")
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
 		output = zap.Output(os.Stdout)
@@ -256,8 +256,8 @@ func (gateway *Gateway) setupHTTPServer() error {
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	tchannelServer, err := NewTChannelServer(
 		&TChannelServerOptions{
-			ServiceName: config.GetString("tchannel.serviceName"),
-			ProcessName: config.GetString("tchannel.processName"),
+			ServiceName: config.MustGetString("tchannel.serviceName"),
+			ProcessName: config.MustGetString("tchannel.processName"),
 		})
 
 	if err != nil {

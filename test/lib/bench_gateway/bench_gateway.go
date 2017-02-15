@@ -86,7 +86,7 @@ func CreateGateway(
 		backends: backends,
 	}
 
-	config := zanzibar.NewStaticConfig([]string{
+	config := zanzibar.NewStaticConfigOrDie([]string{
 		filepath.Join(getProjectDir(), "config", "production.json"),
 		filepath.Join(
 			getProjectDir(),
@@ -99,12 +99,12 @@ func CreateGateway(
 
 	clients := clients.CreateClients(config)
 
-	m3FlushIntervalConfig := config.GetInt("metrics.m3.flushInterval")
+	m3FlushIntervalConfig := config.MustGetInt("metrics.m3.flushInterval")
 
 	commonTags := map[string]string{"env": "bench"}
 	m3Backend, err := metrics.NewM3Backend(
-		config.GetString("metrics.m3.hostPort"),
-		config.GetString("metrics.tally.service"),
+		config.MustGetString("metrics.m3.hostPort"),
+		config.MustGetString("metrics.tally.service"),
 		commonTags, // default tags
 		false,      // include host
 		defaultM3MaxQueueSize,

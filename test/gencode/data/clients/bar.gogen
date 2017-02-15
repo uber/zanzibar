@@ -17,8 +17,8 @@ type BarClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service Bar.
 func NewClient(config *zanzibar.StaticConfig) *BarClient {
-	ip := config.GetString("clients.bar.ip")
-	port := config.GetInt("clients.bar.port")
+	ip := config.MustGetString("clients.bar.ip")
+	port := config.MustGetInt("clients.bar.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &BarClient{

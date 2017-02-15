@@ -47,8 +47,8 @@ func (contacts *ContactsClient) SaveContacts(ctx context.Context, save *SaveCont
 
 // Create makes a contacts client
 func Create(config *zanzibar.StaticConfig) *ContactsClient {
-	ip := config.GetString("clients.contacts.ip")
-	port := config.GetInt("clients.contacts.port")
+	ip := config.MustGetString("clients.contacts.ip")
+	port := config.MustGetInt("clients.contacts.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	client := &ContactsClient{

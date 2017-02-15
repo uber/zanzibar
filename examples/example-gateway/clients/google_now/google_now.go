@@ -36,8 +36,8 @@ func (c *Client) AddCredential(ctx context.Context, r *AddCredentialRequest, h h
 
 // NewClient returns a new http client for googleNow.
 func NewClient(config *zanzibar.StaticConfig) *Client {
-	ip := config.GetString("clients.googleNow.ip")
-	port := config.GetInt("clients.googleNow.port")
+	ip := config.MustGetString("clients.googleNow.ip")
+	port := config.MustGetInt("clients.googleNow.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &Client{
