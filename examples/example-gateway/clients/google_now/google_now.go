@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // Client is the http client for googleNow.
@@ -34,15 +34,12 @@ func (c *Client) AddCredential(ctx context.Context, r *AddCredentialRequest, h h
 	return c.Client.Do(req.WithContext(ctx))
 }
 
-// Options to create a new googleNow client
-type Options struct {
-	IP   string
-	Port int32
-}
-
 // NewClient returns a new http client for googleNow.
-func NewClient(opts *Options) *Client {
-	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+func NewClient(config *zanzibar.StaticConfig) *Client {
+	ip := config.GetString("clients.googleNow.ip")
+	port := config.GetInt("clients.googleNow.port")
+
+	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &Client{
 		Client: &http.Client{
 			Transport: &http.Transport{

@@ -15,18 +15,11 @@ type Clients struct {
 	Bar       *barClient.BarClient
 }
 
-// Options for creating all clients
-type Options struct {
-	Contacts  contactsClient.Options
-	GoogleNow googleNow.Options
-	Bar       zanzibar.HTTPClientOptions
-}
-
 // CreateClients will make all clients
-func CreateClients(opts *Options) *Clients {
+func CreateClients(config *zanzibar.StaticConfig) *Clients {
 	return &Clients{
-		Contacts:  contactsClient.Create(&opts.Contacts),
-		GoogleNow: googleNow.NewClient(&opts.GoogleNow),
-		Bar:       barClient.NewClient(&opts.Bar),
+		Contacts:  contactsClient.Create(config),
+		GoogleNow: googleNow.NewClient(config),
+		Bar:       barClient.NewClient(config),
 	}
 }

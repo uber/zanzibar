@@ -16,8 +16,11 @@ import (
 type BarClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service Bar.
-func NewClient(opts *zanzibar.HTTPClientOptions) *BarClient {
-	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+func NewClient(config *zanzibar.StaticConfig) *BarClient {
+	ip := config.GetString("clients.bar.ip")
+	port := config.GetInt("clients.bar.port")
+
+	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &BarClient{
 		Client: &http.Client{
 			Transport: &http.Transport{

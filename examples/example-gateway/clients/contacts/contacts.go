@@ -5,6 +5,8 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+
+	"github.com/uber/zanzibar/runtime"
 )
 
 // ContactsClient is the client itself
@@ -43,16 +45,12 @@ func (contacts *ContactsClient) SaveContacts(ctx context.Context, save *SaveCont
 	}, nil
 }
 
-// Options for creating Contacts client
-type Options struct {
-	IP   string
-	Port int32
-}
-
 // Create makes a contacts client
-func Create(opts *Options) *ContactsClient {
-	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+func Create(config *zanzibar.StaticConfig) *ContactsClient {
+	ip := config.GetString("clients.contacts.ip")
+	port := config.GetInt("clients.contacts.port")
 
+	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	client := &ContactsClient{
 		httpClient: &http.Client{
 			Transport: &http.Transport{
