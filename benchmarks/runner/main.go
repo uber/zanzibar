@@ -22,23 +22,18 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
+	"flag"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
-
-	"os"
-
-	"flag"
-
-	"bytes"
-
 	"time"
 
-	osext "github.com/kardianos/osext"
+	"github.com/kardianos/osext"
 	"github.com/uber-go/zap"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var logger = zap.New(zap.NewJSONEncoder())
@@ -58,25 +53,24 @@ func spawnBenchServer(dirName string) *exec.Cmd {
 	return benchServerCmd
 }
 
-func writeConfig(gatewayConfig *config.Config) string {
-	tempConfigDir, err := ioutil.TempDir("", "zanzibar-config-yaml")
+func writeConfigToFile(config map[string]interface{}) (string, error) {
+	tempConfigDir, err := ioutil.TempDir("", "zanzibar-bench-config-json")
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	productionYamlFile := path.Join(tempConfigDir, "production.yaml")
-
-	configBytes, err := yaml.Marshal(gatewayConfig)
+	jsonFile := path.Join(tempConfigDir, "production.json")
+	configBytes, err := json.Marshal(config)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	err = ioutil.WriteFile(productionYamlFile, configBytes, os.ModePerm)
+	err = ioutil.WriteFile(jsonFile, configBytes, os.ModePerm)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return tempConfigDir
+	return tempConfigDir, nil
 }
 
 func spawnGateway(dirName string) *exec.Cmd {
@@ -85,18 +79,22 @@ func spawnGateway(dirName string) *exec.Cmd {
 		panic(err)
 	}
 
-	gatewayConfig := &config.Config{}
-	gatewayConfig.Logger.FileName = path.Join(logTempDir, "zanzibar.log")
-	gatewayConfig.Clients.Contacts.Port = 8092
-	gatewayConfig.Clients.Contacts.IP = "127.0.0.1"
-	gatewayConfig.IP = "127.0.0.1"
-	gatewayConfig.Port = 8093
-	gatewayConfig.Metrics.M3.HostPort = "127.0.0.1:8053"
-	gatewayConfig.Metrics.Tally.Service = "bench-zanzibar"
-	gatewayConfig.TChannel.ServiceName = "bench-zanzibar"
-	gatewayConfig.TChannel.ProcessName = "bench-zanzibar"
+	config := map[string]interface{}{}
 
-	tempConfigDir := writeConfig(gatewayConfig)
+	config["ip"] = "127.0.0.1"
+	config["port"] = 8093
+	config["tchannel.serviceName"] = "bench-gateway"
+	config["tchannel.processName"] = "bench-gateway"
+	config["metrics.m3.hostPort"] = "127.0.0.1:8053"
+	config["metrics.tally.service"] = "bench-gateway"
+	config["logger.fileName"] = path.Join(logTempDir, "zanzibar.log")
+	config["clients.contacts.port"] = 8092
+	config["clients.contacts.ip"] = "127.0.0.1"
+
+	tempConfigDir, err := writeConfigToFile(config)
+	if err != nil {
+		panic(err)
+	}
 	uberConfigDir := tempConfigDir
 
 	mainGatewayPath := path.Join(
