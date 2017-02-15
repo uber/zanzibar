@@ -1,0 +1,22 @@
+{
+	"serviceName": "example-gateway",
+	"ip": "127.0.0.1",
+	"port": 7783,
+
+	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
+	"logger.output": "disk",
+
+	"metrics.tally.service": "example-gateway",
+	"metrics.m3.service": "example-gateway",
+	"tchannel.serviceName": "example-gateway",
+	"tchannel.processName": "example-gateway",
+
+	"clients.contacts.port": 4000,
+	"clients.contacts.ip": "127.0.0.1",
+
+	"clients.googleNow.port": 14120,
+	"clients.googleNow.ip": "127.0.0.1",
+
+	"clients.bar.port": 4001,
+	"clients.bar.ip": "127.0.0.1"
+}
