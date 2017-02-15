@@ -39,31 +39,8 @@ import (
 type Clients interface {
 }
 
-// LoggerOptions configures logging in the gateway
-type LoggerOptions struct {
-	FileName string
-}
-
-// MetricsOptions ...
-type MetricsOptions struct {
-	FlushInterval time.Duration
-	Service       string
-}
-
-// TChannelOptions ...
-type TChannelOptions struct {
-	ServiceName string
-	ProcessName string
-}
-
 // Options configures the gateway
 type Options struct {
-	IP       string
-	Port     int32
-	Logger   LoggerOptions
-	Metrics  MetricsOptions
-	TChannel TChannelOptions
-
 	Clients        Clients
 	MetricsBackend tally.CachedStatsReporter
 }
@@ -86,16 +63,14 @@ type Gateway struct {
 	server            *HTTPServer
 	tchannelServer    *TChannelServer
 	// clients?
-	//	- logger
-	//	- statsd
 	//	- panic ???
-	//	- http server ?
 	//	- process reporter ?
-	// HTTP server?
 }
 
 // CreateGateway func
-func CreateGateway(opts *Options) (*Gateway, error) {
+func CreateGateway(
+	config *StaticConfig, opts *Options,
+) (*Gateway, error) {
 	if opts.MetricsBackend == nil {
 		panic("opts.MetricsBackend required")
 	}
@@ -105,8 +80,8 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 	}
 
 	gateway := &Gateway{
-		IP:        opts.IP,
-		Port:      opts.Port,
+		IP:        config.GetString("ip"),
+		Port:      int32(config.GetInt("port")),
 		WaitGroup: &sync.WaitGroup{},
 		Clients:   opts.Clients,
 
@@ -115,11 +90,11 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 
 	gateway.router = NewRouter(gateway)
 
-	if err := gateway.setupLogger(&opts.Logger); err != nil {
+	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
 	}
 
-	if err := gateway.setupMetrics(&opts.Metrics); err != nil {
+	if err := gateway.setupMetrics(config); err != nil {
 		return nil, err
 	}
 
@@ -127,7 +102,7 @@ func CreateGateway(opts *Options) (*Gateway, error) {
 		return nil, err
 	}
 
-	if err := gateway.setupTChannel(&opts.TChannel); err != nil {
+	if err := gateway.setupTChannel(config); err != nil {
 		return nil, err
 	}
 
@@ -198,25 +173,20 @@ func (gateway *Gateway) Wait() {
 	gateway.WaitGroup.Wait()
 }
 
-func (gateway *Gateway) setupMetrics(opts *MetricsOptions) error {
+func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 	// TODO: decide what default tags we want...
 	defaultTags := &map[string]string{}
 
-	prefix := opts.Service + ".production.all-workers"
+	prefix := config.GetString("metrics.tally.service") +
+		".production.all-workers"
 
-	flushIntervalConfig := opts.FlushInterval
-	var flushInterval time.Duration
-	if flushIntervalConfig == 0 {
-		flushInterval = 1 * time.Second
-	} else {
-		flushInterval = flushIntervalConfig
-	}
+	flushIntervalConfig := config.GetInt("metrics.tally.flushInterval")
 
 	scope, closer := tally.NewCachedRootScope(
 		prefix,
 		*defaultTags,
 		gateway.metricsBackend,
-		flushInterval,
+		time.Duration(flushIntervalConfig)*time.Millisecond,
 		tally.DefaultSeparator,
 	)
 	gateway.MetricScope = scope
@@ -225,16 +195,17 @@ func (gateway *Gateway) setupMetrics(opts *MetricsOptions) error {
 	return nil
 }
 
-func (gateway *Gateway) setupLogger(opts *LoggerOptions) error {
+func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	var output zap.Option
 	tempLogger := zap.New(
 		zap.NewJSONEncoder(),
 		zap.Output(os.Stderr),
 	)
 
-	loggerFileName := opts.FileName
+	loggerFileName := config.GetString("logger.fileName")
+	loggerOutput := config.GetString("logger.output")
 
-	if loggerFileName == "" {
+	if loggerFileName == "" || loggerOutput == "stdout" {
 		output = zap.Output(os.Stdout)
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
@@ -282,15 +253,11 @@ func (gateway *Gateway) setupHTTPServer() error {
 	return nil
 }
 
-func (gateway *Gateway) setupTChannel(opts *TChannelOptions) error {
-	if opts == nil {
-		return errors.New("TChannelOptions were nil")
-	}
-
+func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	tchannelServer, err := NewTChannelServer(
 		&TChannelServerOptions{
-			ServiceName: opts.ServiceName,
-			ProcessName: opts.ProcessName,
+			ServiceName: config.GetString("tchannel.serviceName"),
+			ProcessName: config.GetString("tchannel.processName"),
 		})
 
 	if err != nil {
