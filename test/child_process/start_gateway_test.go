@@ -21,10 +21,10 @@
 package startGatewayTest
 
 import (
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"syscall"
 	"testing"
 	"time"
@@ -33,10 +33,8 @@ import (
 	"github.com/uber-go/zap"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
 	"github.com/uber/zanzibar/runtime"
-	"gopkg.in/yaml.v2"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -70,63 +68,42 @@ func listenOnSignals() {
 	}()
 }
 
-func loadConfig(config *config.Config) error {
-	configRoot := os.Getenv("CONFIG_DIR")
-	filePath := path.Join(configRoot, "production.yaml")
-
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-
-	if err := yaml.Unmarshal(data, config); err != nil {
-		return err
-	}
-
-	return nil
+func getProjectDir() string {
+	goPath := os.Getenv("GOPATH")
+	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
 }
 
 func TestStartGateway(t *testing.T) {
-	gatewayConfig := &config.Config{}
 	tempLogger := zap.New(
 		zap.NewJSONEncoder(),
 		zap.Output(os.Stderr),
 	)
 
-	if err := loadConfig(gatewayConfig); err != nil {
-		tempLogger.Error("Error initializing configuration",
-			zap.String("error", err.Error()),
-		)
-		// ?
-		return
-	}
+	config := zanzibar.NewStaticConfig([]string{
+		filepath.Join(getProjectDir(), "config", "production.json"),
+		filepath.Join(
+			getProjectDir(),
+			"examples",
+			"example-gateway",
+			"config",
+			"production.json",
+		),
+		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
+	}, nil)
 
-	clientOpts := &clients.Options{}
-	clientOpts.Contacts.IP = gatewayConfig.Clients.Contacts.IP
-	clientOpts.Contacts.Port = gatewayConfig.Clients.Contacts.Port
-	clientOpts.GoogleNow.IP = gatewayConfig.Clients.GoogleNow.IP
-	clientOpts.GoogleNow.Port = gatewayConfig.Clients.GoogleNow.Port
-	clientOpts.Bar.IP = gatewayConfig.Clients.Bar.IP
-	clientOpts.Bar.Port = gatewayConfig.Clients.Bar.Port
-	clients := clients.CreateClients(clientOpts)
+	clients := clients.CreateClients(config)
 
-	m3FlushIntervalConfig := gatewayConfig.Metrics.M3.FlushInterval
-	var m3FlushInterval time.Duration
-	if m3FlushIntervalConfig == 0 {
-		m3FlushInterval = defaultM3FlushInterval
-	} else {
-		m3FlushInterval = m3FlushIntervalConfig
-	}
+	m3FlushIntervalConfig := config.GetInt("metrics.m3.flushInterval")
 
 	commonTags := map[string]string{"env": "test"}
 	m3Backend, err := metrics.NewM3Backend(
-		gatewayConfig.Metrics.M3.HostPort,
-		gatewayConfig.Metrics.Tally.Service,
+		config.GetString("metrics.m3.hostPort"),
+		config.GetString("metrics.tally.service"),
 		commonTags, // default tags
 		false,      // include host
 		defaultM3MaxQueueSize,
 		defaultM3MaxPacketSize,
-		m3FlushInterval,
+		time.Duration(m3FlushIntervalConfig)*time.Millisecond,
 	)
 	if err != nil {
 		tempLogger.Error("Error initializing m3backend",
@@ -136,21 +113,7 @@ func TestStartGateway(t *testing.T) {
 		return
 	}
 
-	server, err := zanzibar.CreateGateway(&zanzibar.Options{
-		IP:   gatewayConfig.IP,
-		Port: gatewayConfig.Port,
-		Logger: zanzibar.LoggerOptions{
-			FileName: gatewayConfig.Logger.FileName,
-		},
-		Metrics: zanzibar.MetricsOptions{
-			FlushInterval: gatewayConfig.Metrics.Tally.FlushInterval,
-			Service:       gatewayConfig.Metrics.Tally.Service,
-		},
-		TChannel: zanzibar.TChannelOptions{
-			ServiceName: gatewayConfig.TChannel.ServiceName,
-			ProcessName: gatewayConfig.TChannel.ProcessName,
-		},
-
+	server, err := zanzibar.CreateGateway(config, &zanzibar.Options{
 		Clients:        clients,
 		MetricsBackend: m3Backend,
 	})
@@ -173,9 +136,10 @@ func TestStartGateway(t *testing.T) {
 		// ?
 		return
 	}
+
 	server.Logger.Info("Started Gateway",
 		zap.String("realAddr", server.RealAddr),
-		zap.Object("config", gatewayConfig),
+		zap.Object("config", config.Inspect()),
 	)
 
 	server.Wait()
