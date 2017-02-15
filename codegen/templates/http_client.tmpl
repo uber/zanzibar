@@ -23,8 +23,11 @@ import (
 type {{$clientName}} zanzibar.HTTPClient
 
 // NewClient returns a new http client for service {{.Name}}.
-func NewClient(opts *zanzibar.HTTPClientOptions) *{{$clientName}} {
-	baseURL := "http://" + opts.IP + ":" + strconv.Itoa(int(opts.Port))
+func NewClient(config *zanzibar.StaticConfig) *{{$clientName}} {
+	ip := config.GetString("clients.bar.ip")
+	port := config.GetInt("clients.bar.port")
+
+	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
 		Client: &http.Client{
 			Transport: &http.Transport{

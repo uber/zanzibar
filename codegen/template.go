@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	tmpl "text/template"
@@ -57,11 +58,13 @@ type EndpointTestMeta struct {
 	Method      *MethodSpec
 }
 
+var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 var funcMap = tmpl.FuncMap{
 	"title":        strings.Title,
 	"Title":        strings.Title,
 	"fullTypeName": fullTypeName,
 	"statusCodes":  statusCodes,
+	"camel":        camelCase,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -85,6 +88,19 @@ func statusCodes(codes []StatusCode) string {
 		return err.Error()
 	}
 	return string(buf.Bytes())
+}
+
+func camelCase(src string) string {
+	byteSrc := []byte(src)
+	chunks := camelingRegex.FindAll(byteSrc, -1)
+	for idx, val := range chunks {
+		if idx > 0 {
+			chunks[idx] = bytes.Title(val)
+		} else {
+			chunks[idx][0] = bytes.ToLower(val[0:1])[0]
+		}
+	}
+	return string(bytes.Join(chunks, nil))
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.
