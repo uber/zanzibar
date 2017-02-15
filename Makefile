@@ -58,9 +58,13 @@ generate: scripts/easy_json/easy_json
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
+.PHONY: test-all
+test-all: test bench bins
+	./benchmarks/runner/runner -loadtest
+
 .PHONY: test
 test: generate lint
-	go test ./examples/example-gateway/...
+	go test ./examples/example-gateway/... 1>/dev/null
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 

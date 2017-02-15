@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 	"time"
 
@@ -41,7 +42,13 @@ var logger = zap.New(zap.NewJSONEncoder())
 func spawnBenchServer(dirName string) *exec.Cmd {
 	benchServerPath := path.Join(dirName, "..", "benchserver", "benchserver")
 
-	benchServerCmd := exec.Command("taskset", "-c", "1,2", benchServerPath)
+	var benchServerCmd *exec.Cmd
+	if runtime.GOOS == "linux" {
+		benchServerCmd = exec.Command("taskset", "-c", "1,2", benchServerPath)
+	} else {
+		benchServerCmd = exec.Command(benchServerPath)
+	}
+
 	benchServerCmd.Stdout = os.Stdout
 	benchServerCmd.Stderr = os.Stderr
 
@@ -100,7 +107,14 @@ func spawnGateway(dirName string) *exec.Cmd {
 	mainGatewayPath := path.Join(
 		dirName, "..", "..", "examples", "example-gateway", "example-gateway",
 	)
-	gatewayCmd := exec.Command("taskset", "-c", "0,3", mainGatewayPath)
+
+	var gatewayCmd *exec.Cmd
+	if runtime.GOOS == "linux" {
+		gatewayCmd = exec.Command("taskset", "-c", "0,3", mainGatewayPath)
+	} else {
+		gatewayCmd = exec.Command(mainGatewayPath)
+	}
+
 	gatewayCmd.Env = append(os.Environ(), "CONFIG_DIR="+uberConfigDir)
 	gatewayCmd.Env = append(gatewayCmd.Env, "ENVIRONMENT=production")
 	gatewayCmd.Stderr = os.Stderr
