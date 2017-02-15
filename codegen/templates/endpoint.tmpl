@@ -19,3 +19,89 @@ import (
 	"{{$pkg}}"
 	{{end}}
 )
+
+{{with .Method -}}
+{{- $client := index .Downstream.Services 0 -}}
+{{- $clientPackage := .Downstream.PackageName | printf "%sClient" -}}
+{{- $clientName := title ($client).Name | printf "%sClient" -}}
+{{- $clientMethod := index (index .Downstream.Services 0).Methods 0 -}}
+{{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+
+// Handle{{title .Name}}Request handles "{{.HTTPPath}}".
+func Handle{{title .Name}}Request(
+	ctx context.Context,
+	inc *zanzibar.IncomingMessage,
+	g *zanzibar.Gateway,
+	clients *clients.Clients,
+) {
+	// Handle request headers.
+	h := http.Header{}
+	{{ if .Headers -}}
+	for _, header := range {{.Headers | printf "%#v"}} {
+		h.Set(header, inc.Header.Get(header))
+	}
+	{{- end}}
+
+	// Handle request body.
+	{{if or (eq .RequestType "") (eq $clientMethodRequestType "") -}}
+	clientResp, err := clients.{{title ($client).Name}}.{{title ($clientMethod).Name}}(ctx, h)
+	{{- else -}}
+		rawBody, ok := inc.ReadAll()
+		if !ok {
+			return
+		}
+		var body {{title .RequestType}}
+		if ok := inc.UnmarshalBody(&body, rawBody); !ok {
+			return
+		}
+		clientRequest := convertTo{{title .Name}}ClientRequest(&body)
+		clientResp, err := clients.{{title ($client).Name}}.{{title ($clientMethod).Name}}(ctx, clientRequest, h)
+	{{- end }}
+	if err != nil {
+		g.Logger.Error("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
+		return
+	}
+
+	// Handle client respnse.
+	if !inc.IsOKResponse(clientResp.StatusCode, {{statusCodes .OKStatusCode}}) {
+		g.Logger.Warn("Unknown response status code",
+			zap.Int("status code", clientResp.StatusCode),
+		)
+	}
+	{{if or (eq $clientMethodResponseType "") (eq .ResponseType "") -}}
+	inc.WriteJSONBytes(clientResp.StatusCode, nil)
+	{{- else -}}
+	b, err := ioutil.ReadAll(clientResp.Body)
+	if err != nil {
+		inc.SendError(500, errors.Wrap(err, "could not read client response body:"))
+		return
+	}
+	var clientRespBody {{$clientMethodResponseType}}
+	if err := clientRespBody.UnmarshalJSON(b); err != nil {
+	 	inc.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
+	 	return
+	}
+	response := convert{{title .Name}}ClientResponse(&clientRespBody)
+	inc.WriteJSON(clientResp.StatusCode, response)
+	{{- end -}}
+}
+
+{{if and (ne .RequestType "") (ne $clientMethodRequestType "") -}}
+func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientMethodRequestType}} {
+	// TODO: Add request fields mapping here.
+	return &{{$clientMethodRequestType}}{}
+}
+{{end -}}
+
+{{if and (ne .ResponseType "") (ne $clientMethodResponseType "") -}}
+func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
+	// TODO: Add response fields mapping here.
+	return &{{.ResponseType}}{}
+}
+{{end -}}
+
+{{end -}}

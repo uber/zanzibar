@@ -250,3 +250,13 @@ func (inc *IncomingMessage) UnmarshalBody(
 
 	return true
 }
+
+// IsOKResponse checks if the status code is OK.
+func (inc *IncomingMessage) IsOKResponse(statusCode int, okResponses []int) bool {
+	for _, r := range okResponses {
+		if statusCode == r {
+			return true
+		}
+	}
+	return false
+}

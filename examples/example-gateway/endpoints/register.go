@@ -85,7 +85,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"bar",
-			bar.HandleBarRequest,
+			bar.HandleNormalRequest,
 		),
 	)
 }

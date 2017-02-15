@@ -1,8 +1,8 @@
-package barClient
+package bar
 
 import (
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
+	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
 )
 
 // ArgNotStructHTTPRequest is the http body type for endpoint argNotStruct.

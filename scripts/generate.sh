@@ -21,11 +21,7 @@ for file in $(find "$PREFIX/gen-code" -name "*.go" | grep -v "versioncheck.go");
     ./scripts/easy_json/easy_json "$file"
 done
 
-echo "Generating Endpoint Handlers"
-mkdir "$PREFIX/gen-code/handlers"
-for file in $(find "$PREFIX/gen-code/github.com/uber/zanzibar/endpoints/bar" -name "types.go" | grep -v "versioncheck.go"); do
-    go run codegen/runner/main.go $PREFIX/gen-code/handlers $file
-done
+go run codegen/runner/main.go
 
 echo "Generating JSON Marshal/Unmarshal for rest"
 for file in $(find "$PREFIX/gen-code" -name "*_structs.go"); do

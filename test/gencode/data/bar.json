@@ -1,13 +1,13 @@
 {
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
-	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/endpoints/bar/bar",
+	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
-	"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar.go",
-	"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar_structs.go",
+	"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar.go",
+	"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/endpoints/bar/bar_structs.go",
 	"IncludedPackages": [
-		"github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
-		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/bar/bar",
-		"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/endpoints/foo/foo"
+		"github.com/uber/zanzibar/.tmp_gen/clients/bar",
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
 	],
 	"Services": [
 		{
@@ -43,13 +43,13 @@
 					],
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
-						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
+						"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 						],
 						"Services": [
 							{
@@ -91,82 +91,6 @@
 					}
 				},
 				{
-					"Name": "bar",
-					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
-					"HTTPPath": "/bar-path",
-					"Headers": null,
-					"RequestType": "BarHTTPRequest",
-					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
-					],
-					"RequestStruct": [
-						{
-							"Type": "bar.BarRequest",
-							"Name": "request",
-							"Annotations": null
-						}
-					],
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
-						"PackageName": "bar",
-						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
-						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
-							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
-									{
-										"Name": "bar",
-										"HTTPMethod": "POST",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/bar-path",
-										"Headers": null,
-										"RequestType": "BarHTTPRequest",
-										"ResponseType": "bar.BarResponse",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestStruct": [
-											{
-												"Type": "bar.BarRequest",
-												"Name": "request",
-												"Annotations": null
-											}
-										],
-										"Downstream": null
-									}
-								]
-							}
-						]
-					}
-				},
-				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "bar.baz",
@@ -189,13 +113,13 @@
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
-						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
+						"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 						],
 						"Services": [
 							{
@@ -253,13 +177,13 @@
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
-						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
+						"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 						],
 						"Services": [
 							{
@@ -295,11 +219,90 @@
 					}
 				},
 				{
+					"Name": "normal",
+					"HTTPMethod": "POST",
+					"EndpointName": "bar.baz",
+					"HTTPPath": "/bar-path",
+					"Headers": null,
+					"RequestType": "NormalHTTPRequest",
+					"ResponseType": "bar.BarResponse",
+					"OKStatusCode": [
+						{
+							"Code": 200,
+							"Message": ""
+						}
+					],
+					"ExceptionStatusCode": [
+						{
+							"Code": 403,
+							"Message": "barException"
+						}
+					],
+					"RequestStruct": [
+						{
+							"Type": "bar.BarRequest",
+							"Name": "request",
+							"Annotations": null
+						}
+					],
+					"Downstream": {
+						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
+						"PackageName": "bar",
+						"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
+						"IncludedPackages": [
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
+						],
+						"Services": [
+							{
+								"Name": "Bar",
+								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
+								"Methods": [
+									{
+										"Name": "normal",
+										"HTTPMethod": "POST",
+										"EndpointName": "bar.baz",
+										"HTTPPath": "/bar-path",
+										"Headers": null,
+										"RequestType": "NormalHTTPRequest",
+										"ResponseType": "bar.BarResponse",
+										"OKStatusCode": [
+											{
+												"Code": 200,
+												"Message": ""
+											}
+										],
+										"ExceptionStatusCode": [
+											{
+												"Code": 403,
+												"Message": "barException"
+											}
+										],
+										"RequestStruct": [
+											{
+												"Type": "bar.BarRequest",
+												"Name": "request",
+												"Annotations": null
+											}
+										],
+										"Downstream": null
+									}
+								]
+							}
+						]
+					}
+				},
+				{
 					"Name": "tooManyArgs",
 					"HTTPMethod": "POST",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/too-many-args-path",
-					"Headers": null,
+					"Headers": [
+						"x-uuid",
+						"x-token"
+					],
 					"RequestType": "TooManyArgsHTTPRequest",
 					"ResponseType": "bar.BarResponse",
 					"OKStatusCode": [
@@ -328,13 +331,13 @@
 					],
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/uber/zanzibar/clients/bar/bar",
+						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
-						"GoClientStructsFilePath": "/home/raynos/gocode/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
+						"GoClientFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar.go",
+						"GoStructsFilePath": "/Users/zhenghui/go/src/github.com/uber/zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/uber/zanzibar/clients/foo/foo"
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
+							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 						],
 						"Services": [
 							{

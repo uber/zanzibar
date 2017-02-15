@@ -22,7 +22,7 @@ exception BarException {
 }
 
 service Bar {
-  BarResponse bar (
+  BarResponse normal (
     1: required BarRequest request
   ) throws (
     1: BarException barException (zanzibar.http.status = "403")

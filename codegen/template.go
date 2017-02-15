@@ -21,18 +21,64 @@
 package codegen
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
 )
 
+// EndpointFiles are group of files generated for an endpoint.
+type EndpointFiles struct {
+	HandlerFiles []string
+	StructFile   string
+}
+
+// ClientFiles are group of files generated for a client.
+type ClientFiles struct {
+	ClientFile string
+	StructFile string
+}
+
+// EndpointMeta saves meta data used to render an endpoint.
+type EndpointMeta struct {
+	PackageName      string
+	IncludedPackages []string
+	Method           *MethodSpec
+}
+
 var funcMap = tmpl.FuncMap{
-	"title": strings.Title,
-	"Title": strings.Title,
+	"title":        strings.Title,
+	"Title":        strings.Title,
+	"fullTypeName": fullTypeName,
+	"statusCodes":  statusCodes,
+}
+
+func fullTypeName(typeName, packageName string) string {
+	if typeName == "" || strings.Contains(typeName, ".") {
+		return typeName
+	}
+	return packageName + "." + typeName
+}
+
+func statusCodes(codes []StatusCode) string {
+	if len(codes) == 0 {
+		return "[]int{}"
+	}
+	buf := bytes.NewBufferString("[]int{")
+	for i := 0; i < len(codes)-1; i++ {
+		if _, err := buf.WriteString(strconv.Itoa(codes[i].Code) + ","); err != nil {
+			return err.Error()
+		}
+	}
+	if _, err := buf.WriteString(strconv.Itoa(codes[len(codes)-1].Code) + "}"); err != nil {
+		return err.Error()
+	}
+	return string(buf.Bytes())
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.
@@ -52,87 +98,79 @@ func NewTemplate(templatePattern string) (*Template, error) {
 }
 
 // GenerateClientFile generates Go http code for services defined in thrift file.
-// It returns the path of generated file or an error.
-func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (string, error) {
+// It returns the path of generated client file and struct file or an error.
+func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (*ClientFiles, error) {
 	m, err := NewModuleSpec(thrift, h)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to parse thrift file:")
+		return nil, errors.Wrap(err, "failed to parse thrift file:")
 	}
 	if len(m.Services) == 0 {
-		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+		return nil, nil
 	}
 
+	m.PackageName = m.PackageName + "Client"
 	err = t.execTemplateAndFmt("http_client.tmpl", m.GoClientFilePath, m)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	err = t.execTemplateAndFmt("structs.tmpl", m.GoStructsFilePath, m)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClientFiles{
+		ClientFile: m.GoClientFilePath,
+		StructFile: m.GoStructsFilePath,
+	}, nil
+}
+
+// GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
+// thrift file. It returns the path of generated method files, struct file or
+// an error.
+func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (*EndpointFiles, error) {
+	m, err := NewModuleSpec(thrift, h)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse thrift file:")
+	}
+	if len(m.Services) == 0 {
+		return nil, nil
 	}
 
 	err = t.execTemplateAndFmt(
-		"http_client_structs.tmpl", m.GoClientStructsFilePath, m,
+		"structs.tmpl", m.GoStructsFilePath, m,
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return m.GoClientFilePath, nil
-}
-
-// GenerateHandlerFile generates Go http code for endpoint.
-func (t *Template) GenerateHandlerFile(
-	thrift string, h *PackageHelper, methodName string,
-) (string, error) {
-	m, err := NewModuleSpec(thrift, h)
-	if err != nil {
-		return "", errors.Wrap(err, "Failed to parse thrift file.")
-	}
-	if len(m.Services) == 0 {
-		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+	endpointFiles := &EndpointFiles{
+		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
+		StructFile:   m.GoStructsFilePath,
 	}
 
-	if len(m.Services) != 1 {
-		panic("TODO: Do not support multiple services in thrift file yet.")
-	}
-
-	service := m.Services[0]
-	var method *MethodSpec
-	for _, v := range service.Methods {
-		if v.Name == methodName {
-			method = v
-			break
+	for _, service := range m.Services {
+		for _, method := range service.Methods {
+			dest, err := h.TargetEndpointPath(thrift, service.Name, method.Name)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"Could not generate endpoint path, service %s, method %s",
+					service, method)
+			}
+			meta := &EndpointMeta{
+				PackageName:      m.PackageName,
+				IncludedPackages: m.IncludedPackages,
+				Method:           method,
+			}
+			err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
+			if err != nil {
+				return nil, err
+			}
+			endpointFiles.HandlerFiles = append(endpointFiles.HandlerFiles, dest)
 		}
 	}
 
-	if method == nil {
-		return "", errors.Errorf(
-			"could not find method name %s in thrift file %s",
-			methodName, thrift,
-		)
-	}
-
-	endpointName := strings.Split(method.EndpointName, ".")[0]
-	handlerName := strings.Split(method.Name, ".")[0]
-	dest, err := h.TargetEndpointPath(thrift, methodName)
-	if err != nil {
-		return "", errors.Wrap(err, "Could not generate endpoint path")
-	}
-
-	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
-	downstreamService := endpointName
-	downstreamMethod := handlerName
-
-	vals := map[string]string{
-		"MyHandler":         handlerName,
-		"Package":           endpointName,
-		"DownstreamService": downstreamService,
-		"DownstreamMethod":  downstreamMethod,
-	}
-
-	err = t.execTemplateAndFmt("endpoint_template.tmpl", dest, vals)
-	if err != nil {
-		return "", err
-	}
-
-	return dest, nil
+	return endpointFiles, nil
 }
 
 // GenerateHandlerTestFile generates Go http code for endpoint test.
@@ -190,7 +228,7 @@ func (t *Template) GenerateHandlerTestFile(
 
 	vals := map[string]string{
 		"MyHandler":          handlerName,
-		"Package":            endpointName,
+		"Package":            m.PackageName,
 		"DownstreamService":  downstreamService,
 		"DownstreamMethod":   downstreamMethod,
 		"EndpointPath":       endpointPath,
@@ -207,30 +245,6 @@ func (t *Template) GenerateHandlerTestFile(
 		return "", err
 	}
 
-	return dest, nil
-}
-
-// GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
-// thrift file. It returns the path of generated file or an error.
-func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (string, error) {
-	m, err := NewModuleSpec(thrift, h)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to parse thrift file:")
-	}
-	if len(m.Services) == 0 {
-		return "", errors.Errorf("no service is found in thrift file %s", thrift)
-	}
-
-	// TODO: method name ??
-	dest, err := h.TargetEndpointPath(thrift, "")
-	if err != nil {
-		return "", errors.Wrap(err, "Could not generate endpoint path")
-	}
-
-	err = t.execTemplateAndFmt("endpoint.tmpl", dest, m)
-	if err != nil {
-		return "", err
-	}
 	return dest, nil
 }
 

@@ -1,9 +1,10 @@
 {{- /* template to render edge gateway http client code */ -}}
 {{- /* TODO(zw): refactor it to two templates */ -}}
-package {{.PackageName}}Client
+package {{.PackageName}}
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"strconv"
 
@@ -40,7 +41,7 @@ func NewClient(opts *zanzibar.HTTPClientOptions) *{{$clientName}} {
 {{- if ne .RequestType ""}}
 {{/* template for having request http body */}}
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-func (c *{{$clientName}}) {{title .Name}}(r *{{.RequestType}}, h http.Header) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "{{.HTTPPath}}"
 
@@ -57,13 +58,13 @@ func (c *{{$clientName}}) {{title .Name}}(r *{{.RequestType}}, h http.Header) (*
 		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req)
+	return c.Client.Do(req.WithContext(ctx))
 }
 
 {{else}} {{/* template for having http body */ -}}
 
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-func (c *{{$clientName}}) {{title .Name}}(h http.Header) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "{{.HTTPPath}}"
 
@@ -75,7 +76,7 @@ func (c *{{$clientName}}) {{title .Name}}(h http.Header) (*http.Response, error)
 		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req)
+	return c.Client.Do(req.WithContext(ctx))
 }
 {{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 {{end}} {{- /* <range .Methods> */ -}}

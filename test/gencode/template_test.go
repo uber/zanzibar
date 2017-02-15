@@ -25,17 +25,26 @@ import (
 	"os"
 	"testing"
 
+	"path/filepath"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 )
 
 const (
-	clientGenFile   = "data/bar_client.gogen"
-	clientThrift    = "../../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
-	endpointGenFile = "data/bar_endpoint.gogen"
-	endpointThrift  = "../../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
-	tmpDir          = "../../.tmp_gen"
+	clientThrift   = "../../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
+	endpointThrift = "../../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
+	tmpDir         = "../../.tmp_gen"
 )
+
+func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
+	b, err := ioutil.ReadFile(actualFile)
+	if !assert.NoError(t, err, "failed to read genereated file %s", err) {
+		return
+	}
+	goldenFile := filepath.Join(goldenFileDir, filepath.Base(actualFile)+"gen")
+	CompareGoldenFile(t, goldenFile, b, *updateGoldenFile)
+}
 
 func TestGenerateBar(t *testing.T) {
 	tmpl, err := codegen.NewTemplate("../../codegen/templates/*.tmpl")
@@ -48,22 +57,19 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 	pkgHelper := newPackageHelper(t)
-	clientFile, err := tmpl.GenerateClientFile(clientThrift, pkgHelper)
+	clientFiles, err := tmpl.GenerateClientFile(clientThrift, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate client code %s", err) {
 		return
 	}
-	b, err := ioutil.ReadFile(clientFile)
-	if !assert.NoError(t, err, "failed to read genereated client file %s", err) {
-		return
-	}
-	CompareGoldenFile(t, clientGenFile, b, *updateGoldenFile)
-	endpointFile, err := tmpl.GenerateEndpointFile(endpointThrift, pkgHelper)
+	cmpGoldenFile(t, clientFiles.ClientFile, "./data/clients")
+	cmpGoldenFile(t, clientFiles.StructFile, "./data/clients")
+
+	endpointFiles, err := tmpl.GenerateEndpointFile(endpointThrift, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 		return
 	}
-	b, err = ioutil.ReadFile(endpointFile)
-	if !assert.NoError(t, err, "failed to read genereated endpoint file %s", err) {
-		return
+	for _, file := range endpointFiles.HandlerFiles {
+		cmpGoldenFile(t, file, "./data/endpoints")
 	}
-	CompareGoldenFile(t, endpointGenFile, b, *updateGoldenFile)
+	cmpGoldenFile(t, endpointFiles.StructFile, "./data/endpoints")
 }

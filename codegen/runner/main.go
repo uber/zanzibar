@@ -22,112 +22,44 @@ package main
 
 import (
 	"fmt"
-	"go/build"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/uber/zanzibar/codegen"
 )
 
+func checkError(err error, message string) {
+	if err != nil {
+		fmt.Printf("%s: %s \n", message, err)
+		os.Exit(1)
+	}
+}
+
 func main() {
-	// Hacky way to find the template directory. Switch to use zw's template helpers
-	// once they are landed.
-	importPath := "github.com/uber/zanzibar/codegen"
-	p, err := build.Default.Import(importPath, "", build.FindOnly)
-	if err != nil {
-		panic(fmt.Sprintf("Could not create build path for endpoint generation: %s", err))
-	}
-
-	clientTemplatePath := filepath.Join(p.Dir, "templates/*.tmpl")
-	clientTemplate, err := codegen.NewTemplate(clientTemplatePath)
-	if err != nil {
-		fmt.Printf("Could not create template %s: %s (skip)\n", clientTemplatePath, err)
-	}
-
-	h, err := codegen.NewPackageHelper(
+	packageHelper, err := codegen.NewPackageHelper(
 		"examples/example-gateway/idl",
 		"examples/example-gateway/gen-code",
 		"examples/example-gateway",
 		"examples/example-gateway/idl/github.com/uber/zanzibar",
 	)
-	if err != nil {
-		panic(err)
+	checkError(err, fmt.Sprintf("can't create package helper %#v", packageHelper))
+	tmpl, err := codegen.NewTemplate("./codegen/templates/*.tmpl")
+	checkError(err, "Failed to parse templates")
+	clientThrifts, err := filepath.Glob("examples/example-gateway/idl/github.com/uber/zanzibar/clients/*/*.thrift")
+	checkError(err, "Failed to get client thrift files")
+	fmt.Println("Generate clients")
+	for _, thrift := range clientThrifts {
+		fmt.Printf("Generating code for %s\n", thrift)
+		_, err := tmpl.GenerateClientFile(thrift, packageHelper)
+		checkError(err, "Failed to generate client file.")
+	}
+	endpointThrifts, err := filepath.Glob("examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/*/*.thrift")
+	checkError(err, "failed to get endpoint thrift files")
+	for _, thrift := range endpointThrifts {
+		_, err := tmpl.GenerateEndpointFile(thrift, packageHelper)
+		checkError(err, "Failed to generate endpoint file.")
 	}
 
-	fail := false
-	prefix := os.Args[1]
-	// Iterate over all passed in endpoints.
-	for i := 2; i < len(os.Args); i++ {
-		fileParts := strings.Split(os.Args[i], string(os.PathSeparator))
-		endpoint := fileParts[len(fileParts)-2]
-		endpointDir := prefix + string(os.PathSeparator) + strings.ToLower(endpoint)
-		err = os.Mkdir(endpointDir, 0755)
-		if err != nil {
-			panic(err)
-		}
-
-		err = os.Mkdir("examples/example-gateway/gen-code/clients", 0755)
-		if err != nil {
-			panic(err)
-		}
-
-		// Hack: only do bar...
-		_, err = clientTemplate.GenerateClientFile(
-			filepath.Join(
-				p.Dir, "..", "examples", "example-gateway",
-				"idl", "github.com", "uber", "zanzibar", "clients",
-				"bar", "bar.thrift",
-			),
-			h,
-		)
-		if err != nil {
-			fmt.Printf(
-				"Could not create client specs for %s: %s \n",
-				os.Args[i], err,
-			)
-			fail = true
-			continue
-		}
-
-		_, err = clientTemplate.GenerateHandlerFile(
-			filepath.Join(
-				p.Dir, "..", "examples", "example-gateway",
-				"idl", "github.com", "uber", "zanzibar", "endpoints",
-				"bar", "bar.thrift",
-			),
-			h,
-			"bar",
-		)
-		if err != nil {
-			fmt.Printf(
-				"Could not create handler specs for %s: %s \n",
-				os.Args[i], err,
-			)
-			fail = true
-			continue
-		}
-
-		_, err = clientTemplate.GenerateHandlerTestFile(
-			filepath.Join(
-				p.Dir, "..", "examples", "example-gateway",
-				"idl", "github.com", "uber", "zanzibar", "endpoints",
-				"bar", "bar.thrift",
-			),
-			h,
-			"bar",
-		)
-		if err != nil {
-			fmt.Printf(
-				"Could not create tests specs for %s: %s \n",
-				os.Args[i], err,
-			)
-			fail = true
-			continue
-		}
-	}
-
-	if fail {
-		os.Exit(1)
-	}
+	// TODO(zw): - Add code generation for endpoint tests.
+	//           - Move used directories to commandline flags.
 }

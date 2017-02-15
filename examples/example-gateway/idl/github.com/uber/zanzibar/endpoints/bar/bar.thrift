@@ -22,7 +22,7 @@ exception BarException {
 }
 
 service Bar {
-  BarResponse bar (
+  BarResponse normal (
     1: required BarRequest request
   ) throws (
     1: BarException barException (zanzibar.http.status = "403")
@@ -31,7 +31,7 @@ service Bar {
     zanzibar.http.path = "/bar-path"
     zanzibar.http.status = "200"
     zanzibar.http.req.def.boxed = "true"
-    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::bar"
+    zanzibar.http.downstream = "../../clients/bar/bar.thrift::Bar::normal"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -65,6 +65,7 @@ service Bar {
   ) throws (
     1: BarException barException (zanzibar.http.status = "403")
   ) (
+    zanzibar.http.headers = "x-uuid,x-token"
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/too-many-args-path"
     zanzibar.http.status = "200"

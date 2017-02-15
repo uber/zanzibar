@@ -1,6 +1,6 @@
 {{- /* template to render edge gateway http client code */ -}}
 {{- /* TODO(zw): refactor it to two templates */ -}}
-package {{.PackageName}}Client
+package {{.PackageName}}
 
 import (
 	{{range $idx, $pkg := .IncludedPackages -}}

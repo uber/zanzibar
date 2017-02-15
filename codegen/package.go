@@ -81,7 +81,7 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	root := path.Clean(p.thriftRootDir)
+	root := path.Clean(p.gatewayThriftRootDir)
 	idx := strings.Index(thrift, root)
 	if idx == -1 {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
@@ -90,7 +90,7 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	return path.Join(
 		"github.com/uber/",
 		dirUnderZanzibar,
-		thrift[idx+len(root):len(thrift)-7],
+		filepath.Dir(thrift[idx+len(root):]),
 	), nil
 }
 
@@ -126,9 +126,9 @@ func (p PackageHelper) TargetClientPath(thrift string) (string, error) {
 	return path.Join(p.targetGenDir, goFile), nil
 }
 
-// TargetClientStructPath returns the path for any structs needed for
+// TargetStructPath returns the path for any structs needed for
 // a generated client based on thrift file.
-func (p PackageHelper) TargetClientStructPath(thrift string) (string, error) {
+func (p PackageHelper) TargetStructPath(thrift string) (string, error) {
 	fileName, err := p.getRelativeFileName(thrift)
 	if err != nil {
 		return "", err
@@ -140,14 +140,14 @@ func (p PackageHelper) TargetClientStructPath(thrift string) (string, error) {
 // TargetEndpointPath returns the path for the endpoint handler based
 // on the thrift file and method name
 func (p PackageHelper) TargetEndpointPath(
-	thrift string, methodName string,
+	thrift, serviceName, methodName string,
 ) (string, error) {
 	fileName, err := p.getRelativeFileName(thrift)
 	if err != nil {
 		return "", err
 	}
 
-	fileEnding := "_method_" + methodName + ".go"
+	fileEnding := "_" + strings.ToLower(serviceName) + "_method_" + strings.ToLower(methodName) + ".go"
 	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
 	return path.Join(p.targetGenDir, goFile), nil
 }
