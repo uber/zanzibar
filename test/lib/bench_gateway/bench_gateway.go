@@ -23,12 +23,14 @@ package benchGateway
 import (
 	"io"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 
 	"time"
 
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
@@ -47,21 +49,31 @@ type BenchGateway struct {
 	httpClient *http.Client
 }
 
+func getProjectDir() string {
+	goPath := os.Getenv("GOPATH")
+	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+}
+
 // CreateGateway bootstrap gateway for testing
-func CreateGateway(config *config.Config) (testGateway.TestGateway, error) {
-	backends, err := testBackend.BuildBackends(config)
+func CreateGateway(
+	seedConfig map[string]interface{}, opts *testGateway.Options,
+) (testGateway.TestGateway, error) {
+	if seedConfig == nil {
+		seedConfig = map[string]interface{}{}
+	}
+	if opts == nil {
+		opts = &testGateway.Options{}
+	}
+
+	backends, err := testBackend.BuildBackends(seedConfig, opts.KnownBackends)
 	if err != nil {
 		return nil, err
 	}
 
-	config.IP = "127.0.0.1"
-	config.Port = 0
-	config.TChannel.ServiceName = "bench-gateway"
-	config.TChannel.ProcessName = "bench-gateway"
-	config.Metrics.M3.HostPort = "127.0.0.1:8053"
-	config.Metrics.Tally.Service = "bench-example-gateway"
-	config.Metrics.M3.FlushInterval = 500 * time.Millisecond
-	config.Metrics.Tally.FlushInterval = 1 * time.Second
+	seedConfig["port"] = int64(0)
+	seedConfig["tchannel.serviceName"] = "bench-gateway"
+	seedConfig["tchannel.processName"] = "bench-gateway"
+	seedConfig["metrics.tally.service"] = "bench-gateway"
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{
@@ -74,50 +86,36 @@ func CreateGateway(config *config.Config) (testGateway.TestGateway, error) {
 		backends: backends,
 	}
 
-	clientOpts := &clients.Options{}
-	clientOpts.Contacts.IP = config.Clients.Contacts.IP
-	clientOpts.Contacts.Port = config.Clients.Contacts.Port
-	clientOpts.GoogleNow.IP = config.Clients.GoogleNow.IP
-	clientOpts.GoogleNow.Port = config.Clients.GoogleNow.Port
-	clients := clients.CreateClients(clientOpts)
+	config := zanzibar.NewStaticConfig([]string{
+		filepath.Join(getProjectDir(), "config", "production.json"),
+		filepath.Join(
+			getProjectDir(),
+			"examples",
+			"example-gateway",
+			"config",
+			"production.json",
+		),
+	}, seedConfig)
 
-	m3FlushIntervalConfig := config.Metrics.M3.FlushInterval
-	var m3FlushInterval time.Duration
-	if m3FlushIntervalConfig == 0 {
-		m3FlushInterval = defaultM3FlushInterval
-	} else {
-		m3FlushInterval = m3FlushIntervalConfig
-	}
+	clients := clients.CreateClients(config)
+
+	m3FlushIntervalConfig := config.GetInt("metrics.m3.flushInterval")
 
 	commonTags := map[string]string{"env": "bench"}
 	m3Backend, err := metrics.NewM3Backend(
-		config.Metrics.M3.HostPort,
-		config.Metrics.Tally.Service,
+		config.GetString("metrics.m3.hostPort"),
+		config.GetString("metrics.tally.service"),
 		commonTags, // default tags
 		false,      // include host
 		defaultM3MaxQueueSize,
 		defaultM3MaxPacketSize,
-		m3FlushInterval,
+		time.Duration(m3FlushIntervalConfig)*time.Millisecond,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	gateway, err := zanzibar.CreateGateway(&zanzibar.Options{
-		IP:   config.IP,
-		Port: config.Port,
-		Logger: zanzibar.LoggerOptions{
-			FileName: config.Logger.FileName,
-		},
-		Metrics: zanzibar.MetricsOptions{
-			FlushInterval: config.Metrics.Tally.FlushInterval,
-			Service:       config.Metrics.Tally.Service,
-		},
-		TChannel: zanzibar.TChannelOptions{
-			ServiceName: config.TChannel.ServiceName,
-			ProcessName: config.TChannel.ProcessName,
-		},
-
+	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
 		Clients:        clients,
 		MetricsBackend: m3Backend,
 	})

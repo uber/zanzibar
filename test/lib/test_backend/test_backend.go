@@ -21,7 +21,6 @@
 package testBackend
 
 import (
-	"reflect"
 	"sync"
 
 	"net/http"
@@ -30,7 +29,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	zap "github.com/uber-go/zap"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -47,11 +45,9 @@ type TestBackend struct {
 
 // BuildBackends returns a map of backends based on config
 func BuildBackends(
-	cfg *config.Config,
+	cfg map[string]interface{}, knownBackends []string,
 ) (map[string]*TestBackend, error) {
-	structType := reflect.TypeOf(cfg.Clients)
-	structValue := reflect.ValueOf(&cfg.Clients)
-	n := structType.NumField()
+	n := len(knownBackends)
 	result := make(map[string]*TestBackend, n)
 
 	for i := 0; i < n; i++ {
@@ -61,14 +57,10 @@ func BuildBackends(
 			return nil, err
 		}
 
-		field := structType.Field(i)
-		result[field.Name] = backend
-
-		fieldValue := reflect.Indirect(structValue).Field(i)
-		clientConfig := fieldValue.Addr().Interface().(*config.HTTPClientConfig)
-
-		clientConfig.IP = "127.0.0.1"
-		clientConfig.Port = backend.RealPort
+		fieldName := knownBackends[i]
+		result[fieldName] = backend
+		cfg["clients."+fieldName+".ip"] = "127.0.0.1"
+		cfg["clients."+fieldName+".port"] = int64(backend.RealPort)
 	}
 
 	return result, nil

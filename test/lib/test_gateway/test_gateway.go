@@ -29,11 +29,8 @@ import (
 	"syscall"
 	"testing"
 
-	"time"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally/m3"
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
 )
@@ -68,8 +65,9 @@ type ChildProcessGateway struct {
 
 // Options used to create TestGateway
 type Options struct {
-	LogWhitelist map[string]bool
-	CountMetrics bool
+	LogWhitelist  map[string]bool
+	KnownBackends []string
+	CountMetrics  bool
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -90,9 +88,16 @@ func (gateway *ChildProcessGateway) setupMetrics(
 
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
-	t *testing.T, config *config.Config, opts *Options,
+	t *testing.T, config map[string]interface{}, opts *Options,
 ) (TestGateway, error) {
-	backends, err := testBackend.BuildBackends(config)
+	if config == nil {
+		config = map[string]interface{}{}
+	}
+	if opts == nil {
+		opts = &Options{}
+	}
+
+	backends, err := testBackend.BuildBackends(config, opts.KnownBackends)
 	if err != nil {
 		return nil, err
 	}
@@ -111,13 +116,14 @@ func CreateGateway(
 
 	testGateway.setupMetrics(t, opts)
 
-	config.IP = "127.0.0.1"
-	config.TChannel.ServiceName = "test-gateway"
-	config.TChannel.ProcessName = "test-gateway"
-	config.Metrics.M3.HostPort = testGateway.m3Server.Addr
-	config.Metrics.Tally.Service = "test-example-gateway"
-	config.Metrics.M3.FlushInterval = 10 * time.Millisecond
-	config.Metrics.Tally.FlushInterval = 10 * time.Millisecond
+	config["ip"] = "127.0.0.1"
+	config["tchannel.serviceName"] = "test-gateway"
+	config["tchannel.processName"] = "test-gateway"
+	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
+	config["metrics.tally.service"] = "test-gateway"
+	config["metrics.tally.flushInterval"] = 10
+	config["metrics.m3.flushInterval"] = 10
+	config["logger.output"] = "stdout"
 
 	err = testGateway.createAndSpawnChild(config)
 	if err != nil {

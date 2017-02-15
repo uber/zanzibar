@@ -30,7 +30,7 @@ import (
 	"strconv"
 	"strings"
 
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
+	"github.com/pkg/errors"
 )
 
 var realAddrRegex = regexp.MustCompile(
@@ -49,11 +49,11 @@ func (err *MalformedStdoutError) Error() string {
 }
 
 func (gateway *ChildProcessGateway) createAndSpawnChild(
-	config *config.Config,
+	config map[string]interface{},
 ) error {
 	info, err := createTestBinaryFile(config)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Could not create test binary file: ")
 	}
 
 	gateway.binaryFileInfo = info
@@ -72,7 +72,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	tempConfigDir, err := writeConfigToFile(config)
 	if err != nil {
 		gateway.Close()
-		return err
+		return errors.Wrap(err, "Could not exec test command")
 	}
 	gateway.cmd.Env = append(
 		[]string{
@@ -86,13 +86,13 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	cmdStdout, err := gateway.cmd.StdoutPipe()
 	if err != nil {
 		gateway.Close()
-		return err
+		return errors.Wrap(err, "Could not create stdout pipe")
 	}
 
 	err = gateway.cmd.Start()
 	if err != nil {
 		gateway.Close()
-		return err
+		return errors.Wrap(err, "Could not start test gateway")
 	}
 
 	reader := bufio.NewReader(cmdStdout)
@@ -100,7 +100,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	err = readAddrFromStdout(gateway, reader)
 	if err != nil {
 		gateway.Close()
-		return err
+		return errors.Wrap(err, "could not read addr from stdout")
 	}
 
 	go gateway.copyToStdout(cmdStdout)

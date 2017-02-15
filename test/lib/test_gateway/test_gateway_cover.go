@@ -22,6 +22,7 @@ package testGateway
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,9 +30,7 @@ import (
 	"path"
 	"strings"
 
-	yaml "gopkg.in/yaml.v2"
-
-	config "github.com/uber/zanzibar/examples/example-gateway/config"
+	"github.com/pkg/errors"
 )
 
 var cachedBinaryFile *testBinaryInfo
@@ -67,19 +66,19 @@ func (info *testBinaryInfo) Cleanup() {
 	}
 }
 
-func writeConfigToFile(config *config.Config) (string, error) {
-	tempConfigDir, err := ioutil.TempDir("", "example-gateway-config-yaml")
+func writeConfigToFile(config map[string]interface{}) (string, error) {
+	tempConfigDir, err := ioutil.TempDir("", "example-gateway-config-json")
 	if err != nil {
 		return "", err
 	}
 
-	baseYamlFile := path.Join(tempConfigDir, "production.yaml")
-	configBytes, err := yaml.Marshal(config)
+	jsonFile := path.Join(tempConfigDir, "production.json")
+	configBytes, err := json.Marshal(config)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(baseYamlFile, configBytes, os.ModePerm)
+	err = ioutil.WriteFile(jsonFile, configBytes, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
@@ -103,7 +102,7 @@ func getProjectDir() string {
 	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
 }
 
-func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
+func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error) {
 	if cachedBinaryFile != nil {
 		return cachedBinaryFile, nil
 	}
@@ -113,14 +112,14 @@ func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 
 	randStr, err := makeRandStr()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not make rand str...")
 	}
 
 	coverProfileFile := path.Join(dirName, "coverage", "cover-"+randStr+".out")
 
 	tempConfigDir, err := ioutil.TempDir("", "example-gateway-test-binary")
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not create temp dir")
 	}
 
 	binaryFile := path.Join(tempConfigDir, "test-"+randStr+".test")
@@ -129,7 +128,7 @@ func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 	novendorCmd.Dir = dirName
 	outBytes, err := novendorCmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run glide novendor command")
 	}
 
 	allFolders := strings.Split(string(outBytes), "\n")
@@ -158,11 +157,11 @@ func createTestBinaryFile(config *config.Config) (*testBinaryInfo, error) {
 
 	testGenCmd := exec.Command("go", args...)
 
-	// testGenCmd.Stderr = os.Stderr
-	// testGenCmd.Stdout = os.Stdout
+	testGenCmd.Stderr = os.Stderr
+	testGenCmd.Stdout = os.Stdout
 	err = testGenCmd.Run()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not compile test program")
 	}
 
 	cachedBinaryFile = &testBinaryInfo{binaryFile, coverProfileFile}
