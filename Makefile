@@ -3,6 +3,10 @@
 PKGS = $(shell glide novendor)
 PKG_FILES = benchmarks codegen examples runtime test
 
+COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
+	grep -v "main/..." | grep -v "benchmarks/..." | \
+	awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
+
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
 	-o -name '*.go' -print | cut -b3-)
@@ -111,11 +115,20 @@ clean-cover:
 
 .PHONY: cover
 cover: clean-cover
-	COVER_ON=1 go test ./test/...
+	rm -f test.out
+	touch test.out
+	rm -f coverage.tmp
+	go list ./... | grep -v "vendor" | grep "test" | \
+		xargs -n1 -I{} sh -c \
+		'COVER_ON=1 go test -cover -coverpkg $(COVER_PKGS) -coverprofile coverage.tmp {} >>test.out 2>&1 && \
+		mv coverage.tmp ./coverage/cover-'"$$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)"'.out 2>/dev/null || true'
+	@cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
+	rm -f coverage.tmp
+
 	@go get github.com/wadey/gocovmerge
-	@bash ./scripts/concat-coverage.sh
+	bash ./scripts/concat-coverage.sh
 	@echo "\nOutputting coverage info... \n"
-	@go tool cover -func=./coverage/cover.out
+	go tool cover -func=./coverage/cover.out
 
 .PHONY: view-istanbul
 view-istanbul:
