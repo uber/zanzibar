@@ -63,7 +63,7 @@ generate: scripts/easy_json/easy_json
 	@bash ./scripts/generate.sh
 
 .PHONY: test-all
-test-all: test bench bins
+test-all: test cover bench bins
 	./benchmarks/runner/runner -loadtest
 
 .PHONY: test
