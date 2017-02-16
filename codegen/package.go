@@ -155,14 +155,14 @@ func (p PackageHelper) TargetEndpointPath(
 // TargetEndpointTestPath returns the path for the endpoint test based
 // on the thrift file and method name
 func (p PackageHelper) TargetEndpointTestPath(
-	thrift string, methodName string,
+	thrift, serviceName, methodName string,
 ) (string, error) {
 	fileName, err := p.getRelativeFileName(thrift)
 	if err != nil {
 		return "", err
 	}
 
-	fileEnding := "_method_" + methodName + "_test.go"
+	fileEnding := "_" + strings.ToLower(serviceName) + "_method_" + strings.ToLower(methodName) + "_test.go"
 	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
 	return path.Join(p.targetGenDir, goFile), nil
 }

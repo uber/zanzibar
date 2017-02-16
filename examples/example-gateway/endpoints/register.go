@@ -84,8 +84,44 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 		makeEndpoint(
 			g,
 			"bar",
-			"bar",
+			"normal",
 			bar.HandleNormalRequest,
+		),
+	)
+	router.Register(
+		"GET", "/bar/no-request-path",
+		makeEndpoint(
+			g,
+			"bar",
+			"noRequest",
+			bar.HandleNoRequestRequest,
+		),
+	)
+	router.Register(
+		"GET", "/bar/missing-arg-path",
+		makeEndpoint(
+			g,
+			"bar",
+			"missingArg",
+			bar.HandleMissingArgRequest,
+		),
+	)
+	router.Register(
+		"POST", "/bar/too-many-args-path",
+		makeEndpoint(
+			g,
+			"bar",
+			"tooManyArgs",
+			bar.HandleTooManyArgsRequest,
+		),
+	)
+	router.Register(
+		"POST", "/bar/arg-not-struct-path",
+		makeEndpoint(
+			g,
+			"bar",
+			"argNotStrcut",
+			bar.HandleArgNotStructRequest,
 		),
 	)
 }

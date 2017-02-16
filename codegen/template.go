@@ -51,6 +51,12 @@ type EndpointMeta struct {
 	Method           *MethodSpec
 }
 
+// EndpointTestMeta saves meta data used to render an endpoint test.
+type EndpointTestMeta struct {
+	PackageName string
+	Method      *MethodSpec
+}
+
 var funcMap = tmpl.FuncMap{
 	"title":        strings.Title,
 	"Title":        strings.Title,
@@ -173,79 +179,40 @@ func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (*Endpo
 	return endpointFiles, nil
 }
 
-// GenerateHandlerTestFile generates Go http code for endpoint test.
-func (t *Template) GenerateHandlerTestFile(
-	thrift string, h *PackageHelper, methodName string,
-) (string, error) {
+// GenerateEndpointTestFile generates Go code for testing an zanzibar endpoint
+// defined in a thrift file. It returns the path of generated test files,
+// or an error.
+func (t *Template) GenerateEndpointTestFile(thrift string, h *PackageHelper) ([]string, error) {
 	m, err := NewModuleSpec(thrift, h)
 	if err != nil {
-		return "", errors.Wrap(err, "Failed to parse thrift file.")
+		return nil, errors.Wrap(err, "failed to parse thrift file:")
 	}
 	if len(m.Services) == 0 {
-		return "", errors.Errorf("no service is found in thrift file %s", thrift)
+		return nil, nil
 	}
 
-	if len(m.Services) != 1 {
-		panic("TODO: Do not support multiple services in thrift file yet.")
-	}
-
-	service := m.Services[0]
-	var method *MethodSpec
-	for _, v := range service.Methods {
-		if v.Name == methodName {
-			method = v
-			break
+	testFiles := make([]string, 0, len(m.Services[0].Methods))
+	for _, service := range m.Services {
+		for _, method := range service.Methods {
+			dest, err := h.TargetEndpointTestPath(thrift, service.Name, method.Name)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"Could not generate endpoint test path, service %s, method %s",
+					service, method)
+			}
+			meta := &EndpointTestMeta{
+				PackageName: m.PackageName,
+				Method:      method,
+			}
+			err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
+			if err != nil {
+				return nil, err
+			}
+			testFiles = append(testFiles, dest)
 		}
 	}
 
-	if method == nil {
-		return "", errors.Errorf(
-			"could not find method name %s in thrift file %s",
-			methodName, thrift,
-		)
-	}
-
-	endpointName := strings.Split(method.EndpointName, ".")[0]
-	handlerName := strings.Split(method.Name, ".")[0]
-	dest, err := h.TargetEndpointTestPath(thrift, methodName)
-	if err != nil {
-		return "", errors.Wrap(err, "Could not generate endpoint path")
-	}
-
-	// TODO(sindelar): Use an endpoint to client map instead of proxy naming.
-	downstreamService := endpointName
-	downstreamMethod := handlerName
-
-	// TODO(sindelar): Dummy data, read from golden file.
-	var clientResponse = "{\\\"statusCode\\\":200}"
-	var endpointPath = "/bar/bar-path"
-	var endpointHTTPMethod = "POST"
-	var clientPath = "/bar-path"
-	var clientHTTPMethod = "POST"
-	var clientName = "Bar"
-	var endpointRequest = "{\\\"stringField\\\":\\\"field\\\"," +
-		"\\\"boolField\\\":true}"
-
-	vals := map[string]string{
-		"MyHandler":          handlerName,
-		"Package":            m.PackageName,
-		"DownstreamService":  downstreamService,
-		"DownstreamMethod":   downstreamMethod,
-		"EndpointPath":       endpointPath,
-		"EndpointHttpMethod": endpointHTTPMethod,
-		"ClientPath":         clientPath,
-		"ClientName":         clientName,
-		"ClientHttpMethod":   clientHTTPMethod,
-		"ClientResponse":     clientResponse,
-		"EndpointRequest":    endpointRequest,
-	}
-
-	err = t.execTemplateAndFmt("endpoint_test_template.tmpl", dest, vals)
-	if err != nil {
-		return "", err
-	}
-
-	return dest, nil
+	return testFiles, nil
 }
 
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {

@@ -72,4 +72,12 @@ func TestGenerateBar(t *testing.T) {
 		cmpGoldenFile(t, file, "./data/endpoints")
 	}
 	cmpGoldenFile(t, endpointFiles.StructFile, "./data/endpoints")
+
+	testFiles, err := tmpl.GenerateEndpointTestFile(endpointThrift, pkgHelper)
+	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
+		return
+	}
+	for _, file := range testFiles {
+		cmpGoldenFile(t, file, "./data/endpoint_tests")
+	}
 }
