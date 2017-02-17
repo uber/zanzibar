@@ -66,23 +66,35 @@ function parseFunction(folderName, functionInfo) {
 
     for (var i = 0; i < functionInfo.Statements.length; i++) {
         var statement = functionInfo.Statements[i];
-
         
         var startLoc = fileLoc.computeStatementLocation(statement.Start);
         var endLoc = fileLoc.computeStatementLocation(statement.End);
+
+        var skipped = false
+        if (startLoc.line === endLoc.line) {
+            // ignoredLines is 0 indexed, startLoc is 1 indexed
+            var lineIndex = startLoc.line - 1;
+            if (fileLoc.ignoredLines.indexOf(lineIndex) >= 0) {
+                // If this statement is ignored then it is ignored
+                skipped = true
+            }
+        }
 
         var sId = fileObj.sCounter;
         fileObj.s[sId] = statement.Reached;
         fileObj.statementMap[sId] = {
             start: startLoc,
-            end: endLoc
+            end: endLoc,
+            skip: skipped
         };
+
         // console.error('handleStatement', {
         //     fnName: fnName,
         //     offsets: [statement.Start,statement.End],
         //     fileName: filePath,
         //     start: startLoc,
-        //     end: endLoc
+        //     end: endLoc,
+        //     ignoredLines: fileLoc.ignoredLines
         // });
 
         fileObj.sCounter++;
@@ -118,6 +130,14 @@ function FileLoc(fileName) {
     for (var i = 0; i < this.lines.length; i++) {
         this.lineStarts[i] = soFar;
         soFar += this.lines[i].length + 1;
+    }
+
+    // 0 indexed...
+    this.ignoredLines = [];
+    for (var i = 0; i < this.lines.length; i++) {
+        if (this.lines[i].indexOf('coverage ignore next line') >= 0) {
+            this.ignoredLines.push(i + 1);
+        }
     }
 }
 
