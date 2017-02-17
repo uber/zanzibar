@@ -21,7 +21,6 @@
 package runtime_test
 
 import (
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -221,7 +220,7 @@ type fixtureWriter struct {
 	fixtures map[string][]byte
 }
 
-func WriteFixture(rootDir string, fixtures map[string][]byte) io.Closer {
+func WriteFixture(rootDir string, fixtures map[string][]byte) *fixtureWriter {
 	writer := &fixtureWriter{
 		rootDir:  rootDir,
 		fixtures: fixtures,
@@ -247,8 +246,8 @@ func (writer *fixtureWriter) writeToDisk() {
 	}
 }
 
-func (writer *fixtureWriter) Close() error {
-	for fileName, _ := range writer.fixtures {
+func (writer *fixtureWriter) Close() {
+	for fileName := range writer.fixtures {
 		parts := strings.Split(fileName, "/")
 		filePath := filepath.Join(writer.rootDir, parts[0])
 
@@ -257,8 +256,6 @@ func (writer *fixtureWriter) Close() error {
 			panic(err)
 		}
 	}
-
-	return nil
 }
 
 func TestCanReadFromFile(t *testing.T) {
