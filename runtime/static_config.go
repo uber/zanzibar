@@ -211,12 +211,12 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	}
 
 	if v, contains := conf.seedConfig[key]; contains {
-		rv := reflect.ValueOf(ptr)
-		if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		rptr := reflect.ValueOf(ptr)
+		if rptr.Kind() != reflect.Ptr || rptr.IsNil() {
 			panic(errors.Errorf("Cannot GetStruct (%s) into nil ptr", key))
 		}
 
-		rv.Set(reflect.ValueOf(v))
+		rptr.Elem().Set(reflect.ValueOf(v))
 		return
 	}
 
