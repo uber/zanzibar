@@ -32,8 +32,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TODO: func Inspect() map[string]interface{}
-
 // StaticConfigValue represents a json serialized string.
 type StaticConfigValue struct {
 	bytes    []byte
@@ -144,7 +142,7 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// MustGetInt returns the value as a float or panics.
+// MustGetInt returns the value as a int or panics.
 func (conf *StaticConfig) MustGetInt(key string) int64 {
 	if conf.destroyed {
 		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
@@ -172,7 +170,7 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// MustGetString returns the value as a float or panics.
+// MustGetString returns the value as a string or panics.
 func (conf *StaticConfig) MustGetString(key string) string {
 	if conf.destroyed {
 		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
