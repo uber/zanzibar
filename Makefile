@@ -115,30 +115,17 @@ clean-cover:
 
 .PHONY: cover
 cover: clean-cover
-	@rm -f test.out
-	@rm -f fail.out
-	@touch test.out
-	@rm -f coverage.tmp
-	@go list ./... | grep -v "vendor" | grep "test" | \
-		xargs -n1 -I{} sh -c \
-		'COVER_ON=1 go test -cover -coverpkg $(COVER_PKGS) -coverprofile coverage.tmp {} >>test.out 2>&1 && \
-		mv coverage.tmp ./coverage/cover-'"$$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)"'.out 2>/dev/null || true'
-	@cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
-	@rm -f coverage.tmp
-	@grep "FAIL" test.out | tee -a fail.out
-	@[ ! -s fail.out ]
+	bash ./scripts/cover.sh
 
-	@go get github.com/wadey/gocovmerge
-	@bash ./scripts/concat-coverage.sh
-	@echo "\nOutputting coverage info... \n"
-	@go tool cover -func=./coverage/cover.out
-
-.PHONY: view-istanbul
-view-istanbul:
+.PHONY: generate-istanbul-json
+generate-istanbul-json:
 	@go get github.com/axw/gocov/gocov
 	@gocov convert ./coverage/cover.out > coverage/gocov.json
 	@node ./scripts/gocov-to-istanbul-coverage.js ./coverage/gocov.json \
 		> coverage/istanbul.json
+
+.PHONY: view-istanbul
+view-istanbul: generate-istanbul-json
 	istanbul report --root ./coverage --include "**/istanbul.json" html
 	@if [ $$(which xdg-open) ]; then \
 		xdg-open coverage/index.html; \
