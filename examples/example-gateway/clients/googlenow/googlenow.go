@@ -55,8 +55,8 @@ func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsH
 	return c.Client.Do(req.WithContext(ctx))
 }
 
-// CheckCredential calls "/check-credentials" endpoint.
-func (c *GoogleNowClient) CheckCredential(ctx context.Context, h http.Header) (*http.Response, error) {
+// CheckCredentials calls "/check-credentials" endpoint.
+func (c *GoogleNowClient) CheckCredentials(ctx context.Context, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/check-credentials"
 

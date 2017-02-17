@@ -6,7 +6,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints/google_now"
+	"github.com/uber/zanzibar/examples/example-gateway/endpoints/googlenow"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -64,7 +64,17 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"googlenow",
 			"addCredentials",
-			googleNow.HandleAddCredentials,
+			googlenow.HandleAddCredentialsRequest,
+		),
+	)
+
+	router.Register(
+		"POST", "/googlenow/check-credentials",
+		makeEndpoint(
+			g,
+			"googlenow",
+			"addCredentials",
+			googlenow.HandleCheckCredentialsRequest,
 		),
 	)
 

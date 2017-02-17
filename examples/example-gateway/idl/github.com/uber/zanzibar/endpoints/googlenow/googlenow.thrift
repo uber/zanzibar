@@ -6,16 +6,18 @@ service GoogleNow {
         1: required string authCode
     ) (  // can throws exceptions here for non 2XX response
         zanzibar.http.method = "POST"
-        zanzibar.http.path = "/add-credentials"
+        zanzibar.http.path = "/googlenow/add-credentials"
         zanzibar.http.status = "200,202"
         zanzibar.http.headers = "x-uuid,x-token"
+        zanzibar.http.downstream = "../../clients/googlenow/googlenow.thrift::GoogleNow::addCredentials"
     )
     void checkCredentials(
     ) (
         zanzibar.http.method = "POST"
-        zanzibar.http.path = "/check-credentials"
+        zanzibar.http.path = "/googlenow/check-credentials"
         zanzibar.http.status = "200,202"
         // comma sparated list for required headers
         zanzibar.http.headers = "x-uuid,x-token"
+        zanzibar.http.downstream = "../../clients/googlenow/googlenow.thrift::GoogleNow::checkCredentials"
     )
 }
