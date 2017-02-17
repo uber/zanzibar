@@ -105,6 +105,7 @@ func (conf *StaticConfig) MustGetBoolean(key string) bool {
 
 		v, err := jsonparser.ParseBoolean(value.bytes)
 		if err != nil {
+			/* coverage ignore next line */
 			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
 		}
 
@@ -133,6 +134,7 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 
 		v, err := jsonparser.ParseFloat(value.bytes)
 		if err != nil {
+			/* coverage ignore next line */
 			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
 		}
 
@@ -161,6 +163,7 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 
 		v, err := jsonparser.ParseInt(value.bytes)
 		if err != nil {
+			/* coverage ignore next line */
 			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
 		}
 
@@ -189,6 +192,7 @@ func (conf *StaticConfig) MustGetString(key string) string {
 
 		v, err := jsonparser.ParseString(value.bytes)
 		if err != nil {
+			/* coverage ignore next line */
 			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
 		}
 
