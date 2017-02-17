@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -31,8 +30,9 @@ var benchBytesFor{{$clientMethodName}} = []byte("{}")
 func Test{{.Name | Title}}OKResponse(t *testing.T) {
 	var counter int = 0
 
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"{{$clientName | camel}}"},
+	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
@@ -46,7 +46,7 @@ func Test{{.Name | Title}}OKResponse(t *testing.T) {
 		}
 		counter++
 	}
-	gateway.Backends()["{{$clientName}}"].HandleFunc(
+	gateway.Backends()["{{$clientName | camel}}"].HandleFunc(
 		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{$clientMethodName}},
 	)
 
