@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/config"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
@@ -19,8 +18,9 @@ var benchBytesForMissingArg = []byte("{}")
 func TestMissingArgOKResponse(t *testing.T) {
 	var counter int = 0
 
-	config := &config.Config{}
-	gateway, err := testGateway.CreateGateway(t, config, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"bar"},
+	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
@@ -34,7 +34,7 @@ func TestMissingArgOKResponse(t *testing.T) {
 		}
 		counter++
 	}
-	gateway.Backends()["Bar"].HandleFunc(
+	gateway.Backends()["bar"].HandleFunc(
 		"GET", "/missing-arg-path", fakeMissingArg,
 	)
 
