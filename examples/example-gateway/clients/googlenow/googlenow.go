@@ -17,8 +17,8 @@ type GoogleNowClient zanzibar.HTTPClient
 
 // NewClient returns a new http client for service GoogleNow.
 func NewClient(config *zanzibar.StaticConfig) *GoogleNowClient {
-	ip := config.MustGetString("clients.bar.ip")
-	port := config.MustGetInt("clients.bar.port")
+	ip := config.MustGetString("clients.googleNow.ip")
+	port := config.MustGetInt("clients.googleNow.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &GoogleNowClient{
@@ -36,6 +36,7 @@ func NewClient(config *zanzibar.StaticConfig) *GoogleNowClient {
 // AddCredentials calls "/add-credentials" endpoint.
 func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
+	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/add-credentials"
 
 	rawBody, err := r.MarshalJSON()
