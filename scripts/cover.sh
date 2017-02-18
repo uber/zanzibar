@@ -8,7 +8,7 @@ rm -f coverage.tmp
 
 COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
-	awk -vORS=, '{ print $1 }' | sed 's/,$/\n/')
+	awk -v ORS=, '{ print $1 }' | sed 's/,$/\n/')
 
 FILES=$(go list ./... | grep -v "vendor" | grep "test")
 FILES_ARR=($FILES)
