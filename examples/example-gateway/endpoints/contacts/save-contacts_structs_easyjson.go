@@ -297,31 +297,135 @@ func easyjsonDae16842DecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsC
 		}
 		switch key {
 		case "firstName":
-			out.FirstName = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.FirstName = nil
+			} else {
+				if out.FirstName == nil {
+					out.FirstName = new(string)
+				}
+				*out.FirstName = string(in.String())
+			}
 		case "lastName":
-			out.LastName = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.LastName = nil
+			} else {
+				if out.LastName == nil {
+					out.LastName = new(string)
+				}
+				*out.LastName = string(in.String())
+			}
 		case "nickname":
-			out.Nickname = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.Nickname = nil
+			} else {
+				if out.Nickname == nil {
+					out.Nickname = new(string)
+				}
+				*out.Nickname = string(in.String())
+			}
 		case "hasPhoto":
-			out.HasPhoto = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+				out.HasPhoto = nil
+			} else {
+				if out.HasPhoto == nil {
+					out.HasPhoto = new(bool)
+				}
+				*out.HasPhoto = bool(in.Bool())
+			}
 		case "numFields":
-			out.NumFields = int32(in.Int32())
+			if in.IsNull() {
+				in.Skip()
+				out.NumFields = nil
+			} else {
+				if out.NumFields == nil {
+					out.NumFields = new(int32)
+				}
+				*out.NumFields = int32(in.Int32())
+			}
 		case "timesContacted":
-			out.TimesContacted = int32(in.Int32())
+			if in.IsNull() {
+				in.Skip()
+				out.TimesContacted = nil
+			} else {
+				if out.TimesContacted == nil {
+					out.TimesContacted = new(int32)
+				}
+				*out.TimesContacted = int32(in.Int32())
+			}
 		case "lastTimeContacted":
-			out.LastTimeContacted = int32(in.Int32())
+			if in.IsNull() {
+				in.Skip()
+				out.LastTimeContacted = nil
+			} else {
+				if out.LastTimeContacted == nil {
+					out.LastTimeContacted = new(int32)
+				}
+				*out.LastTimeContacted = int32(in.Int32())
+			}
 		case "isStarred":
-			out.IsStarred = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+				out.IsStarred = nil
+			} else {
+				if out.IsStarred == nil {
+					out.IsStarred = new(bool)
+				}
+				*out.IsStarred = bool(in.Bool())
+			}
 		case "hasCustomRingtone":
-			out.HasCustomRingtone = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+				out.HasCustomRingtone = nil
+			} else {
+				if out.HasCustomRingtone == nil {
+					out.HasCustomRingtone = new(bool)
+				}
+				*out.HasCustomRingtone = bool(in.Bool())
+			}
 		case "isSendToVoiceMail":
-			out.IsSendToVoiceMail = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+				out.IsSendToVoiceMail = nil
+			} else {
+				if out.IsSendToVoiceMail == nil {
+					out.IsSendToVoiceMail = new(bool)
+				}
+				*out.IsSendToVoiceMail = bool(in.Bool())
+			}
 		case "hasThumbnail":
-			out.HasThumbnail = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+				out.HasThumbnail = nil
+			} else {
+				if out.HasThumbnail == nil {
+					out.HasThumbnail = new(bool)
+				}
+				*out.HasThumbnail = bool(in.Bool())
+			}
 		case "namePrefix":
-			out.NamePrefix = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.NamePrefix = nil
+			} else {
+				if out.NamePrefix == nil {
+					out.NamePrefix = new(string)
+				}
+				*out.NamePrefix = string(in.String())
+			}
 		case "nameSuffix":
-			out.NameSuffix = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.NameSuffix = nil
+			} else {
+				if out.NameSuffix == nil {
+					out.NameSuffix = new(string)
+				}
+				*out.NameSuffix = string(in.String())
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -341,79 +445,131 @@ func easyjsonDae16842EncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsC
 	}
 	first = false
 	out.RawString("\"firstName\":")
-	out.String(string(in.FirstName))
+	if in.FirstName == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.FirstName))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"lastName\":")
-	out.String(string(in.LastName))
+	if in.LastName == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.LastName))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"nickname\":")
-	out.String(string(in.Nickname))
+	if in.Nickname == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.Nickname))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"hasPhoto\":")
-	out.Bool(bool(in.HasPhoto))
+	if in.HasPhoto == nil {
+		out.RawString("null")
+	} else {
+		out.Bool(bool(*in.HasPhoto))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"numFields\":")
-	out.Int32(int32(in.NumFields))
+	if in.NumFields == nil {
+		out.RawString("null")
+	} else {
+		out.Int32(int32(*in.NumFields))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"timesContacted\":")
-	out.Int32(int32(in.TimesContacted))
+	if in.TimesContacted == nil {
+		out.RawString("null")
+	} else {
+		out.Int32(int32(*in.TimesContacted))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"lastTimeContacted\":")
-	out.Int32(int32(in.LastTimeContacted))
+	if in.LastTimeContacted == nil {
+		out.RawString("null")
+	} else {
+		out.Int32(int32(*in.LastTimeContacted))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"isStarred\":")
-	out.Bool(bool(in.IsStarred))
+	if in.IsStarred == nil {
+		out.RawString("null")
+	} else {
+		out.Bool(bool(*in.IsStarred))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"hasCustomRingtone\":")
-	out.Bool(bool(in.HasCustomRingtone))
+	if in.HasCustomRingtone == nil {
+		out.RawString("null")
+	} else {
+		out.Bool(bool(*in.HasCustomRingtone))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"isSendToVoiceMail\":")
-	out.Bool(bool(in.IsSendToVoiceMail))
+	if in.IsSendToVoiceMail == nil {
+		out.RawString("null")
+	} else {
+		out.Bool(bool(*in.IsSendToVoiceMail))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"hasThumbnail\":")
-	out.Bool(bool(in.HasThumbnail))
+	if in.HasThumbnail == nil {
+		out.RawString("null")
+	} else {
+		out.Bool(bool(*in.HasThumbnail))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"namePrefix\":")
-	out.String(string(in.NamePrefix))
+	if in.NamePrefix == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.NamePrefix))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"nameSuffix\":")
-	out.String(string(in.NameSuffix))
+	if in.NameSuffix == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.NameSuffix))
+	}
 	out.RawByte('}')
 }
 
@@ -460,9 +616,25 @@ func easyjsonDae16842DecodeGithubComUberZanzibarExamplesExampleGatewayEndpointsC
 		}
 		switch key {
 		case "type":
-			out.Type = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.Type = nil
+			} else {
+				if out.Type == nil {
+					out.Type = new(string)
+				}
+				*out.Type = string(in.String())
+			}
 		case "text":
-			out.Text = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.Text = nil
+			} else {
+				if out.Text == nil {
+					out.Text = new(string)
+				}
+				*out.Text = string(in.String())
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -482,13 +654,21 @@ func easyjsonDae16842EncodeGithubComUberZanzibarExamplesExampleGatewayEndpointsC
 	}
 	first = false
 	out.RawString("\"type\":")
-	out.String(string(in.Type))
+	if in.Type == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.Type))
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"text\":")
-	out.String(string(in.Text))
+	if in.Text == nil {
+		out.RawString("null")
+	} else {
+		out.String(string(*in.Text))
+	}
 	out.RawByte('}')
 }
 
