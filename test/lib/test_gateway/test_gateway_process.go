@@ -23,7 +23,6 @@ package testGateway
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -103,7 +102,7 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 		return errors.Wrap(err, "could not read addr from stdout")
 	}
 
-	go gateway.copyToStdout(cmdStdout)
+	go gateway.copyToStdout(reader)
 	return nil
 }
 
@@ -152,10 +151,13 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 	return nil
 }
 
-func (gateway *ChildProcessGateway) copyToStdout(src io.Reader) {
-	reader := bufio.NewReader(src)
+func (gateway *ChildProcessGateway) copyToStdout(reader *bufio.Reader) {
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
 
-	for line, err := reader.ReadString('\n'); err != nil; {
 		if line == "PASS\n" {
 			continue
 		} else if strings.Index(line, "coverage:") == 0 {
@@ -166,10 +168,10 @@ func (gateway *ChildProcessGateway) copyToStdout(src io.Reader) {
 			gateway.jsonLines = append(gateway.jsonLines, line)
 		}
 
-		_, err = os.Stdout.WriteString(line)
-		if err != nil {
+		_, err2 := os.Stdout.WriteString(line)
+		if err2 != nil {
 			// TODO: betterer...
-			panic(err)
+			panic(err2)
 		}
 	}
 }
