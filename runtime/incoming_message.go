@@ -206,7 +206,7 @@ func (inc *IncomingMessage) writeBytes(bytes []byte) {
 
 // WriteHeader writes the header to http respnse.
 func (inc *IncomingMessage) WriteHeader(statusCode int) {
-	inc.responseWriter.WriteHeader(statusCode)
+	inc.writeHeader(statusCode)
 }
 
 // WriteString helper just writes a string to the response
