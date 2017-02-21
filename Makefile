@@ -58,7 +58,7 @@ lint:
 # 	@[ ! -s deps.log ]
 
 .PHONY: generate
-generate: scripts/easy_json/easy_json
+generate:
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
@@ -75,9 +75,6 @@ test: generate lint
 .PHONY: bench
 bench:
 	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 7s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
-
-scripts/easy_json/easy_json: $(GO_FILES)
-	go build -o $@ $(dir ./$@)
 
 $(PROGS): $(GO_FILES)
 	@echo Building $@
