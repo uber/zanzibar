@@ -74,7 +74,7 @@ test: generate lint
 
 .PHONY: bench
 bench:
-	time go test -run _NONE_ -bench . -benchmem -benchtime 7s -cpu 2 ./test/...
+	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 7s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
 
 scripts/easy_json/easy_json: $(GO_FILES)
 	go build -o $@ $(dir ./$@)
