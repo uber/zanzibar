@@ -50,7 +50,12 @@ func NewClient(config *zanzibar.StaticConfig) *{{$clientName}} {
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}, h http.Header) (*http.Response, error) {
 	// Generate full URL.
 	// TODO: (jakev) insert params if needed here.
-	fullURL := c.BaseURL + "{{.HTTPPath}}"
+	fullURL := c.BaseURL
+	{{- range $k, $segment := .PathSegments -}}
+	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
+	{{- else -}}+"/"+string(r.{{$segment.BodyIdentifier | title}})
+	{{- end -}}
+	{{- end}}
 
 	rawBody, err := r.MarshalJSON()
 	if err != nil {
@@ -73,7 +78,12 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, h http.Header) (*http.Response, error) {
 	// Generate full URL.
-	fullURL := c.BaseURL + "{{.HTTPPath}}"
+	fullURL := c.BaseURL
+	{{- range $k, $segment := .PathSegments -}}
+	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
+	{{- else -}}+"/"+r.{{$segment.BodyIdentifier}}
+	{{- end -}}
+	{{- end}}
 
 	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, nil)
 	if err != nil {

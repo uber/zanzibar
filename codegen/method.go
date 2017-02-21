@@ -30,6 +30,13 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
+// PathSegment represents a part of the http path.
+type PathSegment struct {
+	Type           string
+	Text           string
+	BodyIdentifier string
+}
+
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
 	Name       string
@@ -37,6 +44,7 @@ type MethodSpec struct {
 	// Used by edge gateway to generate endpoint.
 	EndpointName string
 	HTTPPath     string
+	PathSegments []PathSegment
 	// Headers needed, generated from "zanzibar.http.headers"
 	Headers             []string
 	RequestType         string
@@ -44,6 +52,7 @@ type MethodSpec struct {
 	OKStatusCode        []StatusCode
 	ExceptionStatusCode []StatusCode
 	// Additional struct generated from the bundle of request args.
+	RequestBoxed  bool
 	RequestStruct []StructSpec
 	// The downstream service method annotated by 'zanzibar.http.downstream'.
 	Downstream *ModuleSpec
@@ -68,6 +77,7 @@ const (
 	antHTTPStatus      = "zanzibar.http.status"
 	antHTTPReqDefBoxed = "zanzibar.http.req.def"
 	antHTTPHeaders     = "zanzibar.http.headers"
+	antHTTPRef         = "zanzibar.http.ref"
 	antHTTPDownstream  = "zanzibar.http.downstream"
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
@@ -84,8 +94,10 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	}
 	var err error
 	if isRequestBoxed(funcSpec) {
+		ms.RequestBoxed = true
 		ms.RequestType, err = packageHelper.TypeFullName(curThriftFile, funcSpec.ArgsSpec[0].Type)
 	} else {
+		ms.RequestBoxed = false
 		ms.RequestType, err = ms.newRequestType(curThriftFile, funcSpec, packageHelper)
 	}
 	if err != nil {
@@ -152,6 +164,86 @@ func (ms *MethodSpec) setExceptionStatusCode(resultSpec *compile.ResultSpec) err
 		}
 	}
 	return nil
+}
+
+func findParamsAnnotation(
+	fields compile.FieldGroup, paramName string, prefix string,
+) (string, bool) {
+	for i := 0; i < len(fields); i++ {
+		field := fields[i]
+
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param == "params."+paramName[1:] {
+				return prefix + field.Name, true
+			}
+		}
+
+		switch t := field.Type.(type) {
+		case *compile.BinarySpec:
+		case *compile.StringSpec:
+		case *compile.BoolSpec:
+		case *compile.DoubleSpec:
+		case *compile.I8Spec:
+		case *compile.I16Spec:
+		case *compile.I32Spec:
+		case *compile.I64Spec:
+		case *compile.StructSpec:
+			path, ok := findParamsAnnotation(
+				t.Fields, paramName, field.Name+".",
+			)
+			if ok {
+				return path, true
+			}
+		case *compile.SetSpec:
+			// TODO: implement
+		case *compile.MapSpec:
+			// TODO: implement
+		case *compile.ListSpec:
+			// TODO: implement
+		default:
+			panic("unknown Spec")
+		}
+	}
+
+	return "", false
+}
+
+func (ms *MethodSpec) setHTTPPath(
+	httpPath string, funcSpec *compile.FunctionSpec,
+) {
+	ms.HTTPPath = httpPath
+
+	segments := strings.Split(httpPath[1:], "/")
+	ms.PathSegments = make([]PathSegment, len(segments))
+	for i := 0; i < len(segments); i++ {
+		segment := segments[i]
+
+		if segment == "" || segment[0] != ':' {
+			ms.PathSegments[i].Type = "static"
+			ms.PathSegments[i].Text = segment
+		} else {
+			ms.PathSegments[i].Type = "param"
+
+			var fieldSelect string
+			var ok bool
+			if ms.RequestBoxed {
+				// Boxed requests mean first arg is struct
+				structType := funcSpec.ArgsSpec[0].Type.(*compile.StructSpec)
+				fieldSelect, ok = findParamsAnnotation(
+					structType.Fields, segment, "",
+				)
+			} else {
+				fieldSelect, ok = findParamsAnnotation(
+					compile.FieldGroup(funcSpec.ArgsSpec), segment, "",
+				)
+			}
+
+			if !ok {
+				panic("cannot find params: " + segment)
+			}
+			ms.PathSegments[i].BodyIdentifier = fieldSelect
+		}
+	}
 }
 
 func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packageHelper *PackageHelper) error {
