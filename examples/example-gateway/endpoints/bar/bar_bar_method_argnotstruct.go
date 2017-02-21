@@ -54,6 +54,9 @@ func HandleArgNotStructRequest(
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
-	// TODO: Add request fields mapping here.
-	return &barClient.ArgNotStructHTTPRequest{}
+	clientRequest := barClient.ArgNotStructHTTPRequest{}
+
+	clientRequest.Request = body.Request
+
+	return &clientRequest
 }

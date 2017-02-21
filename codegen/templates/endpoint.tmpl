@@ -91,15 +91,20 @@ func Handle{{title .Name}}Request(
 
 {{if and (ne .RequestType "") (ne $clientMethodRequestType "") -}}
 func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientMethodRequestType}} {
-	// TODO: Add request fields mapping here.
-	return &{{$clientMethodRequestType}}{}
+	clientRequest := {{$clientMethodRequestType}}{}
+	{{ range $key, $value := .RequestFieldMap }}
+	clientRequest.{{title $key }} = body.{{title $value }}
+	{{ end }}
+	return &clientRequest
 }
 {{end -}}
 
 {{if and (ne .ResponseType "") (ne $clientMethodResponseType "") -}}
 func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
-	// TODO: Add response fields mapping here.
-	return &{{.ResponseType}}{}
+	downstreamResponse := {{.ResponseType}}{}
+	{{ range $key, $value := .ResponseFieldMap }}
+	downstreamResponse.{{title $key }} = body.{{title $value }}{{ end }}
+	return &downstreamResponse
 }
 {{end -}}
 

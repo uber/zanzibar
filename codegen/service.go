@@ -171,6 +171,12 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 	if err := method.setDownstream(funcSpec.Annotations[antHTTPDownstream], s.ThriftFile, packageHelper); err != nil {
 		return nil, err
 	}
+	if err := method.setRequestFieldMap(funcSpec, packageHelper); err != nil {
+		return nil, err
+	}
+	if err := method.setResponseFieldMap(funcSpec.ResultSpec, packageHelper); err != nil {
+		return nil, err
+	}
 	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {
 		return nil, err
 	}

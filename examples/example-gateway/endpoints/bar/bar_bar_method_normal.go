@@ -67,10 +67,14 @@ func HandleNormalRequest(
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
-	// TODO: Add request fields mapping here.
-	return &barClient.NormalHTTPRequest{}
+	clientRequest := barClient.NormalHTTPRequest{}
+
+	clientRequest.Request = body.Request
+
+	return &clientRequest
 }
 func convertNormalClientResponse(body *bar.BarResponse) *bar.BarResponse {
-	// TODO: Add response fields mapping here.
-	return &bar.BarResponse{}
+	downstreamResponse := bar.BarResponse{}
+
+	return &downstreamResponse
 }

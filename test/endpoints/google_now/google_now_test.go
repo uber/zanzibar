@@ -35,7 +35,7 @@ import (
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 var noAuthCodeBytes = []byte("{}")
 
-func BenchmarkRtnowAddCredentials(b *testing.B) {
+func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
 		KnownBackends: []string{"googleNow"},
 	})

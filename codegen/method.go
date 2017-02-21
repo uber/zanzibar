@@ -56,6 +56,10 @@ type MethodSpec struct {
 	RequestStruct []StructSpec
 	// The downstream service method annotated by 'zanzibar.http.downstream'.
 	Downstream *ModuleSpec
+	// A map from upstream to downstream field names in the requests.
+	RequestFieldMap map[string]string
+	// A map from downstream to upstream field names in the response.
+	ResponseFieldMap map[string]string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -287,6 +291,31 @@ func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packa
 		downstreamService,
 	}
 	ms.Downstream = downstreamModule
+	return nil
+}
+
+func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
+	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
+	ms.RequestFieldMap = map[string]string{}
+
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	for i := 0; i < len(structType); i++ {
+		field := structType[i]
+		// Add type checking and conversion
+		ms.RequestFieldMap[field.Name] = field.Name
+	}
+	return nil
+}
+
+func (ms *MethodSpec) setResponseFieldMap(resultSpec *compile.ResultSpec, packageHelper *PackageHelper) error {
+	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
+	ms.ResponseFieldMap = map[string]string{}
+
+	// structType := resultSpec.ReturnType
+	// fieldName := structType.Name
+	// ms.RequestFieldMap[fieldName] = fieldName
+
 	return nil
 }
 

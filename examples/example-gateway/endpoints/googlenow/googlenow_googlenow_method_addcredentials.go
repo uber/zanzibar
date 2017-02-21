@@ -57,6 +57,9 @@ func HandleAddCredentialsRequest(
 }
 
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {
-	// TODO: Add request fields mapping here.
-	return &googlenowClient.AddCredentialsHTTPRequest{}
+	clientRequest := googlenowClient.AddCredentialsHTTPRequest{}
+
+	clientRequest.AuthCode = body.AuthCode
+
+	return &clientRequest
 }
