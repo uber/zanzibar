@@ -1,0 +1,8 @@
+{
+	"thriftRootDir": "./idl",
+	"gatewayThriftRootDir": "./gen-code",
+	"typeFileRootDir": ".",
+	"targetGenDir": "./idl/github.com/uber/zanzibar",
+	"clientThriftDir": "./idl/github.com/uber/zanzibar/clients",
+	"endpointThriftDir": "./idl/github.com/uber/zanzibar/endpoints"
+}

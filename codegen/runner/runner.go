@@ -24,31 +24,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/runtime"
 )
 
-var (
-	thriftRootDir = flag.String("thrift_root_dir", "",
-		"The root directory containing thrift files.")
-
-	gatewayThriftRootDir = flag.String("gateway_thrift_root_dir", "",
-		"The root directory just for the gateway thrift files.")
-
-	typeFileRootDir = flag.String("type_file_root_dir", "",
-		"The root directory where all files of go types are generated.")
-
-	targetGenDir = flag.String("target_gen_dir", "",
-		"The directory to put the generated service code.")
-
-	clientThriftDir = flag.String("client_thrift_dir", "",
-		"The directory contains thrifts for generating clients.")
-
-	endpointThriftDir = flag.String("endpoint_thrift_dir", "",
-		"The directory contains thrifts for generating endpoints.")
-)
+var configFile = flag.String("config", "", "the config file path")
 
 const templateDir = "./codegen/templates/*.tmpl"
 
@@ -61,14 +43,36 @@ func checkError(err error, message string) {
 
 func main() {
 	flag.Parse()
+	if *configFile == "" {
+		flag.Usage()
+		os.Exit(1)
+		return
+	}
+
+	configDirName := filepath.Dir(*configFile)
+	config := zanzibar.NewStaticConfigOrDie([]string{
+		*configFile,
+	}, nil)
+
 	packageHelper, err := codegen.NewPackageHelper(
-		*thriftRootDir, *gatewayThriftRootDir, *typeFileRootDir, *targetGenDir,
+		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
+		filepath.Join(
+			configDirName, config.MustGetString("gatewayThriftRootDir"),
+		),
+		filepath.Join(configDirName, config.MustGetString("typeFileRootDir")),
+		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
 	)
-	checkError(err, fmt.Sprintf("can't create package helper %#v", packageHelper))
+	checkError(
+		err, fmt.Sprintf("can't create package helper %#v", packageHelper),
+	)
 	tmpl, err := codegen.NewTemplate(templateDir)
 	checkError(err, "Failed to parse templates")
-	clientThrifts, err := filepath.Glob(
-		path.Join(*clientThriftDir, "*/*.thrift"))
+
+	clientThrifts, err := filepath.Glob(filepath.Join(
+		configDirName,
+		config.MustGetString("clientThriftDir"),
+		"*/*.thrift",
+	))
 	checkError(err, "Failed to get client thrift files")
 	for _, thrift := range clientThrifts {
 		fmt.Printf("Generating client code for %s ...\n", thrift)
@@ -76,8 +80,11 @@ func main() {
 		checkError(err, "Failed to generate client file.")
 	}
 
-	endpointThrifts, err := filepath.Glob(
-		path.Join(*endpointThriftDir, "*/*.thrift"))
+	endpointThrifts, err := filepath.Glob(filepath.Join(
+		configDirName,
+		config.MustGetString("endpointThriftDir"),
+		"*/*.thrift",
+	))
 	checkError(err, "failed to get endpoint thrift files")
 	for _, thrift := range endpointThrifts {
 		fmt.Printf("Generating endpoint code for %s ...\n", thrift)
