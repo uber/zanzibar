@@ -33,6 +33,7 @@ import (
 )
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
+var noAuthCodeBytes = []byte("{}")
 
 func BenchmarkRtnowAddCredentials(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
@@ -113,4 +114,41 @@ func TestAddCredentials(t *testing.T) {
 
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
+}
+
+func TestAddCredentialsMissingAuthCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.Backends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			if r.FormValue("authCode") != "" {
+				if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+					t.Fatal("can't write fake response")
+				}
+				counter++
+			} else {
+				if _, err := w.Write([]byte("{\"statusCode\":500}")); err != nil {
+					t.Fatal("can't write fake response")
+				}
+			}
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 0, counter)
 }
