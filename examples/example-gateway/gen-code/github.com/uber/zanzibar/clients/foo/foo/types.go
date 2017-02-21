@@ -51,6 +51,9 @@ func (v *FooName) FromWire(w wire.Value) error {
 }
 
 func (v *FooName) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [1]string
 	i := 0
 	if v.Name != nil {
@@ -58,6 +61,22 @@ func (v *FooName) String() string {
 		i++
 	}
 	return fmt.Sprintf("FooName{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _string_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func (v *FooName) Equals(rhs *FooName) bool {
+	if !_string_EqualsPtr(v.Name, rhs.Name) {
+		return false
+	}
+	return true
 }
 
 type FooStruct struct {
@@ -258,6 +277,9 @@ func (v *FooStruct) FromWire(w wire.Value) error {
 }
 
 func (v *FooStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [6]string
 	i := 0
 	fields[i] = fmt.Sprintf("FooString: %v", v.FooString)
@@ -283,4 +305,78 @@ func (v *FooStruct) String() string {
 		i++
 	}
 	return fmt.Sprintf("FooStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _i32_EqualsPtr(lhs, rhs *int32) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _i16_EqualsPtr(lhs, rhs *int16) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _double_EqualsPtr(lhs, rhs *float64) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _bool_EqualsPtr(lhs, rhs *bool) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _Map_String_FooName_EqualsHashable(lhs, rhs map[string]*FooName) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for lk, lv := range lhs {
+		rv, ok := rhs[lk]
+		if !ok {
+			return false
+		}
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *FooStruct) Equals(rhs *FooStruct) bool {
+	if !(v.FooString == rhs.FooString) {
+		return false
+	}
+	if !_i32_EqualsPtr(v.FooI32, rhs.FooI32) {
+		return false
+	}
+	if !_i16_EqualsPtr(v.FooI16, rhs.FooI16) {
+		return false
+	}
+	if !_double_EqualsPtr(v.FooDouble, rhs.FooDouble) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.FooBool, rhs.FooBool) {
+		return false
+	}
+	if !((v.FooMap == nil && rhs.FooMap == nil) || (v.FooMap != nil && rhs.FooMap != nil && _Map_String_FooName_EqualsHashable(v.FooMap, rhs.FooMap))) {
+		return false
+	}
+	return true
 }

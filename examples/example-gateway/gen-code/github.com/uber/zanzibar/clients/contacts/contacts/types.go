@@ -124,6 +124,9 @@ func (v *Contact) FromWire(w wire.Value) error {
 }
 
 func (v *Contact) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [2]string
 	i := 0
 	if v.Fragments != nil {
@@ -135,6 +138,29 @@ func (v *Contact) String() string {
 		i++
 	}
 	return fmt.Sprintf("Contact{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_ContactFragment_Equals(lhs, rhs []*ContactFragment) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *Contact) Equals(rhs *Contact) bool {
+	if !((v.Fragments == nil && rhs.Fragments == nil) || (v.Fragments != nil && rhs.Fragments != nil && _List_ContactFragment_Equals(v.Fragments, rhs.Fragments))) {
+		return false
+	}
+	if !((v.Attributes == nil && rhs.Attributes == nil) || (v.Attributes != nil && rhs.Attributes != nil && v.Attributes.Equals(rhs.Attributes))) {
+		return false
+	}
+	return true
 }
 
 type ContactAttributes struct {
@@ -394,6 +420,9 @@ func (v *ContactAttributes) FromWire(w wire.Value) error {
 }
 
 func (v *ContactAttributes) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [13]string
 	i := 0
 	if v.FirstName != nil {
@@ -449,6 +478,76 @@ func (v *ContactAttributes) String() string {
 		i++
 	}
 	return fmt.Sprintf("ContactAttributes{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _string_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _bool_EqualsPtr(lhs, rhs *bool) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _i32_EqualsPtr(lhs, rhs *int32) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func (v *ContactAttributes) Equals(rhs *ContactAttributes) bool {
+	if !_string_EqualsPtr(v.FirstName, rhs.FirstName) {
+		return false
+	}
+	if !_string_EqualsPtr(v.LastName, rhs.LastName) {
+		return false
+	}
+	if !_string_EqualsPtr(v.Nickname, rhs.Nickname) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.HasPhoto, rhs.HasPhoto) {
+		return false
+	}
+	if !_i32_EqualsPtr(v.NumFields, rhs.NumFields) {
+		return false
+	}
+	if !_i32_EqualsPtr(v.TimesContacted, rhs.TimesContacted) {
+		return false
+	}
+	if !_i32_EqualsPtr(v.LastTimeContacted, rhs.LastTimeContacted) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.IsStarred, rhs.IsStarred) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.HasCustomRingtone, rhs.HasCustomRingtone) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.IsSendToVoicemail, rhs.IsSendToVoicemail) {
+		return false
+	}
+	if !_bool_EqualsPtr(v.HasThumbnail, rhs.HasThumbnail) {
+		return false
+	}
+	if !_string_EqualsPtr(v.NamePrefix, rhs.NamePrefix) {
+		return false
+	}
+	if !_string_EqualsPtr(v.NameSuffix, rhs.NameSuffix) {
+		return false
+	}
+	return true
 }
 
 type ContactFragment struct {
@@ -516,6 +615,9 @@ func (v *ContactFragment) FromWire(w wire.Value) error {
 }
 
 func (v *ContactFragment) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [2]string
 	i := 0
 	if v.Type != nil {
@@ -527,6 +629,25 @@ func (v *ContactFragment) String() string {
 		i++
 	}
 	return fmt.Sprintf("ContactFragment{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _ContactFragmentType_EqualsPtr(lhs, rhs *ContactFragmentType) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func (v *ContactFragment) Equals(rhs *ContactFragment) bool {
+	if !_ContactFragmentType_EqualsPtr(v.Type, rhs.Type) {
+		return false
+	}
+	if !_string_EqualsPtr(v.Text, rhs.Text) {
+		return false
+	}
+	return true
 }
 
 type ContactFragmentType string
@@ -545,6 +666,10 @@ func (v *ContactFragmentType) FromWire(w wire.Value) error {
 	x, err := w.GetString(), error(nil)
 	*v = (ContactFragmentType)(x)
 	return err
+}
+
+func (lhs ContactFragmentType) Equals(rhs ContactFragmentType) bool {
+	return (lhs == rhs)
 }
 
 type SaveContactsRequest struct {
@@ -670,6 +795,9 @@ func (v *SaveContactsRequest) FromWire(w wire.Value) error {
 }
 
 func (v *SaveContactsRequest) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [2]string
 	i := 0
 	fields[i] = fmt.Sprintf("UserUUID: %v", v.UserUUID)
@@ -677,6 +805,29 @@ func (v *SaveContactsRequest) String() string {
 	fields[i] = fmt.Sprintf("Contacts: %v", v.Contacts)
 	i++
 	return fmt.Sprintf("SaveContactsRequest{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_Contact_Equals(lhs, rhs []*Contact) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *SaveContactsRequest) Equals(rhs *SaveContactsRequest) bool {
+	if !(v.UserUUID == rhs.UserUUID) {
+		return false
+	}
+	if !_List_Contact_Equals(v.Contacts, rhs.Contacts) {
+		return false
+	}
+	return true
 }
 
 type SaveContactsResponse struct{}
@@ -698,9 +849,16 @@ func (v *SaveContactsResponse) FromWire(w wire.Value) error {
 }
 
 func (v *SaveContactsResponse) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	var fields [0]string
 	i := 0
 	return fmt.Sprintf("SaveContactsResponse{%v}", strings.Join(fields[:i], ", "))
+}
+
+func (v *SaveContactsResponse) Equals(rhs *SaveContactsResponse) bool {
+	return true
 }
 
 type UUID string
@@ -719,4 +877,8 @@ func (v *UUID) FromWire(w wire.Value) error {
 	x, err := w.GetString(), error(nil)
 	*v = (UUID)(x)
 	return err
+}
+
+func (lhs UUID) Equals(rhs UUID) bool {
+	return (lhs == rhs)
 }
