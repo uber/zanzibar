@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	googleNowClient "github.com/uber/zanzibar/examples/example-gateway/clients/google_now"
+	"github.com/uber/zanzibar/examples/example-gateway/clients/googlenow"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -24,7 +24,7 @@ func HandleAddCredentials(
 	}
 
 	// TODO(zw): use the request type generated from zanzibar endpoint config.
-	var body googleNowClient.AddCredentialRequest
+	var body googlenowClient.AddCredentialsHTTPRequest
 	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
@@ -32,7 +32,7 @@ func HandleAddCredentials(
 	h := make(http.Header)
 	h.Set("x-uuid", inc.Header.Get("x-uuid"))
 
-	clientResp, err := clients.GoogleNow.AddCredential(ctx, &body, h)
+	clientResp, err := clients.GoogleNow.AddCredentials(ctx, &body, h)
 	if err != nil {
 		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return

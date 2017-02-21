@@ -3,7 +3,7 @@ package clients
 import (
 	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/clients/contacts"
-	"github.com/uber/zanzibar/examples/example-gateway/clients/google_now"
+	"github.com/uber/zanzibar/examples/example-gateway/clients/googlenow"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -11,7 +11,7 @@ import (
 // This should only hold clients generate from specs
 type Clients struct {
 	Contacts  *contactsClient.ContactsClient
-	GoogleNow *googleNow.Client
+	GoogleNow *googlenowClient.GoogleNowClient
 	Bar       *barClient.BarClient
 }
 
@@ -19,7 +19,7 @@ type Clients struct {
 func CreateClients(config *zanzibar.StaticConfig) *Clients {
 	return &Clients{
 		Contacts:  contactsClient.NewClient(config),
-		GoogleNow: googleNow.NewClient(config),
+		GoogleNow: googlenowClient.NewClient(config),
 		Bar:       barClient.NewClient(config),
 	}
 }
