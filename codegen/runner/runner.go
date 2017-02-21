@@ -54,44 +54,26 @@ func main() {
 		*configFile,
 	}, nil)
 
-	packageHelper, err := codegen.NewPackageHelper(
+	gatewaySpec, err := codegen.NewGatewaySpec(
+		configDirName,
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
 		filepath.Join(
 			configDirName, config.MustGetString("gatewayThriftRootDir"),
 		),
 		filepath.Join(configDirName, config.MustGetString("typeFileRootDir")),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
+		config.MustGetString("clientThriftDir"),
+		config.MustGetString("endpointThriftDir"),
 	)
 	checkError(
-		err, fmt.Sprintf("can't create package helper %#v", packageHelper),
+		err, fmt.Sprintf("can't create gateway spec %#v", gatewaySpec),
 	)
-	tmpl, err := codegen.NewTemplate(templateDir)
-	checkError(err, "Failed to parse templates")
 
-	clientThrifts, err := filepath.Glob(filepath.Join(
-		configDirName,
-		config.MustGetString("clientThriftDir"),
-		"*/*.thrift",
-	))
-	checkError(err, "Failed to get client thrift files")
-	for _, thrift := range clientThrifts {
-		fmt.Printf("Generating client code for %s ...\n", thrift)
-		_, err := tmpl.GenerateClientFile(thrift, packageHelper)
-		checkError(err, "Failed to generate client file.")
-	}
+	fmt.Printf("Generating clients for gateway \n")
+	err = gatewaySpec.GenerateClients()
+	checkError(err, "Failed to generate client files.")
 
-	endpointThrifts, err := filepath.Glob(filepath.Join(
-		configDirName,
-		config.MustGetString("endpointThriftDir"),
-		"*/*.thrift",
-	))
-	checkError(err, "failed to get endpoint thrift files")
-	for _, thrift := range endpointThrifts {
-		fmt.Printf("Generating endpoint code for %s ...\n", thrift)
-		_, err := tmpl.GenerateEndpointFile(thrift, packageHelper)
-		checkError(err, "Failed to generate endpoint file.")
-		fmt.Printf("Generating endpoint_test code for %s ...\n", thrift)
-		_, err = tmpl.GenerateEndpointTestFile(thrift, packageHelper)
-		checkError(err, "Failed to generate endpoint test file.")
-	}
+	fmt.Printf("Generating endpoint code for gateway \n")
+	err = gatewaySpec.GenerateEndpoints()
+	checkError(err, "Failed to generate endpoint files.")
 }
