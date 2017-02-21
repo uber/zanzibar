@@ -14,16 +14,16 @@ import (
 // Clients datastructure that holds all the generated clients
 // This should only hold clients generate from specs
 type Clients struct {
-	GoogleNow *googlenowClient.GoogleNowClient
 	Bar       *barClient.BarClient
 	Contacts  *contactsClient.ContactsClient
+	GoogleNow *googlenowClient.GoogleNowClient
 }
 
 // CreateClients will make all clients
 func CreateClients(config *zanzibar.StaticConfig) *Clients {
 	return &Clients{
-		GoogleNow: googlenowClient.NewClient(config),
 		Bar:       barClient.NewClient(config),
 		Contacts:  contactsClient.NewClient(config),
+		GoogleNow: googlenowClient.NewClient(config),
 	}
 }
