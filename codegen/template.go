@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	tmpl "text/template"
@@ -238,6 +239,18 @@ type ClientsInitFilesMeta struct {
 	ClientInfo       []ClientInfoMeta
 }
 
+type sortByClientName []*ModuleSpec
+
+func (c sortByClientName) Len() int {
+	return len(c)
+}
+func (c sortByClientName) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+func (c sortByClientName) Less(i, j int) bool {
+	return c[i].GoPackage < c[j].GoPackage
+}
+
 // GenerateClientsInitFile generates go code to allocate and initialize
 // all of the generated clients
 func (t *Template) GenerateClientsInitFile(
@@ -247,6 +260,7 @@ func (t *Template) GenerateClientsInitFile(
 	for _, v := range clientsMap {
 		clients = append(clients, v)
 	}
+	sort.Sort(sortByClientName(clients))
 
 	includedPkgs := []string{}
 	for i := 0; i < len(clients); i++ {
