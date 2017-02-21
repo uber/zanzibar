@@ -23,6 +23,24 @@ make test
 for i in `seq 5`; do make bench; done
 ```
 
+## Running the end-to-end benchmarks
+
+First fetch `wrk`
+
+```
+git clone https://github.com/wg/wrk ~/wrk
+cd ~/wrk
+make
+sudo ln -s $HOME/wrk/wrk /usr/local/bin/wrk
+```
+
+Then you can run the benchmark comparison script
+
+```
+# Assume you are on feature branch ABC
+./benchmarks/compare_to.sh master
+```
+
 ## Running the server
 
 First create log dir...
