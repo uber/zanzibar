@@ -18,7 +18,7 @@ type Clients struct {
 // CreateClients will make all clients
 func CreateClients(config *zanzibar.StaticConfig) *Clients {
 	return &Clients{
-		Contacts:  contactsClient.Create(config),
+		Contacts:  contactsClient.NewClient(config),
 		GoogleNow: googleNow.NewClient(config),
 		Bar:       barClient.NewClient(config),
 	}

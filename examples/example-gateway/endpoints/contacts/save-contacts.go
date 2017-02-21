@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	contactsClient "github.com/uber/zanzibar/examples/example-gateway/clients/contacts"
+	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -37,7 +37,7 @@ func HandleSaveContactsRequest(
 	body.AppVersion = inc.Header.Get("x-uber-client-version")
 
 	clientBody := convertToClient(&body)
-	res, err := clients.Contacts.SaveContacts(ctx, clientBody)
+	res, err := clients.Contacts.SaveContacts(ctx, clientBody, nil)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -46,21 +46,25 @@ func HandleSaveContactsRequest(
 		return
 	}
 
+	// Handle client respnse.
+	if !inc.IsOKResponse(res.StatusCode, []int{200, 202}) {
+		gateway.Logger.Warn("Unknown response status code",
+			zap.Int("status code", res.StatusCode),
+		)
+	}
+
 	// res.Res.StatusCode
-	inc.CopyJSON(res.Res.StatusCode, res.Res.Body)
+	inc.CopyJSON(res.StatusCode, res.Body)
 }
 
 func convertToClient(
 	body *SaveContactsRequest,
-) *contactsClient.SaveContactsRequest {
-	clientBody := &contactsClient.SaveContactsRequest{}
-	clientBody.AppType = body.AppType
-	clientBody.AppVersion = body.AppVersion
-	clientBody.DeviceType = body.DeviceType
-	clientBody.UserUUID = body.UserUUID
+) *contactsClientStructs.SaveContactsRequest {
+	clientBody := &contactsClientStructs.SaveContactsRequest{}
+	clientBody.UserUUID = contactsClientStructs.UUID(body.UserUUID)
 
 	for _, contact := range body.Contacts {
-		clientContact := &contactsClient.Contact{}
+		clientContact := &contactsClientStructs.Contact{}
 		clientAttributes := clientContact.Attributes
 		attributes := contact.Attributes
 
@@ -79,9 +83,11 @@ func convertToClient(
 		clientAttributes.NameSuffix = attributes.NameSuffix
 
 		for _, fragment := range contact.Fragments {
-			clientFragment := &contactsClient.ContactFragment{}
+			clientFragment := &contactsClientStructs.ContactFragment{}
 			clientFragment.Text = fragment.Text
-			clientFragment.Type = fragment.Type
+			clientFragmentType := contactsClientStructs.
+				ContactFragmentType(*fragment.Type)
+			clientFragment.Type = &clientFragmentType
 
 			clientContact.Fragments = append(
 				clientContact.Fragments, clientFragment,
