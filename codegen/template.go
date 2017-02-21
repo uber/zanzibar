@@ -121,17 +121,15 @@ func NewTemplate(templatePattern string) (*Template, error) {
 
 // GenerateClientFile generates Go http code for services defined in thrift file.
 // It returns the path of generated client file and struct file or an error.
-func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (*ClientFiles, error) {
-	m, err := NewModuleSpec(thrift, h)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse thrift file:")
-	}
+func (t *Template) GenerateClientFile(
+	m *ModuleSpec, h *PackageHelper,
+) (*ClientFiles, error) {
 	if len(m.Services) == 0 {
 		return nil, nil
 	}
 
 	m.PackageName = m.PackageName + "Client"
-	err = t.execTemplateAndFmt("http_client.tmpl", m.GoClientFilePath, m)
+	err := t.execTemplateAndFmt("http_client.tmpl", m.GoClientFilePath, m)
 	if err != nil {
 		return nil, err
 	}
@@ -150,16 +148,14 @@ func (t *Template) GenerateClientFile(thrift string, h *PackageHelper) (*ClientF
 // GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
-func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (*EndpointFiles, error) {
-	m, err := NewModuleSpec(thrift, h)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse thrift file:")
-	}
+func (t *Template) GenerateEndpointFile(
+	m *ModuleSpec, h *PackageHelper,
+) (*EndpointFiles, error) {
 	if len(m.Services) == 0 {
 		return nil, nil
 	}
 
-	err = t.execTemplateAndFmt(
+	err := t.execTemplateAndFmt(
 		"structs.tmpl", m.GoStructsFilePath, m,
 	)
 	if err != nil {
@@ -173,7 +169,7 @@ func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (*Endpo
 
 	for _, service := range m.Services {
 		for _, method := range service.Methods {
-			dest, err := h.TargetEndpointPath(thrift, service.Name, method.Name)
+			dest, err := h.TargetEndpointPath(m.ThriftFile, service.Name, method.Name)
 			if err != nil {
 				return nil, errors.Wrapf(err,
 					"Could not generate endpoint path, service %s, method %s",
@@ -198,11 +194,9 @@ func (t *Template) GenerateEndpointFile(thrift string, h *PackageHelper) (*Endpo
 // GenerateEndpointTestFile generates Go code for testing an zanzibar endpoint
 // defined in a thrift file. It returns the path of generated test files,
 // or an error.
-func (t *Template) GenerateEndpointTestFile(thrift string, h *PackageHelper) ([]string, error) {
-	m, err := NewModuleSpec(thrift, h)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse thrift file:")
-	}
+func (t *Template) GenerateEndpointTestFile(
+	m *ModuleSpec, h *PackageHelper,
+) ([]string, error) {
 	if len(m.Services) == 0 {
 		return nil, nil
 	}
@@ -210,7 +204,7 @@ func (t *Template) GenerateEndpointTestFile(thrift string, h *PackageHelper) ([]
 	testFiles := make([]string, 0, len(m.Services[0].Methods))
 	for _, service := range m.Services {
 		for _, method := range service.Methods {
-			dest, err := h.TargetEndpointTestPath(thrift, service.Name, method.Name)
+			dest, err := h.TargetEndpointTestPath(m.ThriftFile, service.Name, method.Name)
 			if err != nil {
 				return nil, errors.Wrapf(err,
 					"Could not generate endpoint test path, service %s, method %s",

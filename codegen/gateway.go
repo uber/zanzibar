@@ -132,7 +132,7 @@ func NewGatewaySpec(
 func (gateway *GatewaySpec) GenerateClients() error {
 	for _, module := range gateway.ClientModules {
 		_, err := gateway.Template.GenerateClientFile(
-			module.ThriftFile, gateway.PackageHelper,
+			module, gateway.PackageHelper,
 		)
 		if err != nil {
 			return err
@@ -146,14 +146,14 @@ func (gateway *GatewaySpec) GenerateClients() error {
 func (gateway *GatewaySpec) GenerateEndpoints() error {
 	for _, module := range gateway.EndpointModules {
 		_, err := gateway.Template.GenerateEndpointFile(
-			module.ThriftFile, gateway.PackageHelper,
+			module, gateway.PackageHelper,
 		)
 		if err != nil {
 			return err
 		}
 
 		_, err = gateway.Template.GenerateEndpointTestFile(
-			module.ThriftFile, gateway.PackageHelper,
+			module, gateway.PackageHelper,
 		)
 		if err != nil {
 			return err

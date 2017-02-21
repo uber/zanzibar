@@ -57,14 +57,25 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 	pkgHelper := newPackageHelper(t)
-	clientFiles, err := tmpl.GenerateClientFile(clientThrift, pkgHelper)
+
+	m, err := codegen.NewModuleSpec(clientThrift, pkgHelper)
+	if !assert.NoError(t, err, "failed to create module spec %s", err) {
+		return
+	}
+
+	clientFiles, err := tmpl.GenerateClientFile(m, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate client code %s", err) {
 		return
 	}
 	cmpGoldenFile(t, clientFiles.ClientFile, "./data/clients")
 	cmpGoldenFile(t, clientFiles.StructFile, "./data/clients")
 
-	endpointFiles, err := tmpl.GenerateEndpointFile(endpointThrift, pkgHelper)
+	m, err = codegen.NewModuleSpec(endpointThrift, pkgHelper)
+	if !assert.NoError(t, err, "failed to create module spec %s", err) {
+		return
+	}
+
+	endpointFiles, err := tmpl.GenerateEndpointFile(m, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 		return
 	}
@@ -73,7 +84,12 @@ func TestGenerateBar(t *testing.T) {
 	}
 	cmpGoldenFile(t, endpointFiles.StructFile, "./data/endpoints")
 
-	testFiles, err := tmpl.GenerateEndpointTestFile(endpointThrift, pkgHelper)
+	m, err = codegen.NewModuleSpec(endpointThrift, pkgHelper)
+	if !assert.NoError(t, err, "failed to create module spec %s", err) {
+		return
+	}
+
+	testFiles, err := tmpl.GenerateEndpointTestFile(m, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 		return
 	}
