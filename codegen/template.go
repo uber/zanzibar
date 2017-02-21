@@ -225,6 +225,74 @@ func (t *Template) GenerateEndpointTestFile(
 	return testFiles, nil
 }
 
+// ClientInfoMeta ...
+type ClientInfoMeta struct {
+	FieldName   string
+	PackageName string
+	TypeName    string
+}
+
+// ClientsInitFilesMeta ...
+type ClientsInitFilesMeta struct {
+	IncludedPackages []string
+	ClientInfo       []ClientInfoMeta
+}
+
+// GenerateClientsInitFile generates go code to allocate and initialize
+// all of the generated clients
+func (t *Template) GenerateClientsInitFile(
+	clientsMap map[string]*ModuleSpec, h *PackageHelper,
+) (string, error) {
+	clients := []*ModuleSpec{}
+	for _, v := range clientsMap {
+		clients = append(clients, v)
+	}
+
+	includedPkgs := []string{}
+	for i := 0; i < len(clients); i++ {
+		if len(clients[i].Services) == 0 {
+			continue
+		}
+
+		includedPkgs = append(includedPkgs, clients[i].GoPackage)
+	}
+
+	clientInfo := []ClientInfoMeta{}
+	for i := 0; i < len(clients); i++ {
+		module := clients[i]
+		if len(module.Services) == 0 {
+			continue
+		}
+
+		if len(module.Services) != 1 {
+			return "", errors.Errorf(
+				"Cannot import client with multiple services: %s",
+				module.PackageName,
+			)
+		}
+
+		service := module.Services[0]
+		clientInfo = append(clientInfo, ClientInfoMeta{
+			FieldName:   strings.Title(service.Name),
+			PackageName: module.PackageName,
+			TypeName:    strings.Title(service.Name) + "Client",
+		})
+	}
+
+	meta := &ClientsInitFilesMeta{
+		IncludedPackages: includedPkgs,
+		ClientInfo:       clientInfo,
+	}
+
+	targetFile := h.TargetClientsInitPath()
+	err := t.execTemplateAndFmt("init_clients.tmpl", targetFile, meta)
+	if err != nil {
+		return "", err
+	}
+
+	return targetFile, nil
+}
+
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {

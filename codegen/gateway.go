@@ -139,7 +139,10 @@ func (gateway *GatewaySpec) GenerateClients() error {
 		}
 	}
 
-	return nil
+	_, err := gateway.Template.GenerateClientsInitFile(
+		gateway.ClientModules, gateway.PackageHelper,
+	)
+	return err
 }
 
 // GenerateEndpoints will generate all the endpoints for the gateway

@@ -126,6 +126,11 @@ func (p PackageHelper) TargetClientPath(thrift string) (string, error) {
 	return path.Join(p.targetGenDir, goFile), nil
 }
 
+// TargetClientsInitPath returns where the clients init should go
+func (p PackageHelper) TargetClientsInitPath() string {
+	return path.Join(p.targetGenDir, "clients", "clients.go")
+}
+
 // TargetStructPath returns the path for any structs needed for
 // a generated client based on thrift file.
 func (p PackageHelper) TargetStructPath(thrift string) (string, error) {
