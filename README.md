@@ -17,6 +17,12 @@ make install
 make test
 ```
 
+## Running the benchmarks
+
+```
+for i in `seq 5`; do make bench; done
+```
+
 ## Running the server
 
 First create log dir...
