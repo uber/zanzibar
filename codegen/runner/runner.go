@@ -57,11 +57,11 @@ func main() {
 	gatewaySpec, err := codegen.NewGatewaySpec(
 		configDirName,
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
+		filepath.Join(configDirName, config.MustGetString("typeFileRootDir")),
+		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
 		filepath.Join(
 			configDirName, config.MustGetString("gatewayThriftRootDir"),
 		),
-		filepath.Join(configDirName, config.MustGetString("typeFileRootDir")),
-		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
 		config.MustGetString("clientThriftDir"),
 		config.MustGetString("endpointThriftDir"),
 	)
