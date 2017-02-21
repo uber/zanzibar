@@ -31,6 +31,10 @@ First create log dir...
 sudo mkdir -p /var/log/my-gateway
 sudo chown $USER /var/log/my-gateway
 chmod 755 /var/log/my-gateway
+
+sudo mkdir -p /var/log/example-gateway
+sudo chown $USER /var/log/example-gateway
+chmod 755 /var/log/example-gateway
 ```
 
 
