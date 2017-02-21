@@ -65,7 +65,7 @@ func convertToClient(
 
 	for _, contact := range body.Contacts {
 		clientContact := &contactsClientStructs.Contact{}
-		clientAttributes := clientContact.Attributes
+		clientAttributes := &contactsClientStructs.ContactAttributes{}
 		attributes := contact.Attributes
 
 		clientAttributes.FirstName = attributes.FirstName
@@ -94,6 +94,7 @@ func convertToClient(
 			)
 		}
 
+		clientContact.Attributes = clientAttributes
 		clientBody.Contacts = append(clientBody.Contacts, clientContact)
 	}
 
