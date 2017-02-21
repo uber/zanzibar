@@ -36,6 +36,7 @@ func NewClient(config *zanzibar.StaticConfig) *BarClient {
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
 func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
+	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/arg-not-struct-path"
 
 	rawBody, err := r.MarshalJSON()
@@ -89,6 +90,7 @@ func (c *BarClient) NoRequest(ctx context.Context, h http.Header) (*http.Respons
 // Normal calls "/bar-path" endpoint.
 func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
+	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/bar-path"
 
 	rawBody, err := r.MarshalJSON()
@@ -110,6 +112,7 @@ func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest, h http.Hea
 // TooManyArgs calls "/too-many-args-path" endpoint.
 func (c *BarClient) TooManyArgs(ctx context.Context, r *TooManyArgsHTTPRequest, h http.Header) (*http.Response, error) {
 	// Generate full URL.
+	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/too-many-args-path"
 
 	rawBody, err := r.MarshalJSON()

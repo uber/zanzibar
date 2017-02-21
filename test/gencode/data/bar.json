@@ -19,6 +19,18 @@
 					"HTTPMethod": "POST",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar/arg-not-struct-path",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "arg-not-struct-path",
+							"BodyIdentifier": ""
+						}
+					],
 					"Headers": null,
 					"RequestType": "ArgNotStructHTTPRequest",
 					"ResponseType": "",
@@ -34,6 +46,7 @@
 							"Message": "barException"
 						}
 					],
+					"RequestBoxed": false,
 					"RequestStruct": [
 						{
 							"Type": "string",
@@ -61,6 +74,13 @@
 										"HTTPMethod": "POST",
 										"EndpointName": "bar.baz",
 										"HTTPPath": "/arg-not-struct-path",
+										"PathSegments": [
+											{
+												"Type": "static",
+												"Text": "arg-not-struct-path",
+												"BodyIdentifier": ""
+											}
+										],
 										"Headers": null,
 										"RequestType": "ArgNotStructHTTPRequest",
 										"ResponseType": "",
@@ -76,6 +96,7 @@
 												"Message": "barException"
 											}
 										],
+										"RequestBoxed": false,
 										"RequestStruct": [
 											{
 												"Type": "string",
@@ -95,6 +116,18 @@
 					"HTTPMethod": "GET",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar/missing-arg-path",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "missing-arg-path",
+							"BodyIdentifier": ""
+						}
+					],
 					"Headers": null,
 					"RequestType": "",
 					"ResponseType": "bar.BarResponse",
@@ -110,6 +143,7 @@
 							"Message": "barException"
 						}
 					],
+					"RequestBoxed": false,
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
@@ -131,6 +165,13 @@
 										"HTTPMethod": "GET",
 										"EndpointName": "bar.baz",
 										"HTTPPath": "/missing-arg-path",
+										"PathSegments": [
+											{
+												"Type": "static",
+												"Text": "missing-arg-path",
+												"BodyIdentifier": ""
+											}
+										],
 										"Headers": null,
 										"RequestType": "",
 										"ResponseType": "bar.BarResponse",
@@ -146,6 +187,7 @@
 												"Message": "barException"
 											}
 										],
+										"RequestBoxed": false,
 										"RequestStruct": null,
 										"Downstream": null
 									}
@@ -159,6 +201,18 @@
 					"HTTPMethod": "GET",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar/no-request-path",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "no-request-path",
+							"BodyIdentifier": ""
+						}
+					],
 					"Headers": null,
 					"RequestType": "",
 					"ResponseType": "bar.BarResponse",
@@ -174,6 +228,7 @@
 							"Message": "barException"
 						}
 					],
+					"RequestBoxed": false,
 					"RequestStruct": null,
 					"Downstream": {
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
@@ -195,6 +250,13 @@
 										"HTTPMethod": "GET",
 										"EndpointName": "bar.baz",
 										"HTTPPath": "/no-request-path",
+										"PathSegments": [
+											{
+												"Type": "static",
+												"Text": "no-request-path",
+												"BodyIdentifier": ""
+											}
+										],
 										"Headers": null,
 										"RequestType": "",
 										"ResponseType": "bar.BarResponse",
@@ -210,6 +272,7 @@
 												"Message": "barException"
 											}
 										],
+										"RequestBoxed": false,
 										"RequestStruct": null,
 										"Downstream": null
 									}
@@ -223,6 +286,18 @@
 					"HTTPMethod": "POST",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar/bar-path",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "bar-path",
+							"BodyIdentifier": ""
+						}
+					],
 					"Headers": null,
 					"RequestType": "NormalHTTPRequest",
 					"ResponseType": "bar.BarResponse",
@@ -238,6 +313,7 @@
 							"Message": "barException"
 						}
 					],
+					"RequestBoxed": false,
 					"RequestStruct": [
 						{
 							"Type": "bar.BarRequest",
@@ -265,6 +341,13 @@
 										"HTTPMethod": "POST",
 										"EndpointName": "bar.baz",
 										"HTTPPath": "/bar-path",
+										"PathSegments": [
+											{
+												"Type": "static",
+												"Text": "bar-path",
+												"BodyIdentifier": ""
+											}
+										],
 										"Headers": null,
 										"RequestType": "NormalHTTPRequest",
 										"ResponseType": "bar.BarResponse",
@@ -280,6 +363,7 @@
 												"Message": "barException"
 											}
 										],
+										"RequestBoxed": false,
 										"RequestStruct": [
 											{
 												"Type": "bar.BarRequest",
@@ -299,6 +383,18 @@
 					"HTTPMethod": "POST",
 					"EndpointName": "bar.baz",
 					"HTTPPath": "/bar/too-many-args-path",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "too-many-args-path",
+							"BodyIdentifier": ""
+						}
+					],
 					"Headers": [
 						"x-uuid",
 						"x-token"
@@ -317,6 +413,7 @@
 							"Message": "barException"
 						}
 					],
+					"RequestBoxed": false,
 					"RequestStruct": [
 						{
 							"Type": "bar.BarRequest",
@@ -349,6 +446,13 @@
 										"HTTPMethod": "POST",
 										"EndpointName": "bar.baz",
 										"HTTPPath": "/too-many-args-path",
+										"PathSegments": [
+											{
+												"Type": "static",
+												"Text": "too-many-args-path",
+												"BodyIdentifier": ""
+											}
+										],
 										"Headers": null,
 										"RequestType": "TooManyArgsHTTPRequest",
 										"ResponseType": "bar.BarResponse",
@@ -364,6 +468,7 @@
 												"Message": "barException"
 											}
 										],
+										"RequestBoxed": false,
 										"RequestStruct": [
 											{
 												"Type": "bar.BarRequest",
