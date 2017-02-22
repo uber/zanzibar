@@ -11,7 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	"{{.GatewayPackageName}}/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}

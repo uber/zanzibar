@@ -48,9 +48,10 @@ type ClientFiles struct {
 
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
-	PackageName      string
-	IncludedPackages []string
-	Method           *MethodSpec
+	GatewayPackageName string
+	PackageName        string
+	IncludedPackages   []string
+	Method             *MethodSpec
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -177,9 +178,10 @@ func (t *Template) GenerateEndpointFile(
 					service, method)
 			}
 			meta := &EndpointMeta{
-				PackageName:      m.PackageName,
-				IncludedPackages: m.IncludedPackages,
-				Method:           method,
+				GatewayPackageName: h.GoGatewayPackageName(),
+				PackageName:        m.PackageName,
+				IncludedPackages:   m.IncludedPackages,
+				Method:             method,
 			}
 			err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
 			if err != nil {

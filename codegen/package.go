@@ -84,6 +84,16 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 	), nil
 }
 
+// GoGatewayPackageName returns the name of the gateway package
+func (p PackageHelper) GoGatewayPackageName() string {
+	nsIndex := strings.Index(p.targetGenDir, p.gatewayThriftNamespace)
+
+	return path.Join(
+		p.gatewayThriftNamespace,
+		p.targetGenDir[nsIndex+len(p.gatewayThriftNamespace):],
+	)
+}
+
 // PackageGenPath returns the Go package path for generated code from a thrift file.
 func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
