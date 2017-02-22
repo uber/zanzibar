@@ -35,6 +35,8 @@ type PackageHelper struct {
 	thriftRootDir string
 	// The root directory just for the gateway thrift files.
 	gatewayThriftRootDir string
+	// Namespace under thrift folder
+	gatewayThriftNamespace string
 	// The root directory where all files of go types are generated.
 	typeFileRootDir string
 	// The directory to put the generated service code.
@@ -52,11 +54,17 @@ func NewPackageHelper(
 	if err != nil {
 		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
 	}
+
+	gatewayThriftRootDir = path.Clean(gatewayThriftRootDir)
+	idlIndex := strings.Index(gatewayThriftRootDir, "idl/") + 4
+	gatewayThriftNamespace := gatewayThriftRootDir[idlIndex:]
+
 	return &PackageHelper{
-		thriftRootDir:        path.Clean(thriftRootDir),
-		typeFileRootDir:      typeFileRootDir,
-		gatewayThriftRootDir: path.Clean(gatewayThriftRootDir),
-		targetGenDir:         genDir,
+		thriftRootDir:          path.Clean(thriftRootDir),
+		typeFileRootDir:        typeFileRootDir,
+		gatewayThriftRootDir:   gatewayThriftRootDir,
+		gatewayThriftNamespace: gatewayThriftNamespace,
+		targetGenDir:           genDir,
 	}, nil
 }
 
@@ -70,7 +78,7 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
 	}
 	return path.Join(
-		"github.com/uber/zanzibar",
+		p.gatewayThriftNamespace,
 		p.typeFileRootDir,
 		thrift[idx+len(p.thriftRootDir):len(thrift)-7],
 	), nil
@@ -86,10 +94,12 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	if idx == -1 {
 		return "", errors.Errorf("file %s is not in thrift dir", thrift)
 	}
-	dirUnderZanzibar := p.targetGenDir[strings.Index(p.targetGenDir, "zanzibar"):]
+
+	nsIndex := strings.Index(p.targetGenDir, p.gatewayThriftNamespace)
+
 	return path.Join(
-		"github.com/uber/",
-		dirUnderZanzibar,
+		p.gatewayThriftNamespace,
+		p.targetGenDir[nsIndex+len(p.gatewayThriftNamespace):],
 		filepath.Dir(thrift[idx+len(root):]),
 	), nil
 }
