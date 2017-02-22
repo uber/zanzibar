@@ -10,7 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
