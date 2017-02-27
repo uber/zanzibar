@@ -15,6 +15,10 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+
+	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+
+	clientTypeFoo "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 )
 
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".
@@ -72,9 +76,9 @@ func HandleTooManyArgsRequest(
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
 	clientRequest := barClient.TooManyArgsHTTPRequest{}
 
-	clientRequest.Foo = body.Foo
+	clientRequest.Foo = clientTypeFoo.FooStruct(body.Foo)
 
-	clientRequest.Request = body.Request
+	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
 
 	return &clientRequest
 }

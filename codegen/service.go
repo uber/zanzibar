@@ -39,6 +39,8 @@ type ModuleSpec struct {
 	GoClientFilePath string
 	// Go client structs file path, generated from thrift file.
 	GoStructsFilePath string
+	// Go client types file path, generated from thrift file.
+	GoThriftTypesFilePath string
 	// Generated imports
 	IncludedPackages []string
 	Services         []*ServiceSpec
@@ -114,6 +116,16 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 			}
 		}
 	}
+
+	// Adds imports for thrift types used by downstream services.
+	for _, service := range ms.Services {
+		for _, method := range service.Methods {
+			if d := method.Downstream; d != nil && !ms.isPackageIncluded(d.GoPackage) {
+				ms.IncludedPackages = append(ms.IncludedPackages, method.Downstream.GoThriftTypesFilePath)
+			}
+		}
+	}
+
 	sort.Strings(ms.IncludedPackages)
 	return nil
 }

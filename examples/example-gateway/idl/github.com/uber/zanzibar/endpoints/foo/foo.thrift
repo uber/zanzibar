@@ -9,5 +9,5 @@ struct FooStruct {
     3: optional i16 fooI16
     4: optional double fooDouble
     5: optional bool fooBool
-    6: optional map<string, FooName> fooMap
+    6: optional map<string, string> fooMap
 }

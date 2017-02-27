@@ -58,6 +58,8 @@ type MethodSpec struct {
 	Downstream *ModuleSpec
 	// A map from upstream to downstream field names in the requests.
 	RequestFieldMap map[string]string
+	// A map from upstream to field names to downstream types in the requests.
+	RequestTypeMap map[string]string
 	// A map from downstream to upstream field names in the response.
 	ResponseFieldMap map[string]string
 }
@@ -297,13 +299,26 @@ func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packa
 func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 	ms.RequestFieldMap = map[string]string{}
+	ms.RequestTypeMap = map[string]string{}
 
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
 	for i := 0; i < len(structType); i++ {
 		field := structType[i]
-		// Add type checking and conversion
+		// Add type checking and conversion, custom mapping
 		ms.RequestFieldMap[field.Name] = field.Name
+
+		// Override thrift type names to avoid naming collisions between endpoint
+		// and client types.
+		switch field.Type.(type) {
+		case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
+			*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
+			ms.RequestTypeMap[field.Name] = field.Type.ThriftName()
+		default:
+			thriftPkgNameParts := strings.Split(field.Type.ThriftFile(), "/")
+			thriftPkgName := thriftPkgNameParts[len(thriftPkgNameParts)-2]
+			ms.RequestTypeMap[field.Name] = "clientType" + strings.Title(thriftPkgName) + "." + field.Type.ThriftName()
+		}
 	}
 	return nil
 }

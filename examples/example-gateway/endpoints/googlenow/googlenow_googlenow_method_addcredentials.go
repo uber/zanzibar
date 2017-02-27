@@ -59,7 +59,7 @@ func HandleAddCredentialsRequest(
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {
 	clientRequest := googlenowClient.AddCredentialsHTTPRequest{}
 
-	clientRequest.AuthCode = body.AuthCode
+	clientRequest.AuthCode = string(body.AuthCode)
 
 	return &clientRequest
 }

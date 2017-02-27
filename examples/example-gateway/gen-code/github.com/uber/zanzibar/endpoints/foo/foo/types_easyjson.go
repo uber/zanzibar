@@ -84,23 +84,15 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayGenCodeGit
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.FooMap = make(map[string]*FooName)
+					out.FooMap = make(map[string]string)
 				} else {
 					out.FooMap = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v1 *FooName
-					if in.IsNull() {
-						in.Skip()
-						v1 = nil
-					} else {
-						if v1 == nil {
-							v1 = new(FooName)
-						}
-						(*v1).UnmarshalEasyJSON(in)
-					}
+					var v1 string
+					v1 = string(in.String())
 					(out.FooMap)[key] = v1
 					in.WantComma()
 				}
@@ -191,11 +183,7 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayGenCodeGit
 			v2First = false
 			out.String(string(v2Name))
 			out.RawByte(':')
-			if v2Value == nil {
-				out.RawString("null")
-			} else {
-				(*v2Value).MarshalEasyJSON(out)
-			}
+			out.String(string(v2Value))
 		}
 		out.RawByte('}')
 	}

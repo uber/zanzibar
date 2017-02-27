@@ -80,26 +80,23 @@ func (v *FooName) Equals(rhs *FooName) bool {
 }
 
 type FooStruct struct {
-	FooString string              `json:"fooString"`
-	FooI32    *int32              `json:"fooI32,omitempty"`
-	FooI16    *int16              `json:"fooI16,omitempty"`
-	FooDouble *float64            `json:"fooDouble,omitempty"`
-	FooBool   *bool               `json:"fooBool,omitempty"`
-	FooMap    map[string]*FooName `json:"fooMap"`
+	FooString string            `json:"fooString"`
+	FooI32    *int32            `json:"fooI32,omitempty"`
+	FooI16    *int16            `json:"fooI16,omitempty"`
+	FooDouble *float64          `json:"fooDouble,omitempty"`
+	FooBool   *bool             `json:"fooBool,omitempty"`
+	FooMap    map[string]string `json:"fooMap"`
 }
 
-type _Map_String_FooName_MapItemList map[string]*FooName
+type _Map_String_String_MapItemList map[string]string
 
-func (m _Map_String_FooName_MapItemList) ForEach(f func(wire.MapItem) error) error {
+func (m _Map_String_String_MapItemList) ForEach(f func(wire.MapItem) error) error {
 	for k, v := range m {
-		if v == nil {
-			return fmt.Errorf("invalid [%v]: value is nil", k)
-		}
 		kw, err := wire.NewValueString(k), error(nil)
 		if err != nil {
 			return err
 		}
-		vw, err := v.ToWire()
+		vw, err := wire.NewValueString(v), error(nil)
 		if err != nil {
 			return err
 		}
@@ -111,19 +108,19 @@ func (m _Map_String_FooName_MapItemList) ForEach(f func(wire.MapItem) error) err
 	return nil
 }
 
-func (m _Map_String_FooName_MapItemList) Size() int {
+func (m _Map_String_String_MapItemList) Size() int {
 	return len(m)
 }
 
-func (_Map_String_FooName_MapItemList) KeyType() wire.Type {
+func (_Map_String_String_MapItemList) KeyType() wire.Type {
 	return wire.TBinary
 }
 
-func (_Map_String_FooName_MapItemList) ValueType() wire.Type {
-	return wire.TStruct
+func (_Map_String_String_MapItemList) ValueType() wire.Type {
+	return wire.TBinary
 }
 
-func (_Map_String_FooName_MapItemList) Close() {
+func (_Map_String_String_MapItemList) Close() {
 }
 
 func (v *FooStruct) ToWire() (wire.Value, error) {
@@ -172,7 +169,7 @@ func (v *FooStruct) ToWire() (wire.Value, error) {
 		i++
 	}
 	if v.FooMap != nil {
-		w, err = wire.NewValueMap(_Map_String_FooName_MapItemList(v.FooMap)), error(nil)
+		w, err = wire.NewValueMap(_Map_String_String_MapItemList(v.FooMap)), error(nil)
 		if err != nil {
 			return w, err
 		}
@@ -182,26 +179,20 @@ func (v *FooStruct) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _FooName_Read(w wire.Value) (*FooName, error) {
-	var v FooName
-	err := v.FromWire(w)
-	return &v, err
-}
-
-func _Map_String_FooName_Read(m wire.MapItemList) (map[string]*FooName, error) {
+func _Map_String_String_Read(m wire.MapItemList) (map[string]string, error) {
 	if m.KeyType() != wire.TBinary {
 		return nil, nil
 	}
-	if m.ValueType() != wire.TStruct {
+	if m.ValueType() != wire.TBinary {
 		return nil, nil
 	}
-	o := make(map[string]*FooName, m.Size())
+	o := make(map[string]string, m.Size())
 	err := m.ForEach(func(x wire.MapItem) error {
 		k, err := x.Key.GetString(), error(nil)
 		if err != nil {
 			return err
 		}
-		v, err := _FooName_Read(x.Value)
+		v, err := x.Value.GetString(), error(nil)
 		if err != nil {
 			return err
 		}
@@ -263,7 +254,7 @@ func (v *FooStruct) FromWire(w wire.Value) error {
 			}
 		case 6:
 			if field.Value.Type() == wire.TMap {
-				v.FooMap, err = _Map_String_FooName_Read(field.Value.GetMap())
+				v.FooMap, err = _Map_String_String_Read(field.Value.GetMap())
 				if err != nil {
 					return err
 				}
@@ -343,7 +334,7 @@ func _bool_EqualsPtr(lhs, rhs *bool) bool {
 	return lhs == nil && rhs == nil
 }
 
-func _Map_String_FooName_EqualsHashable(lhs, rhs map[string]*FooName) bool {
+func _Map_String_String_EqualsHashable(lhs, rhs map[string]string) bool {
 	if len(lhs) != len(rhs) {
 		return false
 	}
@@ -352,7 +343,7 @@ func _Map_String_FooName_EqualsHashable(lhs, rhs map[string]*FooName) bool {
 		if !ok {
 			return false
 		}
-		if !lv.Equals(rv) {
+		if !(lv == rv) {
 			return false
 		}
 	}
@@ -375,7 +366,7 @@ func (v *FooStruct) Equals(rhs *FooStruct) bool {
 	if !_bool_EqualsPtr(v.FooBool, rhs.FooBool) {
 		return false
 	}
-	if !((v.FooMap == nil && rhs.FooMap == nil) || (v.FooMap != nil && rhs.FooMap != nil && _Map_String_FooName_EqualsHashable(v.FooMap, rhs.FooMap))) {
+	if !((v.FooMap == nil && rhs.FooMap == nil) || (v.FooMap != nil && rhs.FooMap != nil && _Map_String_String_EqualsHashable(v.FooMap, rhs.FooMap))) {
 		return false
 	}
 	return true

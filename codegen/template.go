@@ -67,6 +67,8 @@ var funcMap = tmpl.FuncMap{
 	"fullTypeName": fullTypeName,
 	"statusCodes":  statusCodes,
 	"camel":        camelCase,
+	"split":        strings.Split,
+	"dec":          decrement,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -103,6 +105,10 @@ func camelCase(src string) string {
 		}
 	}
 	return string(bytes.Join(chunks, nil))
+}
+
+func decrement(num int) int {
+	return num - 1
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.

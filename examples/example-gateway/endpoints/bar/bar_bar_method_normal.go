@@ -15,6 +15,8 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+
+	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -69,7 +71,7 @@ func HandleNormalRequest(
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
 	clientRequest := barClient.NormalHTTPRequest{}
 
-	clientRequest.Request = body.Request
+	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
 
 	return &clientRequest
 }

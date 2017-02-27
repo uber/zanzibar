@@ -56,7 +56,7 @@ func HandleArgNotStructRequest(
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
 	clientRequest := barClient.ArgNotStructHTTPRequest{}
 
-	clientRequest.Request = body.Request
+	clientRequest.Request = string(body.Request)
 
 	return &clientRequest
 }
