@@ -62,6 +62,8 @@ type MethodSpec struct {
 	RequestTypeMap map[string]string
 	// A map from downstream to upstream field names in the response.
 	ResponseFieldMap map[string]string
+	// A map from downstream to field names to upstream types in the response.
+	ResponseTypeMap map[string]string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -323,14 +325,30 @@ func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, package
 	return nil
 }
 
-func (ms *MethodSpec) setResponseFieldMap(resultSpec *compile.ResultSpec, packageHelper *PackageHelper) error {
+func (ms *MethodSpec) setResponseFieldMap(resultSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 	ms.ResponseFieldMap = map[string]string{}
+	ms.ResponseTypeMap = map[string]string{}
 
-	// structType := resultSpec.ReturnType
-	// fieldName := structType.Name
-	// ms.RequestFieldMap[fieldName] = fieldName
+	structType := compile.FieldGroup(resultSpec.ArgsSpec)
 
+	for i := 0; i < len(structType); i++ {
+		field := structType[i]
+		// Add type checking and conversion, custom mapping
+		ms.ResponseFieldMap[field.Name] = field.Name
+
+		// Override thrift type names to avoid naming collisions between endpoint
+		// and client types.
+		switch field.Type.(type) {
+		case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
+			*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
+			ms.ResponseTypeMap[field.Name] = field.Type.ThriftName()
+		default:
+			thriftPkgNameParts := strings.Split(field.Type.ThriftFile(), "/")
+			thriftPkgName := thriftPkgNameParts[len(thriftPkgNameParts)-2]
+			ms.ResponseTypeMap[field.Name] = thriftPkgName + "." + field.Type.ThriftName()
+		}
+	}
 	return nil
 }
 

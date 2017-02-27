@@ -111,7 +111,11 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
 	downstreamResponse := {{.ResponseType}}{}
 	{{ range $key, $value := .ResponseFieldMap }}
-	downstreamResponse.{{title $key }} = body.{{title $value }}{{ end }}
+	{{ range $name, $type := $.Method.ResponseTypeMap }} {{if eq $name $key -}}
+	downstreamResponse.{{title $key }} = {{ $type }}(body.{{title $value }})
+	{{end -}}
+	{{ end }}
+	{{ end }}
 	return &downstreamResponse
 }
 {{end -}}
