@@ -58,6 +58,6 @@ func HandleMissingArgRequest(
 
 func convertMissingArgClientResponse(body *bar.BarResponse) *bar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := bar.BarResponse{}
-	return &downstreamResponse
+	downstreamResponse := &bar.BarResponse{}
+	return downstreamResponse
 }

@@ -74,16 +74,16 @@ func HandleTooManyArgsRequest(
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
-	clientRequest := barClient.TooManyArgsHTTPRequest{}
+	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
 	clientRequest.Foo = clientTypeFoo.FooStruct(body.Foo)
 
 	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
 
-	return &clientRequest
+	return clientRequest
 }
 func convertTooManyArgsClientResponse(body *bar.BarResponse) *bar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := bar.BarResponse{}
-	return &downstreamResponse
+	downstreamResponse := &bar.BarResponse{}
+	return downstreamResponse
 }

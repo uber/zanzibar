@@ -69,6 +69,7 @@ var funcMap = tmpl.FuncMap{
 	"camel":        camelCase,
 	"split":        strings.Split,
 	"dec":          decrement,
+	"basePath":     filepath.Base,
 }
 
 func fullTypeName(typeName, packageName string) string {

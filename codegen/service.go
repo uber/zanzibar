@@ -23,6 +23,8 @@ package codegen
 import (
 	"sort"
 
+	"fmt"
+
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -171,6 +173,7 @@ func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*S
 // NewMethod creates new method specification.
 func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) (*MethodSpec, error) {
 	method := &MethodSpec{}
+	method.CompiledThriftSpec = funcSpec
 	var err error
 	var ok bool
 	method.Name = funcSpec.MethodName()
@@ -183,7 +186,21 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *P
 	if err := method.setDownstream(funcSpec.Annotations[antHTTPDownstream], s.ThriftFile, packageHelper); err != nil {
 		return nil, err
 	}
-	if err := method.setRequestFieldMap(funcSpec, packageHelper); err != nil {
+
+	fmt.Printf("SINDLEARTEST: downstream : %s \n", method.Downstream)
+	fmt.Printf("SINDLEARTEST: downstream methods : %s \n", method.Downstream.Services[0])
+	var downstreamMethod *MethodSpec
+	for _, downstreamMethod := range method.Downstream.Services[0].Methods {
+		if method.Name == downstreamMethod.Name {
+			downstreamMethod = method
+			break
+		}
+	}
+	if downstreamMethod == nil {
+		return nil, errors.Errorf("Failed to map %s to one of the downstream methods: %s  ", method.Name, method.Downstream.Services[0].Methods)
+	}
+	downstreamSpec := downstreamMethod.CompiledThriftSpec
+	if err := method.setRequestFieldMap(funcSpec, downstreamSpec, packageHelper); err != nil {
 		return nil, err
 	}
 	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {

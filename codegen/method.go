@@ -54,6 +54,8 @@ type MethodSpec struct {
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
 	RequestStruct []StructSpec
+	// The triftrw compiled spec, used to extract type information
+	CompiledThriftSpec *compile.FunctionSpec
 	// The downstream service method annotated by 'zanzibar.http.downstream'.
 	Downstream *ModuleSpec
 	// A map from upstream to downstream field names in the requests.
@@ -294,7 +296,7 @@ func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packa
 	return nil
 }
 
-func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
+func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, downstreamSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 	ms.RequestFieldMap = map[string]string{}
 	ms.RequestTypeMap = map[string]string{}
@@ -304,6 +306,18 @@ func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, package
 	for i := 0; i < len(structType); i++ {
 		field := structType[i]
 		// Add type checking and conversion, custom mapping
+		downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
+		var downstreamField *compile.FieldSpec
+		for j := 0; j < len(downstreamStructType); j++ {
+			if downstreamStructType[j].Name == field.Name {
+				downstreamField = downstreamStructType[j]
+				break
+			}
+		}
+
+		if downstreamField == nil {
+			return errors.Errorf("cannot map by name for the field %s to type: %s", field.Name, downstreamSpec)
+		}
 		ms.RequestFieldMap[field.Name] = field.Name
 
 		// Override thrift type names to avoid naming collisions between endpoint
