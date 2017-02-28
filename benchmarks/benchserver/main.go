@@ -41,7 +41,11 @@ func main() {
 	handleContacts := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)
 	}
+	handleGoogleNow := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(202)
+	}
 	backend.HandleFunc("POST", "/foo/contacts", handleContacts)
+	backend.HandleFunc("POST", "/foo/contacts", handleGoogleNow)
 
 	logger.Info("Listening on port & serving")
 
