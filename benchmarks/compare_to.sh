@@ -3,13 +3,13 @@ set -e
 
 if [ "$1" == "" ]; then
     echo "Must pass in another git sha"
-    echo "e.g: ./benchmarks/compare_to.sh master contacts_10B.lua"
+    echo "e.g: ./benchmarks/compare_to.sh master contacts_1K.lua"
     exit 1
 fi
 
 if [ "$2" == "" ]; then
     echo "Must pass in a target lua script to benchmark against"
-    echo "e.g: ./benchmarks/compare_to.sh master contacts_10B.lua"
+    echo "e.g: ./benchmarks/compare_to.sh master contacts_1K.lua"
     exit 1
 fi
 

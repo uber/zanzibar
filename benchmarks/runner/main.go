@@ -141,7 +141,7 @@ func main() {
 	dirName := path.Dir(execFile)
 
 	loadtest := flag.Bool("loadtest", false, "turn on wrk load testing")
-	luaScript := flag.String("script", "contacts_10B.lua", "wrk lua script to run")
+	luaScript := flag.String("script", "contacts_1K.lua", "wrk lua script to run")
 	flag.Parse()
 
 	loadTestScript := path.Join(dirName, "..", *luaScript)
