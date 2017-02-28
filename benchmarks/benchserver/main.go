@@ -45,7 +45,7 @@ func main() {
 		w.WriteHeader(202)
 	}
 	backend.HandleFunc("POST", "/foo/contacts", handleContacts)
-	backend.HandleFunc("POST", "/foo/contacts", handleGoogleNow)
+	backend.HandleFunc("POST", "/googlenow/add-credentials", handleGoogleNow)
 
 	logger.Info("Listening on port & serving")
 
