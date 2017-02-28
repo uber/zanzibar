@@ -3,7 +3,7 @@ set -e
 
 if [ "$1" == "" ]; then
     echo "Must pass in another git sha"
-    echo "e.g: ./benchmarks/compare_to.sh master"
+    echo "e.g: ./benchmarks/compare_to.sh master contacts_10B.lua"
     exit 1
 fi
 
@@ -46,7 +46,7 @@ while [ "$(basename $PWD)" != "zanzibar" ]; do
     cd ..
 done
 
-run $CURRENT_SHA
-run $OTHER_SHA
+run $CURRENT_SHA $2
+run $OTHER_SHA $2
 
 git checkout $CURRENT_SHA
