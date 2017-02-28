@@ -139,17 +139,17 @@ func main() {
 	}
 
 	dirName := path.Dir(execFile)
-	loadTestScript := path.Join(dirName, "..", "contacts_1KB.lua")
 
 	loadtest := flag.Bool("loadtest", false, "turn on wrk load testing")
-	luascript := flag.String("script", loadTestScript, "wrk lua script to run")
+	luaScript := flag.String("script", "contacts_10B.lua", "wrk lua script to run")
 	flag.Parse()
 
+	loadTestScript := path.Join(dirName, "..", *luaScript)
 	benchServerCmd := spawnBenchServer(dirName)
 	gatewayCmd := spawnGateway(dirName)
 
 	if *loadtest {
-		spawnWrkLoadTest(*luascript)
+		spawnWrkLoadTest(loadTestScript)
 		err = gatewayCmd.Process.Kill()
 		if err != nil {
 			panic(err)

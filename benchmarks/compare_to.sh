@@ -7,6 +7,12 @@ if [ "$1" == "" ]; then
     exit 1
 fi
 
+if [ "$2" == "" ]; then
+    echo "Must pass in a target lua script to benchmark against"
+    echo "e.g: ./benchmarks/compare_to.sh master contacts_10B.lua"
+    exit 1
+fi
+
 OTHER_SHA=$1
 CURRENT_SHA=`git rev-parse --abbrev-ref HEAD`
 
@@ -23,6 +29,7 @@ function banner() {
 
 function run() {
     local sha=$1
+    local lua_script=$2
 
     banner "switching branch to $sha"
     git checkout $sha
@@ -31,7 +38,7 @@ function run() {
     make bins
 
     banner "benchmarking $sha"
-    $PWD/benchmarks/runner/runner -loadtest
+    $PWD/benchmarks/runner/runner -loadtest -script=$lua_script
 }
 
 # Go to root dir
