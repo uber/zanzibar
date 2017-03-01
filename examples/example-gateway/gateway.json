@@ -1,4 +1,5 @@
 {
+	"gatewayName": "example-gateway",
 	"thriftRootDir": "./idl",
 	"gatewayThriftRootDir": "./idl/github.com/uber/zanzibar",
 	"typeFileRootDir": "./gen-code",
