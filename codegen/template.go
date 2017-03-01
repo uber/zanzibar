@@ -70,6 +70,7 @@ var funcMap = tmpl.FuncMap{
 	"split":        strings.Split,
 	"dec":          decrement,
 	"basePath":     filepath.Base,
+	"pascal":       pascalCase,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -110,6 +111,19 @@ func camelCase(src string) string {
 
 func decrement(num int) int {
 	return num - 1
+}
+
+func pascalCase(src string) string {
+	byteSrc := []byte(src)
+	chunks := camelingRegex.FindAll(byteSrc, -1)
+	for idx, val := range chunks {
+		if idx > 0 {
+			chunks[idx] = bytes.Title(val)
+		} else {
+			chunks[idx][0] = bytes.ToUpper(val[0:1])[0]
+		}
+	}
+	return string(bytes.Join(chunks, nil))
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.
