@@ -81,9 +81,6 @@ func CreateGateway(
 	if opts.Clients == nil {
 		panic("opts.Clients required")
 	}
-	if opts.MetricsBackend != nil {
-		panic("wtf m8")
-	}
 
 	gateway := &Gateway{
 		IP:          config.MustGetString("ip"),
