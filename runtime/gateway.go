@@ -55,6 +55,7 @@ type Gateway struct {
 	Clients     Clients
 	Logger      zap.Logger
 	MetricScope tally.Scope
+	ServiceName string
 
 	router            *Router
 	loggerFile        *os.File
@@ -80,10 +81,11 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		IP:        config.MustGetString("ip"),
-		Port:      int32(config.MustGetInt("port")),
-		WaitGroup: &sync.WaitGroup{},
-		Clients:   opts.Clients,
+		IP:          config.MustGetString("ip"),
+		Port:        int32(config.MustGetInt("port")),
+		ServiceName: config.MustGetString("serviceName"),
+		WaitGroup:   &sync.WaitGroup{},
+		Clients:     opts.Clients,
 
 		metricsBackend: opts.MetricsBackend,
 	}
