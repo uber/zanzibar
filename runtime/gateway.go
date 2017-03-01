@@ -33,8 +33,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
+	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
 )
+
+const defaultM3MaxQueueSize = 10000
+const defaultM3MaxPacketSize = 1440 // 1440kb in UDP M3MaxPacketSize
+const defaultM3FlushInterval = 500 * time.Millisecond
 
 // Clients interface is a placeholder for the generated clients
 type Clients interface {
@@ -73,12 +78,11 @@ type Gateway struct {
 func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
-	if opts.MetricsBackend == nil {
-		panic("opts.MetricsBackend required")
-	}
-
 	if opts.Clients == nil {
 		panic("opts.Clients required")
+	}
+	if opts.MetricsBackend != nil {
+		panic("wtf m8")
 	}
 
 	gateway := &Gateway{
@@ -192,18 +196,50 @@ func (gateway *Gateway) Wait() {
 }
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
+	metricsType := config.MustGetString("metrics.type")
+
+	var metricsBackend tally.CachedStatsReporter
+	if metricsType == "m3" {
+		if gateway.metricsBackend != nil {
+			panic("expected no metrics backend in gateway.")
+		}
+
+		m3FlushIntervalConfig := config.MustGetInt("metrics.m3.flushInterval")
+		env := config.MustGetString("env")
+
+		commonTags := map[string]string{"env": env}
+		m3Backend, err := metrics.NewM3Backend(
+			config.MustGetString("metrics.m3.hostPort"),
+			config.MustGetString("metrics.tally.service"),
+			commonTags, // default tags
+			false,      // include host
+			defaultM3MaxQueueSize,
+			defaultM3MaxPacketSize,
+			time.Duration(m3FlushIntervalConfig)*time.Millisecond,
+		)
+		if err != nil {
+			return err
+		}
+
+		metricsBackend = m3Backend
+	} else {
+		if gateway.metricsBackend == nil {
+			panic("expected gateway to have MetricsBackend in opts")
+		}
+		metricsBackend = gateway.metricsBackend
+	}
+
 	// TODO: decide what default tags we want...
 	defaultTags := &map[string]string{}
 
 	prefix := config.MustGetString("metrics.tally.service") +
 		".production.all-workers"
-
 	flushIntervalConfig := config.MustGetInt("metrics.tally.flushInterval")
 
 	scope, closer := tally.NewCachedRootScope(
 		prefix,
 		*defaultTags,
-		gateway.metricsBackend,
+		metricsBackend,
 		time.Duration(flushIntervalConfig)*time.Millisecond,
 		tally.DefaultSeparator,
 	)

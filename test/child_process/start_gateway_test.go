@@ -27,19 +27,13 @@ import (
 	"path/filepath"
 	"syscall"
 	"testing"
-	"time"
 
-	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
 	"github.com/uber/zanzibar/runtime"
 )
-
-const defaultM3MaxQueueSize = 10000
-const defaultM3MaxPacketSize = 1440 // 1440kb in UDP M3MaxPacketSize
-const defaultM3FlushInterval = 500 * time.Millisecond
 
 var cachedServer *zanzibar.Gateway
 
@@ -74,7 +68,7 @@ func getProjectDir() string {
 }
 
 func TestStartGateway(t *testing.T) {
-	tempLogger := zap.New(
+	testLogger := zap.New(
 		zap.NewJSONEncoder(),
 		zap.Output(os.Stderr),
 	)
@@ -93,32 +87,11 @@ func TestStartGateway(t *testing.T) {
 
 	clients := clients.CreateClients(config)
 
-	m3FlushIntervalConfig := config.MustGetInt("metrics.m3.flushInterval")
-
-	commonTags := map[string]string{"env": "test"}
-	m3Backend, err := metrics.NewM3Backend(
-		config.MustGetString("metrics.m3.hostPort"),
-		config.MustGetString("metrics.tally.service"),
-		commonTags, // default tags
-		false,      // include host
-		defaultM3MaxQueueSize,
-		defaultM3MaxPacketSize,
-		time.Duration(m3FlushIntervalConfig)*time.Millisecond,
-	)
-	if err != nil {
-		tempLogger.Error("Error initializing m3backend",
-			zap.String("error", err.Error()),
-		)
-		// ?
-		return
-	}
-
 	server, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients:        clients,
-		MetricsBackend: m3Backend,
+		Clients: clients,
 	})
 	if err != nil {
-		tempLogger.Error(
+		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
 			zap.String("error", err.Error()),
 		)
@@ -129,7 +102,7 @@ func TestStartGateway(t *testing.T) {
 	cachedServer = server
 	err = server.Bootstrap(endpoints.Register)
 	if err != nil {
-		tempLogger.Error(
+		testLogger.Error(
 			"Failed to Bootstrap in TestStartGateway()",
 			zap.String("error", err.Error()),
 		)

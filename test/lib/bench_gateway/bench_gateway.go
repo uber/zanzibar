@@ -27,19 +27,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"time"
-
-	"github.com/uber-go/tally/m3"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
-
-const defaultM3MaxQueueSize = 10000
-const defaultM3MaxPacketSize = 1440 // 1440kb in UDP M3MaxPacketSize
-const defaultM3FlushInterval = 500 * time.Millisecond
 
 // BenchGateway for testing
 type BenchGateway struct {
@@ -99,25 +92,8 @@ func CreateGateway(
 
 	clients := clients.CreateClients(config)
 
-	m3FlushIntervalConfig := config.MustGetInt("metrics.m3.flushInterval")
-
-	commonTags := map[string]string{"env": "bench"}
-	m3Backend, err := metrics.NewM3Backend(
-		config.MustGetString("metrics.m3.hostPort"),
-		config.MustGetString("metrics.tally.service"),
-		commonTags, // default tags
-		false,      // include host
-		defaultM3MaxQueueSize,
-		defaultM3MaxPacketSize,
-		time.Duration(m3FlushIntervalConfig)*time.Millisecond,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients:        clients,
-		MetricsBackend: m3Backend,
+		Clients: clients,
 	})
 	if err != nil {
 		return nil, err
