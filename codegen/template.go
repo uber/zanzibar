@@ -117,11 +117,7 @@ func pascalCase(src string) string {
 	byteSrc := []byte(src)
 	chunks := camelingRegex.FindAll(byteSrc, -1)
 	for idx, val := range chunks {
-		if idx > 0 {
-			chunks[idx] = bytes.Title(val)
-		} else {
-			chunks[idx][0] = bytes.ToUpper(val[0:1])[0]
-		}
+		chunks[idx] = bytes.Title(val)
 	}
 	return string(bytes.Join(chunks, nil))
 }
