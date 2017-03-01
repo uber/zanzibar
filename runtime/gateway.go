@@ -222,6 +222,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 		}
 
 		metricsBackend = m3Backend
+		gateway.metricsBackend = m3Backend
 	} else {
 		if gateway.metricsBackend == nil {
 			panic("expected gateway to have MetricsBackend in opts")

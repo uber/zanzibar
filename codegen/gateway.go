@@ -27,15 +27,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func getProjectDir() string {
+func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 
-	return filepath.Dir(filepath.Dir(file))
+	return filepath.Dir(file)
 }
 
-var templateDir = filepath.Join(
-	getProjectDir(), "./codegen/templates/*.tmpl",
-)
+var templateDir = filepath.Join(getDirName(), "templates", "*.tmpl")
 
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {

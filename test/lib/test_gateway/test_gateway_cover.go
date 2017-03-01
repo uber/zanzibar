@@ -28,6 +28,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -97,9 +99,14 @@ func makeRandStr() (string, error) {
 	return randStr, nil
 }
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
+func getZanzibarDirName() string {
+	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
 func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error) {
@@ -107,15 +114,21 @@ func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error
 		return cachedBinaryFile, nil
 	}
 
-	dirName := getProjectDir()
-	mainTestPath := path.Join(dirName, "test", "child_process", "start_gateway_test.go")
+	dirName := getDirName()
+	zanzibarRoot := getZanzibarDirName()
+
+	mainTestPath := path.Join(
+		dirName, "..", "..", "child_process", "start_gateway_test.go",
+	)
 
 	randStr, err := makeRandStr()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not make rand str...")
 	}
 
-	coverProfileFile := path.Join(dirName, "coverage", "cover-"+randStr+".out")
+	coverProfileFile := path.Join(
+		zanzibarRoot, "coverage", "cover-"+randStr+".out",
+	)
 
 	tempConfigDir, err := ioutil.TempDir("", "example-gateway-test-binary")
 	if err != nil {
@@ -125,7 +138,7 @@ func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error
 	binaryFile := path.Join(tempConfigDir, "test-"+randStr+".test")
 
 	novendorCmd := exec.Command("glide", "novendor")
-	novendorCmd.Dir = dirName
+	novendorCmd.Dir = zanzibarRoot
 	outBytes, err := novendorCmd.Output()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run glide novendor command")

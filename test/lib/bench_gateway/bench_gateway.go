@@ -23,9 +23,8 @@ package benchGateway
 import (
 	"io"
 	"net/http"
-	"os"
-	"path"
 	"path/filepath"
+	"runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
@@ -42,9 +41,14 @@ type BenchGateway struct {
 	httpClient *http.Client
 }
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
+func getZanzibarDirName() string {
+	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
 // CreateGateway bootstrap gateway for testing
@@ -80,9 +84,12 @@ func CreateGateway(
 	}
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getProjectDir(), "config", "production.json"),
+		filepath.Join(getZanzibarDirName(), "config", "production.json"),
 		filepath.Join(
-			getProjectDir(),
+			getDirName(),
+			"..",
+			"..",
+			"..",
 			"examples",
 			"example-gateway",
 			"config",

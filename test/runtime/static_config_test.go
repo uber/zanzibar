@@ -22,8 +22,8 @@ package runtime_test
 
 import (
 	"os"
-	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -35,11 +35,12 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-var testDir string = filepath.Join(getProjectDir(), "test", "runtime")
+var testDir string = getDirName()
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
 }
 
 func TestEmptyConfig(t *testing.T) {

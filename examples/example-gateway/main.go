@@ -2,8 +2,8 @@ package main
 
 import (
 	"os"
-	"path"
 	"path/filepath"
+	"runtime"
 
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
@@ -11,18 +11,21 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
+func getZanzibarDirName() string {
+	return filepath.Join(getDirName(), "..", "..")
 }
 
 func main() {
 	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getProjectDir(), "config", "production.json"),
+		filepath.Join(getZanzibarDirName(), "config", "production.json"),
 		filepath.Join(
-			getProjectDir(),
-			"examples",
-			"example-gateway",
+			getDirName(),
 			"config",
 			"production.json",
 		),

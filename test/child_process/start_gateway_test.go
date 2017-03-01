@@ -23,8 +23,8 @@ package startGatewayTest
 import (
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"testing"
 
@@ -62,9 +62,14 @@ func listenOnSignals() {
 	}()
 }
 
-func getProjectDir() string {
-	goPath := os.Getenv("GOPATH")
-	return path.Join(goPath, "src", "github.com", "uber", "zanzibar")
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
+func getZanzibarDirName() string {
+	return filepath.Join(getDirName(), "..", "..")
 }
 
 func TestStartGateway(t *testing.T) {
@@ -74,9 +79,11 @@ func TestStartGateway(t *testing.T) {
 	)
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getProjectDir(), "config", "production.json"),
+		filepath.Join(getZanzibarDirName(), "config", "production.json"),
 		filepath.Join(
-			getProjectDir(),
+			getDirName(),
+			"..",
+			"..",
 			"examples",
 			"example-gateway",
 			"config",
