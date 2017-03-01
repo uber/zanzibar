@@ -59,6 +59,15 @@ func NewPackageHelper(
 	idlIndex := strings.Index(gatewayThriftRootDir, "idl/") + 4
 	gatewayThriftNamespace := gatewayThriftRootDir[idlIndex:]
 
+	genDirIndex := strings.Index(genDir, gatewayThriftNamespace)
+	if genDirIndex == -1 {
+		return nil, errors.Errorf(
+			"gatewayThriftNamespace (%s) must be inside targetGenDir (%s)",
+			gatewayThriftNamespace,
+			genDir,
+		)
+	}
+
 	return &PackageHelper{
 		thriftRootDir:          path.Clean(thriftRootDir),
 		typeFileRootDir:        typeFileRootDir,
