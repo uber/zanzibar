@@ -6,7 +6,7 @@ A build system & runtime component to generate configuration driven gateways. Ed
 
 ```
 mkdir -p $GOPATH/src/github.com/uber
-git clone gitolite@code.uber.internal:uber/github/zanzibar $GOPATH/src/github.com/uber/zanzibar
+git clone gitolite@code.uber.internal:github/uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
 cd $GOPATH/src/github.com/uber/zanzibar
 make install
 ```
