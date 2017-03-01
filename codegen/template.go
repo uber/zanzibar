@@ -332,8 +332,9 @@ func (t *Template) GenerateClientsInitFile(
 
 // MainMeta ...
 type MainMeta struct {
-	IncludedPackages []string
-	GatewayName      string
+	IncludedPackages           []string
+	GatewayName                string
+	RelativeSegmentsToZanzibar []string
 }
 
 // GenerateMainFile will use main.tmpl to write out the main.go file
@@ -341,12 +342,32 @@ type MainMeta struct {
 func (t *Template) GenerateMainFile(
 	g *GatewaySpec, h *PackageHelper,
 ) (string, error) {
+	pkgPath := h.GoGatewayPackageName()
+	zanzibarPath := "github.com/uber/zanzibar"
+	zIndex := strings.Index(pkgPath, zanzibarPath)
+
+	relativeSegmentsToZanzibar := []string{}
+
+	if zIndex == 0 {
+		gatewayPath := pkgPath[len(zanzibarPath)+1:]
+
+		segmentsToRoot := len(strings.Split(gatewayPath, "/"))
+		for i := 0; i < segmentsToRoot; i++ {
+			relativeSegmentsToZanzibar = append(
+				relativeSegmentsToZanzibar, "..",
+			)
+		}
+	} else {
+		panic("cannot generate main.go outside zanzibar yet.")
+	}
+
 	meta := &MainMeta{
 		IncludedPackages: []string{
 			h.GoGatewayPackageName() + "/clients",
 			h.GoGatewayPackageName() + "/endpoints",
 		},
-		GatewayName: g.gatewayName,
+		GatewayName:                g.gatewayName,
+		RelativeSegmentsToZanzibar: relativeSegmentsToZanzibar,
 	}
 
 	targetFile := h.TargetMainPath()

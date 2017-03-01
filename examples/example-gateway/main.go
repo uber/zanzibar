@@ -20,9 +20,12 @@ func getDirName() string {
 	return filepath.Dir(file)
 }
 
-// TODO: buggy
 func getZanzibarDirName() string {
-	return filepath.Join(getDirName(), "..", "..")
+	return filepath.Join(
+		getDirName(),
+		"..",
+		"..",
+	)
 }
 
 func main() {
