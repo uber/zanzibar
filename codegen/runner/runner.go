@@ -64,6 +64,7 @@ func main() {
 		),
 		config.MustGetString("clientThriftDir"),
 		config.MustGetString("endpointThriftDir"),
+		config.MustGetString("gatewayName"),
 	)
 	checkError(
 		err, fmt.Sprintf("can't create gateway spec %#v", gatewaySpec),

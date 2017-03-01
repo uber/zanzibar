@@ -45,6 +45,7 @@ type GatewaySpec struct {
 	ClientModules   map[string]*ModuleSpec
 	EndpointModules map[string]*ModuleSpec
 
+	gatewayName       string
 	configDirName     string
 	clientThriftDir   string
 	endpointThriftDir string
@@ -59,6 +60,7 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientThriftDir string,
 	endpointThriftDir string,
+	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
 		thriftRootDir,
@@ -102,6 +104,7 @@ func NewGatewaySpec(
 		configDirName:     configDirName,
 		clientThriftDir:   clientThriftDir,
 		endpointThriftDir: endpointThriftDir,
+		gatewayName:       gatewayName,
 	}
 
 	for _, thrift := range clientThrifts {
