@@ -330,6 +330,34 @@ func (t *Template) GenerateClientsInitFile(
 	return targetFile, nil
 }
 
+// MainMeta ...
+type MainMeta struct {
+	IncludedPackages []string
+	GatewayName      string
+}
+
+// GenerateMainFile will use main.tmpl to write out the main.go file
+// for a gateway.
+func (t *Template) GenerateMainFile(
+	g *GatewaySpec, h *PackageHelper,
+) (string, error) {
+	meta := &MainMeta{
+		IncludedPackages: []string{
+			h.GoGatewayPackageName() + "/clients",
+			h.GoGatewayPackageName() + "/endpoints",
+		},
+		GatewayName: g.gatewayName,
+	}
+
+	targetFile := h.TargetMainPath()
+	err := t.execTemplateAndFmt("main.tmpl", targetFile, meta)
+	if err != nil {
+		return "", err
+	}
+
+	return targetFile, nil
+}
+
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {

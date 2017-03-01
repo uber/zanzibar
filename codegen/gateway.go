@@ -166,3 +166,11 @@ func (gateway *GatewaySpec) GenerateEndpoints() error {
 
 	return nil
 }
+
+// GenerateMain will generate the main files for the gateway
+func (gateway *GatewaySpec) GenerateMain() error {
+	_, err := gateway.Template.GenerateMainFile(
+		gateway, gateway.PackageHelper,
+	)
+	return err
+}

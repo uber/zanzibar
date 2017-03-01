@@ -160,6 +160,11 @@ func (p PackageHelper) TargetClientsInitPath() string {
 	return path.Join(p.targetGenDir, "clients", "clients.go")
 }
 
+// TargetMainPath returns where the main.go file should go.
+func (p PackageHelper) TargetMainPath() string {
+	return path.Join(p.targetGenDir, "main.go")
+}
+
 // TargetStructPath returns the path for any structs needed for
 // a generated client based on thrift file.
 func (p PackageHelper) TargetStructPath(thrift string) (string, error) {
