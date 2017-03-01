@@ -83,17 +83,6 @@ func main() {
 
 	server.Wait()
 
-	// log.Configure(&cfg.Logging, cfg.Verbose)
-
-	// metrics, err := cfg.Metrics.New()
-	// if err != nil {
-	// 	log.Fatalf("Could not connect to metrics: %v", err)
-	// }
-	// metrics.Counter("boot").Inc(1)
-
-	// closer, err := xjaeger.InitGlobalTracer(cfg.Jaeger, cfg.ServiceName, metrics)
-	// if err != nil {
-	// 	log.Fatalf("Jaeger.InitGlobalTracer failed: %v", err)
-	// }
-	// defer closer.Close()
+	// TODO: emit metrics about startup.
+	// TODO: setup and configure tracing/jeager.
 }
