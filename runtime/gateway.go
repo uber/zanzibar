@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/pprof"
@@ -155,7 +156,22 @@ func (gateway *Gateway) register(register RegisterFn) {
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
 
+	gateway.router.Register("GET", "/health", NewEndpoint(
+		gateway, "health", "health", handleHealthRequest,
+	))
+
 	register(gateway, gateway.router)
+}
+
+func handleHealthRequest(
+	ctx context.Context, inc *IncomingMessage, g *Gateway,
+) {
+	message := "Healthy, from " + g.ServiceName
+	bytes := []byte(
+		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
+	)
+
+	inc.WriteJSONBytes(200, bytes)
 }
 
 // Close the http server
