@@ -1,0 +1,8 @@
+{
+	"clientType": "http",
+	"clientId": "googlenow",
+	"thriftFile": "github.com/uber/zanzibar/clients/googlenow/googlenow.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"clientName": "GoogleNow",
+	"serviceName": "GoogleNow"
+}

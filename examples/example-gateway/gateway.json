@@ -4,6 +4,7 @@
 	"gatewayThriftRootDir": "./idl/github.com/uber/zanzibar",
 	"typeFileRootDir": "./gen-code",
 	"targetGenDir": ".",
-	"clientThriftDir": "./idl/github.com/uber/zanzibar/clients",
+
+	"clientConfig": "./clients-config",
 	"endpointThriftDir": "./idl/github.com/uber/zanzibar/endpoints"
 }
