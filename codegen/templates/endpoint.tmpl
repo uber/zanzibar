@@ -50,6 +50,7 @@ func Handle{{title .Name}}Request(
 	// Handle request body.
 	{{if or (eq .RequestType "") (eq $clientMethodRequestType "") -}}
 	clientResp, err := clients.{{title ($client).Name}}.{{title ($clientMethod).Name}}(ctx, h)
+
 	{{- else -}}
 		rawBody, ok := inc.ReadAll()
 		if !ok {
@@ -69,6 +70,12 @@ func Handle{{title .Name}}Request(
 		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
+	
+    defer func() {
+        if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
+            err = cerr
+        }
+    }()
 
 	// Handle client respnse.
 	if !inc.IsOKResponse(clientResp.StatusCode, {{statusCodes .OKStatusCode}}) {
@@ -91,7 +98,6 @@ func Handle{{title .Name}}Request(
 	}
 	response := convert{{title .Name}}ClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
-	_ = clientResp.Body.Close()
 	{{- end -}}
 }
 

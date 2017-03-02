@@ -36,6 +36,12 @@ func HandleNoRequestRequest(
 		return
 	}
 
+	defer func() {
+		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+
 	// Handle client respnse.
 	if !inc.IsOKResponse(clientResp.StatusCode, []int{200}) {
 		g.Logger.Warn("Unknown response status code",
@@ -54,7 +60,6 @@ func HandleNoRequestRequest(
 	}
 	response := convertNoRequestClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
-	_ = clientResp.Body.Close()
 }
 
 func convertNoRequestClientResponse(body *bar.BarResponse) *bar.BarResponse {

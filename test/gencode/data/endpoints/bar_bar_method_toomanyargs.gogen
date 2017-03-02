@@ -52,6 +52,12 @@ func HandleTooManyArgsRequest(
 		return
 	}
 
+	defer func() {
+		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+
 	// Handle client respnse.
 	if !inc.IsOKResponse(clientResp.StatusCode, []int{200}) {
 		g.Logger.Warn("Unknown response status code",
@@ -70,7 +76,6 @@ func HandleTooManyArgsRequest(
 	}
 	response := convertTooManyArgsClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
-	_ = clientResp.Body.Close()
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

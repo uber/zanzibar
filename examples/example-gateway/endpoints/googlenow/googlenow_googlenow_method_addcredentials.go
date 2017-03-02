@@ -47,6 +47,12 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
+	defer func() {
+		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+
 	// Handle client respnse.
 	if !inc.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
 		g.Logger.Warn("Unknown response status code",
