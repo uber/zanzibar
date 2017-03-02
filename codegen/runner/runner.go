@@ -62,7 +62,7 @@ func main() {
 		filepath.Join(
 			configDirName, config.MustGetString("gatewayThriftRootDir"),
 		),
-		config.MustGetString("clientThriftDir"),
+		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointThriftDir"),
 		config.MustGetString("gatewayName"),
 	)

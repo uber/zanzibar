@@ -103,6 +103,17 @@ func (p PackageHelper) GoGatewayPackageName() string {
 	)
 }
 
+// ThriftIDLPath returns the file path to the thrift idl folder
+func (p PackageHelper) ThriftIDLPath() string {
+	return p.thriftRootDir
+}
+
+// CodeGenTargetPath returns the file path where the code should
+// be generated.
+func (p PackageHelper) CodeGenTargetPath() string {
+	return p.targetGenDir
+}
+
 // PackageGenPath returns the Go package path for generated code from a thrift file.
 func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
@@ -142,17 +153,6 @@ func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
 		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, p.thriftRootDir)
 	}
 	return thrift[idx+len(root):], nil
-}
-
-// TargetClientPath returns the path for generated file for services in a thrift file.
-func (p PackageHelper) TargetClientPath(thrift string) (string, error) {
-	fileName, err := p.getRelativeFileName(thrift)
-	if err != nil {
-		return "", err
-	}
-
-	goFile := strings.Replace(fileName, ".thrift", ".go", -1)
-	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // TargetClientsInitPath returns where the clients init should go

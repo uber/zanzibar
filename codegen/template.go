@@ -143,26 +143,28 @@ func NewTemplate(templatePattern string) (*Template, error) {
 // GenerateClientFile generates Go http code for services defined in thrift file.
 // It returns the path of generated client file and struct file or an error.
 func (t *Template) GenerateClientFile(
-	m *ModuleSpec, h *PackageHelper,
+	c *ClientSpec, h *PackageHelper,
 ) (*ClientFiles, error) {
+	m := c.ModuleSpec
+
 	if len(m.Services) == 0 {
 		return nil, nil
 	}
 
 	m.PackageName = m.PackageName + "Client"
-	err := t.execTemplateAndFmt("http_client.tmpl", m.GoClientFilePath, m)
+	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, m)
 	if err != nil {
 		return nil, err
 	}
 
-	err = t.execTemplateAndFmt("structs.tmpl", m.GoStructsFilePath, m)
+	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, m)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ClientFiles{
-		ClientFile: m.GoClientFilePath,
-		StructFile: m.GoStructsFilePath,
+		ClientFile: c.GoFileName,
+		StructFile: c.GoStructsFileName,
 	}, nil
 }
 
@@ -275,11 +277,11 @@ func (c sortByClientName) Less(i, j int) bool {
 // GenerateClientsInitFile generates go code to allocate and initialize
 // all of the generated clients
 func (t *Template) GenerateClientsInitFile(
-	clientsMap map[string]*ModuleSpec, h *PackageHelper,
+	clientsMap map[string]*ClientSpec, h *PackageHelper,
 ) (string, error) {
 	clients := []*ModuleSpec{}
 	for _, v := range clientsMap {
-		clients = append(clients, v)
+		clients = append(clients, v.ModuleSpec)
 	}
 	sort.Sort(sortByClientName(clients))
 

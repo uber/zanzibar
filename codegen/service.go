@@ -35,8 +35,6 @@ type ModuleSpec struct {
 	GoPackage string
 	// Go package name, generated base on module name.
 	PackageName string
-	// Go client file path, generated from thrift file.
-	GoClientFilePath string
 	// Go client structs file path, generated from thrift file.
 	GoStructsFilePath string
 	// Go client types file path, generated from thrift file.
@@ -62,10 +60,6 @@ func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, er
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
 	}
-	clientPath, err := packageHelper.TargetClientPath(module.ThriftPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate target client path")
-	}
 	targetPackage, err := packageHelper.PackageGenPath(module.ThriftPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate target package path")
@@ -84,7 +78,6 @@ func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, er
 		ThriftFile:        module.ThriftPath,
 		GoPackage:         targetPackage,
 		PackageName:       module.GetName(),
-		GoClientFilePath:  clientPath,
 		GoStructsFilePath: clientStructsPath,
 	}
 	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
