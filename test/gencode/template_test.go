@@ -23,6 +23,7 @@ package codegen_test
 import (
 	"io/ioutil"
 	"os"
+	"path"
 	"testing"
 
 	"path/filepath"
@@ -63,7 +64,21 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	clientFiles, err := tmpl.GenerateClientFile(m, pkgHelper)
+	clientFiles, err := tmpl.GenerateClientFile(&codegen.ClientSpec{
+		ModuleSpec: m,
+		GoFileName: path.Join(
+			pkgHelper.CodeGenTargetPath(),
+			"clients",
+			"bar",
+			"bar.go",
+		),
+		GoStructsFileName: path.Join(
+			pkgHelper.CodeGenTargetPath(),
+			"clients",
+			"bar",
+			"bar_structs.go",
+		),
+	}, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate client code %s", err) {
 		return
 	}

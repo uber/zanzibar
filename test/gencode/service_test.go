@@ -47,8 +47,7 @@ func TestModuleSpec(t *testing.T) {
 func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 	index := strings.Index(m.ThriftFile, "zanzibar")
 	m.ThriftFile = m.ThriftFile[index:]
-	index2 := strings.Index(m.GoClientFilePath, "zanzibar")
-	m.GoClientFilePath = m.GoClientFilePath[index2:]
+
 	index3 := strings.Index(m.GoStructsFilePath, "zanzibar")
 	m.GoStructsFilePath = m.GoStructsFilePath[index3:]
 

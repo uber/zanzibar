@@ -65,19 +65,20 @@ func TestTypePackageName(t *testing.T) {
 
 func TestGenPath(t *testing.T) {
 	h := newPackageHelper(t)
-	p, err := h.TargetClientPath(fooThrift)
+	p, err := h.TargetStructPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
 	abs, _ := filepath.Abs(tmpDir)
 
 	assert.Equal(
 		t,
-		abs+"/clients/foo/foo.go",
+		abs+"/clients/foo/foo_structs.go",
 		p,
 		"wrong generated code path",
 	)
-	_, err = h.TargetClientPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
+
+	_, err = h.TargetStructPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
-	_, err = h.TargetClientPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
+	_, err = h.TargetStructPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
 	assert.Error(t, err, "should return error for not in IDL dir")
 }
 

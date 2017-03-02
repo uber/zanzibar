@@ -2,7 +2,6 @@
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
 	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
-	"GoClientFilePath": "zanzibar/.tmp_gen/endpoints/bar/bar.go",
 	"GoStructsFilePath": "zanzibar/.tmp_gen/endpoints/bar/bar_structs.go",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
@@ -60,7 +59,6 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "zanzibar/.tmp_gen/clients/bar/bar.go",
 						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"GoThriftTypesFilePath": "",
 						"IncludedPackages": [
@@ -162,7 +160,6 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "zanzibar/.tmp_gen/clients/bar/bar.go",
 						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"GoThriftTypesFilePath": "",
 						"IncludedPackages": [
@@ -254,7 +251,6 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "zanzibar/.tmp_gen/clients/bar/bar.go",
 						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"GoThriftTypesFilePath": "",
 						"IncludedPackages": [
@@ -352,7 +348,6 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "zanzibar/.tmp_gen/clients/bar/bar.go",
 						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"GoThriftTypesFilePath": "",
 						"IncludedPackages": [
@@ -468,7 +463,6 @@
 						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
 						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
 						"PackageName": "bar",
-						"GoClientFilePath": "zanzibar/.tmp_gen/clients/bar/bar.go",
 						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
 						"GoThriftTypesFilePath": "",
 						"IncludedPackages": [
