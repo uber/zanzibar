@@ -12,7 +12,7 @@ import (
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
+	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
 )
 
 // HandleArgNotStructRequest handles "/bar/arg-not-struct-path".
