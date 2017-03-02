@@ -54,6 +54,7 @@ func HandleNoRequestRequest(
 	}
 	response := convertNoRequestClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
+	_ = clientResp.Body.Close()
 }
 
 func convertNoRequestClientResponse(body *bar.BarResponse) *bar.BarResponse {

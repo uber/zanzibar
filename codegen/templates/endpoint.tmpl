@@ -91,6 +91,7 @@ func Handle{{title .Name}}Request(
 	}
 	response := convert{{title .Name}}ClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
+	_ = clientResp.Body.Close()
 	{{- end -}}
 }
 

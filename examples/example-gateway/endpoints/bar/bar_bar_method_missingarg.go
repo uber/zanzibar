@@ -54,6 +54,7 @@ func HandleMissingArgRequest(
 	}
 	response := convertMissingArgClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
+	_ = clientResp.Body.Close()
 }
 
 func convertMissingArgClientResponse(body *bar.BarResponse) *bar.BarResponse {

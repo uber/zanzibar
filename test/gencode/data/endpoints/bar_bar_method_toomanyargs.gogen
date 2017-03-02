@@ -70,6 +70,7 @@ func HandleTooManyArgsRequest(
 	}
 	response := convertTooManyArgsClientResponse(&clientRespBody)
 	inc.WriteJSON(clientResp.StatusCode, response)
+	_ = clientResp.Body.Close()
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
