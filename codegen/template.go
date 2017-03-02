@@ -34,6 +34,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const zanzibarPath = "github.com/uber/zanzibar"
+
 // EndpointFiles are group of files generated for an endpoint.
 type EndpointFiles struct {
 	HandlerFiles []string
@@ -339,7 +341,7 @@ func (t *Template) GenerateMainFile(
 	g *GatewaySpec, h *PackageHelper,
 ) (string, error) {
 	pkgPath := h.GoGatewayPackageName()
-	zanzibarPath := "github.com/uber/zanzibar"
+
 	zIndex := strings.Index(pkgPath, zanzibarPath)
 
 	relativeSegmentsToZanzibar := []string{}
@@ -347,8 +349,8 @@ func (t *Template) GenerateMainFile(
 	if zIndex == 0 {
 		gatewayPath := pkgPath[len(zanzibarPath)+1:]
 
-		segmentsToRoot := len(strings.Split(gatewayPath, "/"))
-		for i := 0; i < segmentsToRoot; i++ {
+		numSegmentsToRoot := len(strings.Split(gatewayPath, "/"))
+		for i := 0; i < numSegmentsToRoot; i++ {
 			relativeSegmentsToZanzibar = append(
 				relativeSegmentsToZanzibar, "..",
 			)
