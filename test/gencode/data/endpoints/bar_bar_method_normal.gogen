@@ -13,8 +13,10 @@ import (
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+
+	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -67,10 +69,14 @@ func HandleNormalRequest(
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
-	// TODO: Add request fields mapping here.
-	return &barClient.NormalHTTPRequest{}
+	clientRequest := &barClient.NormalHTTPRequest{}
+
+	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
+
+	return clientRequest
 }
 func convertNormalClientResponse(body *bar.BarResponse) *bar.BarResponse {
 	// TODO: Add response fields mapping here.
-	return &bar.BarResponse{}
+	downstreamResponse := &bar.BarResponse{}
+	return downstreamResponse
 }

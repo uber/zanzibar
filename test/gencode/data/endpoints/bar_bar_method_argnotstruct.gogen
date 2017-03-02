@@ -12,7 +12,7 @@ import (
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/clients/bar"
 )
 
 // HandleArgNotStructRequest handles "/bar/arg-not-struct-path".
@@ -54,6 +54,9 @@ func HandleArgNotStructRequest(
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
-	// TODO: Add request fields mapping here.
-	return &barClient.ArgNotStructHTTPRequest{}
+	clientRequest := &barClient.ArgNotStructHTTPRequest{}
+
+	clientRequest.Request = string(body.Request)
+
+	return clientRequest
 }
