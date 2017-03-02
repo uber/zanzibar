@@ -17,7 +17,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 
 	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-
 	clientTypeFoo "github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 )
 
@@ -77,7 +76,6 @@ func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.
 	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
 	clientRequest.Foo = clientTypeFoo.FooStruct(body.Foo)
-
 	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
 
 	return clientRequest

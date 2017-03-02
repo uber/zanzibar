@@ -19,7 +19,7 @@ import (
 	{{end}}
 
 	{{range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
-	{{$file := basePath $pkg }}
+	{{$file := basePath $pkg -}}
 	clientType{{ title $file }} "{{$pkg}}"
 	{{end}}
 )
@@ -97,8 +97,9 @@ func Handle{{title .Name}}Request(
 {{if and (ne .RequestType "") (ne $clientMethodRequestType "") -}}
 func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientMethodRequestType}} {
 	clientRequest := &{{$clientMethodRequestType}}{}
-	{{ range $key, $value := .RequestFieldMap }}
-	{{ range $name, $type := $.Method.RequestTypeMap }} {{if eq $name $key -}}
+
+	{{ range $key, $value := .RequestFieldMap -}}
+	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
 	clientRequest.{{title $key }} = {{ $type }}(body.{{title $value }})
 	{{ end -}}
 	{{ end -}}
@@ -106,6 +107,7 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 	return clientRequest
 }
 {{end -}}
+
 
 {{if and (ne .ResponseType "") (ne $clientMethodResponseType "") -}}
 func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
