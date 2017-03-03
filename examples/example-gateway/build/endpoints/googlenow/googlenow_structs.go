@@ -3,6 +3,17 @@
 
 package googlenow
 
+import (
+	"path/filepath"
+	"runtime"
+)
+
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 // AddCredentialsHTTPRequest is the http body type for endpoint addCredentials.
 type AddCredentialsHTTPRequest struct {
 	AuthCode string

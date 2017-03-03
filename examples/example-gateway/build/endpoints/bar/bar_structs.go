@@ -4,9 +4,18 @@
 package bar
 
 import (
+	"path/filepath"
+	"runtime"
+
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
 )
+
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
 
 // ArgNotStructHTTPRequest is the http body type for endpoint argNotStruct.
 type ArgNotStructHTTPRequest struct {
