@@ -51,6 +51,12 @@ type ClientFiles struct {
 	StructFile string
 }
 
+// MainFiles are group of files generated for main entry point.
+type MainFiles struct {
+	MainFile     string
+	MainTestFile string
+}
+
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
 	GatewayPackageName string
@@ -529,15 +535,13 @@ type MainMeta struct {
 // for a gateway.
 func (t *Template) GenerateMainFile(
 	g *GatewaySpec, h *PackageHelper,
-) (string, error) {
-	// TODO: copy config/production over.
-
+) (*MainFiles, error) {
 	rootConfigDirName := g.configDirName
 	configDestFileName := h.TargetProductionConfigFilePath()
 	gatewayDirName := filepath.Dir(configDestFileName)
 	deltaPath, err := filepath.Rel(gatewayDirName, rootConfigDirName)
 	if err != nil {
-		return "", errors.Wrap(
+		return nil, errors.Wrap(
 			err, "Could not build relative path when generating main file",
 		)
 	}
@@ -547,7 +551,7 @@ func (t *Template) GenerateMainFile(
 	)
 	bytes, err := ioutil.ReadFile(configSrcFileName)
 	if err != nil {
-		return "", errors.Wrap(
+		return nil, errors.Wrap(
 			err,
 			"Could not read config/production.json while generating main file",
 		)
@@ -555,7 +559,7 @@ func (t *Template) GenerateMainFile(
 
 	err = ioutil.WriteFile(configDestFileName, bytes, 0644)
 	if err != nil {
-		return "", errors.Wrap(
+		return nil, errors.Wrap(
 			err,
 			"Could not write config file while generating main file",
 		)
@@ -570,13 +574,22 @@ func (t *Template) GenerateMainFile(
 		RelativePathToAppConfig: deltaPath,
 	}
 
-	targetFile := h.TargetMainPath()
-	err = t.execTemplateAndFmt("main.tmpl", targetFile, meta)
+	mainFile := h.TargetMainPath()
+	err = t.execTemplateAndFmt("main.tmpl", mainFile, meta)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return targetFile, nil
+	mainTestFile := h.TargetMainTestPath()
+	err = t.execTemplateAndFmt("main_test.tmpl", mainTestFile, meta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MainFiles{
+		MainFile:     mainFile,
+		MainTestFile: mainTestFile,
+	}, nil
 }
 
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {

@@ -30,18 +30,36 @@ func getConfigDirName() string {
 	)
 }
 
-func main() {
-	config := zanzibar.NewStaticConfigOrDie([]string{
+func getConfig() *zanzibar.StaticConfig {
+	return zanzibar.NewStaticConfigOrDie([]string{
 		filepath.Join(getDirName(), "zanzibar-defaults.json"),
 		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
 	}, nil)
+}
 
+func createGateway() (*zanzibar.Gateway, error) {
+	config := getConfig()
 	clients := clients.CreateClients(config)
-
-	server, err := zanzibar.CreateGateway(config, &zanzibar.Options{
+	return zanzibar.CreateGateway(config, &zanzibar.Options{
 		Clients: clients,
 	})
+}
+
+func logAndWait(server *zanzibar.Gateway) {
+	server.Logger.Info("Started {{.GatewayName | pascal}}",
+		zap.String("realAddr", server.RealAddr),
+		zap.Object("config", server.InspectOrDie()),
+	)
+
+	// TODO: handle sigterm gracefully
+	server.Wait()
+	// TODO: emit metrics about startup.
+	// TODO: setup and configure tracing/jeager.
+}
+
+func main() {
+	server, err := createGateway()
 	if err != nil {
 		panic(err)
 	}
@@ -50,16 +68,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	server.Logger.Info("Started {{.GatewayName | pascal}}",
-		zap.String("realAddr", server.RealAddr),
-		zap.Object("config", config.InspectOrDie()),
-	)
-
-	// TODO: handle sigterm gracefully
-
-	server.Wait()
-
-	// TODO: emit metrics about startup.
-	// TODO: setup and configure tracing/jeager.
+	logAndWait(server)
 }

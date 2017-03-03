@@ -63,6 +63,7 @@ type Gateway struct {
 	MetricScope tally.Scope
 	ServiceName string
 
+	config            *StaticConfig
 	router            *Router
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
@@ -89,6 +90,7 @@ func CreateGateway(
 		WaitGroup:   &sync.WaitGroup{},
 		Clients:     opts.Clients,
 
+		config:         config,
 		metricsBackend: opts.MetricsBackend,
 	}
 
@@ -185,6 +187,11 @@ func (gateway *Gateway) Close() {
 	gateway.metricsBackend.Flush()
 	_ = gateway.metricScopeCloser.Close()
 	gateway.server.Close()
+}
+
+// InspectOrDie inspects the config for this gateway
+func (gateway *Gateway) InspectOrDie() map[string]interface{} {
+	return gateway.config.InspectOrDie()
 }
 
 // Wait for gateway to close the server

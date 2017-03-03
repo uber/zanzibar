@@ -184,6 +184,11 @@ func (p PackageHelper) TargetMainPath() string {
 	return path.Join(p.targetGenDir, "main.go")
 }
 
+// TargetMainTestPath returns where the main.go file should go.
+func (p PackageHelper) TargetMainTestPath() string {
+	return path.Join(p.targetGenDir, "main_test.go")
+}
+
 // TargetProductionConfigFilePath returns where config/production.json
 // should be copied to in a gateway.
 func (p PackageHelper) TargetProductionConfigFilePath() string {
