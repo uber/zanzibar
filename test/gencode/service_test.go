@@ -58,6 +58,7 @@ func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 			if method.Downstream != nil {
 				convertThriftPathToRelative(method.Downstream)
 			}
+			method.CompiledThriftSpec = nil
 		}
 	}
 }
