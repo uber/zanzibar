@@ -6,10 +6,19 @@
 package {{.PackageName}}
 
 import (
+	"runtime"
+	"path/filepath"
+
 	{{range $idx, $pkg := .IncludedPackages -}}
 	"{{$pkg}}"
 	{{end}}
 )
+
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
 
 {{range .Services}}
 
