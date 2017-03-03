@@ -134,6 +134,10 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "main.go",
+		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
