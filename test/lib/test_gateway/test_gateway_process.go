@@ -48,9 +48,10 @@ func (err *MalformedStdoutError) Error() string {
 }
 
 func (gateway *ChildProcessGateway) createAndSpawnChild(
+	mainFile string,
 	config map[string]interface{},
 ) error {
-	info, err := createTestBinaryFile(config)
+	info, err := createTestBinaryFile(mainFile, config)
 	if err != nil {
 		return errors.Wrap(err, "Could not create test binary file: ")
 	}

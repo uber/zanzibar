@@ -65,6 +65,7 @@ type ChildProcessGateway struct {
 
 // Options used to create TestGateway
 type Options struct {
+	TestBinary    string
 	LogWhitelist  map[string]bool
 	KnownBackends []string
 	CountMetrics  bool
@@ -94,7 +95,10 @@ func CreateGateway(
 		config = map[string]interface{}{}
 	}
 	if opts == nil {
-		opts = &Options{}
+		panic("opts in test.CreateGateway() mandatory")
+	}
+	if opts.TestBinary == "" {
+		panic("opts.TestBinary in test.CreateGateway() mandatory")
 	}
 
 	backends, err := testBackend.BuildBackends(config, opts.KnownBackends)
@@ -129,7 +133,7 @@ func CreateGateway(
 	config["metrics.m3.flushInterval"] = 10
 	config["logger.output"] = "stdout"
 
-	err = testGateway.createAndSpawnChild(config)
+	err = testGateway.createAndSpawnChild(opts.TestBinary, config)
 	if err != nil {
 		return nil, err
 	}

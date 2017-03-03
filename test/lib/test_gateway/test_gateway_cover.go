@@ -109,17 +109,17 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
-func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error) {
+func createTestBinaryFile(
+	mainPath string,
+	config map[string]interface{},
+) (*testBinaryInfo, error) {
 	if cachedBinaryFile != nil {
 		return cachedBinaryFile, nil
 	}
 
-	dirName := getDirName()
 	zanzibarRoot := getZanzibarDirName()
 
-	mainTestPath := path.Join(
-		dirName, "..", "..", "child_process", "start_gateway_test.go",
-	)
+	mainTestPath := strings.Replace(mainPath, "main.go", "main_test.go", -1)
 
 	randStr, err := makeRandStr()
 	if err != nil {
@@ -166,7 +166,7 @@ func createTestBinaryFile(config map[string]interface{}) (*testBinaryInfo, error
 			"-coverpkg", allPackagesString)
 	}
 
-	args = append(args, mainTestPath)
+	args = append(args, mainTestPath, mainPath)
 
 	testGenCmd := exec.Command("go", args...)
 
