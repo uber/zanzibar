@@ -39,6 +39,13 @@ func getDirName() string {
 }
 
 var templateDir = filepath.Join(getDirName(), "templates", "*.tmpl")
+var mandatoryFields = []string{
+	"clientId",
+	"thriftFile",
+	"thriftFileSha",
+	"clientName",
+	"serviceName",
+}
 
 // ClientSpec holds information about each client in the
 // gateway included its thriftFile and other meta info
@@ -82,14 +89,6 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	mandatoryFields := []string{
-		"clientId",
-		"thriftFile",
-		"thriftFileSha",
-		"clientName",
-		"serviceName",
-	}
-
 	for i := 0; i < len(mandatoryFields); i++ {
 		fieldName := mandatoryFields[i]
 		if clientConfigObj[fieldName] == "" {
@@ -105,7 +104,9 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 
 	mspec, err := NewModuleSpec(thriftFile, h)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(
+			err, "Could not build module spec for thrift %s: ", thriftFile,
+		)
 	}
 
 	baseName := filepath.Base(jsonFile)
