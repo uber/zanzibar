@@ -50,13 +50,25 @@ var mandatoryFields = []string{
 // ClientSpec holds information about each client in the
 // gateway included its thriftFile and other meta info
 type ClientSpec struct {
-	ModuleSpec        *ModuleSpec
-	ClientType        string
-	GoFileName        string
+	// ModuleSpec holds the thrift module information
+	ModuleSpec *ModuleSpec
+	// ClientType, currently only "http" is supported
+	ClientType string
+	// GoFileName, the absolute path where the generate client is
+	GoFileName string
+	// GoStructsFileName, absolute path where any helper structs
+	// are generated for this generated client
 	GoStructsFileName string
-	ThriftFile        string
-	ClientID          string
-	ClientName        string
+	// ThriftFile, absolute path to thrift file
+	ThriftFile string
+	// ClientID, used for logging and metrics, must be lowercase
+	// and use dashes.
+	ClientID string
+	// ClientName, PascalCase name of the client, the generated
+	// `Clients` struct will contain a field of this name
+	ClientName string
+	// ThriftServiceName, if the thrift file has multiple
+	// services then this is the service that describes the client
 	ThriftServiceName string
 }
 
