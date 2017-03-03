@@ -72,6 +72,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 				b.Error("could not write response: " + res.Status)
 				break
 			}
+			res.Body.Close()
 		}
 	})
 
