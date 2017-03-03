@@ -25,6 +25,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -85,11 +87,21 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	b.StartTimer()
 }
 
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 func TestAddCredentials(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "main.go",
+		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

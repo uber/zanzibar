@@ -22,6 +22,8 @@ package gateway_test
 
 import (
 	"io/ioutil"
+	"path/filepath"
+	"runtime"
 	"sort"
 	"testing"
 
@@ -31,8 +33,18 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 func TestHealthCall(t *testing.T) {
-	gateway, err := testGateway.CreateGateway(t, nil, nil)
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		TestBinary: filepath.Join(
+			getDirName(), "..", "examples", "example-gateway", "main.go",
+		),
+	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
 	}
@@ -98,6 +110,9 @@ func (a SortMetricByName) Less(i, j int) bool {
 func TestHealthMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics: true,
+		TestBinary: filepath.Join(
+			getDirName(), "..", "examples", "example-gateway", "main.go",
+		),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return

@@ -24,6 +24,8 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -81,11 +83,21 @@ func BenchmarkSaveContacts(b *testing.B) {
 	b.StartTimer()
 }
 
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 func TestSaveContactsCall(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownBackends: []string{"contacts"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "main.go",
+		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

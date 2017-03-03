@@ -21,6 +21,7 @@
 package gateway_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"encoding/json"
@@ -31,7 +32,11 @@ import (
 )
 
 func TestBootstrapError(t *testing.T) {
-	gateway1, err := testGateway.CreateGateway(t, nil, nil)
+	gateway1, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		TestBinary: filepath.Join(
+			getDirName(), "..", "examples", "example-gateway", "main.go",
+		),
+	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
 	}
@@ -46,6 +51,9 @@ func TestBootstrapError(t *testing.T) {
 		LogWhitelist: map[string]bool{
 			"Error listening on port": true,
 		},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "examples", "example-gateway", "main.go",
+		),
 	})
 
 	assert.Error(t, err, "expected err creating server")
