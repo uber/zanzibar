@@ -1,0 +1,13 @@
+{
+	"endpointType": "http",
+	"endpointId": "bar",
+	"handleId": "noRequest",
+	"thriftFile": "github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "Bar::noRequest",
+	"workflowType": "httpClient",
+	"clientName": "Bar",
+	"clientMethod": "noRequest",
+	"testFixtures": [],
+	"middlewares": []
+}
