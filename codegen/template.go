@@ -172,8 +172,10 @@ func (t *Template) GenerateClientFile(
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
 func (t *Template) GenerateEndpointFile(
-	m *ModuleSpec, h *PackageHelper,
+	e *EndpointSpec, h *PackageHelper,
 ) (*EndpointFiles, error) {
+	m := e.ModuleSpec
+
 	if len(m.Services) == 0 {
 		return nil, nil
 	}
@@ -219,8 +221,10 @@ func (t *Template) GenerateEndpointFile(
 // defined in a thrift file. It returns the path of generated test files,
 // or an error.
 func (t *Template) GenerateEndpointTestFile(
-	m *ModuleSpec, h *PackageHelper,
+	e *EndpointSpec, h *PackageHelper,
 ) ([]string, error) {
+	m := e.ModuleSpec
+
 	if len(m.Services) == 0 {
 		return nil, nil
 	}

@@ -90,7 +90,9 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	endpointFiles, err := tmpl.GenerateEndpointFile(m, pkgHelper)
+	endpointFiles, err := tmpl.GenerateEndpointFile(&codegen.EndpointSpec{
+		ModuleSpec: m,
+	}, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 		return
 	}
@@ -104,7 +106,9 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	testFiles, err := tmpl.GenerateEndpointTestFile(m, pkgHelper)
+	testFiles, err := tmpl.GenerateEndpointTestFile(&codegen.EndpointSpec{
+		ModuleSpec: m,
+	}, pkgHelper)
 	if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 		return
 	}

@@ -308,7 +308,7 @@ type GatewaySpec struct {
 	Template *Template
 
 	ClientModules   map[string]*ClientSpec
-	EndpointModules map[string]*ModuleSpec
+	EndpointModules map[string]*EndpointSpec
 
 	gatewayName       string
 	configDirName     string
@@ -352,7 +352,7 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "Cannot load client json files")
 	}
 
-	_, err = filepath.Glob(filepath.Join(
+	endpointJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
 		endpointConfig,
 		"*.json",
@@ -361,20 +361,11 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "Cannot load endpoint json files")
 	}
 
-	endpointThrifts, err := filepath.Glob(filepath.Join(
-		configDirName,
-		endpointThriftDir,
-		"*/*.thrift",
-	))
-	if err != nil {
-		return nil, errors.Wrap(err, "Cannot load endpoint thrift files")
-	}
-
 	spec := &GatewaySpec{
 		PackageHelper:   packageHelper,
 		Template:        tmpl,
 		ClientModules:   map[string]*ClientSpec{},
-		EndpointModules: map[string]*ModuleSpec{},
+		EndpointModules: map[string]*EndpointSpec{},
 
 		configDirName:     configDirName,
 		clientConfigDir:   clientConfig,
@@ -391,14 +382,14 @@ func NewGatewaySpec(
 		}
 		spec.ClientModules[cspec.ThriftFile] = cspec
 	}
-	for _, thrift := range endpointThrifts {
-		module, err := NewModuleSpec(thrift, packageHelper)
+	for _, json := range endpointJsons {
+		espec, err := NewEndpointSpec(json, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot parse endpoint thrift file %s :", thrift,
+				err, "Cannot parse endpoint json file %s :", json,
 			)
 		}
-		spec.EndpointModules[thrift] = module
+		spec.EndpointModules[espec.ThriftFile] = espec
 	}
 
 	return spec, nil
