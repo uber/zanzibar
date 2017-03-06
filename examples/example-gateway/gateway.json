@@ -6,5 +6,6 @@
 	"targetGenDir": ".",
 
 	"clientConfig": "./clients-config",
+	"endpointConfig": "./endpoints-config",
 	"endpointThriftDir": "./idl/github.com/uber/zanzibar/endpoints"
 }

@@ -39,12 +39,24 @@ func getDirName() string {
 }
 
 var templateDir = filepath.Join(getDirName(), "templates", "*.tmpl")
-var mandatoryFields = []string{
+var mandatoryClientFields = []string{
+	"clientType",
 	"clientId",
 	"thriftFile",
 	"thriftFileSha",
 	"clientName",
 	"serviceName",
+}
+var mandatoryEndpointFields = []string{
+	"endpointType",
+	"endpointId",
+	"handleId",
+	"thriftFile",
+	"thriftFileSha",
+	"thriftMethodName",
+	"workflowType",
+	"testFixtures",
+	"middlewares",
 }
 
 // ClientSpec holds information about each client in the
@@ -73,7 +85,6 @@ type ClientSpec struct {
 }
 
 // NewClientSpec creates a client spec from a json file.
-// This will panic if the json file is malformed.
 func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	_, err := os.Stat(jsonFile)
 	if err != nil {
@@ -101,8 +112,8 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	for i := 0; i < len(mandatoryFields); i++ {
-		fieldName := mandatoryFields[i]
+	for i := 0; i < len(mandatoryClientFields); i++ {
+		fieldName := mandatoryClientFields[i]
 		if clientConfigObj[fieldName] == "" {
 			return nil, errors.Errorf(
 				"client config (%s) must have %s field", jsonFile, fieldName,
@@ -150,6 +161,145 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	}, nil
 }
 
+// EndpointSpec holds information about each endpoint in the
+// gateway including its thriftFile and meta data
+type EndpointSpec struct {
+	// ModuleSpec holds the thrift module info
+	ModuleSpec *ModuleSpec
+
+	// EndpointType, currently only "http"
+	EndpointType string
+	// EndpointID, used in metrics and logging, lower case.
+	EndpointID string
+	// HandleID, used in metrics and logging, lowercase.
+	HandleID string
+	// ThriftFile, the thrift file for this endpoint
+	ThriftFile string
+	// ThriftMethodName, which thrift method to use.
+	ThriftMethodName string
+	// TestFixtures, meta data to generate tests, TODO
+	TestFixtures []int
+	// Middlewares, meta data to add middlewares, TODO
+	Middlewares []int
+
+	// WorkflowType, either "httpClient" or "custom".
+	// A httpClient workflow generates a http client Caller
+	// A custom workflow just imports the custom code
+	WorkflowType string
+	// If "custom" then where to import custom code from
+	WorkflowImportPath string
+	// if "httpClient", which client to call.
+	ClientName string
+	// if "httpClient", which client method to call.
+	ClientMethod string
+}
+
+// NewEndpointSpec creats an endpoint spec from a json file.
+func NewEndpointSpec(
+	jsonFile string, h *PackageHelper,
+) (*EndpointSpec, error) {
+	_, err := os.Stat(jsonFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Could not find file %s: ", jsonFile)
+	}
+
+	bytes, err := ioutil.ReadFile(jsonFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not read json file %s: ", jsonFile,
+		)
+	}
+
+	endpointConfigObj := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &endpointConfigObj)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not parse json file %s: ", jsonFile,
+		)
+	}
+
+	if endpointConfigObj["endpointType"] != "http" {
+		return nil, errors.Errorf(
+			"Cannot support unknown endpointType for endpoint %s", jsonFile,
+		)
+	}
+
+	for i := 0; i < len(mandatoryEndpointFields); i++ {
+		fieldName := mandatoryEndpointFields[i]
+		if endpointConfigObj[fieldName] == "" {
+			return nil, errors.Errorf(
+				"endpoint config (%s) must have %s field", jsonFile, fieldName,
+			)
+		}
+	}
+
+	thriftFile := filepath.Join(
+		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
+	)
+
+	mspec, err := NewModuleSpec(thriftFile, h)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not build module spec for thrift %s: ", thriftFile,
+		)
+	}
+
+	var workflowImportPath string
+	var clientName string
+	var clientMethod string
+
+	workflowType := endpointConfigObj["workflowType"].(string)
+	if workflowType == "httpClient" {
+		iclientName, ok := endpointConfigObj["clientName"]
+		if !ok {
+			return nil, errors.Errorf(
+				"endpoint config (%s) must have clientName field", jsonFile,
+			)
+		}
+		clientName = iclientName.(string)
+
+		iclientMethod, ok := endpointConfigObj["clientMethod"]
+		if !ok {
+			return nil, errors.Errorf(
+				"endpoint config (%s) must have clientMethod field", jsonFile,
+			)
+		}
+		clientMethod = iclientMethod.(string)
+	} else if workflowType == "custom" {
+		iworkflowImportPath, ok := endpointConfigObj["workflowImportPath"]
+		if !ok {
+			return nil, errors.Errorf(
+				"endpoint config (%s) must have workflowImportPath field",
+				jsonFile,
+			)
+		}
+		workflowImportPath = iworkflowImportPath.(string)
+	} else {
+		return nil, errors.Errorf(
+			"Invalid workflowType (%s) for endpoint (%s)",
+			workflowType, jsonFile,
+		)
+	}
+
+	// baseName := filepath.Base(jsonFile)
+	// baseName = baseName[0 : len(baseName)-5]
+
+	return &EndpointSpec{
+		ModuleSpec:         mspec,
+		EndpointType:       endpointConfigObj["endpointType"].(string),
+		EndpointID:         endpointConfigObj["endpointId"].(string),
+		HandleID:           endpointConfigObj["handleId"].(string),
+		ThriftFile:         thriftFile,
+		ThriftMethodName:   endpointConfigObj["thriftMethodName"].(string),
+		TestFixtures:       endpointConfigObj["testFixtures"].([]int),
+		Middlewares:        endpointConfigObj["middlewares"].([]int),
+		WorkflowType:       workflowType,
+		WorkflowImportPath: workflowImportPath,
+		ClientName:         clientName,
+		ClientMethod:       clientMethod,
+	}, nil
+}
+
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {
 	// package helper for gateway
@@ -175,6 +325,7 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointThriftDir string,
+	endpointConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -199,6 +350,15 @@ func NewGatewaySpec(
 	))
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot load client json files")
+	}
+
+	_, err = filepath.Glob(filepath.Join(
+		configDirName,
+		endpointConfig,
+		"*.json",
+	))
+	if err != nil {
+		return nil, errors.Wrap(err, "Cannot load endpoint json files")
 	}
 
 	endpointThrifts, err := filepath.Glob(filepath.Join(
