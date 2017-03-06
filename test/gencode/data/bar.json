@@ -2,10 +2,8 @@
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
 	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
-	"GoStructsFilePath": "zanzibar/.tmp_gen/endpoints/bar/bar_structs.go",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
-		"github.com/uber/zanzibar/.tmp_gen/clients/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
 		"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
 	],
@@ -55,71 +53,11 @@
 						}
 					],
 					"CompiledThriftSpec": null,
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
-						"PackageName": "bar",
-						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"GoThriftTypesFilePath": "",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
-							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
-									{
-										"Name": "argNotStruct",
-										"HTTPMethod": "POST",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/arg-not-struct-path",
-										"PathSegments": [
-											{
-												"Type": "static",
-												"Text": "arg-not-struct-path",
-												"BodyIdentifier": ""
-											}
-										],
-										"Headers": null,
-										"RequestType": "ArgNotStructHTTPRequest",
-										"ResponseType": "",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestBoxed": false,
-										"RequestStruct": [
-											{
-												"Type": "string",
-												"Name": "request",
-												"Annotations": null
-											}
-										],
-										"CompiledThriftSpec": null,
-										"Downstream": null,
-										"RequestFieldMap": null,
-										"RequestTypeMap": null
-									}
-								]
-							}
-						]
-					},
-					"RequestFieldMap": {
-						"request": "request"
-					},
-					"RequestTypeMap": {
-						"request": "string"
-					}
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"RequestFieldMap": null,
+					"RequestTypeMap": null
 				},
 				{
 					"Name": "missingArg",
@@ -156,61 +94,11 @@
 					"RequestBoxed": false,
 					"RequestStruct": null,
 					"CompiledThriftSpec": null,
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
-						"PackageName": "bar",
-						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"GoThriftTypesFilePath": "",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
-							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
-									{
-										"Name": "missingArg",
-										"HTTPMethod": "GET",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/missing-arg-path",
-										"PathSegments": [
-											{
-												"Type": "static",
-												"Text": "missing-arg-path",
-												"BodyIdentifier": ""
-											}
-										],
-										"Headers": null,
-										"RequestType": "",
-										"ResponseType": "bar.BarResponse",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestBoxed": false,
-										"RequestStruct": null,
-										"CompiledThriftSpec": null,
-										"Downstream": null,
-										"RequestFieldMap": null,
-										"RequestTypeMap": null
-									}
-								]
-							}
-						]
-					},
-					"RequestFieldMap": {},
-					"RequestTypeMap": {}
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"RequestFieldMap": null,
+					"RequestTypeMap": null
 				},
 				{
 					"Name": "noRequest",
@@ -247,61 +135,11 @@
 					"RequestBoxed": false,
 					"RequestStruct": null,
 					"CompiledThriftSpec": null,
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
-						"PackageName": "bar",
-						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"GoThriftTypesFilePath": "",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
-							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
-									{
-										"Name": "noRequest",
-										"HTTPMethod": "GET",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/no-request-path",
-										"PathSegments": [
-											{
-												"Type": "static",
-												"Text": "no-request-path",
-												"BodyIdentifier": ""
-											}
-										],
-										"Headers": null,
-										"RequestType": "",
-										"ResponseType": "bar.BarResponse",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestBoxed": false,
-										"RequestStruct": null,
-										"CompiledThriftSpec": null,
-										"Downstream": null,
-										"RequestFieldMap": null,
-										"RequestTypeMap": null
-									}
-								]
-							}
-						]
-					},
-					"RequestFieldMap": {},
-					"RequestTypeMap": {}
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"RequestFieldMap": null,
+					"RequestTypeMap": null
 				},
 				{
 					"Name": "normal",
@@ -344,71 +182,11 @@
 						}
 					],
 					"CompiledThriftSpec": null,
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
-						"PackageName": "bar",
-						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"GoThriftTypesFilePath": "",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
-							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
-									{
-										"Name": "normal",
-										"HTTPMethod": "POST",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/bar-path",
-										"PathSegments": [
-											{
-												"Type": "static",
-												"Text": "bar-path",
-												"BodyIdentifier": ""
-											}
-										],
-										"Headers": null,
-										"RequestType": "NormalHTTPRequest",
-										"ResponseType": "bar.BarResponse",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestBoxed": false,
-										"RequestStruct": [
-											{
-												"Type": "bar.BarRequest",
-												"Name": "request",
-												"Annotations": null
-											}
-										],
-										"CompiledThriftSpec": null,
-										"Downstream": null,
-										"RequestFieldMap": null,
-										"RequestTypeMap": null
-									}
-								]
-							}
-						]
-					},
-					"RequestFieldMap": {
-						"request": "request"
-					},
-					"RequestTypeMap": {
-						"request": "clientTypeBar.BarRequest"
-					}
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"RequestFieldMap": null,
+					"RequestTypeMap": null
 				},
 				{
 					"Name": "tooManyArgs",
@@ -459,80 +237,760 @@
 						}
 					],
 					"CompiledThriftSpec": null,
-					"Downstream": {
-						"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-						"GoPackage": "github.com/uber/zanzibar/.tmp_gen/clients/bar",
-						"PackageName": "bar",
-						"GoStructsFilePath": "zanzibar/.tmp_gen/clients/bar/bar_structs.go",
-						"GoThriftTypesFilePath": "",
-						"IncludedPackages": [
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/bar/bar",
-							"github.com/uber/zanzibar/examples/example-gateway/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-						],
-						"Services": [
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"RequestFieldMap": null,
+					"RequestTypeMap": null
+				}
+			],
+			"CompileSpec": {
+				"linkOnce": true,
+				"Name": "Bar",
+				"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+				"Parent": null,
+				"Functions": {
+					"argNotStruct": {
+						"linkOnce": true,
+						"Name": "argNotStruct",
+						"ArgsSpec": [
 							{
-								"Name": "Bar",
-								"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift",
-								"Methods": [
+								"ID": 1,
+								"Name": "request",
+								"Type": {
+									"Annotations": null
+								},
+								"Required": true,
+								"Default": null,
+								"Annotations": null
+							}
+						],
+						"ResultSpec": {
+							"ReturnType": null,
+							"Exceptions": [
+								{
+									"ID": 1,
+									"Name": "barException",
+									"Type": {
+										"linkOnce": true,
+										"Name": "BarException",
+										"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+										"Type": 3,
+										"Fields": [
+											{
+												"ID": 1,
+												"Name": "stringField",
+												"Type": {
+													"Annotations": null
+												},
+												"Required": true,
+												"Default": null,
+												"Annotations": {
+													"zanzibar.http.ref": "headers.another-header-field"
+												}
+											}
+										],
+										"Annotations": null
+									},
+									"Required": false,
+									"Default": null,
+									"Annotations": {
+										"zanzibar.http.status": "403"
+									}
+								}
+							]
+						},
+						"OneWay": false,
+						"Annotations": {
+							"zanzibar.handler": "bar.baz",
+							"zanzibar.http.method": "POST",
+							"zanzibar.http.path": "/bar/arg-not-struct-path",
+							"zanzibar.http.req.def.boxed": "false",
+							"zanzibar.http.status": "200",
+							"zanzibar.meta": "SomeMeta"
+						}
+					},
+					"missingArg": {
+						"linkOnce": true,
+						"Name": "missingArg",
+						"ArgsSpec": [],
+						"ResultSpec": {
+							"ReturnType": {
+								"linkOnce": true,
+								"Name": "BarResponse",
+								"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+								"Type": 1,
+								"Fields": [
 									{
-										"Name": "tooManyArgs",
-										"HTTPMethod": "POST",
-										"EndpointName": "bar.baz",
-										"HTTPPath": "/too-many-args-path",
-										"PathSegments": [
-											{
-												"Type": "static",
-												"Text": "too-many-args-path",
-												"BodyIdentifier": ""
-											}
-										],
-										"Headers": null,
-										"RequestType": "TooManyArgsHTTPRequest",
-										"ResponseType": "bar.BarResponse",
-										"OKStatusCode": [
-											{
-												"Code": 200,
-												"Message": ""
-											}
-										],
-										"ExceptionStatusCode": [
-											{
-												"Code": 403,
-												"Message": "barException"
-											}
-										],
-										"RequestBoxed": false,
-										"RequestStruct": [
-											{
-												"Type": "bar.BarRequest",
-												"Name": "request",
+										"ID": 1,
+										"Name": "stringField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "headers.some-header-field",
+											"zanzibar.validation.type": "object,number"
+										}
+									},
+									{
+										"ID": 2,
+										"Name": "intWithRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 3,
+										"Name": "intWithoutRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "mapIntWithRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
 												"Annotations": null
 											},
-											{
-												"Type": "foo.FooStruct",
-												"Name": "foo",
+											"ValueSpec": {
 												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 5,
+										"Name": "mapIntWithoutRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									}
+								],
+								"Annotations": null
+							},
+							"Exceptions": [
+								{
+									"ID": 1,
+									"Name": "barException",
+									"Type": {
+										"linkOnce": true,
+										"Name": "BarException",
+										"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+										"Type": 3,
+										"Fields": [
+											{
+												"ID": 1,
+												"Name": "stringField",
+												"Type": {
+													"Annotations": null
+												},
+												"Required": true,
+												"Default": null,
+												"Annotations": {
+													"zanzibar.http.ref": "headers.another-header-field"
+												}
 											}
 										],
-										"CompiledThriftSpec": null,
-										"Downstream": null,
-										"RequestFieldMap": null,
-										"RequestTypeMap": null
+										"Annotations": null
+									},
+									"Required": false,
+									"Default": null,
+									"Annotations": {
+										"zanzibar.http.status": "403"
 									}
-								]
+								}
+							]
+						},
+						"OneWay": false,
+						"Annotations": {
+							"zanzibar.handler": "bar.baz",
+							"zanzibar.http.method": "GET",
+							"zanzibar.http.path": "/bar/missing-arg-path",
+							"zanzibar.http.req.def.boxed": "true",
+							"zanzibar.http.status": "200",
+							"zanzibar.meta": "SomeMeta"
+						}
+					},
+					"noRequest": {
+						"linkOnce": true,
+						"Name": "noRequest",
+						"ArgsSpec": [],
+						"ResultSpec": {
+							"ReturnType": {
+								"linkOnce": true,
+								"Name": "BarResponse",
+								"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+								"Type": 1,
+								"Fields": [
+									{
+										"ID": 1,
+										"Name": "stringField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "headers.some-header-field",
+											"zanzibar.validation.type": "object,number"
+										}
+									},
+									{
+										"ID": 2,
+										"Name": "intWithRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 3,
+										"Name": "intWithoutRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "mapIntWithRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 5,
+										"Name": "mapIntWithoutRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									}
+								],
+								"Annotations": null
+							},
+							"Exceptions": [
+								{
+									"ID": 1,
+									"Name": "barException",
+									"Type": {
+										"linkOnce": true,
+										"Name": "BarException",
+										"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+										"Type": 3,
+										"Fields": [
+											{
+												"ID": 1,
+												"Name": "stringField",
+												"Type": {
+													"Annotations": null
+												},
+												"Required": true,
+												"Default": null,
+												"Annotations": {
+													"zanzibar.http.ref": "headers.another-header-field"
+												}
+											}
+										],
+										"Annotations": null
+									},
+									"Required": false,
+									"Default": null,
+									"Annotations": {
+										"zanzibar.http.status": "403"
+									}
+								}
+							]
+						},
+						"OneWay": false,
+						"Annotations": {
+							"zanzibar.handler": "bar.baz",
+							"zanzibar.http.method": "GET",
+							"zanzibar.http.path": "/bar/no-request-path",
+							"zanzibar.http.req.def.boxed": "false",
+							"zanzibar.http.status": "200",
+							"zanzibar.meta": "SomeMeta"
+						}
+					},
+					"normal": {
+						"linkOnce": true,
+						"Name": "normal",
+						"ArgsSpec": [
+							{
+								"ID": 1,
+								"Name": "request",
+								"Type": {
+									"linkOnce": true,
+									"Name": "BarRequest",
+									"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+									"Type": 1,
+									"Fields": [
+										{
+											"ID": 1,
+											"Name": "stringField",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": true,
+											"Default": null,
+											"Annotations": {
+												"zanzibar.http.ref": "params.someParamsField"
+											}
+										},
+										{
+											"ID": 2,
+											"Name": "boolField",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": true,
+											"Default": null,
+											"Annotations": {
+												"zanzibar.http.ref": "query.some-query-field"
+											}
+										}
+									],
+									"Annotations": null
+								},
+								"Required": true,
+								"Default": null,
+								"Annotations": null
 							}
-						]
+						],
+						"ResultSpec": {
+							"ReturnType": {
+								"linkOnce": true,
+								"Name": "BarResponse",
+								"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+								"Type": 1,
+								"Fields": [
+									{
+										"ID": 1,
+										"Name": "stringField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "headers.some-header-field",
+											"zanzibar.validation.type": "object,number"
+										}
+									},
+									{
+										"ID": 2,
+										"Name": "intWithRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 3,
+										"Name": "intWithoutRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "mapIntWithRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 5,
+										"Name": "mapIntWithoutRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									}
+								],
+								"Annotations": null
+							},
+							"Exceptions": [
+								{
+									"ID": 1,
+									"Name": "barException",
+									"Type": {
+										"linkOnce": true,
+										"Name": "BarException",
+										"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+										"Type": 3,
+										"Fields": [
+											{
+												"ID": 1,
+												"Name": "stringField",
+												"Type": {
+													"Annotations": null
+												},
+												"Required": true,
+												"Default": null,
+												"Annotations": {
+													"zanzibar.http.ref": "headers.another-header-field"
+												}
+											}
+										],
+										"Annotations": null
+									},
+									"Required": false,
+									"Default": null,
+									"Annotations": {
+										"zanzibar.http.status": "403"
+									}
+								}
+							]
+						},
+						"OneWay": false,
+						"Annotations": {
+							"zanzibar.handler": "bar.baz",
+							"zanzibar.http.method": "POST",
+							"zanzibar.http.path": "/bar/bar-path",
+							"zanzibar.http.req.def.boxed": "true",
+							"zanzibar.http.status": "200",
+							"zanzibar.meta": "SomeMeta"
+						}
 					},
-					"RequestFieldMap": {
-						"foo": "foo",
-						"request": "request"
-					},
-					"RequestTypeMap": {
-						"foo": "clientTypeFoo.FooStruct",
-						"request": "clientTypeBar.BarRequest"
+					"tooManyArgs": {
+						"linkOnce": true,
+						"Name": "tooManyArgs",
+						"ArgsSpec": [
+							{
+								"ID": 1,
+								"Name": "request",
+								"Type": {
+									"linkOnce": true,
+									"Name": "BarRequest",
+									"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+									"Type": 1,
+									"Fields": [
+										{
+											"ID": 1,
+											"Name": "stringField",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": true,
+											"Default": null,
+											"Annotations": {
+												"zanzibar.http.ref": "params.someParamsField"
+											}
+										},
+										{
+											"ID": 2,
+											"Name": "boolField",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": true,
+											"Default": null,
+											"Annotations": {
+												"zanzibar.http.ref": "query.some-query-field"
+											}
+										}
+									],
+									"Annotations": null
+								},
+								"Required": true,
+								"Default": null,
+								"Annotations": null
+							},
+							{
+								"ID": 2,
+								"Name": "foo",
+								"Type": {
+									"linkOnce": true,
+									"Name": "FooStruct",
+									"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/foo/foo.thrift",
+									"Type": 1,
+									"Fields": [
+										{
+											"ID": 1,
+											"Name": "fooString",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": true,
+											"Default": null,
+											"Annotations": null
+										},
+										{
+											"ID": 2,
+											"Name": "fooI32",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": false,
+											"Default": null,
+											"Annotations": null
+										},
+										{
+											"ID": 3,
+											"Name": "fooI16",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": false,
+											"Default": null,
+											"Annotations": null
+										},
+										{
+											"ID": 4,
+											"Name": "fooDouble",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": false,
+											"Default": null,
+											"Annotations": null
+										},
+										{
+											"ID": 5,
+											"Name": "fooBool",
+											"Type": {
+												"Annotations": null
+											},
+											"Required": false,
+											"Default": null,
+											"Annotations": null
+										},
+										{
+											"ID": 6,
+											"Name": "fooMap",
+											"Type": {
+												"linkOnce": true,
+												"KeySpec": {
+													"Annotations": null
+												},
+												"ValueSpec": {
+													"Annotations": null
+												},
+												"Annotations": null
+											},
+											"Required": false,
+											"Default": null,
+											"Annotations": null
+										}
+									],
+									"Annotations": null
+								},
+								"Required": false,
+								"Default": null,
+								"Annotations": null
+							}
+						],
+						"ResultSpec": {
+							"ReturnType": {
+								"linkOnce": true,
+								"Name": "BarResponse",
+								"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+								"Type": 1,
+								"Fields": [
+									{
+										"ID": 1,
+										"Name": "stringField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "headers.some-header-field",
+											"zanzibar.validation.type": "object,number"
+										}
+									},
+									{
+										"ID": 2,
+										"Name": "intWithRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 3,
+										"Name": "intWithoutRange",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "mapIntWithRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": null
+									},
+									{
+										"ID": 5,
+										"Name": "mapIntWithoutRange",
+										"Type": {
+											"linkOnce": true,
+											"KeySpec": {
+												"Annotations": null
+											},
+											"ValueSpec": {
+												"Annotations": null
+											},
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.ignore.integer.range": "true"
+										}
+									}
+								],
+								"Annotations": null
+							},
+							"Exceptions": [
+								{
+									"ID": 1,
+									"Name": "barException",
+									"Type": {
+										"linkOnce": true,
+										"Name": "BarException",
+										"File": "/home/raynos/gocode/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+										"Type": 3,
+										"Fields": [
+											{
+												"ID": 1,
+												"Name": "stringField",
+												"Type": {
+													"Annotations": null
+												},
+												"Required": true,
+												"Default": null,
+												"Annotations": {
+													"zanzibar.http.ref": "headers.another-header-field"
+												}
+											}
+										],
+										"Annotations": null
+									},
+									"Required": false,
+									"Default": null,
+									"Annotations": {
+										"zanzibar.http.status": "403"
+									}
+								}
+							]
+						},
+						"OneWay": false,
+						"Annotations": {
+							"zanzibar.handler": "bar.baz",
+							"zanzibar.http.headers": "x-uuid,x-token",
+							"zanzibar.http.method": "POST",
+							"zanzibar.http.path": "/bar/too-many-args-path",
+							"zanzibar.http.req.def.boxed": "true",
+							"zanzibar.http.status": "200",
+							"zanzibar.meta": "SomeMeta"
+						}
 					}
-				}
-			]
+				},
+				"Annotations": null
+			}
 		}
 	]
 }

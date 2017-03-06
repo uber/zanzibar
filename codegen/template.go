@@ -427,7 +427,7 @@ func (t *Template) GenerateMainFile(
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open file: ", err)
+		return errors.Wrapf(err, "failed to open file: %s", err)
 	}
 	if err := t.template.ExecuteTemplate(file, templName, data); err != nil {
 		return errors.Wrapf(err, "failed to execute template files for file %s", file)

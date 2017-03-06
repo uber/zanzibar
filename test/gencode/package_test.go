@@ -21,7 +21,6 @@
 package codegen_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,25 +60,6 @@ func TestTypePackageName(t *testing.T) {
 	assert.Equal(t, "foo", packageName, "wrong package name")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.txt")
 	assert.Error(t, err, "should return error for not a thrift file")
-}
-
-func TestGenPath(t *testing.T) {
-	h := newPackageHelper(t)
-	p, err := h.TargetStructPath(fooThrift)
-	assert.Nil(t, err, "should not return error")
-	abs, _ := filepath.Abs(tmpDir)
-
-	assert.Equal(
-		t,
-		abs+"/clients/foo/foo_structs.go",
-		p,
-		"wrong generated code path",
-	)
-
-	_, err = h.TargetStructPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.go")
-	assert.Error(t, err, "should return error for not a thrift file")
-	_, err = h.TargetStructPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/zanzibar/clients/foo/foo.thrift")
-	assert.Error(t, err, "should return error for not in IDL dir")
 }
 
 func TestPackageGenPath(t *testing.T) {

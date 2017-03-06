@@ -48,9 +48,6 @@ func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 	index := strings.Index(m.ThriftFile, "zanzibar")
 	m.ThriftFile = m.ThriftFile[index:]
 
-	index3 := strings.Index(m.GoStructsFilePath, "zanzibar")
-	m.GoStructsFilePath = m.GoStructsFilePath[index3:]
-
 	for _, service := range m.Services {
 		service.ThriftFile = service.ThriftFile[index:]
 		for _, method := range service.Methods {
