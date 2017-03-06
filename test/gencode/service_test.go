@@ -49,6 +49,7 @@ func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 	m.ThriftFile = m.ThriftFile[index:]
 
 	for _, service := range m.Services {
+		service.CompileSpec = nil
 		service.ThriftFile = service.ThriftFile[index:]
 		for _, method := range service.Methods {
 			if method.Downstream != nil {
