@@ -6,5 +6,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Contacts::saveContacts",
     "workflowType": "custom",
-    "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+    "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts",
+	"testFixtures": [],
+	"middlewares": []
 }

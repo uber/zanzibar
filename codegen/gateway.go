@@ -177,10 +177,12 @@ type EndpointSpec struct {
 	ThriftFile string
 	// ThriftMethodName, which thrift method to use.
 	ThriftMethodName string
-	// TestFixtures, meta data to generate tests, TODO
-	TestFixtures []int
-	// Middlewares, meta data to add middlewares, TODO
-	Middlewares []int
+	// TestFixtures, meta data to generate tests,
+	// TODO figure out struct type
+	TestFixtures []interface{}
+	// Middlewares, meta data to add middlewares,
+	// TODO figure out struct type
+	Middlewares []interface{}
 
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
@@ -291,8 +293,8 @@ func NewEndpointSpec(
 		HandleID:           endpointConfigObj["handleId"].(string),
 		ThriftFile:         thriftFile,
 		ThriftMethodName:   endpointConfigObj["thriftMethodName"].(string),
-		TestFixtures:       endpointConfigObj["testFixtures"].([]int),
-		Middlewares:        endpointConfigObj["middlewares"].([]int),
+		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
+		Middlewares:        endpointConfigObj["middlewares"].([]interface{}),
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,
@@ -355,6 +357,7 @@ func NewGatewaySpec(
 	endpointJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
 		endpointConfig,
+		"*",
 		"*.json",
 	))
 	if err != nil {
