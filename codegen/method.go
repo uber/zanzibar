@@ -54,7 +54,7 @@ type MethodSpec struct {
 	RequestStruct []StructSpec
 	// The triftrw compiled spec, used to extract type information
 	CompiledThriftSpec *compile.FunctionSpec
-	// The downstream service method annotated by 'zanzibar.http.downstream'.
+	// The downstream service method set by endpoint config
 	Downstream *ModuleSpec
 	// the downstream service name
 	DownstreamService string
@@ -86,7 +86,6 @@ const (
 	antHTTPReqDefBoxed = "zanzibar.http.req.def"
 	antHTTPHeaders     = "zanzibar.http.headers"
 	antHTTPRef         = "zanzibar.http.ref"
-	antHTTPDownstream  = "zanzibar.http.downstream"
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
 )
