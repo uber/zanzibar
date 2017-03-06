@@ -65,6 +65,8 @@ var mandatoryEndpointFields = []string{
 type ClientSpec struct {
 	// ModuleSpec holds the thrift module information
 	ModuleSpec *ModuleSpec
+	// JSONFile for this spec
+	JSONFile string
 	// ClientType, currently only "http" is supported
 	ClientType string
 	// GoFileName, the absolute path where the generate client is
@@ -152,6 +154,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 
 	return &ClientSpec{
 		ModuleSpec:        mspec,
+		JSONFile:          jsonFile,
 		ClientType:        clientConfigObj["clientType"],
 		GoFileName:        goFileName,
 		GoStructsFileName: goStructsFileName,
@@ -167,6 +170,8 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 type EndpointSpec struct {
 	// ModuleSpec holds the thrift module info
 	ModuleSpec *ModuleSpec
+	// JSONFile for this endpoint spec
+	JSONFile string
 	// GoStructsFileName is where structs are generated
 	GoStructsFileName string
 	// GoFolderName is the folder where all the endpoints
@@ -183,6 +188,8 @@ type EndpointSpec struct {
 	ThriftFile string
 	// ThriftMethodName, which thrift method to use.
 	ThriftMethodName string
+	// ThriftServiceName, which thrift service to use.
+	ThriftServiceName string
 	// TestFixtures, meta data to generate tests,
 	// TODO figure out struct type
 	TestFixtures []interface{}
@@ -290,8 +297,6 @@ func NewEndpointSpec(
 	}
 
 	dirName := filepath.Base(filepath.Dir(jsonFile))
-	baseName := filepath.Base(jsonFile)
-	baseName = baseName[0 : len(baseName)-5]
 
 	goFolderName := filepath.Join(
 		h.CodeGenTargetPath(),
@@ -306,15 +311,26 @@ func NewEndpointSpec(
 		dirName+"_structs.go",
 	)
 
+	thriftInfo := endpointConfigObj["thriftMethodName"].(string)
+	parts := strings.Split(thriftInfo, "::")
+	if len(parts) != 2 {
+		return nil, errors.Errorf(
+			"Cannot read thriftMethodName (%s) for endpoint json file %s : ",
+			thriftInfo, jsonFile,
+		)
+	}
+
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
+		JSONFile:           jsonFile,
 		GoStructsFileName:  goStructsFileName,
 		GoFolderName:       goFolderName,
 		EndpointType:       endpointConfigObj["endpointType"].(string),
 		EndpointID:         endpointConfigObj["endpointId"].(string),
 		HandleID:           endpointConfigObj["handleId"].(string),
 		ThriftFile:         thriftFile,
-		ThriftMethodName:   endpointConfigObj["thriftMethodName"].(string),
+		ThriftServiceName:  parts[0],
+		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
 		Middlewares:        endpointConfigObj["middlewares"].([]interface{}),
 		WorkflowType:       workflowType,
@@ -344,6 +360,36 @@ func (e *EndpointSpec) TargetEndpointTestPath(
 	fileName := baseName + "_" + strings.ToLower(serviceName) +
 		"_method_" + strings.ToLower(methodName) + "_test.go"
 	return filepath.Join(e.GoFolderName, fileName)
+}
+
+// SetDownstream configures the downstream client for this endpoint spec
+func (e *EndpointSpec) SetDownstream(
+	gatewaySpec *GatewaySpec,
+) error {
+	if e.WorkflowType == "custom" {
+		return nil
+	}
+
+	var clientModule *ModuleSpec
+	for _, v := range gatewaySpec.ClientModules {
+		if v.ClientName == e.ClientName {
+			clientModule = v.ModuleSpec
+			break
+		}
+	}
+
+	if clientModule == nil {
+		return errors.Errorf(
+			"When parsing endpoint json (%s), "+
+				"could not find client (%s) in gateway",
+			e.JSONFile, e.ClientName,
+		)
+	}
+
+	return e.ModuleSpec.SetDownstream(
+		e.ThriftServiceName, e.ThriftMethodName,
+		clientModule, e.ClientName, e.ClientMethod,
+	)
 }
 
 // GatewaySpec collects information for the entire gateway
@@ -427,7 +473,7 @@ func NewGatewaySpec(
 				err, "Cannot parse client json file %s :", json,
 			)
 		}
-		spec.ClientModules[cspec.ThriftFile] = cspec
+		spec.ClientModules[cspec.JSONFile] = cspec
 	}
 	for _, json := range endpointJsons {
 		espec, err := NewEndpointSpec(json, packageHelper)
@@ -436,7 +482,14 @@ func NewGatewaySpec(
 				err, "Cannot parse endpoint json file %s :", json,
 			)
 		}
-		spec.EndpointModules[espec.ThriftFile] = espec
+
+		err = espec.SetDownstream(spec)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot parse downstream info for endpoint : %s", json,
+			)
+		}
+		spec.EndpointModules[espec.JSONFile] = espec
 	}
 
 	return spec, nil
@@ -468,6 +521,7 @@ func (gateway *GatewaySpec) GenerateEndpoints() error {
 
 		_, err := gateway.Template.GenerateEndpointFile(
 			module, gateway.PackageHelper,
+			module.ThriftServiceName, module.ThriftMethodName,
 		)
 		if err != nil {
 			return err
@@ -475,6 +529,7 @@ func (gateway *GatewaySpec) GenerateEndpoints() error {
 
 		_, err = gateway.Template.GenerateEndpointTestFile(
 			module, gateway.PackageHelper,
+			module.ThriftServiceName, module.ThriftMethodName,
 		)
 		if err != nil {
 			return err

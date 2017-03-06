@@ -16,10 +16,9 @@ import (
 )
 
 {{with .Method -}}
-{{- $client := index .Downstream.Services 0 -}}
-{{- $clientPackage := .Downstream.PackageName | printf "%sClient" -}}
-{{- $clientName := title ($client).Name -}}
-{{- $clientMethod := index $client.Methods 0 -}}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $clientName := title .DownstreamService -}}
+{{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}

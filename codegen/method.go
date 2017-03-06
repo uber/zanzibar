@@ -21,8 +21,6 @@
 package codegen
 
 import (
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -58,6 +56,10 @@ type MethodSpec struct {
 	CompiledThriftSpec *compile.FunctionSpec
 	// The downstream service method annotated by 'zanzibar.http.downstream'.
 	Downstream *ModuleSpec
+	// the downstream service name
+	DownstreamService string
+	// The downstream methdo spec for the endpoint
+	DownstreamMethod *MethodSpec
 	// A map from upstream to downstream field names in the requests.
 	RequestFieldMap map[string]string
 	// A map from upstream to field names to downstream types in the requests.
@@ -252,51 +254,46 @@ func (ms *MethodSpec) setHTTPPath(
 	}
 }
 
-func (ms *MethodSpec) setDownstream(downstreamLink string, curfile string, packageHelper *PackageHelper) error {
-	if downstreamLink == "" {
-		return nil
-	}
-	parts := strings.Split(downstreamLink, "::")
-	if len(parts) != 3 {
-		return errors.Errorf("downstream annotation should be in the form of 'zanzibar.http.downstream = <relative thrift path>::<service>::<method>', but get %s", downstreamLink)
-	}
-	downstreamFile := path.Join(filepath.Dir(curfile), parts[0])
-	downstreamModule, err := NewModuleSpec(downstreamFile, packageHelper)
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse the downstream module: %s", downstreamFile)
-	}
+func (ms *MethodSpec) setDownstream(
+	clientModule *ModuleSpec, clientService string, clientMethod string,
+) error {
 	var downstreamService *ServiceSpec
-	for _, service := range downstreamModule.Services {
-		if service.Name == parts[1] {
+	for _, service := range clientModule.Services {
+		if service.Name == clientService {
 			downstreamService = service
 			break
 		}
 	}
 	if downstreamService == nil {
-		return errors.Errorf("Downstream service '%s' is not found in '%s'", parts[1], downstreamLink)
+		return errors.Errorf(
+			"Downstream service '%s' is not found in '%s'",
+			clientService, clientModule.ThriftFile,
+		)
 	}
 	var downstreamMethod *MethodSpec
 	for _, method := range downstreamService.Methods {
-		if method.Name == parts[2] {
+		if method.Name == clientMethod {
 			downstreamMethod = method
 			break
 		}
 	}
 	if downstreamMethod == nil {
-		return errors.Errorf("Downstream method is not found: %s", downstreamLink)
+		return errors.Errorf(
+			"Downstream method (%s) is not found: %s",
+			clientModule.ThriftFile, clientMethod,
+		)
 	}
 	// Remove irrelevant services and methods.
-	downstreamService.Methods = []*MethodSpec{
-		downstreamMethod,
-	}
-	downstreamModule.Services = []*ServiceSpec{
-		downstreamService,
-	}
-	ms.Downstream = downstreamModule
+	ms.Downstream = clientModule
+	ms.DownstreamService = clientService
+	ms.DownstreamMethod = downstreamMethod
 	return nil
 }
 
-func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, downstreamSpec *compile.FunctionSpec, packageHelper *PackageHelper) error {
+func (ms *MethodSpec) setRequestFieldMap(
+	funcSpec *compile.FunctionSpec,
+	downstreamSpec *compile.FunctionSpec,
+) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 	ms.RequestFieldMap = map[string]string{}
 	ms.RequestTypeMap = map[string]string{}
@@ -316,7 +313,10 @@ func (ms *MethodSpec) setRequestFieldMap(funcSpec *compile.FunctionSpec, downstr
 		}
 
 		if downstreamField == nil {
-			return errors.Errorf("cannot map by name for the field %s to type: %s", field.Name, downstreamSpec)
+			return errors.Errorf(
+				"cannot map by name for the field %s to type: %s",
+				field.Name, downstreamSpec.Name,
+			)
 		}
 		ms.RequestFieldMap[field.Name] = field.Name
 

@@ -25,11 +25,10 @@ import (
 )
 
 {{with .Method -}}
-{{- $client := index .Downstream.Services 0 -}}
-{{- $clientPackage := .Downstream.PackageName | printf "%sClient" -}}
-{{- $clientName := title ($client).Name | printf "%sClient" -}}
-{{- $clientMethod := index (index .Downstream.Services 0).Methods 0 -}}
-{{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $clientName := title .DownstreamService -}}
+{{- $clientMethod := .DownstreamMethod -}}
+{{- $clientMethodRequestType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
@@ -49,7 +48,7 @@ func Handle{{title .Name}}Request(
 
 	// Handle request body.
 	{{if or (eq .RequestType "") (eq $clientMethodRequestType "") -}}
-	clientResp, err := clients.{{title ($client).Name}}.{{title ($clientMethod).Name}}(ctx, h)
+	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, h)
 
 	{{- else -}}
 		rawBody, ok := inc.ReadAll()
@@ -61,7 +60,7 @@ func Handle{{title .Name}}Request(
 			return
 		}
 		clientRequest := convertTo{{title .Name}}ClientRequest(&body)
-		clientResp, err := clients.{{title ($client).Name}}.{{title ($clientMethod).Name}}(ctx, clientRequest, h)
+		clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest, h)
 	{{- end }}
 	if err != nil {
 		g.Logger.Error("Could not make client request",

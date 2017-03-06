@@ -172,7 +172,7 @@ func (t *Template) GenerateClientFile(
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
 func (t *Template) GenerateEndpointFile(
-	e *EndpointSpec, h *PackageHelper,
+	e *EndpointSpec, h *PackageHelper, serviceName string, methodName string,
 ) (*EndpointFiles, error) {
 	m := e.ModuleSpec
 
@@ -191,9 +191,25 @@ func (t *Template) GenerateEndpointFile(
 		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
 		StructFile:   e.GoStructsFileName,
 	}
+	generated := false
 
 	for _, service := range m.Services {
+		if service.Name != serviceName {
+			continue
+		}
 		for _, method := range service.Methods {
+			if method.Name != methodName {
+				continue
+			}
+
+			if method.Downstream == nil {
+				return nil, errors.Errorf(
+					"Could not find downstream for endpoint generation... "+
+						"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
+					methodName, serviceName, e.JSONFile,
+				)
+			}
+
 			dest := e.TargetEndpointPath(service.Name, method.Name)
 			meta := &EndpointMeta{
 				GatewayPackageName: h.GoGatewayPackageName(),
@@ -201,12 +217,21 @@ func (t *Template) GenerateEndpointFile(
 				IncludedPackages:   m.IncludedPackages,
 				Method:             method,
 			}
+
 			err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
 			if err != nil {
 				return nil, err
 			}
 			endpointFiles.HandlerFiles = append(endpointFiles.HandlerFiles, dest)
+			generated = true
 		}
+	}
+
+	if !generated {
+		return nil, errors.Errorf(
+			"Could not find serviceName (%s) + methodName (%s) in module",
+			serviceName, methodName,
+		)
 	}
 
 	return endpointFiles, nil
@@ -216,7 +241,7 @@ func (t *Template) GenerateEndpointFile(
 // defined in a thrift file. It returns the path of generated test files,
 // or an error.
 func (t *Template) GenerateEndpointTestFile(
-	e *EndpointSpec, h *PackageHelper,
+	e *EndpointSpec, h *PackageHelper, serviceName string, methodName string,
 ) ([]string, error) {
 	m := e.ModuleSpec
 
@@ -224,9 +249,27 @@ func (t *Template) GenerateEndpointTestFile(
 		return nil, nil
 	}
 
+	generated := false
+
 	testFiles := make([]string, 0, len(m.Services[0].Methods))
 	for _, service := range m.Services {
+		if service.Name != serviceName {
+			continue
+		}
+
 		for _, method := range service.Methods {
+			if method.Name != methodName {
+				continue
+			}
+
+			if method.Downstream == nil {
+				return nil, errors.Errorf(
+					"Could not find downstream for endpoint generation... "+
+						"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
+					methodName, serviceName, e.JSONFile,
+				)
+			}
+
 			dest := e.TargetEndpointTestPath(service.Name, method.Name)
 			meta := &EndpointTestMeta{
 				PackageName: m.PackageName,
@@ -237,7 +280,15 @@ func (t *Template) GenerateEndpointTestFile(
 				return nil, err
 			}
 			testFiles = append(testFiles, dest)
+			generated = true
 		}
+	}
+
+	if !generated {
+		return nil, errors.Errorf(
+			"Could not find serviceName (%s) + methodName (%s) in module",
+			serviceName, methodName,
+		)
 	}
 
 	return testFiles, nil
