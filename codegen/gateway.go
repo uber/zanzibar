@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"io/ioutil"
 
@@ -166,6 +167,11 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 type EndpointSpec struct {
 	// ModuleSpec holds the thrift module info
 	ModuleSpec *ModuleSpec
+	// GoStructsFileName is where structs are generated
+	GoStructsFileName string
+	// GoFolderName is the folder where all the endpoints
+	// are generated.
+	GoFolderName string
 
 	// EndpointType, currently only "http"
 	EndpointType string
@@ -283,11 +289,27 @@ func NewEndpointSpec(
 		)
 	}
 
-	// baseName := filepath.Base(jsonFile)
-	// baseName = baseName[0 : len(baseName)-5]
+	dirName := filepath.Base(filepath.Dir(jsonFile))
+	baseName := filepath.Base(jsonFile)
+	baseName = baseName[0 : len(baseName)-5]
+
+	goFolderName := filepath.Join(
+		h.CodeGenTargetPath(),
+		"endpoints",
+		dirName,
+	)
+
+	goStructsFileName := filepath.Join(
+		h.CodeGenTargetPath(),
+		"endpoints",
+		dirName,
+		dirName+"_structs.go",
+	)
 
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
+		GoStructsFileName:  goStructsFileName,
+		GoFolderName:       goFolderName,
 		EndpointType:       endpointConfigObj["endpointType"].(string),
 		EndpointID:         endpointConfigObj["endpointId"].(string),
 		HandleID:           endpointConfigObj["handleId"].(string),
@@ -300,6 +322,28 @@ func NewEndpointSpec(
 		ClientName:         clientName,
 		ClientMethod:       clientMethod,
 	}, nil
+}
+
+// TargetEndpointPath generates a filepath for each endpoint method
+func (e *EndpointSpec) TargetEndpointPath(
+	serviceName string, methodName string,
+) string {
+	baseName := filepath.Base(e.GoFolderName)
+
+	fileName := baseName + "_" + strings.ToLower(serviceName) +
+		"_method_" + strings.ToLower(methodName) + ".go"
+	return filepath.Join(e.GoFolderName, fileName)
+}
+
+// TargetEndpointTestPath generates a filepath for each endpoint test
+func (e *EndpointSpec) TargetEndpointTestPath(
+	serviceName string, methodName string,
+) string {
+	baseName := filepath.Base(e.GoFolderName)
+
+	fileName := baseName + "_" + strings.ToLower(serviceName) +
+		"_method_" + strings.ToLower(methodName) + "_test.go"
+	return filepath.Join(e.GoFolderName, fileName)
 }
 
 // GatewaySpec collects information for the entire gateway

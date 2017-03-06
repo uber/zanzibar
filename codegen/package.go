@@ -165,49 +165,6 @@ func (p PackageHelper) TargetMainPath() string {
 	return path.Join(p.targetGenDir, "main.go")
 }
 
-// TargetStructPath returns the path for any structs needed for
-// a generated client based on thrift file.
-func (p PackageHelper) TargetStructPath(thrift string) (string, error) {
-	fileName, err := p.getRelativeFileName(thrift)
-	if err != nil {
-		return "", err
-	}
-	goFile := strings.Replace(fileName, ".thrift", "_structs.go", -1)
-	return path.Join(p.targetGenDir, goFile), nil
-}
-
-// TargetEndpointPath returns the path for the endpoint handler based
-// on the thrift file and method name
-func (p PackageHelper) TargetEndpointPath(
-	thrift, serviceName, methodName string,
-) (string, error) {
-	fileName, err := p.getRelativeFileName(thrift)
-	if err != nil {
-		return "", err
-	}
-
-	fileEnding := "_" + strings.ToLower(serviceName) + "_method_" + strings.ToLower(methodName) + ".go"
-	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
-	return path.Join(p.targetGenDir, goFile), nil
-}
-
-// TargetEndpointTestPath returns the path for the endpoint test based
-// on the thrift file and method name
-func (p PackageHelper) TargetEndpointTestPath(
-	thrift, serviceName, methodName string,
-) (string, error) {
-	fileName, err := p.getRelativeFileName(thrift)
-	if err != nil {
-		return "", err
-	}
-
-	fileEnding := "_" + strings.ToLower(serviceName) + "_method_" + strings.ToLower(methodName) + "_test.go"
-	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
-	return path.Join(p.targetGenDir, goFile), nil
-}
-
-// TargetEndpointPath
-
 // TypeFullName returns the referred Go type name in generated code from curThriftFile.
 func (p PackageHelper) TypeFullName(curThriftFile string, typeSpec compile.TypeSpec) (string, error) {
 	if typeSpec == nil {

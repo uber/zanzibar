@@ -181,7 +181,7 @@ func (t *Template) GenerateEndpointFile(
 	}
 
 	err := t.execTemplateAndFmt(
-		"structs.tmpl", m.GoStructsFilePath, m,
+		"structs.tmpl", e.GoStructsFileName, m,
 	)
 	if err != nil {
 		return nil, err
@@ -189,17 +189,12 @@ func (t *Template) GenerateEndpointFile(
 
 	endpointFiles := &EndpointFiles{
 		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
-		StructFile:   m.GoStructsFilePath,
+		StructFile:   e.GoStructsFileName,
 	}
 
 	for _, service := range m.Services {
 		for _, method := range service.Methods {
-			dest, err := h.TargetEndpointPath(m.ThriftFile, service.Name, method.Name)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Could not generate endpoint path, service %s, method %s",
-					service, method)
-			}
+			dest := e.TargetEndpointPath(service.Name, method.Name)
 			meta := &EndpointMeta{
 				GatewayPackageName: h.GoGatewayPackageName(),
 				PackageName:        m.PackageName,
@@ -232,17 +227,12 @@ func (t *Template) GenerateEndpointTestFile(
 	testFiles := make([]string, 0, len(m.Services[0].Methods))
 	for _, service := range m.Services {
 		for _, method := range service.Methods {
-			dest, err := h.TargetEndpointTestPath(m.ThriftFile, service.Name, method.Name)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Could not generate endpoint test path, service %s, method %s",
-					service, method)
-			}
+			dest := e.TargetEndpointTestPath(service.Name, method.Name)
 			meta := &EndpointTestMeta{
 				PackageName: m.PackageName,
 				Method:      method,
 			}
-			err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
+			err := t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
 			if err != nil {
 				return nil, err
 			}
