@@ -45,6 +45,5 @@ service Contacts {
         zanzibar.http.path = "/contacts/:userUUID/contacts"
         zanzibar.http.status = "202"
         zanzibar.http.req.def = "true"
-        zanzibar.http.downstream = "../../clients/contacts/contacts.thrift::Contacts::saveContacts"
     )
 }

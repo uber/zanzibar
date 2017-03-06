@@ -9,7 +9,6 @@ service GoogleNow {
         zanzibar.http.path = "/googlenow/add-credentials"
         zanzibar.http.status = "200,202"
         zanzibar.http.headers = "x-uuid,x-token"
-        zanzibar.http.downstream = "../../clients/googlenow/googlenow.thrift::GoogleNow::addCredentials"
     )
     void checkCredentials(
     ) (
@@ -18,6 +17,5 @@ service GoogleNow {
         zanzibar.http.status = "200,202"
         // comma sparated list for required headers
         zanzibar.http.headers = "x-uuid,x-token"
-        zanzibar.http.downstream = "../../clients/googlenow/googlenow.thrift::GoogleNow::checkCredentials"
     )
 }
