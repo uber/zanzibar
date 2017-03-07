@@ -71,8 +71,8 @@ type EndpointTestMeta struct {
 // TestStub saves stubbed requests/responses for an endpoint test.
 type TestStub struct {
 	TestName         string
-	EndpointId       string
-	HandlerId        string
+	EndpointID       string
+	HandlerID        string
 	EndpointRequest  string
 	EndpointResponse string
 
@@ -81,7 +81,7 @@ type TestStub struct {
 
 // ClientStub saves stubbed client request/response for an endpoint test.
 type ClientStub struct {
-	ClientId       string
+	ClientID       string
 	ClientMethod   string
 	ClientRequest  string
 	ClientResponse string

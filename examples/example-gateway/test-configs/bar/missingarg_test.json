@@ -1,1 +1,14 @@
-[]
+[{
+    "testName": "successfulRequest",
+    "endpointId": "bar",
+    "handlerId": "missingArg",
+    "endpointRequest": "{}",
+    "endpointResponse": "{status:\"200 OK\"}",
+
+    "clients": [{
+        "clientId": "bar",
+        "clientMethod": "missingArg",
+        "clientRequest": "{}",
+        "clientResponse": "{status:\"200 OK\"}"
+    }]
+}]

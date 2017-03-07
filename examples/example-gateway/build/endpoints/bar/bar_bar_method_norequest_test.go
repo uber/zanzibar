@@ -5,17 +5,13 @@ package bar_test
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForNoRequest = []byte("{}")
-
-func TestNoRequestOKResponse(t *testing.T) {
+func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -26,20 +22,8 @@ func TestNoRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeNoRequest := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
-			t.Fatal("can't write fake response")
-		}
-		counter++
-	}
-	gateway.Backends()["bar"].HandleFunc(
-		"GET", "/no-request-path", fakeNoRequest,
-	)
-
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/no-request-path", bytes.NewReader(benchBytesForNoRequest),
+		"GET", "/bar/no-request-path", bytes.NewReader([]byte("{}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

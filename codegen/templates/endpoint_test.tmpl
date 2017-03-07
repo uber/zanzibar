@@ -23,10 +23,10 @@ import (
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesFor{{$clientMethodName}} = []byte("{}")
 
-func Test{{.Name | Title}}OKResponse(t *testing.T) {
+{{range $.TestStubs}}
+
+func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -37,27 +37,32 @@ func Test{{.Name | Title}}OKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fake{{$clientMethodName}} := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader({{(index .OKStatusCode 0).Code}})
+	{{range .ClientStubs}}
+	fake{{.ClientMethod | Title}} := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader({{(index $.Method.OKStatusCode 0).Code}})
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
+		if _, err := w.Write([]byte("{{.ClientResponse}}")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
 	}
+
 	gateway.Backends()["{{$clientName | camel}}"].HandleFunc(
-		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{$clientMethodName}},
+		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
 	)
 
+	{{end -}}
+
 	res, err := gateway.MakeRequest(
-		"{{.HTTPMethod}}", "{{.HTTPPath}}", bytes.NewReader(benchBytesFor{{$clientMethodName}}),
+		"{{$.Method.HTTPMethod}}", "{{$.Method.HTTPPath}}", bytes.NewReader([]byte("{{.EndpointRequest }}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
 
-	assert.Equal(t, "{{(index .OKStatusCode 0).Code}} OK", res.Status)
+	assert.Equal(t, "{{(index $.Method.OKStatusCode 0).Code}} OK", res.Status)
 	assert.Equal(t, 1, counter)
 }
 
+{{end -}}
 {{end -}}

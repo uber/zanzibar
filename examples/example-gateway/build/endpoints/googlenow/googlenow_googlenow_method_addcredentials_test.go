@@ -12,10 +12,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForAddCredentials = []byte("{}")
-
-func TestAddCredentialsOKResponse(t *testing.T) {
+func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -29,17 +26,18 @@ func TestAddCredentialsOKResponse(t *testing.T) {
 	fakeAddCredentials := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
+		if _, err := w.Write([]byte("{status:\"200 OK\"}")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
 	}
+
 	gateway.Backends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", fakeAddCredentials,
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytesForAddCredentials),
+		"POST", "/googlenow/add-credentials", bytes.NewReader([]byte("{\"authcode\":\"test\"}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

@@ -1,1 +1,14 @@
-[]
+[{
+    "testName": "successfulRequest",
+    "endpointId": "bar",
+    "handlerId": "normal",
+    "endpointRequest": "{}",
+    "endpointResponse": "{status:\"200 OK\"}",
+
+    "clients": [{
+        "clientId": "bar",
+        "clientMethod": "normal",
+        "clientRequest": "{}",
+        "clientResponse": "{status:\"200 OK\"}"
+    }]
+}]

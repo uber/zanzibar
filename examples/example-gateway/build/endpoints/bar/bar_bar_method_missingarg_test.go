@@ -5,17 +5,13 @@ package bar_test
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForMissingArg = []byte("{}")
-
-func TestMissingArgOKResponse(t *testing.T) {
+func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -26,20 +22,8 @@ func TestMissingArgOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeMissingArg := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
-			t.Fatal("can't write fake response")
-		}
-		counter++
-	}
-	gateway.Backends()["bar"].HandleFunc(
-		"GET", "/missing-arg-path", fakeMissingArg,
-	)
-
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/missing-arg-path", bytes.NewReader(benchBytesForMissingArg),
+		"GET", "/bar/missing-arg-path", bytes.NewReader([]byte("{}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
