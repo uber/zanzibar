@@ -168,6 +168,25 @@ func (t *Template) GenerateClientFile(
 	}, nil
 }
 
+func findMethod(
+	m *ModuleSpec, serviceName string, methodName string,
+) *MethodSpec {
+	for _, service := range m.Services {
+		if service.Name != serviceName {
+			continue
+		}
+
+		for _, method := range service.Methods {
+			if method.Name != methodName {
+				continue
+			}
+
+			return method
+		}
+	}
+	return nil
+}
+
 // GenerateEndpointFile generates Go code for an zanzibar endpoint defined in
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
@@ -191,48 +210,35 @@ func (t *Template) GenerateEndpointFile(
 		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
 		StructFile:   e.GoStructsFileName,
 	}
-	generated := false
-
-	for _, service := range m.Services {
-		if service.Name != serviceName {
-			continue
-		}
-		for _, method := range service.Methods {
-			if method.Name != methodName {
-				continue
-			}
-
-			if method.Downstream == nil {
-				return nil, errors.Errorf(
-					"Could not find downstream for endpoint generation... "+
-						"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-					methodName, serviceName, e.JSONFile,
-				)
-			}
-
-			dest := e.TargetEndpointPath(service.Name, method.Name)
-			meta := &EndpointMeta{
-				GatewayPackageName: h.GoGatewayPackageName(),
-				PackageName:        m.PackageName,
-				IncludedPackages:   m.IncludedPackages,
-				Method:             method,
-			}
-
-			err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
-			if err != nil {
-				return nil, err
-			}
-			endpointFiles.HandlerFiles = append(endpointFiles.HandlerFiles, dest)
-			generated = true
-		}
-	}
-
-	if !generated {
+	method := findMethod(m, serviceName, methodName)
+	if method == nil {
 		return nil, errors.Errorf(
 			"Could not find serviceName (%s) + methodName (%s) in module",
 			serviceName, methodName,
 		)
 	}
+
+	if method.Downstream == nil {
+		return nil, errors.Errorf(
+			"Could not find downstream for endpoint generation... "+
+				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
+			methodName, serviceName, e.JSONFile,
+		)
+	}
+
+	dest := e.TargetEndpointPath(serviceName, method.Name)
+	meta := &EndpointMeta{
+		GatewayPackageName: h.GoGatewayPackageName(),
+		PackageName:        m.PackageName,
+		IncludedPackages:   m.IncludedPackages,
+		Method:             method,
+	}
+
+	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
+	if err != nil {
+		return nil, err
+	}
+	endpointFiles.HandlerFiles = append(endpointFiles.HandlerFiles, dest)
 
 	return endpointFiles, nil
 }
@@ -249,47 +255,34 @@ func (t *Template) GenerateEndpointTestFile(
 		return nil, nil
 	}
 
-	generated := false
-
 	testFiles := make([]string, 0, len(m.Services[0].Methods))
-	for _, service := range m.Services {
-		if service.Name != serviceName {
-			continue
-		}
 
-		for _, method := range service.Methods {
-			if method.Name != methodName {
-				continue
-			}
-
-			if method.Downstream == nil {
-				return nil, errors.Errorf(
-					"Could not find downstream for endpoint generation... "+
-						"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-					methodName, serviceName, e.JSONFile,
-				)
-			}
-
-			dest := e.TargetEndpointTestPath(service.Name, method.Name)
-			meta := &EndpointTestMeta{
-				PackageName: m.PackageName,
-				Method:      method,
-			}
-			err := t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
-			if err != nil {
-				return nil, err
-			}
-			testFiles = append(testFiles, dest)
-			generated = true
-		}
-	}
-
-	if !generated {
+	method := findMethod(m, serviceName, methodName)
+	if method == nil {
 		return nil, errors.Errorf(
 			"Could not find serviceName (%s) + methodName (%s) in module",
 			serviceName, methodName,
 		)
 	}
+
+	if method.Downstream == nil {
+		return nil, errors.Errorf(
+			"Could not find downstream for endpoint generation... "+
+				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
+			methodName, serviceName, e.JSONFile,
+		)
+	}
+
+	dest := e.TargetEndpointTestPath(serviceName, method.Name)
+	meta := &EndpointTestMeta{
+		PackageName: m.PackageName,
+		Method:      method,
+	}
+	err := t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
+	if err != nil {
+		return nil, err
+	}
+	testFiles = append(testFiles, dest)
 
 	return testFiles, nil
 }
@@ -368,6 +361,108 @@ func (t *Template) GenerateClientsInitFile(
 
 	targetFile := h.TargetClientsInitPath()
 	err := t.execTemplateAndFmt("init_clients.tmpl", targetFile, meta)
+	if err != nil {
+		return "", err
+	}
+
+	return targetFile, nil
+}
+
+// EndpointRegisterInfo ...
+type EndpointRegisterInfo struct {
+	Method      string
+	Pattern     string
+	EndpointID  string
+	HandlerID   string
+	HandlerType string
+}
+
+// EndpointsRegisterMeta ...
+type EndpointsRegisterMeta struct {
+	IncludedPackages []string
+	Endpoints        []EndpointRegisterInfo
+}
+
+type sortByEndpointName []*EndpointSpec
+
+func (c sortByEndpointName) Len() int {
+	return len(c)
+}
+func (c sortByEndpointName) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+func (c sortByEndpointName) Less(i, j int) bool {
+	return c[i].EndpointID+c[i].HandleID <
+		c[j].EndpointID+c[j].HandleID
+}
+
+func contains(arr []string, value string) bool {
+	for i := 0; i < len(arr); i++ {
+		if arr[i] == value {
+			return true
+		}
+	}
+	return false
+}
+
+// GenerateEndpointRegisterFile will generate the registration file
+// that mounts all the endpoints in the router.
+func (t *Template) GenerateEndpointRegisterFile(
+	endpointsMap map[string]*EndpointSpec, h *PackageHelper,
+) (string, error) {
+	endpoints := []*EndpointSpec{}
+	for _, v := range endpointsMap {
+		endpoints = append(endpoints, v)
+	}
+	sort.Sort(sortByEndpointName(endpoints))
+
+	includedPkgs := []string{
+		h.GoGatewayPackageName() + "/clients",
+	}
+	endpointsInfo := []EndpointRegisterInfo{}
+
+	for i := 0; i < len(endpoints); i++ {
+		espec := endpoints[i]
+		goPkg := espec.ModuleSpec.GoPackage
+
+		if !contains(includedPkgs, goPkg) {
+			includedPkgs = append(includedPkgs, goPkg)
+		}
+
+		method := findMethod(
+			espec.ModuleSpec,
+			espec.ThriftServiceName,
+			espec.ThriftMethodName,
+		)
+		if method == nil {
+			return "", errors.Errorf(
+				"Could not find serviceName (%s) + methodName (%s) in module",
+				espec.ThriftServiceName, espec.ThriftMethodName,
+			)
+		}
+
+		handlerType := espec.ModuleSpec.PackageName +
+			".Handle" + strings.Title(method.Name) + "Request"
+
+		info := EndpointRegisterInfo{
+			EndpointID:  espec.EndpointID,
+			HandlerID:   espec.HandleID,
+			Method:      method.HTTPMethod,
+			Pattern:     method.HTTPPath,
+			HandlerType: handlerType,
+		}
+		endpointsInfo = append(endpointsInfo, info)
+	}
+
+	// TODO: for each endpoint, import endpoint in includedPkgs
+
+	meta := &EndpointsRegisterMeta{
+		IncludedPackages: includedPkgs,
+		Endpoints:        endpointsInfo,
+	}
+
+	targetFile := h.TargetEndpointsRegisterPath()
+	err := t.execTemplateAndFmt("endpoint_register.tmpl", targetFile, meta)
 	if err != nil {
 		return "", err
 	}

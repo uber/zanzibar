@@ -547,7 +547,10 @@ func (gateway *GatewaySpec) GenerateEndpoints() error {
 		}
 	}
 
-	return nil
+	_, err := gateway.Template.GenerateEndpointRegisterFile(
+		gateway.EndpointModules, gateway.PackageHelper,
+	)
+	return err
 }
 
 // GenerateMain will generate the main files for the gateway

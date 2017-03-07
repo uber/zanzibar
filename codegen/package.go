@@ -171,6 +171,12 @@ func (p PackageHelper) TargetClientsInitPath() string {
 	return path.Join(p.targetGenDir, "clients", "clients.go")
 }
 
+// TargetEndpointsRegisterPath returns where the endpoints register file
+// should be written to
+func (p PackageHelper) TargetEndpointsRegisterPath() string {
+	return path.Join(p.targetGenDir, "endpoints", "register.go")
+}
+
 // TargetMainPath returns where the main.go file should go.
 func (p PackageHelper) TargetMainPath() string {
 	return path.Join(p.targetGenDir, "main.go")
