@@ -46,25 +46,7 @@ func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
 	CompareGoldenFile(t, goldenFile, b, *updateGoldenFile)
 }
 
-// func newPackageHelper(t *testing.T) *codegen.PackageHelper {
-// 	h, err := codegen.NewPackageHelper(
-// 		"examples/example-gateway/idl",
-// 		"examples/example-gateway/gen-code",
-// 		tmpDir,
-// 		"examples/example-gateway/idl/github.com/uber/zanzibar",
-// 	)
-// 	if !assert.NoError(t, err, "failed to create package helper") {
-// 		return nil
-// 	}
-// 	return h
-// }
-
 func TestGenerateBar(t *testing.T) {
-	// tmpl, err := codegen.NewTemplate("../../codegen/templates/*.tmpl")
-	// if !assert.NoError(t, err, "failed to create template %s", err) {
-	// 	return
-	// }
-
 	assert.NoError(t, os.RemoveAll(tmpDir), "failed to clean temporary directory")
 	if err := os.MkdirAll(tmpDir, os.ModePerm); !assert.NoError(t, err, "failed to create temporary directory", err) {
 		return
@@ -75,7 +57,6 @@ func TestGenerateBar(t *testing.T) {
 	if !assert.NoError(t, err, "failed to get abs path %s", err) {
 		return
 	}
-	_ = absGatewayPath
 
 	gateway, err := codegen.NewGatewaySpec(
 		absGatewayPath,
@@ -90,32 +71,6 @@ func TestGenerateBar(t *testing.T) {
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
 	}
-
-	// pkgHelper := newPackageHelper(t)
-
-	// m, err := codegen.NewModuleSpec(clientThrift, pkgHelper)
-	// if !assert.NoError(t, err, "failed to create module spec %s", err) {
-	// 	return
-	// }
-
-	// clientFiles, err := tmpl.GenerateClientFile(&codegen.ClientSpec{
-	// 	ModuleSpec: m,
-	// 	GoFileName: path.Join(
-	// 		pkgHelper.CodeGenTargetPath(),
-	// 		"clients",
-	// 		"bar",
-	// 		"bar.go",
-	// 	),
-	// 	GoStructsFileName: path.Join(
-	// 		pkgHelper.CodeGenTargetPath(),
-	// 		"clients",
-	// 		"bar",
-	// 		"bar_structs.go",
-	// 	),
-	// }, pkgHelper)
-	// if !assert.NoError(t, err, "failed to generate client code %s", err) {
-	// 	return
-	// }
 
 	err = gateway.GenerateClients()
 	if !assert.NoError(t, err, "failed to create clients %s", err) {
@@ -133,51 +88,46 @@ func TestGenerateBar(t *testing.T) {
 		"./data/clients",
 	)
 
-	// m, err = codegen.NewModuleSpec(endpointThrift, pkgHelper)
-	// if !assert.NoError(t, err, "failed to create module spec %s", err) {
-	// 	return
-	// }
+	err = gateway.GenerateEndpoints()
+	if !assert.NoError(t, err, "failed to create endpoints %s", err) {
+		return
+	}
 
-	// TODO: (jakev) These tests are super painful to run directly because of
-	// config parsing, need to add config parsing to these tests
-	// Maybe just refactor these tests to drive codegen/runner directly
+	endpoints, err := ioutil.ReadDir(
+		filepath.Join(tmpDir, "endpoints", "bar"),
+	)
+	if !assert.NoError(t, err, "cannot read dir %s", err) {
+		return
+	}
 
-	// endpointFiles, err := tmpl.GenerateEndpointFile(&codegen.EndpointSpec{
-	// 	ModuleSpec: m,
-	// 	GoStructsFileName: path.Join(
-	// 		pkgHelper.CodeGenTargetPath(),
-	// 		"endpoints",
-	// 		"bar",
-	// 		"bar_structs.go",
-	// 	),
-	// 	GoFolderName: path.Join(
-	// 		pkgHelper.CodeGenTargetPath(),
-	// 		"endpoints",
-	// 		"bar",
-	// 	),
-	// }, pkgHelper, "Bar", "argNotStruct")
-	// if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
-	// 	return
-	// }
+	for _, file := range endpoints {
+		footer := file.Name()[len(file.Name())-8 : len(file.Name())]
+		if footer == "_test.go" {
+			continue
+		}
 
-	// for _, file := range endpointFiles.HandlerFiles {
-	// 	cmpGoldenFile(t, file, "./data/endpoints")
-	// }
-	// cmpGoldenFile(t, endpointFiles.StructFile, "./data/endpoints")
+		cmpGoldenFile(
+			t,
+			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			"./data/endpoints",
+		)
+	}
+	cmpGoldenFile(
+		t,
+		filepath.Join(tmpDir, "endpoints", "bar", "bar_structs.go"),
+		"./data/endpoints",
+	)
 
-	// m, err = codegen.NewModuleSpec(endpointThrift, pkgHelper)
-	// if !assert.NoError(t, err, "failed to create module spec %s", err) {
-	// 	return
-	// }
+	for _, file := range endpoints {
+		footer := file.Name()[len(file.Name())-8 : len(file.Name())]
+		if footer != "_test.go" {
+			continue
+		}
 
-	// testFiles, err := tmpl.GenerateEndpointTestFile(&codegen.EndpointSpec{
-	// 	ModuleSpec: m,
-	// }, pkgHelper, "Bar", "argNotStruct")
-	// if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
-	// 	return
-	// }
-
-	// for _, file := range testFiles {
-	// 	cmpGoldenFile(t, file, "./data/endpoint_tests")
-	// }
+		cmpGoldenFile(
+			t,
+			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			"./data/endpoint_tests",
+		)
+	}
 }
