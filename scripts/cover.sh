@@ -5,6 +5,7 @@ rm -f test.out
 rm -f fail.out
 touch test.out
 rm -f coverage.tmp
+mkdir -p ./coverage
 
 COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
