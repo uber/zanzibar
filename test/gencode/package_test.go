@@ -88,3 +88,10 @@ func TestPackageGenPath(t *testing.T) {
 	_, err = h.PackageGenPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/zanzibar/clients/foo/foo.thrift")
 	assert.Error(t, err, "should return error for not in IDL dir")
 }
+
+func TestEndpointTestConfigPath(t *testing.T) {
+	h := newPackageHelper(t)
+	p := h.EndpointTestConfigPath("foo", "bar")
+	exp := "examples/example-gateway/test-configs/foo/bar_test.json"
+	assert.Equal(t, exp, p, "wrong generated endpoint test config path")
+
