@@ -405,24 +405,23 @@ type GatewaySpec struct {
 	gatewayName       string
 	configDirName     string
 	clientConfigDir   string
-	endpointThriftDir string
+	endpointConfigDir string
 }
 
 // NewGatewaySpec sets up gateway spec
 func NewGatewaySpec(
 	configDirName string,
 	thriftRootDir string,
-	typeFileRootDir string,
+	genCodePackage string,
 	targetGenDir string,
 	gatewayThriftRootDir string,
 	clientConfig string,
-	endpointThriftDir string,
 	endpointConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
 		thriftRootDir,
-		typeFileRootDir,
+		genCodePackage,
 		targetGenDir,
 		gatewayThriftRootDir,
 	)
@@ -462,7 +461,7 @@ func NewGatewaySpec(
 
 		configDirName:     configDirName,
 		clientConfigDir:   clientConfig,
-		endpointThriftDir: endpointThriftDir,
+		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
 	}
 

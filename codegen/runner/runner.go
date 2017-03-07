@@ -54,16 +54,20 @@ func main() {
 		*configFile,
 	}, nil)
 
+	configDirName, err := filepath.Abs(configDirName)
+	checkError(
+		err, fmt.Sprintf("cant get abs path of config dir %s", configDirName),
+	)
+
 	gatewaySpec, err := codegen.NewGatewaySpec(
 		configDirName,
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
-		filepath.Join(configDirName, config.MustGetString("typeFileRootDir")),
+		config.MustGetString("genCodePackage"),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
 		filepath.Join(
 			configDirName, config.MustGetString("gatewayThriftRootDir"),
 		),
 		config.MustGetString("clientConfig"),
-		config.MustGetString("endpointThriftDir"),
 		config.MustGetString("endpointConfig"),
 		config.MustGetString("gatewayName"),
 	)

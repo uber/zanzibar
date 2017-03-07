@@ -37,8 +37,8 @@ type PackageHelper struct {
 	gatewayThriftRootDir string
 	// Namespace under thrift folder
 	gatewayThriftNamespace string
-	// The root directory where all files of go types are generated.
-	typeFileRootDir string
+	// The go package name of where all the generated structs are
+	genCodePackage string
 	// The directory to put the generated service code.
 	targetGenDir string
 }
@@ -46,7 +46,7 @@ type PackageHelper struct {
 // NewPackageHelper creates a package helper.
 func NewPackageHelper(
 	thriftRootDir string,
-	typeFileRootDir string,
+	genCodePackage string,
 	targetGenDir string,
 	gatewayThriftRootDir string,
 ) (*PackageHelper, error) {
@@ -68,13 +68,14 @@ func NewPackageHelper(
 		)
 	}
 
-	return &PackageHelper{
+	p := &PackageHelper{
 		thriftRootDir:          path.Clean(thriftRootDir),
-		typeFileRootDir:        typeFileRootDir,
+		genCodePackage:         genCodePackage,
 		gatewayThriftRootDir:   gatewayThriftRootDir,
 		gatewayThriftNamespace: gatewayThriftNamespace,
 		targetGenDir:           genDir,
-	}, nil
+	}
+	return p, nil
 }
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.
@@ -82,13 +83,16 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
+
 	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
-		return "", errors.Errorf("file %s is not in thrift dir", thrift)
+		return "", errors.Errorf(
+			"file %s is not in thrift dir (%s)",
+			thrift, p.thriftRootDir,
+		)
 	}
 	return path.Join(
-		p.gatewayThriftNamespace,
-		p.typeFileRootDir,
+		p.genCodePackage,
 		thrift[idx+len(p.thriftRootDir):len(thrift)-7],
 	), nil
 }
@@ -120,9 +124,13 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
 	root := path.Clean(p.gatewayThriftRootDir)
+
 	idx := strings.Index(thrift, root)
 	if idx == -1 {
-		return "", errors.Errorf("file %s is not in thrift dir", thrift)
+		return "", errors.Errorf(
+			"file %s is not in thrift dir (%s)",
+			thrift, p.gatewayThriftRootDir,
+		)
 	}
 
 	nsIndex := strings.Index(p.targetGenDir, p.gatewayThriftNamespace)
@@ -150,7 +158,10 @@ func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
 	root := path.Clean(p.gatewayThriftRootDir)
 	idx := strings.Index(thrift, root)
 	if idx == -1 {
-		return "", errors.Errorf("file %s is not in thrift dir %s", thrift, p.thriftRootDir)
+		return "", errors.Errorf(
+			"file %s is not in thrift dir (%s)",
+			thrift, p.thriftRootDir,
+		)
 	}
 	return thrift[idx+len(root):], nil
 }
