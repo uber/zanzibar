@@ -23,7 +23,6 @@ package codegen_test
 import (
 	"io/ioutil"
 	"os"
-	"path"
 	"testing"
 
 	"path/filepath"
@@ -47,43 +46,92 @@ func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
 	CompareGoldenFile(t, goldenFile, b, *updateGoldenFile)
 }
 
+// func newPackageHelper(t *testing.T) *codegen.PackageHelper {
+// 	h, err := codegen.NewPackageHelper(
+// 		"examples/example-gateway/idl",
+// 		"examples/example-gateway/gen-code",
+// 		tmpDir,
+// 		"examples/example-gateway/idl/github.com/uber/zanzibar",
+// 	)
+// 	if !assert.NoError(t, err, "failed to create package helper") {
+// 		return nil
+// 	}
+// 	return h
+// }
+
 func TestGenerateBar(t *testing.T) {
-	tmpl, err := codegen.NewTemplate("../../codegen/templates/*.tmpl")
-	if !assert.NoError(t, err, "failed to create template %s", err) {
-		return
-	}
+	// tmpl, err := codegen.NewTemplate("../../codegen/templates/*.tmpl")
+	// if !assert.NoError(t, err, "failed to create template %s", err) {
+	// 	return
+	// }
 
 	assert.NoError(t, os.RemoveAll(tmpDir), "failed to clean temporary directory")
 	if err := os.MkdirAll(tmpDir, os.ModePerm); !assert.NoError(t, err, "failed to create temporary directory", err) {
 		return
 	}
-	pkgHelper := newPackageHelper(t)
 
-	m, err := codegen.NewModuleSpec(clientThrift, pkgHelper)
-	if !assert.NoError(t, err, "failed to create module spec %s", err) {
+	relativeGatewayPath := "../../examples/example-gateway"
+	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
+	if !assert.NoError(t, err, "failed to get abs path %s", err) {
+		return
+	}
+	_ = absGatewayPath
+
+	gateway, err := codegen.NewGatewaySpec(
+		absGatewayPath,
+		filepath.Join(absGatewayPath, "idl"),
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code",
+		tmpDir,
+		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
+		"./clients-config",
+		"./endpoints-config",
+		"example-gateway",
+	)
+	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
 	}
 
-	clientFiles, err := tmpl.GenerateClientFile(&codegen.ClientSpec{
-		ModuleSpec: m,
-		GoFileName: path.Join(
-			pkgHelper.CodeGenTargetPath(),
-			"clients",
-			"bar",
-			"bar.go",
-		),
-		GoStructsFileName: path.Join(
-			pkgHelper.CodeGenTargetPath(),
-			"clients",
-			"bar",
-			"bar_structs.go",
-		),
-	}, pkgHelper)
-	if !assert.NoError(t, err, "failed to generate client code %s", err) {
+	// pkgHelper := newPackageHelper(t)
+
+	// m, err := codegen.NewModuleSpec(clientThrift, pkgHelper)
+	// if !assert.NoError(t, err, "failed to create module spec %s", err) {
+	// 	return
+	// }
+
+	// clientFiles, err := tmpl.GenerateClientFile(&codegen.ClientSpec{
+	// 	ModuleSpec: m,
+	// 	GoFileName: path.Join(
+	// 		pkgHelper.CodeGenTargetPath(),
+	// 		"clients",
+	// 		"bar",
+	// 		"bar.go",
+	// 	),
+	// 	GoStructsFileName: path.Join(
+	// 		pkgHelper.CodeGenTargetPath(),
+	// 		"clients",
+	// 		"bar",
+	// 		"bar_structs.go",
+	// 	),
+	// }, pkgHelper)
+	// if !assert.NoError(t, err, "failed to generate client code %s", err) {
+	// 	return
+	// }
+
+	err = gateway.GenerateClients()
+	if !assert.NoError(t, err, "failed to create clients %s", err) {
 		return
 	}
-	cmpGoldenFile(t, clientFiles.ClientFile, "./data/clients")
-	cmpGoldenFile(t, clientFiles.StructFile, "./data/clients")
+
+	cmpGoldenFile(
+		t,
+		filepath.Join(tmpDir, "clients", "bar", "bar.go"),
+		"./data/clients",
+	)
+	cmpGoldenFile(
+		t,
+		filepath.Join(tmpDir, "clients", "bar", "bar_structs.go"),
+		"./data/clients",
+	)
 
 	// m, err = codegen.NewModuleSpec(endpointThrift, pkgHelper)
 	// if !assert.NoError(t, err, "failed to create module spec %s", err) {
@@ -111,6 +159,7 @@ func TestGenerateBar(t *testing.T) {
 	// if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 	// 	return
 	// }
+
 	// for _, file := range endpointFiles.HandlerFiles {
 	// 	cmpGoldenFile(t, file, "./data/endpoints")
 	// }
@@ -127,6 +176,7 @@ func TestGenerateBar(t *testing.T) {
 	// if !assert.NoError(t, err, "failed to generate endpoint code %s", err) {
 	// 	return
 	// }
+
 	// for _, file := range testFiles {
 	// 	cmpGoldenFile(t, file, "./data/endpoint_tests")
 	// }

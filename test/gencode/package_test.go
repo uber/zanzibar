@@ -21,20 +21,32 @@
 package codegen_test
 
 import (
+	"path/filepath"
 	"testing"
+
+	"os"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 )
 
-var fooThrift = "/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/clients/foo/foo.thrift"
+var fooThrift = os.Getenv("GOPATH") +
+	"/src/github.com/uber/zanzibar/" +
+	"examples/example-gateway/idl/" +
+	"github.com/uber/zanzibar/clients/foo/foo.thrift"
 
 func newPackageHelper(t *testing.T) *codegen.PackageHelper {
+	relativeGatewayPath := "../../examples/example-gateway"
+	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
+	if !assert.NoError(t, err, "failed to get abs path %s", err) {
+		return nil
+	}
+
 	h, err := codegen.NewPackageHelper(
-		"examples/example-gateway/idl",
-		"examples/example-gateway/gen-code",
+		filepath.Join(absGatewayPath, "idl"),
+		"github.com/uber/zanzibar/examples/example-gateway/gen-code",
 		tmpDir,
-		"examples/example-gateway/idl/github.com/uber/zanzibar",
+		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {
 		return nil
