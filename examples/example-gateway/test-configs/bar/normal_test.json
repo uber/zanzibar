@@ -3,12 +3,12 @@
     "endpointId": "bar",
     "handlerId": "normal",
     "endpointRequest": "{}",
-    "endpointResponse": "{status:\"200 OK\"}",
+    "endpointResponse": "{status:\\\"200 OK\\\"}",
 
-    "clients": [{
+    "clientStubs": [{
         "clientId": "bar",
         "clientMethod": "normal",
         "clientRequest": "{}",
-        "clientResponse": "{status:\"200 OK\"}"
+        "clientResponse": "{status:\\\"200 OK\\\"}"
     }]
 }]

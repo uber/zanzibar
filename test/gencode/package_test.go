@@ -91,6 +91,6 @@ func TestPackageGenPath(t *testing.T) {
 func TestEndpointTestConfigPath(t *testing.T) {
 	h := newPackageHelper(t)
 	p := h.EndpointTestConfigPath("foo", "bar")
-	exp := "../../examples/example-gateway/test-configs/foo/bar_test.json"
+	exp := "examples/example-gateway/test-configs/foo/bar_test.json"
 	assert.Equal(t, exp, p, "wrong generated endpoint test config path")
 }
