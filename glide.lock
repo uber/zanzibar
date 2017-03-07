@@ -1,5 +1,5 @@
-hash: a4bb0649dd2dd0a9ec66a79a98af31a978488839baf2de9f643480f1cc5b4b8c
-updated: 2017-02-13T19:07:17.542188056-08:00
+hash: eb4ba44eefb3ba77f8490c87c52e48bdc913d9b2cb7162fd73de93fadee59b58
+updated: 2017-03-07T14:53:51.75227916-08:00
 imports:
 - name: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
@@ -17,6 +17,10 @@ imports:
   - spew
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
+- name: github.com/go-validator/validator
+  version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
+- name: github.com/go-yaml/yaml
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -42,9 +46,9 @@ imports:
   subpackages:
   - difflib
 - name: github.com/Sirupsen/logrus
-  version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
+  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
 - name: github.com/stretchr/testify
-  version: d77da356e56a7428ad25149ca77381849a6a5232
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
   - assert
   - require
@@ -84,11 +88,7 @@ imports:
   subpackages:
   - context
 - name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
   - unix
-- name: gopkg.in/validator.v2
-  version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
-- name: gopkg.in/yaml.v2
-  version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports: []
