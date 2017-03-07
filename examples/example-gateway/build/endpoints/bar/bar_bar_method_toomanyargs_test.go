@@ -5,7 +5,6 @@ package bar_test
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,19 +21,6 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 	defer gateway.Close()
-
-	fakeTooManyArgs := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
-			t.Fatal("can't write fake response")
-		}
-		counter++
-	}
-
-	gateway.Backends()["bar"].HandleFunc(
-		"POST", "/too-many-args-path", fakeTooManyArgs,
-	)
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/too-many-args-path", bytes.NewReader([]byte("{}")),

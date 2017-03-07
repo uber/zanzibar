@@ -5,7 +5,6 @@ package bar_test
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,19 +21,6 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 	defer gateway.Close()
-
-	fakeMissingArg := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
-			t.Fatal("can't write fake response")
-		}
-		counter++
-	}
-
-	gateway.Backends()["bar"].HandleFunc(
-		"GET", "/missing-arg-path", fakeMissingArg,
-	)
 
 	res, err := gateway.MakeRequest(
 		"GET", "/bar/missing-arg-path", bytes.NewReader([]byte("{}")),
