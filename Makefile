@@ -63,7 +63,7 @@ generate:
 	@bash ./scripts/generate.sh
 
 .PHONY: test-all
-test-all: test cover bench bins
+test-all: test cover fast-bench bins
 	./benchmarks/runner/runner -loadtest
 
 .PHONY: test
@@ -71,6 +71,10 @@ test: generate lint
 	go test ./examples/example-gateway/... 1>/dev/null
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
+
+.PHONY: fast-bench
+fast-bench:
+	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 1s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
 
 .PHONY: bench
 bench:
