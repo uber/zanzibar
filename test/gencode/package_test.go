@@ -45,10 +45,9 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	h, err := codegen.NewPackageHelper(
 		"examples/example-gateway/idl",
 		"examples/example-gateway/gen-code",
-		"examples/example-gateway/test-configs",
 		tmpDir,
-		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
-		"../../examples/example-gateway/test-configs",
+		"examples/example-gateway/idl/github.com/uber/zanzibar",
+		"examples/example-gateway/test-configs",
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {
 		return nil

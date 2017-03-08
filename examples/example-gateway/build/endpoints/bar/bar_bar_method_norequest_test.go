@@ -5,6 +5,7 @@ package bar_test
 
 import (
 	"bytes"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,19 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 	defer gateway.Close()
+
+	fakeNoRequest := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		// TODO(zw): generate client response.
+		if _, err := w.Write([]byte("{}")); err != nil {
+			t.Fatal("can't write fake response")
+		}
+		counter++
+	}
+
+	gateway.Backends()["bar"].HandleFunc(
+		"GET", "/no-request-path", fakeNoRequest,
+	)
 
 	res, err := gateway.MakeRequest(
 		"GET", "/bar/no-request-path", bytes.NewReader([]byte("{}")),
