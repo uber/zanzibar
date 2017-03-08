@@ -22,3 +22,4 @@ scripts/easy_json/easy_json
 *.log
 *.svg
 *.pprof
+*.prof
