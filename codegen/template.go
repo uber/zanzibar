@@ -392,8 +392,8 @@ func (c sortByEndpointName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 func (c sortByEndpointName) Less(i, j int) bool {
-	return c[i].EndpointID+c[i].HandleID <
-		c[j].EndpointID+c[j].HandleID
+	return (c[i].EndpointID+c[i].HandleID <
+		c[j].EndpointID+c[j].HandleID)
 }
 
 func contains(arr []string, value string) bool {
@@ -453,8 +453,6 @@ func (t *Template) GenerateEndpointRegisterFile(
 		}
 		endpointsInfo = append(endpointsInfo, info)
 	}
-
-	// TODO: for each endpoint, import endpoint in includedPkgs
 
 	meta := &EndpointsRegisterMeta{
 		IncludedPackages: includedPkgs,
