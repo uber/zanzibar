@@ -1,0 +1,14 @@
+[{
+    "testName": "successfulRequest",
+    "endpointId": "bar",
+    "handlerId": "noRequest",
+    "endpointRequest": "{}",
+    "endpointResponse": "{}",
+
+    "clientStubs": [{
+        "clientId": "bar",
+        "clientMethod": "noRequest",
+        "clientRequest": "{}",
+        "clientResponse": "{}"
+    }]
+}]

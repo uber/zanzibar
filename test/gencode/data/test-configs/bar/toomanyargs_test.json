@@ -1,0 +1,14 @@
+[{
+    "testName": "successfulRequest",
+    "endpointId": "bar",
+    "handlerId": "tooManyArgs",
+    "endpointRequest": "{}",
+    "endpointResponse": "{}",
+
+    "clientStubs": [{
+        "clientId": "bar",
+        "clientMethod": "tooManyArgs",
+        "clientRequest": "{}",
+        "clientResponse": "{}"
+    }]
+}]
