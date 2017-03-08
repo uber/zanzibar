@@ -177,11 +177,9 @@ func findMethod(
 		}
 
 		for _, method := range service.Methods {
-			if method.Name != methodName {
-				continue
+			if method.Name == methodName {
+				return method
 			}
-
-			return method
 		}
 	}
 	return nil
@@ -392,8 +390,8 @@ func (c sortByEndpointName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 func (c sortByEndpointName) Less(i, j int) bool {
-	return (c[i].EndpointID+c[i].HandleID <
-		c[j].EndpointID+c[j].HandleID)
+	return (c[i].EndpointID + c[i].HandleID) <
+		(c[j].EndpointID + c[j].HandleID)
 }
 
 func contains(arr []string, value string) bool {
@@ -410,7 +408,7 @@ func contains(arr []string, value string) bool {
 func (t *Template) GenerateEndpointRegisterFile(
 	endpointsMap map[string]*EndpointSpec, h *PackageHelper,
 ) (string, error) {
-	endpoints := []*EndpointSpec{}
+	endpoints := make([]*EndpointSpec, 0, len(endpointsMap))
 	for _, v := range endpointsMap {
 		endpoints = append(endpoints, v)
 	}
@@ -419,7 +417,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 	includedPkgs := []string{
 		h.GoGatewayPackageName() + "/clients",
 	}
-	endpointsInfo := []EndpointRegisterInfo{}
+	endpointsInfo := make([]EndpointRegisterInfo, 0, len(endpoints))
 
 	for i := 0; i < len(endpoints); i++ {
 		espec := endpoints[i]
