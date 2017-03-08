@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/custom-endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/bar"
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/googlenow"
 
 	"github.com/uber/zanzibar/runtime"

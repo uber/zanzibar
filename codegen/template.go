@@ -421,7 +421,15 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 	for i := 0; i < len(endpoints); i++ {
 		espec := endpoints[i]
-		goPkg := espec.ModuleSpec.GoPackage
+
+		var goPkg string
+		if espec.WorkflowType == "httpClient" {
+			goPkg = espec.ModuleSpec.GoPackage
+		} else if espec.WorkflowType == "custom" {
+			goPkg = espec.WorkflowImportPath
+		} else {
+			panic("Unsupported WorkflowType: " + espec.WorkflowType)
+		}
 
 		if !contains(includedPkgs, goPkg) {
 			includedPkgs = append(includedPkgs, goPkg)

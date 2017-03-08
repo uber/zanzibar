@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	"github.com/uber/zanzibar/examples/example-gateway/custom-endpoints/contacts"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
