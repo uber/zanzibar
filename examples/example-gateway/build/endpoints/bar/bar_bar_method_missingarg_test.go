@@ -26,7 +26,7 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	fakeMissingArg := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{status:\"200 OK\"}")); err != nil {
+		if _, err := w.Write([]byte("{}")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++

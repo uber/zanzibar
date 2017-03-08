@@ -47,9 +47,10 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		"examples/example-gateway/idl",
 		"examples/example-gateway/gen-code",
-		"examples/example-gateway/test-configs",
 		tmpDir,
 		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
+		"examples/example-gateway/idl/github.com/uber/zanzibar",
+		"examples/example-gateway/test-configs",
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {
 		return nil
@@ -94,4 +95,4 @@ func TestEndpointTestConfigPath(t *testing.T) {
 	p := h.EndpointTestConfigPath("foo", "bar")
 	exp := "examples/example-gateway/test-configs/foo/bar_test.json"
 	assert.Equal(t, exp, p, "wrong generated endpoint test config path")
-
+}
