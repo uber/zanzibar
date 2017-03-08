@@ -12,10 +12,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForNoRequest = []byte("{}")
-
-func TestNoRequestOKResponse(t *testing.T) {
+func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -34,12 +31,13 @@ func TestNoRequestOKResponse(t *testing.T) {
 		}
 		counter++
 	}
+
 	gateway.Backends()["bar"].HandleFunc(
 		"GET", "/no-request-path", fakeNoRequest,
 	)
 
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/no-request-path", bytes.NewReader(benchBytesForNoRequest),
+		"GET", "/bar/no-request-path", bytes.NewReader([]byte("{}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

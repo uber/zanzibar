@@ -12,10 +12,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForNormal = []byte("{}")
-
-func TestNormalOKResponse(t *testing.T) {
+func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -34,12 +31,13 @@ func TestNormalOKResponse(t *testing.T) {
 		}
 		counter++
 	}
+
 	gateway.Backends()["bar"].HandleFunc(
 		"POST", "/bar-path", fakeNormal,
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", bytes.NewReader(benchBytesForNormal),
+		"POST", "/bar/bar-path", bytes.NewReader([]byte("{}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

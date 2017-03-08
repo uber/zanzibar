@@ -12,10 +12,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-// TODO(zw): benchBytes should be generated according to request type.
-var benchBytesForArgNotStruct = []byte("{}")
-
-func TestArgNotStructOKResponse(t *testing.T) {
+func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -34,12 +31,13 @@ func TestArgNotStructOKResponse(t *testing.T) {
 		}
 		counter++
 	}
+
 	gateway.Backends()["bar"].HandleFunc(
 		"POST", "/arg-not-struct-path", fakeArgNotStruct,
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/arg-not-struct-path", bytes.NewReader(benchBytesForArgNotStruct),
+		"POST", "/bar/arg-not-struct-path", bytes.NewReader([]byte("{}")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
