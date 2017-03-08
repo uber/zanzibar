@@ -371,7 +371,7 @@ func (t *Template) GenerateClientsInitFile(
 // EndpointRegisterInfo ...
 type EndpointRegisterInfo struct {
 	Method      string
-	Pattern     string
+	HTTPPath    string
 	EndpointID  string
 	HandlerID   string
 	HandlerType string
@@ -448,7 +448,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 			EndpointID:  espec.EndpointID,
 			HandlerID:   espec.HandleID,
 			Method:      method.HTTPMethod,
-			Pattern:     method.HTTPPath,
+			HTTPPath:    method.HTTPPath,
 			HandlerType: handlerType,
 		}
 		endpointsInfo = append(endpointsInfo, info)

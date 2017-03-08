@@ -57,7 +57,7 @@ func makeEndpoint(
 func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	{{range $idx, $endpoint := .Endpoints -}}
 	router.Register(
-		"{{$endpoint.Method}}", "{{$endpoint.Pattern}}",
+		"{{$endpoint.Method}}", "{{$endpoint.HTTPPath}}",
 		makeEndpoint(
 			g,
 			"{{$endpoint.EndpointID}}",
