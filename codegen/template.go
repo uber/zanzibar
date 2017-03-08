@@ -154,12 +154,12 @@ func (t *Template) GenerateClientFile(
 	m.PackageName = m.PackageName + "Client"
 	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, m)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run http_client template")
 	}
 
 	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, m)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run structs template")
 	}
 
 	return &ClientFiles{
@@ -203,7 +203,7 @@ func (t *Template) GenerateEndpointFile(
 		"structs.tmpl", e.GoStructsFileName, m,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run structs template")
 	}
 
 	endpointFiles := &EndpointFiles{
@@ -236,7 +236,7 @@ func (t *Template) GenerateEndpointFile(
 
 	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run endpoint template")
 	}
 	endpointFiles.HandlerFiles = append(endpointFiles.HandlerFiles, dest)
 
@@ -280,7 +280,7 @@ func (t *Template) GenerateEndpointTestFile(
 	}
 	err := t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not run endpoint_test template")
 	}
 	testFiles = append(testFiles, dest)
 
@@ -554,7 +554,9 @@ func (t *Template) execTemplateAndFmt(templName string, filePath string, data in
 func openFileOrCreate(file string) (*os.File, error) {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(file), os.ModePerm); err != nil {
-			return nil, err
+			return nil, errors.Wrapf(
+				err, "could not make directory: %s", file,
+			)
 		}
 	}
 	return os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
