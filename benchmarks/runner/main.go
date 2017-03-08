@@ -145,7 +145,12 @@ func main() {
 	luaScript := flag.String("script", "contacts_1KB.lua", "wrk lua script to run")
 	flag.Parse()
 
-	loadTestScript := path.Join(dirName, "..", *luaScript)
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	loadTestScript := path.Join(cwd, *luaScript)
 	benchServerCmd := spawnBenchServer(dirName)
 	gatewayCmd := spawnGateway(dirName)
 

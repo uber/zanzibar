@@ -22,9 +22,11 @@ package benchGateway
 
 import (
 	"io"
+	"net"
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/uber/zanzibar/examples/example-gateway/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
@@ -71,14 +73,23 @@ func CreateGateway(
 	seedConfig["tchannel.serviceName"] = "bench-gateway"
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.tally.service"] = "bench-gateway"
+	seedConfig["logger.output"] = "stdout"
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{
 			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
+				DialContext: (&net.Dialer{
+					Timeout:   30 * time.Second,
+					KeepAlive: 30 * time.Second,
+				}).DialContext,
+				DisableKeepAlives:     false,
+				MaxIdleConns:          50000,
+				MaxIdleConnsPerHost:   50000,
+				IdleConnTimeout:       90 * time.Second,
+				TLSHandshakeTimeout:   30 * time.Second,
+				ExpectContinueTimeout: 30 * time.Second,
 			},
+			Timeout: 30 * 1000 * time.Millisecond,
 		},
 		backends: backends,
 	}
