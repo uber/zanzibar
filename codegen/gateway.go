@@ -115,20 +115,55 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	clientConfigObj := map[string]string{}
-	err = json.Unmarshal(bytes, &clientConfigObj)
+	clientConfigGeneric := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &clientConfigGeneric)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not parse json file %s: ", jsonFile,
 		)
 	}
 
-	if clientConfigObj["clientType"] != "http" {
-		return nil, errors.Errorf(
-			"Cannot support unknown clientType for client %s", jsonFile,
-		)
+	clientType := clientConfigGeneric["clientType"].(string)
+	if clientType == "http" {
+		// A better solution for client configs is needed here.
+		// Assuming a string map is too restrictive
+		clientConfigObj := map[string]string{}
+		err := json.Unmarshal(bytes, &clientConfigObj)
+
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Could not parse json file %s: ", jsonFile,
+			)
+		}
+
+		return NewHTTPClientSpec(jsonFile, clientConfigObj, h)
+	} else if clientType == "tchannel" {
+		return NewTChannelClientSpec(jsonFile, clientConfigGeneric, h)
+	} else if clientType == "custom" {
+		return NewCustomClientSpec(jsonFile, clientConfigGeneric, h)
 	}
 
+	return nil, errors.Errorf(
+		"Cannot support unknown clientType for client %s", jsonFile,
+	)
+}
+
+// NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
+func NewTChannelClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+	return &ClientSpec{
+		ClientType: "tchannel",
+	}, nil
+}
+
+// NewCustomClientSpec creates a client spec from a json file whose type is custom
+func NewCustomClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+	return &ClientSpec{
+		ClientType: "custom",
+	}, nil
+}
+
+// NewHTTPClientSpec creates a client spec from a json file whose type is http
+func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *PackageHelper) (*ClientSpec, error) {
 	for i := 0; i < len(mandatoryClientFields); i++ {
 		fieldName := mandatoryClientFields[i]
 		if clientConfigObj[fieldName] == "" {
@@ -174,7 +209,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ModuleSpec:        mspec,
 		JSONFile:          jsonFile,
-		ClientType:        clientConfigObj["clientType"],
+		ClientType:        "http",
 		GoFileName:        goFileName,
 		GoPackageName:     goPackageName,
 		GoStructsFileName: goStructsFileName,
@@ -537,7 +572,11 @@ func NewGatewaySpec(
 				err, "Cannot parse client json file %s :", json,
 			)
 		}
-		spec.ClientModules[cspec.JSONFile] = cspec
+
+		// TODO: Other clients should be generated
+		if cspec.ClientType == "http" {
+			spec.ClientModules[cspec.JSONFile] = cspec
+		}
 	}
 	for _, json := range endpointJsons {
 		espec, err := NewEndpointSpec(json, packageHelper)

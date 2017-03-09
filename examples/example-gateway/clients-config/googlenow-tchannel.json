@@ -1,0 +1,10 @@
+{
+	"clientType": "tchannel",
+	"clientId": "googlenowtchannel",
+	"clientName": "GoogleNowTChannel",
+	"thriftFile": "github.com/uber/zanzibar/clients/googlenow/googlenow.thrift",
+	"methods": {
+		"AddCredentials": "Googlenow::addCredentials",
+		"CheckCredentials": "GoogleNow::checkCredentials"
+	}
+}
