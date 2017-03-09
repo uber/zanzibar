@@ -26,6 +26,7 @@ func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
 		"{{.RelativePathToAppConfig}}",
+		"config",
 	)
 }
 
