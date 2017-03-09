@@ -21,19 +21,19 @@
 package codegen_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
-
-	"os"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 )
 
-var fooThrift = os.Getenv("GOPATH") +
-	"/src/github.com/uber/zanzibar/" +
-	"examples/example-gateway/idl/" +
-	"github.com/uber/zanzibar/clients/foo/foo.thrift"
+var fooThrift = filepath.Join(
+	os.Getenv("GOPATH"),
+	"/src/github.com/uber/zanzibar/",
+	"examples/example-gateway/idl/",
+	"github.com/uber/zanzibar/clients/foo/foo.thrift")
 
 func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	relativeGatewayPath := "../../examples/example-gateway"
