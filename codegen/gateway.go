@@ -391,15 +391,15 @@ func (e *EndpointSpec) SetDownstream(
 		return nil
 	}
 
-	var clientModule *ModuleSpec
+	var clientSpec *ClientSpec
 	for _, v := range gatewaySpec.ClientModules {
 		if v.ClientName == e.ClientName {
-			clientModule = v.ModuleSpec
+			clientSpec = v
 			break
 		}
 	}
 
-	if clientModule == nil {
+	if clientSpec == nil {
 		return errors.Errorf(
 			"When parsing endpoint json (%s), "+
 				"could not find client (%s) in gateway",
@@ -409,7 +409,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	return e.ModuleSpec.SetDownstream(
 		e.ThriftServiceName, e.ThriftMethodName,
-		clientModule, e.ClientName, e.ClientMethod,
+		clientSpec, e.ClientName, e.ClientMethod,
 	)
 }
 

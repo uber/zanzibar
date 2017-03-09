@@ -137,7 +137,7 @@ func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*S
 // SetDownstream ...
 func (ms *ModuleSpec) SetDownstream(
 	serviceName string, methodName string,
-	clientModule *ModuleSpec, clientService string, clientMethod string,
+	clientSpec *ClientSpec, clientService string, clientMethod string,
 ) error {
 	var service *ServiceSpec
 	for _, v := range ms.Services {
@@ -167,7 +167,9 @@ func (ms *ModuleSpec) SetDownstream(
 		)
 	}
 
-	err := method.setDownstream(clientModule, clientService, clientMethod)
+	err := method.setDownstream(
+		clientSpec.ModuleSpec, clientService, clientMethod,
+	)
 	if err != nil {
 		return err
 	}
@@ -195,12 +197,10 @@ func (ms *ModuleSpec) SetDownstream(
 	}
 
 	// Adds imports for downstream services.
-	for _, service := range ms.Services {
-		for _, method := range service.Methods {
-			if d := method.Downstream; d != nil && !ms.isPackageIncluded(d.GoPackage) {
-				ms.IncludedPackages = append(ms.IncludedPackages, method.Downstream.GoPackage)
-			}
-		}
+	if !ms.isPackageIncluded(clientSpec.GoPackageName) {
+		ms.IncludedPackages = append(
+			ms.IncludedPackages, clientSpec.GoPackageName,
+		)
 	}
 
 	// Adds imports for thrift types used by downstream services.
