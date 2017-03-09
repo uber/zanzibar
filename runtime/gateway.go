@@ -201,19 +201,18 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 			panic("expected no metrics backend in gateway.")
 		}
 
-		m3FlushIntervalConfig := config.MustGetInt("metrics.m3.flushInterval")
 		env := config.MustGetString("env")
 
 		commonTags := map[string]string{"env": env}
-		m3Backend, err := metrics.NewM3Backend(
-			config.MustGetString("metrics.m3.hostPort"),
-			config.MustGetString("metrics.tally.service"),
-			commonTags, // default tags
-			false,      // include host
-			defaultM3MaxQueueSize,
-			defaultM3MaxPacketSize,
-			time.Duration(m3FlushIntervalConfig)*time.Millisecond,
-		)
+		m3Backend, err := m3.NewReporter(m3.Options{
+			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
+			Service:            config.MustGetString("metrics.tally.service"),
+			CommonTags:         commonTags,
+			Env:                env,
+			IncludeHost:        false,
+			MaxQueueSize:       defaultM3MaxQueueSize,
+			MaxPacketSizeBytes: defaultM3MaxPacketSize,
+		})
 		if err != nil {
 			return err
 		}
@@ -228,19 +227,18 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 	}
 
 	// TODO: decide what default tags we want...
-	defaultTags := &map[string]string{}
+	defaultTags := map[string]string{}
 
 	prefix := config.MustGetString("metrics.tally.service") +
 		".production.all-workers"
 	flushIntervalConfig := config.MustGetInt("metrics.tally.flushInterval")
 
-	scope, closer := tally.NewCachedRootScope(
-		prefix,
-		*defaultTags,
-		metricsBackend,
-		time.Duration(flushIntervalConfig)*time.Millisecond,
-		tally.DefaultSeparator,
-	)
+	scope, closer := tally.NewRootScope(tally.ScopeOptions{
+		Tags:           defaultTags,
+		Prefix:         prefix,
+		CachedReporter: metricsBackend,
+		Separator:      tally.DefaultSeparator,
+	}, time.Duration(flushIntervalConfig)*time.Millisecond)
 	gateway.MetricScope = scope
 	gateway.metricScopeCloser = closer
 

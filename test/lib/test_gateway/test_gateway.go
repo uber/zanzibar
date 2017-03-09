@@ -80,7 +80,7 @@ func (gateway *ChildProcessGateway) setupMetrics(
 
 	gateway.m3Server = testM3Server.NewFakeM3Server(
 		t, &gateway.MetricsWaitGroup,
-		false, countMetrics, metrics.Compact,
+		false, countMetrics, m3.Compact,
 	)
 	gateway.M3Service = gateway.m3Server.Service
 	go gateway.m3Server.Serve()

@@ -21,7 +21,7 @@ import:
   subpackages:
   - lib/go/thrift
 - package: github.com/uber-go/tally
-  version: 19715ce22dfc24b4fb4019f8606ce7f2d5b0304f
+  version: v2.1.0
 - package: github.com/julienschmidt/httprouter
   version: v1.1
 - package: github.com/kardianos/osext
