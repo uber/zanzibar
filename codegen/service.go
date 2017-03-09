@@ -206,8 +206,16 @@ func (ms *ModuleSpec) SetDownstream(
 	// Adds imports for thrift types used by downstream services.
 	for _, service := range ms.Services {
 		for _, method := range service.Methods {
-			if d := method.Downstream; d != nil && !ms.isPackageIncluded(d.GoPackage) {
-				ms.IncludedPackages = append(ms.IncludedPackages, method.Downstream.GoThriftTypesFilePath)
+			d := method.Downstream
+			if d != nil && !ms.isPackageIncluded(d.GoPackage) {
+				// thrift types file is optional...
+				if method.Downstream.GoThriftTypesFilePath == "" {
+					continue
+				}
+
+				ms.IncludedPackages = append(
+					ms.IncludedPackages, method.Downstream.GoThriftTypesFilePath,
+				)
 			}
 		}
 	}
