@@ -24,12 +24,15 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	tmpl "text/template"
+
+	"io/ioutil"
 
 	"github.com/pkg/errors"
 )
@@ -476,9 +479,9 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 // MainMeta ...
 type MainMeta struct {
-	IncludedPackages           []string
-	GatewayName                string
-	RelativeSegmentsToZanzibar []string
+	IncludedPackages        []string
+	GatewayName             string
+	RelativePathToAppConfig string
 }
 
 // GenerateMainFile will use main.tmpl to write out the main.go file
@@ -486,23 +489,35 @@ type MainMeta struct {
 func (t *Template) GenerateMainFile(
 	g *GatewaySpec, h *PackageHelper,
 ) (string, error) {
-	pkgPath := h.GoGatewayPackageName()
+	// TODO: copy config/production over.
 
-	zIndex := strings.Index(pkgPath, zanzibarPath)
+	rootConfigDirName := g.configDirName
+	configDestFileName := h.TargetProductionConfigFilePath()
+	gatewayDirName := filepath.Dir(configDestFileName)
+	deltaPath, err := filepath.Rel(gatewayDirName, rootConfigDirName)
+	if err != nil {
+		return "", errors.Wrap(
+			err, "Could not build relative path when generating main file",
+		)
+	}
 
-	relativeSegmentsToZanzibar := []string{}
+	configSrcFileName := path.Join(
+		getDirName(), "..", "config", "production.json",
+	)
+	bytes, err := ioutil.ReadFile(configSrcFileName)
+	if err != nil {
+		return "", errors.Wrap(
+			err,
+			"Could not read config/production.json while generating main file",
+		)
+	}
 
-	if zIndex == 0 {
-		gatewayPath := pkgPath[len(zanzibarPath)+1:]
-
-		numSegmentsToRoot := len(strings.Split(gatewayPath, "/"))
-		for i := 0; i < numSegmentsToRoot; i++ {
-			relativeSegmentsToZanzibar = append(
-				relativeSegmentsToZanzibar, "..",
-			)
-		}
-	} else {
-		panic("cannot generate main.go outside zanzibar yet.")
+	err = ioutil.WriteFile(configDestFileName, bytes, 0755)
+	if err != nil {
+		return "", errors.Wrap(
+			err,
+			"Could not write config file while generating main file",
+		)
 	}
 
 	meta := &MainMeta{
@@ -510,12 +525,12 @@ func (t *Template) GenerateMainFile(
 			h.GoGatewayPackageName() + "/clients",
 			h.GoGatewayPackageName() + "/endpoints",
 		},
-		GatewayName:                g.gatewayName,
-		RelativeSegmentsToZanzibar: relativeSegmentsToZanzibar,
+		GatewayName:             g.gatewayName,
+		RelativePathToAppConfig: deltaPath,
 	}
 
 	targetFile := h.TargetMainPath()
-	err := t.execTemplateAndFmt("main.tmpl", targetFile, meta)
+	err = t.execTemplateAndFmt("main.tmpl", targetFile, meta)
 	if err != nil {
 		return "", err
 	}
