@@ -1,0 +1,20 @@
+{
+	"serviceName": "my-gateway",
+	"ip": "127.0.0.1",
+	"port": 4000,
+	"env": "production",
+
+	"logger.fileName": "/var/log/my-gateway/my-gateway.log",
+	"logger.output": "disk",
+
+	"metrics.type": "m3",
+	"metrics.tally.flushInterval": 1000,
+	"metrics.tally.service": "my-gateway",
+
+	"metrics.m3.hostPort": "127.0.0.1:9052",
+	"metrics.m3.service": "my-gateway",
+	"metrics.m3.flushInterval": 500,
+
+	"tchannel.serviceName": "my-gateway",
+	"tchannel.processName": "my-gateway"
+}

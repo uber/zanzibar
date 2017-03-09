@@ -20,18 +20,17 @@ func getDirName() string {
 	return filepath.Dir(file)
 }
 
-func getZanzibarDirName() string {
+func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"..",
-		"..",
+		".",
 	)
 }
 
 func main() {
 	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getZanzibarDirName(), "config", "production.json"),
-		filepath.Join(getDirName(), "config", "production.json"),
+		filepath.Join(getDirName(), "zanzibar-production.json"),
+		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
 	}, nil)
 
