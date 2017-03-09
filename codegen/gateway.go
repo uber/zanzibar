@@ -83,6 +83,8 @@ type ClientSpec struct {
 	ClientType string
 	// GoFileName, the absolute path where the generate client is
 	GoFileName string
+	// GoPackageName is the golang package name for the client
+	GoPackageName string
 	// GoStructsFileName, absolute path where any helper structs
 	// are generated for this generated client
 	GoStructsFileName string
@@ -157,6 +159,12 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		baseName+".go",
 	)
 
+	goPackageName := filepath.Join(
+		h.GoGatewayPackageName(),
+		"clients",
+		baseName,
+	)
+
 	goStructsFileName := filepath.Join(
 		h.CodeGenTargetPath(),
 		"clients",
@@ -169,6 +177,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		JSONFile:          jsonFile,
 		ClientType:        clientConfigObj["clientType"],
 		GoFileName:        goFileName,
+		GoPackageName:     goPackageName,
 		GoStructsFileName: goStructsFileName,
 		ThriftFile:        thriftFile,
 		ClientID:          clientConfigObj["clientId"],

@@ -301,7 +301,7 @@ type ClientsInitFilesMeta struct {
 	ClientInfo       []ClientInfoMeta
 }
 
-type sortByClientName []*ModuleSpec
+type sortByClientName []*ClientSpec
 
 func (c sortByClientName) Len() int {
 	return len(c)
@@ -310,7 +310,7 @@ func (c sortByClientName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 func (c sortByClientName) Less(i, j int) bool {
-	return c[i].GoPackage < c[j].GoPackage
+	return c[i].GoFileName < c[j].GoFileName
 }
 
 // GenerateClientsInitFile generates go code to allocate and initialize
@@ -318,24 +318,26 @@ func (c sortByClientName) Less(i, j int) bool {
 func (t *Template) GenerateClientsInitFile(
 	clientsMap map[string]*ClientSpec, h *PackageHelper,
 ) (string, error) {
-	clients := []*ModuleSpec{}
+	clients := []*ClientSpec{}
 	for _, v := range clientsMap {
-		clients = append(clients, v.ModuleSpec)
+		clients = append(clients, v)
 	}
 	sort.Sort(sortByClientName(clients))
 
 	includedPkgs := []string{}
 	for i := 0; i < len(clients); i++ {
-		if len(clients[i].Services) == 0 {
+		if len(clients[i].ModuleSpec.Services) == 0 {
 			continue
 		}
 
-		includedPkgs = append(includedPkgs, clients[i].GoPackage)
+		includedPkgs = append(
+			includedPkgs, clients[i].GoPackageName,
+		)
 	}
 
 	clientInfo := []ClientInfoMeta{}
 	for i := 0; i < len(clients); i++ {
-		module := clients[i]
+		module := clients[i].ModuleSpec
 		if len(module.Services) == 0 {
 			continue
 		}
