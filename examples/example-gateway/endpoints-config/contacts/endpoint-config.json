@@ -1,0 +1,5 @@
+{
+    "endpoints": [
+        "./save_contacts.json"
+    ]
+}

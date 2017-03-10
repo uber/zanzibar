@@ -1,0 +1,6 @@
+{
+    "endpoints": [
+        "./add_credentials.json",
+        "./check_credentials.json"
+    ]
+}
