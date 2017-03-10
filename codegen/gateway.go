@@ -149,8 +149,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	baseName := filepath.Base(jsonFile)
-	baseName = baseName[0 : len(baseName)-5]
+	baseName := filepath.Base(filepath.Dir(jsonFile))
 
 	goFileName := filepath.Join(
 		h.CodeGenTargetPath(),
@@ -458,7 +457,8 @@ func NewGatewaySpec(
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
 		clientConfig,
-		"*.json",
+		"*",
+		"client-config.json",
 	))
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot load client json files")
