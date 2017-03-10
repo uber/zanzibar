@@ -514,7 +514,7 @@ func (t *Template) GenerateMainFile(
 		)
 	}
 
-	err = ioutil.WriteFile(configDestFileName, bytes, 0755)
+	err = ioutil.WriteFile(configDestFileName, bytes, 0644)
 	if err != nil {
 		return "", errors.Wrap(
 			err,
@@ -580,5 +580,5 @@ func openFileOrCreate(file string) (*os.File, error) {
 			)
 		}
 	}
-	return os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
+	return os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 }
