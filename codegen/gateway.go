@@ -412,6 +412,45 @@ func (e *EndpointSpec) SetDownstream(
 	)
 }
 
+// EndpointGroupInfo ...
+type EndpointGroupInfo struct {
+	Endpoints []string
+}
+
+func parseEndpointJsons(
+	endpointGroupJsons []string,
+) ([]string, error) {
+	endpointJsons := []string{}
+
+	for _, endpointGroupJSON := range endpointGroupJsons {
+		bytes, err := ioutil.ReadFile(endpointGroupJSON)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot read endpoint group json: %s",
+				endpointGroupJSON,
+			)
+		}
+
+		var endpointGroupInfo EndpointGroupInfo
+		err = json.Unmarshal(bytes, &endpointGroupInfo)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for endpoint group config: %s",
+				endpointGroupJSON,
+			)
+		}
+
+		endpointConfigDir := filepath.Dir(endpointGroupJSON)
+		for _, fileName := range endpointGroupInfo.Endpoints {
+			endpointJsons = append(
+				endpointJsons, filepath.Join(endpointConfigDir, fileName),
+			)
+		}
+	}
+
+	return endpointJsons, nil
+}
+
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {
 	// package helper for gateway
@@ -464,14 +503,19 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "Cannot load client json files")
 	}
 
-	endpointJsons, err := filepath.Glob(filepath.Join(
+	endpointGroupJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
 		endpointConfig,
 		"*",
-		"*.json",
+		"endpoint-config.json",
 	))
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot load endpoint json files")
+	}
+
+	endpointJsons, err := parseEndpointJsons(endpointGroupJsons)
+	if err != nil {
+		return nil, errors.Wrap(err, "Cannot parse endpoint config")
 	}
 
 	spec := &GatewaySpec{
