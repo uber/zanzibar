@@ -185,7 +185,7 @@ func (p PackageHelper) TargetMainPath() string {
 // TargetProductionConfigFilePath returns where config/production.json
 // should be copied to in a gateway.
 func (p PackageHelper) TargetProductionConfigFilePath() string {
-	return path.Join(p.targetGenDir, "zanzibar-production.json")
+	return path.Join(p.targetGenDir, "zanzibar-defaults.json")
 }
 
 // TypeFullName returns the referred Go type name in generated code from curThriftFile.
