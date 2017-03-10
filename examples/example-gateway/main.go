@@ -24,12 +24,13 @@ func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
 		".",
+		"config",
 	)
 }
 
 func main() {
 	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getDirName(), "zanzibar-production.json"),
+		filepath.Join(getDirName(), "zanzibar-defaults.json"),
 		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
 	}, nil)
