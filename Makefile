@@ -14,7 +14,7 @@ GO_FILES := $(shell \
 FILTER_LINT := grep -v -e "vendor/" -e "gen-code/"
 
 # list all executables
-PROGS = examples/example-gateway/example-gateway \
+PROGS = examples/example-gateway/build/example-gateway \
 	benchmarks/benchserver/benchserver \
 	benchmarks/runner/runner
 
@@ -88,11 +88,11 @@ $(PROGS): $(GO_FILES)
 bins: generate $(PROGS)
 
 .PHONY: run
-run: examples/example-gateway/example-gateway
+run: examples/example-gateway/build/example-gateway
 	cd ./examples/example-gateway; \
 		ENVIRONMENT=production \
 		CONFIG_DIR=./config \
-		./example-gateway
+		./build/example-gateway
 
 .PHONY: go-docs
 go-docs:

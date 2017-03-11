@@ -17,7 +17,7 @@
 /coverage/*
 benchmarks/runner/runner
 benchmarks/benchserver/benchserver
-examples/example-gateway/example-gateway
+examples/example-gateway/build/example-gateway
 scripts/easy_json/easy_json
 *.log
 *.svg

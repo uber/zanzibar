@@ -106,7 +106,8 @@ func spawnGateway(dirName string) *exec.Cmd {
 	uberConfigDir := tempConfigDir
 
 	mainGatewayPath := path.Join(
-		dirName, "..", "..", "examples", "example-gateway", "example-gateway",
+		dirName, "..", "..", "examples",
+		"example-gateway", "build", "example-gateway",
 	)
 
 	var gatewayCmd *exec.Cmd
