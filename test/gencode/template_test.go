@@ -61,11 +61,11 @@ func TestGenerateBar(t *testing.T) {
 	gateway, err := codegen.NewGatewaySpec(
 		absGatewayPath,
 		filepath.Join(absGatewayPath, "idl"),
-		"github.com/uber/zanzibar/examples/example-gateway/gen-code",
+		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
-		"./clients-config",
-		"./endpoints-config",
+		"./clients",
+		"./endpoints",
 		"example-gateway",
 	)
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {

@@ -30,8 +30,8 @@ import (
 
 	"github.com/uber-go/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 )
 
