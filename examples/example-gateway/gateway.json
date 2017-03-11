@@ -2,9 +2,9 @@
 	"gatewayName": "example-gateway",
 	"thriftRootDir": "./idl",
 	"gatewayThriftRootDir": "./idl/github.com/uber/zanzibar",
-	"genCodePackage": "github.com/uber/zanzibar/examples/example-gateway/gen-code",
-	"targetGenDir": ".",
+	"genCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
+	"targetGenDir": "./build",
 
-	"clientConfig": "./clients-config",
-	"endpointConfig": "./endpoints-config"
+	"clientConfig": "./clients",
+	"endpointConfig": "./endpoints"
 }

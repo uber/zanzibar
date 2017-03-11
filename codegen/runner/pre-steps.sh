@@ -21,7 +21,7 @@ EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 go get -u go.uber.org/thriftrw
 echo "Generating Go code from Thrift files"
 rm -rf "$BUILD_DIR/gen-code"
-mkdir "$BUILD_DIR/gen-code"
+mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
     thriftrw \
         --out="$BUILD_DIR/gen-code" \
