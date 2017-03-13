@@ -96,7 +96,12 @@ var knownStatusCodes = []int{
 }
 
 // HandlerFn is a func that handles IncomingHTTPRequest
-type HandlerFn func(context.Context, *IncomingHTTPRequest, *Gateway)
+type HandlerFn func(
+	context.Context,
+	*IncomingHTTPRequest,
+	*OutgoingHTTPResponse,
+	*Gateway,
+)
 
 // EndpointMetrics contains pre allocated metrics structures
 // These are pre-allocated to cache tags maps and for performance
@@ -156,10 +161,10 @@ func NewEndpoint(
 func (endpoint *Endpoint) HandleRequest(
 	w http.ResponseWriter, r *http.Request, params httprouter.Params,
 ) {
-	inc := NewIncomingHTTPRequest(w, r, params, endpoint)
+	req := NewIncomingHTTPRequest(w, r, params, endpoint)
 
 	fn := endpoint.HandlerFn
-	fn(r.Context(), inc, endpoint.gateway)
+	fn(r.Context(), req, req.res, endpoint.gateway)
 }
 
 // Router data structure to handle and register endpoints

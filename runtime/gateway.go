@@ -167,14 +167,17 @@ func (gateway *Gateway) register(register RegisterFn) {
 }
 
 func handleHealthRequest(
-	ctx context.Context, inc *IncomingHTTPRequest, g *Gateway,
+	ctx context.Context,
+	req *IncomingHTTPRequest,
+	res *OutgoingHTTPResponse,
+	g *Gateway,
 ) {
 	message := "Healthy, from " + g.ServiceName
 	bytes := []byte(
 		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
 	)
 
-	inc.WriteJSONBytes(200, bytes)
+	res.WriteJSONBytes(200, bytes)
 }
 
 // Close the http server

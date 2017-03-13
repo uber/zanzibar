@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -37,18 +36,15 @@ var newLineBytes = []byte("\n")
 
 // IncomingHTTPRequest struct manages request
 type IncomingHTTPRequest struct {
-	responseWriter http.ResponseWriter
-	httpRequest    *http.Request
-	gateway        *Gateway
-	started        bool
-	startTime      time.Time
-	finishTime     time.Time
-	finished       bool
-	metrics        *EndpointMetrics
+	httpRequest *http.Request
+	res         *OutgoingHTTPResponse
+	gateway     *Gateway
+	started     bool
+	startTime   time.Time
+	metrics     *EndpointMetrics
 
 	EndpointName string
 	HandlerName  string
-	StatusCode   int
 	URL          *url.URL
 	Method       string
 	Params       httprouter.Params
@@ -60,173 +56,46 @@ func NewIncomingHTTPRequest(
 	w http.ResponseWriter, r *http.Request,
 	params httprouter.Params, endpoint *Endpoint,
 ) *IncomingHTTPRequest {
-	inc := &IncomingHTTPRequest{
-		gateway:        endpoint.gateway,
-		responseWriter: w,
-		httpRequest:    r,
-		URL:            r.URL,
-		StatusCode:     200,
-		Method:         r.Method,
-		Params:         params,
-		Header:         r.Header,
-		metrics:        &endpoint.metrics,
+	req := &IncomingHTTPRequest{
+		gateway:     endpoint.gateway,
+		httpRequest: r,
+		URL:         r.URL,
+		Method:      r.Method,
+		Params:      params,
+		Header:      r.Header,
+		metrics:     &endpoint.metrics,
 	}
+	req.res = NewOutgoingHTTPResponse(w, req)
 
-	inc.Start(endpoint.EndpointName, endpoint.HandlerName)
+	req.Start(endpoint.EndpointName, endpoint.HandlerName)
 
-	return inc
-}
-
-// finish will handle final logic, like metrics
-func (inc *IncomingHTTPRequest) finish() {
-	if !inc.started {
-		inc.gateway.Logger.Error(
-			"Forgot to start incoming request",
-			zap.String("path", inc.URL.Path),
-		)
-		return
-	}
-	if inc.finished {
-		inc.gateway.Logger.Error(
-			"Finished an incoming request twice",
-			zap.String("path", inc.URL.Path),
-		)
-		return
-	}
-
-	inc.finished = true
-	inc.finishTime = time.Now()
-
-	counter := inc.metrics.statusCodes[inc.StatusCode]
-	if counter == nil {
-		inc.gateway.Logger.Error(
-			"Could not emit statusCode metric",
-			zap.Int("UnexpectedStatusCode", inc.StatusCode),
-		)
-	} else {
-		counter.Inc(1)
-	}
-
-	inc.metrics.requestLatency.Record(inc.finishTime.Sub(inc.startTime))
+	return req
 }
 
 // Start the request, do some metrics etc
-func (inc *IncomingHTTPRequest) Start(endpoint string, handler string) {
-	if inc.started {
-		inc.gateway.Logger.Error(
+func (req *IncomingHTTPRequest) Start(endpoint string, handler string) {
+	if req.started {
+		req.gateway.Logger.Error(
 			"Cannot start IncomingHTTPRequest twice",
-			zap.String("path", inc.URL.Path),
+			zap.String("path", req.URL.Path),
 		)
 		return
 	}
 
-	inc.EndpointName = endpoint
-	inc.HandlerName = handler
-	inc.started = true
-	inc.startTime = time.Now()
+	req.EndpointName = endpoint
+	req.HandlerName = handler
+	req.started = true
+	req.startTime = time.Now()
 
-	inc.metrics.requestRecvd.Inc(1)
-}
-
-// SendError helper to send an error
-func (inc *IncomingHTTPRequest) SendError(statusCode int, err error) {
-	inc.SendErrorString(statusCode, err.Error())
-}
-
-// SendErrorString helper to send an error string
-func (inc *IncomingHTTPRequest) SendErrorString(statusCode int, err string) {
-	inc.gateway.Logger.Warn(
-		"Sending error for endpoint request",
-		zap.String("error", err),
-		zap.String("path", inc.URL.Path),
-	)
-
-	inc.writeHeader(statusCode)
-	inc.writeString(err)
-
-	inc.finish()
-}
-
-// CopyJSON will copy json bytes from a Reader
-func (inc *IncomingHTTPRequest) CopyJSON(statusCode int, src io.Reader) {
-	inc.responseWriter.Header().Set("content-type", "application/json")
-	inc.writeHeader(statusCode)
-	_, err := io.Copy(inc.responseWriter, src)
-	if err != nil {
-		inc.gateway.Logger.Error("Could not copy bytes",
-			zap.String("error", err.Error()),
-		)
-	}
-
-	inc.finish()
-}
-
-// WriteJSONBytes writes a byte[] slice that is valid json to Response
-func (inc *IncomingHTTPRequest) WriteJSONBytes(statusCode int, bytes []byte) {
-	inc.responseWriter.Header().Set("content-type", "application/json")
-	inc.writeHeader(statusCode)
-	inc.writeBytes(bytes)
-
-	inc.finish()
-}
-
-// WriteJSON writes a json serializable struct to Response
-func (inc *IncomingHTTPRequest) WriteJSON(statusCode int, body json.Marshaler) {
-	bytes, err := body.MarshalJSON()
-	if err != nil {
-		inc.SendErrorString(500, "Could not serialize json response")
-		inc.gateway.Logger.Error("Could not serialize json response",
-			zap.String("error", err.Error()),
-		)
-		return
-	}
-
-	inc.responseWriter.Header().Set("content-type", "application/json")
-	inc.writeHeader(statusCode)
-	inc.writeBytes(bytes)
-	inc.writeBytes(newLineBytes)
-
-	inc.finish()
-}
-
-func (inc *IncomingHTTPRequest) writeHeader(statusCode int) {
-	inc.StatusCode = statusCode
-	inc.responseWriter.WriteHeader(statusCode)
-}
-
-// WriteBytes writes raw bytes to output
-func (inc *IncomingHTTPRequest) writeBytes(bytes []byte) {
-	_, err := inc.responseWriter.Write(bytes)
-	if err != nil {
-		inc.gateway.Logger.Error("Could not write string to resp body",
-			zap.String("error", err.Error()),
-		)
-	}
-}
-
-// WriteHeader writes the header to http respnse.
-func (inc *IncomingHTTPRequest) WriteHeader(statusCode int) {
-	inc.writeHeader(statusCode)
-}
-
-// WriteString helper just writes a string to the response
-func (inc *IncomingHTTPRequest) writeString(text string) {
-	inc.writeBytes([]byte(text))
-}
-
-// NotFound helper to make request NotFound
-func (inc *IncomingHTTPRequest) NotFound() {
-	http.NotFound(inc.responseWriter, inc.httpRequest)
-	// A NotFound request is not started...
-	// TODO: inc.finish()
+	req.metrics.requestRecvd.Inc(1)
 }
 
 // ReadAll helper to read entire body
-func (inc *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
-	rawBody, err := ioutil.ReadAll(inc.httpRequest.Body)
+func (req *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
+	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		inc.SendErrorString(500, "Could not ReadAll() body")
-		inc.gateway.Logger.Error("Could not ReadAll() body",
+		req.res.SendErrorString(500, "Could not ReadAll() body")
+		req.gateway.Logger.Error("Could not ReadAll() body",
 			zap.String("error", err.Error()),
 		)
 		return nil, false
@@ -236,27 +105,17 @@ func (inc *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
 }
 
 // UnmarshalBody helper to unmarshal body into struct
-func (inc *IncomingHTTPRequest) UnmarshalBody(
+func (req *IncomingHTTPRequest) UnmarshalBody(
 	body json.Unmarshaler, rawBody []byte,
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		inc.SendErrorString(400, "Could not parse json: "+err.Error())
-		inc.gateway.Logger.Warn("Could not parse json",
+		req.res.SendErrorString(400, "Could not parse json: "+err.Error())
+		req.gateway.Logger.Warn("Could not parse json",
 			zap.String("error", err.Error()),
 		)
 		return false
 	}
 
 	return true
-}
-
-// IsOKResponse checks if the status code is OK.
-func (inc *IncomingHTTPRequest) IsOKResponse(statusCode int, okResponses []int) bool {
-	for _, r := range okResponses {
-		if statusCode == r {
-			return true
-		}
-	}
-	return false
 }
