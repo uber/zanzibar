@@ -17,6 +17,7 @@ DIRNAME="$(dirname $0)"
 EASY_JSON_RAW_DIR="$DIRNAME/../../scripts/easy_json"
 EASY_JSON_DIR="`cd "${EASY_JSON_RAW_DIR}";pwd`"
 EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
+EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 
 start=`date +%s`
 echo $start > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
@@ -44,9 +45,14 @@ for file in $(find "$BUILD_DIR/gen-code" -name 'versioncheck.go'); do
     rm "$file"
 done
 
+go build -o $EASY_JSON_BINARY $EASY_JSON_FILE
+end=`date +%s`
+runtime=$((end-start))
+echo "Compiled easyjson : +$runtime"
+
 echo "Generating JSON Marshal/Unmarshal"
 for file in $(find "$BUILD_DIR/gen-code" -name "*.go" | grep -v "versioncheck.go");do
-    go run "$EASY_JSON_FILE" -- "$file"
+    "$EASY_JSON_BINARY" -- "$file"
 done
 
 end=`date +%s`
