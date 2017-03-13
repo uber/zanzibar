@@ -16,14 +16,15 @@ import (
 // HandleCheckCredentialsRequest handles "/googlenow/check-credentials".
 func HandleCheckCredentialsRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingHTTPRequest,
+	req *zanzibar.IncomingHTTPRequest,
+	res *zanzibar.OutgoingHTTPResponse,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.
 	h := http.Header{}
 	for _, header := range []string{"x-uuid", "x-token"} {
-		h.Set(header, inc.Header.Get(header))
+		h.Set(header, req.Header.Get(header))
 	}
 
 	// Handle request body.
@@ -32,7 +33,7 @@ func HandleCheckCredentialsRequest(
 		g.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
@@ -43,10 +44,10 @@ func HandleCheckCredentialsRequest(
 	}()
 
 	// Handle client respnse.
-	if !inc.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
+	if !res.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
 		g.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
-	inc.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes(clientResp.StatusCode, nil)
 }

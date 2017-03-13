@@ -13,17 +13,18 @@ import (
 // HandleSaveContactsRequest "/contacts/:userUUID/contacts"
 func HandleSaveContactsRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingHTTPRequest,
+	req *zanzibar.IncomingHTTPRequest,
+	res *zanzibar.OutgoingHTTPResponse,
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
-	rawBody, ok := inc.ReadAll()
+	rawBody, ok := req.ReadAll()
 	if !ok {
 		return
 	}
 
 	var body SaveContactsRequest
-	ok = inc.UnmarshalBody(&body, rawBody)
+	ok = req.UnmarshalBody(&body, rawBody)
 	if !ok {
 		return
 	}
@@ -31,30 +32,30 @@ func HandleSaveContactsRequest(
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
-	body.UserUUID = inc.Params[0].Value
-	body.AppType = inc.Header.Get("x-uber-client-name")
-	body.DeviceType = inc.Header.Get("x-uber-device")
-	body.AppVersion = inc.Header.Get("x-uber-client-version")
+	body.UserUUID = req.Params[0].Value
+	body.AppType = req.Header.Get("x-uber-client-name")
+	body.DeviceType = req.Header.Get("x-uber-device")
+	body.AppVersion = req.Header.Get("x-uber-client-version")
 
 	clientBody := convertToClient(&body)
-	res, err := clients.Contacts.SaveContacts(ctx, clientBody, nil)
+	cres, err := clients.Contacts.SaveContacts(ctx, clientBody, nil)
 	if err != nil {
 		gateway.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		inc.SendError(500, errors.Wrap(err, "Could not make client request:"))
+		res.SendError(500, errors.Wrap(err, "Could not make client request:"))
 		return
 	}
 
 	// Handle client respnse.
-	if !inc.IsOKResponse(res.StatusCode, []int{200, 202}) {
+	if !res.IsOKResponse(cres.StatusCode, []int{200, 202}) {
 		gateway.Logger.Warn("Unknown response status code",
-			zap.Int("status code", res.StatusCode),
+			zap.Int("status code", cres.StatusCode),
 		)
 	}
 
 	// res.Res.StatusCode
-	inc.CopyJSON(res.StatusCode, res.Body)
+	res.CopyJSON(cres.StatusCode, cres.Body)
 }
 
 func convertToClient(
