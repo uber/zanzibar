@@ -31,12 +31,8 @@ func HandleNormalRequest(
 	h := http.Header{}
 
 	// Handle request body.
-	rawBody, ok := req.ReadAll()
-	if !ok {
-		return
-	}
 	var body NormalHTTPRequest
-	if ok := req.UnmarshalBody(&body, rawBody); !ok {
+	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToNormalClientRequest(&body)
