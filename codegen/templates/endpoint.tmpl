@@ -36,7 +36,6 @@ func Handle{{title .Name}}Request(
 	ctx context.Context,
 	req *zanzibar.IncomingHTTPRequest,
 	res *zanzibar.OutgoingHTTPResponse,
-	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.
@@ -60,7 +59,7 @@ func Handle{{title .Name}}Request(
 		clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest, h)
 	{{- end }}
 	if err != nil {
-		g.Logger.Error("Could not make client request",
+		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
@@ -75,7 +74,7 @@ func Handle{{title .Name}}Request(
 
 	// Handle client respnse.
 	if !res.IsOKResponse(clientResp.StatusCode, {{statusCodes .OKStatusCode}}) {
-		g.Logger.Warn("Unknown response status code",
+		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
