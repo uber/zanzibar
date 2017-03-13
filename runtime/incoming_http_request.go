@@ -35,8 +35,8 @@ import (
 
 var newLineBytes = []byte("\n")
 
-// IncomingMessage struct manages request/response
-type IncomingMessage struct {
+// IncomingHTTPRequest struct manages request
+type IncomingHTTPRequest struct {
 	responseWriter http.ResponseWriter
 	httpRequest    *http.Request
 	gateway        *Gateway
@@ -55,12 +55,12 @@ type IncomingMessage struct {
 	Header       http.Header
 }
 
-// NewIncomingMessage is helper function to alloc IncomingMessage
-func NewIncomingMessage(
+// NewIncomingHTTPRequest is helper function to alloc IncomingHTTPRequest
+func NewIncomingHTTPRequest(
 	w http.ResponseWriter, r *http.Request,
 	params httprouter.Params, endpoint *Endpoint,
-) *IncomingMessage {
-	inc := &IncomingMessage{
+) *IncomingHTTPRequest {
+	inc := &IncomingHTTPRequest{
 		gateway:        endpoint.gateway,
 		responseWriter: w,
 		httpRequest:    r,
@@ -78,7 +78,7 @@ func NewIncomingMessage(
 }
 
 // finish will handle final logic, like metrics
-func (inc *IncomingMessage) finish() {
+func (inc *IncomingHTTPRequest) finish() {
 	if !inc.started {
 		inc.gateway.Logger.Error(
 			"Forgot to start incoming request",
@@ -111,10 +111,10 @@ func (inc *IncomingMessage) finish() {
 }
 
 // Start the request, do some metrics etc
-func (inc *IncomingMessage) Start(endpoint string, handler string) {
+func (inc *IncomingHTTPRequest) Start(endpoint string, handler string) {
 	if inc.started {
 		inc.gateway.Logger.Error(
-			"Cannot start IncomingMessage twice",
+			"Cannot start IncomingHTTPRequest twice",
 			zap.String("path", inc.URL.Path),
 		)
 		return
@@ -129,12 +129,12 @@ func (inc *IncomingMessage) Start(endpoint string, handler string) {
 }
 
 // SendError helper to send an error
-func (inc *IncomingMessage) SendError(statusCode int, err error) {
+func (inc *IncomingHTTPRequest) SendError(statusCode int, err error) {
 	inc.SendErrorString(statusCode, err.Error())
 }
 
 // SendErrorString helper to send an error string
-func (inc *IncomingMessage) SendErrorString(statusCode int, err string) {
+func (inc *IncomingHTTPRequest) SendErrorString(statusCode int, err string) {
 	inc.gateway.Logger.Warn(
 		"Sending error for endpoint request",
 		zap.String("error", err),
@@ -148,7 +148,7 @@ func (inc *IncomingMessage) SendErrorString(statusCode int, err string) {
 }
 
 // CopyJSON will copy json bytes from a Reader
-func (inc *IncomingMessage) CopyJSON(statusCode int, src io.Reader) {
+func (inc *IncomingHTTPRequest) CopyJSON(statusCode int, src io.Reader) {
 	inc.responseWriter.Header().Set("content-type", "application/json")
 	inc.writeHeader(statusCode)
 	_, err := io.Copy(inc.responseWriter, src)
@@ -162,7 +162,7 @@ func (inc *IncomingMessage) CopyJSON(statusCode int, src io.Reader) {
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
-func (inc *IncomingMessage) WriteJSONBytes(statusCode int, bytes []byte) {
+func (inc *IncomingHTTPRequest) WriteJSONBytes(statusCode int, bytes []byte) {
 	inc.responseWriter.Header().Set("content-type", "application/json")
 	inc.writeHeader(statusCode)
 	inc.writeBytes(bytes)
@@ -171,7 +171,7 @@ func (inc *IncomingMessage) WriteJSONBytes(statusCode int, bytes []byte) {
 }
 
 // WriteJSON writes a json serializable struct to Response
-func (inc *IncomingMessage) WriteJSON(statusCode int, body json.Marshaler) {
+func (inc *IncomingHTTPRequest) WriteJSON(statusCode int, body json.Marshaler) {
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		inc.SendErrorString(500, "Could not serialize json response")
@@ -189,13 +189,13 @@ func (inc *IncomingMessage) WriteJSON(statusCode int, body json.Marshaler) {
 	inc.finish()
 }
 
-func (inc *IncomingMessage) writeHeader(statusCode int) {
+func (inc *IncomingHTTPRequest) writeHeader(statusCode int) {
 	inc.StatusCode = statusCode
 	inc.responseWriter.WriteHeader(statusCode)
 }
 
 // WriteBytes writes raw bytes to output
-func (inc *IncomingMessage) writeBytes(bytes []byte) {
+func (inc *IncomingHTTPRequest) writeBytes(bytes []byte) {
 	_, err := inc.responseWriter.Write(bytes)
 	if err != nil {
 		inc.gateway.Logger.Error("Could not write string to resp body",
@@ -205,24 +205,24 @@ func (inc *IncomingMessage) writeBytes(bytes []byte) {
 }
 
 // WriteHeader writes the header to http respnse.
-func (inc *IncomingMessage) WriteHeader(statusCode int) {
+func (inc *IncomingHTTPRequest) WriteHeader(statusCode int) {
 	inc.writeHeader(statusCode)
 }
 
 // WriteString helper just writes a string to the response
-func (inc *IncomingMessage) writeString(text string) {
+func (inc *IncomingHTTPRequest) writeString(text string) {
 	inc.writeBytes([]byte(text))
 }
 
 // NotFound helper to make request NotFound
-func (inc *IncomingMessage) NotFound() {
+func (inc *IncomingHTTPRequest) NotFound() {
 	http.NotFound(inc.responseWriter, inc.httpRequest)
 	// A NotFound request is not started...
 	// TODO: inc.finish()
 }
 
 // ReadAll helper to read entire body
-func (inc *IncomingMessage) ReadAll() ([]byte, bool) {
+func (inc *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(inc.httpRequest.Body)
 	if err != nil {
 		inc.SendErrorString(500, "Could not ReadAll() body")
@@ -236,7 +236,7 @@ func (inc *IncomingMessage) ReadAll() ([]byte, bool) {
 }
 
 // UnmarshalBody helper to unmarshal body into struct
-func (inc *IncomingMessage) UnmarshalBody(
+func (inc *IncomingHTTPRequest) UnmarshalBody(
 	body json.Unmarshaler, rawBody []byte,
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
@@ -252,7 +252,7 @@ func (inc *IncomingMessage) UnmarshalBody(
 }
 
 // IsOKResponse checks if the status code is OK.
-func (inc *IncomingMessage) IsOKResponse(statusCode int, okResponses []int) bool {
+func (inc *IncomingHTTPRequest) IsOKResponse(statusCode int, okResponses []int) bool {
 	for _, r := range okResponses {
 		if statusCode == r {
 			return true
