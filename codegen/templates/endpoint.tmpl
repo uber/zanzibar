@@ -34,7 +34,7 @@ import (
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
 func Handle{{title .Name}}Request(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
