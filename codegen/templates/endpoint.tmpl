@@ -52,12 +52,8 @@ func Handle{{title .Name}}Request(
 	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, h)
 
 	{{- else -}}
-		rawBody, ok := req.ReadAll()
-		if !ok {
-			return
-		}
 		var body {{title .RequestType}}
-		if ok := req.UnmarshalBody(&body, rawBody); !ok {
+		if ok := req.ReadAndUnmarshalBody(&body); !ok {
 			return
 		}
 		clientRequest := convertTo{{title .Name}}ClientRequest(&body)

@@ -90,6 +90,18 @@ func (req *IncomingHTTPRequest) Start(endpoint string, handler string) {
 	req.metrics.requestRecvd.Inc(1)
 }
 
+// ReadAndUnmarshalBody will try to unmarshal into struct or fail
+func (req *IncomingHTTPRequest) ReadAndUnmarshalBody(
+	body json.Unmarshaler,
+) bool {
+	rawBody, success := req.ReadAll()
+	if !success {
+		return false
+	}
+
+	return req.UnmarshalBody(body, rawBody)
+}
+
 // ReadAll helper to read entire body
 func (req *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
