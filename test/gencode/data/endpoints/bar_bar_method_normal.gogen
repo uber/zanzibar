@@ -22,7 +22,7 @@ import (
 // HandleNormalRequest handles "/bar/bar-path".
 func HandleNormalRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
