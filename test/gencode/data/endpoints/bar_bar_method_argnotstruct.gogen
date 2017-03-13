@@ -18,7 +18,8 @@ import (
 // HandleArgNotStructRequest handles "/bar/arg-not-struct-path".
 func HandleArgNotStructRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingHTTPRequest,
+	req *zanzibar.IncomingHTTPRequest,
+	res *zanzibar.OutgoingHTTPResponse,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
@@ -26,12 +27,12 @@ func HandleArgNotStructRequest(
 	h := http.Header{}
 
 	// Handle request body.
-	rawBody, ok := inc.ReadAll()
+	rawBody, ok := req.ReadAll()
 	if !ok {
 		return
 	}
 	var body ArgNotStructHTTPRequest
-	if ok := inc.UnmarshalBody(&body, rawBody); !ok {
+	if ok := req.UnmarshalBody(&body, rawBody); !ok {
 		return
 	}
 	clientRequest := convertToArgNotStructClientRequest(&body)
@@ -40,7 +41,7 @@ func HandleArgNotStructRequest(
 		g.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
@@ -51,12 +52,12 @@ func HandleArgNotStructRequest(
 	}()
 
 	// Handle client respnse.
-	if !inc.IsOKResponse(clientResp.StatusCode, []int{200}) {
+	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
 		g.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
-	inc.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes(clientResp.StatusCode, nil)
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

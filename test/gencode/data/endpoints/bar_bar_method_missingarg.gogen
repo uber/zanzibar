@@ -19,7 +19,8 @@ import (
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
 func HandleMissingArgRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingHTTPRequest,
+	req *zanzibar.IncomingHTTPRequest,
+	res *zanzibar.OutgoingHTTPResponse,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
@@ -32,7 +33,7 @@ func HandleMissingArgRequest(
 		g.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		inc.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
@@ -43,23 +44,23 @@ func HandleMissingArgRequest(
 	}()
 
 	// Handle client respnse.
-	if !inc.IsOKResponse(clientResp.StatusCode, []int{200}) {
+	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
 		g.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
 	b, err := ioutil.ReadAll(clientResp.Body)
 	if err != nil {
-		inc.SendError(500, errors.Wrap(err, "could not read client response body:"))
+		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
 		return
 	}
 	var clientRespBody bar.BarResponse
 	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-		inc.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
+		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
 		return
 	}
 	response := convertMissingArgClientResponse(&clientRespBody)
-	inc.WriteJSON(clientResp.StatusCode, response)
+	res.WriteJSON(clientResp.StatusCode, response)
 }
 
 func convertMissingArgClientResponse(body *bar.BarResponse) *bar.BarResponse {
