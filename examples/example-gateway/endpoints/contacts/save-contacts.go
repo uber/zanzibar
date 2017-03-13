@@ -18,13 +18,8 @@ func HandleSaveContactsRequest(
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
-	rawBody, ok := req.ReadAll()
-	if !ok {
-		return
-	}
-
 	var body SaveContactsRequest
-	ok = req.UnmarshalBody(&body, rawBody)
+	ok := req.ReadAndUnmarshalBody(&body)
 	if !ok {
 		return
 	}

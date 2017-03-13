@@ -30,12 +30,8 @@ func HandleAddCredentialsRequest(
 	}
 
 	// Handle request body.
-	rawBody, ok := req.ReadAll()
-	if !ok {
-		return
-	}
 	var body AddCredentialsHTTPRequest
-	if ok := req.UnmarshalBody(&body, rawBody); !ok {
+	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToAddCredentialsClientRequest(&body)
