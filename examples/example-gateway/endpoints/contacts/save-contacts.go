@@ -15,7 +15,6 @@ func HandleSaveContactsRequest(
 	ctx context.Context,
 	req *zanzibar.IncomingHTTPRequest,
 	res *zanzibar.OutgoingHTTPResponse,
-	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	var body SaveContactsRequest
@@ -35,7 +34,7 @@ func HandleSaveContactsRequest(
 	clientBody := convertToClient(&body)
 	cres, err := clients.Contacts.SaveContacts(ctx, clientBody, nil)
 	if err != nil {
-		gateway.Logger.Error("Could not make client request",
+		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "Could not make client request:"))
@@ -44,7 +43,7 @@ func HandleSaveContactsRequest(
 
 	// Handle client respnse.
 	if !res.IsOKResponse(cres.StatusCode, []int{200, 202}) {
-		gateway.Logger.Warn("Unknown response status code",
+		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", cres.StatusCode),
 		)
 	}

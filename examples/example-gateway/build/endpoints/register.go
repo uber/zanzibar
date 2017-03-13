@@ -18,7 +18,6 @@ type handlerFn func(
 	ctx context.Context,
 	req *zanzibar.IncomingHTTPRequest,
 	res *zanzibar.OutgoingHTTPResponse,
-	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 )
 
@@ -31,10 +30,9 @@ func (endpoint *myEndpoint) handle(
 	ctx context.Context,
 	req *zanzibar.IncomingHTTPRequest,
 	res *zanzibar.OutgoingHTTPResponse,
-	g *zanzibar.Gateway,
 ) {
 	fn := endpoint.HandlerFn
-	fn(ctx, req, res, g, endpoint.Clients)
+	fn(ctx, req, res, endpoint.Clients)
 }
 
 func makeEndpoint(

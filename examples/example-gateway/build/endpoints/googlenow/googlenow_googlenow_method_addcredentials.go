@@ -20,7 +20,6 @@ func HandleAddCredentialsRequest(
 	ctx context.Context,
 	req *zanzibar.IncomingHTTPRequest,
 	res *zanzibar.OutgoingHTTPResponse,
-	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.
@@ -37,7 +36,7 @@ func HandleAddCredentialsRequest(
 	clientRequest := convertToAddCredentialsClientRequest(&body)
 	clientResp, err := clients.GoogleNow.AddCredentials(ctx, clientRequest, h)
 	if err != nil {
-		g.Logger.Error("Could not make client request",
+		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
@@ -52,7 +51,7 @@ func HandleAddCredentialsRequest(
 
 	// Handle client respnse.
 	if !res.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
-		g.Logger.Warn("Unknown response status code",
+		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
