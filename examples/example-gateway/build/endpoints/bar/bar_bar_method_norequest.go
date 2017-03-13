@@ -19,7 +19,7 @@ import (
 // HandleNoRequestRequest handles "/bar/no-request-path".
 func HandleNoRequestRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {

@@ -23,7 +23,7 @@ import (
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".
 func HandleTooManyArgsRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {

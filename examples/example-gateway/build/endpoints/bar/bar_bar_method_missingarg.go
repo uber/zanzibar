@@ -19,7 +19,7 @@ import (
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
 func HandleMissingArgRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	g *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {

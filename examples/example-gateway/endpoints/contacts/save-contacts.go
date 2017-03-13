@@ -13,7 +13,7 @@ import (
 // HandleSaveContactsRequest "/contacts/:userUUID/contacts"
 func HandleSaveContactsRequest(
 	ctx context.Context,
-	inc *zanzibar.IncomingMessage,
+	inc *zanzibar.IncomingHTTPRequest,
 	gateway *zanzibar.Gateway,
 	clients *clients.Clients,
 ) {
