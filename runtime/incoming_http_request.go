@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/uber-go/tally"
 	"github.com/uber-go/zap"
 )
 
@@ -42,6 +43,9 @@ type IncomingHTTPRequest struct {
 	started     bool
 	startTime   time.Time
 	metrics     *EndpointMetrics
+
+	Logger zap.Logger
+	Scope  tally.Scope
 
 	EndpointName string
 	HandlerName  string
@@ -59,11 +63,15 @@ func NewIncomingHTTPRequest(
 	req := &IncomingHTTPRequest{
 		gateway:     endpoint.gateway,
 		httpRequest: r,
-		URL:         r.URL,
-		Method:      r.Method,
-		Params:      params,
-		Header:      r.Header,
-		metrics:     &endpoint.metrics,
+
+		Logger: endpoint.gateway.Logger,
+		Scope:  endpoint.gateway.MetricScope,
+
+		URL:     r.URL,
+		Method:  r.Method,
+		Params:  params,
+		Header:  r.Header,
+		metrics: &endpoint.metrics,
 	}
 	req.res = NewOutgoingHTTPResponse(w, req)
 
@@ -75,7 +83,7 @@ func NewIncomingHTTPRequest(
 // Start the request, do some metrics etc
 func (req *IncomingHTTPRequest) Start(endpoint string, handler string) {
 	if req.started {
-		req.gateway.Logger.Error(
+		req.Logger.Error(
 			"Cannot start IncomingHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -107,7 +115,7 @@ func (req *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.res.SendErrorString(500, "Could not ReadAll() body")
-		req.gateway.Logger.Error("Could not ReadAll() body",
+		req.Logger.Error("Could not ReadAll() body",
 			zap.String("error", err.Error()),
 		)
 		return nil, false
@@ -123,7 +131,7 @@ func (req *IncomingHTTPRequest) UnmarshalBody(
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
 		req.res.SendErrorString(400, "Could not parse json: "+err.Error())
-		req.gateway.Logger.Warn("Could not parse json",
+		req.Logger.Warn("Could not parse json",
 			zap.String("error", err.Error()),
 		)
 		return false

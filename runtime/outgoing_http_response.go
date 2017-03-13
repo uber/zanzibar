@@ -60,14 +60,14 @@ func NewOutgoingHTTPResponse(
 // finish will handle final logic, like metrics
 func (res *OutgoingHTTPResponse) finish() {
 	if !res.req.started {
-		res.gateway.Logger.Error(
+		res.req.Logger.Error(
 			"Forgot to start incoming request",
 			zap.String("path", res.req.URL.Path),
 		)
 		return
 	}
 	if res.finished {
-		res.gateway.Logger.Error(
+		res.req.Logger.Error(
 			"Finished an incoming request twice",
 			zap.String("path", res.req.URL.Path),
 		)
@@ -79,7 +79,7 @@ func (res *OutgoingHTTPResponse) finish() {
 
 	counter := res.metrics.statusCodes[res.StatusCode]
 	if counter == nil {
-		res.gateway.Logger.Error(
+		res.req.Logger.Error(
 			"Could not emit statusCode metric",
 			zap.Int("UnexpectedStatusCode", res.StatusCode),
 		)
@@ -101,7 +101,7 @@ func (res *OutgoingHTTPResponse) SendError(statusCode int, err error) {
 func (res *OutgoingHTTPResponse) SendErrorString(
 	statusCode int, err string,
 ) {
-	res.gateway.Logger.Warn(
+	res.req.Logger.Warn(
 		"Sending error for endpoint request",
 		zap.String("error", err),
 		zap.String("path", res.req.URL.Path),
@@ -119,7 +119,7 @@ func (res *OutgoingHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
 	res.writeHeader(statusCode)
 	_, err := io.Copy(res.responseWriter, src)
 	if err != nil {
-		res.gateway.Logger.Error("Could not copy bytes",
+		res.req.Logger.Error("Could not copy bytes",
 			zap.String("error", err.Error()),
 		)
 	}
@@ -145,7 +145,7 @@ func (res *OutgoingHTTPResponse) WriteJSON(
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.gateway.Logger.Error("Could not serialize json response",
+		res.req.Logger.Error("Could not serialize json response",
 			zap.String("error", err.Error()),
 		)
 		return
@@ -168,7 +168,7 @@ func (res *OutgoingHTTPResponse) writeHeader(statusCode int) {
 func (res *OutgoingHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
-		res.gateway.Logger.Error("Could not write string to resp body",
+		res.req.Logger.Error("Could not write string to resp body",
 			zap.String("error", err.Error()),
 		)
 	}

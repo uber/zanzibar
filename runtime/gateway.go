@@ -160,19 +160,18 @@ func (gateway *Gateway) register(register RegisterFn) {
 	)
 
 	gateway.router.Register("GET", "/health", NewEndpoint(
-		gateway, "health", "health", handleHealthRequest,
+		gateway, "health", "health", gateway.handleHealthRequest,
 	))
 
 	register(gateway, gateway.router)
 }
 
-func handleHealthRequest(
+func (gateway *Gateway) handleHealthRequest(
 	ctx context.Context,
 	req *IncomingHTTPRequest,
 	res *OutgoingHTTPResponse,
-	g *Gateway,
 ) {
-	message := "Healthy, from " + g.ServiceName
+	message := "Healthy, from " + gateway.ServiceName
 	bytes := []byte(
 		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
 	)

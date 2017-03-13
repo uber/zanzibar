@@ -100,7 +100,6 @@ type HandlerFn func(
 	context.Context,
 	*IncomingHTTPRequest,
 	*OutgoingHTTPResponse,
-	*Gateway,
 )
 
 // EndpointMetrics contains pre allocated metrics structures
@@ -164,7 +163,7 @@ func (endpoint *Endpoint) HandleRequest(
 	req := NewIncomingHTTPRequest(w, r, params, endpoint)
 
 	fn := endpoint.HandlerFn
-	fn(r.Context(), req, req.res, endpoint.gateway)
+	fn(r.Context(), req, req.res)
 }
 
 // Router data structure to handle and register endpoints
