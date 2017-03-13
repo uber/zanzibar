@@ -47,7 +47,6 @@ type Clients interface {
 
 // Options configures the gateway
 type Options struct {
-	Clients        Clients
 	MetricsBackend tally.CachedStatsReporter
 	LogWriter      zap.WriteSyncer
 }
@@ -81,8 +80,13 @@ type Gateway struct {
 func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
-	if opts.Clients == nil {
-		panic("opts.Clients required")
+	var metricsBackend tally.CachedStatsReporter
+	var logWriter zap.WriteSyncer
+	if opts != nil && opts.MetricsBackend != nil {
+		metricsBackend = opts.MetricsBackend
+	}
+	if opts != nil && opts.LogWriter != nil {
+		logWriter = opts.LogWriter
 	}
 
 	gateway := &Gateway{
@@ -90,11 +94,10 @@ func CreateGateway(
 		Port:        int32(config.MustGetInt("port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
-		Clients:     opts.Clients,
 		Config:      config,
 
-		metricsBackend: opts.MetricsBackend,
-		logWriter:      opts.LogWriter,
+		logWriter:      logWriter,
+		metricsBackend: metricsBackend,
 	}
 
 	gateway.Router = NewRouter(gateway)
