@@ -47,7 +47,6 @@ func NewClient(
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}) (*http.Response, error) {
 	// Generate full URL.
-	// TODO: (jakev) insert params if needed here.
 	fullURL := c.client.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
