@@ -42,10 +42,12 @@ func NewClient(
 
 {{range .Methods}}
 
-{{- if ne .RequestType ""}}
-{{/* template for having request http body */}}
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
+{{- if ne .RequestType ""}}
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}) (*http.Response, error) {
+{{else}}
+func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
+{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 	// Generate full URL.
 	fullURL := c.client.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
@@ -54,38 +56,21 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 	{{- end -}}
 	{{- end}}
 
+	{{if ne .RequestType ""}}
 	rawBody, err := r.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
 
 	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, bytes.NewReader(rawBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
-}
-
-{{else}} {{/* template for having http body */ -}}
-
-// {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
-	// Generate full URL.
-	fullURL := c.client.BaseURL
-	{{- range $k, $segment := .PathSegments -}}
-	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
-	{{- else -}}+"/"+r.{{$segment.BodyIdentifier}}
-	{{- end -}}
-	{{- end}}
-
+	{{else}}
 	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, nil)
+	{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.client.Client.Do(req.WithContext(ctx))
 }
-{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
