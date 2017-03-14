@@ -321,8 +321,6 @@ func (t *Template) GenerateEndpointTestFile(
 		Method:      method,
 		TestStubs:   testStubs,
 	}
-	//fmt.Printf("SINDELARTEST: %#v \n", meta)
-	//fmt.Printf("SINDELARTEST: Downstream %#v \n", method.Downstream)
 
 	err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
 	if err != nil {
