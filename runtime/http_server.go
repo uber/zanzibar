@@ -81,6 +81,10 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 // Close the listening socket
 func (server *HTTPServer) Close() {
 	server.closing = true
+	if server.listeningSocket == nil {
+		return
+	}
+
 	err := server.listeningSocket.Close()
 	if err != nil {
 		server.Logger.Error("Error closing listening socket",
