@@ -34,7 +34,8 @@ import (
 func TestBootstrapError(t *testing.T) {
 	gateway1, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		TestBinary: filepath.Join(
-			getDirName(), "..", "examples", "example-gateway", "main.go",
+			getDirName(), "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {

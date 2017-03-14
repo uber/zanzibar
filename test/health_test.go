@@ -42,7 +42,8 @@ func getDirName() string {
 func TestHealthCall(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		TestBinary: filepath.Join(
-			getDirName(), "..", "examples", "example-gateway", "main.go",
+			getDirName(), "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
@@ -111,7 +112,8 @@ func TestHealthMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics: true,
 		TestBinary: filepath.Join(
-			getDirName(), "..", "examples", "example-gateway", "main.go",
+			getDirName(), "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
