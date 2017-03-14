@@ -53,7 +53,6 @@ func TestStartGateway(t *testing.T) {
 			"Failed to CreateGateway in TestStartGateway()",
 			zap.String("error", err.Error()),
 		)
-		// ?
 		return
 	}
 
@@ -64,7 +63,6 @@ func TestStartGateway(t *testing.T) {
 			"Failed to Bootstrap in TestStartGateway()",
 			zap.String("error", err.Error()),
 		)
-		// ?
 		return
 	}
 	logAndWait(server)
