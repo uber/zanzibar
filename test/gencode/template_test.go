@@ -66,6 +66,7 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
 		"./clients",
 		"./endpoints",
+		"../../examples/example-gateway/test-configs",
 		"example-gateway",
 	)
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {

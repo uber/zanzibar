@@ -70,7 +70,6 @@ func main() {
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
 		filepath.Join(configDirName, config.MustGetString("testConfigsRootDir")),
-		config.MustGetString("endpointThriftDir"),
 		config.MustGetString("gatewayName"),
 	)
 	checkError(

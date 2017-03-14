@@ -34,8 +34,6 @@ import (
 	"strings"
 	tmpl "text/template"
 
-	"io/ioutil"
-
 	"github.com/pkg/errors"
 )
 
@@ -286,42 +284,6 @@ func (t *Template) GenerateEndpointTestFile(
 			"Could not find serviceName (%s) + methodName (%s) in module",
 			serviceName, methodName,
 		)
-
-	for _, service := range m.Services {
-		for _, method := range service.Methods {
-			dest, err := h.TargetEndpointTestPath(m.ThriftFile, service.Name, method.Name)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Could not generate endpoint test path, service %s, method %s",
-					service, method)
-			}
-			// Read test configurations
-			testConfigPath := h.EndpointTestConfigPath(service.Name, method.Name)
-
-			var testStubs []TestStub
-			file, err := ioutil.ReadFile(testConfigPath)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Could not read endpoint test config for service %s, method %s",
-					service, method)
-			}
-			err = json.Unmarshal(file, &testStubs)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Error parsing test config file.")
-			}
-
-			meta := &EndpointTestMeta{
-				PackageName: m.PackageName,
-				Method:      method,
-				TestStubs:   testStubs,
-			}
-			err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
-			if err != nil {
-				return nil, err
-			}
-			testFiles = append(testFiles, dest)
-		}
 	}
 
 	if method.Downstream == nil {
@@ -332,12 +294,37 @@ func (t *Template) GenerateEndpointTestFile(
 		)
 	}
 
-	dest := e.TargetEndpointTestPath(serviceName, method.Name)
+	dest, err := h.TargetEndpointTestPath(m.ThriftFile, serviceName, methodName)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Could not generate endpoint test path, service %s, method %s",
+			serviceName, methodName)
+	}
+	// Read test configurations
+	testConfigPath := h.EndpointTestConfigPath(serviceName, method.Name)
+
+	var testStubs []TestStub
+	file, err := ioutil.ReadFile(testConfigPath)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Could not read endpoint test config for service %s, method %s",
+			serviceName, method.Name)
+	}
+	err = json.Unmarshal(file, &testStubs)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Error parsing test config file.")
+	}
+
 	meta := &EndpointTestMeta{
 		PackageName: m.PackageName,
 		Method:      method,
+		TestStubs:   testStubs,
 	}
-	err := t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
+	//fmt.Printf("SINDELARTEST: %#v \n", meta)
+	//fmt.Printf("SINDELARTEST: Downstream %#v \n", method.Downstream)
+
+	err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run endpoint_test template")
 	}

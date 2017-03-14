@@ -510,12 +510,8 @@ func NewGatewaySpec(
 	targetGenDir string,
 	gatewayThriftRootDir string,
 	clientConfig string,
-<<<<<<< f1b370b228e3c57fd2c1db08945bd745d8b2efef
 	endpointConfig string,
-=======
 	testConfigsRootDir string,
-	endpointThriftDir string,
->>>>>>> Parse test config file into package helper
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
