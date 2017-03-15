@@ -225,6 +225,8 @@ func (router *Router) Register(
 
 func (router *Router) handleNotFound(w http.ResponseWriter, r *http.Request) {
 	// TODO custom NotFound
+	// A NotFound request is not started...
+	// TODO: inc.finish()
 	http.NotFound(w, r)
 }
 

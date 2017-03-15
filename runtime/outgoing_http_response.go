@@ -154,7 +154,6 @@ func (res *OutgoingHTTPResponse) WriteJSON(
 	res.responseWriter.Header().Set("content-type", "application/json")
 	res.writeHeader(statusCode)
 	res.writeBytes(bytes)
-	res.writeBytes(newLineBytes)
 
 	res.finish()
 }
@@ -182,13 +181,6 @@ func (res *OutgoingHTTPResponse) WriteHeader(statusCode int) {
 // WriteString helper just writes a string to the response
 func (res *OutgoingHTTPResponse) writeString(text string) {
 	res.writeBytes([]byte(text))
-}
-
-// NotFound helper to make request NotFound
-func (res *OutgoingHTTPResponse) NotFound() {
-	http.NotFound(res.responseWriter, res.req.httpRequest)
-	// A NotFound request is not started...
-	// TODO: inc.finish()
 }
 
 // IsOKResponse checks if the status code is OK.

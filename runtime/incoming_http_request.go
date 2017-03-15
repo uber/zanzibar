@@ -33,8 +33,6 @@ import (
 	"github.com/uber-go/zap"
 )
 
-var newLineBytes = []byte("\n")
-
 // IncomingHTTPRequest struct manages request
 type IncomingHTTPRequest struct {
 	httpRequest *http.Request
@@ -75,13 +73,13 @@ func NewIncomingHTTPRequest(
 	}
 	req.res = NewOutgoingHTTPResponse(w, req)
 
-	req.Start(endpoint.EndpointName, endpoint.HandlerName)
+	req.start(endpoint.EndpointName, endpoint.HandlerName)
 
 	return req
 }
 
-// Start the request, do some metrics etc
-func (req *IncomingHTTPRequest) Start(endpoint string, handler string) {
+// start the request, do some metrics etc
+func (req *IncomingHTTPRequest) start(endpoint string, handler string) {
 	if req.started {
 		req.Logger.Error(
 			"Cannot start IncomingHTTPRequest twice",
