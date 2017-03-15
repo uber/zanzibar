@@ -18,8 +18,8 @@ import (
 // HandleArgNotStructRequest handles "/bar/arg-not-struct-path".
 func HandleArgNotStructRequest(
 	ctx context.Context,
-	req *zanzibar.IncomingHTTPRequest,
-	res *zanzibar.OutgoingHTTPResponse,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.
