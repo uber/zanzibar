@@ -2,13 +2,13 @@
     "testName": "successfulRequest",
     "endpointId": "bar",
     "handlerId": "normal",
-    "endpointRequest": "{}",
-    "endpointResponse": "{}",
+    "endpointRequest": {},
+    "endpointResponse": {},
 
     "clientStubs": [{
         "clientId": "bar",
         "clientMethod": "normal",
-        "clientRequest": "{}",
-        "clientResponse": "{}"
+        "clientRequest": {},
+        "clientResponse": {}
     }]
 }]

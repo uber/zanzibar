@@ -30,7 +30,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	fakeTooManyArgs := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
+		if _, err := w.Write([]byte("map[]")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
@@ -41,7 +41,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/too-many-args-path", bytes.NewReader([]byte("{}")),
+		"POST", "/bar/too-many-args-path", bytes.NewReader([]byte("map[]")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

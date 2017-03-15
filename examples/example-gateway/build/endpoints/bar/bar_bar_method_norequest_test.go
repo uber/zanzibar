@@ -30,7 +30,7 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	fakeNoRequest := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{}")); err != nil {
+		if _, err := w.Write([]byte("map[]")); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
@@ -41,7 +41,7 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/no-request-path", bytes.NewReader([]byte("{}")),
+		"GET", "/bar/no-request-path", bytes.NewReader([]byte("map[]")),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
