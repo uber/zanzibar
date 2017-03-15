@@ -23,3 +23,4 @@ scripts/easy_json/easy_json
 *.svg
 *.pprof
 *.prof
+node_modules/

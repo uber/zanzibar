@@ -6,6 +6,7 @@ rm -f fail.out
 touch test.out
 rm -f coverage.tmp
 mkdir -p ./coverage
+rm ./coverage/*.out
 
 COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
@@ -30,4 +31,7 @@ go get github.com/wadey/gocovmerge
 bash ./scripts/concat-coverage.sh
 echo "\nOutputting coverage info... \n"
 make generate-istanbul-json
-istanbul report --root ./coverage --include "**/istanbul.json" text
+
+ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
+./node_modules/.bin/istanbul report --root ./coverage \
+	--include "**/istanbul.json" text
