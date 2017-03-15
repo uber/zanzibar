@@ -23,6 +23,11 @@ check-licence:
 	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
 	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen'
 
+.PHONY: fix-licence
+fix-licence:
+	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
+	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen'
+
 .PHONY: install
 install:
 	@echo "Mounting git pre-push hook"
@@ -32,7 +37,7 @@ install:
 	glide install
 
 .PHONY: lint
-lint:
+lint: check-licence
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@gofmt -d -s $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
