@@ -19,8 +19,8 @@ import (
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
 func HandleMissingArgRequest(
 	ctx context.Context,
-	req *zanzibar.IncomingHTTPRequest,
-	res *zanzibar.OutgoingHTTPResponse,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.

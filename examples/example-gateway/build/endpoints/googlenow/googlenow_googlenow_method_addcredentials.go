@@ -18,8 +18,8 @@ import (
 // HandleAddCredentialsRequest handles "/googlenow/add-credentials".
 func HandleAddCredentialsRequest(
 	ctx context.Context,
-	req *zanzibar.IncomingHTTPRequest,
-	res *zanzibar.OutgoingHTTPResponse,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
 	// Handle request headers.
