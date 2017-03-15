@@ -33,10 +33,10 @@ import (
 	"github.com/uber-go/zap"
 )
 
-// IncomingHTTPRequest struct manages request
-type IncomingHTTPRequest struct {
+// ServerHTTPRequest struct manages request
+type ServerHTTPRequest struct {
 	httpRequest *http.Request
-	res         *OutgoingHTTPResponse
+	res         *ServerHTTPResponse
 	gateway     *Gateway
 	started     bool
 	startTime   time.Time
@@ -53,12 +53,12 @@ type IncomingHTTPRequest struct {
 	Header       http.Header
 }
 
-// NewIncomingHTTPRequest is helper function to alloc IncomingHTTPRequest
-func NewIncomingHTTPRequest(
+// NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
+func NewServerHTTPRequest(
 	w http.ResponseWriter, r *http.Request,
 	params httprouter.Params, endpoint *Endpoint,
-) *IncomingHTTPRequest {
-	req := &IncomingHTTPRequest{
+) *ServerHTTPRequest {
+	req := &ServerHTTPRequest{
 		gateway:     endpoint.gateway,
 		httpRequest: r,
 
@@ -71,7 +71,7 @@ func NewIncomingHTTPRequest(
 		Header:  r.Header,
 		metrics: &endpoint.metrics,
 	}
-	req.res = NewOutgoingHTTPResponse(w, req)
+	req.res = NewServerHTTPResponse(w, req)
 
 	req.start(endpoint.EndpointName, endpoint.HandlerName)
 
@@ -79,10 +79,10 @@ func NewIncomingHTTPRequest(
 }
 
 // start the request, do some metrics etc
-func (req *IncomingHTTPRequest) start(endpoint string, handler string) {
+func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 	if req.started {
 		req.Logger.Error(
-			"Cannot start IncomingHTTPRequest twice",
+			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
 		return
@@ -97,7 +97,7 @@ func (req *IncomingHTTPRequest) start(endpoint string, handler string) {
 }
 
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
-func (req *IncomingHTTPRequest) ReadAndUnmarshalBody(
+func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	body json.Unmarshaler,
 ) bool {
 	rawBody, success := req.ReadAll()
@@ -109,7 +109,7 @@ func (req *IncomingHTTPRequest) ReadAndUnmarshalBody(
 }
 
 // ReadAll helper to read entire body
-func (req *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
+func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.res.SendErrorString(500, "Could not ReadAll() body")
@@ -123,7 +123,7 @@ func (req *IncomingHTTPRequest) ReadAll() ([]byte, bool) {
 }
 
 // UnmarshalBody helper to unmarshal body into struct
-func (req *IncomingHTTPRequest) UnmarshalBody(
+func (req *ServerHTTPRequest) UnmarshalBody(
 	body json.Unmarshaler, rawBody []byte,
 ) bool {
 	err := body.UnmarshalJSON(rawBody)

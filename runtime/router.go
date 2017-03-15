@@ -95,11 +95,11 @@ var knownStatusCodes = []int{
 	http.StatusNetworkAuthenticationRequired, // 511
 }
 
-// HandlerFn is a func that handles IncomingHTTPRequest
+// HandlerFn is a func that handles ServerHTTPRequest
 type HandlerFn func(
 	context.Context,
-	*IncomingHTTPRequest,
-	*OutgoingHTTPResponse,
+	*ServerHTTPRequest,
+	*ServerHTTPResponse,
 )
 
 // EndpointMetrics contains pre allocated metrics structures
@@ -160,7 +160,7 @@ func NewEndpoint(
 func (endpoint *Endpoint) HandleRequest(
 	w http.ResponseWriter, r *http.Request, params httprouter.Params,
 ) {
-	req := NewIncomingHTTPRequest(w, r, params, endpoint)
+	req := NewServerHTTPRequest(w, r, params, endpoint)
 
 	fn := endpoint.HandlerFn
 	fn(r.Context(), req, req.res)

@@ -168,8 +168,8 @@ func (gateway *Gateway) register(register RegisterFn) {
 
 func (gateway *Gateway) handleHealthRequest(
 	ctx context.Context,
-	req *IncomingHTTPRequest,
-	res *OutgoingHTTPResponse,
+	req *ServerHTTPRequest,
+	res *ServerHTTPResponse,
 ) {
 	message := "Healthy, from " + gateway.ServiceName
 	bytes := []byte(

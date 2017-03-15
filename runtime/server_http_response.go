@@ -30,10 +30,10 @@ import (
 	"github.com/uber-go/zap"
 )
 
-// OutgoingHTTPResponse struct manages request
-type OutgoingHTTPResponse struct {
+// ServerHTTPResponse struct manages request
+type ServerHTTPResponse struct {
 	responseWriter http.ResponseWriter
-	req            *IncomingHTTPRequest
+	req            *ServerHTTPRequest
 	gateway        *Gateway
 	finishTime     time.Time
 	finished       bool
@@ -42,11 +42,11 @@ type OutgoingHTTPResponse struct {
 	StatusCode int
 }
 
-// NewOutgoingHTTPResponse is helper function to alloc OutgoingHTTPResponse
-func NewOutgoingHTTPResponse(
-	w http.ResponseWriter, req *IncomingHTTPRequest,
-) *OutgoingHTTPResponse {
-	res := &OutgoingHTTPResponse{
+// NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
+func NewServerHTTPResponse(
+	w http.ResponseWriter, req *ServerHTTPRequest,
+) *ServerHTTPResponse {
+	res := &ServerHTTPResponse{
 		gateway:        req.gateway,
 		req:            req,
 		responseWriter: w,
@@ -58,7 +58,7 @@ func NewOutgoingHTTPResponse(
 }
 
 // finish will handle final logic, like metrics
-func (res *OutgoingHTTPResponse) finish() {
+func (res *ServerHTTPResponse) finish() {
 	if !res.req.started {
 		res.req.Logger.Error(
 			"Forgot to start incoming request",
@@ -93,12 +93,12 @@ func (res *OutgoingHTTPResponse) finish() {
 }
 
 // SendError helper to send an error
-func (res *OutgoingHTTPResponse) SendError(statusCode int, err error) {
+func (res *ServerHTTPResponse) SendError(statusCode int, err error) {
 	res.SendErrorString(statusCode, err.Error())
 }
 
 // SendErrorString helper to send an error string
-func (res *OutgoingHTTPResponse) SendErrorString(
+func (res *ServerHTTPResponse) SendErrorString(
 	statusCode int, err string,
 ) {
 	res.req.Logger.Warn(
@@ -114,7 +114,7 @@ func (res *OutgoingHTTPResponse) SendErrorString(
 }
 
 // CopyJSON will copy json bytes from a Reader
-func (res *OutgoingHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
+func (res *ServerHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
 	res.responseWriter.Header().Set("content-type", "application/json")
 	res.writeHeader(statusCode)
 	_, err := io.Copy(res.responseWriter, src)
@@ -128,7 +128,7 @@ func (res *OutgoingHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
-func (res *OutgoingHTTPResponse) WriteJSONBytes(
+func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, bytes []byte,
 ) {
 	res.responseWriter.Header().Set("content-type", "application/json")
@@ -139,7 +139,7 @@ func (res *OutgoingHTTPResponse) WriteJSONBytes(
 }
 
 // WriteJSON writes a json serializable struct to Response
-func (res *OutgoingHTTPResponse) WriteJSON(
+func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, body json.Marshaler,
 ) {
 	bytes, err := body.MarshalJSON()
@@ -158,13 +158,13 @@ func (res *OutgoingHTTPResponse) WriteJSON(
 	res.finish()
 }
 
-func (res *OutgoingHTTPResponse) writeHeader(statusCode int) {
+func (res *ServerHTTPResponse) writeHeader(statusCode int) {
 	res.StatusCode = statusCode
 	res.responseWriter.WriteHeader(statusCode)
 }
 
 // WriteBytes writes raw bytes to output
-func (res *OutgoingHTTPResponse) writeBytes(bytes []byte) {
+func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
 		res.req.Logger.Error("Could not write string to resp body",
@@ -174,17 +174,17 @@ func (res *OutgoingHTTPResponse) writeBytes(bytes []byte) {
 }
 
 // WriteHeader writes the header to http respnse.
-func (res *OutgoingHTTPResponse) WriteHeader(statusCode int) {
+func (res *ServerHTTPResponse) WriteHeader(statusCode int) {
 	res.writeHeader(statusCode)
 }
 
 // WriteString helper just writes a string to the response
-func (res *OutgoingHTTPResponse) writeString(text string) {
+func (res *ServerHTTPResponse) writeString(text string) {
 	res.writeBytes([]byte(text))
 }
 
 // IsOKResponse checks if the status code is OK.
-func (res *OutgoingHTTPResponse) IsOKResponse(
+func (res *ServerHTTPResponse) IsOKResponse(
 	statusCode int, okResponses []int,
 ) bool {
 	for _, r := range okResponses {
