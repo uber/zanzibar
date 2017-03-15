@@ -417,6 +417,11 @@ func (e *EndpointSpec) TargetEndpointTestPath(
 	return filepath.Join(e.GoFolderName, fileName)
 }
 
+// EndpointTestConfigPath generates a filepath for each endpoint test config
+func (e *EndpointSpec) EndpointTestConfigPath() string {
+	return strings.TrimSuffix(e.JSONFile, filepath.Ext(e.JSONFile)) + "_test.json"
+}
+
 // SetDownstream configures the downstream client for this endpoint spec
 func (e *EndpointSpec) SetDownstream(
 	gatewaySpec *GatewaySpec,
@@ -511,7 +516,6 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointConfig string,
-	testConfigsRootDir string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -519,7 +523,6 @@ func NewGatewaySpec(
 		genCodePackage,
 		targetGenDir,
 		gatewayThriftRootDir,
-		testConfigsRootDir,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot build package helper")

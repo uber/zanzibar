@@ -6,6 +6,5 @@
 	"targetGenDir": "./build",
 
 	"clientConfig": "./clients",
-	"endpointConfig": "./endpoints",
-	"testConfigsRootDir": "./test-configs"
+	"endpointConfig": "./endpoints"
 }

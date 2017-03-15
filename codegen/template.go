@@ -294,14 +294,10 @@ func (t *Template) GenerateEndpointTestFile(
 		)
 	}
 
-	dest, err := h.TargetEndpointTestPath(m.ThriftFile, serviceName, methodName)
-	if err != nil {
-		return nil, errors.Wrapf(err,
-			"Could not generate endpoint test path, service %s, method %s",
-			serviceName, methodName)
-	}
+	dest := e.TargetEndpointTestPath(serviceName, methodName)
+
 	// Read test configurations
-	testConfigPath := h.EndpointTestConfigPath(serviceName, method.Name)
+	testConfigPath := e.EndpointTestConfigPath()
 
 	var testStubs []TestStub
 	file, err := ioutil.ReadFile(testConfigPath)

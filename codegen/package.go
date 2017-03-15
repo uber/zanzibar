@@ -51,7 +51,6 @@ func NewPackageHelper(
 	genCodePackage string,
 	targetGenDir string,
 	gatewayThriftRootDir string,
-	testConfigsRootDir string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
 	if err != nil {
@@ -59,7 +58,6 @@ func NewPackageHelper(
 	}
 
 	gatewayThriftRootDir = path.Clean(gatewayThriftRootDir)
-	testConfigsRootDir = path.Clean(testConfigsRootDir)
 	idlIndex := strings.Index(gatewayThriftRootDir, "idl/") + 4
 	gatewayThriftNamespace := gatewayThriftRootDir[idlIndex:]
 
@@ -78,7 +76,6 @@ func NewPackageHelper(
 		gatewayThriftRootDir:   gatewayThriftRootDir,
 		gatewayThriftNamespace: gatewayThriftNamespace,
 		targetGenDir:           genDir,
-		testConfigsRootDir:     testConfigsRootDir,
 	}
 	return p, nil
 }
@@ -191,21 +188,6 @@ func (p PackageHelper) TargetMainPath() string {
 // should be copied to in a gateway.
 func (p PackageHelper) TargetProductionConfigFilePath() string {
 	return path.Join(p.targetGenDir, "zanzibar-defaults.json")
-}
-
-// TargetEndpointTestPath returns the path for the endpoint test based
-// on the thrift file and method name
-func (p PackageHelper) TargetEndpointTestPath(
-	thrift, serviceName, methodName string,
-) (string, error) {
-	fileName, err := p.getRelativeFileName(thrift)
-	if err != nil {
-		return "", err
-	}
-
-	fileEnding := "_" + strings.ToLower(serviceName) + "_method_" + strings.ToLower(methodName) + "_test.go"
-	goFile := strings.Replace(fileName, ".thrift", fileEnding, -1)
-	return path.Join(p.targetGenDir, goFile), nil
 }
 
 // EndpointTestConfigPath returns the path for the endpoint test configs
