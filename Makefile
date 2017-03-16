@@ -11,7 +11,7 @@ GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
 	-o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "gen-code/"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/"
 
 # list all executables
 PROGS = examples/example-gateway/build/example-gateway \
