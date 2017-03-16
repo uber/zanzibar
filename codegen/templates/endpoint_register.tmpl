@@ -10,6 +10,13 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	"{{$pkg}}"
 	{{end}}
+
+	{{range $idx, $endpoint := .Endpoints -}}
+	{{range $idx, $middleware := .Middlewares -}}
+	// Path to "{{$middleware}}"
+	{{end}}
+	{{end}}
+
 	"github.com/uber/zanzibar/runtime"
 )
 

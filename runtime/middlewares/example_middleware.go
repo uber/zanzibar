@@ -18,19 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package zanzibar
+package exampleMiddleware
 
-//type HandlerFn func(
-//	ctx context.Context,
-//	req *ServerHTTPRequest,
-//	res *ServerHTTPResponse,
-//clients *clients.Clients,
-//)
+import (
+	"net/http"
 
-//type Adapter func(http.Handler) http.Handler
+	zanzibar "github.com/uber/zanzibar/runtime"
+)
 
-//type Middleware interface {
+type Options struct {
+	foo string
+	bar int
+}
 
+type MiddlewareState struct {
+	baz string
+}
+
+//func middlewareFoo(next zanzibar.HandlerFn) zanzibar.HandlerFn {
+//	ctx.Put("token", "c9e452805dee5044ba520198628abcaa")
+//	next.ServeHTTP(w, r)
 //}
 
-//NewMiddleware(gateway zanzibar.Gateway, options Options)
+func WithHeader(key, value string) Adapter {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header.Add(key, value)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func NewMiddleWare(gateway zanzibar.Gateway, options Options, next zanzibar.HandlerFn) zanzibar.HandlerFn {
+	return func(h zanzibar.HandlerFn) zanzibar.HandlerFn {
+		h.ctx.Put("token", MiddlewareState{baz: "c9e452805dee5044ba520198628abcaa"})
+		next.ServeHTTP(w, r)
+	}
+}

@@ -235,8 +235,9 @@ type EndpointSpec struct {
 	// TODO figure out struct type
 	TestFixtures []interface{}
 	// Middlewares, meta data to add middlewares,
-	// TODO figure out struct type
-	Middlewares []interface{}
+	// TODO(sindelar): Refactor to struct type with name and
+	// []map interface for options and validate
+	Middlewares []string
 
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
@@ -361,6 +362,12 @@ func NewEndpointSpec(
 		)
 	}
 
+	// TODO(sindelar): Use structures and validate middleware are defined in codebase.
+	middlewareStrings := make([]string, len(endpointConfigObj["middlewares"].([]interface{})))
+	for idx, middleware := range endpointConfigObj["middlewares"].([]interface{}) {
+		middlewareStrings[idx] = middleware.(string)
+	}
+
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           jsonFile,
@@ -373,7 +380,7 @@ func NewEndpointSpec(
 		ThriftServiceName:  parts[0],
 		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
-		Middlewares:        endpointConfigObj["middlewares"].([]interface{}),
+		Middlewares:        middlewareStrings,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,
