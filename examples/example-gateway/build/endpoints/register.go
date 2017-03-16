@@ -11,6 +11,8 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 
+	// Path to "exampleMiddleware"
+
 	"github.com/uber/zanzibar/runtime"
 )
 
