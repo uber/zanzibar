@@ -74,21 +74,25 @@ type EndpointTestMeta struct {
 
 // TestStub saves stubbed requests/responses for an endpoint test.
 type TestStub struct {
-	TestName         string
-	EndpointID       string
-	HandlerID        string
-	EndpointRequest  map[string]interface{} // Json blob
-	EndpointResponse map[string]interface{} // Json blob
+	TestName               string
+	EndpointID             string
+	HandlerID              string
+	EndpointRequest        map[string]interface{} // Json blob
+	EndpointRequestString  string
+	EndpointResponse       map[string]interface{} // Json blob
+	EndpointResponseString string
 
 	ClientStubs []ClientStub
 }
 
 // ClientStub saves stubbed client request/response for an endpoint test.
 type ClientStub struct {
-	ClientID       string
-	ClientMethod   string
-	ClientRequest  map[string]interface{} // Json blob
-	ClientResponse map[string]interface{} // Json blob
+	ClientID             string
+	ClientMethod         string
+	ClientRequest        map[string]interface{} // Json blob
+	ClientRequestString  string
+	ClientResponse       map[string]interface{} // Json blob
+	ClientResponseString string
 }
 
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
@@ -145,12 +149,9 @@ func decrement(num int) int {
 	return num - 1
 }
 
-func jsonMarshal(jsonObj map[string]interface{}) string {
+func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
 	str, err := json.Marshal(jsonObj)
-	if err != nil {
-		return "Error encoding JSON"
-	}
-	return string(str)
+	return string(str), err
 }
 
 func pascalCase(src string) string {
@@ -325,6 +326,37 @@ func (t *Template) GenerateEndpointTestFile(
 	if err != nil {
 		return nil, errors.Wrapf(err,
 			"Error parsing test config file.")
+	}
+
+	for i := 0; i < len(testStubs); i++ {
+		testStub := &testStubs[i]
+		testStub.EndpointRequestString, err = jsonMarshal(
+			testStub.EndpointRequest)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"Error parsing JSON in test config.")
+		}
+		testStub.EndpointResponseString, err = jsonMarshal(
+			testStub.EndpointResponse)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"Error parsing JSON in test config.")
+		}
+		for j := 0; j < len(testStub.ClientStubs); j++ {
+			clientStub := &testStub.ClientStubs[j]
+			clientStub.ClientRequestString, err = jsonMarshal(
+				clientStub.ClientRequest)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"Error parsing JSON in test config.")
+			}
+			clientStub.ClientResponseString, err = jsonMarshal(
+				clientStub.ClientResponse)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"Error parsing JSON in test config.")
+			}
+		}
 	}
 
 	meta := &EndpointTestMeta{
