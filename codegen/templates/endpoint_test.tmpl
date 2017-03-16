@@ -45,7 +45,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	fake{{.ClientMethod | Title}} := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader({{(index $.Method.OKStatusCode 0).Code}})
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte("{{.ClientResponse}}")); err != nil {
+		if _, err := w.Write([]byte( `{{.ClientResponse | jsonMarshal}}`)); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
@@ -58,7 +58,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	{{end -}}
 
 	res, err := gateway.MakeRequest(
-		"{{$.Method.HTTPMethod}}", "{{$.Method.HTTPPath}}", bytes.NewReader([]byte("{{.EndpointRequest }}")),
+		"{{$.Method.HTTPMethod}}", "{{$.Method.HTTPPath}}", bytes.NewReader([]byte(`{{.EndpointRequest | jsonMarshal}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

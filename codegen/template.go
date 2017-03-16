@@ -102,6 +102,7 @@ var funcMap = tmpl.FuncMap{
 	"dec":          decrement,
 	"basePath":     filepath.Base,
 	"pascal":       pascalCase,
+	"jsonMarshal":  jsonMarshal,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -142,6 +143,14 @@ func camelCase(src string) string {
 
 func decrement(num int) int {
 	return num - 1
+}
+
+func jsonMarshal(jsonObj map[string]interface{}) string {
+	str, err := json.Marshal(jsonObj)
+	if err != nil {
+		return "Error encoding JSON"
+	}
+	return string(str)
 }
 
 func pascalCase(src string) string {
