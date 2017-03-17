@@ -22,6 +22,7 @@ package testGateway
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -107,6 +108,27 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	return nil
 }
 
+func addJSONLine(gateway *ChildProcessGateway, line string) {
+	gateway.jsonLines = append(gateway.jsonLines, line)
+
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if jsonErr != nil {
+		// do not decode msg
+		return
+	}
+
+	msg := lineStruct["msg"].(string)
+
+	msgLogs := gateway.errorLogs[msg]
+	if msgLogs == nil {
+		msgLogs = []string{line}
+	} else {
+		msgLogs = append(msgLogs, line)
+	}
+	gateway.errorLogs[msg] = msgLogs
+}
+
 func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) error {
 	line1, err := reader.ReadString('\n')
 	if err != nil {
@@ -114,7 +136,7 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 	}
 
 	if line1[0] == '{' {
-		testGateway.jsonLines = append(testGateway.jsonLines, line1)
+		addJSONLine(testGateway, line1)
 	}
 
 	_, err = os.Stdout.WriteString(line1)
@@ -166,7 +188,7 @@ func (gateway *ChildProcessGateway) copyToStdout(reader *bufio.Reader) {
 		}
 
 		if line[0] == '{' {
-			gateway.jsonLines = append(gateway.jsonLines, line)
+			addJSONLine(gateway, line)
 		}
 
 		_, err2 := os.Stdout.WriteString(line)
