@@ -62,9 +62,9 @@ type Gateway struct {
 	Logger      zap.Logger
 	MetricScope tally.Scope
 	ServiceName string
+	Config      *StaticConfig
+	Router      *Router
 
-	config            *StaticConfig
-	router            *Router
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
@@ -89,12 +89,12 @@ func CreateGateway(
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
 		Clients:     opts.Clients,
+		Config:      config,
 
-		config:         config,
 		metricsBackend: opts.MetricsBackend,
 	}
 
-	gateway.router = NewRouter(gateway)
+	gateway.Router = NewRouter(gateway)
 
 	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
@@ -140,30 +140,30 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 }
 
 func (gateway *Gateway) register(register RegisterFn) {
-	gateway.router.RegisterRaw("GET", "/debug/pprof", pprof.Index)
-	gateway.router.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
-	gateway.router.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
-	gateway.router.RegisterRaw("GET", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.router.RegisterRaw("POST", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.router.RegisterRaw(
+	gateway.Router.RegisterRaw("GET", "/debug/pprof", pprof.Index)
+	gateway.Router.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
+	gateway.Router.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
+	gateway.Router.RegisterRaw("GET", "/debug/pprof/symbol", pprof.Symbol)
+	gateway.Router.RegisterRaw("POST", "/debug/pprof/symbol", pprof.Symbol)
+	gateway.Router.RegisterRaw(
 		"GET", "/debug/pprof/goroutine", pprof.Handler("goroutine").ServeHTTP,
 	)
-	gateway.router.RegisterRaw(
+	gateway.Router.RegisterRaw(
 		"GET", "/debug/pprof/heap", pprof.Handler("heap").ServeHTTP,
 	)
-	gateway.router.RegisterRaw(
+	gateway.Router.RegisterRaw(
 		"GET", "/debug/pprof/threadcreate",
 		pprof.Handler("threadcreate").ServeHTTP,
 	)
-	gateway.router.RegisterRaw(
+	gateway.Router.RegisterRaw(
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
 
-	gateway.router.Register("GET", "/health", NewEndpoint(
+	gateway.Router.Register("GET", "/health", NewEndpoint(
 		gateway, "health", "health", gateway.handleHealthRequest,
 	))
 
-	register(gateway, gateway.router)
+	register(gateway, gateway.Router)
 }
 
 func (gateway *Gateway) handleHealthRequest(
@@ -193,7 +193,7 @@ func (gateway *Gateway) Close() {
 
 // InspectOrDie inspects the config for this gateway
 func (gateway *Gateway) InspectOrDie() map[string]interface{} {
-	return gateway.config.InspectOrDie()
+	return gateway.Config.InspectOrDie()
 }
 
 // Wait for gateway to close the server
@@ -304,7 +304,7 @@ func (gateway *Gateway) setupHTTPServer() error {
 	gateway.server = &HTTPServer{
 		Server: &http.Server{
 			Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
-			Handler: gateway.router,
+			Handler: gateway.Router,
 		},
 		Logger: gateway.Logger,
 	}
