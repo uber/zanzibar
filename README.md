@@ -6,7 +6,7 @@ A build system & runtime component to generate configuration driven gateways. Ed
 
 ```
 mkdir -p $GOPATH/src/github.com/uber
-git clone gitolite@code.uber.internal:github/uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
+git clone git@github.com:uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
 cd $GOPATH/src/github.com/uber/zanzibar
 make install
 ```
@@ -54,7 +54,6 @@ sudo mkdir -p /var/log/example-gateway
 sudo chown $USER /var/log/example-gateway
 chmod 755 /var/log/example-gateway
 ```
-
 
 ```
 make run
