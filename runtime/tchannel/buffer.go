@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package buffer
+package tchannel
 
 import (
 	"bytes"
@@ -31,14 +31,14 @@ var _pool = sync.Pool{
 	},
 }
 
-// Get returns a new Byte Buffer from the buffer pool that has been reset
-func Get() *bytes.Buffer {
+// GetBuffer returns a new Byte Buffer from the buffer pool that has been reset
+func GetBuffer() *bytes.Buffer {
 	buf := _pool.Get().(*bytes.Buffer)
 	buf.Reset()
 	return buf
 }
 
-// Put returns byte buffer to the buffer pool
-func Put(buf *bytes.Buffer) {
+// PutBuffer returns byte buffer to the buffer pool
+func PutBuffer(buf *bytes.Buffer) {
 	_pool.Put(buf)
 }
