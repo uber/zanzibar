@@ -22,19 +22,13 @@ EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 start=`date +%s`
 echo $start > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
 
-thriftrw --version || go get -u go.uber.org/thriftrw
-end=`date +%s`
-runtime=$((end-start))
-echo "Fetched thriftrw : +$runtime"
-
 echo "Generating Go code from Thrift files"
 rm -rf "$BUILD_DIR/gen-code"
 mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
-    thriftrw \
+    go run "$DIRNAME/../../vendor/go.uber.org/thriftrw/main.go" \
         --out="$BUILD_DIR/gen-code" \
-        --thrift-root="$CONFIG_DIR/idl" \
-        --no-service-helpers "$tfile"
+        --thrift-root="$CONFIG_DIR/idl" "$tfile"
 done
 
 end=`date +%s`
