@@ -17,6 +17,7 @@ FILES_ARR=($FILES)
 
 for file in "${FILES_ARR[@]}"; do
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
+	echo "Running coverage test : $file"
 	COVER_ON=1 go test -cover -coverpkg $COVER_PKGS \
 		-coverprofile coverage.tmp $file >>test.out 2>&1 && \
 		mv coverage.tmp "./coverage/cover-unit-$RAND.out" 2>/dev/null || true
