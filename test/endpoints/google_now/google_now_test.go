@@ -22,13 +22,17 @@ package google_now_test
 
 import (
 	"bytes"
-	"errors"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
+	"encoding/json"
+
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -127,6 +131,95 @@ func TestAddCredentials(t *testing.T) {
 
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 1, counter)
+}
+
+type failingConn struct {
+	net.Conn
+}
+
+func (conn *failingConn) Write(b []byte) (int, error) {
+	b = b[0 : len(b)-1]
+	n, err := conn.Conn.Write(b)
+
+	_ = conn.Conn.Close()
+	return n, err
+}
+
+func TestGoogleNowFailReadAllCall(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		LogWhitelist: map[string]bool{
+			"Could not ReadAll() body": true,
+		},
+		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.Backends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	cgateway := gateway.(*testGateway.ChildProcessGateway)
+	cgateway.HTTPClient.Transport = &http.Transport{
+		DisableKeepAlives:   false,
+		MaxIdleConns:        500,
+		MaxIdleConnsPerHost: 500,
+		Dial: func(network string, addr string) (net.Conn, error) {
+			dialer := &net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}
+
+			conn, err := dialer.Dial(network, addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return &failingConn{conn}, nil
+		},
+	}
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials",
+		bytes.NewReader([]byte("junk data")),
+	)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "short write")
+	assert.Nil(t, res)
+	assert.Equal(t, 0, counter)
+
+	time.Sleep(10 * time.Millisecond)
+
+	errLogs := gateway.GetErrorLogs()
+
+	logLines := errLogs["Could not ReadAll() body"]
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
+		return
+	}
+
+	errorField := lineStruct["error"].(string)
+	assert.Equal(t, "unexpected EOF", errorField)
 }
 
 func TestAddCredentialsMissingAuthCode(t *testing.T) {
