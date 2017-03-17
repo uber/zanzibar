@@ -18,6 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Package tchannel integrates the thriftrw thrift encoding/coding library with
+// Package tchannel integrates the thriftrw Thrift encoding/coding library with
 // tchannel to provide an alternative thrift-over-tchannel solution.
 package tchannel
