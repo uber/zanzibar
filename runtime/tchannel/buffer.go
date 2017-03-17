@@ -25,7 +25,7 @@ import (
 	"sync"
 )
 
-var _pool = sync.Pool{
+var pool = sync.Pool{
 	New: func() interface{} {
 		return &bytes.Buffer{}
 	},
@@ -33,12 +33,12 @@ var _pool = sync.Pool{
 
 // GetBuffer returns a new Byte Buffer from the buffer pool that has been reset
 func GetBuffer() *bytes.Buffer {
-	buf := _pool.Get().(*bytes.Buffer)
+	buf := pool.Get().(*bytes.Buffer)
 	buf.Reset()
 	return buf
 }
 
 // PutBuffer returns byte buffer to the buffer pool
 func PutBuffer(buf *bytes.Buffer) {
-	_pool.Put(buf)
+	pool.Put(buf)
 }
