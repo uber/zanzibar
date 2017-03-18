@@ -42,6 +42,16 @@ func getDirName() string {
 		dirname = filepath.Dir(dirname)
 	}
 
+	// Strip _obj_test in go test -cover
+	if filepath.Base(dirname) == "_obj_test" {
+		dirname = filepath.Dir(dirname)
+	}
+
+	// go test -cover does weird folder stuff
+	if filepath.Base(dirname) == "_test" {
+		dirname = filepath.Dir(dirname)
+	}
+
 	// if absolute then fini.
 	if filepath.IsAbs(dirname) {
 		return dirname
