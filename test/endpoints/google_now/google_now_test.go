@@ -222,6 +222,55 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	assert.Equal(t, "unexpected EOF", errorField)
 }
 
+func TestGoogleNowFailJSONParsing(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.Backends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials",
+		bytes.NewReader([]byte("bad bytes")),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t,
+		"Could not parse json: parse error: "+
+			"invalid character 'b' after top-level value "+
+			"near offset 0 of 'bad bytes'",
+		string(respBytes),
+	)
+}
+
 func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	var counter int = 0
 
