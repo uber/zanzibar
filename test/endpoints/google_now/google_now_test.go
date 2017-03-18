@@ -229,9 +229,10 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		KnownBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "main.go",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
+
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}

@@ -53,7 +53,8 @@ func TestBootstrapError(t *testing.T) {
 			"Error listening on port": true,
 		},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "examples", "example-gateway", "main.go",
+			getDirName(), "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 
