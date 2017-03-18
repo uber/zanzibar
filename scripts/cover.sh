@@ -37,4 +37,6 @@ ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
 ./node_modules/.bin/istanbul report --root ./coverage \
 	--include "**/istanbul.json" text
 ./node_modules/.bin/istanbul report --root ./coverage \
+	--include "**/istanbul.json" html
+./node_modules/.bin/istanbul report --root ./coverage \
 	--include "**/istanbul.json" lcovonly
