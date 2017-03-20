@@ -42,19 +42,27 @@ type handler struct {
 // Server handles incoming TChannel calls and forwards them to the matching TChanServer.
 type Server struct {
 	sync.RWMutex
-	ch       tchan.Registrar
-	log      tchan.Logger
-	handlers map[string]handler
-	ctxFn    func(ctx context.Context, method string, headers map[string]string) thrift.Context
+	ch          tchan.Registrar
+	log         tchan.Logger
+	handlers    map[string]handler
+	metaHandler *metaHandler
+	ctxFn       func(ctx context.Context, method string, headers map[string]string) thrift.Context
 }
 
 // NewServer returns a server that can serve thrift services over TChannel.
 func NewServer(registrar tchan.Registrar) *Server {
+	metaHandler := newMetaHandler()
 	server := &Server{
-		ch:       registrar,
-		log:      registrar.Logger(),
-		handlers: make(map[string]handler),
-		ctxFn:    defaultContextFn,
+		ch:          registrar,
+		log:         registrar.Logger(),
+		handlers:    make(map[string]handler),
+		metaHandler: metaHandler,
+		ctxFn:       defaultContextFn,
+	}
+	server.Register(newTChanMetaServer(metaHandler))
+	if ch, ok := registrar.(*tchan.Channel); ok {
+		// Register the meta endpoints on the "tchannel" service name.
+		NewServer(ch.GetSubChannel("tchannel"))
 	}
 	return server
 }
@@ -74,6 +82,11 @@ func (s *Server) Register(svr TChanServer, opts ...RegisterOption) {
 	for _, m := range svr.Methods() {
 		s.ch.Register(s, service+"::"+m)
 	}
+}
+
+// RegisterHealthHandler uses the user-specified function f for the Health endpoint.
+func (s *Server) RegisterHealthHandler(f HealthFunc) {
+	s.metaHandler.setHandler(f)
 }
 
 // SetContextFn sets the function used to convert a context.Context to a thrift.Context.
