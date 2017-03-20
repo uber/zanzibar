@@ -13,6 +13,7 @@ cache:
     - vendor
 before_install:
   - sudo apt-get install -qq time
+  - sudo apt-get install -qq wrk
 install:
   - make install
 script:
@@ -22,7 +23,6 @@ script:
   - make cover
   - make fast-bench
   - make bins
-  - make install-wrk
   - make test-benchmark-runner
 after_success:
   - make travis-coveralls
