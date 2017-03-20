@@ -16,4 +16,11 @@ before_install:
 install:
   - make install
 script:
-  - make test-all
+  - make generate
+  - make lint
+  - make test-only
+  - make cover
+  - make fast-bench
+  - make bins
+  - make install-wrk
+  - make test-benchmark-runner

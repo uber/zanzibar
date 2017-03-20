@@ -73,8 +73,11 @@ generate:
 	@bash ./scripts/generate.sh
 
 .PHONY: test-all
-test-all: test cover fast-bench bins
-	make install-wrk
+test-all: test cover fast-bench bins install-wrk
+	make test-benchmark-runner
+
+.PHONY: test-benchmark-runner
+test-benchmark-runner:
 	PATH=$$PATH:$$PWD/vendor/wrk ./benchmarks/runner/runner -loadtest
 
 .PHONY: install-wrk
@@ -85,6 +88,10 @@ install-wrk:
 
 .PHONY: test
 test: generate lint
+	make test-only
+
+.PHONY: test-only
+test-only:
 	go test ./examples/example-gateway/... 1>/dev/null
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
