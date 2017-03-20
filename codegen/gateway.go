@@ -52,7 +52,7 @@ func getDirName() string {
 		dirname = filepath.Dir(dirname)
 	}
 
-	// if absolute then fini.
+	// if filepath then we are done, otherwise its go package name
 	if filepath.IsAbs(dirname) {
 		return dirname
 	}
