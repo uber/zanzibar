@@ -1,6 +1,6 @@
 ## zanzibar
 
-A build system & runtime component to generate configuration driven gateways. Edit
+A build system & runtime component to generate configuration driven gateways.
 
 ## Installation
 
