@@ -84,7 +84,7 @@ test-benchmark-runner:
 install-wrk:
 	ls ./vendor/wrk/wrk 2>/dev/null || git clone \
 		https://github.com/wg/wrk.git ./vendor/wrk
-	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make)
+	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make >install_wrk.log)
 
 .PHONY: test
 test: generate lint
