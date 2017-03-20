@@ -54,7 +54,7 @@ lint: check-licence
 	@go get github.com/kisielk/errcheck
 	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
-	@go get honnef.co/go/staticcheck/cmd/staticcheck
+	@go get honnef.co/go/tools/cmd/staticcheck
 	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
