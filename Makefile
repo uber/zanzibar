@@ -74,7 +74,14 @@ generate:
 
 .PHONY: test-all
 test-all: test cover fast-bench bins
+	make install-wrk
 	./benchmarks/runner/runner -loadtest
+
+.PHONY: install-wrk
+install-wrk:
+	ls ./vendor/wrk/wrk 2>/dev/null || git clone \
+		https://github.com/wg/wrk.git ./vendor/wrk
+	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make)
 
 .PHONY: test
 test: generate lint
