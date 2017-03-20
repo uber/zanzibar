@@ -24,3 +24,5 @@ script:
   - make bins
   - make install-wrk
   - make test-benchmark-runner
+after_success:
+  - make travis-coveralls

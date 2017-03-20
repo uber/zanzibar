@@ -96,6 +96,12 @@ test-only:
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
+.PHONY: travis-coveralls
+travis-coveralls:
+	ls ./node_modules/coveralls/bin/coveralls.js 2>/dev/null || \
+		npm i coveralls
+	cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+
 .PHONY: fast-bench
 fast-bench:
 	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 1s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
