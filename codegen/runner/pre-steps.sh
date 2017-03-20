@@ -19,15 +19,24 @@ EASY_JSON_DIR="`cd "${EASY_JSON_RAW_DIR}";pwd`"
 EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 
+THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
+THRIFTRW_DIR="`cd "${THRIFTRW_RAW_DIR}";pwd`"
+THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
+THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
+
 start=`date +%s`
 echo $start > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
+
+go build -o $THRIFTRW_BINARY $THRIFTRW_MAIN_FILE
+end=`date +%s`
+runtime=$((end-start))
+echo "Compiled thriftrw : +$runtime"
 
 echo "Generating Go code from Thrift files"
 rm -rf "$BUILD_DIR/gen-code"
 mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
-    go run "$DIRNAME/../../vendor/go.uber.org/thriftrw/main.go" \
-        --out="$BUILD_DIR/gen-code" \
+    "$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
         --thrift-root="$CONFIG_DIR/idl" "$tfile"
 done
 
@@ -35,17 +44,13 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Generated structs : +$runtime"
 
-for file in $(find "$BUILD_DIR/gen-code" -name 'versioncheck.go'); do
-    rm "$file"
-done
-
 go build -o $EASY_JSON_BINARY $EASY_JSON_FILE
 end=`date +%s`
 runtime=$((end-start))
 echo "Compiled easyjson : +$runtime"
 
 echo "Generating JSON Marshal/Unmarshal"
-for file in $(find "$BUILD_DIR/gen-code" -name "*.go" | grep -v "versioncheck.go");do
+for file in $(find "$BUILD_DIR/gen-code" -name "types.go" | grep -v "versioncheck.go");do
     "$EASY_JSON_BINARY" -- "$file"
 done
 
