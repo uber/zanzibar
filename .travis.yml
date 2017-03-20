@@ -12,6 +12,7 @@ cache:
   directories:
     - vendor
 before_install:
+  - sudo apt-get -qq update
   - sudo apt-get install -qq time
   - sudo apt-get install -qq wrk
 install:
