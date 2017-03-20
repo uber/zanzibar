@@ -14,7 +14,8 @@ cache:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -qq time
-  - sudo apt-get install -qq wrk
+  - wget http://us.archive.ubuntu.com/ubuntu/pool/universe/w/wrk/wrk_4.0.1-2_amd64.deb
+  - sudo dpkg -i wrk_4.0.1-2_amd64.deb
 install:
   - make install
 script:
