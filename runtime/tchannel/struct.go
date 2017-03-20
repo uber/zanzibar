@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"io"
 
-	"code.uber.internal/rt/tchan-server/thriftrw/buffer"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 )
@@ -49,8 +48,8 @@ func ReadStruct(reader io.Reader, s RWTStruct) error {
 
 	// do not read all to buffer if reader already is type of io.ReaderAt
 	if !ok {
-		buf := buffer.Get()
-		defer buffer.Put(buf)
+		buf := GetBuffer()
+		defer PutBuffer(buf)
 
 		if _, err := buf.ReadFrom(reader); err != nil {
 			return err
