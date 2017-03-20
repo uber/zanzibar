@@ -1,5 +1,5 @@
 hash: 594f2200204ea9d8b50d6d880c87edc6e24f221dc2aad728f28da003bd66422e
-updated: 2017-03-20T15:12:19.511109652-07:00
+updated: 2017-03-20T15:27:09.063184134-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -90,10 +90,8 @@ imports:
   - internal/goast
   - internal/multiplex
   - internal/plugin
-  - internal/plugin/builtin/pluginapigen
   - internal/process
   - internal/semver
-  - plugin
   - plugin/api
   - protocol
   - protocol/binary
@@ -104,8 +102,4 @@ imports:
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
   subpackages:
   - context
-- name: golang.org/x/tools
-  version: a5c9681e31155c07ac546c8cb7cf5018ac4ef2b7
-  subpackages:
-  - go/ast/astutil
 testImports: []

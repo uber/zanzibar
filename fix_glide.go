@@ -21,8 +21,13 @@
 package fixGlide
 
 import (
-  _ "go.uber.org/thriftrw"
-  _ "go.uber.org/thriftrw/internal/plugin"
+	// Import go-flags to workaround glide
+	_ "github.com/anmitsu/go-shlex"
+	_ "go.uber.org/thriftrw/compile"
+	_ "go.uber.org/thriftrw/gen"
+	_ "go.uber.org/thriftrw/version"
 
+	// Import go-flags to workaround glide
+	_ "github.com/jessevdk/go-flags"
+	_ "go.uber.org/atomic"
 )
-
