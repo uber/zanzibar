@@ -1,0 +1,17 @@
+language: go
+sudo: false
+go:
+  - 1.7
+  - 1.8
+go_import_path: github.com/uber/zanzibar
+env:
+  global:
+    - GO15VENDOREXPERIMENT=1
+    - TEST_TIMEOUT_SCALE=10
+cache:
+  directories:
+    - vendor
+install:
+  - make install
+script:
+  - make test-all
