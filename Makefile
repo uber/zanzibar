@@ -75,7 +75,7 @@ generate:
 .PHONY: test-all
 test-all: test cover fast-bench bins
 	make install-wrk
-	./benchmarks/runner/runner -loadtest
+	PATH=$$PATH:$$PWD/vendor/wrk ./benchmarks/runner/runner -loadtest
 
 .PHONY: install-wrk
 install-wrk:
