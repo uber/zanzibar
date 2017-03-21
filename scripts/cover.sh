@@ -8,6 +8,7 @@ rm -f coverage.tmp
 mkdir -p ./coverage
 rm -f ./coverage/*.out
 
+start=`date +%s`
 COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
 	awk -v ORS=, '{ print $1 }' | sed 's/,$/\n/')
@@ -21,6 +22,9 @@ for file in "${FILES_ARR[@]}"; do
 	COVER_ON=1 go test -cover -coverpkg $COVER_PKGS \
 		-coverprofile coverage.tmp $file >>test.out 2>&1 && \
 		mv coverage.tmp "./coverage/cover-unit-$RAND.out" 2>/dev/null || true
+	end=`date +%s`
+	runtime=$((end-start))
+	echo "Finished coverage test : $file : +$runtime"
 done
 
 cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
@@ -30,8 +34,16 @@ grep "FAIL" test.out | tee -a fail.out
 
 go get github.com/wadey/gocovmerge
 bash ./scripts/concat-coverage.sh
-echo "\nOutputting coverage info... \n"
+
+end=`date +%s`
+runtime=$((end-start))
+echo "Finished concatting coverage : +$runtime"
+
 make generate-istanbul-json
+
+end=`date +%s`
+runtime=$((end-start))
+echo "Finished generating istanbul json : +$runtime"
 
 ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
 ./node_modules/.bin/istanbul report --root ./coverage \
@@ -40,3 +52,7 @@ ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
 	--include "**/istanbul.json" html
 ./node_modules/.bin/istanbul report --root ./coverage \
 	--include "**/istanbul.json" lcovonly
+
+end=`date +%s`
+runtime=$((end-start))
+echo "Finished building istanbul reports : +$runtime"
