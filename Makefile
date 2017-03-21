@@ -54,7 +54,7 @@ lint: check-licence
 	@go get github.com/kisielk/errcheck
 	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
-	@go get honnef.co/go/staticcheck/cmd/staticcheck
+	@go get honnef.co/go/tools/cmd/staticcheck
 	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
@@ -73,14 +73,34 @@ generate:
 	@bash ./scripts/generate.sh
 
 .PHONY: test-all
-test-all: test cover fast-bench bins
-	./benchmarks/runner/runner -loadtest
+test-all: test cover fast-bench bins install-wrk
+	make test-benchmark-runner
+
+.PHONY: test-benchmark-runner
+test-benchmark-runner:
+	PATH=$$PATH:$$PWD/vendor/wrk ./benchmarks/runner/runner -loadtest
+
+.PHONY: install-wrk
+install-wrk:
+	ls ./vendor/wrk/wrk 2>/dev/null || git clone \
+		https://github.com/wg/wrk.git ./vendor/wrk
+	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make >install_wrk.log)
 
 .PHONY: test
 test: generate lint
+	make test-only
+
+.PHONY: test-only
+test-only:
 	go test ./examples/example-gateway/... 1>/dev/null
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
+
+.PHONY: travis-coveralls
+travis-coveralls:
+	ls ./node_modules/coveralls/bin/coveralls.js 2>/dev/null || \
+		npm i coveralls
+	cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 
 .PHONY: fast-bench
 fast-bench:

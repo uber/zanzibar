@@ -1,6 +1,8 @@
 hash: 594f2200204ea9d8b50d6d880c87edc6e24f221dc2aad728f28da003bd66422e
-updated: 2017-03-09T15:15:17.47075053-08:00
+updated: 2017-03-20T15:27:09.063184134-07:00
 imports:
+- name: github.com/anmitsu/go-shlex
+  version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
   subpackages:
@@ -17,6 +19,8 @@ imports:
   version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
+- name: github.com/jessevdk/go-flags
+  version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -47,7 +51,7 @@ imports:
   - assert
   - require
 - name: github.com/uber-go/atomic
-  version: 0c9e689d64f004564b79d9a663634756df322902
+  version: 3b8db5e93c4c02efbc313e17b2e796b0914a01fb
 - name: github.com/uber-go/tally
   version: 34be4a565ce6286a0ba91a54a81be3f6181ca2e2
   subpackages:
@@ -62,16 +66,37 @@ imports:
   subpackages:
   - internal/argreader
   - relay
+  - thrift
+  - thrift/gen-go/meta
   - tnet
   - trand
   - typed
+- name: go.uber.org/atomic
+  version: 0c9e689d64f004564b79d9a663634756df322902
 - name: go.uber.org/thriftrw
   version: c98a13058faa5dd41584a77221a268d2c72d832d
   subpackages:
   - ast
   - compile
+  - gen
   - idl
   - idl/internal
+  - internal
+  - internal/concurrent
+  - internal/curry
+  - internal/envelope
+  - internal/envelope/exception
+  - internal/frame
+  - internal/goast
+  - internal/multiplex
+  - internal/plugin
+  - internal/process
+  - internal/semver
+  - plugin/api
+  - protocol
+  - protocol/binary
+  - ptr
+  - version
   - wire
 - name: golang.org/x/net
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
