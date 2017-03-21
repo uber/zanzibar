@@ -11,7 +11,7 @@ rm -f ./coverage/*.out
 start=`date +%s`
 COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
-	awk -v ORS=, '{ print $1 }' | sed 's/,$/\n/')
+	awk -v ORS=, '{ print $1 }' | sed $'s/,$/\\\n/')
 
 FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
 FILES_ARR=($FILES)
