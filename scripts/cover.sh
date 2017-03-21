@@ -45,7 +45,7 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Finished generating istanbul json : +$runtime"
 
-ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
+ls ./node_modules/.bin/istanbul 2>/dev/null || npm i istanbul
 ./node_modules/.bin/istanbul report --root ./coverage \
 	--include "**/istanbul.json" text
 ./node_modules/.bin/istanbul report --root ./coverage \
