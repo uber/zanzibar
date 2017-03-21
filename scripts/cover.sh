@@ -13,7 +13,13 @@ COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
 	awk -v ORS=, '{ print $1 }' | sed $'s/,$/\\\n/')
 
-FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
+if [ $# -eq 0 ]
+then
+    FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
+else
+    FILES="$@"
+fi
+
 FILES_ARR=($FILES)
 
 for file in "${FILES_ARR[@]}"; do
@@ -45,7 +51,7 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Finished generating istanbul json : +$runtime"
 
-ls ./node_modules/.bin/instanbul 2>/dev/null || npm i istanbul
+ls ./node_modules/.bin/istanbul 2>/dev/null || npm i istanbul
 ./node_modules/.bin/istanbul report --root ./coverage \
 	--include "**/istanbul.json" text
 ./node_modules/.bin/istanbul report --root ./coverage \
