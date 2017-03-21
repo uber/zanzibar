@@ -33,7 +33,7 @@ import (
 	"github.com/uber/zanzibar/runtime/tchannel/gen-code/meta"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thriftrw-go/ptr"
+	"go.uber.org/thriftrw/ptr"
 )
 
 func TestDefaultHealth(t *testing.T) {
