@@ -13,7 +13,13 @@ COVER_PKGS=$(glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
 	awk -v ORS=, '{ print $1 }' | sed $'s/,$/\\\n/')
 
-FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
+if [ $# -eq 0 ]
+then
+    FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
+else
+    FILES="$@"
+fi
+
 FILES_ARR=($FILES)
 
 for file in "${FILES_ARR[@]}"; do
