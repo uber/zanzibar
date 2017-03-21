@@ -1,4 +1,4 @@
-## zanzibar
+## zanzibar [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov]
 
 A build system & runtime component to generate configuration driven gateways.
 
@@ -78,3 +78,10 @@ If you want to update a dependency:
  - Change the `version` field in the `glide.yaml`
  - run `glide up --quick`
  - check in the `glide.yaml` and `glide.lock`
+
+[doc-img]: https://godoc.org/github.com/uber/zanzibar?status.svg
+[doc]: https://godoc.org/github.com/uber/zanzibar
+[ci-img]: https://travis-ci.org/uber/zanzibar.svg?branch=master
+[ci]: https://travis-ci.org/uber/zanzibar
+[cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
+[cov]: https://coveralls.io/github/uber/zanzibar?branch=master
