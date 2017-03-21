@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"path/filepath"
 
+	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	"{{$pkg}}"
 	{{end}}
@@ -16,8 +17,7 @@ import (
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
+	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
 {{range .Services}}

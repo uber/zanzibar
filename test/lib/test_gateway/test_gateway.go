@@ -42,6 +42,8 @@ type TestGateway interface {
 	) (*http.Response, error)
 	Backends() map[string]*testBackend.TestBackend
 	GetPort() int
+	GetErrorLogs() map[string][]string
+
 	Close()
 }
 
@@ -52,10 +54,11 @@ type ChildProcessGateway struct {
 	jsonLines      []string
 	test           *testing.T
 	opts           *Options
-	httpClient     *http.Client
 	m3Server       *testM3Server.FakeM3Server
 	backends       map[string]*testBackend.TestBackend
+	errorLogs      map[string][]string
 
+	HTTPClient       *http.Client
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup sync.WaitGroup
 	RealAddr         string
@@ -108,14 +111,16 @@ func CreateGateway(
 
 	testGateway := &ChildProcessGateway{
 		test: t, opts: opts,
-		httpClient: &http.Client{
+		HTTPClient: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
 				MaxIdleConns:        500,
 				MaxIdleConnsPerHost: 500,
 			},
 		},
-		backends: backends,
+		jsonLines: []string{},
+		errorLogs: map[string][]string{},
+		backends:  backends,
 	}
 
 	testGateway.setupMetrics(t, opts)
@@ -145,7 +150,7 @@ func CreateGateway(
 func (gateway *ChildProcessGateway) MakeRequest(
 	method string, url string, body io.Reader,
 ) (*http.Response, error) {
-	client := gateway.httpClient
+	client := gateway.HTTPClient
 
 	fullURL := "http://" + gateway.RealAddr + url
 
@@ -166,6 +171,11 @@ func (gateway *ChildProcessGateway) Backends() map[string]*testBackend.TestBacke
 // GetPort ...
 func (gateway *ChildProcessGateway) GetPort() int {
 	return gateway.RealPort
+}
+
+// GetErrorLogs ...
+func (gateway *ChildProcessGateway) GetErrorLogs() map[string][]string {
+	return gateway.errorLogs
 }
 
 // Close test gateway
@@ -201,7 +211,10 @@ func (gateway *ChildProcessGateway) Close() {
 		}
 
 		msg := lineStruct["msg"].(string)
-		if gateway.opts == nil || !gateway.opts.LogWhitelist[msg] {
+
+		if gateway.opts != nil && gateway.opts.LogWhitelist[msg] {
+			continue
+		} else {
 			assert.Fail(gateway.test,
 				"Got unexpected error log from example-gateway:", line,
 			)

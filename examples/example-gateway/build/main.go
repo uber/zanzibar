@@ -16,8 +16,7 @@ import (
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
+	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
 func getConfigDirName() string {

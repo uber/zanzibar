@@ -4,12 +4,12 @@
 package contactsClient
 
 import (
-	"path/filepath"
 	"runtime"
+
+	"github.com/uber/zanzibar/runtime"
 )
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
+	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }

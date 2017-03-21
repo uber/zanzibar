@@ -81,10 +81,12 @@ func NewServerHTTPRequest(
 // start the request, do some metrics etc
 func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 	if req.started {
+		/* coverage ignore next line */
 		req.Logger.Error(
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
+		/* coverage ignore next line */
 		return
 	}
 

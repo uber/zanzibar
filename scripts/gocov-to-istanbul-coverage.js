@@ -71,13 +71,12 @@ function parseFunction(folderName, functionInfo) {
         var endLoc = fileLoc.computeStatementLocation(statement.End);
 
         var skipped = false
-        if (startLoc.line === endLoc.line) {
-            // ignoredLines is 0 indexed, startLoc is 1 indexed
-            var lineIndex = startLoc.line - 1;
-            if (fileLoc.ignoredLines.indexOf(lineIndex) >= 0) {
-                // If this statement is ignored then it is ignored
-                skipped = true
-            }
+            
+        // ignoredLines is 0 indexed, startLoc is 1 indexed
+        var lineIndex = startLoc.line - 1;
+        if (fileLoc.ignoredLines.indexOf(lineIndex) >= 0) {
+            // If this statement is ignored then it is ignored
+            skipped = true
         }
 
         var sId = fileObj.sCounter;

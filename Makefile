@@ -157,7 +157,8 @@ generate-istanbul-json:
 
 .PHONY: view-istanbul
 view-istanbul: generate-istanbul-json
-	istanbul report --root ./coverage --include "**/istanbul.json" html
+	./node_modules/.bin/istanbul report --root ./coverage \
+		--include "**/istanbul.json" html
 	@if [ $$(which xdg-open) ]; then \
 		xdg-open coverage/index.html; \
 	else \

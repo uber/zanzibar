@@ -4,14 +4,14 @@
 package googlenowClient
 
 import (
-	"path/filepath"
 	"runtime"
+
+	"github.com/uber/zanzibar/runtime"
 )
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
+	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
 // AddCredentialsHTTPRequest is the http body type for endpoint addCredentials.

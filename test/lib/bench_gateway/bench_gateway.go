@@ -130,6 +130,11 @@ func (gateway *BenchGateway) GetPort() int {
 	return int(gateway.ActualGateway.RealPort)
 }
 
+// GetErrorLogs ...
+func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
+	panic("Not implemented")
+}
+
 // Backends ...
 func (gateway *BenchGateway) Backends() map[string]*testBackend.TestBackend {
 	return gateway.backends
