@@ -14,6 +14,8 @@ cache:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -qq time
+  - sudo apt-get install -qq build-essential libssl-dev git
+  - sudo apt-get install -qq libluajit-5.1-2 libluajit-5.1-common
   - wget http://us.archive.ubuntu.com/ubuntu/pool/universe/w/wrk/wrk_4.0.1-2_amd64.deb
   - sudo dpkg -i wrk_4.0.1-2_amd64.deb
 install:
