@@ -33,8 +33,8 @@ import (
 
 // Interfaces for the service and client for the services defined in the IDL.
 
-// tchanMeta is the interface that defines the server handler and client interface.
-type tchanMeta interface {
+// TchanMeta is the interface that defines the server handler and client interface.
+type TchanMeta interface {
 	Health(ctx thrift.Context) (*gen.HealthStatus, error)
 	VersionInfo(ctx thrift.Context) (*gen.VersionInfo, error)
 }
@@ -46,7 +46,8 @@ type tchanMetaClient struct {
 	client        TChanClient
 }
 
-func newTChanMetaClient(client TChanClient) tchanMeta {
+// NewTChanMetaClient returns a new TchanMeta client
+func NewTChanMetaClient(client TChanClient) TchanMeta {
 	return &tchanMetaClient{
 		"Meta",
 		client,
@@ -82,10 +83,11 @@ func (c *tchanMetaClient) VersionInfo(ctx thrift.Context) (*gen.VersionInfo, err
 }
 
 type tchanMetaServer struct {
-	handler tchanMeta
+	handler TchanMeta
 }
 
-func newTChanMetaServer(handler tchanMeta) TChanServer {
+// NewTChanMetaServer returns a new TchanMeta server
+func NewTChanMetaServer(handler TchanMeta) TChanServer {
 	return &tchanMetaServer{
 		handler,
 	}
