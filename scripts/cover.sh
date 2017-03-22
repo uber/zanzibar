@@ -39,7 +39,17 @@ grep "FAIL" test.out | tee -a fail.out
 [ ! -s fail.out ]
 
 go get github.com/wadey/gocovmerge
-bash ./scripts/concat-coverage.sh
+rm -f ./coverage/cover-temp.out
+gocovmerge ./coverage/cover-*.out > ./coverage/cover-temp.out
+
+cat ./coverage/cover-temp.out | \
+    grep -v "_easyjson.go" | \
+    grep -v "gen-code" | \
+    sed "s/github.com\/uber\/zanzibar/./" > \
+    ./coverage/cover.out
+
+rm ./coverage/cover-temp.out
+
 
 end=`date +%s`
 runtime=$((end-start))
