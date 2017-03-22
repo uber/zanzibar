@@ -29,7 +29,10 @@ import (
 	"github.com/uber/tchannel-go/testutils/testwriter"
 	"github.com/uber/zanzibar/runtime/tchannel"
 	"github.com/uber/zanzibar/test/runtime/tchannel/gen-code/baz"
+	"go.uber.org/thriftrw/protocol/binary"
+	"go.uber.org/thriftrw/wire"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,6 +58,16 @@ var structTest = struct {
 		0x0, 0x0, 0x0, 0x3, // i32 3
 		0x0, // end of struct
 	},
+}
+
+type rwstructTest struct{}
+
+func (rwstructTest) ToWire() (wire.Value, error) {
+	return wire.Value{}, errors.New("ToWire error")
+}
+
+func (rwstructTest) FromWire(wire.Value) error {
+	return errors.New("FromWire error")
 }
 
 func TestReadStruct(t *testing.T) {
@@ -97,15 +110,15 @@ func TestReadStruct(t *testing.T) {
 
 		assert.Equal(t, tt.wantErr, err != nil, "Unexpected error: %v", err)
 		assert.Equal(t, tt.s, s, "Unexpected struct")
-		assert.Equal(t, readerAt.Len(), len(tt.encoded), "decoder does not cosume data")
+		assert.Equal(t, readerAt.Len(), len(tt.encoded), "readerAt data is not consumed")
 
 		s = &baz.Data{}
 		reader := bytes.NewBuffer(tt.encoded)
-		err = tchannel.ReadStruct(readerAt, s)
+		err = tchannel.ReadStruct(reader, s)
 
 		assert.Equal(t, tt.wantErr, err != nil, "Unexpected error: %v", err)
 		assert.Equal(t, tt.s, s, "Unexpected struct")
-		assert.Equal(t, reader.Len(), len(tt.encoded), "decoder does not cosume data")
+		assert.Equal(t, 0, reader.Len(), "reader data is consumed")
 	}
 }
 
@@ -122,6 +135,14 @@ func TestReadStructErr(t *testing.T) {
 		// to the underlying error, so we can't check the underlying error exactly.
 		assert.Contains(t, err.Error(), testreader.ErrUser.Error(), "Underlying error missing")
 	}
+}
+
+func TestReadStructDecodeErr(t *testing.T) {
+	reader := bytes.NewReader([]byte{1, 2, 3})
+	s := &baz.Data{}
+	err := tchannel.ReadStruct(reader, s)
+	assert.Error(t, err, "ReadStruct should fail")
+	assert.True(t, binary.IsDecodeError(err), "Should be decode error")
 }
 
 func TestWriteStruct(t *testing.T) {
@@ -146,6 +167,14 @@ func TestWriteStruct(t *testing.T) {
 
 		assert.Equal(t, tt.encoded, buf.Bytes(), "Encoded data mismatch")
 	}
+}
+
+func TestWriteStructToWireErr(t *testing.T) {
+	value := rwstructTest{}
+	writer := testwriter.Limited(10)
+	err := tchannel.WriteStruct(writer, value)
+	assert.Error(t, err, "WriteStruct should fail")
+	assert.Contains(t, err.Error(), "ToWire error", "Underlying error missing")
 }
 
 func TestWriteStructErr(t *testing.T) {
