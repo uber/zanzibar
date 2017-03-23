@@ -15,7 +15,8 @@ COVER_PKGS=$(glide novendor | grep -v "test/..." | grep -v "^\.$" | \
 
 if [ $# -eq 0 ]
 then
-    FILES=$(go list ./... | grep -v "vendor" | grep "test\|examples")
+    FILES=$(go list ./... | grep -v "vendor" | \
+		grep "test\|examples\|runtime\|codegen")
 else
     FILES="$@"
 fi
