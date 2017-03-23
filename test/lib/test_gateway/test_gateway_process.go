@@ -60,12 +60,12 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 	gateway.binaryFileInfo = info
 
 	args := []string{
-		gateway.binaryFileInfo.binaryFile,
+		gateway.binaryFileInfo.BinaryFile,
 	}
 
 	if os.Getenv("COVER_ON") == "1" {
 		args = append(args,
-			"-test.coverprofile", info.coverProfileFile,
+			"-test.coverprofile", info.CoverProfileFile,
 		)
 	}
 
