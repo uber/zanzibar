@@ -32,9 +32,9 @@ import (
 )
 
 const (
-	clientThrift   = "../../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
-	endpointThrift = "../../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
-	tmpDir         = "../../.tmp_gen"
+	clientThrift   = "../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
+	endpointThrift = "../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
+	tmpDir         = "../.tmp_gen"
 )
 
 func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
@@ -52,7 +52,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	relativeGatewayPath := "../../examples/example-gateway"
+	relativeGatewayPath := "../examples/example-gateway"
 	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
 	if !assert.NoError(t, err, "failed to get abs path %s", err) {
 		return
@@ -80,12 +80,12 @@ func TestGenerateBar(t *testing.T) {
 	cmpGoldenFile(
 		t,
 		filepath.Join(tmpDir, "clients", "bar", "bar.go"),
-		"./data/clients",
+		"./test_data/clients",
 	)
 	cmpGoldenFile(
 		t,
 		filepath.Join(tmpDir, "clients", "bar", "bar_structs.go"),
-		"./data/clients",
+		"./test_data/clients",
 	)
 
 	err = gateway.GenerateEndpoints()
@@ -109,13 +109,13 @@ func TestGenerateBar(t *testing.T) {
 		cmpGoldenFile(
 			t,
 			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
-			"./data/endpoints",
+			"./test_data/endpoints",
 		)
 	}
 	cmpGoldenFile(
 		t,
 		filepath.Join(tmpDir, "endpoints", "bar", "bar_structs.go"),
-		"./data/endpoints",
+		"./test_data/endpoints",
 	)
 
 	for _, file := range endpoints {
@@ -127,7 +127,7 @@ func TestGenerateBar(t *testing.T) {
 		cmpGoldenFile(
 			t,
 			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
-			"./data/endpoint_tests",
+			"./test_data/endpoint_tests",
 		)
 	}
 }
