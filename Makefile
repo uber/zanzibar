@@ -93,6 +93,8 @@ test: generate lint
 .PHONY: test-only
 test-only:
 	go test ./examples/example-gateway/... 1>/dev/null
+	go test ./codegen/... | grep -v '\[no test files\]'
+	go test ./runtime/... | grep -v '\[no test files\]'
 	go test ./test/... | grep -v '\[no test files\]'
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 

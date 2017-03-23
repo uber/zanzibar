@@ -36,7 +36,7 @@ var fooThrift = filepath.Join(
 	"github.com/uber/zanzibar/clients/foo/foo.thrift")
 
 func newPackageHelper(t *testing.T) *codegen.PackageHelper {
-	relativeGatewayPath := "../../examples/example-gateway"
+	relativeGatewayPath := "../examples/example-gateway"
 	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
 	if !assert.NoError(t, err, "failed to get abs path %s", err) {
 		return nil

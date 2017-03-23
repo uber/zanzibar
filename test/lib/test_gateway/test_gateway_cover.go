@@ -38,8 +38,9 @@ import (
 var cachedBinaryFile *testBinaryInfo
 
 type testBinaryInfo struct {
-	binaryFile       string
-	coverProfileFile string
+	BinaryFile       string
+	CoverProfileFile string
+	MainFile         string
 }
 
 func (info *testBinaryInfo) Cleanup() {
@@ -53,11 +54,11 @@ func (info *testBinaryInfo) Cleanup() {
 	}
 
 	newCoverProfileFile := path.Join(
-		path.Dir(info.coverProfileFile),
+		path.Dir(info.CoverProfileFile),
 		"cover-"+randStr+".out",
 	)
 
-	bytes, err := ioutil.ReadFile(info.coverProfileFile)
+	bytes, err := ioutil.ReadFile(info.CoverProfileFile)
 	if err != nil {
 		panic(err)
 	}
@@ -109,11 +110,55 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
+func tryLoadCachedBinaryTestInfo(mainPath string) {
+	jsonFile := filepath.Join(
+		getDirName(), "..", "..", ".cached_binary_test_info.json",
+	)
+
+	bytes, err := ioutil.ReadFile(jsonFile)
+	if err != nil {
+		return
+	}
+
+	jsonObj := &testBinaryInfo{}
+	err = json.Unmarshal(bytes, jsonObj)
+	if err != nil {
+		return
+	}
+
+	if jsonObj.MainFile != mainPath {
+		return
+	}
+
+	cachedBinaryFile = jsonObj
+}
+
+func tryWriteCachedBinaryTestInfo() {
+	jsonFile := filepath.Join(
+		getDirName(), "..", "..", ".cached_binary_test_info.json",
+	)
+
+	bytes, err := json.Marshal(cachedBinaryFile)
+	if err != nil {
+		return
+	}
+
+	err = ioutil.WriteFile(jsonFile, bytes, 0644)
+	if err != nil {
+		return
+	}
+}
+
 func createTestBinaryFile(
 	mainPath string,
 	config map[string]interface{},
 ) (*testBinaryInfo, error) {
-	if cachedBinaryFile != nil {
+	if os.Getenv("COVER_ON") == "1" && cachedBinaryFile == nil {
+		// Try to load cachedBinaryFile from disk
+		tryLoadCachedBinaryTestInfo(mainPath)
+	}
+
+	if cachedBinaryFile != nil && cachedBinaryFile.MainFile == mainPath {
 		return cachedBinaryFile, nil
 	}
 
@@ -177,6 +222,13 @@ func createTestBinaryFile(
 		return nil, errors.Wrap(err, "could not compile test program")
 	}
 
-	cachedBinaryFile = &testBinaryInfo{binaryFile, coverProfileFile}
+	cachedBinaryFile = &testBinaryInfo{
+		BinaryFile:       binaryFile,
+		CoverProfileFile: coverProfileFile,
+		MainFile:         mainPath,
+	}
+	if os.Getenv("COVER_ON") == "1" {
+		tryWriteCachedBinaryTestInfo()
+	}
 	return cachedBinaryFile, nil
 }
