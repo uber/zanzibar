@@ -37,10 +37,11 @@ for file in "${FILES_ARR[@]}"; do
 	fi
 
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
+	COVERNAME="./coverage/cover-unit-$RAND.out"
 
-	COVER_ON=1 go test -cover -coverpkg $COVER_PKGS \
-		-coverprofile coverage.tmp $file 2>&1 | tee test.tmp.out >>test.out && \
-		mv coverage.tmp "./coverage/cover-unit-$RAND.out" 2>/dev/null || true
+	COVER_ON=1 go test -cover -coverprofile coverage.tmp $file 2>&1 | \
+		tee test.tmp.out >>test.out && \
+		mv coverage.tmp "$COVERNAME" 2>/dev/null || true
 
 	# cat test.tmp.out | grep -E '[0-9]s' || true
 	rm test.tmp.out
