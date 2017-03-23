@@ -9,7 +9,7 @@ mkdir -p ./coverage
 rm -f ./coverage/*.out
 
 start=`date +%s`
-COVER_PKGS=$(glide novendor | grep -v "test/..." | \
+COVER_PKGS=$(glide novendor | grep -v "test/..." | grep -v "^\.$" | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
 	awk -v ORS=, '{ print $1 }' | sed $'s/,$/\\\n/')
 
@@ -20,18 +20,40 @@ else
     FILES="$@"
 fi
 
+rm -f ./test/.cached_binary_test_info.json
+
+REAL_TEST_FILES=$(git grep -l 'func Test.' | \
+	xargs -I{} dirname github.com/uber/zanzibar/{} | sort | uniq)
+
 FILES_ARR=($FILES)
 
+echo "Starting coverage tests."
+
 for file in "${FILES_ARR[@]}"; do
+
+	if grep -q -v $file <<<$REAL_TEST_FILES; then
+		continue
+	fi
+
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
-	echo "Running coverage test : $file"
+
 	COVER_ON=1 go test -cover -coverpkg $COVER_PKGS \
-		-coverprofile coverage.tmp $file >>test.out 2>&1 && \
+		-coverprofile coverage.tmp $file 2>&1 | tee test.tmp.out >>test.out && \
 		mv coverage.tmp "./coverage/cover-unit-$RAND.out" 2>/dev/null || true
+
+	# cat test.tmp.out | grep -E '[0-9]s' || true
+	rm test.tmp.out
+
+	relativeName=$(echo $file | sed s#github.com/uber/zanzibar#.#)
+
 	end=`date +%s`
 	runtime=$((end-start))
-	echo "Finished coverage test : $file : +$runtime"
+	printf "Finished coverage test  :  %-60s  :  +%3d \n" $relativeName $runtime
 done
+
+echo ""
+echo "      --------------------        "
+echo ""
 
 cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
 rm -f coverage.tmp
@@ -50,6 +72,9 @@ cat ./coverage/cover-temp.out | \
 
 rm ./coverage/cover-temp.out
 
+echo ""
+echo "      --------------------        "
+echo ""
 
 end=`date +%s`
 runtime=$((end-start))
@@ -72,3 +97,5 @@ ls ./node_modules/.bin/istanbul 2>/dev/null || npm i istanbul
 end=`date +%s`
 runtime=$((end-start))
 echo "Finished building istanbul reports : +$runtime"
+
+rm -f ./test/.cached_binary_test_info.json
