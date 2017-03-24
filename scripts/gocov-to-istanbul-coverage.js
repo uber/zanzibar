@@ -26,7 +26,6 @@ GocovParser.prototype.parse = function parse() {
 GocovParser.prototype.parseFunction =
 function parseFunction(folderName, functionInfo) {
     // console.error('functionInfo', functionInfo);
-
     var filePath = path.join(process.cwd(), functionInfo.File);
 
     var fileObj = this.output[filePath];
@@ -64,6 +63,10 @@ function parseFunction(folderName, functionInfo) {
     };
     fileObj.fnCounter++;
 
+    // TODO(sindelar): Investigate
+    if (functionInfo.Statements == null) {
+        return
+    }
     for (var i = 0; i < functionInfo.Statements.length; i++) {
         var statement = functionInfo.Statements[i];
         
