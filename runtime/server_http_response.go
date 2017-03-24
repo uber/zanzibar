@@ -168,11 +168,6 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	}
 }
 
-// WriteHeader writes the header to http respnse.
-func (res *ServerHTTPResponse) WriteHeader(statusCode int) {
-	res.writeHeader(statusCode)
-}
-
 // WriteString helper just writes a string to the response
 func (res *ServerHTTPResponse) writeString(text string) {
 	res.writeBytes([]byte(text))
