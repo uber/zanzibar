@@ -21,10 +21,8 @@
 package runtime_test
 
 import (
-	"bytes"
 	"context"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,28 +33,6 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
-
-// helper setup functions
-func setUpRequest() (context.Context, *zanzibar.ServerHTTPRequest, *zanzibar.ServerHTTPResponse) {
-	responseWriter := httptest.NewRecorder()
-
-	httpReq, _ := http.NewRequest(
-		"POST",
-		"/googlenow/add-credentials",
-		bytes.NewReader([]byte("{\"foo\":\"bar\"}")))
-
-	request := zanzibar.NewServerHTTPRequest(
-		responseWriter,
-		httpReq,
-		nil, // Params
-		nil, // Endpoint
-	)
-
-	response := zanzibar.NewServerHTTPResponse(responseWriter,
-		request)
-	ctx := context.Background()
-	return ctx, request, response
-}
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
