@@ -1,6 +1,8 @@
-hash: 594f2200204ea9d8b50d6d880c87edc6e24f221dc2aad728f28da003bd66422e
-updated: 2017-03-20T15:27:09.063184134-07:00
+hash: dc2a6808f9c73f6a836b432f442ebf18eecd56fcfbf1752bc8382fec6666f80b
+updated: 2017-03-20T16:35:58.071285891-07:00
 imports:
+- name: github.com/alecthomas/jsonschema
+  version: 7284d683b3771acbbc194b5829dd734711644ddc
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
@@ -28,17 +30,17 @@ imports:
 - name: github.com/mailru/easyjson
   version: 9d6630dc8c577b56cb9687a9cf9e8578aca7298a
   subpackages:
-  - bootstrap
   - buffer
-  - gen
   - jlexer
   - jwriter
+  - bootstrap
+  - gen
   - parser
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
-  - ext
   - log
+  - ext
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -102,4 +104,6 @@ imports:
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
   subpackages:
   - context
-testImports: []
+- name: https://github.com/alecthomas/jsonschema
+  version: ""
+devImports: []
