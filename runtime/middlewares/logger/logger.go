@@ -23,7 +23,7 @@ package logger
 import (
 	"context"
 
-	"github.com/alecthomas/jsonschema"
+	"github.com/mcuadros/go-jsonschema-generator"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -59,8 +59,9 @@ func NewMiddleWare(
 	}
 }
 
-// JSONSchema returns a schema definition of the configuration options for
-// a middlware
-func JSONSchema() *jsonschema.Schema {
-	return jsonschema.Reflect(&Options{})
+// JSONSchema returns a schema definition of the configuration options for a middlware
+func JSONSchema() *jsonschema.Document {
+	s := &jsonschema.Document{}
+	s.Read(&Options{})
+	return s
 }

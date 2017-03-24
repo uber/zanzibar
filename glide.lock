@@ -1,8 +1,6 @@
-hash: dc2a6808f9c73f6a836b432f442ebf18eecd56fcfbf1752bc8382fec6666f80b
-updated: 2017-03-20T16:35:58.071285891-07:00
+hash: 905b6a0f87ff1b7379f4f468772515352d315d9bf251da776d05318e46b8d8ac
+updated: 2017-03-24T10:11:06.195210714-07:00
 imports:
-- name: github.com/alecthomas/jsonschema
-  version: 7284d683b3771acbbc194b5829dd734711644ddc
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
@@ -36,6 +34,8 @@ imports:
   - bootstrap
   - gen
   - parser
+- name: github.com/mcuadros/go-jsonschema-generator
+  version: b230f1338bcd899d31970d8f08207cfb955592c3
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
@@ -66,44 +66,42 @@ imports:
 - name: github.com/uber/tchannel-go
   version: 79387824978f91318be3bfb43ae12e04c38cfe97
   subpackages:
+  - thrift
   - internal/argreader
   - relay
-  - thrift
-  - thrift/gen-go/meta
   - tnet
   - trand
   - typed
+  - thrift/gen-go/meta
 - name: go.uber.org/atomic
   version: 0c9e689d64f004564b79d9a663634756df322902
 - name: go.uber.org/thriftrw
   version: c98a13058faa5dd41584a77221a268d2c72d832d
   subpackages:
-  - ast
   - compile
   - gen
-  - idl
-  - idl/internal
-  - internal
-  - internal/concurrent
-  - internal/curry
-  - internal/envelope
-  - internal/envelope/exception
-  - internal/frame
-  - internal/goast
-  - internal/multiplex
-  - internal/plugin
-  - internal/process
-  - internal/semver
-  - plugin/api
-  - protocol
-  - protocol/binary
-  - ptr
   - version
   - wire
+  - ast
+  - idl
+  - internal
+  - internal/curry
+  - internal/goast
+  - internal/plugin
+  - plugin/api
+  - ptr
+  - internal/semver
+  - idl/internal
+  - internal/concurrent
+  - internal/envelope
+  - internal/multiplex
+  - internal/process
+  - protocol
+  - internal/envelope/exception
+  - internal/frame
+  - protocol/binary
 - name: golang.org/x/net
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
   subpackages:
   - context
-- name: https://github.com/alecthomas/jsonschema
-  version: ""
 devImports: []
