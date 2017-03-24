@@ -51,7 +51,10 @@ func makeEndpoint(
 		Clients:   g.Clients.(*clients.Clients),
 		HandlerFn: handlerFn,
 	}
-
+//	wrappedHandler := example.NewMiddleWare(
+//		g,
+//		example.Options{},
+//		myEndpoint.handle)
 	return zanzibar.NewEndpoint(
 		g,
 		endpointName,
@@ -69,6 +72,9 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"{{$endpoint.EndpointID}}",
 			"{{$endpoint.HandlerID}}",
+			{{range $idx, $middleware := $endpoint.Middlewares -}}
+			// Apply "{{$middleware}}"
+			{{end -}}
 			{{$endpoint.HandlerType}},
 		),
 	)

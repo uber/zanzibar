@@ -47,7 +47,10 @@ func makeEndpoint(
 		Clients:   g.Clients.(*clients.Clients),
 		HandlerFn: handlerFn,
 	}
-
+	//	wrappedHandler := example.NewMiddleWare(
+	//		g,
+	//		example.Options{},
+	//		myEndpoint.handle)
 	return zanzibar.NewEndpoint(
 		g,
 		endpointName,
@@ -91,6 +94,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"normal",
+			// Apply "exampleMiddleware"
 			bar.HandleNormalRequest,
 		),
 	)

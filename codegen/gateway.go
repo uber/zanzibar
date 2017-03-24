@@ -365,7 +365,9 @@ func NewEndpointSpec(
 	// TODO(sindelar): Use structures and validate middleware are defined in codebase.
 	middlewareStrings := make([]string, len(endpointConfigObj["middlewares"].([]interface{})))
 	for idx, middleware := range endpointConfigObj["middlewares"].([]interface{}) {
-		middlewareStrings[idx] = middleware.(string)
+		middlewareObj := middleware.(map[string]interface{})
+		middlewareStrings[idx] = middlewareObj["name"].(string)
+		// TODO(sindelar): Add argument parsing
 	}
 
 	return &EndpointSpec{
@@ -649,4 +651,12 @@ func (gateway *GatewaySpec) GenerateMain() error {
 		gateway, gateway.PackageHelper,
 	)
 	return err
+}
+
+// GenerateMiddlewareSchemas will generate the middleware schema files
+// for the gateway
+func (gateway *GatewaySpec) GenerateMiddlewareSchemas() error {
+	// TODO(sindelar): Implement this
+
+	return nil
 }
