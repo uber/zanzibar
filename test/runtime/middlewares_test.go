@@ -25,11 +25,15 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 // helper setup functions
@@ -56,6 +60,33 @@ func setUpRequest() (context.Context, *zanzibar.ServerHTTPRequest, *zanzibar.Ser
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
+	// TODO(sindelar): Refactor. We some helpers to build zanzibar
+	// request/responses without setting up a backend and register.
+	// Currently they require endpoints to instantiate.
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		TestBinary: filepath.Join(
+			getDirName(), "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "must be able to create gateway") {
+		return
+	}
+	defer gateway.Close()
+	assert.NotNil(t, gateway, "gateway exists")
+
+	gateway.backend.router.Register(
+		router.Register(
+			"POST", "/bar/arg-not-struct-path",
+
+			makeEndpoint(
+				g,
+				"bar",
+				"argNotStruct",
+				bar.HandleArgNotStructRequest,
+			),
+		))
+
 	contxt, request, response := setUpRequest()
 
 	middlewareStack := zanzibar.NewStack()
@@ -73,7 +104,7 @@ func TestHandlers(t *testing.T) {
 	})
 
 	ex := example.NewMiddleWare(
-		nil, // nil Gateway
+		nil, // *zanzibar.Gateway
 		example.Options{
 			Foo: "foo",
 			Bar: 2,
@@ -87,6 +118,7 @@ func TestHandlers(t *testing.T) {
 	assert.Equal(t, 2, len(handlers))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
+
 	middlewareStack.Handle(contxt, request, response)
 	assert.Equal(t, response.StatusCode, http.StatusOK)
 }
