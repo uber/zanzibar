@@ -48,6 +48,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 	gateway.Backends()["contacts"].HandleFunc(
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(202)
+			_, _ = w.Write([]byte("{}"))
 		},
 	)
 
@@ -108,6 +109,7 @@ func TestSaveContactsCall(t *testing.T) {
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			counter++
 			w.WriteHeader(202)
+			_, _ = w.Write([]byte("{}"))
 		},
 	)
 

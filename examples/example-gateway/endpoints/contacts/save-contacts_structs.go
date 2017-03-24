@@ -37,3 +37,7 @@ type SaveContactsRequest struct {
 	DeviceType string
 	AppVersion string
 }
+
+// SaveContactsResponse ...
+type SaveContactsResponse struct {
+}
