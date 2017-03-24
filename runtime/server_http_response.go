@@ -162,6 +162,7 @@ func (res *ServerHTTPResponse) writeHeader(statusCode int) {
 func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
+		/* coverage ignore next line */
 		res.req.Logger.Error("Could not write string to resp body",
 			zap.String("error", err.Error()),
 		)
