@@ -18,14 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel_test
+package tchannel
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/uber/tchannel-go/testutils/testreader"
-	"github.com/uber/zanzibar/runtime/tchannel"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,13 +32,13 @@ import (
 
 func TestEnsureEmptySuccess(t *testing.T) {
 	reader := bytes.NewReader(nil)
-	err := tchannel.EnsureEmpty(reader, "success")
+	err := EnsureEmpty(reader, "success")
 	require.NoError(t, err, "ensureEmpty should succeed with empty reader")
 }
 
 func TestEnsureEmptyHasBytes(t *testing.T) {
 	reader := bytes.NewReader([]byte{1, 2, 3})
-	err := tchannel.EnsureEmpty(reader, "T")
+	err := EnsureEmpty(reader, "T")
 	require.Error(t, err, "ensureEmpty should fail when there's bytes")
 	assert.Equal(t, err.Error(), "found unexpected bytes after T, found (upto 128 bytes): 010203")
 }
@@ -49,7 +48,7 @@ func TestEnsureEmptyError(t *testing.T) {
 	control <- nil
 	close(control)
 
-	err := tchannel.EnsureEmpty(reader, "has bytes")
+	err := EnsureEmpty(reader, "has bytes")
 	require.Error(t, err, "ensureEmpty should fail when there's an error")
 	assert.Equal(t, testreader.ErrUser, err, "Unexpected error")
 }

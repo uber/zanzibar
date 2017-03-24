@@ -21,9 +21,13 @@
 package tchannel
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"sync"
+
+	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/wire"
 )
 
 var bufPool = sync.Pool{
@@ -46,5 +50,42 @@ func EnsureEmpty(r io.Reader, stage string) error {
 	if err == io.EOF {
 		return nil
 	}
+	return err
+}
+
+// WriteStruct writes the given Thriftrw struct to a writer.
+func WriteStruct(writer io.Writer, s RWTStruct) error {
+	wireValue, err := s.ToWire()
+	if err != nil {
+		return err
+	}
+
+	if err := protocol.Binary.Encode(wireValue, writer); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ReadStruct reads the given Thriftrw struct.
+func ReadStruct(reader io.Reader, s RWTStruct) error {
+	readerAt, ok := reader.(io.ReaderAt)
+
+	// do not read all to buffer if reader already is type of io.ReaderAt
+	if !ok {
+		buf := GetBuffer()
+		defer PutBuffer(buf)
+
+		if _, err := buf.ReadFrom(reader); err != nil {
+			return err
+		}
+		readerAt = bytes.NewReader(buf.Bytes())
+	}
+
+	wireValue, err := protocol.Binary.Decode(readerAt, wire.TStruct)
+	if err != nil {
+		return err
+	}
+	err = s.FromWire(wireValue)
 	return err
 }

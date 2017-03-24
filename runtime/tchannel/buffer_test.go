@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel_test
+package tchannel
 
 import (
 	"math/rand"
@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/runtime/tchannel"
 )
 
 func TestBuffers(t *testing.T) {
@@ -35,7 +34,7 @@ func TestBuffers(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			for i := 0; i < 100; i++ {
-				buf := tchannel.GetBuffer()
+				buf := GetBuffer()
 				assert.Zero(t, buf.Len(), "Expected truncated buffer")
 
 				bytesOfNoise := make([]byte, rand.Intn(5000))
@@ -46,7 +45,7 @@ func TestBuffers(t *testing.T) {
 
 				assert.Equal(t, buf.Len(), len(bytesOfNoise), "Expected same buffer size")
 
-				tchannel.PutBuffer(buf)
+				PutBuffer(buf)
 			}
 			wg.Done()
 		}()
