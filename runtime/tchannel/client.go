@@ -115,10 +115,11 @@ func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req,
 		isOK        bool
 	)
 
+	arg1 := thriftService + "::" + methodName
 	err := c.ch.RunWithRetry(ctx, func(ctx context.Context, rs *tchannel.RequestState) error {
 		respHeaders, isOK = nil, false
 
-		call, err := c.sc.BeginCall(ctx, thriftService+"::"+methodName, &tchannel.CallOptions{
+		call, err := c.sc.BeginCall(ctx, arg1, &tchannel.CallOptions{
 			Format:       tchannel.Thrift,
 			RequestState: rs,
 		})
