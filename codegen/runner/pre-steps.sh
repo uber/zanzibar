@@ -19,10 +19,18 @@ EASY_JSON_DIR="`cd "${EASY_JSON_RAW_DIR}";pwd`"
 EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 
-THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
-THRIFTRW_DIR="`cd "${THRIFTRW_RAW_DIR}";pwd`"
-THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
-THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
+
+if [ -d "$DIRNAME/../../vendor" ]; then
+	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
+	THRIFTRW_DIR="`cd "${THRIFTRW_RAW_DIR}";pwd`"
+	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
+	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
+else
+	THRIFTRW_RAW_DIR="$DIRNAME/../../../../../go.uber.org/thriftrw"
+	THRIFTRW_DIR="`cd "${THRIFTRW_RAW_DIR}";pwd`"
+	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
+	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
+fi
 
 start=`date +%s`
 echo $start > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
