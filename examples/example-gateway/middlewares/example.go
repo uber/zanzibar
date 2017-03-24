@@ -18,40 +18,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package exampleMiddleware
+package example
 
 import (
-	"net/http"
+	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+// Options for middleware configuration
 type Options struct {
 	foo string
 	bar int
 }
 
+// MiddlewareState accessible by other middlewares and endpoint handler
+// though the context object.
 type MiddlewareState struct {
 	baz string
 }
 
-//func middlewareFoo(next zanzibar.HandlerFn) zanzibar.HandlerFn {
-//	ctx.Put("token", "c9e452805dee5044ba520198628abcaa")
-//	next.ServeHTTP(w, r)
-//}
+type key int
 
-func WithHeader(key, value string) Adapter {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header.Add(key, value)
-			h.ServeHTTP(w, r)
-		})
-	}
-}
+// MiddlewareStateName
+const (
+	MiddlewareStateName key = iota
+)
 
-func NewMiddleWare(gateway zanzibar.Gateway, options Options, next zanzibar.HandlerFn) zanzibar.HandlerFn {
-	return func(h zanzibar.HandlerFn) zanzibar.HandlerFn {
-		h.ctx.Put("token", MiddlewareState{baz: "c9e452805dee5044ba520198628abcaa"})
-		next.ServeHTTP(w, r)
+// NewMiddleWare creates a new middleware that executes the next middleware
+// after performing it's operations.
+func NewMiddleWare(
+	gateway *zanzibar.Gateway,
+	options Options,
+	next zanzibar.HandlerFn) zanzibar.HandlerFn {
+	return func(ctx context.Context,
+		req *zanzibar.ServerHTTPRequest,
+		res *zanzibar.ServerHTTPResponse) {
+		scopedCtx := context.WithValue(
+			ctx,
+			MiddlewareStateName,
+			MiddlewareState{baz: "c9e452805dee5044ba520198628abcaa"})
+		next(scopedCtx, req, res)
 	}
 }
