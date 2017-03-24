@@ -30,7 +30,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 )
 
-var bufPool = sync.Pool{
+var bytesPool = sync.Pool{
 	New: func() interface{} {
 		b := make([]byte, 128)
 		return &b
@@ -40,8 +40,8 @@ var bufPool = sync.Pool{
 // EnsureEmpty ensures that the specified reader is empty. If the reader is
 // not empty, it returns an error with the specified stage in the message.
 func EnsureEmpty(r io.Reader, stage string) error {
-	buf := bufPool.Get().(*[]byte)
-	defer bufPool.Put(buf)
+	buf := bytesPool.Get().(*[]byte)
+	defer bytesPool.Put(buf)
 
 	n, err := r.Read(*buf)
 	if n > 0 {
@@ -51,6 +51,24 @@ func EnsureEmpty(r io.Reader, stage string) error {
 		return nil
 	}
 	return err
+}
+
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return &bytes.Buffer{}
+	},
+}
+
+// GetBuffer returns a new Byte Buffer from the buffer pool that has been reset
+func GetBuffer() *bytes.Buffer {
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	return buf
+}
+
+// PutBuffer returns byte buffer to the buffer pool
+func PutBuffer(buf *bytes.Buffer) {
+	bufPool.Put(buf)
 }
 
 // WriteStruct writes the given Thriftrw struct to a writer.
