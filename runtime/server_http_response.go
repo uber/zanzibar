@@ -142,6 +142,12 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, body json.Marshaler,
 ) {
+	if body == nil {
+		res.SendErrorString(500, "Could not serialize json response")
+		res.req.Logger.Error("Could not serialize nil pointer body")
+		return
+	}
+
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
