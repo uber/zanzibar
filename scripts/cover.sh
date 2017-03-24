@@ -50,7 +50,7 @@ for file in "${FILES_ARR[@]}"; do
 
 	end=`date +%s`
 	runtime=$((end-start))
-	printf "Finished coverage test  :  %-60s  :  +%3d \n" $relativeName $runtime
+	printf "Finished coverage test  :  %-55s  :  +%3d \n" $relativeName $runtime
 done
 
 echo ""
