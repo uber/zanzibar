@@ -25,15 +25,15 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	// TODO(sindelar): Refactor into a unit test and remove the
+	// example middleware (which creates a cyclic dependency)
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
 
 // helper setup functions
@@ -60,34 +60,6 @@ func setUpRequest() (context.Context, *zanzibar.ServerHTTPRequest, *zanzibar.Ser
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
-	// TODO(sindelar): Refactor. We some helpers to build zanzibar
-	// request/responses without setting up a backend and register.
-	// Currently they require endpoints to instantiate.
-	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		TestBinary: filepath.Join(
-			getDirName(), "..",
-			"examples", "example-gateway", "build", "main.go",
-		),
-	})
-	if !assert.NoError(t, err, "must be able to create gateway") {
-		return
-	}
-	defer gateway.Close()
-	assert.NotNil(t, gateway, "gateway exists")
-
-	gateway.backend.router.Register(
-		router.Register(
-			"POST", "/bar/arg-not-struct-path",
-
-			makeEndpoint(
-				g,
-				"bar",
-				"argNotStruct",
-				bar.HandleArgNotStructRequest,
-			),
-		))
-
-	contxt, request, response := setUpRequest()
 
 	middlewareStack := zanzibar.NewStack()
 	handlers := middlewareStack.Handlers()
@@ -109,7 +81,7 @@ func TestHandlers(t *testing.T) {
 			Foo: "foo",
 			Bar: 2,
 		},
-		nil,
+		noop,
 	)
 	middlewareStack.UseHandlerFn(ex)
 
@@ -118,18 +90,50 @@ func TestHandlers(t *testing.T) {
 	assert.Equal(t, 2, len(handlers))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
+	// TODO(sindelar): Refactor. We some helpers to build zanzibar
+	// request/responses without setting up a backend and register.
+	// Currently they require endpoints to instantiate.
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 
-	middlewareStack.Handle(contxt, request, response)
-	assert.Equal(t, response.StatusCode, http.StatusOK)
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo",
+		zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			middlewareStack.Handle,
+		),
+	)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
 }
 
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
-	contxt, request, response := setUpRequest()
+	//contxt, request, response := setUpRequest()
 
 	middlewareStack := zanzibar.NewStack()
 	handlers := middlewareStack.Handlers()
 	assert.Equal(t, 0, len(handlers))
+
+	// Read from a shared state
+	readFn := func(
+		ctx context.Context,
+		req *zanzibar.ServerHTTPRequest,
+		res *zanzibar.ServerHTTPResponse) {
+		sharedState := ctx.Value(example.MiddlewareStateName).(example.MiddlewareState)
+		if sharedState.Baz == "test_state" {
+			res.StatusCode = http.StatusOK
+		}
+	}
 
 	// Write to a shared state
 	ex := example.NewMiddleWare(
@@ -138,30 +142,44 @@ func TestMiddlewareSharedStates(t *testing.T) {
 			Foo: "test_state",
 			Bar: 2,
 		},
-		nil,
+		readFn,
 	)
 	middlewareStack.UseHandlerFn(ex)
 
-	// Read from a shared state
-	middlewareStack.UseFunc(func(
-		ctx context.Context,
-		req *zanzibar.ServerHTTPRequest,
-		res *zanzibar.ServerHTTPResponse,
-		next zanzibar.HandlerFn) {
-		next(ctx, req, res)
-		sharedState := ctx.Value(example.MiddlewareStateName).(example.MiddlewareState)
-		if sharedState.Baz == "test_state" {
-			res.StatusCode = http.StatusOK
-		}
-	})
-
 	// Run the zanzibar.HandleFn of composed middlewares.
-	middlewareStack.Handle(contxt, request, response)
-	assert.Equal(t, response.StatusCode, http.StatusOK)
+	// TODO(sindelar): Refactor. We some helpers to build zanzibar
+	// request/responses without setting up a backend and register.
+	// Currently they require endpoints to instantiate.
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo",
+		zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			middlewareStack.Handle,
+		),
+	)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
 }
 
 // Ensures that a middleware stack can accept Http middlewares.
 func TestAdaptedHttpHandlers(t *testing.T) {
 	// TODO(sindelar)
+}
+
+func noop(ctx context.Context,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse) {
+	return
 }
