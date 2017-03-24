@@ -42,19 +42,19 @@ type handler struct {
 // Server handles incoming TChannel calls and forwards them to the matching TChanServer.
 type Server struct {
 	sync.RWMutex
-	ch       tchan.Registrar
-	log      tchan.Logger
-	handlers map[string]handler
-	ctxFn    func(ctx context.Context, method string, headers map[string]string) thrift.Context
+	registrar tchan.Registrar
+	log       tchan.Logger
+	handlers  map[string]handler
+	ctxFn     func(ctx context.Context, method string, headers map[string]string) thrift.Context
 }
 
 // NewServer returns a server that can serve thrift services over TChannel.
 func NewServer(registrar tchan.Registrar) *Server {
 	server := &Server{
-		ch:       registrar,
-		log:      registrar.Logger(),
-		handlers: make(map[string]handler),
-		ctxFn:    defaultContextFn,
+		registrar: registrar,
+		log:       registrar.Logger(),
+		handlers:  map[string]handler{},
+		ctxFn:     defaultContextFn,
 	}
 	return server
 }
@@ -72,7 +72,7 @@ func (s *Server) Register(svr TChanServer, opts ...RegisterOption) {
 	s.Unlock()
 
 	for _, m := range svr.Methods() {
-		s.ch.Register(s, service+"::"+m)
+		s.registrar.Register(s, service+"::"+m)
 	}
 }
 
@@ -83,7 +83,7 @@ func (s *Server) SetContextFn(f func(ctx context.Context, method string, headers
 
 func (s *Server) onError(err error) {
 	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
-		s.log.Debugf("Thrift server timeout: %v", err)
+		s.log.Warn("Thrift server timeout:" + err.Error())
 	} else {
 		s.log.WithFields(tchan.ErrField(err)).Error("Thrift server error.")
 	}
@@ -121,7 +121,7 @@ func (s *Server) handle(origCtx context.Context, handler handler, method string,
 		return err
 	}
 
-	tracer := tchan.TracerFromRegistrar(s.ch)
+	tracer := tchan.TracerFromRegistrar(s.registrar)
 	origCtx = tchan.ExtractInboundSpan(origCtx, call, headers, tracer)
 	ctx := s.ctxFn(origCtx, method, headers)
 
@@ -129,6 +129,8 @@ func (s *Server) handle(origCtx context.Context, handler handler, method string,
 	if err != nil {
 		return err
 	}
+
+	// TODO: (lu) pass wireValue pointer
 	success, resp, err := handler.server.Handle(ctx, method, wireValue)
 
 	if handler.postResponseCB != nil {
@@ -172,13 +174,11 @@ func (s *Server) handle(origCtx context.Context, handler handler, method string,
 		return err
 	}
 
-	wireValue, err = resp.ToWire()
+	err = WriteStruct(writer, resp)
 	if err != nil {
-		return nil
-	}
-	if err := protocol.Binary.Encode(wireValue, writer); err != nil {
 		return err
 	}
+
 	if err := writer.Close(); err != nil {
 		return err
 	}
