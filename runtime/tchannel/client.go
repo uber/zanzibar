@@ -21,6 +21,7 @@
 package tchannel
 
 import (
+	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/tchannel-go/thrift"
 	"golang.org/x/net/context"
@@ -43,26 +44,26 @@ func NewClient(ch *tchannel.Channel, serviceName string) TChanClient {
 	return client
 }
 
-func writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
+func (c *Client) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
 	writer, err := call.Arg2Writer()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg2writer for client outbound call %s", c.serviceName)
 	}
 	headers = tchannel.InjectOutboundSpan(call.Response(), headers)
-	if err := thrift.WriteHeaders(writer, headers); err != nil {
-		return err
+	if err := WriteHeaders(writer, headers); err != nil {
+		return errors.Wrapf(err, "could not write headers for client outbound call %s", c.serviceName)
 	}
 	if err := writer.Close(); err != nil {
-		return err
+		return errors.Wrapf(err, "could not close arg2 writer for client outbound call %s", c.serviceName)
 	}
 
 	writer, err = call.Arg3Writer()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg3writer for client outbound call %s", c.serviceName)
 	}
 
 	if err := WriteStruct(writer, req); err != nil {
-		return err
+		return errors.Wrapf(err, "could not write request for client outbound call %s", c.serviceName)
 	}
 
 	return writer.Close()
@@ -76,7 +77,7 @@ func readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[
 		return nil, false, err
 	}
 
-	headers, err := thrift.ReadHeaders(reader)
+	headers, err := ReadHeaders(reader)
 	if err != nil {
 		return nil, false, err
 	}
@@ -125,7 +126,7 @@ func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req,
 			return err
 		}
 
-		if err := writeArgs(call, headers, req); err != nil {
+		if err := c.writeArgs(call, headers, req); err != nil {
 			return err
 		}
 
