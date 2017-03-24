@@ -22,11 +22,11 @@ package zanzibar_test
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
-	"encoding/json"
-
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -84,4 +84,111 @@ func TestInvalidStatusCode(t *testing.T) {
 
 	code := lineStruct["UnexpectedStatusCode"].(float64)
 	assert.Equal(t, 999.0, code)
+}
+
+func TestCallingWriteJSONWithNil(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, nil)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.Status, "500 Internal Server Error")
+	assert.Equal(t, resp.StatusCode, 500)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		"Could not serialize json response", string(bytes))
+
+	errorLogs := bgateway.GetErrorLogs()
+	logLines := errorLogs["Could not serialize nil pointer body"]
+
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+}
+
+type failingJsonObj struct {
+}
+
+func (f failingJsonObj) MarshalJSON() ([]byte, error) {
+	return nil, errors.New("cannot serialize")
+}
+
+func TestCallWriteJSONWithBadJSON(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, failingJsonObj{})
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.Status, "500 Internal Server Error")
+	assert.Equal(t, resp.StatusCode, 500)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		"Could not serialize json response", string(bytes))
+
+	errorLogs := bgateway.GetErrorLogs()
+	logLines := errorLogs["Could not serialize json response"]
+
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
+		return
+	}
+
+	errorText := lineStruct["error"].(string)
+	assert.Equal(t, "cannot serialize", errorText)
 }
