@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"time"
@@ -113,20 +112,6 @@ func (res *ServerHTTPResponse) SendErrorString(
 
 	res.writeHeader(statusCode)
 	res.writeString(err)
-
-	res.finish()
-}
-
-// CopyJSON will copy json bytes from a Reader
-func (res *ServerHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	_, err := io.Copy(res.responseWriter, src)
-	if err != nil {
-		res.req.Logger.Error("Could not copy bytes",
-			zap.String("error", err.Error()),
-		)
-	}
 
 	res.finish()
 }
