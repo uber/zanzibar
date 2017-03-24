@@ -26,8 +26,14 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
+	"bytes"
+
+	"encoding/json"
+
+	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
@@ -40,6 +46,9 @@ type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
 
 	backends   map[string]*testBackend.TestBackend
+	logBytes   *bytes.Buffer
+	readLogs   bool
+	errorLogs  map[string][]string
 	httpClient *http.Client
 }
 
@@ -92,6 +101,10 @@ func CreateGateway(
 			Timeout: 30 * 1000 * time.Millisecond,
 		},
 		backends: backends,
+		logBytes: bytes.NewBuffer(nil),
+
+		readLogs:  false,
+		errorLogs: map[string][]string{},
 	}
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
@@ -111,7 +124,8 @@ func CreateGateway(
 	clients := clients.CreateClients(config)
 
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients: clients,
+		Clients:   clients,
+		LogWriter: zap.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
@@ -132,7 +146,37 @@ func (gateway *BenchGateway) GetPort() int {
 
 // GetErrorLogs ...
 func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
-	panic("Not implemented")
+	if gateway.readLogs {
+		return gateway.errorLogs
+	}
+
+	lines := strings.Split(gateway.logBytes.String(), "\n")
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		if len(line) == 0 {
+			continue
+		}
+
+		lineStruct := map[string]interface{}{}
+		jsonError := json.Unmarshal([]byte(line), &lineStruct)
+		if jsonError != nil {
+			// do not decode msg
+			continue
+		}
+
+		msg := lineStruct["msg"].(string)
+
+		msgLogs := gateway.errorLogs[msg]
+		if msgLogs == nil {
+			msgLogs = []string{line}
+		} else {
+			msgLogs = append(msgLogs, line)
+		}
+		gateway.errorLogs[msg] = msgLogs
+	}
+
+	gateway.readLogs = true
+	return gateway.errorLogs
 }
 
 // Backends ...
