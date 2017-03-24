@@ -34,6 +34,11 @@ import (
 	"golang.org/x/net/context"
 )
 
+// PostResponseCB registers a callback that is run after a response has been
+// completely processed (e.g. written to the channel).
+// This gives the thriftrw a chance to clean up resources from the response object
+type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
+
 type handler struct {
 	server         TChanServer
 	postResponseCB PostResponseCB
@@ -59,21 +64,30 @@ func NewServer(registrar tchan.Registrar) *Server {
 	return server
 }
 
-// Register registers the given TChanServer to the be called on any incoming call for its services.
-func (s *Server) Register(svr TChanServer, opts ...RegisterOption) {
+func (s *Server) register(svr TChanServer, h *handler)  {
 	service := svr.Service()
-	handler := &handler{server: svr}
-	for _, opt := range opts {
-		opt.Apply(handler)
-	}
-
 	s.Lock()
-	s.handlers[service] = *handler
+	s.handlers[service] = *h
 	s.Unlock()
 
 	for _, m := range svr.Methods() {
 		s.registrar.Register(s, service+"::"+m)
 	}
+}
+
+// Register registers the given TChanServer to the be called on any incoming call for its services.
+func (s *Server) Register(svr TChanServer) {
+	handler := &handler{server: svr}
+	s.register(svr, handler)
+}
+
+// RegisterWithPostResponseCB registers the given TChanServer with a PostResponseCB function
+func (s *Server) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
+	handler := &handler{
+		server:         svr,
+		postResponseCB: cb,
+	}
+	s.register(svr, handler)
 }
 
 // SetContextFn sets the function used to convert a context.Context to a thrift.Context.
