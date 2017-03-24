@@ -70,7 +70,7 @@ func main() {
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
 		config.MustGetString("middlewareConfig"),
-
+		config.MustGetString("copyrightHeader"),
 		config.MustGetString("gatewayName"),
 	)
 	checkError(

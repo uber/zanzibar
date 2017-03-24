@@ -672,6 +672,7 @@ type GatewaySpec struct {
 	clientConfigDir   string
 	endpointConfigDir string
 	middlewareConfig  string
+	copyrightHeader   string
 }
 
 // NewGatewaySpec sets up gateway spec
@@ -684,6 +685,7 @@ func NewGatewaySpec(
 	clientConfig string,
 	endpointConfig string,
 	middlewareConfig string,
+	copyrightHeader string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -742,6 +744,7 @@ func NewGatewaySpec(
 		clientConfigDir:   clientConfig,
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
+		copyrightHeader:   copyrightHeader,
 	}
 
 	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
