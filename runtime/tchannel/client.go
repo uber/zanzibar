@@ -27,37 +27,20 @@ import (
 )
 
 // client implements TChanClient and makes outgoing Thrift calls.
-type client struct {
+type Client struct {
 	ch          *tchannel.Channel
 	sc          *tchannel.SubChannel
 	serviceName string
-	opts        ClientOptions
-}
-
-// ClientOptions are options to customize the client.
-type ClientOptions struct {
-	// HostPort specifies a specific server to hit.
-	HostPort string
 }
 
 // NewClient returns a Client that makes calls over the given tchannel to the given Hyperbahn service.
-func NewClient(ch *tchannel.Channel, serviceName string, opts *ClientOptions) TChanClient {
-	client := &client{
+func NewClient(ch *tchannel.Channel, serviceName string) TChanClient {
+	client := &Client{
 		ch:          ch,
 		sc:          ch.GetSubChannel(serviceName),
 		serviceName: serviceName,
 	}
-	if opts != nil {
-		client.opts = *opts
-	}
 	return client
-}
-
-func (c *client) startCall(ctx context.Context, method string, callOptions *tchannel.CallOptions) (*tchannel.OutboundCall, error) {
-	if c.opts.HostPort != "" {
-		return c.ch.BeginCall(ctx, c.opts.HostPort, c.serviceName, method, callOptions)
-	}
-	return c.sc.BeginCall(ctx, method, callOptions)
 }
 
 func writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
@@ -123,7 +106,7 @@ func readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[
 	return headers, success, reader.Close()
 }
 
-func (c *client) Call(ctx thrift.Context, thriftService, methodName string, req, resp RWTStruct) (bool, error) {
+func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req, resp RWTStruct) (bool, error) {
 	var (
 		headers = ctx.Headers()
 
@@ -134,7 +117,7 @@ func (c *client) Call(ctx thrift.Context, thriftService, methodName string, req,
 	err := c.ch.RunWithRetry(ctx, func(ctx context.Context, rs *tchannel.RequestState) error {
 		respHeaders, isOK = nil, false
 
-		call, err := c.startCall(ctx, thriftService+"::"+methodName, &tchannel.CallOptions{
+		call, err := c.sc.BeginCall(ctx, thriftService+"::"+methodName, &tchannel.CallOptions{
 			Format:       tchannel.Thrift,
 			RequestState: rs,
 		})
