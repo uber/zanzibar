@@ -47,23 +47,23 @@ func NewClient(ch *tchannel.Channel, serviceName string) TChanClient {
 func (c *Client) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
 	writer, err := call.Arg2Writer()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg2writer for client outbound call %s", c.serviceName)
+		return errors.Wrapf(err, "could not create arg2writer for outbound call %s: ", c.serviceName)
 	}
 	headers = tchannel.InjectOutboundSpan(call.Response(), headers)
 	if err := WriteHeaders(writer, headers); err != nil {
-		return errors.Wrapf(err, "could not write headers for client outbound call %s", c.serviceName)
+		return errors.Wrapf(err, "could not write headers for outbound call %s: ", c.serviceName)
 	}
 	if err := writer.Close(); err != nil {
-		return errors.Wrapf(err, "could not close arg2 writer for client outbound call %s", c.serviceName)
+		return errors.Wrapf(err, "could not close arg2writer for outbound call %s: ", c.serviceName)
 	}
 
 	writer, err = call.Arg3Writer()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg3writer for client outbound call %s", c.serviceName)
+		return errors.Wrapf(err, "could not create arg3writer for outbound call %s: ", c.serviceName)
 	}
 
 	if err := WriteStruct(writer, req); err != nil {
-		return errors.Wrapf(err, "could not write request for client outbound call %s", c.serviceName)
+		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
 	}
 
 	return writer.Close()
@@ -71,37 +71,37 @@ func (c *Client) writeArgs(call *tchannel.OutboundCall, headers map[string]strin
 
 // readResponse reads the response struct into resp, and returns:
 // (response headers, whether there was an application error, unexpected error).
-func readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[string]string, bool, error) {
+func (c *Client) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[string]string, bool, error) {
 	reader, err := response.Arg2Reader()
 	if err != nil {
-		return nil, false, err
+		return nil, false, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
 	}
 
 	headers, err := ReadHeaders(reader)
 	if err != nil {
-		return nil, false, err
+		return nil, false, errors.Wrapf(err, "could not read headers for outbound call response: %s", c.serviceName)
 	}
 
 	if err := EnsureEmpty(reader, "reading response headers"); err != nil {
-		return nil, false, err
+		return nil, false, errors.Wrapf(err, "could not ensure arg2reader is empty for outbound call response: %s", c.serviceName)
 	}
 
 	if err := reader.Close(); err != nil {
-		return nil, false, err
+		return nil, false, errors.Wrapf(err, "could not close arg2reader for outbound call response: %s", c.serviceName)
 	}
 
 	success := !response.ApplicationError()
 	reader, err = response.Arg3Reader()
 	if err != nil {
-		return headers, success, err
+		return headers, success, errors.Wrapf(err, "could not create arg3Reader for outbound call response: %s", c.serviceName)
 	}
 
 	if err := ReadStruct(reader, resp); err != nil {
-		return headers, success, err
+		return headers, success, errors.Wrapf(err, "could not read outbound call response: %s", c.serviceName)
 	}
 
 	if err := EnsureEmpty(reader, "reading response body"); err != nil {
-		return nil, false, err
+		return nil, false, errors.Wrapf(err, "could not ensure arg3reader is empty for outbound call response: %s", c.serviceName)
 	}
 
 	return headers, success, reader.Close()
@@ -124,18 +124,18 @@ func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req,
 			RequestState: rs,
 		})
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "could not begin outbound call: %s", c.serviceName)
 		}
 
 		if err := c.writeArgs(call, headers, req); err != nil {
 			return err
 		}
 
-		respHeaders, isOK, err = readResponse(call.Response(), resp)
+		respHeaders, isOK, err = c.readResponse(call.Response(), resp)
 		return err
 	})
 	if err != nil {
-		return false, err
+		return nil, false, errors.Wrapf(err, "could not make outbound call: %s", c.serviceName)
 	}
 
 	ctx.SetResponseHeaders(respHeaders)
