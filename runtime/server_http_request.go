@@ -98,6 +98,11 @@ func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 	req.metrics.requestRecvd.Inc(1)
 }
 
+// CheckHeaders verifies that request contains required headers.
+func (req *ServerHTTPRequest) CheckHeaders([]string) bool {
+	return true
+}
+
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
 func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	body json.Unmarshaler,

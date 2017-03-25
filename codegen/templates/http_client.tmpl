@@ -47,7 +47,7 @@ func NewClient(config *zanzibar.StaticConfig) *{{$clientName}} {
 {{- if ne .RequestType ""}}
 {{/* template for having request http body */}}
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}, h http.Header) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}) (*http.Response, error) {
 	// Generate full URL.
 	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL
@@ -66,9 +66,6 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 	if err != nil {
 		return nil, err
 	}
-	if h != nil {
-		req.Header = h
-	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req.WithContext(ctx))
 }
@@ -76,7 +73,7 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 {{else}} {{/* template for having http body */ -}}
 
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, h http.Header) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
@@ -88,9 +85,6 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, h http.Header) (*
 	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, nil)
 	if err != nil {
 		return nil, err
-	}
-	if h != nil {
-		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req.WithContext(ctx))
