@@ -100,4 +100,17 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Finished building istanbul reports : +$runtime"
 
+
+cat ./coverage/istanbul.json | jq '[
+	. |
+	to_entries |
+	.[] |
+	select(.key | contains("runtime")) |
+	select(.key | contains("runtime/gateway") | not)
+] | from_entries' > ./coverage/istanbul-runtime.json
+
+echo "Checking code coverage for runtime folder"
+./node_modules/.bin/istanbul check-coverage --statements 100 \
+	./coverage/istanbul-runtime.json
+
 rm -f ./test/.cached_binary_test_info.json
