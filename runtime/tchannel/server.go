@@ -30,6 +30,7 @@ import (
 	netContext "golang.org/x/net/context"
 	tchan "github.com/uber/tchannel-go"
 
+	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 )
@@ -107,31 +108,33 @@ func (s *Server) onError(err error) {
 }
 
 func (s *Server) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
+	serviceName := handler.server.Service()
+
 	reader, err := call.Arg2Reader()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", serviceName, method)
 	}
 	headers, err := ReadHeaders(reader)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", serviceName, method)
 	}
 	if err := EnsureEmpty(reader, "reading request headers"); err != nil {
-		return err
+		return errors.Wrapf(err, "could not ensure arg2reader is empty for inbound call: %s::%s", serviceName, method)
 	}
 
 	if err := reader.Close(); err != nil {
-		return err
+		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", serviceName, method)
 	}
 
 	reader, err = call.Arg3Reader()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", serviceName, method)
 	}
 
 	buf := GetBuffer()
 	defer PutBuffer(buf)
 	if _, err := buf.ReadFrom(reader); err != nil {
-		return err
+		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", serviceName, method)
 	}
 
 	tracer := tchan.TracerFromRegistrar(s.registrar)
@@ -139,7 +142,7 @@ func (s *Server) handle(ctx context.Context, handler handler, method string, cal
 
 	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", serviceName, method)
 	}
 
 	success, respHeaders, resp, err := handler.server.Handle(ctx, method, &wireValue)
@@ -150,16 +153,16 @@ func (s *Server) handle(ctx context.Context, handler handler, method string, cal
 
 	if err != nil {
 		if er := reader.Close(); er != nil {
-			return er
+			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", serviceName, method)
 		}
 		return call.Response().SendSystemError(err)
 	}
 
 	if err := EnsureEmpty(reader, "reading request body"); err != nil {
-		return err
+		return errors.Wrapf(err, "could not ensure arg3reader is empty for inbound call: %s::%s", serviceName, method)
 	}
 	if err := reader.Close(); err != nil {
-		return err
+		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", serviceName, method)
 	}
 
 	if !success {
@@ -170,28 +173,28 @@ func (s *Server) handle(ctx context.Context, handler handler, method string, cal
 
 	writer, err := call.Response().Arg2Writer()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", serviceName, method)
 	}
 
 	if err := WriteHeaders(writer, respHeaders); err != nil {
-		return err
+		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", serviceName, method)
 	}
 	if err := writer.Close(); err != nil {
-		return err
+		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", serviceName, method)
 	}
 
 	writer, err = call.Response().Arg3Writer()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", serviceName, method)
 	}
 
 	err = WriteStruct(writer, resp)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", serviceName, method)
 	}
 
 	if err := writer.Close(); err != nil {
-		return err
+		return errors.Wrapf(err, "could not close arg3writer for inbound call response: %s::%s", serviceName, method)
 	}
 
 	return nil
