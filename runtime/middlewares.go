@@ -22,175 +22,96 @@ package zanzibar
 
 import (
 	"context"
-	"net/http"
+
+	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 )
 
-// Handler is an interface that compatable middlewares must implement to be used
-// in the middleware stack. Handle should yield to the next middleware in the stack
-// by invoking the next HandlerFn passed in.
-type Handler interface {
-	Handle(
-		ctx context.Context,
-		req *ServerHTTPRequest,
-		res *ServerHTTPResponse,
-		next HandlerFn)
-}
-
-// HandlerFunc is an adapter to allow functions to be directly added as MiddlewareStack handlers.
-type HandlerFunc func(
-	ctx context.Context,
-	req *ServerHTTPRequest,
-	res *ServerHTTPResponse,
-	next HandlerFn)
-
-// Handle executes the HandlerFunc.
-func (h HandlerFunc) Handle(
-	ctx context.Context,
-	req *ServerHTTPRequest,
-	res *ServerHTTPResponse,
-	next HandlerFn) {
-	h(ctx, req, res, next)
-}
-
-type middleware struct {
-	handler Handler
-	next    *middleware
-}
-
-func (m middleware) Handle(
-	ctx context.Context,
-	req *ServerHTTPRequest,
-	res *ServerHTTPResponse) {
-	m.handler.Handle(ctx, req, res, m.next.Handle)
-}
-
 // MiddlewareStack is a stack of Middleware Handlers that can be invoked as an Handler.
-// MiddlewareStack middleware is evaluated in the order that they are added to the stack using
-// the Use and UseHandler methods.
+// MiddlewareStack middlewares are evaluated for requests in the order that they are added to the stack
+// followed by the underlying HandlerFn. The middleware responses are then executed in reverse.
 type MiddlewareStack struct {
-	middleware middleware
-	handlers   []Handler
+	middlewares []MiddlewareHandle
+	handle      HandlerFn
 }
 
 // NewStack returns a new MiddlewareStack instance with no middleware preconfigured.
-func NewStack(handlers ...Handler) *MiddlewareStack {
+func NewStack(middlewares []MiddlewareHandle,
+	handle HandlerFn) *MiddlewareStack {
 	return &MiddlewareStack{
-		handlers:   handlers,
-		middleware: build(handlers),
+		handle:      handle,
+		middlewares: middlewares,
 	}
-
 }
 
-// With returns a new MiddlewareStack instance that is a combination of the MiddlewareStack
-// receiver's handlers and the provided handlers.
-func (m *MiddlewareStack) With(handlers ...Handler) *MiddlewareStack {
-	return NewStack(
-		append(m.handlers, handlers...)...,
-	)
+// Middlewares returns a list of all the handlers in the current MiddlewareStack.
+func (m *MiddlewareStack) Middlewares() []MiddlewareHandle {
+	return m.middlewares
 }
 
-// Handle calls Handle on the the handlers in the stack.
+// MiddlewareHandle used to define middleware
+type MiddlewareHandle interface {
+	// implement HandleRequest for your middleware.
+	HandleRequest(
+		req *ServerHTTPRequest,
+		res *ServerHTTPResponse,
+		shared SharedState) error
+	// implement HandleResponse for your middleware
+	HandleResponse(
+		res *ServerHTTPResponse,
+		shared SharedState) error
+	// return any shared state for this middleware.
+	OwnState() interface{}
+	JSONSchema() *jsonschema.Document
+	Name() string
+}
+
+// SharedState used to access other middlewares in the chain.
+type SharedState struct {
+	middlewareDict map[string]MiddlewareHandle
+}
+
+func newSharedState(middlewares []MiddlewareHandle) SharedState {
+	sharedState := SharedState{}
+	sharedState.middlewareDict = make(map[string]MiddlewareHandle)
+
+	for i := 0; i < len(middlewares); i++ {
+		sharedState.middlewareDict[middlewares[i].Name()] = middlewares[i]
+	}
+	return sharedState
+}
+
+// GetState returns the state from a different middleware
+func (s SharedState) GetState(name string) interface{} {
+	return s.middlewareDict[name].OwnState()
+}
+
+// Handle executes the middlewares in a stack and underlying handler.
 func (m *MiddlewareStack) Handle(
 	ctx context.Context,
 	req *ServerHTTPRequest,
 	res *ServerHTTPResponse) {
-	m.middleware.Handle(ctx, req, res)
-}
 
-// Use adds a Handler onto the middleware stack. Handlers are invoked in the order they are added to a MiddlewareStack.
-func (m *MiddlewareStack) Use(handler Handler) {
-	if handler == nil {
-		panic("handler cannot be nil")
+	shared := newSharedState(m.middlewares)
+
+	for i := 0; i < len(m.middlewares); i++ {
+		err := m.middlewares[i].HandleRequest(req, res, shared)
+		if err != nil {
+			// Decide whether to log and 500 or change the
+			// zanzibar.HandleFn to return an error and let
+			// router process those at that level.
+			return
+		}
 	}
 
-	m.handlers = append(m.handlers, handler)
-	m.middleware = build(m.handlers)
-}
+	m.handle(ctx, req, res)
 
-// UseFunc adds a MiddlewareStack-style handler function onto the middleware stack.
-func (m *MiddlewareStack) UseFunc(
-	handlerFunc func(
-		ctx context.Context,
-		req *ServerHTTPRequest,
-		res *ServerHTTPResponse,
-		next HandlerFn)) {
-	m.Use(HandlerFunc(handlerFunc))
-}
-
-// Handlers returns a list of all the handlers in the current MiddlewareStack.
-func (m *MiddlewareStack) Handlers() []Handler {
-	return m.handlers
-}
-
-func build(handlers []Handler) middleware {
-	if len(handlers) == 0 {
-		return voidMiddleware()
+	for i := len(m.middlewares) - 1; i >= 0; i-- {
+		err := m.middlewares[i].HandleResponse(res, shared)
+		if err != nil {
+			// Decide whether to log and 500 or change the
+			// zanzibar.HandleFn to return an error and let
+			// router process those at that level.
+			return
+		}
 	}
-
-	var next middleware
-	if len(handlers) > 1 {
-		next = build(handlers[1:])
-	} else {
-		next = voidMiddleware()
-	}
-
-	return middleware{handlers[0], &next}
-}
-
-func voidMiddleware() middleware {
-	return middleware{
-		HandlerFunc(
-			func(
-				ctx context.Context,
-				req *ServerHTTPRequest,
-				res *ServerHTTPResponse,
-				next HandlerFn) {
-			}),
-		&middleware{},
-	}
-}
-
-// Wrap converts a zanzibar.HandlerFn into a middleware.Handler so it can be used
-// in the middleware stack. The following zanzibar.HandlerFn is called after execution.
-func Wrap(handlerFn HandlerFn) Handler {
-	return HandlerFunc(
-		func(
-			ctx context.Context,
-			req *ServerHTTPRequest,
-			res *ServerHTTPResponse,
-			next HandlerFn) {
-			handlerFn(ctx, req, res)
-			next(ctx, req, res)
-		})
-}
-
-// UseHandlerFn adds a zanzibar.HandlerFn handler function onto the middleware stack.
-func (m *MiddlewareStack) UseHandlerFn(
-	handlerFunc func(
-		ctx context.Context,
-		req *ServerHTTPRequest,
-		res *ServerHTTPResponse)) {
-	m.Use(Wrap(handlerFunc))
-}
-
-// AdaptHTTPHandler wraps a http.Handler to support standard non-zanzibar middlewares.
-func AdaptHTTPHandler(handler http.Handler) HandlerFunc {
-	return func(
-		ctx context.Context,
-		req *ServerHTTPRequest,
-		res *ServerHTTPResponse,
-		next HandlerFn) {
-		// TODO(sindelar): Implement this with a recorder and context propogation.
-		handler.ServeHTTP(res.responseWriter, req.httpRequest)
-		next(ctx, req, res)
-	}
-}
-
-// DefaultStack returns a new middleware stack instance with the default middlewares.
-//
-// Logger - Request/Response Logging
-// Tracer - Cross service request tracing
-func DefaultStack() *MiddlewareStack {
-	//TODO(sindelar): implement this.
-	return nil
 }

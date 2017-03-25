@@ -29,6 +29,7 @@ import (
 	// TODO(sindelar): Refactor into a unit test and remove the
 	// example middleware (which creates a cyclic dependency)
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -36,34 +37,20 @@ import (
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
-
-	middlewareStack := zanzibar.NewStack()
-	handlers := middlewareStack.Handlers()
-	assert.Equal(t, 0, len(handlers))
-
-	// Test unnammed anonymous middleware
-	middlewareStack.UseFunc(func(
-		ctx context.Context,
-		req *zanzibar.ServerHTTPRequest,
-		res *zanzibar.ServerHTTPResponse,
-		next zanzibar.HandlerFn) {
-		next(ctx, req, res)
-		res.StatusCode = http.StatusOK
-	})
-
 	ex := example.NewMiddleWare(
 		nil, // *zanzibar.Gateway
 		example.Options{
 			Foo: "foo",
 			Bar: 2,
 		},
-		noop,
 	)
-	middlewareStack.UseHandlerFn(ex)
+
+	middles := []zanzibar.MiddlewareHandle{ex}
+	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
-	handlers = middlewareStack.Handlers()
-	assert.Equal(t, 2, len(handlers))
+	middlewares := middlewareStack.Middlewares()
+	assert.Equal(t, 1, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
 	// TODO(sindelar): Refactor. We some helpers to build zanzibar
@@ -94,33 +81,26 @@ func TestHandlers(t *testing.T) {
 
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
-	//contxt, request, response := setUpRequest()
-
-	middlewareStack := zanzibar.NewStack()
-	handlers := middlewareStack.Handlers()
-	assert.Equal(t, 0, len(handlers))
-
-	// Read from a shared state
-	readFn := func(
-		ctx context.Context,
-		req *zanzibar.ServerHTTPRequest,
-		res *zanzibar.ServerHTTPResponse) {
-		sharedState := ctx.Value(example.MiddlewareStateName).(example.MiddlewareState)
-		if sharedState.Baz == "test_state" {
-			res.StatusCode = http.StatusOK
-		}
-	}
-
-	// Write to a shared state
 	ex := example.NewMiddleWare(
 		nil, // nil Gateway
 		example.Options{
 			Foo: "test_state",
 			Bar: 2,
 		},
-		readFn,
 	)
-	middlewareStack.UseHandlerFn(ex)
+	exReader := exampleReader.NewMiddleWare(
+		nil, // *zanzibar.Gateway
+		exampleReader.Options{
+			Foo: "foo",
+		},
+	)
+
+	middles := []zanzibar.MiddlewareHandle{ex, exReader}
+	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+
+	// Verify the custom middleware has been added.
+	middlewares := middlewareStack.Middlewares()
+	assert.Equal(t, 2, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
 	// TODO(sindelar): Refactor. We some helpers to build zanzibar
@@ -149,12 +129,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 }
 
-// Ensures that a middleware stack can accept Http middlewares.
-func TestAdaptedHttpHandlers(t *testing.T) {
-	// TODO(sindelar)
-}
-
-func noop(ctx context.Context,
+func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse) {
 	return

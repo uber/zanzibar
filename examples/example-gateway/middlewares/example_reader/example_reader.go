@@ -18,68 +18,71 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package example
+package exampleReader
 
 import (
+	"net/http"
+
 	"github.com/mcuadros/go-jsonschema-generator"
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-type exampleMiddleware struct {
+type exampleReaderMiddleware struct {
 	middlewareState MiddlewareState
 	options         Options
 }
 
 // Options for middleware configuration
 type Options struct {
-	Foo string `json:"Foo"`
-	Bar int    `json:",omitempty"`
+	Foo string `json:"Foo"` // string to verify in shared
 }
 
 // MiddlewareState accessible by other middlewares and endpoint handler
 // though the context object.
-type MiddlewareState struct {
-	Baz string
-}
+type MiddlewareState struct{}
 
 // NewMiddleWare creates a new middleware that executes the next middleware
 // after performing it's operations.
 func NewMiddleWare(
 	gateway *zanzibar.Gateway,
 	options Options) zanzibar.MiddlewareHandle {
-	return &exampleMiddleware{
+	return &exampleReaderMiddleware{
 		options: options,
 	}
 }
 
-func (m exampleMiddleware) OwnState() interface{} {
+func (m exampleReaderMiddleware) OwnState() interface{} {
 	return m.middlewareState
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m exampleMiddleware) HandleRequest(
+func (m exampleReaderMiddleware) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
-	m.middlewareState = MiddlewareState{
-		Baz: m.options.Foo,
-	}
 	return nil
 }
 
-func (m exampleMiddleware) HandleResponse(
+func (m exampleReaderMiddleware) HandleResponse(
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
+	ss := shared.GetState("example").(example.MiddlewareState)
+	if ss.Baz == m.options.Foo {
+		res.StatusCode = http.StatusOK
+		return nil
+	}
+	res.StatusCode = http.StatusNotFound
 	return nil
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m exampleMiddleware) JSONSchema() *jsonschema.Document {
+func (m exampleReaderMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m exampleMiddleware) Name() string {
-	return "example"
+func (m exampleReaderMiddleware) Name() string {
+	return "example_reader"
 }

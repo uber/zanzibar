@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package example
+package exampleReader
 
 import (
 	"testing"
@@ -27,16 +27,13 @@ import (
 )
 
 func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
-	schema := (&exampleMiddleware{}).JSONSchema()
+	schema := (&exampleReaderMiddleware{}).JSONSchema()
 
 	// TODO(sindelar): Read expected from test file
 	expected := "{\n" +
 		"    \"$schema\": \"http://json-schema.org/schema#\",\n" +
 		"    \"type\": \"object\",\n" +
 		"    \"properties\": {\n" +
-		"        \"Bar\": {\n" +
-		"            \"type\": \"integer\"\n" +
-		"        },\n" +
 		"        \"Foo\": {\n" +
 		"            \"type\": \"string\"\n" +
 		"        }\n" +
