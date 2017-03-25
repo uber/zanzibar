@@ -57,6 +57,8 @@ echo ""
 echo "      --------------------        "
 echo ""
 
+rm -f ./test/.cached_binary_test_info.json
+
 cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
 rm -f coverage.tmp
 grep "FAIL" test.out | tee -a fail.out
@@ -112,5 +114,3 @@ cat ./coverage/istanbul.json | jq '[
 echo "Checking code coverage for runtime folder"
 ./node_modules/.bin/istanbul check-coverage --statements 100 \
 	./coverage/istanbul-runtime.json
-
-rm -f ./test/.cached_binary_test_info.json
