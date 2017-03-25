@@ -88,9 +88,9 @@ imports:
   - internal/curry
   - internal/goast
   - internal/plugin
+  - internal/semver
   - plugin/api
   - ptr
-  - internal/semver
   - idl/internal
   - internal/concurrent
   - internal/envelope

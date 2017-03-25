@@ -36,3 +36,7 @@ import:
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
 - package: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
+-testImport:
+ - package: github.com/stretchr/testify		
+ -  subpackages:		
+ -  - assert
