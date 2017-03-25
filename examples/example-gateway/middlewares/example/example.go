@@ -21,13 +21,14 @@
 package example
 
 import (
+	"context"
+
 	"github.com/mcuadros/go-jsonschema-generator"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 type exampleMiddleware struct {
-	middlewareState MiddlewareState
-	options         Options
+	options Options
 }
 
 // Options for middleware configuration
@@ -52,22 +53,22 @@ func NewMiddleWare(
 	}
 }
 
-func (m exampleMiddleware) OwnState() interface{} {
-	return m.middlewareState
-}
-
 // HandleRequest handles the requests before calling lower level middlewares.
 func (m exampleMiddleware) HandleRequest(
+	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
-	m.middlewareState = MiddlewareState{
-		Baz: m.options.Foo,
-	}
+	shared.SetState(
+		m.Name(),
+		MiddlewareState{
+			Baz: m.options.Foo,
+		})
 	return nil
 }
 
 func (m exampleMiddleware) HandleResponse(
+	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
 	return nil

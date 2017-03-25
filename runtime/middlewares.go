@@ -52,27 +52,28 @@ func (m *MiddlewareStack) Middlewares() []MiddlewareHandle {
 type MiddlewareHandle interface {
 	// implement HandleRequest for your middleware.
 	HandleRequest(
+		ctx context.Context,
 		req *ServerHTTPRequest,
 		res *ServerHTTPResponse,
 		shared SharedState) error
-	// implement HandleResponse for your middleware
+	// implement HandleResponse for your middleware.
 	HandleResponse(
+		ctx context.Context,
 		res *ServerHTTPResponse,
 		shared SharedState) error
 	// return any shared state for this middleware.
-	OwnState() interface{}
 	JSONSchema() *jsonschema.Document
 	Name() string
 }
 
 // SharedState used to access other middlewares in the chain.
 type SharedState struct {
-	middlewareDict map[string]MiddlewareHandle
+	middlewareDict map[string]interface{}
 }
 
 func newSharedState(middlewares []MiddlewareHandle) SharedState {
 	sharedState := SharedState{}
-	sharedState.middlewareDict = make(map[string]MiddlewareHandle)
+	sharedState.middlewareDict = make(map[string]interface{})
 
 	for i := 0; i < len(middlewares); i++ {
 		sharedState.middlewareDict[middlewares[i].Name()] = middlewares[i]
@@ -82,7 +83,12 @@ func newSharedState(middlewares []MiddlewareHandle) SharedState {
 
 // GetState returns the state from a different middleware
 func (s SharedState) GetState(name string) interface{} {
-	return s.middlewareDict[name].OwnState()
+	return s.middlewareDict[name]
+}
+
+// SetState returns the state from a different middleware
+func (s SharedState) SetState(name string, state interface{}) {
+	s.middlewareDict[name] = state
 }
 
 // Handle executes the middlewares in a stack and underlying handler.
@@ -94,7 +100,7 @@ func (m *MiddlewareStack) Handle(
 	shared := newSharedState(m.middlewares)
 
 	for i := 0; i < len(m.middlewares); i++ {
-		err := m.middlewares[i].HandleRequest(req, res, shared)
+		err := m.middlewares[i].HandleRequest(ctx, req, res, shared)
 		if err != nil {
 			// Decide whether to log and 500 or change the
 			// zanzibar.HandleFn to return an error and let
@@ -106,7 +112,7 @@ func (m *MiddlewareStack) Handle(
 	m.handle(ctx, req, res)
 
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
-		err := m.middlewares[i].HandleResponse(res, shared)
+		err := m.middlewares[i].HandleResponse(ctx, res, shared)
 		if err != nil {
 			// Decide whether to log and 500 or change the
 			// zanzibar.HandleFn to return an error and let

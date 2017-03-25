@@ -21,6 +21,7 @@
 package exampleReader
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/mcuadros/go-jsonschema-generator"
@@ -29,8 +30,7 @@ import (
 )
 
 type exampleReaderMiddleware struct {
-	middlewareState MiddlewareState
-	options         Options
+	options Options
 }
 
 // Options for middleware configuration
@@ -52,12 +52,9 @@ func NewMiddleWare(
 	}
 }
 
-func (m exampleReaderMiddleware) OwnState() interface{} {
-	return m.middlewareState
-}
-
 // HandleRequest handles the requests before calling lower level middlewares.
 func (m exampleReaderMiddleware) HandleRequest(
+	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
@@ -65,6 +62,7 @@ func (m exampleReaderMiddleware) HandleRequest(
 }
 
 func (m exampleReaderMiddleware) HandleResponse(
+	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState) error {
 	ss := shared.GetState("example").(example.MiddlewareState)
