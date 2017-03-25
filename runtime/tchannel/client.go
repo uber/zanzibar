@@ -29,7 +29,7 @@ import (
 	netContext "golang.org/x/net/context"
 )
 
-// client implements TChanClient and makes outgoing Thrift calls.
+// Client implements TChanClient and makes outgoing Thrift calls.
 type Client struct {
 	ch          *tchannel.Channel
 	sc          *tchannel.SubChannel
@@ -109,6 +109,7 @@ func (c *Client) readResponse(response *tchannel.OutboundCallResponse, resp RWTS
 	return headers, success, reader.Close()
 }
 
+// Call makes a RPC call to the given service.
 func (c *Client) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (map[string]string, bool, error) {
 	var respHeaders map[string]string
 	var isOK bool

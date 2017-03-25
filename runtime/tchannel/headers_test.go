@@ -156,7 +156,8 @@ func TestReadHeadersLeftoverBytes(t *testing.T) {
 
 func BenchmarkWriteHeaders(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		WriteHeaders(ioutil.Discard, headers)
+		err := WriteHeaders(ioutil.Discard, headers)
+		swallow(err)
 	}
 }
 
@@ -168,7 +169,11 @@ func BenchmarkReadHeaders(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		reader.Seek(0, 0)
-		ReadHeaders(reader)
+		_, err := reader.Seek(0, 0)
+		swallow(err)
+		_, err = ReadHeaders(reader)
+		swallow(err)
 	}
 }
+
+func swallow(err error) {}
