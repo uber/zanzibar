@@ -21,10 +21,12 @@
 package tchannel
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
-	"golang.org/x/net/context"
+
+	netContext "golang.org/x/net/context"
 )
 
 // client implements TChanClient and makes outgoing Thrift calls.
@@ -107,16 +109,12 @@ func (c *Client) readResponse(response *tchannel.OutboundCallResponse, resp RWTS
 	return headers, success, reader.Close()
 }
 
-func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req, resp RWTStruct) (bool, error) {
-	var (
-		headers = ctx.Headers()
-
-		respHeaders map[string]string
-		isOK        bool
-	)
+func (c *Client) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (map[string]string, bool, error) {
+	var respHeaders map[string]string
+	var isOK bool
 
 	arg1 := thriftService + "::" + methodName
-	err := c.ch.RunWithRetry(ctx, func(ctx context.Context, rs *tchannel.RequestState) error {
+	err := c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) error {
 		respHeaders, isOK = nil, false
 
 		call, err := c.sc.BeginCall(ctx, arg1, &tchannel.CallOptions{
@@ -127,7 +125,7 @@ func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req,
 			return errors.Wrapf(err, "could not begin outbound call: %s", c.serviceName)
 		}
 
-		if err := c.writeArgs(call, headers, req); err != nil {
+		if err := c.writeArgs(call, reqHeaders, req); err != nil {
 			return err
 		}
 
@@ -138,6 +136,5 @@ func (c *Client) Call(ctx thrift.Context, thriftService, methodName string, req,
 		return nil, false, errors.Wrapf(err, "could not make outbound call: %s", c.serviceName)
 	}
 
-	ctx.SetResponseHeaders(respHeaders)
-	return isOK, nil
+	return respHeaders, isOK, nil
 }

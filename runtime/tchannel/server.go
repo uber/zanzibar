@@ -22,21 +22,21 @@ package tchannel
 
 import (
 	"bytes"
-	"log"
+	"context"
+	"fmt"
 	"strings"
 	"sync"
 
+	netContext "golang.org/x/net/context"
 	tchan "github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/thrift"
 
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
-	"golang.org/x/net/context"
 )
 
 // PostResponseCB registers a callback that is run after a response has been
 // completely processed (e.g. written to the channel).
-// This gives the thriftrw a chance to clean up resources from the response object
+// This gives the server a chance to clean up resources from the response object
 type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 type handler struct {
@@ -50,7 +50,15 @@ type Server struct {
 	registrar tchan.Registrar
 	log       tchan.Logger
 	handlers  map[string]handler
-	ctxFn     func(ctx context.Context, method string, headers map[string]string) thrift.Context
+}
+
+// netContextServer implements the Handler interface that consumes netContext instead of stdlib context
+type netContextServer struct {
+	server *Server
+}
+
+func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCall) {
+	ncs.server.Handle(ctx, call)
 }
 
 // NewServer returns a server that can serve thrift services over TChannel.
@@ -59,19 +67,19 @@ func NewServer(registrar tchan.Registrar) *Server {
 		registrar: registrar,
 		log:       registrar.Logger(),
 		handlers:  map[string]handler{},
-		ctxFn:     defaultContextFn,
 	}
 	return server
 }
 
-func (s *Server) register(svr TChanServer, h *handler)  {
+func (s *Server) register(svr TChanServer, h *handler) {
 	service := svr.Service()
 	s.Lock()
 	s.handlers[service] = *h
 	s.Unlock()
 
+	ncs := netContextServer{server: s}
 	for _, m := range svr.Methods() {
-		s.registrar.Register(s, service+"::"+m)
+		s.registrar.Register(ncs, service+"::"+m)
 	}
 }
 
@@ -90,24 +98,15 @@ func (s *Server) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) 
 	s.register(svr, handler)
 }
 
-// SetContextFn sets the function used to convert a context.Context to a thrift.Context.
-func (s *Server) SetContextFn(f func(ctx context.Context, method string, headers map[string]string) thrift.Context) {
-	s.ctxFn = f
-}
-
 func (s *Server) onError(err error) {
 	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
-		s.log.Warn("Thrift server timeout:" + err.Error())
+		s.log.Warn("Thrift server timeout: " + err.Error())
 	} else {
 		s.log.WithFields(tchan.ErrField(err)).Error("Thrift server error.")
 	}
 }
 
-func defaultContextFn(ctx context.Context, method string, headers map[string]string) thrift.Context {
-	return thrift.WithHeaders(ctx, headers)
-}
-
-func (s *Server) handle(origCtx context.Context, handler handler, method string, call *tchan.InboundCall) error {
+func (s *Server) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
 	reader, err := call.Arg2Reader()
 	if err != nil {
 		return err
@@ -136,16 +135,14 @@ func (s *Server) handle(origCtx context.Context, handler handler, method string,
 	}
 
 	tracer := tchan.TracerFromRegistrar(s.registrar)
-	origCtx = tchan.ExtractInboundSpan(origCtx, call, headers, tracer)
-	ctx := s.ctxFn(origCtx, method, headers)
+	ctx = tchan.ExtractInboundSpan(ctx, call, headers, tracer)
 
 	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
 		return err
 	}
 
-	// TODO: (lu) pass wireValue pointer
-	success, resp, err := handler.server.Handle(ctx, method, wireValue)
+	success, respHeaders, resp, err := handler.server.Handle(ctx, method, &wireValue)
 
 	if handler.postResponseCB != nil {
 		defer handler.postResponseCB(ctx, method, resp)
@@ -176,7 +173,7 @@ func (s *Server) handle(origCtx context.Context, handler handler, method string,
 		return err
 	}
 
-	if err := WriteHeaders(writer, ctx.ResponseHeaders()); err != nil {
+	if err := WriteHeaders(writer, respHeaders); err != nil {
 		return err
 	}
 	if err := writer.Close(); err != nil {
@@ -214,14 +211,14 @@ func (s *Server) Handle(ctx context.Context, call *tchan.InboundCall) {
 	op := call.MethodString()
 	service, method, ok := getServiceMethod(op)
 	if !ok {
-		log.Fatalf("Handle got call for %s which does not match the expected call format", op)
+		s.log.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
 	}
 
 	s.RLock()
 	handler, ok := s.handlers[service]
 	s.RUnlock()
 	if !ok {
-		log.Fatalf("Handle got call for service %v which is not registered", service)
+		s.log.Error(fmt.Sprintf("Handle got call for service %v which is not registered", service))
 	}
 
 	if err := s.handle(ctx, handler, method, call); err != nil {
