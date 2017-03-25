@@ -79,7 +79,10 @@ func CreateGateway(
 	}
 
 	seedConfig["port"] = int64(0)
-	seedConfig["tchannel.serviceName"] = "bench-gateway"
+
+	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
+		seedConfig["tchannel.serviceName"] = "bench-gateway"
+	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.tally.service"] = "bench-gateway"
 	seedConfig["logger.output"] = "stdout"
