@@ -84,6 +84,7 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 func (server *HTTPServer) Close() {
 	server.closing = true
 	if server.listeningSocket == nil {
+		/* coverage ignore next line */
 		return
 	}
 
