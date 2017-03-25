@@ -27,10 +27,12 @@ import (
 	"strings"
 	"sync"
 
-	netContext "golang.org/x/net/context"
 	tchan "github.com/uber/tchannel-go"
+	netContext "golang.org/x/net/context"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/zap"
+	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 )
@@ -49,7 +51,7 @@ type handler struct {
 type Server struct {
 	sync.RWMutex
 	registrar tchan.Registrar
-	log       tchan.Logger
+	log       zap.Logger
 	handlers  map[string]handler
 }
 
@@ -63,10 +65,10 @@ func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCa
 }
 
 // NewServer returns a server that can serve thrift services over TChannel.
-func NewServer(registrar tchan.Registrar) *Server {
+func NewServer(registrar tchan.Registrar, gateway *zanzibar.Gateway) *Server {
 	server := &Server{
 		registrar: registrar,
-		log:       registrar.Logger(),
+		log:       gateway.Logger,
 		handlers:  map[string]handler{},
 	}
 	return server
@@ -103,7 +105,7 @@ func (s *Server) onError(err error) {
 	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
 		s.log.Warn("Thrift server timeout: " + err.Error())
 	} else {
-		s.log.WithFields(tchan.ErrField(err)).Error("Thrift server error.")
+		s.log.With(zap.Error(err)).Error("Thrift server error.")
 	}
 }
 
