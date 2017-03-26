@@ -99,7 +99,20 @@ func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 }
 
 // CheckHeaders verifies that request contains required headers.
-func (req *ServerHTTPRequest) CheckHeaders([]string) bool {
+func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
+	for _, headerName := range headers {
+		headerValue := req.httpRequest.Header.Get(headerName)
+		if headerValue == "" {
+			req.res.SendErrorString(
+				400, "Missing mandatory header: "+headerName,
+			)
+			req.Logger.Warn("Got request without mandatory header",
+				zap.String("headerName", headerName),
+			)
+			return false
+		}
+
+	}
 	return true
 }
 
