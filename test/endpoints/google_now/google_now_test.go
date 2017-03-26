@@ -40,6 +40,10 @@ import (
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 var noAuthCodeBytes = []byte("{}")
+var headers map[string]string = map[string]string{
+	"x-uuid":  "uuid",
+	"x-token": "token",
+}
 
 func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
@@ -65,7 +69,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			res, err := gateway.MakeRequest(
-				"POST", "/googlenow/add-credentials",
+				"POST", "/googlenow/add-credentials", headers,
 				bytes.NewReader(benchBytes),
 			)
 			if err != nil {
@@ -123,7 +127,8 @@ func TestAddCredentials(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -195,7 +200,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	}
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials",
+		"POST", "/googlenow/add-credentials", headers,
 		bytes.NewReader([]byte("junk data")),
 	)
 	assert.Error(t, err)
@@ -247,7 +252,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials",
+		"POST", "/googlenow/add-credentials", headers,
 		bytes.NewReader([]byte("bad bytes")),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -302,7 +307,8 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -333,7 +339,8 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	gateway.HTTPBackends()["googleNow"].Close()
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -396,7 +403,8 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 		},
 	)
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

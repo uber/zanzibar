@@ -54,7 +54,7 @@ func TestHealthCall(t *testing.T) {
 
 	assert.NotNil(t, gateway, "gateway exists")
 
-	res, err := gateway.MakeRequest("GET", "/health", nil)
+	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
@@ -74,7 +74,7 @@ func BenchmarkHealthCall(b *testing.B) {
 	// b.SetParallelism(100)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			res, err := gateway.MakeRequest("GET", "/health", nil)
+			res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 			if err != nil {
 				b.Error("got http error: " + err.Error())
 				break
@@ -124,7 +124,7 @@ func TestHealthMetrics(t *testing.T) {
 	// Expect three metrics
 	cgateway.MetricsWaitGroup.Add(3)
 
-	res, err := gateway.MakeRequest("GET", "/health", nil)
+	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}

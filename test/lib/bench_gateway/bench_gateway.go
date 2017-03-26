@@ -189,13 +189,16 @@ func (gateway *BenchGateway) HTTPBackends() map[string]*testBackend.TestHTTPBack
 
 // MakeRequest helper
 func (gateway *BenchGateway) MakeRequest(
-	method string, url string, body io.Reader,
+	method string, url string, headers map[string]string, body io.Reader,
 ) (*http.Response, error) {
 	client := gateway.httpClient
 
 	fullURL := "http://" + gateway.ActualGateway.RealAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
+	for headerName, headerValue := range headers {
+		req.Header.Set(headerName, headerValue)
+	}
 
 	if err != nil {
 		return nil, err
