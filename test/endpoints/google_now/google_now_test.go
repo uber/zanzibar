@@ -420,3 +420,37 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 	assert.Equal(t, "", string(bytes))
 	assert.Equal(t, 1, counter)
 }
+
+func TestGoogleNowMissingHeaders(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", nil,
+		bytes.NewReader([]byte("bad bytes")),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t,
+		"Missing mandatory header: x-uuid",
+		string(respBytes),
+	)
+}
