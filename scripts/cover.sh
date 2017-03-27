@@ -50,12 +50,14 @@ for file in "${FILES_ARR[@]}"; do
 
 	end=`date +%s`
 	runtime=$((end-start))
-	printf "Finished coverage test  :  %-60s  :  +%3d \n" $relativeName $runtime
+	printf "Finished coverage test  :  %-55s  :  +%3d \n" $relativeName $runtime
 done
 
 echo ""
 echo "      --------------------        "
 echo ""
+
+rm -f ./test/.cached_binary_test_info.json
 
 cat test.out | grep -v "warning: no packages" | grep -v "\[no test files\]" || true
 rm -f coverage.tmp
@@ -100,4 +102,15 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Finished building istanbul reports : +$runtime"
 
-rm -f ./test/.cached_binary_test_info.json
+
+cat ./coverage/istanbul.json | jq '[
+	. |
+	to_entries |
+	.[] |
+	select(.key | contains("runtime")) |
+	select(.key | contains("runtime/gateway") | not)
+] | from_entries' > ./coverage/istanbul-runtime.json
+
+echo "Checking code coverage for runtime folder"
+./node_modules/.bin/istanbul check-coverage --statements 100 \
+	./coverage/istanbul-runtime.json

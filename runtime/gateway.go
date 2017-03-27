@@ -49,6 +49,7 @@ type Clients interface {
 type Options struct {
 	Clients        Clients
 	MetricsBackend tally.CachedStatsReporter
+	LogWriter      zap.WriteSyncer
 }
 
 // Gateway type
@@ -68,6 +69,7 @@ type Gateway struct {
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
+	logWriter         zap.WriteSyncer
 	server            *HTTPServer
 	tchannelServer    *TChannelServer
 	// clients?
@@ -92,6 +94,7 @@ func CreateGateway(
 		Config:      config,
 
 		metricsBackend: opts.MetricsBackend,
+		logWriter:      opts.LogWriter,
 	}
 
 	gateway.Router = NewRouter(gateway)
@@ -265,7 +268,14 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	loggerOutput := config.MustGetString("logger.output")
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
-		output = zap.Output(os.Stdout)
+		var writer zap.WriteSyncer
+		if gateway.logWriter != nil {
+			writer = zap.MultiWriteSyncer(os.Stdout, gateway.logWriter)
+		} else {
+			writer = os.Stdout
+		}
+
+		output = zap.Output(writer)
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
 		if err != nil {

@@ -312,3 +312,99 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 0, counter)
 }
+
+func TestAddCredentialsBackendDown(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+		LogWhitelist: map[string]bool{
+			"Could not make client request": true,
+		},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	// Close backend
+	gateway.Backends()["googleNow"].Close()
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got bytes read error") {
+		return
+	}
+
+	assert.Contains(t, string(bytes), "could not make client request")
+
+	errorLogs := gateway.GetErrorLogs()
+	logLines := errorLogs["Could not make client request"]
+
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
+		return
+	}
+
+	errorMsg := lineStruct["error"].(string)
+	assert.Contains(t, errorMsg, "dial tcp")
+}
+
+func TestAddCredentialsWrongStatusCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.Backends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(201)
+			if _, err := w.Write([]byte("{\"statusCode\":201}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "201 Created", res.Status)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got bytes read error") {
+		return
+	}
+
+	assert.Equal(t, "", string(bytes))
+	assert.Equal(t, 1, counter)
+}

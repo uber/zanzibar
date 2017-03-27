@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"time"
@@ -60,17 +59,21 @@ func NewServerHTTPResponse(
 // finish will handle final logic, like metrics
 func (res *ServerHTTPResponse) finish() {
 	if !res.req.started {
+		/* coverage ignore next line */
 		res.req.Logger.Error(
 			"Forgot to start incoming request",
 			zap.String("path", res.req.URL.Path),
 		)
+		/* coverage ignore next line */
 		return
 	}
 	if res.finished {
+		/* coverage ignore next line */
 		res.req.Logger.Error(
 			"Finished an incoming request twice",
 			zap.String("path", res.req.URL.Path),
 		)
+		/* coverage ignore next line */
 		return
 	}
 
@@ -113,20 +116,6 @@ func (res *ServerHTTPResponse) SendErrorString(
 	res.finish()
 }
 
-// CopyJSON will copy json bytes from a Reader
-func (res *ServerHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	_, err := io.Copy(res.responseWriter, src)
-	if err != nil {
-		res.req.Logger.Error("Could not copy bytes",
-			zap.String("error", err.Error()),
-		)
-	}
-
-	res.finish()
-}
-
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
 func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, bytes []byte,
@@ -142,6 +131,12 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, body json.Marshaler,
 ) {
+	if body == nil {
+		res.SendErrorString(500, "Could not serialize json response")
+		res.req.Logger.Error("Could not serialize nil pointer body")
+		return
+	}
+
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
@@ -167,15 +162,11 @@ func (res *ServerHTTPResponse) writeHeader(statusCode int) {
 func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
+		/* coverage ignore next line */
 		res.req.Logger.Error("Could not write string to resp body",
 			zap.String("error", err.Error()),
 		)
 	}
-}
-
-// WriteHeader writes the header to http respnse.
-func (res *ServerHTTPResponse) WriteHeader(statusCode int) {
-	res.writeHeader(statusCode)
 }
 
 // WriteString helper just writes a string to the response
