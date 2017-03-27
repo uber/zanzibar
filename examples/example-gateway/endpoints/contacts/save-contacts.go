@@ -68,6 +68,7 @@ func HandleSaveContactsRequest(
 	}
 	response := convertToResponse(&clientRespBody)
 	res.WriteJSON(cres.StatusCode, response)
+	res.Flush()
 }
 
 func convertToResponse(
