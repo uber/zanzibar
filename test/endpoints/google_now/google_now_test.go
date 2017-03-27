@@ -199,7 +199,6 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 		bytes.NewReader([]byte("junk data")),
 	)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "short write")
 	assert.Nil(t, res)
 	assert.Equal(t, 0, counter)
 
