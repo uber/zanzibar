@@ -45,7 +45,6 @@ func HandleTooManyArgsRequest(
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
-		res.Flush()
 		return
 	}
 
@@ -64,18 +63,15 @@ func HandleTooManyArgsRequest(
 	b, err := ioutil.ReadAll(clientResp.Body)
 	if err != nil {
 		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		res.Flush()
 		return
 	}
 	var clientRespBody bar.BarResponse
 	if err := clientRespBody.UnmarshalJSON(b); err != nil {
 		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		res.Flush()
 		return
 	}
 	response := convertTooManyArgsClientResponse(&clientRespBody)
 	res.WriteJSON(clientResp.StatusCode, response)
-	res.Flush()
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

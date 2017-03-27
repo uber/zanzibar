@@ -37,7 +37,6 @@ func HandleArgNotStructRequest(
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
-		res.Flush()
 		return
 	}
 
@@ -54,7 +53,6 @@ func HandleArgNotStructRequest(
 		)
 	}
 	res.WriteJSONBytes(clientResp.StatusCode, nil)
-	res.Flush()
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
