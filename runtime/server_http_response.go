@@ -115,12 +115,9 @@ func (res *ServerHTTPResponse) SendErrorString(
 		zap.String("path", res.req.URL.Path),
 	)
 
-	// TODO: mark bodyBytes ...
-
-	res.writeHeader(statusCode)
-	res.writeString(err)
-
-	res.finish()
+	res.WriteJSONBytes(statusCode,
+		[]byte(`{"error":"`+err+`"}`),
+	)
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
@@ -204,11 +201,6 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 			zap.String("error", err.Error()),
 		)
 	}
-}
-
-// WriteString helper just writes a string to the response
-func (res *ServerHTTPResponse) writeString(text string) {
-	res.writeBytes([]byte(text))
 }
 
 // IsOKResponse checks if the status code is OK.
