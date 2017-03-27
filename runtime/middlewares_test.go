@@ -106,9 +106,8 @@ func (c *countMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
-) bool {
+) {
 	c.resCounter++
-	return !c.resBail
 }
 
 func (c *countMiddleware) JSONSchema() *jsonschema.Document {
@@ -175,8 +174,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 		name: "mid1",
 	}
 	mid2 := &countMiddleware{
-		name:    "mid2",
-		resBail: true,
+		name: "mid2",
 	}
 	mid3 := &countMiddleware{
 		name: "mid3",
@@ -212,7 +210,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 
 	assert.Equal(t, mid1.reqCounter, 1)
-	assert.Equal(t, mid1.resCounter, 0)
+	assert.Equal(t, mid1.resCounter, 1)
 	assert.Equal(t, mid2.reqCounter, 1)
 	assert.Equal(t, mid2.resCounter, 1)
 	assert.Equal(t, mid3.reqCounter, 1)
