@@ -107,7 +107,7 @@ func (m *MiddlewareStack) Handle(
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
 		if ok == false {
-			for j := i; i >= 0; i-- {
+			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
 			return
@@ -117,6 +117,9 @@ func (m *MiddlewareStack) Handle(
 	m.handle(ctx, req, res)
 
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
-		m.middlewares[i].HandleResponse(ctx, res, shared)
+		ok := m.middlewares[i].HandleResponse(ctx, res, shared)
+		if ok == false {
+			return
+		}
 	}
 }

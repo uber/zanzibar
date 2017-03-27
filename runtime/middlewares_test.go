@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"testing"
 
+	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
 	// TODO(sindelar): Refactor into a unit test and remove the
 	// example middleware (which creates a cyclic dependency)
@@ -79,6 +80,145 @@ func TestHandlers(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 }
 
+type countMiddleware struct {
+	name       string
+	reqCounter int
+	resCounter int
+	reqBail    bool
+	resBail    bool
+}
+
+func (c *countMiddleware) HandleRequest(
+	ctx context.Context,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState,
+) bool {
+	c.reqCounter++
+	if !c.reqBail {
+		res.WriteJSONBytes(200, []byte(""))
+	}
+
+	return !c.reqBail
+}
+
+func (c *countMiddleware) HandleResponse(
+	ctx context.Context,
+	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState,
+) bool {
+	c.resCounter++
+	return !c.resBail
+}
+
+func (c *countMiddleware) JSONSchema() *jsonschema.Document {
+	return nil
+}
+
+func (c *countMiddleware) Name() string {
+	return c.name
+}
+
+// Ensures that a middleware stack can correctly return all of its handlers.
+func TestMiddlewareRequestAbort(t *testing.T) {
+	mid1 := &countMiddleware{
+		name: "mid1",
+	}
+	mid2 := &countMiddleware{
+		name:    "mid2",
+		reqBail: true,
+	}
+	mid3 := &countMiddleware{
+		name: "mid3",
+	}
+
+	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
+	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+
+	// Verify the custom middleware has been added.
+	middlewares := middlewareStack.Middlewares()
+	assert.Equal(t, 3, len(middlewares))
+
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo",
+		zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			middlewareStack.Handle,
+		),
+	)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
+
+	assert.Equal(t, mid1.reqCounter, 1)
+	assert.Equal(t, mid1.resCounter, 1)
+	assert.Equal(t, mid2.reqCounter, 1)
+	assert.Equal(t, mid2.resCounter, 1)
+	assert.Equal(t, mid3.reqCounter, 0)
+	assert.Equal(t, mid3.resCounter, 0)
+}
+
+// Ensures that a middleware stack can correctly return all of its handlers.
+func TestMiddlewareResponseAbort(t *testing.T) {
+	mid1 := &countMiddleware{
+		name: "mid1",
+	}
+	mid2 := &countMiddleware{
+		name:    "mid2",
+		resBail: true,
+	}
+	mid3 := &countMiddleware{
+		name: "mid3",
+	}
+
+	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
+	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+
+	// Verify the custom middleware has been added.
+	middlewares := middlewareStack.Middlewares()
+	assert.Equal(t, 3, len(middlewares))
+
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo",
+		zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			middlewareStack.Handle,
+		),
+	)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
+
+	assert.Equal(t, mid1.reqCounter, 1)
+	assert.Equal(t, mid1.resCounter, 0)
+	assert.Equal(t, mid2.reqCounter, 1)
+	assert.Equal(t, mid2.resCounter, 1)
+	assert.Equal(t, mid3.reqCounter, 1)
+	assert.Equal(t, mid3.resCounter, 1)
+}
+
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
 	ex := example.NewMiddleWare(
@@ -131,6 +271,8 @@ func TestMiddlewareSharedStates(t *testing.T) {
 
 func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse) {
+	res *zanzibar.ServerHTTPResponse,
+) {
+	res.WriteJSONBytes(200, []byte(""))
 	return
 }
