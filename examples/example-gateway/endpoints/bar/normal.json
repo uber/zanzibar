@@ -12,7 +12,7 @@
 	"middlewares": [
 		{"name" : "example",
 		 "options" : {
-			 "foo": 10
+			 "Foo": "\"test\""
 		 }
 		},
 		{"name" : "logger"}

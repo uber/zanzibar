@@ -41,6 +41,7 @@ func makeEndpoint(
 	g *zanzibar.Gateway,
 	endpointName string,
 	handlerName string,
+	middlewares []zanzibar.MiddlewareHandle,
 	handlerFn handlerFn,
 ) *zanzibar.Endpoint {
 	myEndpoint := &myEndpoint{
@@ -52,7 +53,10 @@ func makeEndpoint(
 		g,
 		endpointName,
 		handlerName,
-		myEndpoint.handle,
+		zanzibar.NewStack(
+			middlewares,
+			myEndpoint.handle,
+		).Handle,
 	)
 }
 
@@ -64,6 +68,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"argNotStruct",
+			nil,
 			bar.HandleArgNotStructRequest,
 		),
 	)
@@ -73,6 +78,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"missingArg",
+			nil,
 			bar.HandleMissingArgRequest,
 		),
 	)
@@ -82,6 +88,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"noRequest",
+			nil,
 			bar.HandleNoRequestRequest,
 		),
 	)
@@ -91,20 +98,19 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"normal",
-			zanzibar.NewStack(
-				[...]zanzibar.MiddlewareHandle{
-					example.NewMiddleWare(
-						g,
-						&example.Options{
-							foo: 10,
-						},
-					),
-					logger.NewMiddleWare(
-						g,
-						nil,
-					),
-				},
-				bar.HandleNormalRequest).Handle,
+			[]zanzibar.MiddlewareHandle{
+				example.NewMiddleWare(
+					g,
+					example.Options{
+						Foo: "test",
+					},
+				),
+				logger.NewMiddleWare(
+					g,
+					logger.Options{},
+				),
+			},
+			bar.HandleNormalRequest,
 		),
 	)
 	router.Register(
@@ -113,6 +119,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"tooManyArgs",
+			nil,
 			bar.HandleTooManyArgsRequest,
 		),
 	)
@@ -122,6 +129,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"contacts",
 			"saveContacts",
+			nil,
 			contacts.HandleSaveContactsRequest,
 		),
 	)
@@ -131,6 +139,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"googlenow",
 			"addCredentials",
+			nil,
 			googlenow.HandleAddCredentialsRequest,
 		),
 	)
@@ -140,6 +149,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"googlenow",
 			"checkCredentials",
+			nil,
 			googlenow.HandleCheckCredentialsRequest,
 		),
 	)
