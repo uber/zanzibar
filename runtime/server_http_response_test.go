@@ -51,7 +51,6 @@ func TestInvalidStatusCode(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSONBytes(999, []byte("true"))
-				res.Flush()
 			},
 		),
 	)
@@ -106,7 +105,6 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSON(200, nil)
-				res.Flush()
 			},
 		),
 	)
@@ -161,7 +159,6 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSON(200, failingJsonObj{})
-				res.Flush()
 			},
 		),
 	)
@@ -245,8 +242,6 @@ func TestResponsePeekBody(t *testing.T) {
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`myClientToken`), value)
 				assert.Equal(t, vType, jsonparser.String)
-
-				res.Flush()
 			},
 		),
 	)
@@ -296,8 +291,6 @@ func TestResponsePeekBodyError(t *testing.T) {
 				_, _, err := res.PeekBody("Token2")
 				assert.Error(t, err)
 				assert.Equal(t, "Key path not found", err.Error())
-
-				res.Flush()
 			},
 		),
 	)
