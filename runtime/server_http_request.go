@@ -115,6 +115,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.res.SendErrorString(500, "Could not ReadAll() body")
+		req.res.Flush()
 		req.Logger.Error("Could not ReadAll() body",
 			zap.String("error", err.Error()),
 		)
@@ -131,6 +132,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
 		req.res.SendErrorString(400, "Could not parse json: "+err.Error())
+		req.res.Flush()
 		req.Logger.Warn("Could not parse json",
 			zap.String("error", err.Error()),
 		)
