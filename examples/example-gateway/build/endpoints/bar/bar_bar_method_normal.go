@@ -41,6 +41,7 @@ func HandleNormalRequest(
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.Flush()
 		return
 	}
 
@@ -59,11 +60,13 @@ func HandleNormalRequest(
 	b, err := ioutil.ReadAll(clientResp.Body)
 	if err != nil {
 		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
+		res.Flush()
 		return
 	}
 	var clientRespBody bar.BarResponse
 	if err := clientRespBody.UnmarshalJSON(b); err != nil {
 		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
+		res.Flush()
 		return
 	}
 	response := convertNormalClientResponse(&clientRespBody)

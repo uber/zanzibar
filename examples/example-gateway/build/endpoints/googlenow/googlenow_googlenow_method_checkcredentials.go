@@ -33,6 +33,7 @@ func HandleCheckCredentialsRequest(
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.Flush()
 		return
 	}
 
