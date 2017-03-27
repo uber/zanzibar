@@ -464,7 +464,7 @@ type EndpointRegisterInfo struct {
 	EndpointID  string
 	HandlerID   string
 	HandlerType string
-	Middlewares []string
+	Middlewares []MiddlewareSpec
 }
 
 // EndpointsRegisterMeta ...

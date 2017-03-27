@@ -22,11 +22,15 @@ package codegen
 
 import (
 	"encoding/json"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
@@ -206,6 +210,41 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 	}, nil
 }
 
+// MiddlewareSpec holds information about each middleware at the endpoint
+// level. The same mid
+type MiddlewareSpec struct {
+	// The middleware package name.
+	Name string
+	// Go import path for the middleware.
+	Path string
+	// Middleware specific configuration options.
+	Options map[string]interface{}
+}
+
+func NewMiddlewareSpec(goFile string, h *PackageHelper) (*MiddlewareSpec, error) {
+	_, err := os.Stat(goFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Could not find file %s: ", goFile)
+	}
+
+	// Read the go middleware definitions.
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, goFile, nil, parser.PackageClauseOnly)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not read go file %s: ", goFile,
+		)
+	}
+
+	fmt.Printf("SINDELARTEST %s", string(f.Package))
+
+	// TODO(sindelar): Consider adding other middleware validation here.
+	return &MiddlewareSpec{
+		Name: string(f.Package),
+		Path: goFile,
+	}, nil
+}
+
 // EndpointSpec holds information about each endpoint in the
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
@@ -235,9 +274,7 @@ type EndpointSpec struct {
 	// TODO figure out struct type
 	TestFixtures []interface{}
 	// Middlewares, meta data to add middlewares,
-	// TODO(sindelar): Refactor to struct type with name and
-	// []map interface for options and validate
-	Middlewares []string
+	Middlewares []MiddlewareSpec
 
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
@@ -253,7 +290,9 @@ type EndpointSpec struct {
 
 // NewEndpointSpec creats an endpoint spec from a json file.
 func NewEndpointSpec(
-	jsonFile string, h *PackageHelper,
+	jsonFile string,
+	h *PackageHelper,
+	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
 	_, err := os.Stat(jsonFile)
 	if err != nil {
@@ -362,12 +401,24 @@ func NewEndpointSpec(
 		)
 	}
 
-	// TODO(sindelar): Use structures and validate middleware are defined in codebase.
-	middlewareStrings := make([]string, len(endpointConfigObj["middlewares"].([]interface{})))
+	// TODO(sindelar): Validate middleware are defined in codebase.
+	middlewares := make([]MiddlewareSpec, len(endpointConfigObj["middlewares"].([]interface{})))
 	for idx, middleware := range endpointConfigObj["middlewares"].([]interface{}) {
 		middlewareObj := middleware.(map[string]interface{})
-		middlewareStrings[idx] = middlewareObj["name"].(string)
-		// TODO(sindelar): Add argument parsing
+		name := middlewareObj["name"].(string)
+		// Verify the middleware name is defined.
+		if midSpecs[name] == nil {
+			return nil, errors.Errorf(
+				"middlewares config (%s) not found.", name,
+			)
+		}
+		// TODO(sindelar): Validate Options against middleware spec and support
+		// nested typed objects.
+		middlewares[idx] = MiddlewareSpec{
+			Name:    name,
+			Path:    midSpecs[name].Path,
+			Options: middlewareObj["options"].(map[string]interface{}),
+		}
 	}
 
 	return &EndpointSpec{
@@ -382,7 +433,7 @@ func NewEndpointSpec(
 		ThriftServiceName:  parts[0],
 		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
-		Middlewares:        middlewareStrings,
+		Middlewares:        middlewares,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,
@@ -493,13 +544,15 @@ type GatewaySpec struct {
 	// tempalte instance for gateway
 	Template *Template
 
-	ClientModules   map[string]*ClientSpec
-	EndpointModules map[string]*EndpointSpec
+	ClientModules     map[string]*ClientSpec
+	EndpointModules   map[string]*EndpointSpec
+	MiddlewareModules map[string]*MiddlewareSpec
 
 	gatewayName       string
 	configDirName     string
 	clientConfigDir   string
 	endpointConfigDir string
+	middlewareDir     string
 }
 
 // NewGatewaySpec sets up gateway spec
@@ -511,6 +564,7 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointConfig string,
+	middlewareDir string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -526,6 +580,17 @@ func NewGatewaySpec(
 	tmpl, err := NewTemplate(templateDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
+	}
+
+	// TODO(sindelar): Filter test files.
+	middlewareFiles, err := filepath.Glob(filepath.Join(
+		configDirName,
+		middlewareDir,
+		"*",
+		"*.go",
+	))
+	if err != nil {
+		return nil, errors.Wrap(err, "Cannot load middlewares.")
 	}
 
 	clientJsons, err := filepath.Glob(filepath.Join(
@@ -554,17 +619,27 @@ func NewGatewaySpec(
 	}
 
 	spec := &GatewaySpec{
-		PackageHelper:   packageHelper,
-		Template:        tmpl,
-		ClientModules:   map[string]*ClientSpec{},
-		EndpointModules: map[string]*EndpointSpec{},
+		PackageHelper:     packageHelper,
+		Template:          tmpl,
+		ClientModules:     map[string]*ClientSpec{},
+		EndpointModules:   map[string]*EndpointSpec{},
+		MiddlewareModules: map[string]*MiddlewareSpec{},
 
 		configDirName:     configDirName,
 		clientConfigDir:   clientConfig,
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
 	}
+	for _, mid := range middlewareFiles {
+		mspec, err := NewMiddlewareSpec(mid, packageHelper)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot parse middleware file %s :", mid,
+			)
+		}
 
+		spec.MiddlewareModules[mspec.Name] = mspec
+	}
 	for _, json := range clientJsons {
 		cspec, err := NewClientSpec(json, packageHelper)
 		if err != nil {
@@ -579,7 +654,7 @@ func NewGatewaySpec(
 		}
 	}
 	for _, json := range endpointJsons {
-		espec, err := NewEndpointSpec(json, packageHelper)
+		espec, err := NewEndpointSpec(json, packageHelper, spec.MiddlewareModules)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse endpoint json file %s :", json,
@@ -656,7 +731,12 @@ func (gateway *GatewaySpec) GenerateMain() error {
 // GenerateMiddlewareSchemas will generate the middleware schema files
 // for the gateway
 func (gateway *GatewaySpec) GenerateMiddlewareSchemas() error {
-	// TODO(sindelar): Implement this
+
+	// Validate middleware go files.
+
+	//for _, middlewares := range gateway.MiddlewareModules {
+	//
+	//}
 
 	return nil
 }

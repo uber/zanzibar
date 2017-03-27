@@ -11,8 +11,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 
-	// Path to "exampleMiddleware"
-
+	// exampleMiddleware "/"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -47,10 +46,7 @@ func makeEndpoint(
 		Clients:   g.Clients.(*clients.Clients),
 		HandlerFn: handlerFn,
 	}
-	//	wrappedHandler := example.NewMiddleWare(
-	//		g,
-	//		example.Options{},
-	//		myEndpoint.handle)
+
 	return zanzibar.NewEndpoint(
 		g,
 		endpointName,
@@ -94,8 +90,16 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"bar",
 			"normal",
-			// Apply "exampleMiddleware"
-			bar.HandleNormalRequest,
+			zanzibar.NewStack(
+				[...]zanzibar.MiddlewareHandle{
+					exampleMiddleware.NewMiddleWare(
+						g,
+						&exampleMiddlewareOptions{
+							foo: 10,
+						},
+					),
+				},
+				bar.HandleNormalRequest),
 		),
 	)
 	router.Register(

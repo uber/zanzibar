@@ -11,7 +11,7 @@
 	"testFixtures": [],
 	"middlewares": [
 		{"name" : "exampleMiddleware",
-		 "configOptions" : {
+		 "options" : {
 			 "foo": 10
 		 }
 		}

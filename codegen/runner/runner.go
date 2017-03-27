@@ -69,6 +69,8 @@ func main() {
 		),
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
+		config.MustGetString("middlewareDir"),
+
 		config.MustGetString("gatewayName"),
 	)
 	checkError(
