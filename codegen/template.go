@@ -464,6 +464,7 @@ type EndpointRegisterInfo struct {
 	EndpointID  string
 	HandlerID   string
 	HandlerType string
+	Middlewares []string
 }
 
 // EndpointsRegisterMeta ...
@@ -477,9 +478,11 @@ type sortByEndpointName []*EndpointSpec
 func (c sortByEndpointName) Len() int {
 	return len(c)
 }
+
 func (c sortByEndpointName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
+
 func (c sortByEndpointName) Less(i, j int) bool {
 	return (c[i].EndpointID + c[i].HandleID) <
 		(c[j].EndpointID + c[j].HandleID)
@@ -547,6 +550,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 			Method:      method.HTTPMethod,
 			HTTPPath:    method.HTTPPath,
 			HandlerType: handlerType,
+			Middlewares: espec.Middlewares,
 		}
 		endpointsInfo = append(endpointsInfo, info)
 	}

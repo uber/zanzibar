@@ -132,7 +132,6 @@ go-docs:
 
 .PHONY: clean-easyjson
 clean-easyjson:
-	find . -name "*_easyjson.go" -delete
 	find . -name "*.bak" -delete
 	find . -name "easyjson-bootstrap*.go" -delete
 

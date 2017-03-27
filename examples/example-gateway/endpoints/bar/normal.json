@@ -9,5 +9,5 @@
 	"clientName": "Bar",
 	"clientMethod": "normal",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [ "exampleMiddleware" ]
 }
