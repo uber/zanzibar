@@ -180,6 +180,7 @@ func (gateway *Gateway) handleHealthRequest(
 	)
 
 	res.WriteJSONBytes(200, bytes)
+	res.Flush()
 }
 
 // Close the http server

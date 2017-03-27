@@ -31,12 +31,16 @@ import (
 
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
-	responseWriter http.ResponseWriter
-	req            *ServerHTTPRequest
-	gateway        *Gateway
-	finishTime     time.Time
-	finished       bool
-	metrics        *EndpointMetrics
+	responseWriter    http.ResponseWriter
+	req               *ServerHTTPRequest
+	gateway           *Gateway
+	finishTime        time.Time
+	finished          bool
+	metrics           *EndpointMetrics
+	flushed           bool
+	pendingBodyBytes  []byte
+	pendingBodyObj    interface{}
+	pendingStatusCode int
 
 	StatusCode int
 }
@@ -110,6 +114,8 @@ func (res *ServerHTTPResponse) SendErrorString(
 		zap.String("path", res.req.URL.Path),
 	)
 
+	// TODO: mark bodyBytes ...
+
 	res.writeHeader(statusCode)
 	res.writeString(err)
 
@@ -120,11 +126,12 @@ func (res *ServerHTTPResponse) SendErrorString(
 func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, bytes []byte,
 ) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
-	res.finish()
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
 }
 
 // WriteJSON writes a json serializable struct to Response
@@ -146,10 +153,30 @@ func (res *ServerHTTPResponse) WriteJSON(
 		return
 	}
 
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
+	res.pendingBodyObj = body
+}
+
+// PeekBody ...
+func (res *ServerHTTPResponse) PeekBody(key string) {
+
+}
+
+// PeekBodyReflection ...
+func (res *ServerHTTPResponse) PeekBodyReflection() {
+
+}
+
+// Flush ...
+func (res *ServerHTTPResponse) Flush() {
+	res.flushed = true
+	res.writeHeader(res.pendingStatusCode)
+	res.writeBytes(res.pendingBodyBytes)
 	res.finish()
 }
 

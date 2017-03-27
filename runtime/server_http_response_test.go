@@ -50,6 +50,7 @@ func TestInvalidStatusCode(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSONBytes(999, []byte("true"))
+				res.Flush()
 			},
 		),
 	)
@@ -104,6 +105,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSON(200, nil)
+				res.Flush()
 			},
 		),
 	)
@@ -156,6 +158,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 				res *zanzibar.ServerHTTPResponse,
 			) {
 				res.WriteJSON(200, failingJsonObj{})
+				res.Flush()
 			},
 		),
 	)
