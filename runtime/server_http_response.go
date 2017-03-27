@@ -180,7 +180,17 @@ func (res *ServerHTTPResponse) PeekBody(
 // Flush will write the body to the response. Before flush is called
 // the body is pending. A pending body allows a response middleware to
 // write a different body.
-func (res *ServerHTTPResponse) Flush() {
+func (res *ServerHTTPResponse) flush() {
+	if res.flushed {
+		/* coverage ignore next line */
+		res.req.Logger.Error(
+			"Flushed a server response twice",
+			zap.String("path", res.req.URL.Path),
+		)
+		/* coverage ignore next line */
+		return
+	}
+
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
 	res.writeBytes(res.pendingBodyBytes)
