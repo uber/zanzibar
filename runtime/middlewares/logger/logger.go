@@ -45,38 +45,38 @@ type MiddlewareState struct{}
 func NewMiddleWare(
 	gateway *zanzibar.Gateway,
 	options Options) zanzibar.MiddlewareHandle {
-	return loggerMiddleware{
+	return &loggerMiddleware{
 		logger: gateway.Logger,
 	}
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m loggerMiddleware) HandleRequest(
+func (m *loggerMiddleware) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
+	shared zanzibar.SharedState) bool {
 	// TODO(sindelar): merge in logger branch and use logic here
 	m.logger.Info("Incoming Request")
-	return nil
+	return true
 }
 
-func (m loggerMiddleware) HandleResponse(
+func (m *loggerMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
+	shared zanzibar.SharedState) bool {
 	// TODO(sindelar): merge in logger branch and use logic here
 	m.logger.Info("Outgoing Response")
-	return nil
+	return true
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m loggerMiddleware) JSONSchema() *jsonschema.Document {
+func (m *loggerMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m loggerMiddleware) Name() string {
+func (m *loggerMiddleware) Name() string {
 	return "logger"
 }

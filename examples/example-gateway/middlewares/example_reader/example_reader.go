@@ -53,34 +53,34 @@ func NewMiddleWare(
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m exampleReaderMiddleware) HandleRequest(
+func (m *exampleReaderMiddleware) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
-	return nil
+	shared zanzibar.SharedState) bool {
+	return true
 }
 
-func (m exampleReaderMiddleware) HandleResponse(
+func (m *exampleReaderMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
+	shared zanzibar.SharedState) bool {
 	ss := shared.GetState("example").(example.MiddlewareState)
 	if ss.Baz == m.options.Foo {
 		res.StatusCode = http.StatusOK
-		return nil
+		return true
 	}
 	res.StatusCode = http.StatusNotFound
-	return nil
+	return false
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m exampleReaderMiddleware) JSONSchema() *jsonschema.Document {
+func (m *exampleReaderMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m exampleReaderMiddleware) Name() string {
+func (m *exampleReaderMiddleware) Name() string {
 	return "example_reader"
 }

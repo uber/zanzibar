@@ -54,33 +54,33 @@ func NewMiddleWare(
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m exampleMiddleware) HandleRequest(
+func (m *exampleMiddleware) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
+	shared zanzibar.SharedState) bool {
 	shared.SetState(
 		m.Name(),
 		MiddlewareState{
 			Baz: m.options.Foo,
 		})
-	return nil
+	return true
 }
 
-func (m exampleMiddleware) HandleResponse(
+func (m *exampleMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) error {
-	return nil
+	shared zanzibar.SharedState) bool {
+	return true
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m exampleMiddleware) JSONSchema() *jsonschema.Document {
+func (m *exampleMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m exampleMiddleware) Name() string {
+func (m *exampleMiddleware) Name() string {
 	return "example"
 }

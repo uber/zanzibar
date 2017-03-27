@@ -50,17 +50,19 @@ func (m *MiddlewareStack) Middlewares() []MiddlewareHandle {
 
 // MiddlewareHandle used to define middleware
 type MiddlewareHandle interface {
-	// implement HandleRequest for your middleware.
+	// implement HandleRequest for your middleware. Return false
+	// if the handler writes to the response body.
 	HandleRequest(
 		ctx context.Context,
 		req *ServerHTTPRequest,
 		res *ServerHTTPResponse,
-		shared SharedState) error
-	// implement HandleResponse for your middleware.
+		shared SharedState) bool
+	// implement HandleResponse for your middleware. Return false
+	// if the handler writes to the response body.
 	HandleResponse(
 		ctx context.Context,
 		res *ServerHTTPResponse,
-		shared SharedState) error
+		shared SharedState) bool
 	// return any shared state for this middleware.
 	JSONSchema() *jsonschema.Document
 	Name() string
@@ -100,11 +102,14 @@ func (m *MiddlewareStack) Handle(
 	shared := newSharedState(m.middlewares)
 
 	for i := 0; i < len(m.middlewares); i++ {
-		err := m.middlewares[i].HandleRequest(ctx, req, res, shared)
-		if err != nil {
-			// Decide whether to log and 500 or change the
-			// zanzibar.HandleFn to return an error and let
-			// router process those at that level.
+		ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)
+		// If a middleware errors and writes to the response header
+		// then abort the rest of the stack and evaluate the response
+		// handlers for the middlewares seen so far.
+		if ok == false {
+			for j := i; i >= 0; i-- {
+				m.middlewares[j].HandleResponse(ctx, res, shared)
+			}
 			return
 		}
 	}
@@ -112,12 +117,6 @@ func (m *MiddlewareStack) Handle(
 	m.handle(ctx, req, res)
 
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
-		err := m.middlewares[i].HandleResponse(ctx, res, shared)
-		if err != nil {
-			// Decide whether to log and 500 or change the
-			// zanzibar.HandleFn to return an error and let
-			// router process those at that level.
-			return
-		}
+		m.middlewares[i].HandleResponse(ctx, res, shared)
 	}
 }
