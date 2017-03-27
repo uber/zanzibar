@@ -23,9 +23,11 @@ package zanzibar
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/uber-go/zap"
 )
 
@@ -162,17 +164,46 @@ func (res *ServerHTTPResponse) WriteJSON(
 	res.pendingBodyObj = body
 }
 
-// PeekBody ...
-func (res *ServerHTTPResponse) PeekBody(key string) {
+// PeekBody allows for inspecting a key path inside the body
+// that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (res *ServerHTTPResponse) PeekBody(
+	keys ...string,
+) ([]byte, jsonparser.ValueType, error) {
+	value, valueType, _, err := jsonparser.Get(
+		res.pendingBodyBytes, keys...,
+	)
 
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return value, valueType, nil
 }
 
-// PeekBodyReflection ...
-func (res *ServerHTTPResponse) PeekBodyReflection() {
+// PeekBodyReflection allows for inspecting a key path inside the
+// body that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (res *ServerHTTPResponse) PeekBodyReflection(
+	keys ...string,
+) interface{} {
+	obj := res.pendingBodyObj
 
+	rptr := reflect.ValueOf(obj).Elem()
+
+	for i := 0; i < len(keys); i++ {
+		key := keys[i]
+
+		field := rptr.FieldByName(key)
+		rptr = field
+	}
+
+	return rptr.Interface()
 }
 
-// Flush ...
+// Flush will write the body to the response. Before flush is called
+// the body is pending. A pending body allows a response middleware to
+// write a different body.
 func (res *ServerHTTPResponse) Flush() {
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
