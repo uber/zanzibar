@@ -66,7 +66,7 @@ func (res *ServerHTTPResponse) finish() {
 	if !res.req.started {
 		/* coverage ignore next line */
 		res.req.Logger.Error(
-			"Forgot to start incoming request",
+			"Forgot to start server response",
 			zap.String("path", res.req.URL.Path),
 		)
 		/* coverage ignore next line */
@@ -75,7 +75,7 @@ func (res *ServerHTTPResponse) finish() {
 	if res.finished {
 		/* coverage ignore next line */
 		res.req.Logger.Error(
-			"Finished an incoming request twice",
+			"Finished an server response twice",
 			zap.String("path", res.req.URL.Path),
 		)
 		/* coverage ignore next line */
