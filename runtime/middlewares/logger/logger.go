@@ -24,44 +24,59 @@ import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
+	"github.com/uber-go/zap"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-type key string
-
-// Middleware State Name for accessing from Context
-const (
-	StateName key = "logger"
-)
+type loggerMiddleware struct {
+	options Options
+	logger  zap.Logger
+}
 
 // Options for middleware configuration
 type Options struct{}
 
-// State accessible by other middlewares and endpoint
-// handler though the context object.
-type State struct{}
+// MiddlewareState accessible by other middlewares and endpoint handler
+// though the context object.
+type MiddlewareState struct{}
 
 // NewMiddleWare creates a new middleware that executes the
 // next middleware after performing it's operations.
 func NewMiddleWare(
 	gateway *zanzibar.Gateway,
-	options Options,
-	next zanzibar.HandlerFn) zanzibar.HandlerFn {
-	return func(ctx context.Context,
-		req *zanzibar.ServerHTTPRequest,
-		res *zanzibar.ServerHTTPResponse) {
-
-		// TODO(sindelar): merge in logger branch and use logic here
-		gateway.Logger.Info("Incoming Request")
-		next(ctx, req, res)
-		// TODO(sindelar): merge in logger branch and use logic here
-		gateway.Logger.Info("Outgoing Response")
+	options Options) zanzibar.MiddlewareHandle {
+	return loggerMiddleware{
+		logger: gateway.Logger,
 	}
 }
 
+// HandleRequest handles the requests before calling lower level middlewares.
+func (m loggerMiddleware) HandleRequest(
+	ctx context.Context,
+	req *zanzibar.ServerHTTPRequest,
+	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState) error {
+	// TODO(sindelar): merge in logger branch and use logic here
+	m.logger.Info("Incoming Request")
+	return nil
+}
+
+func (m loggerMiddleware) HandleResponse(
+	ctx context.Context,
+	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState) error {
+	// TODO(sindelar): merge in logger branch and use logic here
+	m.logger.Info("Outgoing Response")
+	return nil
+}
+
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func JSONSchema() *jsonschema.Document {
+func (m loggerMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
+}
+
+func (m loggerMiddleware) Name() string {
+	return "logger"
 }

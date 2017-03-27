@@ -76,7 +76,7 @@ func newSharedState(middlewares []MiddlewareHandle) SharedState {
 	sharedState.middlewareDict = make(map[string]interface{})
 
 	for i := 0; i < len(middlewares); i++ {
-		sharedState.middlewareDict[middlewares[i].Name()] = middlewares[i]
+		sharedState.middlewareDict[middlewares[i].Name()] = nil
 	}
 	return sharedState
 }
