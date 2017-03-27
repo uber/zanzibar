@@ -36,13 +36,19 @@ import (
 	_ "github.com/mailru/easyjson/gen"
 )
 
+var allStructs = flag.Bool(
+	"all",
+	false,
+	"generate marshaler/unmarshalers for all structs in a file",
+)
+
 func generate(fname string) error {
 	fInfo, err := os.Stat(fname)
 	if err != nil {
 		return err
 	}
 
-	p := parser.Parser{AllStructs: true}
+	p := parser.Parser{AllStructs: *allStructs}
 	if err := p.Parse(fname, fInfo.IsDir()); err != nil {
 		return fmt.Errorf("Error parsing %v: %v", fname, err)
 	}
