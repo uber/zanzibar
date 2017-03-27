@@ -348,6 +348,8 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	assert.Contains(t, string(bytes), "could not make client request")
 
+	time.Sleep(10 * time.Millisecond)
+
 	errorLogs := gateway.GetErrorLogs()
 	logLines := errorLogs["Could not make client request"]
 
