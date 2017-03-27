@@ -51,7 +51,7 @@ type handler struct {
 type Server struct {
 	sync.RWMutex
 	registrar tchan.Registrar
-	log       zap.Logger
+	logger    zap.Logger
 	handlers  map[string]handler
 }
 
@@ -68,7 +68,7 @@ func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCa
 func NewServer(registrar tchan.Registrar, gateway *zanzibar.Gateway) *Server {
 	server := &Server{
 		registrar: registrar,
-		log:       gateway.Logger,
+		logger:    gateway.Logger,
 		handlers:  map[string]handler{},
 	}
 	return server
@@ -103,9 +103,13 @@ func (s *Server) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) 
 
 func (s *Server) onError(err error) {
 	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
-		s.log.Warn("Thrift server timeout: " + err.Error())
+		s.logger.Warn("Thrift server timeout",
+			zap.String("error", err.Error()),
+		)
 	} else {
-		s.log.With(zap.Error(err)).Error("Thrift server error.")
+		s.logger.Error("Thrift server error.",
+			zap.String("error", err.Error()),
+		)
 	}
 }
 
@@ -216,14 +220,14 @@ func (s *Server) Handle(ctx context.Context, call *tchan.InboundCall) {
 	op := call.MethodString()
 	service, method, ok := getServiceMethod(op)
 	if !ok {
-		s.log.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
 	}
 
 	s.RLock()
 	handler, ok := s.handlers[service]
 	s.RUnlock()
 	if !ok {
-		s.log.Error(fmt.Sprintf("Handle got call for service %v which is not registered", service))
+		s.logger.Error(fmt.Sprintf("Handle got call for service %s which is not registered", service))
 	}
 
 	if err := s.handle(ctx, handler, method, call); err != nil {
