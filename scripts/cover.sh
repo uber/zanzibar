@@ -110,6 +110,7 @@ cat ./coverage/istanbul.json | jq '[
 	.[] |
 	select(.key | contains("runtime")) |
 	select(.key | contains("runtime/tchannel") | not) |
+	select(.key | contains("runtime/middlewares/logger") | not) |
 	select(.key | contains("runtime/gateway") | not)
 ] | from_entries' > ./coverage/istanbul-runtime.json
 
