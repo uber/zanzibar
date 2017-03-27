@@ -263,9 +263,9 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not parse json: parse error: "+
+		"{\"error\":\"Could not parse json: parse error: "+
 			"invalid character 'b' after top-level value "+
-			"near offset 0 of 'bad bytes'",
+			"near offset 0 of 'bad bytes'\"}",
 		string(respBytes),
 	)
 }
@@ -346,7 +346,10 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 		return
 	}
 
-	assert.Contains(t, string(bytes), "could not make client request")
+	assert.Contains(t,
+		string(bytes),
+		`{"error":"could not make client request`,
+	)
 
 	time.Sleep(10 * time.Millisecond)
 

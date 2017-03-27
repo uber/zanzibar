@@ -125,7 +125,9 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not serialize json response", string(bytes))
+		`{"error":"Could not serialize json response"}`,
+		string(bytes),
+	)
 
 	errorLogs := bgateway.GetErrorLogs()
 	logLines := errorLogs["Could not serialize nil pointer body"]
@@ -178,7 +180,9 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not serialize json response", string(bytes))
+		`{"error":"Could not serialize json response"}`,
+		string(bytes),
+	)
 
 	errorLogs := bgateway.GetErrorLogs()
 	logLines := errorLogs["Could not serialize json response"]
