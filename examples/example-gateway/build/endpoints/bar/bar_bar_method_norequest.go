@@ -60,6 +60,7 @@ func HandleNoRequestRequest(
 	}
 	response := convertNoRequestClientResponse(&clientRespBody)
 	res.WriteJSON(clientResp.StatusCode, response)
+	res.Flush()
 }
 
 func convertNoRequestClientResponse(body *bar.BarResponse) *bar.BarResponse {

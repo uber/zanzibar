@@ -60,6 +60,7 @@ func HandleMissingArgRequest(
 	}
 	response := convertMissingArgClientResponse(&clientRespBody)
 	res.WriteJSON(clientResp.StatusCode, response)
+	res.Flush()
 }
 
 func convertMissingArgClientResponse(body *bar.BarResponse) *bar.BarResponse {

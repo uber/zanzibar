@@ -68,6 +68,7 @@ func HandleNormalRequest(
 	}
 	response := convertNormalClientResponse(&clientRespBody)
 	res.WriteJSON(clientResp.StatusCode, response)
+	res.Flush()
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {

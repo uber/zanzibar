@@ -72,6 +72,7 @@ func HandleTooManyArgsRequest(
 	}
 	response := convertTooManyArgsClientResponse(&clientRespBody)
 	res.WriteJSON(clientResp.StatusCode, response)
+	res.Flush()
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

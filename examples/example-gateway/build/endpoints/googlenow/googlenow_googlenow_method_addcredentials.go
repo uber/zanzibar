@@ -56,6 +56,7 @@ func HandleAddCredentialsRequest(
 		)
 	}
 	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.Flush()
 }
 
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {

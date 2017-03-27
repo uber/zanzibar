@@ -49,4 +49,5 @@ func HandleCheckCredentialsRequest(
 		)
 	}
 	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.Flush()
 }

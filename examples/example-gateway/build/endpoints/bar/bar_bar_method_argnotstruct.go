@@ -53,6 +53,7 @@ func HandleArgNotStructRequest(
 		)
 	}
 	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.Flush()
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
