@@ -10,10 +10,12 @@
 	"clientMethod": "normal",
 	"testFixtures": [],
 	"middlewares": [
-		{"name" : "exampleMiddleware",
+		{"name" : "example",
 		 "options" : {
 			 "foo": 10
 		 }
-		}
+		},
+		{"name" : "logger"}
+
 		]
 }

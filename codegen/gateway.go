@@ -30,8 +30,6 @@ import (
 	"runtime"
 	"strings"
 
-	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -221,7 +219,8 @@ type MiddlewareSpec struct {
 	Options map[string]interface{}
 }
 
-func NewMiddlewareSpec(goFile string, h *PackageHelper) (*MiddlewareSpec, error) {
+// NewMiddlewareSpec creates a middleware spec from a go file.
+func NewMiddlewareSpec(goFile string) (*MiddlewareSpec, error) {
 	_, err := os.Stat(goFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Could not find file %s: ", goFile)
@@ -236,11 +235,9 @@ func NewMiddlewareSpec(goFile string, h *PackageHelper) (*MiddlewareSpec, error)
 		)
 	}
 
-	fmt.Printf("SINDELARTEST %s", string(f.Package))
-
 	// TODO(sindelar): Consider adding other middleware validation here.
 	return &MiddlewareSpec{
-		Name: string(f.Package),
+		Name: string(f.Name.Name),
 		Path: goFile,
 	}, nil
 }
@@ -288,7 +285,7 @@ type EndpointSpec struct {
 	ClientMethod string
 }
 
-// NewEndpointSpec creats an endpoint spec from a json file.
+// NewEndpointSpec creates an endpoint spec from a json file.
 func NewEndpointSpec(
 	jsonFile string,
 	h *PackageHelper,
@@ -414,10 +411,15 @@ func NewEndpointSpec(
 		}
 		// TODO(sindelar): Validate Options against middleware spec and support
 		// nested typed objects.
+		opts, ok := middlewareObj["options"].(map[string]interface{})
+		if !ok {
+			opts = make(map[string]interface{})
+		}
+
 		middlewares[idx] = MiddlewareSpec{
 			Name:    name,
 			Path:    midSpecs[name].Path,
-			Options: middlewareObj["options"].(map[string]interface{}),
+			Options: opts,
 		}
 	}
 
@@ -585,6 +587,16 @@ func NewGatewaySpec(
 	// TODO(sindelar): Filter test files.
 	middlewareFiles, err := filepath.Glob(filepath.Join(
 		configDirName,
+		"../../runtime/middlewares",
+		"*",
+		"*.go",
+	))
+	if err != nil {
+		return nil, errors.Wrap(err, "Cannot load middlewares.")
+	}
+	// Build custom middleware definitions
+	customMidFiles, err := filepath.Glob(filepath.Join(
+		configDirName,
 		middlewareDir,
 		"*",
 		"*.go",
@@ -592,6 +604,15 @@ func NewGatewaySpec(
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot load middlewares.")
 	}
+	middlewareFiles = append(middlewareFiles, customMidFiles...)
+	// Strip test files.
+	results := []string{}
+	for _, m := range middlewareFiles {
+		if !strings.HasSuffix(m, "_test.go") {
+			results = append(results, m)
+		}
+	}
+	middlewareFiles = results
 
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
@@ -630,8 +651,9 @@ func NewGatewaySpec(
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
 	}
+
 	for _, mid := range middlewareFiles {
-		mspec, err := NewMiddlewareSpec(mid, packageHelper)
+		mspec, err := NewMiddlewareSpec(mid)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse middleware file %s :", mid,

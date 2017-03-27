@@ -11,12 +11,6 @@ import (
 	"{{$pkg}}"
 	{{end}}
 
-	{{range $idx, $endpoint := .Endpoints -}}
-	{{range $idx, $middleware := .Middlewares -}}
-	// {{$middleware.Name}} "{{$middleware.Path}}"
-	{{end -}}
-	{{end -}}
-
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -80,14 +74,14 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 							{{range $key, $value := $middleware.Options -}}
 									{{$key}} : {{$value}},
 							{{end -}}
+							},
 						{{- else -}}
 						nil,
 						{{- end}}
-						},
 					),
 				{{end -}}
 				},
-				{{$endpoint.HandlerType}}),
+				{{$endpoint.HandlerType}}).Handle,
 			{{- else -}}
 			{{$endpoint.HandlerType}},
 			{{- end}}

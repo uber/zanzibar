@@ -10,8 +10,9 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	"github.com/uber/zanzibar/runtime/middlewares/logger"
 
-	// exampleMiddleware "/"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -92,14 +93,18 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			"normal",
 			zanzibar.NewStack(
 				[...]zanzibar.MiddlewareHandle{
-					exampleMiddleware.NewMiddleWare(
+					example.NewMiddleWare(
 						g,
-						&exampleMiddlewareOptions{
+						&example.Options{
 							foo: 10,
 						},
 					),
+					logger.NewMiddleWare(
+						g,
+						nil,
+					),
 				},
-				bar.HandleNormalRequest),
+				bar.HandleNormalRequest).Handle,
 		),
 	)
 	router.Register(
