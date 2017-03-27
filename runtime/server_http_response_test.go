@@ -26,8 +26,6 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"net/http/httptest"
-
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -210,7 +208,7 @@ type MyBody struct {
 	Token  string
 }
 
-func TestResponsePeekbody(t *testing.T) {
+func TestResponsePeekBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(nil, nil)
 	if !assert.NoError(t, err) {
 		return
@@ -294,148 +292,6 @@ func TestResponsePeekBodyError(t *testing.T) {
 				_, _, err := res.PeekBody("Token2")
 				assert.Error(t, err)
 				assert.Equal(t, "Key path not found", err.Error())
-
-				res.Flush()
-			},
-		),
-	)
-
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, resp.StatusCode, 200)
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(
-		t,
-		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
-		string(bytes),
-	)
-}
-
-func BenchmarkPeekBodyInterface(b *testing.B) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
-	if err != nil {
-		b.Error("got bootstrap err: " + err.Error())
-		return
-	}
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	res := zanzibar.NewServerHTTPResponse(
-		httptest.NewRecorder(),
-		zanzibar.NewServerHTTPRequest(
-			httptest.NewRecorder(),
-			httptest.NewRequest("GET", "/", nil),
-			nil,
-			zanzibar.NewEndpoint(
-				bgateway.ActualGateway,
-				"",
-				"",
-				nil,
-			),
-		),
-	)
-	res.WriteJSON(200, &MyBody{
-		Token: "myToken",
-		Client: MyBodyClient{
-			Token: "myClientToken",
-		},
-	})
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		value := res.PeekBodyReflection("Client", "Token")
-		if value.(string) != "myClientToken" {
-			b.Error("benchmark is invalid")
-			break
-		}
-	}
-
-	b.StopTimer()
-	gateway.Close()
-	b.StartTimer()
-}
-
-func BenchmarkPeekBody(b *testing.B) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
-	if err != nil {
-		b.Error("got bootstrap err: " + err.Error())
-		return
-	}
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	res := zanzibar.NewServerHTTPResponse(
-		httptest.NewRecorder(),
-		zanzibar.NewServerHTTPRequest(
-			httptest.NewRecorder(),
-			httptest.NewRequest("GET", "/", nil),
-			nil,
-			zanzibar.NewEndpoint(
-				bgateway.ActualGateway,
-				"",
-				"",
-				nil,
-			),
-		),
-	)
-	res.WriteJSON(200, &MyBody{
-		Token: "myToken",
-		Client: MyBodyClient{
-			Token: "myClientToken",
-		},
-	})
-
-	knownValue := []byte("myClientToken")
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		value, _, err := res.PeekBody("Client", "Token")
-		if err != nil {
-			b.Error("got error peeking body")
-		}
-		if value[0] != knownValue[0] {
-			b.Error("benchmark is invalid")
-		}
-	}
-
-	b.StopTimer()
-	gateway.Close()
-	b.StartTimer()
-}
-
-func TestResponsePeekbodyInterface(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				res *zanzibar.ServerHTTPResponse,
-			) {
-				res.WriteJSON(200, &MyBody{
-					Token: "myToken",
-					Client: MyBodyClient{
-						Token: "myClientToken",
-					},
-				})
-
-				value := res.PeekBodyReflection("Client", "Token")
-				assert.Equal(t, "myClientToken", value.(string))
 
 				res.Flush()
 			},

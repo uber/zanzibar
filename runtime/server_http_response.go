@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"encoding/json"
 	"net/http"
-	"reflect"
 
 	"time"
 
@@ -179,26 +178,6 @@ func (res *ServerHTTPResponse) PeekBody(
 	}
 
 	return value, valueType, nil
-}
-
-// PeekBodyReflection allows for inspecting a key path inside the
-// body that is not flushed yet. This is useful for response middlewares
-// that want to inspect the response body.
-func (res *ServerHTTPResponse) PeekBodyReflection(
-	keys ...string,
-) interface{} {
-	obj := res.pendingBodyObj
-
-	rptr := reflect.ValueOf(obj).Elem()
-
-	for i := 0; i < len(keys); i++ {
-		key := keys[i]
-
-		field := rptr.FieldByName(key)
-		rptr = field
-	}
-
-	return rptr.Interface()
 }
 
 // Flush will write the body to the response. Before flush is called
