@@ -21,7 +21,8 @@
 package tchannel
 
 import (
-	"github.com/uber/tchannel-go/thrift"
+	"context"
+
 	"go.uber.org/thriftrw/wire"
 )
 
@@ -33,16 +34,16 @@ type RWTStruct interface {
 
 // TChanClient abstracts calling a Thrift endpoint, and is used by the generated client code.
 type TChanClient interface {
-	// Call should be passed the method to call and the request/response thriftrw structs.
+	// Call should be passed the method to call, headers and the request/response thriftrw structs.
 	// The arguments returned are (whether there was an application error, unexpected error)
-	Call(ctx thrift.Context, serviceName, methodName string, req, resp RWTStruct) (success bool, err error)
+	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (respHeaders map[string]string, success bool, err error)
 }
 
 // TChanServer abstracts handling of an RPC that is implemented by the generated server code.
 type TChanServer interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
-	// The arguments returned are (whether there was an application error, result struct, unexpected error)
-	Handle(ctx thrift.Context, methodName string, wireValue wire.Value) (success bool, resp RWTStruct, err error)
+	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
+	Handle(ctx context.Context, method string, wireValue *wire.Value) (success bool, respHeaders map[string]string, resp RWTStruct, err error)
 
 	// Service returns the service name.
 	Service() string

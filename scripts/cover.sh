@@ -103,11 +103,13 @@ runtime=$((end-start))
 echo "Finished building istanbul reports : +$runtime"
 
 
+# TODO: (lu) remove runtime/tchannel exclusion
 cat ./coverage/istanbul.json | jq '[
 	. |
 	to_entries |
 	.[] |
 	select(.key | contains("runtime")) |
+	select(.key | contains("runtime/tchannel") | not) |
 	select(.key | contains("runtime/gateway") | not)
 ] | from_entries' > ./coverage/istanbul-runtime.json
 
