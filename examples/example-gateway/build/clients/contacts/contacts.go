@@ -35,7 +35,7 @@ func NewClient(config *zanzibar.StaticConfig) *ContactsClient {
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
-func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest, h http.Header) (*http.Response, error) {
+func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest) (*http.Response, error) {
 	// Generate full URL.
 	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/" + string(r.UserUUID) + "/contacts"
@@ -48,9 +48,6 @@ func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveConta
 	req, err := http.NewRequest("POST", fullURL, bytes.NewReader(rawBody))
 	if err != nil {
 		return nil, err
-	}
-	if h != nil {
-		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req.WithContext(ctx))

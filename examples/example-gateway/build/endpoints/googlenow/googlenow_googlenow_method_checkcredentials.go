@@ -5,7 +5,6 @@ package googlenow
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -20,14 +19,12 @@ func HandleCheckCredentialsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
-	for _, header := range []string{"x-uuid", "x-token"} {
-		h.Set(header, req.Header.Get(header))
+	if ok := req.CheckHeaders([]string{"x-uuid", "x-token"}); !ok {
+		return
 	}
 
 	// Handle request body.
-	clientResp, err := clients.GoogleNow.CheckCredentials(ctx, h)
+	clientResp, err := clients.GoogleNow.CheckCredentials(ctx)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

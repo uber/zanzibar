@@ -40,8 +40,13 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 		"POST", "/arg-not-struct-path", fakeArgNotStruct,
 	)
 
+	headers := map[string]string{}
+
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/arg-not-struct-path", bytes.NewReader([]byte(`{}`)),
+		"POST",
+		"/bar/arg-not-struct-path",
+		headers,
+		bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

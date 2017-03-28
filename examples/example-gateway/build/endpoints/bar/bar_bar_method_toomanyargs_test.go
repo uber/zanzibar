@@ -40,8 +40,15 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 		"POST", "/too-many-args-path", fakeTooManyArgs,
 	)
 
+	headers := map[string]string{}
+	headers["x-uuid"] = "placeholder"
+	headers["x-token"] = "placeholder"
+
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/too-many-args-path", bytes.NewReader([]byte(`{}`)),
+		"POST",
+		"/bar/too-many-args-path",
+		headers,
+		bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

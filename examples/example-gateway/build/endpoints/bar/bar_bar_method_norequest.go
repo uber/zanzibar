@@ -6,7 +6,6 @@ package bar
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -23,11 +22,9 @@ func HandleNoRequestRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
 
 	// Handle request body.
-	clientResp, err := clients.Bar.NoRequest(ctx, h)
+	clientResp, err := clients.Bar.NoRequest(ctx)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

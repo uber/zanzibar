@@ -40,8 +40,13 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 		"POST", "/bar-path", fakeNormal,
 	)
 
+	headers := map[string]string{}
+
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", bytes.NewReader([]byte(`{}`)),
+		"POST",
+		"/bar/bar-path",
+		headers,
+		bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
