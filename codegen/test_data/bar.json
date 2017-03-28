@@ -176,7 +176,7 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "bar.BarRequest",
+							"Type": "*bar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						}
@@ -226,12 +226,12 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "bar.BarRequest",
+							"Type": "*bar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						},
 						{
-							"Type": "foo.FooStruct",
+							"Type": "*foo.FooStruct",
 							"Name": "foo",
 							"Annotations": null
 						}

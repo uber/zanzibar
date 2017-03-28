@@ -7,6 +7,8 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 )
 
 // suppress unused package warning
@@ -37,9 +39,25 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 		}
 		switch key {
 		case "Request":
-			(out.Request).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Request = nil
+			} else {
+				if out.Request == nil {
+					out.Request = new(bar.BarRequest)
+				}
+				(*out.Request).UnmarshalEasyJSON(in)
+			}
 		case "Foo":
-			(out.Foo).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Foo = nil
+			} else {
+				if out.Foo == nil {
+					out.Foo = new(foo.FooStruct)
+				}
+				(*out.Foo).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -59,13 +77,21 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 	}
 	first = false
 	out.RawString("\"Request\":")
-	(in.Request).MarshalEasyJSON(out)
+	if in.Request == nil {
+		out.RawString("null")
+	} else {
+		(*in.Request).MarshalEasyJSON(out)
+	}
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"Foo\":")
-	(in.Foo).MarshalEasyJSON(out)
+	if in.Foo == nil {
+		out.RawString("null")
+	} else {
+		(*in.Foo).MarshalEasyJSON(out)
+	}
 	out.RawByte('}')
 }
 
@@ -112,7 +138,15 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 		}
 		switch key {
 		case "Request":
-			(out.Request).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.Request = nil
+			} else {
+				if out.Request == nil {
+					out.Request = new(bar.BarRequest)
+				}
+				(*out.Request).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -132,7 +166,11 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 	}
 	first = false
 	out.RawString("\"Request\":")
-	(in.Request).MarshalEasyJSON(out)
+	if in.Request == nil {
+		out.RawString("null")
+	} else {
+		(*in.Request).MarshalEasyJSON(out)
+	}
 	out.RawByte('}')
 }
 

@@ -73,7 +73,7 @@ func HandleNormalRequest(
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
 	clientRequest := &barClient.NormalHTTPRequest{}
 
-	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
+	clientRequest.Request = (*clientTypeBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
