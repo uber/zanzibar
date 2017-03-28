@@ -73,7 +73,7 @@ func TestHandlers(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -154,7 +154,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -203,7 +203,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -260,7 +260,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}

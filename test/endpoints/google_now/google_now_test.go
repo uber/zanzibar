@@ -450,7 +450,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Missing mandatory header: x-uuid",
+		`{"error":"Missing mandatory header: x-uuid"}`,
 		string(respBytes),
 	)
 }
