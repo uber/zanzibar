@@ -39,7 +39,7 @@ func Handle{{title .Name}}Request(
 	clients *clients.Clients,
 ) {
 	{{ if .Headers -}}
-	if ok := req.CheckHeaders({{.Headers | printf "%#v" }}); !ok {
+	if !req.CheckHeaders({{.Headers | printf "%#v" }}) {
 		return
 	}
 	{{- end}}
