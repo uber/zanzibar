@@ -101,32 +101,46 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	clientConfigGeneric := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &clientConfigGeneric)
+	classConfig := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &classConfig)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not parse json file %s: ", jsonFile,
 		)
 	}
 
-	clientType := clientConfigGeneric["clientType"].(string)
-	if clientType == "http" {
+	className := classConfig["name"].(string)
+	classType := classConfig["type"].(string)
+
+	clientConfig := classConfig["config"].(map[string]interface{})
+
+	if classType == "http" {
 		// A better solution for client configs is needed here.
 		// Assuming a string map is too restrictive
-		clientConfigObj := map[string]string{}
-		err := json.Unmarshal(bytes, &clientConfigObj)
+		httpClientConfig := map[string]string{}
 
+		serializedConfig, err := json.Marshal(clientConfig)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Could not parse json file %s: ", jsonFile,
+				err, "Could not serialize class config in file %s: ", jsonFile,
 			)
 		}
 
-		return NewHTTPClientSpec(jsonFile, clientConfigObj, h)
-	} else if clientType == "tchannel" {
-		return NewTChannelClientSpec(jsonFile, clientConfigGeneric, h)
-	} else if clientType == "custom" {
-		return NewCustomClientSpec(jsonFile, clientConfigGeneric, h)
+		if err := json.Unmarshal(serializedConfig, &httpClientConfig); err != nil {
+			return nil, errors.Wrapf(
+				err, "Could not parse class config json file %s: ", jsonFile,
+			)
+		}
+
+		// Restore the properties in the old config structure
+		httpClientConfig["clientId"] = className
+		httpClientConfig["clientType"] = classType
+
+		return NewHTTPClientSpec(jsonFile, httpClientConfig, h)
+	} else if classType == "tchannel" {
+		return NewTChannelClientSpec(jsonFile, clientConfig, h)
+	} else if classType == "custom" {
+		return NewCustomClientSpec(jsonFile, clientConfig, h)
 	}
 
 	return nil, errors.Errorf(

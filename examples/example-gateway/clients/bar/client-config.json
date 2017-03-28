@@ -1,8 +1,10 @@
 {
-	"clientType": "http",
-	"clientId": "bar",
-	"thriftFile": "github.com/uber/zanzibar/clients/bar/bar.thrift",
-	"thriftFileSha": "{{placeholder}}",
-	"clientName": "Bar",
-	"serviceName": "Bar"
+	"name": "bar",
+	"type": "http",
+	"config": {
+		"thriftFile": "github.com/uber/zanzibar/clients/bar/bar.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"clientName": "Bar",
+		"serviceName": "Bar"
+	}
 }
