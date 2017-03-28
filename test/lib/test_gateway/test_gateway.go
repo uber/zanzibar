@@ -40,7 +40,7 @@ type TestGateway interface {
 	MakeRequest(
 		method string, url string, body io.Reader,
 	) (*http.Response, error)
-	Backends() map[string]*testBackend.TestBackend
+	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	GetPort() int
 	GetErrorLogs() map[string][]string
 
@@ -55,7 +55,7 @@ type ChildProcessGateway struct {
 	test           *testing.T
 	opts           *Options
 	m3Server       *testM3Server.FakeM3Server
-	backends       map[string]*testBackend.TestBackend
+	backendsHTTP   map[string]*testBackend.TestHTTPBackend
 	errorLogs      map[string][]string
 
 	HTTPClient       *http.Client
@@ -68,10 +68,10 @@ type ChildProcessGateway struct {
 
 // Options used to create TestGateway
 type Options struct {
-	TestBinary    string
-	LogWhitelist  map[string]bool
-	KnownBackends []string
-	CountMetrics  bool
+	TestBinary        string
+	LogWhitelist      map[string]bool
+	KnownHTTPBackends []string
+	CountMetrics      bool
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -104,7 +104,7 @@ func CreateGateway(
 		panic("opts.TestBinary in test.CreateGateway() mandatory")
 	}
 
-	backends, err := testBackend.BuildBackends(config, opts.KnownBackends)
+	backendsHTTP, err := testBackend.BuildHTTPBackends(config, opts.KnownHTTPBackends)
 	if err != nil {
 		return nil, err
 	}
@@ -118,9 +118,9 @@ func CreateGateway(
 				MaxIdleConnsPerHost: 500,
 			},
 		},
-		jsonLines: []string{},
-		errorLogs: map[string][]string{},
-		backends:  backends,
+		jsonLines:    []string{},
+		errorLogs:    map[string][]string{},
+		backendsHTTP: backendsHTTP,
 	}
 
 	testGateway.setupMetrics(t, opts)
@@ -163,9 +163,9 @@ func (gateway *ChildProcessGateway) MakeRequest(
 	return client.Do(req)
 }
 
-// Backends returns the backends
-func (gateway *ChildProcessGateway) Backends() map[string]*testBackend.TestBackend {
-	return gateway.backends
+// HTTPBackends returns the HTTP backends
+func (gateway *ChildProcessGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
+	return gateway.backendsHTTP
 }
 
 // GetPort ...

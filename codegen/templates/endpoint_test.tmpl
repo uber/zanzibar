@@ -31,7 +31,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"{{$clientName | camel}}"},
+		KnownHTTPBackends: []string{"{{$clientName | camel}}"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -51,7 +51,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["{{$clientName | camel}}"].HandleFunc(
+	gateway.HTTPBackends()["{{$clientName | camel}}"].HandleFunc(
 		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
 	)
 
