@@ -26,7 +26,7 @@ func HandleTooManyArgsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	if ok := req.CheckHeaders([]string{"x-uuid", "x-token"}); !ok {
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
 
