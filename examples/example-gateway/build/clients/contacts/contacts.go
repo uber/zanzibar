@@ -14,31 +14,28 @@ import (
 )
 
 // ContactsClient is the http client for service Contacts.
-type ContactsClient zanzibar.HTTPClient
+type ContactsClient struct {
+	client *zanzibar.HTTPClient
+}
 
 // NewClient returns a new http client for service Contacts.
-func NewClient(config *zanzibar.StaticConfig) *ContactsClient {
+func NewClient(
+	config *zanzibar.StaticConfig,
+	gateway *zanzibar.Gateway,
+) *ContactsClient {
 	ip := config.MustGetString("clients.contacts.ip")
 	port := config.MustGetInt("clients.contacts.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &ContactsClient{
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-		},
-		BaseURL: baseURL,
+		client: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
 func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest) (*http.Response, error) {
 	// Generate full URL.
-	// TODO: (jakev) insert params if needed here.
-	fullURL := c.BaseURL + "/" + string(r.UserUUID) + "/contacts"
+	fullURL := c.client.BaseURL + "/" + string(r.UserUUID) + "/contacts"
 
 	rawBody, err := r.MarshalJSON()
 	if err != nil {
@@ -50,5 +47,5 @@ func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveConta
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req.WithContext(ctx))
+	return c.client.Client.Do(req.WithContext(ctx))
 }
