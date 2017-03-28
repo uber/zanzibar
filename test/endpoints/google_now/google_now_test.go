@@ -423,7 +423,7 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 
 func TestGoogleNowMissingHeaders(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
