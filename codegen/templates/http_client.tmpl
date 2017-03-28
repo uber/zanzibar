@@ -23,7 +23,7 @@ import (
 // {{$clientName}} is the http client for service {{.Name}}.
 type {{$clientName}} struct {
 	ClientID string
-	client   *zanzibar.HTTPClient
+	HTTPClient   *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service {{.Name}}.
@@ -37,7 +37,7 @@ func NewClient(
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
 		ClientID: "{{$clientID}}",
-		client: zanzibar.NewHTTPClient(gateway, baseURL),
+		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
@@ -52,11 +52,11 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
 {{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "{{.Name}}", c.client,
+		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL
+	fullURL := c.HTTPClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string(r.{{$segment.BodyIdentifier | title}})
