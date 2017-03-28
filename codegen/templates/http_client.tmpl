@@ -17,11 +17,13 @@ import (
 	{{end}}
 )
 
+{{- $clientID := .ClientID -}}
 {{range .Services}}
-{{- $clientName := title .Name | printf "%sClient" -}}
+{{- $clientName := title .Name | printf "%sClient" }}
 // {{$clientName}} is the http client for service {{.Name}}.
 type {{$clientName}} struct {
-	client *zanzibar.HTTPClient
+	ClientID string
+	client   *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service {{.Name}}.
@@ -34,6 +36,7 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
+		ClientID: "{{$clientID}}",
 		client: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
@@ -48,6 +51,10 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 {{else}}
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
 {{end}} {{- /* <if .ReqeustType ne ""> */ -}}
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "{{.Name}}", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
@@ -57,20 +64,14 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, 
 	{{- end}}
 
 	{{if ne .RequestType ""}}
-	rawBody, err := r.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, bytes.NewReader(rawBody))
+	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, r)
 	{{else}}
-	req, err := http.NewRequest("{{.HTTPMethod}}", fullURL, nil)
+	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, nil)
 	{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
