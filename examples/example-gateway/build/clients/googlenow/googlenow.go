@@ -13,8 +13,8 @@ import (
 
 // GoogleNowClient is the http client for service GoogleNow.
 type GoogleNowClient struct {
-	ClientID string
-	client   *zanzibar.HTTPClient
+	ClientID   string
+	HTTPClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service GoogleNow.
@@ -27,19 +27,19 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &GoogleNowClient{
-		ClientID: "googlenow",
-		client:   zanzibar.NewHTTPClient(gateway, baseURL),
+		ClientID:   "googlenow",
+		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // AddCredentials calls "/add-credentials" endpoint.
 func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsHTTPRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "addCredentials", c.client,
+		c.ClientID, "addCredentials", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/add-credentials"
+	fullURL := c.HTTPClient.BaseURL + "/add-credentials"
 
 	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
@@ -51,11 +51,11 @@ func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsH
 // CheckCredentials calls "/check-credentials" endpoint.
 func (c *GoogleNowClient) CheckCredentials(ctx context.Context) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "checkCredentials", c.client,
+		c.ClientID, "checkCredentials", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/check-credentials"
+	fullURL := c.HTTPClient.BaseURL + "/check-credentials"
 
 	err := req.WriteJSON("POST", fullURL, nil)
 	if err != nil {

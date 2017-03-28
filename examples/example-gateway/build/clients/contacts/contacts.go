@@ -14,8 +14,8 @@ import (
 
 // ContactsClient is the http client for service Contacts.
 type ContactsClient struct {
-	ClientID string
-	client   *zanzibar.HTTPClient
+	ClientID   string
+	HTTPClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service Contacts.
@@ -28,19 +28,19 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &ContactsClient{
-		ClientID: "contacts",
-		client:   zanzibar.NewHTTPClient(gateway, baseURL),
+		ClientID:   "contacts",
+		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
 func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "saveContacts", c.client,
+		c.ClientID, "saveContacts", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/" + string(r.UserUUID) + "/contacts"
+	fullURL := c.HTTPClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
 
 	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {

@@ -13,8 +13,8 @@ import (
 
 // BarClient is the http client for service Bar.
 type BarClient struct {
-	ClientID string
-	client   *zanzibar.HTTPClient
+	ClientID   string
+	HTTPClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service Bar.
@@ -27,19 +27,19 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &BarClient{
-		ClientID: "bar",
-		client:   zanzibar.NewHTTPClient(gateway, baseURL),
+		ClientID:   "bar",
+		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
 func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argNotStruct", c.client,
+		c.ClientID, "argNotStruct", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/arg-not-struct-path"
+	fullURL := c.HTTPClient.BaseURL + "/arg-not-struct-path"
 
 	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
@@ -51,11 +51,11 @@ func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest
 // MissingArg calls "/missing-arg-path" endpoint.
 func (c *BarClient) MissingArg(ctx context.Context) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "missingArg", c.client,
+		c.ClientID, "missingArg", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/missing-arg-path"
+	fullURL := c.HTTPClient.BaseURL + "/missing-arg-path"
 
 	err := req.WriteJSON("GET", fullURL, nil)
 	if err != nil {
@@ -67,11 +67,11 @@ func (c *BarClient) MissingArg(ctx context.Context) (*http.Response, error) {
 // NoRequest calls "/no-request-path" endpoint.
 func (c *BarClient) NoRequest(ctx context.Context) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "noRequest", c.client,
+		c.ClientID, "noRequest", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/no-request-path"
+	fullURL := c.HTTPClient.BaseURL + "/no-request-path"
 
 	err := req.WriteJSON("GET", fullURL, nil)
 	if err != nil {
@@ -83,11 +83,11 @@ func (c *BarClient) NoRequest(ctx context.Context) (*http.Response, error) {
 // Normal calls "/bar-path" endpoint.
 func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "normal", c.client,
+		c.ClientID, "normal", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/bar-path"
+	fullURL := c.HTTPClient.BaseURL + "/bar-path"
 
 	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
@@ -99,11 +99,11 @@ func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest) (*http.Res
 // TooManyArgs calls "/too-many-args-path" endpoint.
 func (c *BarClient) TooManyArgs(ctx context.Context, r *TooManyArgsHTTPRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "tooManyArgs", c.client,
+		c.ClientID, "tooManyArgs", c.HTTPClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/too-many-args-path"
+	fullURL := c.HTTPClient.BaseURL + "/too-many-args-path"
 
 	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
