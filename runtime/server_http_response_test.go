@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -122,7 +123,9 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not serialize json response", string(bytes))
+		`{"error":"Could not serialize json response"}`,
+		string(bytes),
+	)
 
 	errorLogs := bgateway.GetErrorLogs()
 	logLines := errorLogs["Could not serialize nil pointer body"]
@@ -174,7 +177,9 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not serialize json response", string(bytes))
+		`{"error":"Could not serialize json response"}`,
+		string(bytes),
+	)
 
 	errorLogs := bgateway.GetErrorLogs()
 	logLines := errorLogs["Could not serialize json response"]
@@ -191,4 +196,119 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 
 	errorText := lineStruct["error"].(string)
 	assert.Equal(t, "cannot serialize", errorText)
+}
+
+//easyjson:json
+type MyBodyClient struct {
+	Token string
+}
+
+//easyjson:json
+type MyBody struct {
+	Client MyBodyClient
+	Token  string
+}
+
+func TestResponsePeekBody(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				})
+
+				value, vType, err := res.PeekBody("Token")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte(`myToken`), value)
+				assert.Equal(t, vType, jsonparser.String)
+
+				value, vType, err = res.PeekBody("Client", "Token")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte(`myClientToken`), value)
+				assert.Equal(t, vType, jsonparser.String)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(
+		t,
+		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
+		string(bytes),
+	)
+}
+
+func TestResponsePeekBodyError(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				})
+
+				_, _, err := res.PeekBody("Token2")
+				assert.Error(t, err)
+				assert.Equal(t, "Key path not found", err.Error())
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(
+		t,
+		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
+		string(bytes),
+	)
 }

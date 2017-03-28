@@ -59,7 +59,7 @@ echo "Compiled easyjson : +$runtime"
 
 echo "Generating JSON Marshal/Unmarshal"
 for file in $(find "$BUILD_DIR/gen-code" -name "types.go" | grep -v "versioncheck.go");do
-    "$EASY_JSON_BINARY" -- "$file"
+    "$EASY_JSON_BINARY" -all -- "$file"
 done
 
 end=`date +%s`

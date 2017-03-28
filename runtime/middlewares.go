@@ -56,13 +56,15 @@ type MiddlewareHandle interface {
 		ctx context.Context,
 		req *ServerHTTPRequest,
 		res *ServerHTTPResponse,
-		shared SharedState) bool
+		shared SharedState,
+	) bool
 	// implement HandleResponse for your middleware. Return false
 	// if the handler writes to the response body.
 	HandleResponse(
 		ctx context.Context,
 		res *ServerHTTPResponse,
-		shared SharedState) bool
+		shared SharedState,
+	)
 	// return any shared state for this middleware.
 	JSONSchema() *jsonschema.Document
 	Name() string
@@ -107,7 +109,7 @@ func (m *MiddlewareStack) Handle(
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
 		if ok == false {
-			for j := i; i >= 0; i-- {
+			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
 			return

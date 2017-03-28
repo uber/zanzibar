@@ -55,7 +55,8 @@ func (m *loggerMiddleware) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) bool {
+	shared zanzibar.SharedState,
+) bool {
 	// TODO(sindelar): merge in logger branch and use logic here
 	m.logger.Info("Incoming Request")
 	return true
@@ -64,10 +65,10 @@ func (m *loggerMiddleware) HandleRequest(
 func (m *loggerMiddleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState) bool {
+	shared zanzibar.SharedState,
+) {
 	// TODO(sindelar): merge in logger branch and use logic here
 	m.logger.Info("Outgoing Response")
-	return true
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware

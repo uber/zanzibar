@@ -26,17 +26,22 @@ import (
 
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/uber-go/zap"
 )
 
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
-	responseWriter http.ResponseWriter
-	req            *ServerHTTPRequest
-	gateway        *Gateway
-	finishTime     time.Time
-	finished       bool
-	metrics        *EndpointMetrics
+	responseWriter    http.ResponseWriter
+	req               *ServerHTTPRequest
+	gateway           *Gateway
+	finishTime        time.Time
+	finished          bool
+	metrics           *EndpointMetrics
+	flushed           bool
+	pendingBodyBytes  []byte
+	pendingBodyObj    interface{}
+	pendingStatusCode int
 
 	StatusCode int
 }
@@ -61,7 +66,7 @@ func (res *ServerHTTPResponse) finish() {
 	if !res.req.started {
 		/* coverage ignore next line */
 		res.req.Logger.Error(
-			"Forgot to start incoming request",
+			"Forgot to start server response",
 			zap.String("path", res.req.URL.Path),
 		)
 		/* coverage ignore next line */
@@ -70,7 +75,7 @@ func (res *ServerHTTPResponse) finish() {
 	if res.finished {
 		/* coverage ignore next line */
 		res.req.Logger.Error(
-			"Finished an incoming request twice",
+			"Finished an server response twice",
 			zap.String("path", res.req.URL.Path),
 		)
 		/* coverage ignore next line */
@@ -110,21 +115,21 @@ func (res *ServerHTTPResponse) SendErrorString(
 		zap.String("path", res.req.URL.Path),
 	)
 
-	res.writeHeader(statusCode)
-	res.writeString(err)
-
-	res.finish()
+	res.WriteJSONBytes(statusCode,
+		[]byte(`{"error":"`+err+`"}`),
+	)
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
 func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, bytes []byte,
 ) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
-	res.finish()
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
 }
 
 // WriteJSON writes a json serializable struct to Response
@@ -146,10 +151,49 @@ func (res *ServerHTTPResponse) WriteJSON(
 		return
 	}
 
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
+	res.pendingBodyObj = body
+}
+
+// PeekBody allows for inspecting a key path inside the body
+// that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (res *ServerHTTPResponse) PeekBody(
+	keys ...string,
+) ([]byte, jsonparser.ValueType, error) {
+	value, valueType, _, err := jsonparser.Get(
+		res.pendingBodyBytes, keys...,
+	)
+
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return value, valueType, nil
+}
+
+// Flush will write the body to the response. Before flush is called
+// the body is pending. A pending body allows a response middleware to
+// write a different body.
+func (res *ServerHTTPResponse) flush() {
+	if res.flushed {
+		/* coverage ignore next line */
+		res.req.Logger.Error(
+			"Flushed a server response twice",
+			zap.String("path", res.req.URL.Path),
+		)
+		/* coverage ignore next line */
+		return
+	}
+
+	res.flushed = true
+	res.writeHeader(res.pendingStatusCode)
+	res.writeBytes(res.pendingBodyBytes)
 	res.finish()
 }
 
@@ -167,11 +211,6 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 			zap.String("error", err.Error()),
 		)
 	}
-}
-
-// WriteString helper just writes a string to the response
-func (res *ServerHTTPResponse) writeString(text string) {
-	res.writeBytes([]byte(text))
 }
 
 // IsOKResponse checks if the status code is OK.
