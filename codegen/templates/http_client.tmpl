@@ -20,23 +20,21 @@ import (
 {{range .Services}}
 {{- $clientName := title .Name | printf "%sClient" -}}
 // {{$clientName}} is the http client for service {{.Name}}.
-type {{$clientName}} zanzibar.HTTPClient
+type {{$clientName}} struct {
+	client *zanzibar.HTTPClient
+}
 
 // NewClient returns a new http client for service {{.Name}}.
-func NewClient(config *zanzibar.StaticConfig) *{{$clientName}} {
+func NewClient(
+	config *zanzibar.StaticConfig,
+	gateway *zanzibar.Gateway,
+) *{{$clientName}} {
 	ip := config.MustGetString("clients.{{.Name | camel}}.ip")
 	port := config.MustGetInt("clients.{{.Name | camel}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-		},
-		BaseURL: baseURL,
+		client: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
@@ -49,8 +47,7 @@ func NewClient(config *zanzibar.StaticConfig) *{{$clientName}} {
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}) (*http.Response, error) {
 	// Generate full URL.
-	// TODO: (jakev) insert params if needed here.
-	fullURL := c.BaseURL
+	fullURL := c.client.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string(r.{{$segment.BodyIdentifier | title}})
@@ -67,7 +64,7 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req.WithContext(ctx))
+	return c.client.Client.Do(req.WithContext(ctx))
 }
 
 {{else}} {{/* template for having http body */ -}}
@@ -75,7 +72,7 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
 func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
 	// Generate full URL.
-	fullURL := c.BaseURL
+	fullURL := c.client.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+r.{{$segment.BodyIdentifier}}
@@ -87,7 +84,7 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, 
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Client.Do(req.WithContext(ctx))
+	return c.client.Client.Do(req.WithContext(ctx))
 }
 {{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 {{end}} {{- /* <range .Methods> */ -}}

@@ -124,15 +124,14 @@ func CreateGateway(
 		),
 	}, seedConfig)
 
-	clients := clients.CreateClients(config)
-
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients:   clients,
 		LogWriter: zap.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
 	}
+	gateway.Clients = clients.CreateClients(config, gateway)
+
 	benchGateway.ActualGateway = gateway
 	err = gateway.Bootstrap(endpoints.Register)
 	if err != nil {
