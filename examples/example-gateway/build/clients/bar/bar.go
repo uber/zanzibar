@@ -4,7 +4,6 @@
 package barClient
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 	"strconv"
@@ -14,7 +13,8 @@ import (
 
 // BarClient is the http client for service Bar.
 type BarClient struct {
-	client *zanzibar.HTTPClient
+	ClientID string
+	client   *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service Bar.
@@ -27,86 +27,87 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &BarClient{
-		client: zanzibar.NewHTTPClient(gateway, baseURL),
+		ClientID: "bar",
+		client:   zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
 func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "argNotStruct", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL + "/arg-not-struct-path"
 
-	rawBody, err := r.MarshalJSON()
+	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", fullURL, bytes.NewReader(rawBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
 func (c *BarClient) MissingArg(ctx context.Context) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "missingArg", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL + "/missing-arg-path"
 
-	req, err := http.NewRequest("GET", fullURL, nil)
+	err := req.WriteJSON("GET", fullURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
 
 // NoRequest calls "/no-request-path" endpoint.
 func (c *BarClient) NoRequest(ctx context.Context) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "noRequest", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL + "/no-request-path"
 
-	req, err := http.NewRequest("GET", fullURL, nil)
+	err := req.WriteJSON("GET", fullURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
 
 // Normal calls "/bar-path" endpoint.
 func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "normal", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL + "/bar-path"
 
-	rawBody, err := r.MarshalJSON()
+	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", fullURL, bytes.NewReader(rawBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
 func (c *BarClient) TooManyArgs(ctx context.Context, r *TooManyArgsHTTPRequest) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "tooManyArgs", c.client,
+	)
+
 	// Generate full URL.
 	fullURL := c.client.BaseURL + "/too-many-args-path"
 
-	rawBody, err := r.MarshalJSON()
+	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", fullURL, bytes.NewReader(rawBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
