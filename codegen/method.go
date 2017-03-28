@@ -113,6 +113,12 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	return nil
 }
 
+func isStructType(spec compile.TypeSpec) bool {
+	spec = compile.RootTypeSpec(spec)
+	_, isStruct := spec.(*compile.StructSpec)
+	return isStruct
+}
+
 func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSpec, h *PackageHelper) (string, error) {
 	requestType := strings.Title(f.Name) + "HTTPRequest"
 	ms.RequestStruct = make([]StructSpec, len(f.ArgsSpec))
@@ -120,6 +126,9 @@ func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSp
 		typeName, err := h.TypeFullName(curThriftFile, arg.Type)
 		if err != nil {
 			return "", errors.Wrap(err, "failed to generate new request type")
+		}
+		if isStructType(arg.Type) {
+			typeName = "*" + typeName
 		}
 		ms.RequestStruct[i] = StructSpec{
 			Type:        typeName,
@@ -328,7 +337,7 @@ func (ms *MethodSpec) setRequestFieldMap(
 		default:
 			thriftPkgNameParts := strings.Split(field.Type.ThriftFile(), "/")
 			thriftPkgName := thriftPkgNameParts[len(thriftPkgNameParts)-2]
-			ms.RequestTypeMap[field.Name] = "clientType" + strings.Title(thriftPkgName) + "." + field.Type.ThriftName()
+			ms.RequestTypeMap[field.Name] = "(*clientType" + strings.Title(thriftPkgName) + "." + field.Type.ThriftName() + ")"
 		}
 	}
 	return nil

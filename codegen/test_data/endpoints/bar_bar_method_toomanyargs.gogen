@@ -77,8 +77,8 @@ func HandleTooManyArgsRequest(
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
 	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
-	clientRequest.Foo = clientTypeFoo.FooStruct(body.Foo)
-	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
+	clientRequest.Foo = (*clientTypeFoo.FooStruct)(body.Foo)
+	clientRequest.Request = (*clientTypeBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
