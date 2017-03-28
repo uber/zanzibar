@@ -1,0 +1,17 @@
+[
+    {
+    	"name": "example",
+	    "schema": "./middlewares/example/example_schema.json",
+	    "importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+    },
+    {
+    	"name": "example_reader",
+	    "schema": "./middlewares/example_reader/example_reader_schema.json",
+	    "importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
+    },
+    {
+    	"name": "logger",
+	    "schema": "../../runtime/middlewares/logger/logger_schema.json",
+	    "importPath": "github.com/uber/zanzibar/runtime/middlewares/logger"
+    }
+]
