@@ -7,5 +7,5 @@
 
 	"clientConfig": "./clients",
 	"endpointConfig": "./endpoints",
-	"middlewareDir": "./middlewares"
+	"middlewareConfig": "./middlewares/middleware-config.json"
 }

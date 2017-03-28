@@ -22,8 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"go/parser"
-	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -220,24 +218,39 @@ type MiddlewareSpec struct {
 }
 
 // NewMiddlewareSpec creates a middleware spec from a go file.
-func NewMiddlewareSpec(goFile string) (*MiddlewareSpec, error) {
-	_, err := os.Stat(goFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Could not find file %s: ", goFile)
-	}
+func NewMiddlewareSpec(
+	name string,
+	goFile string,
+	jsonFile string,
+	configDirName string,
+) (*MiddlewareSpec, error) {
+	schPath := filepath.Join(
+		configDirName,
+		jsonFile,
+	)
 
-	// Read the go middleware definitions.
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, goFile, nil, parser.PackageClauseOnly)
+	bytes, err := ioutil.ReadFile(schPath)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not read go file %s: ", goFile,
+			err, "Cannot read middleware json schema: %s",
+			schPath,
 		)
 	}
 
-	// TODO(sindelar): Consider adding other middleware validation here.
+	var midOptSchema map[string]interface{}
+	err = json.Unmarshal(bytes, &midOptSchema)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json schema for middleware options: %s",
+			schPath,
+		)
+	}
+
+	// TODO(sindelar): Add middleware validation here. Validate name
+	// and package name match. Validate the options json schema matches the options
+	// struct
 	return &MiddlewareSpec{
-		Name: string(f.Name.Name),
+		Name: name,
 		Path: goFile,
 	}, nil
 }
@@ -398,11 +411,28 @@ func NewEndpointSpec(
 		)
 	}
 
-	// TODO(sindelar): Validate middleware are defined in codebase.
-	middlewares := make([]MiddlewareSpec, len(endpointConfigObj["middlewares"].([]interface{})))
-	for idx, middleware := range endpointConfigObj["middlewares"].([]interface{}) {
-		middlewareObj := middleware.(map[string]interface{})
-		name := middlewareObj["name"].(string)
+	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse middlewares field",
+		)
+	}
+	middlewares := make([]MiddlewareSpec, len(endpointMids))
+	for idx, middleware := range endpointMids {
+		middlewareObj, ok := middleware.(map[string]interface{})
+		if !ok {
+			return nil, errors.Errorf(
+				"Unable to parse middleware %s",
+				middlewareObj,
+			)
+		}
+		name, ok := middlewareObj["name"].(string)
+		if !ok {
+			return nil, errors.Errorf(
+				"Unable to parse \"name\" field in middleware %s",
+				middlewareObj,
+			)
+		}
 		// Verify the middleware name is defined.
 		if midSpecs[name] == nil {
 			return nil, errors.Errorf(
@@ -539,6 +569,45 @@ func parseEndpointJsons(
 	return endpointJsons, nil
 }
 
+func parseMiddlewareConfig(
+	config string,
+	configDirName string,
+) ([]*MiddlewareSpec, error) {
+	bytes, err := ioutil.ReadFile(config)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot read middleware config json: %s",
+			config,
+		)
+	}
+
+	// TODO(sindelar): Use a struct
+	var configJSON []map[string]string
+	err = json.Unmarshal(bytes, &configJSON)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json for middleware config json: %s",
+			config,
+		)
+	}
+	specs := make([]*MiddlewareSpec, len(configJSON))
+	for idx, mid := range configJSON {
+		specs[idx], err = NewMiddlewareSpec(
+			mid["name"],
+			mid["importPath"],
+			mid["schema"],
+			configDirName,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot validate middleware: %s",
+				mid,
+			)
+		}
+	}
+	return specs, nil
+}
+
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {
 	// package helper for gateway
@@ -554,7 +623,7 @@ type GatewaySpec struct {
 	configDirName     string
 	clientConfigDir   string
 	endpointConfigDir string
-	middlewareDir     string
+	middlewareConfig  string
 }
 
 // NewGatewaySpec sets up gateway spec
@@ -566,7 +635,7 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointConfig string,
-	middlewareDir string,
+	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -584,35 +653,10 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "cannot create template")
 	}
 
-	// TODO(sindelar): Filter test files.
-	middlewareFiles, err := filepath.Glob(filepath.Join(
+	middleConfig := filepath.Join(
 		configDirName,
-		"../../runtime/middlewares",
-		"*",
-		"*.go",
-	))
-	if err != nil {
-		return nil, errors.Wrap(err, "Cannot load middlewares.")
-	}
-	// Build custom middleware definitions
-	customMidFiles, err := filepath.Glob(filepath.Join(
-		configDirName,
-		middlewareDir,
-		"*",
-		"*.go",
-	))
-	if err != nil {
-		return nil, errors.Wrap(err, "Cannot load middlewares.")
-	}
-	middlewareFiles = append(middlewareFiles, customMidFiles...)
-	// Strip test files.
-	results := []string{}
-	for _, m := range middlewareFiles {
-		if !strings.HasSuffix(m, "_test.go") {
-			results = append(results, m)
-		}
-	}
-	middlewareFiles = results
+		middlewareConfig,
+	)
 
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
@@ -652,16 +696,15 @@ func NewGatewaySpec(
 		gatewayName:       gatewayName,
 	}
 
-	for _, mid := range middlewareFiles {
-		mspec, err := NewMiddlewareSpec(mid)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Cannot parse middleware file %s :", mid,
-			)
-		}
-
+	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load middlewares:")
+	}
+	for _, mspec := range middlewares {
 		spec.MiddlewareModules[mspec.Name] = mspec
 	}
+
 	for _, json := range clientJsons {
 		cspec, err := NewClientSpec(json, packageHelper)
 		if err != nil {
@@ -748,17 +791,4 @@ func (gateway *GatewaySpec) GenerateMain() error {
 		gateway, gateway.PackageHelper,
 	)
 	return err
-}
-
-// GenerateMiddlewareSchemas will generate the middleware schema files
-// for the gateway
-func (gateway *GatewaySpec) GenerateMiddlewareSchemas() error {
-
-	// Validate middleware go files.
-
-	//for _, middlewares := range gateway.MiddlewareModules {
-	//
-	//}
-
-	return nil
 }

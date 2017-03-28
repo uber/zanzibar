@@ -69,7 +69,7 @@ func main() {
 		),
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
-		config.MustGetString("middlewareDir"),
+		config.MustGetString("middlewareConfig"),
 
 		config.MustGetString("gatewayName"),
 	)
@@ -88,9 +88,5 @@ func main() {
 	fmt.Printf("Generating main.go for gateway \n")
 	err = gatewaySpec.GenerateMain()
 	checkError(err, "Failed to generate main.go.")
-
-	fmt.Printf("Generating middleware schemas for gateway \n")
-	err = gatewaySpec.GenerateMiddlewareSchemas()
-	checkError(err, "Failed to generate middleware schemas files.")
 
 }
