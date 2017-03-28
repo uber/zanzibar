@@ -17,7 +17,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"bar"},
+		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -36,7 +36,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["bar"].HandleFunc(
+	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/too-many-args-path", fakeTooManyArgs,
 	)
 

@@ -38,14 +38,14 @@ var benchBytes = []byte("{\"contacts\":[{\"fragments\":[{\"type\":\"message\",\"
 
 func BenchmarkSaveContacts(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownBackends: []string{"contacts"},
+		KnownHTTPBackends: []string{"contacts"},
 	})
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
 
-	gateway.Backends()["contacts"].HandleFunc(
+	gateway.HTTPBackends()["contacts"].HandleFunc(
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(202)
 			_, _ = w.Write([]byte("{}"))
@@ -94,7 +94,7 @@ func TestSaveContactsCall(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"contacts"},
+		KnownHTTPBackends: []string{"contacts"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
@@ -105,7 +105,7 @@ func TestSaveContactsCall(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["contacts"].HandleFunc(
+	gateway.HTTPBackends()["contacts"].HandleFunc(
 		"POST", "/foo/contacts", func(w http.ResponseWriter, r *http.Request) {
 			counter++
 			w.WriteHeader(202)

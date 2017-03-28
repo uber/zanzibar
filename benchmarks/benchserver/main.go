@@ -32,7 +32,7 @@ var PORT int32 = 8092
 
 func main() {
 	logger := zap.New(zap.NewJSONEncoder())
-	backend := testBackend.CreateBackend(PORT)
+	backend := testBackend.CreateHTTPBackend(PORT)
 	err := backend.Bootstrap()
 	if err != nil {
 		panic(err)

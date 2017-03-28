@@ -21,19 +21,17 @@
 package testBackend
 
 import (
-	"sync"
-
 	"net/http"
-
 	"strconv"
+	"sync"
 
 	"github.com/julienschmidt/httprouter"
 	zap "github.com/uber-go/zap"
 	"github.com/uber/zanzibar/runtime"
 )
 
-// TestBackend will pretend to be a http backend
-type TestBackend struct {
+// TestHTTPBackend will pretend to be a http backend
+type TestHTTPBackend struct {
 	Server    *zanzibar.HTTPServer
 	IP        string
 	Port      int32
@@ -43,21 +41,21 @@ type TestBackend struct {
 	router    *httprouter.Router
 }
 
-// BuildBackends returns a map of backends based on config
-func BuildBackends(
-	cfg map[string]interface{}, knownBackends []string,
-) (map[string]*TestBackend, error) {
-	n := len(knownBackends)
-	result := make(map[string]*TestBackend, n)
+// BuildHTTPBackends returns a map of backends based on config
+func BuildHTTPBackends(
+	cfg map[string]interface{}, knownHTTPBackends []string,
+) (map[string]*TestHTTPBackend, error) {
+	n := len(knownHTTPBackends)
+	result := make(map[string]*TestHTTPBackend, n)
 
 	for i := 0; i < n; i++ {
-		backend := CreateBackend(0)
+		backend := CreateHTTPBackend(0)
 		err := backend.Bootstrap()
 		if err != nil {
 			return nil, err
 		}
 
-		fieldName := knownBackends[i]
+		fieldName := knownHTTPBackends[i]
 		result[fieldName] = backend
 		cfg["clients."+fieldName+".ip"] = "127.0.0.1"
 		cfg["clients."+fieldName+".port"] = int64(backend.RealPort)
@@ -67,7 +65,7 @@ func BuildBackends(
 }
 
 // Bootstrap creates a backend for testing
-func (backend *TestBackend) Bootstrap() error {
+func (backend *TestHTTPBackend) Bootstrap() error {
 	_, err := backend.Server.JustListen()
 	if err != nil {
 		return err
@@ -82,26 +80,26 @@ func (backend *TestBackend) Bootstrap() error {
 }
 
 // HandleFunc registers funcs
-func (backend *TestBackend) HandleFunc(
+func (backend *TestHTTPBackend) HandleFunc(
 	method string, path string, handler http.HandlerFunc,
 ) {
 	backend.router.HandlerFunc(method, path, handler)
 }
 
 // Close ...
-func (backend *TestBackend) Close() {
+func (backend *TestHTTPBackend) Close() {
 	backend.Server.Close()
 	backend.WaitGroup.Wait()
 }
 
 // Wait ...
-func (backend *TestBackend) Wait() {
+func (backend *TestHTTPBackend) Wait() {
 	backend.WaitGroup.Wait()
 }
 
-// CreateBackend creates a backend for testing
-func CreateBackend(port int32) *TestBackend {
-	backend := &TestBackend{
+// CreateHTTPBackend creates a HTTP backend for testing
+func CreateHTTPBackend(port int32) *TestHTTPBackend {
+	backend := &TestHTTPBackend{
 		IP:        "127.0.0.1",
 		Port:      port,
 		WaitGroup: &sync.WaitGroup{},
