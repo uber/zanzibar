@@ -23,6 +23,7 @@ import (
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $headers := .Headers }}
 
 
 {{range $.TestStubs}}
@@ -57,8 +58,18 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 
 	{{end -}}
 
+	headers := map[string]string{}
+	{{ if $headers -}}
+	{{range $idx, $headerName := $headers -}}
+	headers["{{$headerName}}"] = "placeholder"
+	{{end}}
+	{{- end}}
+
 	res, err := gateway.MakeRequest(
-		"{{$.Method.HTTPMethod}}", "{{$.Method.HTTPPath}}", bytes.NewReader([]byte(`{{.EndpointRequestString}}`)),
+		"{{$.Method.HTTPMethod}}",
+		"{{$.Method.HTTPPath}}",
+		headers,
+		bytes.NewReader([]byte(`{{.EndpointRequestString}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

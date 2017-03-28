@@ -81,7 +81,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	}
 
 	for _, testReq := range testRequests {
-		resp, err := gateway.MakeRequest("GET", testReq.url, nil)
+		resp, err := gateway.MakeRequest("GET", testReq.url, nil, nil)
 		if !assert.NoError(t, err) {
 			return
 		}
@@ -101,7 +101,7 @@ func TestRouterNotFound(t *testing.T) {
 		return
 	}
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -123,7 +123,7 @@ func TestRouterInvalidMethod(t *testing.T) {
 		return
 	}
 
-	resp, err := gateway.MakeRequest("POST", "/health", nil)
+	resp, err := gateway.MakeRequest("POST", "/health", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}

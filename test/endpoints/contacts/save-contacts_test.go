@@ -58,7 +58,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			res, err := gateway.MakeRequest(
-				"POST", "/contacts/foo/contacts",
+				"POST", "/contacts/foo/contacts", nil,
 				bytes.NewReader(benchBytes),
 			)
 			if err != nil {
@@ -119,7 +119,7 @@ func TestSaveContactsCall(t *testing.T) {
 	rawBody, _ := saveContacts.MarshalJSON()
 
 	res, err := gateway.MakeRequest(
-		"POST", "/contacts/foo/contacts", bytes.NewReader(rawBody),
+		"POST", "/contacts/foo/contacts", nil, bytes.NewReader(rawBody),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

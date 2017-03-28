@@ -34,7 +34,7 @@ func NewClient(config *zanzibar.StaticConfig) *GoogleNowClient {
 }
 
 // AddCredentials calls "/add-credentials" endpoint.
-func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsHTTPRequest, h http.Header) (*http.Response, error) {
+func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsHTTPRequest) (*http.Response, error) {
 	// Generate full URL.
 	// TODO: (jakev) insert params if needed here.
 	fullURL := c.BaseURL + "/add-credentials"
@@ -48,24 +48,18 @@ func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsH
 	if err != nil {
 		return nil, err
 	}
-	if h != nil {
-		req.Header = h
-	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req.WithContext(ctx))
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
-func (c *GoogleNowClient) CheckCredentials(ctx context.Context, h http.Header) (*http.Response, error) {
+func (c *GoogleNowClient) CheckCredentials(ctx context.Context) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.BaseURL + "/check-credentials"
 
 	req, err := http.NewRequest("POST", fullURL, nil)
 	if err != nil {
 		return nil, err
-	}
-	if h != nil {
-		req.Header = h
 	}
 	req.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(req.WithContext(ctx))

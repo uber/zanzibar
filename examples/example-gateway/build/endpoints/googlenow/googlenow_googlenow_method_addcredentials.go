@@ -5,7 +5,6 @@ package googlenow
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -22,10 +21,8 @@ func HandleAddCredentialsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
-	for _, header := range []string{"x-uuid", "x-token"} {
-		h.Set(header, req.Header.Get(header))
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+		return
 	}
 
 	// Handle request body.
@@ -34,7 +31,7 @@ func HandleAddCredentialsRequest(
 		return
 	}
 	clientRequest := convertToAddCredentialsClientRequest(&body)
-	clientResp, err := clients.GoogleNow.AddCredentials(ctx, clientRequest, h)
+	clientResp, err := clients.GoogleNow.AddCredentials(ctx, clientRequest)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

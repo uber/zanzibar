@@ -55,7 +55,7 @@ func TestInvalidStatusCode(t *testing.T) {
 		),
 	)
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -109,7 +109,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 		),
 	)
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -163,7 +163,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 		),
 	)
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -246,7 +246,7 @@ func TestResponsePeekBody(t *testing.T) {
 		),
 	)
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -295,7 +295,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 		),
 	)
 
-	resp, err := gateway.MakeRequest("GET", "/foo", nil)
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
 	}

@@ -6,7 +6,6 @@ package bar
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -26,8 +25,6 @@ func HandleNormalRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
 
 	// Handle request body.
 	var body NormalHTTPRequest
@@ -35,7 +32,7 @@ func HandleNormalRequest(
 		return
 	}
 	clientRequest := convertToNormalClientRequest(&body)
-	clientResp, err := clients.Bar.Normal(ctx, clientRequest, h)
+	clientResp, err := clients.Bar.Normal(ctx, clientRequest)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

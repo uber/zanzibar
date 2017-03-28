@@ -34,7 +34,7 @@ func HandleSaveContactsRequest(
 	body.AppVersion = req.Header.Get("x-uber-client-version")
 
 	clientBody := convertToClient(&body)
-	cres, err := clients.Contacts.SaveContacts(ctx, clientBody, nil)
+	cres, err := clients.Contacts.SaveContacts(ctx, clientBody)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),

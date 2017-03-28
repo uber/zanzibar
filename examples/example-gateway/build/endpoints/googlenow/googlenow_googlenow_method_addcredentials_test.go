@@ -40,8 +40,15 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 		"POST", "/add-credentials", fakeAddCredentials,
 	)
 
+	headers := map[string]string{}
+	headers["x-uuid"] = "placeholder"
+	headers["x-token"] = "placeholder"
+
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader([]byte(`{"authcode":"test"}`)),
+		"POST",
+		"/googlenow/add-credentials",
+		headers,
+		bytes.NewReader([]byte(`{"authcode":"test"}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
