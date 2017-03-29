@@ -10,6 +10,7 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	"{{$pkg}}"
 	{{end}}
+
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -38,6 +39,7 @@ func makeEndpoint(
 	g *zanzibar.Gateway,
 	endpointName string,
 	handlerName string,
+	middlewares []zanzibar.MiddlewareHandle,
 	handlerFn handlerFn,
 ) *zanzibar.Endpoint {
 	myEndpoint := &myEndpoint{
@@ -49,7 +51,10 @@ func makeEndpoint(
 		g,
 		endpointName,
 		handlerName,
-		myEndpoint.handle,
+		zanzibar.NewStack(
+			middlewares,
+			myEndpoint.handle,
+		).Handle,
 	)
 }
 
@@ -62,6 +67,23 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			g,
 			"{{$endpoint.EndpointID}}",
 			"{{$endpoint.HandlerID}}",
+			{{ if len $endpoint.Middlewares | ne 0 -}}
+			
+			[]zanzibar.MiddlewareHandle{
+			{{range $idx, $middleware := $endpoint.Middlewares -}}
+				{{$middleware.Name}}.NewMiddleWare(
+					g,
+						{{$middleware.Name}}.Options{
+						{{range $key, $value := $middleware.Options -}}
+								{{$key}} : {{$value}},
+						{{end -}}
+						},
+				),
+			{{end -}}
+			},
+			{{- else -}}
+			nil,
+			{{- end}}
 			{{$endpoint.HandlerType}},
 		),
 	)

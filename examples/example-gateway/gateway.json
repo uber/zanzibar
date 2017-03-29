@@ -6,5 +6,6 @@
 	"targetGenDir": "./build",
 
 	"clientConfig": "./clients",
-	"endpointConfig": "./endpoints"
+	"endpointConfig": "./endpoints",
+	"middlewareConfig": "./middlewares/middleware-config.json"
 }

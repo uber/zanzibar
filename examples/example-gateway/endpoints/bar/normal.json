@@ -9,5 +9,13 @@
 	"clientName": "Bar",
 	"clientMethod": "normal",
 	"testFixtures": [],
-	"middlewares": [ "exampleMiddleware" ]
+	"middlewares": [
+		{"name" : "example",
+		 "options" : {
+			 "Foo": "\"test\""
+		 }
+		},
+		{"name" : "logger"}
+
+		]
 }

@@ -69,6 +69,8 @@ func main() {
 		),
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
+		config.MustGetString("middlewareConfig"),
+
 		config.MustGetString("gatewayName"),
 	)
 	checkError(
@@ -86,4 +88,5 @@ func main() {
 	fmt.Printf("Generating main.go for gateway \n")
 	err = gatewaySpec.GenerateMain()
 	checkError(err, "Failed to generate main.go.")
+
 }
