@@ -583,14 +583,17 @@ func parseMiddlewareConfig(
 
 	// TODO(sindelar): Use a struct
 	var configJSON map[string]interface{}
+
 	err = json.Unmarshal(bytes, &configJSON)
+
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot parse json for middleware config json: %s",
 			config,
 		)
 	}
-	midList, ok := configJSON["middlewares"].([]map[string]string)
+
+	midList, ok := configJSON["middlewares"].([]interface{})
 	if !ok {
 		return nil, errors.Wrapf(
 			err, "Cannot parse json for middleware config json: %s",
@@ -598,12 +601,29 @@ func parseMiddlewareConfig(
 		)
 	}
 
-	specs := make([]*MiddlewareSpec, len(configJSON))
+	specs := make([]*MiddlewareSpec, len(midList))
 	for idx, mid := range midList {
+		mid, ok := mid.(map[string]interface{})
+		if !ok {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for middleware config json: %s",
+				config,
+			)
+		}
+		name, okOne := mid["name"].(string)
+		schema, okTwo := mid["schema"].(string)
+		importPath, okThree := mid["importPath"].(string)
+		if !okOne || !okTwo || !okThree {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for middleware config json: %s",
+				config,
+			)
+		}
+
 		specs[idx], err = NewMiddlewareSpec(
-			mid["name"],
-			mid["importPath"],
-			mid["schema"],
+			name,
+			importPath,
+			schema,
 			configDirName,
 		)
 		if err != nil {
