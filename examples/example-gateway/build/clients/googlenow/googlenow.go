@@ -5,7 +5,6 @@ package googlenowClient
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	"github.com/uber/zanzibar/runtime"
@@ -33,7 +32,12 @@ func NewClient(
 }
 
 // AddCredentials calls "/add-credentials" endpoint.
-func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsHTTPRequest) (*http.Response, error) {
+func (c *GoogleNowClient) AddCredentials(
+	ctx context.Context,
+	headers map[string]string,
+	r *AddCredentialsHTTPRequest,
+) (map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "addCredentials", c.HTTPClient,
 	)
@@ -41,15 +45,36 @@ func (c *GoogleNowClient) AddCredentials(ctx context.Context, r *AddCredentialsH
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/add-credentials"
 
-	err := req.WriteJSON("POST", fullURL, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
 		return nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(202)
+
+	_, err = res.ReadAll()
+	if err != nil {
+		return respHeaders, err
+	}
+	return respHeaders, nil
+
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
-func (c *GoogleNowClient) CheckCredentials(ctx context.Context) (*http.Response, error) {
+func (c *GoogleNowClient) CheckCredentials(
+	ctx context.Context,
+	headers map[string]string,
+) (map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "checkCredentials", c.HTTPClient,
 	)
@@ -57,9 +82,26 @@ func (c *GoogleNowClient) CheckCredentials(ctx context.Context) (*http.Response,
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/check-credentials"
 
-	err := req.WriteJSON("POST", fullURL, nil)
+	err := req.WriteJSON("POST", fullURL, headers, nil)
 	if err != nil {
 		return nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(202)
+
+	_, err = res.ReadAll()
+	if err != nil {
+		return respHeaders, err
+	}
+	return respHeaders, nil
+
 }
