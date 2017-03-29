@@ -31,13 +31,14 @@ import (
 	"github.com/uber-go/zap"
 )
 
-// ClientHTTPRequest is the struct for making outbound
-// requests using a client.
+// ClientHTTPRequest is the struct for making client
+// requests using an outbound http client.
 type ClientHTTPRequest struct {
 	started     bool
 	startTime   time.Time
 	client      *HTTPClient
 	httpRequest *http.Request
+	res         *ClientHTTPResponse
 
 	ClientName string
 	MethodName string
@@ -53,6 +54,8 @@ func NewClientHTTPRequest(
 		Logger: client.Logger,
 		client: client,
 	}
+
+	req.res = NewClientHTTPResponse(req)
 
 	req.start(clientName, methodName)
 	return req
@@ -121,6 +124,15 @@ func (req *ClientHTTPRequest) WriteJSON(
 // Do will send the request out.
 func (req *ClientHTTPRequest) Do(
 	ctx context.Context,
-) (*http.Response, error) {
-	return req.client.Client.Do(req.httpRequest.WithContext(ctx))
+) (*ClientHTTPResponse, error) {
+	res, err := req.client.Client.Do(
+		req.httpRequest.WithContext(ctx),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.res.setRawHTTPResponse(res)
+	return req.res, nil
 }
