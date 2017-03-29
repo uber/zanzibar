@@ -1,8 +1,10 @@
 {
-	"clientType": "http",
-	"clientId": "contacts",
-	"thriftFile": "github.com/uber/zanzibar/clients/contacts/contacts.thrift",
-	"thriftFileSha": "{{placeholder}}",
-	"clientName": "Contacts",
-	"serviceName": "Contacts"
+	"name": "contacts",
+	"type": "http",
+	"config": {
+		"thriftFile": "github.com/uber/zanzibar/clients/contacts/contacts.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"clientName": "Contacts",
+		"serviceName": "Contacts"
+	}
 }

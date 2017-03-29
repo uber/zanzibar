@@ -87,6 +87,23 @@ type ClientSpec struct {
 	ThriftServiceName string
 }
 
+// moduleClassConfig represents the generic JSON config for
+// all modules. This will be provided by the module pacakge.
+type moduleClassConfig struct {
+	Name   string      `json:"name"`
+	Type   string      `json:"type"`
+	Config interface{} `json:"config"`
+}
+
+// httpClientClassConfig represents the specific config for
+// an http client. This is a downcast of the moduleClassConfig.
+// Config here is a map[string]string but could be any type.
+type httpClientClassConfig struct {
+	Name   string            `json:"name"`
+	Type   string            `json:"type"`
+	Config map[string]string `json:"config"`
+}
+
 // NewClientSpec creates a client spec from a json file.
 func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	_, err := os.Stat(jsonFile)
@@ -101,32 +118,35 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	clientConfigGeneric := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &clientConfigGeneric)
+	classConfig := moduleClassConfig{}
+	err = json.Unmarshal(bytes, &classConfig)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not parse json file %s: ", jsonFile,
 		)
 	}
 
-	clientType := clientConfigGeneric["clientType"].(string)
-	if clientType == "http" {
-		// A better solution for client configs is needed here.
-		// Assuming a string map is too restrictive
-		clientConfigObj := map[string]string{}
-		err := json.Unmarshal(bytes, &clientConfigObj)
+	className := classConfig.Name
+	classType := classConfig.Type
 
-		if err != nil {
+	if classType == "http" {
+		clientConfig := httpClientClassConfig{}
+
+		if err := json.Unmarshal(bytes, &clientConfig); err != nil {
 			return nil, errors.Wrapf(
-				err, "Could not parse json file %s: ", jsonFile,
+				err, "Could not parse class config json file %s: ", jsonFile,
 			)
 		}
 
-		return NewHTTPClientSpec(jsonFile, clientConfigObj, h)
-	} else if clientType == "tchannel" {
-		return NewTChannelClientSpec(jsonFile, clientConfigGeneric, h)
-	} else if clientType == "custom" {
-		return NewCustomClientSpec(jsonFile, clientConfigGeneric, h)
+		// Restore the properties in the old config structure
+		clientConfig.Config["clientId"] = className
+		clientConfig.Config["clientType"] = classType
+
+		return NewHTTPClientSpec(jsonFile, clientConfig.Config, h)
+	} else if classType == "tchannel" {
+		return NewTChannelClientSpec(jsonFile, &classConfig, h)
+	} else if classType == "custom" {
+		return NewCustomClientSpec(jsonFile, &classConfig, h)
 	}
 
 	return nil, errors.Errorf(
@@ -135,14 +155,14 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+func NewTChannelClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ClientType: "tchannel",
 	}, nil
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+func NewCustomClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ClientType: "custom",
 	}, nil
