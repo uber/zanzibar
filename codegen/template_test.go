@@ -67,8 +67,8 @@ func TestGenerateBar(t *testing.T) {
 		"./clients",
 		"./endpoints",
 		"./middlewares/middleware-config.json",
-		"example-gateway",
 		"./copyright_header.txt",
+		"example-gateway",
 	)
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
