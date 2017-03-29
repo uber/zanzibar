@@ -582,7 +582,7 @@ func parseMiddlewareConfig(
 	}
 
 	// TODO(sindelar): Use a struct
-	var configJSON []map[string]string
+	var configJSON map[string]interface{}
 	err = json.Unmarshal(bytes, &configJSON)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -590,8 +590,16 @@ func parseMiddlewareConfig(
 			config,
 		)
 	}
+	midList, ok := configJSON["middlewares"].([]map[string]string)
+	if !ok {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json for middleware config json: %s",
+			config,
+		)
+	}
+
 	specs := make([]*MiddlewareSpec, len(configJSON))
-	for idx, mid := range configJSON {
+	for idx, mid := range midList {
 		specs[idx], err = NewMiddlewareSpec(
 			mid["name"],
 			mid["importPath"],
