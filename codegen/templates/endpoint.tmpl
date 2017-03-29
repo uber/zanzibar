@@ -44,18 +44,16 @@ func Handle{{title .Name}}Request(
 	}
 	{{- end}}
 
-	// Handle request body.
-	{{if or (eq .RequestType "") (eq $clientMethodRequestType "") -}}
+	{{if ne .RequestType ""}}
+	var body {{title .RequestType}}
+	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+		return
+	}
+	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
+	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest)
+	{{else}}
 	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx)
-
-	{{- else -}}
-		var body {{title .RequestType}}
-		if ok := req.ReadAndUnmarshalBody(&body); !ok {
-			return
-		}
-		clientRequest := convertTo{{title .Name}}ClientRequest(&body)
-		clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest)
-	{{- end }}
+	{{ end }} {{- /* <if .ReqeustType ne ""> */ -}}
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -63,12 +61,6 @@ func Handle{{title .Name}}Request(
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
-	
-    defer func() {
-        if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-            err = cerr
-        }
-    }()
 
 	// Handle client respnse.
 	expectedStatusCode := []int{ {{.DownstreamMethod.OKStatusCode.Code}} }
@@ -77,19 +69,25 @@ func Handle{{title .Name}}Request(
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
-	{{if or (eq $clientMethodResponseType "") (eq .ResponseType "") -}}
-	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
-	{{- else -}}
-	b, err := ioutil.ReadAll(clientResp.Body)
+
+	{{if ne $clientMethodResponseType ""}}
+	var clientRespBody {{$clientMethodResponseType}}
+	err = clientResp.ReadAndUnmarshalBody(&clientRespBody)
 	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
+		res.SendError(500, errors.Wrap(err, "could not parse client body"))
 		return
 	}
-	var clientRespBody {{$clientMethodResponseType}}
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-	 	res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-	 	return
+	{{else}}
+	_, err = clientResp.ReadAll()
+	if err != nil {
+		res.SendError(500, errors.Wrap(err, "could not parse client body"))
+		return
 	}
+	{{ end }} {{- /* if ne $clientMethodResponseType "" */ -}}
+
+	{{if eq .ResponseType "" -}}
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
+	{{- else -}}
 	response := convert{{title .Name}}ClientResponse(&clientRespBody)
 	res.WriteJSON({{.OKStatusCode.Code}}, response)
 	{{- end -}}

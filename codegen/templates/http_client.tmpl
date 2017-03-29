@@ -47,9 +47,14 @@ func NewClient(
 
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
 {{- if ne .RequestType ""}}
-func (c *{{$clientName}}) {{title .Name}}(ctx context.Context, r *{{.RequestType}}) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(
+	ctx context.Context,
+	r *{{.RequestType}},
+) (*zanzibar.ClientHTTPResponse, error) {
 {{else}}
-func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, error) {
+func (c *{{$clientName}}) {{title .Name}}(
+	ctx context.Context,
+) (*zanzibar.ClientHTTPResponse, error) {
 {{end}} {{- /* <if .ReqeustType ne ""> */ -}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
@@ -71,7 +76,12 @@ func (c *{{$clientName}}) {{title .Name}}(ctx context.Context) (*http.Response, 
 	if err != nil {
 		return nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
