@@ -43,6 +43,8 @@ type PackageHelper struct {
 	targetGenDir string
 	// The root directory for the gateway test config files.
 	testConfigsRootDir string
+	// String containing copyright header to add to generated code.
+	copyrightHeader string
 }
 
 // NewPackageHelper creates a package helper.
@@ -51,6 +53,7 @@ func NewPackageHelper(
 	genCodePackage string,
 	targetGenDir string,
 	gatewayThriftRootDir string,
+	copyrightHeader string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
 	if err != nil {
@@ -76,6 +79,7 @@ func NewPackageHelper(
 		gatewayThriftRootDir:   gatewayThriftRootDir,
 		gatewayThriftNamespace: gatewayThriftNamespace,
 		targetGenDir:           genDir,
+		copyrightHeader:        copyrightHeader,
 	}
 	return p, nil
 }

@@ -56,7 +56,7 @@ func main() {
 
 	configDirName, err := filepath.Abs(configDirName)
 	checkError(
-		err, fmt.Sprintf("cant get abs path of config dir %s", configDirName),
+		err, fmt.Sprintf("can not get abs path of config dir %s", configDirName),
 	)
 
 	gatewaySpec, err := codegen.NewGatewaySpec(

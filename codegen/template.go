@@ -23,6 +23,7 @@ package codegen
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -191,12 +192,20 @@ func (t *Template) GenerateClientFile(
 	}
 
 	m.PackageName = m.PackageName + "Client"
-	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, m)
+	err := t.execTemplateAndFmt(
+		"http_client.tmpl",
+		c.GoFileName,
+		m,
+		h.copyrightHeader)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run http_client template")
 	}
 
-	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, m)
+	err = t.execTemplateAndFmt(
+		"structs.tmpl",
+		c.GoStructsFileName,
+		m,
+		h.copyrightHeader)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run structs template")
 	}
@@ -237,7 +246,7 @@ func (t *Template) GenerateEndpointFile(
 	}
 
 	err := t.execTemplateAndFmt(
-		"structs.tmpl", e.GoStructsFileName, m,
+		"structs.tmpl", e.GoStructsFileName, m, h.copyrightHeader,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run structs template")
@@ -271,7 +280,7 @@ func (t *Template) GenerateEndpointFile(
 		Method:             method,
 	}
 
-	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
+	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta, h.copyrightHeader)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run endpoint template")
 	}
@@ -365,7 +374,11 @@ func (t *Template) GenerateEndpointTestFile(
 		TestStubs:   testStubs,
 	}
 
-	err = t.execTemplateAndFmt("endpoint_test.tmpl", dest, meta)
+	err = t.execTemplateAndFmt(
+		"endpoint_test.tmpl",
+		dest,
+		meta,
+		h.copyrightHeader)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run endpoint_test template")
 	}
@@ -449,7 +462,11 @@ func (t *Template) GenerateClientsInitFile(
 	}
 
 	targetFile := h.TargetClientsInitPath()
-	err := t.execTemplateAndFmt("init_clients.tmpl", targetFile, meta)
+	err := t.execTemplateAndFmt(
+		"init_clients.tmpl",
+		targetFile,
+		meta,
+		h.copyrightHeader)
 	if err != nil {
 		return "", err
 	}
@@ -561,7 +578,11 @@ func (t *Template) GenerateEndpointRegisterFile(
 	}
 
 	targetFile := h.TargetEndpointsRegisterPath()
-	err := t.execTemplateAndFmt("endpoint_register.tmpl", targetFile, meta)
+	err := t.execTemplateAndFmt(
+		"endpoint_register.tmpl",
+		targetFile,
+		meta,
+		h.copyrightHeader)
 	if err != nil {
 		return "", err
 	}
@@ -620,13 +641,17 @@ func (t *Template) GenerateMainFile(
 	}
 
 	mainFile := h.TargetMainPath()
-	err = t.execTemplateAndFmt("main.tmpl", mainFile, meta)
+	err = t.execTemplateAndFmt("main.tmpl", mainFile, meta, h.copyrightHeader)
 	if err != nil {
 		return nil, err
 	}
 
 	mainTestFile := h.TargetMainTestPath()
-	err = t.execTemplateAndFmt("main_test.tmpl", mainTestFile, meta)
+	err = t.execTemplateAndFmt(
+		"main_test.tmpl",
+		mainTestFile,
+		meta,
+		h.copyrightHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -637,11 +662,26 @@ func (t *Template) GenerateMainFile(
 	}, nil
 }
 
-func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
+func (t *Template) execTemplateAndFmt(
+	templName string,
+	filePath string,
+	data interface{},
+	copyrightHeader string,
+) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open file: %s", err)
 	}
+
+	_, err = io.WriteString(file, copyrightHeader)
+	if err != nil {
+		return errors.Wrapf(err, "failed to write to file: %s", err)
+	}
+	_, err = io.WriteString(file, "\n")
+	if err != nil {
+		return errors.Wrapf(err, "failed to write to file: %s", err)
+	}
+
 	if err := t.template.ExecuteTemplate(file, templName, data); err != nil {
 		return errors.Wrapf(err, "failed to execute template files for file %s", file)
 	}

@@ -688,11 +688,21 @@ func NewGatewaySpec(
 	copyrightHeader string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
+
+	copyright, err := ioutil.ReadFile(filepath.Join(
+		configDirName,
+		copyrightHeader,
+	))
+	if err != nil {
+		return nil, errors.Wrap(err, "Cannot read copyright config")
+	}
+
 	packageHelper, err := NewPackageHelper(
 		thriftRootDir,
 		genCodePackage,
 		targetGenDir,
 		gatewayThriftRootDir,
+		string(copyright),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot build package helper")
@@ -744,7 +754,6 @@ func NewGatewaySpec(
 		clientConfigDir:   clientConfig,
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
-		copyrightHeader:   copyrightHeader,
 	}
 
 	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
