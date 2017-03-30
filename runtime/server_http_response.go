@@ -43,7 +43,11 @@ type ServerHTTPResponse struct {
 	pendingBodyObj    interface{}
 	pendingStatusCode int
 
-	StatusCode int
+	Logger zap.Logger
+
+	StatusCode   int
+	EndpointName string
+	HandlerName  string
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
@@ -56,6 +60,11 @@ func NewServerHTTPResponse(
 		responseWriter: w,
 		StatusCode:     200,
 		metrics:        req.metrics,
+
+		Logger: req.Logger,
+
+		EndpointName: req.EndpointName,
+		HandlerName:  req.HandlerName,
 	}
 
 	return res
