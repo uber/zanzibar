@@ -64,6 +64,7 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {
+		/* coverage ignore next line */
 		res.req.Logger.Error("Could not close client resp body",
 			zap.String("error", err.Error()),
 		)
