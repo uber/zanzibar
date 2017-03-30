@@ -43,7 +43,7 @@ type TChanClient interface {
 type TChanServer interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
-	Handle(ctx context.Context, method string, wireValue *wire.Value) (success bool, respHeaders map[string]string, resp RWTStruct, err error)
+	Handle(ctx context.Context, method string, reqHeaders map[string]string, wireValue *wire.Value) (success bool, respHeaders map[string]string, resp RWTStruct, err error)
 
 	// Service returns the service name.
 	Service() string
