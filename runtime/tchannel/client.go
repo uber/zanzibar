@@ -36,7 +36,7 @@ type Client struct {
 	serviceName string
 }
 
-// NewClient returns a Client that makes calls over the given tchannel to the given Hyperbahn service.
+// NewClient returns a Client that makes calls over the given tchannel to the given thrift service.
 func NewClient(ch *tchannel.Channel, serviceName string) TChanClient {
 	client := &Client{
 		ch:          ch,
