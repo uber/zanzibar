@@ -47,7 +47,7 @@ type MethodSpec struct {
 	Headers             []string
 	RequestType         string
 	ResponseType        string
-	OKStatusCode        []StatusCode
+	OKStatusCode        StatusCode
 	ExceptionStatusCode []StatusCode
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
@@ -155,15 +155,18 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	if statusCode == "" {
 		return errors.Errorf("no http OK status code set by annotation '%s' ", antHTTPStatus)
 	}
-	scode := strings.Split(statusCode, ",")
-	ms.OKStatusCode = make([]StatusCode, len(scode))
-	var err error
-	for i, c := range scode {
-		ms.OKStatusCode[i].Code, err = strconv.Atoi(c)
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse the annotation %s for ok response status")
-		}
+
+	code, err := strconv.Atoi(statusCode)
+	if err != nil {
+		return errors.Wrapf(err,
+			"Could not parse status code annotation (%s) for ok response",
+			statusCode,
+		)
 	}
+	ms.OKStatusCode = StatusCode{
+		Code: code,
+	}
+
 	return nil
 }
 
