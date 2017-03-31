@@ -43,6 +43,5 @@ func HandleSimpleRequest(
 
 	// TODO: (lu) convert rpc response to http response status code
 	statusCode := 200
-	// TODO: (lu) empty response?
-	res.WriteJSON(statusCode, nil)
+	res.WriteJSONBytes(statusCode, nil)
 }

@@ -45,5 +45,5 @@ func HandleSimpleFutureRequest(
 
 	// TODO: (lu) convert rpc response to http response status code
 	statusCode := 200
-	res.WriteJSON(statusCode, nil)
+	res.WriteJSONBytes(statusCode, nil)
 }
