@@ -263,3 +263,16 @@ func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders
 
 	return err == nil, respHeaders, &res, nil
 }
+
+type Handler struct{}
+
+func (h *Handler) Call(ctx context.Context, reqHeaders map[string]string, r *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
+	return nil, nil, errors.New("not implemented")
+}
+
+func (h *Handler) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+	return nil, errors.New("not implemented")
+}
+func (h *Handler) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+	return nil, errors.New("not implemented")
+}
