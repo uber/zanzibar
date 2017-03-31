@@ -22,6 +22,7 @@
 
 	"clients.SimpleService.port": 4002,
 	"clients.SimpleService.ip": "127.0.0.1",
+	"clients.SimpleService.timeout": 1000,
 
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
@@ -34,9 +35,9 @@ type BazClient struct {
 
 // NewClient returns a new http client for service Bar.
 func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazClient {
-	// TODO: (lu) get clientName from config
-	// clientName := config.MustGetString("clients.baz.clientName")
+	// TODO: (lu) get clientName and serviceName from client config
 	clientName := "BazClient"
+	serviceName := "SimpleService"
 
 	// TODO: (lu) client channel opts
 	ch, err := tchannel.NewChannel(clientName, nil)
@@ -45,19 +46,20 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 			zap.String("error", err.Error()))
 	}
 
+	// TODO: (lu) client connection type
 	ip := config.MustGetString("clients.SimpleService.ip")
 	port := config.MustGetInt("clients.SimpleService.port")
 	ch.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	// TODO: (lu) get serviceName from config
-	// serviceName := config.MustGetString("clients.baz.serviceName")
-	serviceName := "SimpleService"
 	client := zt.NewClient(ch, serviceName)
+
+	timeout := time.Duration(config.MustGetInt("clients.SimpleService.timeout")) * time.Millisecond
 
 	return &BazClient{
 		SimpleServiceClient{
 			thriftService: serviceName,
 			client:        client,
+			timeout:       timeout,
 		},
 	}
 }
@@ -66,11 +68,21 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 type SimpleServiceClient struct {
 	thriftService string
 	client        zt.TChanClient
+	// timeout is the default timeout if upstream does not have one
+	timeout time.Duration
 }
 
 // Call ...
 func (c *SimpleServiceClient) Call(ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
 	var result baz.SimpleService_Call_Result
+
+	_, ok := ctx.Deadline()
+	if !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.timeout)
+		defer cancel()
+	}
+
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, args, &result)
 	if err == nil && !success {
 		err = errors.New("received no result or unknown exception for Call")
@@ -87,6 +99,14 @@ func (c *SimpleServiceClient) Call(ctx context.Context, reqHeaders map[string]st
 // Simple ...
 func (c *SimpleServiceClient) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_Simple_Result
+
+	_, ok := ctx.Deadline()
+	if !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.timeout)
+		defer cancel()
+	}
+
 	args := baz.SimpleService_Simple_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Simple", reqHeaders, &args, &result)
 	if err == nil && !success {
@@ -104,6 +124,14 @@ func (c *SimpleServiceClient) Simple(ctx context.Context, reqHeaders map[string]
 // SimpleFuture ...
 func (c *SimpleServiceClient) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_SimpleFuture_Result
+
+	_, ok := ctx.Deadline()
+	if !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.timeout)
+		defer cancel()
+	}
+
 	args := baz.SimpleService_SimpleFuture_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "SimpleFuture", reqHeaders, &args, &result)
 	if err == nil && !success {
