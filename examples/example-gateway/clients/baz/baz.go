@@ -264,15 +264,20 @@ func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders
 	return err == nil, respHeaders, &res, nil
 }
 
+// Handler is intended as the base struct for testing
 type Handler struct{}
 
+// Call is to be implemented by a struct that embeds Handler
 func (h *Handler) Call(ctx context.Context, reqHeaders map[string]string, r *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
 	return nil, nil, errors.New("not implemented")
 }
 
+// Simple is to be implemented by a struct that embeds Handler
 func (h *Handler) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	return nil, errors.New("not implemented")
 }
+
+// SimpleFuture is to be implemented by a struct that embeds Handler
 func (h *Handler) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	return nil, errors.New("not implemented")
 }
