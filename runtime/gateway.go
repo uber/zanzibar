@@ -70,6 +70,7 @@ type Gateway struct {
 	metricsBackend    tally.CachedStatsReporter
 	logWriter         zap.WriteSyncer
 	server            *HTTPServer
+	localServer       *HTTPServer
 	tchannelServer    *TChannelServer
 	// clients?
 	//	- panic ???
@@ -128,14 +129,23 @@ type RegisterFn func(gateway *Gateway, router *Router)
 func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 	gateway.register(register)
 
-	_, err := gateway.server.JustListen()
+	_, err := gateway.localServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port",
 			zap.String("error", err.Error()),
 		)
 		return errors.Wrap(err, "error listening on port")
 	}
+	if gateway.localServer.RealIP != gateway.IP {
 
+		_, err := gateway.server.JustListen()
+		if err != nil {
+			gateway.Logger.Error("Error listening on port",
+				zap.String("error", err.Error()),
+			)
+			return errors.Wrap(err, "error listening on port")
+		}
+	}
 	gateway.RealPort = gateway.server.RealPort
 	gateway.RealAddr = gateway.server.RealAddr
 
@@ -322,6 +332,13 @@ func (gateway *Gateway) setupHTTPServer() error {
 		Logger: gateway.Logger,
 	}
 
+	gateway.localServer = &HTTPServer{
+		Server: &http.Server{
+			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.Port), 10),
+			Handler: gateway.Router,
+		},
+		Logger: gateway.Logger,
+	}
 	return nil
 }
 
