@@ -126,7 +126,7 @@ func TestAddCredentials(t *testing.T) {
 
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
+			w.WriteHeader(202)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
@@ -142,7 +142,7 @@ func TestAddCredentials(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, "202 Accepted", res.Status)
 	assert.Equal(t, 1, counter)
 }
 
@@ -283,6 +283,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	)
 }
 
+// TODO: what this test even do ?
 func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	var counter int = 0
 
@@ -322,7 +323,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, "202 Accepted", res.Status)
 	assert.Equal(t, 0, counter)
 }
 
@@ -385,6 +386,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	assert.Contains(t, errorMsg, "dial tcp")
 }
 
+// TODO: how do we want to test this edge case ?
 func TestAddCredentialsWrongStatusCode(t *testing.T) {
 	var counter int = 0
 
@@ -418,7 +420,7 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "201 Created", res.Status)
+	assert.Equal(t, "202 Accepted", res.Status)
 
 	bytes, err := ioutil.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got bytes read error") {
