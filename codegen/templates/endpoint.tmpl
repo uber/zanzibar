@@ -67,7 +67,7 @@ func Handle{{title .Name}}Request(
 	)
 	{{end}}
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
