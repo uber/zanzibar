@@ -90,8 +90,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 		return {{if eq .ResponseType ""}}err{{else}}nil, err{{end}}
 	}
 
-	// TODO: verify statusCode as per thrift annotation
-	// TODO: use IsOKResponse() + Warn
+	res.CheckOKResponse({{.OKStatusCode.Code}})
 
 	{{if eq .ResponseType ""}}
 	_, err = res.ReadAll()
