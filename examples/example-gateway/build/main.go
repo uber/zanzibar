@@ -55,6 +55,20 @@ func createGateway() (*zanzibar.Gateway, error) {
 	return gateway, nil
 }
 
+func createLocalGateway() (*zanzibar.Gateway, error) {
+	config := getConfig(map[string]interface{}{
+		"ip": "127.0.0.1",
+	})
+	gateway, err := zanzibar.CreateGateway(config, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	clients := clients.CreateClients(config, gateway)
+	gateway.Clients = clients
+	return gateway, nil
+}
+
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started ExampleGateway",
 		zap.String("realAddr", server.RealAddr),
@@ -71,6 +85,14 @@ func main() {
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
+	}
+
+	localServer, err := createLocalGateway()
+	if err != nil {
+		panic(err)
+	}
+	if localServer.RealAddr != server.RealAddr {
+		go localServer.Wait()
 	}
 
 	err = server.Bootstrap(endpoints.Register)
