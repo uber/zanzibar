@@ -44,7 +44,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 
 	{{range .ClientStubs}}
 	fake{{.ClientMethod | Title}} := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader({{(index $.Method.OKStatusCode 0).Code}})
+		w.WriteHeader({{$.Method.OKStatusCode.Code}})
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte( `{{.ClientResponseString}}`)); err != nil {
 			t.Fatal("can't write fake response")
@@ -75,7 +75,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "{{(index $.Method.OKStatusCode 0).Code}} OK", res.Status)
+	assert.Equal(t, "{{$.Method.OKStatusCode.Code}} OK", res.Status)
 	assert.Equal(t, 1, counter)
 }
 

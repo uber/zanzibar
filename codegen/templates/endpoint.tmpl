@@ -77,7 +77,7 @@ func Handle{{title .Name}}Request(
 		)
 	}
 	{{if or (eq $clientMethodResponseType "") (eq .ResponseType "") -}}
-	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
 	b, err := ioutil.ReadAll(clientResp.Body)
 	if err != nil {
@@ -90,7 +90,7 @@ func Handle{{title .Name}}Request(
 	 	return
 	}
 	response := convert{{title .Name}}ClientResponse(&clientRespBody)
-	res.WriteJSON(clientResp.StatusCode, response)
+	res.WriteJSON({{.OKStatusCode.Code}}, response)
 	{{- end -}}
 }
 
