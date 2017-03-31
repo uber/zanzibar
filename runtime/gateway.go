@@ -329,7 +329,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 func (gateway *Gateway) setupHTTPServer() error {
 	listenIP, err := tchannel.ListenIP()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error finding the best IP")
 	}
 	gateway.server = &HTTPServer{
 		Server: &http.Server{
