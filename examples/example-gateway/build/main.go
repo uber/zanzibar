@@ -9,7 +9,6 @@ import (
 	"runtime"
 
 	"github.com/uber-go/zap"
-	tchannel "github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
@@ -28,22 +27,17 @@ func getConfigDirName() string {
 	)
 }
 
-func getConfig(seedConfig map[string]interface{}) *zanzibar.StaticConfig {
+func getConfig() *zanzibar.StaticConfig {
 	return zanzibar.NewStaticConfigOrDie([]string{
 		filepath.Join(getDirName(), "zanzibar-defaults.json"),
 		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
-	}, seedConfig)
+	}, nil)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
-	listenIP, err := tchannel.ListenIP()
-	if err != nil {
-		return nil, err
-	}
-	config := getConfig(map[string]interface{}{
-		"ip": listenIP.String(),
-	})
+	config := getConfig()
+
 	gateway, err := zanzibar.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err

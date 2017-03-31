@@ -35,6 +35,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
+	tchannel "github.com/uber/tchannel-go"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -137,7 +138,6 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		return errors.Wrap(err, "error listening on port")
 	}
 	if gateway.localServer.RealIP != gateway.IP {
-
 		_, err := gateway.server.JustListen()
 		if err != nil {
 			gateway.Logger.Error("Error listening on port",
@@ -145,6 +145,9 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 			)
 			return errors.Wrap(err, "error listening on port")
 		}
+	} else {
+		// Do not start at the same IP
+		gateway.server = gateway.localServer
 	}
 	gateway.RealPort = gateway.server.RealPort
 	gateway.RealAddr = gateway.server.RealAddr
@@ -324,9 +327,13 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupHTTPServer() error {
+	listenIP, err := tchannel.ListenIP()
+	if err != nil {
+		return err
+	}
 	gateway.server = &HTTPServer{
 		Server: &http.Server{
-			Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
+			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.Port), 10),
 			Handler: gateway.Router,
 		},
 		Logger: gateway.Logger,
