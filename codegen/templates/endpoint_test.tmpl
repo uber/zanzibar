@@ -75,7 +75,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "{{$.Method.OKStatusCode.Code}} OK", res.Status)
+	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
 	assert.Equal(t, 1, counter)
 }
 
