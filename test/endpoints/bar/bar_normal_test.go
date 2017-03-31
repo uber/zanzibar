@@ -83,7 +83,7 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"{\"error\":\"could not parse client body: "+
+		"{\"error\":\"could not make client request:: "+
 			"Could not parse client(bar) json: "+
 			"parse error: "+
 			"invalid character 'b' after top-level value "+
@@ -115,7 +115,8 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 			_, _ = conn.Write([]byte(
 				"HTTP/1.1 500 Internal Server Error\n" +
 					"Content-Length: 12\n" +
-					"\n"))
+					"\n" +
+					"abc\n"))
 			_ = conn.Close()
 		}
 
@@ -135,10 +136,7 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t,
-		"{\"error\":\"could not parse client body: "+
-			"Could not read client(bar) response body: "+
-			"unexpected EOF\"}",
-		string(respBytes),
+	assert.Contains(t, string(respBytes),
+		"Could not read client(bar) response body",
 	)
 }
