@@ -149,8 +149,20 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	file := path.Base(thrift)
-	return file[:len(file)-7], nil
+	root := path.Clean(p.gatewayThriftRootDir)
+
+	idx := strings.Index(thrift, root)
+	if idx == -1 {
+		return "", errors.Errorf(
+			"file %s is not in thrift dir (%s)",
+			thrift, p.gatewayThriftRootDir,
+		)
+	}
+
+	thriftSegment := thrift[idx+len(root)+1 : len(thrift)-7]
+
+	thriftPackageName := strings.Replace(thriftSegment, "/", "_", 100)
+	return thriftPackageName, nil
 }
 
 func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
