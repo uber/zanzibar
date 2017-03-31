@@ -30,6 +30,7 @@ import (
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodRequestType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientMethodName := title ($clientMethod).Name -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
 func Handle{{title .Name}}Request(
@@ -50,10 +51,21 @@ func Handle{{title .Name}}Request(
 		return
 	}
 	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
-	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest)
+	{{end}}
+
+	{{if and (eq $clientMethodRequestType "") (eq $clientMethodResponseType "")}}
+	err := clients.{{$clientName}}.{{$clientMethodName}}(ctx)
+	{{else if eq $clientMethodRequestType ""}}
+	clientRespBody, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx)
+	{{else if eq $clientMethodResponseType ""}}
+	err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRequest,
+	)
 	{{else}}
-	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx)
-	{{ end }} {{- /* <if .ReqeustType ne ""> */ -}}
+	clientRespBody, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, clientRequest,
+	)
+	{{end}}
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -62,33 +74,12 @@ func Handle{{title .Name}}Request(
 		return
 	}
 
-	// Handle client respnse.
-	expectedStatusCode := []int{ {{.DownstreamMethod.OKStatusCode.Code}} }
-	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-
-	{{if ne $clientMethodResponseType ""}}
-	var clientRespBody {{$clientMethodResponseType}}
-	err = clientResp.ReadAndUnmarshalBody(&clientRespBody)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not parse client body"))
-		return
-	}
-	{{else}}
-	_, err = clientResp.ReadAll()
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not parse client body"))
-		return
-	}
-	{{ end }} {{- /* if ne $clientMethodResponseType "" */ -}}
+	// TODO: verify IsOKResponse() on client response status code
 
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
-	response := convert{{title .Name}}ClientResponse(&clientRespBody)
+	response := convert{{title .Name}}ClientResponse(clientRespBody)
 	res.WriteJSON({{.OKStatusCode.Code}}, response)
 	{{- end -}}
 }

@@ -46,16 +46,25 @@ func NewClient(
 {{range .Methods}}
 
 // {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-{{- if ne .RequestType ""}}
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+func (c *{{$clientName}}) {{title .Name}}(
+	ctx context.Context,
+) error {
+{{else if eq .RequestType "" }}
+func (c *{{$clientName}}) {{title .Name}}(
+	ctx context.Context,
+) (*{{.ResponseType}}, error) {
+{{else if eq .ResponseType "" }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	r *{{.RequestType}},
-) (*zanzibar.ClientHTTPResponse, error) {
+) error {
 {{else}}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
-) (*zanzibar.ClientHTTPResponse, error) {
-{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
+	r *{{.RequestType}},
+) (*{{.ResponseType}}, error) {
+{{end}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
@@ -72,16 +81,33 @@ func (c *{{$clientName}}) {{title .Name}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, r)
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, nil)
-	{{end}} {{- /* <if .ReqeustType ne ""> */ -}}
+	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return nil, err
+		return {{if eq .ResponseType ""}}err{{else}}nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
+	if err != nil {
+		return {{if eq .ResponseType ""}}err{{else}}nil, err{{end}}
+	}
+
+	// TODO: verify statusCode as per thrift annotation
+	// TODO: use IsOKResponse() + Warn
+
+	{{if eq .ResponseType ""}}
+	_, err = res.ReadAll()
+	if err != nil {
+		return err
+	}
+	return nil
+	{{else}}
+	var responseBody {{.ResponseType}}
+	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &responseBody, nil
+	{{end}}
 }
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
