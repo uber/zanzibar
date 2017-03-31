@@ -41,20 +41,9 @@ func HandleSaveContactsRequest(
 		return
 	}
 
-	// Handle client respnse.
-	if !res.IsOKResponse(cres.StatusCode, []int{200, 202}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", cres.StatusCode),
-		)
-	}
+	// TODO: verify IsOKResponse() on client response status code
 
-	var clientRespBody contactsClientStructs.SaveContactsResponse
-	if err := cres.ReadAndUnmarshalBody(&clientRespBody); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-
-	response := convertToResponse(&clientRespBody)
+	response := convertToResponse(cres)
 	res.WriteJSON(202, response)
 }
 
