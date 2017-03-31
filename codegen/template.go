@@ -179,6 +179,14 @@ func NewTemplate(templatePattern string) (*Template, error) {
 	}, nil
 }
 
+// ClientMeta ...
+type ClientMeta struct {
+	PackageName      string
+	ClientID         string
+	IncludedPackages []string
+	Services         []*ServiceSpec
+}
+
 // GenerateClientFile generates Go http code for services defined in thrift file.
 // It returns the path of generated client file and struct file or an error.
 func (t *Template) GenerateClientFile(
@@ -190,13 +198,18 @@ func (t *Template) GenerateClientFile(
 		return nil, nil
 	}
 
-	m.PackageName = m.PackageName + "Client"
-	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, m)
+	clientMeta := &ClientMeta{
+		PackageName:      m.PackageName,
+		Services:         m.Services,
+		IncludedPackages: m.IncludedPackages,
+		ClientID:         c.ClientID,
+	}
+	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, clientMeta)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run http_client template")
 	}
 
-	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, m)
+	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, clientMeta)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run structs template")
 	}
@@ -464,6 +477,7 @@ type EndpointRegisterInfo struct {
 	EndpointID  string
 	HandlerID   string
 	HandlerType string
+	Middlewares []MiddlewareSpec
 }
 
 // EndpointsRegisterMeta ...
@@ -477,9 +491,11 @@ type sortByEndpointName []*EndpointSpec
 func (c sortByEndpointName) Len() int {
 	return len(c)
 }
+
 func (c sortByEndpointName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
+
 func (c sortByEndpointName) Less(i, j int) bool {
 	return (c[i].EndpointID + c[i].HandleID) <
 		(c[j].EndpointID + c[j].HandleID)
@@ -547,6 +563,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 			Method:      method.HTTPMethod,
 			HTTPPath:    method.HTTPPath,
 			HandlerType: handlerType,
+			Middlewares: espec.Middlewares,
 		}
 		endpointsInfo = append(endpointsInfo, info)
 	}

@@ -87,6 +87,23 @@ type ClientSpec struct {
 	ThriftServiceName string
 }
 
+// moduleClassConfig represents the generic JSON config for
+// all modules. This will be provided by the module pacakge.
+type moduleClassConfig struct {
+	Name   string      `json:"name"`
+	Type   string      `json:"type"`
+	Config interface{} `json:"config"`
+}
+
+// httpClientClassConfig represents the specific config for
+// an http client. This is a downcast of the moduleClassConfig.
+// Config here is a map[string]string but could be any type.
+type httpClientClassConfig struct {
+	Name   string            `json:"name"`
+	Type   string            `json:"type"`
+	Config map[string]string `json:"config"`
+}
+
 // NewClientSpec creates a client spec from a json file.
 func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	_, err := os.Stat(jsonFile)
@@ -101,32 +118,35 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	clientConfigGeneric := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &clientConfigGeneric)
+	classConfig := moduleClassConfig{}
+	err = json.Unmarshal(bytes, &classConfig)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not parse json file %s: ", jsonFile,
 		)
 	}
 
-	clientType := clientConfigGeneric["clientType"].(string)
-	if clientType == "http" {
-		// A better solution for client configs is needed here.
-		// Assuming a string map is too restrictive
-		clientConfigObj := map[string]string{}
-		err := json.Unmarshal(bytes, &clientConfigObj)
+	className := classConfig.Name
+	classType := classConfig.Type
 
-		if err != nil {
+	if classType == "http" {
+		clientConfig := httpClientClassConfig{}
+
+		if err := json.Unmarshal(bytes, &clientConfig); err != nil {
 			return nil, errors.Wrapf(
-				err, "Could not parse json file %s: ", jsonFile,
+				err, "Could not parse class config json file %s: ", jsonFile,
 			)
 		}
 
-		return NewHTTPClientSpec(jsonFile, clientConfigObj, h)
-	} else if clientType == "tchannel" {
-		return NewTChannelClientSpec(jsonFile, clientConfigGeneric, h)
-	} else if clientType == "custom" {
-		return NewCustomClientSpec(jsonFile, clientConfigGeneric, h)
+		// Restore the properties in the old config structure
+		clientConfig.Config["clientId"] = className
+		clientConfig.Config["clientType"] = classType
+
+		return NewHTTPClientSpec(jsonFile, clientConfig.Config, h)
+	} else if classType == "tchannel" {
+		return NewTChannelClientSpec(jsonFile, &classConfig, h)
+	} else if classType == "custom" {
+		return NewCustomClientSpec(jsonFile, &classConfig, h)
 	}
 
 	return nil, errors.Errorf(
@@ -135,14 +155,14 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+func NewTChannelClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ClientType: "tchannel",
 	}, nil
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfigObj map[string]interface{}, h *PackageHelper) (*ClientSpec, error) {
+func NewCustomClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ClientType: "custom",
 	}, nil
@@ -169,6 +189,7 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 			err, "Could not build module spec for thrift %s: ", thriftFile,
 		)
 	}
+	mspec.PackageName = mspec.PackageName + "Client"
 
 	baseName := filepath.Base(filepath.Dir(jsonFile))
 
@@ -206,6 +227,55 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 	}, nil
 }
 
+// MiddlewareSpec holds information about each middleware at the endpoint
+// level. The same mid
+type MiddlewareSpec struct {
+	// The middleware package name.
+	Name string
+	// Go import path for the middleware.
+	Path string
+	// Middleware specific configuration options.
+	Options map[string]interface{}
+}
+
+// NewMiddlewareSpec creates a middleware spec from a go file.
+func NewMiddlewareSpec(
+	name string,
+	goFile string,
+	jsonFile string,
+	configDirName string,
+) (*MiddlewareSpec, error) {
+	schPath := filepath.Join(
+		configDirName,
+		jsonFile,
+	)
+
+	bytes, err := ioutil.ReadFile(schPath)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot read middleware json schema: %s",
+			schPath,
+		)
+	}
+
+	var midOptSchema map[string]interface{}
+	err = json.Unmarshal(bytes, &midOptSchema)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json schema for middleware options: %s",
+			schPath,
+		)
+	}
+
+	// TODO(sindelar): Add middleware validation here. Validate name
+	// and package name match. Validate the options json schema matches the options
+	// struct
+	return &MiddlewareSpec{
+		Name: name,
+		Path: goFile,
+	}, nil
+}
+
 // EndpointSpec holds information about each endpoint in the
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
@@ -235,8 +305,7 @@ type EndpointSpec struct {
 	// TODO figure out struct type
 	TestFixtures []interface{}
 	// Middlewares, meta data to add middlewares,
-	// TODO figure out struct type
-	Middlewares []interface{}
+	Middlewares []MiddlewareSpec
 
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
@@ -250,9 +319,11 @@ type EndpointSpec struct {
 	ClientMethod string
 }
 
-// NewEndpointSpec creats an endpoint spec from a json file.
+// NewEndpointSpec creates an endpoint spec from a json file.
 func NewEndpointSpec(
-	jsonFile string, h *PackageHelper,
+	jsonFile string,
+	h *PackageHelper,
+	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
 	_, err := os.Stat(jsonFile)
 	if err != nil {
@@ -361,6 +432,48 @@ func NewEndpointSpec(
 		)
 	}
 
+	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse middlewares field",
+		)
+	}
+	middlewares := make([]MiddlewareSpec, len(endpointMids))
+	for idx, middleware := range endpointMids {
+		middlewareObj, ok := middleware.(map[string]interface{})
+		if !ok {
+			return nil, errors.Errorf(
+				"Unable to parse middleware %s",
+				middlewareObj,
+			)
+		}
+		name, ok := middlewareObj["name"].(string)
+		if !ok {
+			return nil, errors.Errorf(
+				"Unable to parse \"name\" field in middleware %s",
+				middlewareObj,
+			)
+		}
+		// Verify the middleware name is defined.
+		if midSpecs[name] == nil {
+			return nil, errors.Errorf(
+				"middlewares config (%s) not found.", name,
+			)
+		}
+		// TODO(sindelar): Validate Options against middleware spec and support
+		// nested typed objects.
+		opts, ok := middlewareObj["options"].(map[string]interface{})
+		if !ok {
+			opts = make(map[string]interface{})
+		}
+
+		middlewares[idx] = MiddlewareSpec{
+			Name:    name,
+			Path:    midSpecs[name].Path,
+			Options: opts,
+		}
+	}
+
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           jsonFile,
@@ -373,7 +486,7 @@ func NewEndpointSpec(
 		ThriftServiceName:  parts[0],
 		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
-		Middlewares:        endpointConfigObj["middlewares"].([]interface{}),
+		Middlewares:        middlewares,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,
@@ -477,6 +590,73 @@ func parseEndpointJsons(
 	return endpointJsons, nil
 }
 
+func parseMiddlewareConfig(
+	config string,
+	configDirName string,
+) ([]*MiddlewareSpec, error) {
+	bytes, err := ioutil.ReadFile(config)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot read middleware config json: %s",
+			config,
+		)
+	}
+
+	// TODO(sindelar): Use a struct
+	var configJSON map[string]interface{}
+
+	err = json.Unmarshal(bytes, &configJSON)
+
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json for middleware config json: %s",
+			config,
+		)
+	}
+
+	midList, ok := configJSON["middlewares"].([]interface{})
+	if !ok {
+		return nil, errors.Wrapf(
+			err, "Cannot parse json for middleware config json: %s",
+			config,
+		)
+	}
+
+	specs := make([]*MiddlewareSpec, len(midList))
+	for idx, mid := range midList {
+		mid, ok := mid.(map[string]interface{})
+		if !ok {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for middleware config json: %s",
+				config,
+			)
+		}
+		name, okOne := mid["name"].(string)
+		schema, okTwo := mid["schema"].(string)
+		importPath, okThree := mid["importPath"].(string)
+		if !okOne || !okTwo || !okThree {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for middleware config json: %s",
+				config,
+			)
+		}
+
+		specs[idx], err = NewMiddlewareSpec(
+			name,
+			importPath,
+			schema,
+			configDirName,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot validate middleware: %s",
+				mid,
+			)
+		}
+	}
+	return specs, nil
+}
+
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {
 	// package helper for gateway
@@ -484,13 +664,15 @@ type GatewaySpec struct {
 	// tempalte instance for gateway
 	Template *Template
 
-	ClientModules   map[string]*ClientSpec
-	EndpointModules map[string]*EndpointSpec
+	ClientModules     map[string]*ClientSpec
+	EndpointModules   map[string]*EndpointSpec
+	MiddlewareModules map[string]*MiddlewareSpec
 
 	gatewayName       string
 	configDirName     string
 	clientConfigDir   string
 	endpointConfigDir string
+	middlewareConfig  string
 }
 
 // NewGatewaySpec sets up gateway spec
@@ -502,6 +684,7 @@ func NewGatewaySpec(
 	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointConfig string,
+	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
 	packageHelper, err := NewPackageHelper(
@@ -518,6 +701,11 @@ func NewGatewaySpec(
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
 	}
+
+	middleConfig := filepath.Join(
+		configDirName,
+		middlewareConfig,
+	)
 
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
@@ -545,15 +733,25 @@ func NewGatewaySpec(
 	}
 
 	spec := &GatewaySpec{
-		PackageHelper:   packageHelper,
-		Template:        tmpl,
-		ClientModules:   map[string]*ClientSpec{},
-		EndpointModules: map[string]*EndpointSpec{},
+		PackageHelper:     packageHelper,
+		Template:          tmpl,
+		ClientModules:     map[string]*ClientSpec{},
+		EndpointModules:   map[string]*EndpointSpec{},
+		MiddlewareModules: map[string]*MiddlewareSpec{},
 
 		configDirName:     configDirName,
 		clientConfigDir:   clientConfig,
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
+	}
+
+	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load middlewares:")
+	}
+	for _, mspec := range middlewares {
+		spec.MiddlewareModules[mspec.Name] = mspec
 	}
 
 	for _, json := range clientJsons {
@@ -570,7 +768,7 @@ func NewGatewaySpec(
 		}
 	}
 	for _, json := range endpointJsons {
-		espec, err := NewEndpointSpec(json, packageHelper)
+		espec, err := NewEndpointSpec(json, packageHelper, spec.MiddlewareModules)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse endpoint json file %s :", json,

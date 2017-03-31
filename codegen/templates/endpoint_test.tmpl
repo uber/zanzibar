@@ -23,6 +23,7 @@ import (
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $headers := .Headers }}
 
 
 {{range $.TestStubs}}
@@ -31,7 +32,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"{{$clientName | camel}}"},
+		KnownHTTPBackends: []string{"{{$clientName | camel}}"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -51,14 +52,24 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["{{$clientName | camel}}"].HandleFunc(
+	gateway.HTTPBackends()["{{$clientName | camel}}"].HandleFunc(
 		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
 	)
 
 	{{end -}}
 
+	headers := map[string]string{}
+	{{ if $headers -}}
+	{{range $idx, $headerName := $headers -}}
+	headers["{{$headerName}}"] = "placeholder"
+	{{end}}
+	{{- end}}
+
 	res, err := gateway.MakeRequest(
-		"{{$.Method.HTTPMethod}}", "{{$.Method.HTTPPath}}", bytes.NewReader([]byte(`{{.EndpointRequestString}}`)),
+		"{{$.Method.HTTPMethod}}",
+		"{{$.Method.HTTPPath}}",
+		headers,
+		bytes.NewReader([]byte(`{{.EndpointRequestString}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

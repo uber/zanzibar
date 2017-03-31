@@ -47,6 +47,7 @@ type HTTPServer struct {
 func (server *HTTPServer) JustListen() (net.Listener, error) {
 	addr := server.Addr
 	if addr == "" {
+		/* coverage ignore next line */
 		addr = ":http"
 	}
 
@@ -70,6 +71,7 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 
 	err := server.Serve(tcpKeepAliveListener{ln})
 	if err != nil && !server.closing {
+		/* coverage ignore next line */
 		server.Logger.Error("Error http serving",
 			zap.String("error", err.Error()),
 		)
@@ -82,11 +84,13 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 func (server *HTTPServer) Close() {
 	server.closing = true
 	if server.listeningSocket == nil {
+		/* coverage ignore next line */
 		return
 	}
 
 	err := server.listeningSocket.Close()
 	if err != nil {
+		/* coverage ignore next line */
 		server.Logger.Error("Error closing listening socket",
 			zap.String("error", err.Error()),
 		)

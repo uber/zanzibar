@@ -18,7 +18,7 @@ start=$(cat .TMP_ZANZIBAR_TIMESTAMP_FILE.txt)
 echo "Generating JSON Marshal/Unmarshal for rest"
 
 for file in $(find "$PREFIX/clients" -name "*_structs.go"); do
-    "$EASY_JSON_BINARY" -- "$file"
+    "$EASY_JSON_BINARY" -all -- "$file"
 done
 
 end=`date +%s`
@@ -26,7 +26,7 @@ runtime=$((end-start))
 echo "Generated easy_json files for clients +$runtime"
 
 for file in $(find "$PREFIX/endpoints" -name "*_structs.go"); do
-    "$EASY_JSON_BINARY" -- "$file"
+    "$EASY_JSON_BINARY" -all -- "$file"
 done
 
 end=`date +%s`

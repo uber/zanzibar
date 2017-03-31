@@ -17,7 +17,7 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"bar"},
+		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -36,12 +36,17 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["bar"].HandleFunc(
+	gateway.HTTPBackends()["bar"].HandleFunc(
 		"GET", "/no-request-path", fakeNoRequest,
 	)
 
+	headers := map[string]string{}
+
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/no-request-path", bytes.NewReader([]byte(`{}`)),
+		"GET",
+		"/bar/no-request-path",
+		headers,
+		bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

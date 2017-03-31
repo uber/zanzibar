@@ -18,27 +18,4 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel
-
-import (
-	"bytes"
-	"sync"
-)
-
-var pool = sync.Pool{
-	New: func() interface{} {
-		return &bytes.Buffer{}
-	},
-}
-
-// GetBuffer returns a new Byte Buffer from the buffer pool that has been reset
-func GetBuffer() *bytes.Buffer {
-	buf := pool.Get().(*bytes.Buffer)
-	buf.Reset()
-	return buf
-}
-
-// PutBuffer returns byte buffer to the buffer pool
-func PutBuffer(buf *bytes.Buffer) {
-	pool.Put(buf)
-}
+package zanzibar

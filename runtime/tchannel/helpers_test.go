@@ -18,16 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel_test
+package tchannel
 
 import (
+	"bytes"
 	"math/rand"
 	"sync"
 	"testing"
 
+	"github.com/uber/tchannel-go/testutils/testreader"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/runtime/tchannel"
+	"github.com/stretchr/testify/require"
 )
+
+func TestEnsureEmptySuccess(t *testing.T) {
+	reader := bytes.NewReader(nil)
+	err := EnsureEmpty(reader, "success")
+	require.NoError(t, err, "ensureEmpty should succeed with empty reader")
+}
+
+func TestEnsureEmptyHasBytes(t *testing.T) {
+	reader := bytes.NewReader([]byte{1, 2, 3})
+	err := EnsureEmpty(reader, "T")
+	require.Error(t, err, "ensureEmpty should fail when there's bytes")
+	assert.Equal(t, err.Error(), "found unexpected bytes after T, found (upto 128 bytes): 010203")
+}
+
+func TestEnsureEmptyError(t *testing.T) {
+	control, reader := testreader.ChunkReader()
+	control <- nil
+	close(control)
+
+	err := EnsureEmpty(reader, "has bytes")
+	require.Error(t, err, "ensureEmpty should fail when there's an error")
+	assert.Equal(t, testreader.ErrUser, err, "Unexpected error")
+}
 
 func TestBuffers(t *testing.T) {
 	var wg sync.WaitGroup
@@ -35,7 +61,7 @@ func TestBuffers(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			for i := 0; i < 100; i++ {
-				buf := tchannel.GetBuffer()
+				buf := GetBuffer()
 				assert.Zero(t, buf.Len(), "Expected truncated buffer")
 
 				bytesOfNoise := make([]byte, rand.Intn(5000))
@@ -46,7 +72,7 @@ func TestBuffers(t *testing.T) {
 
 				assert.Equal(t, buf.Len(), len(bytesOfNoise), "Expected same buffer size")
 
-				tchannel.PutBuffer(buf)
+				PutBuffer(buf)
 			}
 			wg.Done()
 		}()

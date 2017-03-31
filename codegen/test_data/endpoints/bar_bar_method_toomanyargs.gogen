@@ -6,7 +6,6 @@ package bar
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -27,10 +26,8 @@ func HandleTooManyArgsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
-	for _, header := range []string{"x-uuid", "x-token"} {
-		h.Set(header, req.Header.Get(header))
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+		return
 	}
 
 	// Handle request body.
@@ -39,7 +36,7 @@ func HandleTooManyArgsRequest(
 		return
 	}
 	clientRequest := convertToTooManyArgsClientRequest(&body)
-	clientResp, err := clients.Bar.TooManyArgs(ctx, clientRequest, h)
+	clientResp, err := clients.Bar.TooManyArgs(ctx, clientRequest)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -77,8 +74,8 @@ func HandleTooManyArgsRequest(
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
 	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
-	clientRequest.Foo = clientTypeFoo.FooStruct(body.Foo)
-	clientRequest.Request = clientTypeBar.BarRequest(body.Request)
+	clientRequest.Foo = (*clientTypeFoo.FooStruct)(body.Foo)
+	clientRequest.Request = (*clientTypeBar.BarRequest)(body.Request)
 
 	return clientRequest
 }

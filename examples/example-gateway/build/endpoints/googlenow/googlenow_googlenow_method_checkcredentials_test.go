@@ -17,7 +17,7 @@ func TestCheckCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -36,12 +36,19 @@ func TestCheckCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/check-credentials", fakeCheckCredentials,
 	)
 
+	headers := map[string]string{}
+	headers["x-uuid"] = "placeholder"
+	headers["x-token"] = "placeholder"
+
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/check-credentials", bytes.NewReader([]byte(`{"authcode":"test"}`)),
+		"POST",
+		"/googlenow/check-credentials",
+		headers,
+		bytes.NewReader([]byte(`{"authcode":"test"}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

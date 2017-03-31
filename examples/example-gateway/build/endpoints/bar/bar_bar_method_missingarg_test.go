@@ -17,7 +17,7 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"bar"},
+		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "main.go",
 		),
@@ -36,12 +36,17 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.Backends()["bar"].HandleFunc(
+	gateway.HTTPBackends()["bar"].HandleFunc(
 		"GET", "/missing-arg-path", fakeMissingArg,
 	)
 
+	headers := map[string]string{}
+
 	res, err := gateway.MakeRequest(
-		"GET", "/bar/missing-arg-path", bytes.NewReader([]byte(`{}`)),
+		"GET",
+		"/bar/missing-arg-path",
+		headers,
+		bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

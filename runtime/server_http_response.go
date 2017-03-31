@@ -22,22 +22,26 @@ package zanzibar
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/uber-go/zap"
 )
 
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
-	responseWriter http.ResponseWriter
-	req            *ServerHTTPRequest
-	gateway        *Gateway
-	finishTime     time.Time
-	finished       bool
-	metrics        *EndpointMetrics
+	responseWriter    http.ResponseWriter
+	Request           *ServerHTTPRequest
+	gateway           *Gateway
+	finishTime        time.Time
+	finished          bool
+	metrics           *EndpointMetrics
+	flushed           bool
+	pendingBodyBytes  []byte
+	pendingBodyObj    interface{}
+	pendingStatusCode int
 
 	StatusCode int
 }
@@ -48,7 +52,7 @@ func NewServerHTTPResponse(
 ) *ServerHTTPResponse {
 	res := &ServerHTTPResponse{
 		gateway:        req.gateway,
-		req:            req,
+		Request:        req,
 		responseWriter: w,
 		StatusCode:     200,
 		metrics:        req.metrics,
@@ -59,18 +63,22 @@ func NewServerHTTPResponse(
 
 // finish will handle final logic, like metrics
 func (res *ServerHTTPResponse) finish() {
-	if !res.req.started {
-		res.req.Logger.Error(
-			"Forgot to start incoming request",
-			zap.String("path", res.req.URL.Path),
+	if !res.Request.started {
+		/* coverage ignore next line */
+		res.Request.Logger.Error(
+			"Forgot to start server response",
+			zap.String("path", res.Request.URL.Path),
 		)
+		/* coverage ignore next line */
 		return
 	}
 	if res.finished {
-		res.req.Logger.Error(
-			"Finished an incoming request twice",
-			zap.String("path", res.req.URL.Path),
+		/* coverage ignore next line */
+		res.Request.Logger.Error(
+			"Finished an server response twice",
+			zap.String("path", res.Request.URL.Path),
 		)
+		/* coverage ignore next line */
 		return
 	}
 
@@ -79,7 +87,7 @@ func (res *ServerHTTPResponse) finish() {
 
 	counter := res.metrics.statusCodes[res.StatusCode]
 	if counter == nil {
-		res.req.Logger.Error(
+		res.Request.Logger.Error(
 			"Could not emit statusCode metric",
 			zap.Int("UnexpectedStatusCode", res.StatusCode),
 		)
@@ -88,7 +96,7 @@ func (res *ServerHTTPResponse) finish() {
 	}
 
 	res.metrics.requestLatency.Record(
-		res.finishTime.Sub(res.req.startTime),
+		res.finishTime.Sub(res.Request.startTime),
 	)
 }
 
@@ -101,60 +109,91 @@ func (res *ServerHTTPResponse) SendError(statusCode int, err error) {
 func (res *ServerHTTPResponse) SendErrorString(
 	statusCode int, err string,
 ) {
-	res.req.Logger.Warn(
+	res.Request.Logger.Warn(
 		"Sending error for endpoint request",
 		zap.String("error", err),
-		zap.String("path", res.req.URL.Path),
+		zap.String("path", res.Request.URL.Path),
 	)
 
-	res.writeHeader(statusCode)
-	res.writeString(err)
-
-	res.finish()
-}
-
-// CopyJSON will copy json bytes from a Reader
-func (res *ServerHTTPResponse) CopyJSON(statusCode int, src io.Reader) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	_, err := io.Copy(res.responseWriter, src)
-	if err != nil {
-		res.req.Logger.Error("Could not copy bytes",
-			zap.String("error", err.Error()),
-		)
-	}
-
-	res.finish()
+	res.WriteJSONBytes(statusCode,
+		[]byte(`{"error":"`+err+`"}`),
+	)
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
 func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, bytes []byte,
 ) {
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
-	res.finish()
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
 }
 
 // WriteJSON writes a json serializable struct to Response
 func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, body json.Marshaler,
 ) {
+	if body == nil {
+		res.SendErrorString(500, "Could not serialize json response")
+		res.Request.Logger.Error("Could not serialize nil pointer body")
+		return
+	}
+
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.req.Logger.Error("Could not serialize json response",
+		res.Request.Logger.Error("Could not serialize json response",
 			zap.String("error", err.Error()),
 		)
 		return
 	}
 
-	res.responseWriter.Header().Set("content-type", "application/json")
-	res.writeHeader(statusCode)
-	res.writeBytes(bytes)
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
+	res.pendingStatusCode = statusCode
+	res.pendingBodyBytes = bytes
+	res.pendingBodyObj = body
+}
+
+// PeekBody allows for inspecting a key path inside the body
+// that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (res *ServerHTTPResponse) PeekBody(
+	keys ...string,
+) ([]byte, jsonparser.ValueType, error) {
+	value, valueType, _, err := jsonparser.Get(
+		res.pendingBodyBytes, keys...,
+	)
+
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return value, valueType, nil
+}
+
+// Flush will write the body to the response. Before flush is called
+// the body is pending. A pending body allows a response middleware to
+// write a different body.
+func (res *ServerHTTPResponse) flush() {
+	if res.flushed {
+		/* coverage ignore next line */
+		res.Request.Logger.Error(
+			"Flushed a server response twice",
+			zap.String("path", res.Request.URL.Path),
+		)
+		/* coverage ignore next line */
+		return
+	}
+
+	res.flushed = true
+	res.writeHeader(res.pendingStatusCode)
+	res.writeBytes(res.pendingBodyBytes)
 	res.finish()
 }
 
@@ -167,20 +206,11 @@ func (res *ServerHTTPResponse) writeHeader(statusCode int) {
 func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
-		res.req.Logger.Error("Could not write string to resp body",
+		/* coverage ignore next line */
+		res.Request.Logger.Error("Could not write string to resp body",
 			zap.String("error", err.Error()),
 		)
 	}
-}
-
-// WriteHeader writes the header to http respnse.
-func (res *ServerHTTPResponse) WriteHeader(statusCode int) {
-	res.writeHeader(statusCode)
-}
-
-// WriteString helper just writes a string to the response
-func (res *ServerHTTPResponse) writeString(text string) {
-	res.writeBytes([]byte(text))
 }
 
 // IsOKResponse checks if the status code is OK.

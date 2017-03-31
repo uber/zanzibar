@@ -26,8 +26,14 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
+	"bytes"
+
+	"encoding/json"
+
+	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
@@ -39,8 +45,11 @@ import (
 type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
 
-	backends   map[string]*testBackend.TestBackend
-	httpClient *http.Client
+	backendsHTTP map[string]*testBackend.TestHTTPBackend
+	logBytes     *bytes.Buffer
+	readLogs     bool
+	errorLogs    map[string][]string
+	httpClient   *http.Client
 }
 
 func getDirName() string {
@@ -64,13 +73,16 @@ func CreateGateway(
 		opts = &testGateway.Options{}
 	}
 
-	backends, err := testBackend.BuildBackends(seedConfig, opts.KnownBackends)
+	backendsHTTP, err := testBackend.BuildHTTPBackends(seedConfig, opts.KnownHTTPBackends)
 	if err != nil {
 		return nil, err
 	}
 
 	seedConfig["port"] = int64(0)
-	seedConfig["tchannel.serviceName"] = "bench-gateway"
+
+	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
+		seedConfig["tchannel.serviceName"] = "bench-gateway"
+	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.tally.service"] = "bench-gateway"
 	seedConfig["logger.output"] = "stdout"
@@ -91,7 +103,11 @@ func CreateGateway(
 			},
 			Timeout: 30 * 1000 * time.Millisecond,
 		},
-		backends: backends,
+		backendsHTTP: backendsHTTP,
+		logBytes:     bytes.NewBuffer(nil),
+
+		readLogs:  false,
+		errorLogs: map[string][]string{},
 	}
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
@@ -108,14 +124,14 @@ func CreateGateway(
 		),
 	}, seedConfig)
 
-	clients := clients.CreateClients(config)
-
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients: clients,
+		LogWriter: zap.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
 	}
+	gateway.Clients = clients.CreateClients(config, gateway)
+
 	benchGateway.ActualGateway = gateway
 	err = gateway.Bootstrap(endpoints.Register)
 	if err != nil {
@@ -132,23 +148,56 @@ func (gateway *BenchGateway) GetPort() int {
 
 // GetErrorLogs ...
 func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
-	panic("Not implemented")
+	if gateway.readLogs {
+		return gateway.errorLogs
+	}
+
+	lines := strings.Split(gateway.logBytes.String(), "\n")
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		if len(line) == 0 {
+			continue
+		}
+
+		lineStruct := map[string]interface{}{}
+		jsonError := json.Unmarshal([]byte(line), &lineStruct)
+		if jsonError != nil {
+			// do not decode msg
+			continue
+		}
+
+		msg := lineStruct["msg"].(string)
+
+		msgLogs := gateway.errorLogs[msg]
+		if msgLogs == nil {
+			msgLogs = []string{line}
+		} else {
+			msgLogs = append(msgLogs, line)
+		}
+		gateway.errorLogs[msg] = msgLogs
+	}
+
+	gateway.readLogs = true
+	return gateway.errorLogs
 }
 
-// Backends ...
-func (gateway *BenchGateway) Backends() map[string]*testBackend.TestBackend {
-	return gateway.backends
+// HTTPBackends returns the HTTP backends of the gateway
+func (gateway *BenchGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
+	return gateway.backendsHTTP
 }
 
 // MakeRequest helper
 func (gateway *BenchGateway) MakeRequest(
-	method string, url string, body io.Reader,
+	method string, url string, headers map[string]string, body io.Reader,
 ) (*http.Response, error) {
 	client := gateway.httpClient
 
 	fullURL := "http://" + gateway.ActualGateway.RealAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
+	for headerName, headerValue := range headers {
+		req.Header.Set(headerName, headerValue)
+	}
 
 	if err != nil {
 		return nil, err

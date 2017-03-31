@@ -47,8 +47,8 @@ type Clients interface {
 
 // Options configures the gateway
 type Options struct {
-	Clients        Clients
 	MetricsBackend tally.CachedStatsReporter
+	LogWriter      zap.WriteSyncer
 }
 
 // Gateway type
@@ -68,6 +68,7 @@ type Gateway struct {
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
+	logWriter         zap.WriteSyncer
 	server            *HTTPServer
 	tchannelServer    *TChannelServer
 	// clients?
@@ -79,8 +80,13 @@ type Gateway struct {
 func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
-	if opts.Clients == nil {
-		panic("opts.Clients required")
+	var metricsBackend tally.CachedStatsReporter
+	var logWriter zap.WriteSyncer
+	if opts != nil && opts.MetricsBackend != nil {
+		metricsBackend = opts.MetricsBackend
+	}
+	if opts != nil && opts.LogWriter != nil {
+		logWriter = opts.LogWriter
 	}
 
 	gateway := &Gateway{
@@ -88,10 +94,10 @@ func CreateGateway(
 		Port:        int32(config.MustGetInt("port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
-		Clients:     opts.Clients,
 		Config:      config,
 
-		metricsBackend: opts.MetricsBackend,
+		logWriter:      logWriter,
+		metricsBackend: metricsBackend,
 	}
 
 	gateway.Router = NewRouter(gateway)
@@ -265,7 +271,14 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	loggerOutput := config.MustGetString("logger.output")
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
-		output = zap.Output(os.Stdout)
+		var writer zap.WriteSyncer
+		if gateway.logWriter != nil {
+			writer = zap.MultiWriteSyncer(os.Stdout, gateway.logWriter)
+		} else {
+			writer = os.Stdout
+		}
+
+		output = zap.Output(writer)
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
 		if err != nil {

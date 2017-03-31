@@ -46,10 +46,15 @@ func createGateway() (*zanzibar.Gateway, error) {
     config := getConfig(map[string]interface{}{
         "ip": listenIP.String(),
     })
-	clients := clients.CreateClients(config)
-	return zanzibar.CreateGateway(config, &zanzibar.Options{
-		Clients: clients,
-	})
+    gateway, err := zanzibar.CreateGateway(config, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	clients := clients.CreateClients(config, gateway)
+	gateway.Clients = clients
+
+	return gateway, nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {

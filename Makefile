@@ -92,7 +92,7 @@ test: generate lint
 
 .PHONY: test-only
 test-only:
-	go test ./examples/example-gateway/... 1>/dev/null
+	go test ./examples/example-gateway/... | grep -v '\[no test files\]'
 	go test ./codegen/... | grep -v '\[no test files\]'
 	go test ./runtime/... | grep -v '\[no test files\]'
 	go test ./test/... | grep -v '\[no test files\]'
@@ -132,7 +132,6 @@ go-docs:
 
 .PHONY: clean-easyjson
 clean-easyjson:
-	find . -name "*_easyjson.go" -delete
 	find . -name "*.bak" -delete
 	find . -name "easyjson-bootstrap*.go" -delete
 

@@ -164,6 +164,8 @@ func (endpoint *Endpoint) HandleRequest(
 
 	fn := endpoint.HandlerFn
 	fn(r.Context(), req, req.res)
+
+	req.res.flush()
 }
 
 // Router data structure to handle and register endpoints

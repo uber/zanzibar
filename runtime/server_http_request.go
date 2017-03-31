@@ -98,6 +98,24 @@ func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 	req.metrics.requestRecvd.Inc(1)
 }
 
+// CheckHeaders verifies that request contains required headers.
+func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
+	for _, headerName := range headers {
+		headerValue := req.httpRequest.Header.Get(headerName)
+		if headerValue == "" {
+			req.res.SendErrorString(
+				400, "Missing mandatory header: "+headerName,
+			)
+			req.Logger.Warn("Got request without mandatory header",
+				zap.String("headerName", headerName),
+			)
+			return false
+		}
+
+	}
+	return true
+}
+
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
 func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	body json.Unmarshaler,

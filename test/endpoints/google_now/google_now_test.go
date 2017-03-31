@@ -40,17 +40,21 @@ import (
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 var noAuthCodeBytes = []byte("{}")
+var headers map[string]string = map[string]string{
+	"x-uuid":  "uuid",
+	"x-token": "token",
+}
 
 func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 	})
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
 	}
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
@@ -65,7 +69,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			res, err := gateway.MakeRequest(
-				"POST", "/googlenow/add-credentials",
+				"POST", "/googlenow/add-credentials", headers,
 				bytes.NewReader(benchBytes),
 			)
 			if err != nil {
@@ -101,7 +105,7 @@ func TestAddCredentials(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
@@ -112,7 +116,7 @@ func TestAddCredentials(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
@@ -123,7 +127,8 @@ func TestAddCredentials(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(benchBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -152,7 +157,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 		LogWhitelist: map[string]bool{
 			"Could not ReadAll() body": true,
 		},
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
@@ -163,7 +168,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
@@ -195,11 +200,10 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	}
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials",
+		"POST", "/googlenow/add-credentials", headers,
 		bytes.NewReader([]byte("junk data")),
 	)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "short write")
 	assert.Nil(t, res)
 	assert.Equal(t, 0, counter)
 
@@ -226,7 +230,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
@@ -237,7 +241,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
@@ -248,7 +252,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials",
+		"POST", "/googlenow/add-credentials", headers,
 		bytes.NewReader([]byte("bad bytes")),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -264,9 +268,9 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		"Could not parse json: parse error: "+
+		"{\"error\":\"Could not parse json: parse error: "+
 			"invalid character 'b' after top-level value "+
-			"near offset 0 of 'bad bytes'",
+			"near offset 0 of 'bad bytes'\"}",
 		string(respBytes),
 	)
 }
@@ -275,7 +279,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownBackends: []string{"googleNow"},
+		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build", "main.go",
@@ -287,7 +291,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.Backends()["googleNow"].HandleFunc(
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			if r.FormValue("authCode") != "" {
 				if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
@@ -303,7 +307,8 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", bytes.NewReader(noAuthCodeBytes),
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -311,4 +316,141 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, 0, counter)
+}
+
+func TestAddCredentialsBackendDown(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		LogWhitelist: map[string]bool{
+			"Could not make client request": true,
+		},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	// Close backend
+	gateway.HTTPBackends()["googleNow"].Close()
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got bytes read error") {
+		return
+	}
+
+	assert.Contains(t,
+		string(bytes),
+		`{"error":"could not make client request`,
+	)
+
+	time.Sleep(10 * time.Millisecond)
+
+	errorLogs := gateway.GetErrorLogs()
+	logLines := errorLogs["Could not make client request"]
+
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
+		return
+	}
+
+	errorMsg := lineStruct["error"].(string)
+	assert.Contains(t, errorMsg, "dial tcp")
+}
+
+func TestAddCredentialsWrongStatusCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(201)
+			if _, err := w.Write([]byte("{\"statusCode\":201}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "201 Created", res.Status)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got bytes read error") {
+		return
+	}
+
+	assert.Equal(t, "", string(bytes))
+	assert.Equal(t, 1, counter)
+}
+
+func TestGoogleNowMissingHeaders(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", nil,
+		bytes.NewReader([]byte("bad bytes")),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Missing mandatory header: x-uuid"}`,
+		string(respBytes),
+	)
 }

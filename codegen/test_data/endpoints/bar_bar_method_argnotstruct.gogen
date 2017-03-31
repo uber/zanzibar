@@ -5,7 +5,6 @@ package bar
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -22,8 +21,6 @@ func HandleArgNotStructRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	// Handle request headers.
-	h := http.Header{}
 
 	// Handle request body.
 	var body ArgNotStructHTTPRequest
@@ -31,7 +28,7 @@ func HandleArgNotStructRequest(
 		return
 	}
 	clientRequest := convertToArgNotStructClientRequest(&body)
-	clientResp, err := clients.Bar.ArgNotStruct(ctx, clientRequest, h)
+	clientResp, err := clients.Bar.ArgNotStruct(ctx, clientRequest)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
