@@ -4,7 +4,6 @@
 package contactsClient
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 	"strconv"
@@ -15,7 +14,8 @@ import (
 
 // ContactsClient is the http client for service Contacts.
 type ContactsClient struct {
-	client *zanzibar.HTTPClient
+	ClientID   string
+	HTTPClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client for service Contacts.
@@ -28,24 +28,23 @@ func NewClient(
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &ContactsClient{
-		client: zanzibar.NewHTTPClient(gateway, baseURL),
+		ClientID:   "contacts",
+		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
 func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest) (*http.Response, error) {
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "saveContacts", c.HTTPClient,
+	)
+
 	// Generate full URL.
-	fullURL := c.client.BaseURL + "/" + string(r.UserUUID) + "/contacts"
+	fullURL := c.HTTPClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
 
-	rawBody, err := r.MarshalJSON()
+	err := req.WriteJSON("POST", fullURL, r)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", fullURL, bytes.NewReader(rawBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return c.client.Client.Do(req.WithContext(ctx))
+	return req.Do(ctx)
 }
