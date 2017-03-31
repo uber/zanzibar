@@ -33,7 +33,7 @@ import (
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
 	responseWriter    http.ResponseWriter
-	req               *ServerHTTPRequest
+	Request           *ServerHTTPRequest
 	gateway           *Gateway
 	finishTime        time.Time
 	finished          bool
@@ -52,7 +52,7 @@ func NewServerHTTPResponse(
 ) *ServerHTTPResponse {
 	res := &ServerHTTPResponse{
 		gateway:        req.gateway,
-		req:            req,
+		Request:        req,
 		responseWriter: w,
 		StatusCode:     200,
 		metrics:        req.metrics,
@@ -63,20 +63,20 @@ func NewServerHTTPResponse(
 
 // finish will handle final logic, like metrics
 func (res *ServerHTTPResponse) finish() {
-	if !res.req.started {
+	if !res.Request.started {
 		/* coverage ignore next line */
-		res.req.Logger.Error(
+		res.Request.Logger.Error(
 			"Forgot to start server response",
-			zap.String("path", res.req.URL.Path),
+			zap.String("path", res.Request.URL.Path),
 		)
 		/* coverage ignore next line */
 		return
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.req.Logger.Error(
+		res.Request.Logger.Error(
 			"Finished an server response twice",
-			zap.String("path", res.req.URL.Path),
+			zap.String("path", res.Request.URL.Path),
 		)
 		/* coverage ignore next line */
 		return
@@ -87,7 +87,7 @@ func (res *ServerHTTPResponse) finish() {
 
 	counter := res.metrics.statusCodes[res.StatusCode]
 	if counter == nil {
-		res.req.Logger.Error(
+		res.Request.Logger.Error(
 			"Could not emit statusCode metric",
 			zap.Int("UnexpectedStatusCode", res.StatusCode),
 		)
@@ -96,7 +96,7 @@ func (res *ServerHTTPResponse) finish() {
 	}
 
 	res.metrics.requestLatency.Record(
-		res.finishTime.Sub(res.req.startTime),
+		res.finishTime.Sub(res.Request.startTime),
 	)
 }
 
@@ -109,10 +109,10 @@ func (res *ServerHTTPResponse) SendError(statusCode int, err error) {
 func (res *ServerHTTPResponse) SendErrorString(
 	statusCode int, err string,
 ) {
-	res.req.Logger.Warn(
+	res.Request.Logger.Warn(
 		"Sending error for endpoint request",
 		zap.String("error", err),
-		zap.String("path", res.req.URL.Path),
+		zap.String("path", res.Request.URL.Path),
 	)
 
 	res.WriteJSONBytes(statusCode,
@@ -138,14 +138,14 @@ func (res *ServerHTTPResponse) WriteJSON(
 ) {
 	if body == nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.req.Logger.Error("Could not serialize nil pointer body")
+		res.Request.Logger.Error("Could not serialize nil pointer body")
 		return
 	}
 
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.req.Logger.Error("Could not serialize json response",
+		res.Request.Logger.Error("Could not serialize json response",
 			zap.String("error", err.Error()),
 		)
 		return
@@ -183,9 +183,9 @@ func (res *ServerHTTPResponse) PeekBody(
 func (res *ServerHTTPResponse) flush() {
 	if res.flushed {
 		/* coverage ignore next line */
-		res.req.Logger.Error(
+		res.Request.Logger.Error(
 			"Flushed a server response twice",
-			zap.String("path", res.req.URL.Path),
+			zap.String("path", res.Request.URL.Path),
 		)
 		/* coverage ignore next line */
 		return
@@ -207,7 +207,7 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Could not write string to resp body",
+		res.Request.Logger.Error("Could not write string to resp body",
 			zap.String("error", err.Error()),
 		)
 	}
