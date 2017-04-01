@@ -40,6 +40,7 @@ type HTTPServer struct {
 	closing         bool
 
 	RealPort int32
+	RealIP   string
 	RealAddr string
 }
 
@@ -59,6 +60,7 @@ func (server *HTTPServer) JustListen() (net.Listener, error) {
 
 	realAddr := ln.Addr().(*net.TCPAddr)
 	server.RealPort = int32(realAddr.Port)
+	server.RealIP = realAddr.IP.String()
 	server.RealAddr = realAddr.IP.String() + ":" +
 		strconv.Itoa(int(server.RealPort))
 
