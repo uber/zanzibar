@@ -85,7 +85,7 @@ func (req *ClientHTTPRequest) start(
 
 // WriteJSON will send a json http request out.
 func (req *ClientHTTPRequest) WriteJSON(
-	method string, url string, body json.Marshaler,
+	method string, url string, headers map[string]string, body json.Marshaler,
 ) error {
 	var httpReq *http.Request
 	var httpErr error
@@ -116,6 +116,11 @@ func (req *ClientHTTPRequest) WriteJSON(
 			req.ClientName,
 		)
 	}
+
+	for k := range headers {
+		httpReq.Header.Add(k, headers[k])
+	}
+
 	req.httpRequest = httpReq
 	req.httpRequest.Header.Set("Content-Type", "application/json")
 	return nil

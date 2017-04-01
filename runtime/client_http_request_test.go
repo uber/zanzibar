@@ -46,7 +46,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
-	err = req.WriteJSON("GET", "/foo", &failingJsonObj{})
+	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 
 	assert.Equal(t,
@@ -70,7 +70,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
-	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil)
+	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
 
 	assert.Equal(t,
