@@ -21,7 +21,12 @@
 package zanzibar_test
 
 import (
+	"context"
+	"net/http"
 	"testing"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -29,6 +34,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
@@ -78,4 +84,79 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 			"clientID: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
+}
+
+func TestMakingClientCalLWithHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			_ = w.Write([]byte(r.Header.Get("Example-Header")))
+		},
+	)
+
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	client := clients.Bar.HTTPClient
+
+	req := zanzibar.NewClientHTTPRequest("bar", "bar-path", client)
+
+	err = req.WriteJSON(
+		"POST",
+		client.BaseURL+"/bar-path",
+		map[string]string{
+			"Example-Header": "Example-Value",
+		},
+		nil,
+	)
+	assert.NoError(t, err)
+
+	res, err := req.Do(context.Background())
+	assert.NoError(t, err)
+
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := res.ReadAll()
+	assert.NoError(t, err)
+
+	assert.Equal(t, []byte("Example-Value"), bytes)
+}
+
+func TestMakingClientCalLWithRespHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Example-Header", "Example-Value")
+			w.WriteHeader(200)
+			_ = w.Write([]byte("{}"))
+		},
+	)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	bClient := clients.Bar
+
+	body, headers, err := bClient.Normal(
+		context.Background(), nil, &barClient.NormalHTTPRequest{},
+	)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, body)
+	assert.Equal(t, "Example-Value", headers["Example-Header"])
+
 }
