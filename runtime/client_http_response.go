@@ -39,6 +39,7 @@ type ClientHTTPResponse struct {
 	rawResponse *http.Response
 
 	StatusCode int
+	Header     http.Header
 }
 
 // NewClientHTTPResponse allocates a client http response object
@@ -56,6 +57,7 @@ func NewClientHTTPResponse(
 func (res *ClientHTTPResponse) setRawHTTPResponse(httpRes *http.Response) {
 	res.rawResponse = httpRes
 	res.StatusCode = httpRes.StatusCode
+	res.Header = httpRes.Header
 }
 
 // ReadAll reads bytes from response.
