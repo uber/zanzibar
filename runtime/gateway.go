@@ -207,6 +207,9 @@ func (gateway *Gateway) Close() {
 
 	gateway.metricsBackend.Flush()
 	_ = gateway.metricScopeCloser.Close()
+	if gateway.localServer != gateway.server {
+		gateway.localServer.Close()
+	}
 	gateway.server.Close()
 }
 
