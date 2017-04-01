@@ -54,16 +54,18 @@ func Handle{{title .Name}}Request(
 	{{end}}
 
 	{{if and (eq $clientMethodRequestType "") (eq $clientMethodResponseType "")}}
-	err := clients.{{$clientName}}.{{$clientMethodName}}(ctx)
+	_, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
 	{{else if eq $clientMethodRequestType ""}}
-	clientRespBody, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx)
+	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil,
+	)
 	{{else if eq $clientMethodResponseType ""}}
-	err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, clientRequest,
+	_, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
 	)
 	{{else}}
-	clientRespBody, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, clientRequest,
+	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
 	)
 	{{end}}
 	if err != nil {

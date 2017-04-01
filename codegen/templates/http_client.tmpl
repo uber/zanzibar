@@ -49,21 +49,25 @@ func NewClient(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
-) error {
+	headers map[string]string,
+) (map[string]string, error) {
 {{else if eq .RequestType "" }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
-) (*{{.ResponseType}}, error) {
+	headers map[string]string,
+) (*{{.ResponseType}}, map[string]string, error) {
 {{else if eq .ResponseType "" }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
+	headers map[string]string,
 	r *{{.RequestType}},
-) error {
+) (map[string]string, error) {
 {{else}}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
+	headers map[string]string,
 	r *{{.RequestType}},
-) (*{{.ResponseType}}, error) {
+) (*{{.ResponseType}}, map[string]string, error) {
 {{end}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
@@ -78,16 +82,21 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{- end}}
 
 	{{if ne .RequestType ""}}
-	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, r)
+	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
 	{{else}}
-	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, nil)
+	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}err{{else}}nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return {{if eq .ResponseType ""}}err{{else}}nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
 	}
 
 	res.CheckOKResponse({{.OKStatusCode.Code}})
@@ -95,17 +104,17 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{if eq .ResponseType ""}}
 	_, err = res.ReadAll()
 	if err != nil {
-		return err
+		return respHeaders, err
 	}
-	return nil
+	return respHeaders, nil
 	{{else}}
 	var responseBody {{.ResponseType}}
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
-		return nil, err
+		return nil, respHeaders, err
 	}
 
-	return &responseBody, nil
+	return &responseBody, respHeaders, nil
 	{{end}}
 }
 {{end}} {{- /* <range .Methods> */ -}}
