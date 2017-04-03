@@ -28,7 +28,7 @@ func TestCheckCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	fakeCheckCredentials := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(202)
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte(`{"status":"200 OK"}`)); err != nil {
 			t.Fatal("can't write fake response")
@@ -54,6 +54,6 @@ func TestCheckCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 202, res.StatusCode)
 	assert.Equal(t, 1, counter)
 }

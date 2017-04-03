@@ -52,7 +52,8 @@ func HandleTooManyArgsRequest(
 	}()
 
 	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
+	expectedStatusCode := []int{200}
+	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
 		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
@@ -68,7 +69,7 @@ func HandleTooManyArgsRequest(
 		return
 	}
 	response := convertTooManyArgsClientResponse(&clientRespBody)
-	res.WriteJSON(clientResp.StatusCode, response)
+	res.WriteJSON(200, response)
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
