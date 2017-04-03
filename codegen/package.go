@@ -162,8 +162,8 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	// Strip the leading / and strip the .thrift on the end.
 	thriftSegment := thrift[idx+len(root)+1 : len(thrift)-7]
 
-	thriftPackageName := strings.Replace(thriftSegment, "/", "_", 100)
-	return thriftPackageName, nil
+	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
+	return camelCase(thriftPackageName), nil
 }
 
 func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {

@@ -97,7 +97,6 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 		return errors.Wrapf(err, "can't add import %s", ms.ThriftFile)
 	}
 
-	// sort.Strings(ms.IncludedPackages)
 	return nil
 }
 
