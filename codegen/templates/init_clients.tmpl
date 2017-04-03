@@ -23,7 +23,7 @@ type Clients struct {
 func CreateClients(
 	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
-) *Clients {
+) interface{} {
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
 		{{$cinfo.FieldName}}: {{$cinfo.PackageName}}.NewClient(
