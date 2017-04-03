@@ -100,7 +100,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 		"POST", "/bar-path",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
-			_ = w.Write([]byte(r.Header.Get("Example-Header")))
+			_, _ = w.Write([]byte(r.Header.Get("Example-Header")))
 		},
 	)
 
@@ -145,7 +145,7 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Example-Header", "Example-Value")
 			w.WriteHeader(200)
-			_ = w.Write([]byte("{}"))
+			_, _ = w.Write([]byte("{}"))
 		},
 	)
 	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
