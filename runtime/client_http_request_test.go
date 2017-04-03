@@ -25,15 +25,12 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
-
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
@@ -89,7 +86,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 func TestMakingClientCalLWithHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
-	})
+	}, clients.CreateClients, endpoints.Register)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -133,7 +130,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
-	})
+	}, clients.CreateClients, endpoints.Register)
 	if !assert.NoError(t, err) {
 		return
 	}
