@@ -6,8 +6,8 @@ package bar
 import (
 	"runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
+	endpoints_bar_bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	endpoints_foo_foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -23,11 +23,11 @@ type ArgNotStructHTTPRequest struct {
 
 // NormalHTTPRequest is the http body type for endpoint normal.
 type NormalHTTPRequest struct {
-	Request *bar.BarRequest
+	Request *endpoints_bar_bar.BarRequest
 }
 
 // TooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
 type TooManyArgsHTTPRequest struct {
-	Request *bar.BarRequest
-	Foo     *foo.FooStruct
+	Request *endpoints_bar_bar.BarRequest
+	Foo     *endpoints_foo_foo.FooStruct
 }
