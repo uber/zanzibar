@@ -71,7 +71,8 @@ func Handle{{title .Name}}Request(
     }()
 
 	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, {{statusCodes .OKStatusCode}}) {
+	expectedStatusCode := []int{ {{.DownstreamMethod.OKStatusCode.Code}} }
+	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
 		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)

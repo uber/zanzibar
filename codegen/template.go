@@ -30,7 +30,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	tmpl "text/template"
 
@@ -100,7 +99,6 @@ var funcMap = tmpl.FuncMap{
 	"title":        strings.Title,
 	"Title":        strings.Title,
 	"fullTypeName": fullTypeName,
-	"statusCodes":  statusCodes,
 	"camel":        camelCase,
 	"split":        strings.Split,
 	"dec":          decrement,
@@ -114,22 +112,6 @@ func fullTypeName(typeName, packageName string) string {
 		return typeName
 	}
 	return packageName + "." + typeName
-}
-
-func statusCodes(codes []StatusCode) string {
-	if len(codes) == 0 {
-		return "[]int{}"
-	}
-	buf := bytes.NewBufferString("[]int{")
-	for i := 0; i < len(codes)-1; i++ {
-		if _, err := buf.WriteString(strconv.Itoa(codes[i].Code) + ","); err != nil {
-			return err.Error()
-		}
-	}
-	if _, err := buf.WriteString(strconv.Itoa(codes[len(codes)-1].Code) + "}"); err != nil {
-		return err.Error()
-	}
-	return string(buf.Bytes())
 }
 
 func camelCase(src string) string {
