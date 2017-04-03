@@ -28,8 +28,8 @@ import (
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientName := title .DownstreamService -}}
 {{- $clientMethod := .DownstreamMethod -}}
-{{- $clientMethodRequestType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
-{{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 {{- $clientMethodName := title ($clientMethod).Name -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
@@ -53,13 +53,13 @@ func Handle{{title .Name}}Request(
 	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
 	{{end}}
 
-	{{if and (eq $clientMethodRequestType "") (eq $clientMethodResponseType "")}}
+	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 	_, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
-	{{else if eq $clientMethodRequestType ""}}
+	{{else if eq $clientReqType ""}}
 	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
 		ctx, nil,
 	)
-	{{else if eq $clientMethodResponseType ""}}
+	{{else if eq $clientResType ""}}
 	_, err := clients.{{$clientName}}.{{$clientMethodName}}(
 		ctx, nil, clientRequest,
 	)
@@ -84,9 +84,9 @@ func Handle{{title .Name}}Request(
 	{{- end -}}
 }
 
-{{if and (ne .RequestType "") (ne $clientMethodRequestType "") -}}
-func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientMethodRequestType}} {
-	clientRequest := &{{$clientMethodRequestType}}{}
+{{if and (ne .RequestType "") (ne $clientReqType "") -}}
+func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientReqType}} {
+	clientRequest := &{{$clientReqType}}{}
 
 	{{ range $key, $value := .RequestFieldMap -}}
 	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
@@ -99,8 +99,8 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 {{end -}}
 
 
-{{if and (ne .ResponseType "") (ne $clientMethodResponseType "") -}}
-func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
+{{if and (ne .ResponseType "") (ne $clientResType "") -}}
+func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {
 	// TODO: Add response fields mapping here.
 	downstreamResponse := &{{.ResponseType}}{}
 	return downstreamResponse
