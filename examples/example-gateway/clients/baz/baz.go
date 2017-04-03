@@ -36,7 +36,7 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 
 	client := zt.NewClient(gateway.Channel, serviceName)
 
-	timeout := time.Duration(config.MustGetInt("clients.SimpleService.timeout")) * time.Millisecond
+	timeout := time.Duration(config.MustGetInt("clients.baz.timeout")) * time.Millisecond
 
 	return &BazClient{
 		thriftService: serviceName,
