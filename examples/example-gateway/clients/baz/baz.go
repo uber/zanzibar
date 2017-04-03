@@ -23,11 +23,6 @@ type TChanBaz interface {
 	SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 }
 
-// BazClient is the client to to talk to its backend service.
-type BazClient struct {
-	SimpleServiceClient
-}
-
 // NewClient returns a new http client for service Bar.
 func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazClient {
 	// TODO: (lu) get serviceName from thrift
@@ -42,21 +37,19 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 	client := zt.NewClient(ch, serviceName)
 
 	return &BazClient{
-		SimpleServiceClient{
-			thriftService: serviceName,
-			client:        client,
-		},
+		thriftService: serviceName,
+		client:        client,
 	}
 }
 
-// SimpleServiceClient is the client to talk to SimpleService backend.
-type SimpleServiceClient struct {
+// BazClient is the client to talk to SimpleService backend.
+type BazClient struct {
 	thriftService string
 	client        zt.TChanClient
 }
 
 // Call ...
-func (c *SimpleServiceClient) Call(ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
+func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
 	var result baz.SimpleService_Call_Result
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, args, &result)
 	if err == nil && !success {
@@ -72,7 +65,7 @@ func (c *SimpleServiceClient) Call(ctx context.Context, reqHeaders map[string]st
 }
 
 // Simple ...
-func (c *SimpleServiceClient) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+func (c *BazClient) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_Simple_Result
 	args := baz.SimpleService_Simple_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Simple", reqHeaders, &args, &result)
@@ -89,7 +82,7 @@ func (c *SimpleServiceClient) Simple(ctx context.Context, reqHeaders map[string]
 }
 
 // SimpleFuture ...
-func (c *SimpleServiceClient) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+func (c *BazClient) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_SimpleFuture_Result
 	args := baz.SimpleService_SimpleFuture_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "SimpleFuture", reqHeaders, &args, &result)
