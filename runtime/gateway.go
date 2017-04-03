@@ -356,14 +356,6 @@ func (gateway *Gateway) setupHTTPServer() error {
 }
 
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
-	// TODO: (lu) channel name and opts
-	ch, err := tchannel.NewChannel("Gateway", nil)
-	if err != nil {
-		return err
-	}
-
-	gateway.Channel = ch
-
 	tchannelServer, err := NewTChannelServer(
 		&TChannelServerOptions{
 			ServiceName: config.MustGetString("tchannel.serviceName"),

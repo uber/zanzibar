@@ -68,5 +68,7 @@ func NewTChannelServer(opts *TChannelServerOptions, gateway *Gateway) (*zt.Serve
 			err)
 	}
 
+	gateway.Channel = channel
+
 	return zt.NewServer(channel, gateway.Logger), nil
 }
