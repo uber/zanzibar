@@ -28,13 +28,13 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 	// TODO: (lu) get serviceName from thrift
 	serviceName := "SimpleService"
 
-	ch := gateway.Channel
+	sc := gateway.Channel.GetSubChannel(serviceName)
 
 	ip := config.MustGetString("clients.baz.ip")
 	port := config.MustGetInt("clients.baz.port")
-	ch.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	client := zt.NewClient(ch, serviceName)
+	client := zt.NewClient(gateway.Channel, serviceName)
 
 	return &BazClient{
 		thriftService: serviceName,
