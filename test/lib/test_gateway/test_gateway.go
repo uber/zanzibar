@@ -44,6 +44,7 @@ type TestGateway interface {
 		body io.Reader,
 	) (*http.Response, error)
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
+	TChannelBackends() map[string]*testBackend.TestTChannelBackend
 	GetPort() int
 	GetErrorLogs() map[string][]string
 
@@ -52,14 +53,15 @@ type TestGateway interface {
 
 // ChildProcessGateway for testing
 type ChildProcessGateway struct {
-	cmd            *exec.Cmd
-	binaryFileInfo *testBinaryInfo
-	jsonLines      []string
-	test           *testing.T
-	opts           *Options
-	m3Server       *testM3Server.FakeM3Server
-	backendsHTTP   map[string]*testBackend.TestHTTPBackend
-	errorLogs      map[string][]string
+	cmd              *exec.Cmd
+	binaryFileInfo   *testBinaryInfo
+	jsonLines        []string
+	test             *testing.T
+	opts             *Options
+	m3Server         *testM3Server.FakeM3Server
+	backendsHTTP     map[string]*testBackend.TestHTTPBackend
+	backendsTChannel map[string]*testBackend.TestTChannelBackend
+	errorLogs        map[string][]string
 
 	HTTPClient       *http.Client
 	M3Service        *testM3Server.FakeM3Service
@@ -71,10 +73,11 @@ type ChildProcessGateway struct {
 
 // Options used to create TestGateway
 type Options struct {
-	TestBinary        string
-	LogWhitelist      map[string]bool
-	KnownHTTPBackends []string
-	CountMetrics      bool
+	TestBinary            string
+	LogWhitelist          map[string]bool
+	KnownHTTPBackends     []string
+	KnownTChannelBackends []string
+	CountMetrics          bool
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -112,6 +115,11 @@ func CreateGateway(
 		return nil, err
 	}
 
+	backendsTChannel, err := testBackend.BuildTChannelBackends(config, opts.KnownTChannelBackends)
+	if err != nil {
+		return nil, err
+	}
+
 	testGateway := &ChildProcessGateway{
 		test: t, opts: opts,
 		HTTPClient: &http.Client{
@@ -121,9 +129,10 @@ func CreateGateway(
 				MaxIdleConnsPerHost: 500,
 			},
 		},
-		jsonLines:    []string{},
-		errorLogs:    map[string][]string{},
-		backendsHTTP: backendsHTTP,
+		jsonLines:        []string{},
+		errorLogs:        map[string][]string{},
+		backendsHTTP:     backendsHTTP,
+		backendsTChannel: backendsTChannel,
 	}
 
 	testGateway.setupMetrics(t, opts)
@@ -172,6 +181,11 @@ func (gateway *ChildProcessGateway) MakeRequest(
 // HTTPBackends returns the HTTP backends
 func (gateway *ChildProcessGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
 	return gateway.backendsHTTP
+}
+
+// TChannelBackends returns the TChannel backends
+func (gateway *ChildProcessGateway) TChannelBackends() map[string]*testBackend.TestTChannelBackend {
+	return gateway.backendsTChannel
 }
 
 // GetPort ...

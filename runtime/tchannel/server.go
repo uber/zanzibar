@@ -32,7 +32,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 )
@@ -65,10 +64,10 @@ func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCa
 }
 
 // NewServer returns a server that can serve thrift services over TChannel.
-func NewServer(registrar tchan.Registrar, gateway *zanzibar.Gateway) *Server {
+func NewServer(registrar tchan.Registrar, logger zap.Logger) *Server {
 	server := &Server{
 		registrar: registrar,
-		logger:    gateway.Logger,
+		logger:    logger,
 		handlers:  map[string]handler{},
 	}
 	return server

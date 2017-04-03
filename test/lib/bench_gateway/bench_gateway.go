@@ -45,11 +45,12 @@ import (
 type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
 
-	backendsHTTP map[string]*testBackend.TestHTTPBackend
-	logBytes     *bytes.Buffer
-	readLogs     bool
-	errorLogs    map[string][]string
-	httpClient   *http.Client
+	backendsHTTP     map[string]*testBackend.TestHTTPBackend
+	backendsTChannel map[string]*testBackend.TestTChannelBackend
+	logBytes         *bytes.Buffer
+	readLogs         bool
+	errorLogs        map[string][]string
+	httpClient       *http.Client
 }
 
 func getDirName() string {
@@ -74,6 +75,11 @@ func CreateGateway(
 	}
 
 	backendsHTTP, err := testBackend.BuildHTTPBackends(seedConfig, opts.KnownHTTPBackends)
+	if err != nil {
+		return nil, err
+	}
+
+	backendsTChannel, err := testBackend.BuildTChannelBackends(seedConfig, opts.KnownTChannelBackends)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +109,9 @@ func CreateGateway(
 			},
 			Timeout: 30 * 1000 * time.Millisecond,
 		},
-		backendsHTTP: backendsHTTP,
-		logBytes:     bytes.NewBuffer(nil),
+		backendsHTTP:     backendsHTTP,
+		backendsTChannel: backendsTChannel,
+		logBytes:         bytes.NewBuffer(nil),
 
 		readLogs:  false,
 		errorLogs: map[string][]string{},
@@ -184,6 +191,11 @@ func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
 // HTTPBackends returns the HTTP backends of the gateway
 func (gateway *BenchGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
 	return gateway.backendsHTTP
+}
+
+// TChannelBackends returns the TChannel backends of the gateway
+func (gateway *BenchGateway) TChannelBackends() map[string]*testBackend.TestTChannelBackend {
+	return gateway.backendsTChannel
 }
 
 // MakeRequest helper
