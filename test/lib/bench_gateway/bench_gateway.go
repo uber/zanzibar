@@ -34,8 +34,6 @@ import (
 	"encoding/json"
 
 	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -62,9 +60,27 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
+type clientsInterface interface {
+	CreateClients(
+		config *zanzibar.StaticConfig,
+		gateway *zanzibar.Gateway,
+	) *Clients
+}
+
+// Clients interface is a placeholder for the generated clients
+type Clients interface {
+}
+
+type endpointsInterface interface {
+	Register(g *zanzibar.Gateway, router *zanzibar.Router)
+}
+
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
-	seedConfig map[string]interface{}, opts *testGateway.Options,
+	seedConfig map[string]interface{},
+	opts *testGateway.Options,
+	createClients func(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) interface{},
+	regEndpoints func(g *zanzibar.Gateway, router *zanzibar.Router),
 ) (testGateway.TestGateway, error) {
 	if seedConfig == nil {
 		seedConfig = map[string]interface{}{}
@@ -130,10 +146,10 @@ func CreateGateway(
 	if err != nil {
 		return nil, err
 	}
-	gateway.Clients = clients.CreateClients(config, gateway)
+	gateway.Clients = createClients(config, gateway)
 
 	benchGateway.ActualGateway = gateway
-	err = gateway.Bootstrap(endpoints.Register)
+	err = gateway.Bootstrap(regEndpoints)
 	if err != nil {
 		return nil, err
 	}

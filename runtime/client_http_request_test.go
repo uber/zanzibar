@@ -26,10 +26,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 )
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -48,7 +56,12 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 }
 
 func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}

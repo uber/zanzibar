@@ -30,6 +30,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+
 	"encoding/json"
 
 	"github.com/pkg/errors"
@@ -46,9 +49,14 @@ var headers map[string]string = map[string]string{
 }
 
 func BenchmarkGoogleNowAddCredentials(b *testing.B) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"googleNow"},
-	})
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		&testGateway.Options{
+			KnownHTTPBackends: []string{"googleNow"},
+		},
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
