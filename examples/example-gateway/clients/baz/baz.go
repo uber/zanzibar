@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/uber-go/zap"
-	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 
 	zt "github.com/uber/zanzibar/runtime/tchannel"
@@ -32,23 +30,15 @@ type BazClient struct {
 
 // NewClient returns a new http client for service Bar.
 func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazClient {
-	// TODO: (lu) get clientName from config
-	// clientName := config.MustGetString("clients.baz.clientName")
-	clientName := "BazClient"
+	// TODO: (lu) get serviceName from thrift
+	serviceName := "SimpleService"
 
-	// TODO: (lu) client channel opts
-	ch, err := tchannel.NewChannel(clientName, nil)
-	if err != nil {
-		gateway.Logger.Error("Failed to create tchannel",
-			zap.String("error", err.Error()))
-	}
+	ch := gateway.Channel
 
 	ip := config.MustGetString("clients.baz.ip")
 	port := config.MustGetInt("clients.baz.port")
 	ch.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	// TODO: (lu) get serviceName from thrift
-	serviceName := "SimpleService"
 	client := zt.NewClient(ch, serviceName)
 
 	return &BazClient{
