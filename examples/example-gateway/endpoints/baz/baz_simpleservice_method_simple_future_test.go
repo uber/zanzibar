@@ -48,7 +48,7 @@ func (h *testSimpleFutureHandler) SimpleFuture(ctx context.Context, reqHeaders m
 
 func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownTChannelBackends: []string{"SimpleService"},
+		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "build", "main.go",
 		),
@@ -61,7 +61,7 @@ func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 	testSimpleFutureCounter = 0
 
 	server := bazServer.NewSimpleServiceServer(&testSimpleFutureHandler{})
-	gateway.TChannelBackends()["SimpleService"].Register(server)
+	gateway.TChannelBackends()["baz"].Register(server)
 
 	headers := map[string]string{}
 

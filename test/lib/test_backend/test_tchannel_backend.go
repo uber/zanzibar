@@ -47,8 +47,14 @@ func BuildTChannelBackends(
 	n := len(knownTChannelBackends)
 	result := make(map[string]*TestTChannelBackend, n)
 
+	var clientName, serviceName string
 	for i := 0; i < n; i++ {
-		serviceName := knownTChannelBackends[i]
+		clientName = knownTChannelBackends[i]
+
+		// TODO: (lu) tmp, get backend thrift service name from config
+		if clientName == "baz" {
+			serviceName = "SimpleService"
+		}
 		backend, err := CreateTChannelBackend(0, serviceName)
 		if err != nil {
 			return nil, err
@@ -59,9 +65,9 @@ func BuildTChannelBackends(
 			return nil, err
 		}
 
-		result[serviceName] = backend
-		cfg["clients."+serviceName+".ip"] = "127.0.0.1"
-		cfg["clients."+serviceName+".port"] = int64(backend.RealPort)
+		result[clientName] = backend
+		cfg["clients."+clientName+".ip"] = "127.0.0.1"
+		cfg["clients."+clientName+".port"] = int64(backend.RealPort)
 	}
 
 	return result, nil

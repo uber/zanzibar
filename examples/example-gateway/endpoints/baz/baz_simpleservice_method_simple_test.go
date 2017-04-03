@@ -48,7 +48,7 @@ func (h *testSimpleHandler) Simple(ctx context.Context, reqHeaders map[string]st
 
 func TestSimpleSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownTChannelBackends: []string{"SimpleService"},
+		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "build", "main.go",
 		),
@@ -59,7 +59,7 @@ func TestSimpleSuccessfulRequestOKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	server := bazServer.NewSimpleServiceServer(&testSimpleHandler{})
-	gateway.TChannelBackends()["SimpleService"].Register(server)
+	gateway.TChannelBackends()["baz"].Register(server)
 
 	headers := map[string]string{}
 
