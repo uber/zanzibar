@@ -23,7 +23,6 @@ package testBackend
 import (
 	"net"
 	"strconv"
-	"sync"
 
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
@@ -33,13 +32,12 @@ import (
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
-	Channel   *tchannel.Channel
-	Server    *zt.Server
-	IP        string
-	Port      int32
-	RealPort  int32
-	RealAddr  string
-	WaitGroup *sync.WaitGroup
+	Channel  *tchannel.Channel
+	Server   *zt.Server
+	IP       string
+	Port     int32
+	RealPort int32
+	RealAddr string
 }
 
 // BuildTChannelBackends returns a map of TChannel backends based on config
@@ -96,17 +94,11 @@ func (backend *TestTChannelBackend) Close() {
 	backend.Channel.Close()
 }
 
-// Wait keeps backend process live
-func (backend *TestTChannelBackend) Wait() {
-	backend.WaitGroup.Wait()
-}
-
 // CreateTChannelBackend creates a TChannel backend for testing
 func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend, error) {
 	backend := &TestTChannelBackend{
-		IP:        "127.0.0.1",
-		Port:      port,
-		WaitGroup: &sync.WaitGroup{},
+		IP:   "127.0.0.1",
+		Port: port,
 	}
 
 	testLogger := zap.New(zap.NewJSONEncoder())
