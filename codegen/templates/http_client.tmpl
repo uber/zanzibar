@@ -13,7 +13,7 @@ import (
 
 	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
-	"{{$pkg}}"
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 )
 

@@ -4,8 +4,14 @@
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
-		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
-		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
+		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo",
+			"AliasName": "endpointsFooFoo"
+		},
+		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
+			"AliasName": "endpointsBarBar"
+		}
 	],
 	"Services": [
 		{
@@ -76,7 +82,7 @@
 					],
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "bar.BarResponse",
+					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -115,7 +121,7 @@
 					],
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "bar.BarResponse",
+					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -154,7 +160,7 @@
 					],
 					"Headers": null,
 					"RequestType": "NormalHTTPRequest",
-					"ResponseType": "bar.BarResponse",
+					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -168,7 +174,7 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*bar.BarRequest",
+							"Type": "*endpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						}
@@ -202,7 +208,7 @@
 						"x-token"
 					],
 					"RequestType": "TooManyArgsHTTPRequest",
-					"ResponseType": "bar.BarResponse",
+					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -216,12 +222,12 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*bar.BarRequest",
+							"Type": "*endpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						},
 						{
-							"Type": "*foo.FooStruct",
+							"Type": "*endpointsFooFoo.FooStruct",
 							"Name": "foo",
 							"Annotations": null
 						}

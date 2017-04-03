@@ -15,12 +15,12 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
-	"{{$pkg}}"
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 
 	{{range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
-	{{$file := basePath $pkg -}}
-	clientType{{ title $file }} "{{$pkg}}"
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 )
 

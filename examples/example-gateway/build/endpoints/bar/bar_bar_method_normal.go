@@ -13,9 +13,9 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 
-	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -59,7 +59,7 @@ func HandleNormalRequest(
 		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
 		return
 	}
-	var clientRespBody bar.BarResponse
+	var clientRespBody clientsBarBar.BarResponse
 	if err := clientRespBody.UnmarshalJSON(b); err != nil {
 		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
 		return
@@ -71,12 +71,12 @@ func HandleNormalRequest(
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
 	clientRequest := &barClient.NormalHTTPRequest{}
 
-	clientRequest.Request = (*clientTypeBar.BarRequest)(body.Request)
+	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
-func convertNormalClientResponse(body *bar.BarResponse) *bar.BarResponse {
+func convertNormalClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &bar.BarResponse{}
+	downstreamResponse := &endpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

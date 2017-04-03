@@ -38,8 +38,14 @@ type ModuleSpec struct {
 	// Go client types file path, generated from thrift file.
 	GoThriftTypesFilePath string
 	// Generated imports
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
+}
+
+// GoPackageImport ...
+type GoPackageImport struct {
+	PackageName string
+	AliasName   string
 }
 
 // ServiceSpec specifies a service.
@@ -91,7 +97,6 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 		return errors.Wrapf(err, "can't add import %s", ms.ThriftFile)
 	}
 
-	sort.Strings(ms.IncludedPackages)
 	return nil
 }
 
@@ -138,6 +143,7 @@ func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*S
 func (ms *ModuleSpec) SetDownstream(
 	serviceName string, methodName string,
 	clientSpec *ClientSpec, clientService string, clientMethod string,
+	h *PackageHelper,
 ) error {
 	var service *ServiceSpec
 	for _, v := range ms.Services {
@@ -190,7 +196,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err := method.setRequestFieldMap(funcSpec, downstreamSpec)
+		err := method.setRequestFieldMap(funcSpec, downstreamSpec, h)
 		if err != nil {
 			return err
 		}
@@ -198,8 +204,12 @@ func (ms *ModuleSpec) SetDownstream(
 
 	// Adds imports for downstream services.
 	if !ms.isPackageIncluded(clientSpec.GoPackageName) {
+
 		ms.IncludedPackages = append(
-			ms.IncludedPackages, clientSpec.GoPackageName,
+			ms.IncludedPackages, GoPackageImport{
+				PackageName: clientSpec.GoPackageName,
+				AliasName:   "",
+			},
 		)
 	}
 
@@ -214,7 +224,10 @@ func (ms *ModuleSpec) SetDownstream(
 				}
 
 				ms.IncludedPackages = append(
-					ms.IncludedPackages, method.Downstream.GoThriftTypesFilePath,
+					ms.IncludedPackages, GoPackageImport{
+						PackageName: method.Downstream.GoThriftTypesFilePath,
+						AliasName:   "",
+					},
 				)
 			}
 		}
@@ -267,15 +280,25 @@ func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHel
 	if err != nil {
 		return err
 	}
+	aliasName, err := packageHelper.TypePackageName(thriftPath)
+	if err != nil {
+		return err
+	}
+
 	if !ms.isPackageIncluded(newPkg) {
-		ms.IncludedPackages = append(ms.IncludedPackages, newPkg)
+		ms.IncludedPackages = append(
+			ms.IncludedPackages, GoPackageImport{
+				PackageName: newPkg,
+				AliasName:   aliasName,
+			},
+		)
 	}
 	return nil
 }
 
 func (ms *ModuleSpec) isPackageIncluded(pkg string) bool {
 	for _, includedPkg := range ms.IncludedPackages {
-		if pkg == includedPkg {
+		if pkg == includedPkg.PackageName {
 			return true
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"context"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
-	"{{$pkg}}"
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 
 	"github.com/uber/zanzibar/runtime"

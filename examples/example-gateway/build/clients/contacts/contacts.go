@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
+	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -34,7 +34,7 @@ func NewClient(
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
-func (c *ContactsClient) SaveContacts(ctx context.Context, r *contacts.SaveContactsRequest) (*http.Response, error) {
+func (c *ContactsClient) SaveContacts(ctx context.Context, r *clientsContactsContacts.SaveContactsRequest) (*http.Response, error) {
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "saveContacts", c.HTTPClient,
 	)
