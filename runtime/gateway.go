@@ -359,17 +359,35 @@ func (gateway *Gateway) setupHTTPServer() error {
 }
 
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
-	tchannelServer, err := NewTChannelServer(
-		&TChannelServerOptions{
-			ServiceName: config.MustGetString("tchannel.serviceName"),
-			ProcessName: config.MustGetString("tchannel.processName"),
-		}, gateway)
+	serviceName := config.MustGetString("tchannel.serviceName")
+	processName := config.MustGetString("tchannel.processName")
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName: processName,
+
+			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
+			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
+			//RelayHost:                opts.RelayHost,
+			//RelayLocalHandlers:       opts.RelayLocalHandlers,
+			//RelayMaxTimeout:          opts.RelayMaxTimeout,
+			//StatsReporter:            opts.StatsReporter,
+			//Tracer:
+
+			// TODO: (lu) wrap zap logger with tchannel logger interface
+			Logger: tchannel.NullLogger,
+		})
 
 	if err != nil {
-		return err
+		return errors.Errorf(
+			"Error creating top channel:\n    %s",
+			err)
 	}
 
-	gateway.tchannelServer = tchannelServer
+	gateway.Channel = channel
+	gateway.tchannelServer = zt.NewServer(channel, gateway.Logger)
+
 	return nil
 }
 
