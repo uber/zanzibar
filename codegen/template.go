@@ -179,6 +179,14 @@ func NewTemplate(templatePattern string) (*Template, error) {
 	}, nil
 }
 
+// ClientMeta ...
+type ClientMeta struct {
+	PackageName      string
+	ClientID         string
+	IncludedPackages []string
+	Services         []*ServiceSpec
+}
+
 // GenerateClientFile generates Go http code for services defined in thrift file.
 // It returns the path of generated client file and struct file or an error.
 func (t *Template) GenerateClientFile(
@@ -190,13 +198,18 @@ func (t *Template) GenerateClientFile(
 		return nil, nil
 	}
 
-	m.PackageName = m.PackageName + "Client"
-	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, m)
+	clientMeta := &ClientMeta{
+		PackageName:      m.PackageName,
+		Services:         m.Services,
+		IncludedPackages: m.IncludedPackages,
+		ClientID:         c.ClientID,
+	}
+	err := t.execTemplateAndFmt("http_client.tmpl", c.GoFileName, clientMeta)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run http_client template")
 	}
 
-	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, m)
+	err = t.execTemplateAndFmt("structs.tmpl", c.GoStructsFileName, clientMeta)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run structs template")
 	}

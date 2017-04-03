@@ -189,6 +189,7 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 			err, "Could not build module spec for thrift %s: ", thriftFile,
 		)
 	}
+	mspec.PackageName = mspec.PackageName + "Client"
 
 	baseName := filepath.Base(filepath.Dir(jsonFile))
 

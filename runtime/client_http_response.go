@@ -19,34 +19,3 @@
 // THE SOFTWARE.
 
 package zanzibar
-
-import "net/http"
-import "github.com/uber-go/zap"
-
-// HTTPClient defines a http client.
-type HTTPClient struct {
-	gateway *Gateway
-
-	Client  *http.Client
-	Logger  zap.Logger
-	BaseURL string
-}
-
-// NewHTTPClient will allocate a http client.
-func NewHTTPClient(
-	gateway *Gateway, baseURL string,
-) *HTTPClient {
-	return &HTTPClient{
-		gateway: gateway,
-
-		Logger: gateway.Logger,
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-		},
-		BaseURL: baseURL,
-	}
-}
