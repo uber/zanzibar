@@ -74,6 +74,7 @@ type Gateway struct {
 	metricsBackend    tally.CachedStatsReporter
 	logWriter         zap.WriteSyncer
 	server            *HTTPServer
+	localServer       *HTTPServer
 	tchannelServer    *zt.Server
 	// clients?
 	//	- panic ???
@@ -139,14 +140,25 @@ type RegisterFn func(gateway *Gateway, router *Router)
 func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 	gateway.register(register)
 
-	_, err := gateway.server.JustListen()
+	_, err := gateway.localServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port",
 			zap.String("error", err.Error()),
 		)
 		return errors.Wrap(err, "error listening on port")
 	}
-
+	if gateway.localServer.RealIP != gateway.IP {
+		_, err := gateway.server.JustListen()
+		if err != nil {
+			gateway.Logger.Error("Error listening on port",
+				zap.String("error", err.Error()),
+			)
+			return errors.Wrap(err, "error listening on port")
+		}
+	} else {
+		// Do not start at the same IP
+		gateway.server = gateway.localServer
+	}
 	gateway.RealPort = gateway.server.RealPort
 	gateway.RealAddr = gateway.server.RealAddr
 
@@ -205,6 +217,9 @@ func (gateway *Gateway) Close() {
 
 	gateway.metricsBackend.Flush()
 	_ = gateway.metricScopeCloser.Close()
+	if gateway.localServer != gateway.server {
+		gateway.localServer.Close()
+	}
 	gateway.server.Close()
 }
 
@@ -325,14 +340,25 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupHTTPServer() error {
+	listenIP, err := tchannel.ListenIP()
+	if err != nil {
+		return errors.Wrap(err, "error finding the best IP")
+	}
 	gateway.server = &HTTPServer{
 		Server: &http.Server{
-			Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
+			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.Port), 10),
 			Handler: gateway.Router,
 		},
 		Logger: gateway.Logger,
 	}
 
+	gateway.localServer = &HTTPServer{
+		Server: &http.Server{
+			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.Port), 10),
+			Handler: gateway.Router,
+		},
+		Logger: gateway.Logger,
+	}
 	return nil
 }
 
