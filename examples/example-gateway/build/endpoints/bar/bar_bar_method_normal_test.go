@@ -52,6 +52,6 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, 1, counter)
 }

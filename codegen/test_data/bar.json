@@ -32,12 +32,10 @@
 					"Headers": null,
 					"RequestType": "ArgNotStructHTTPRequest",
 					"ResponseType": "",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
 					"ExceptionStatusCode": [
 						{
 							"Code": 403,
@@ -79,12 +77,10 @@
 					"Headers": null,
 					"RequestType": "",
 					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
 					"ExceptionStatusCode": [
 						{
 							"Code": 403,
@@ -120,12 +116,10 @@
 					"Headers": null,
 					"RequestType": "",
 					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
 					"ExceptionStatusCode": [
 						{
 							"Code": 403,
@@ -161,12 +155,10 @@
 					"Headers": null,
 					"RequestType": "NormalHTTPRequest",
 					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
 					"ExceptionStatusCode": [
 						{
 							"Code": 403,
@@ -211,12 +203,10 @@
 					],
 					"RequestType": "TooManyArgsHTTPRequest",
 					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
-						{
-							"Code": 200,
-							"Message": ""
-						}
-					],
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
 					"ExceptionStatusCode": [
 						{
 							"Code": 403,

@@ -40,7 +40,8 @@ func HandleNoRequestRequest(
 	}()
 
 	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
+	expectedStatusCode := []int{200}
+	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
 		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
@@ -56,7 +57,7 @@ func HandleNoRequestRequest(
 		return
 	}
 	response := convertNoRequestClientResponse(&clientRespBody)
-	res.WriteJSON(clientResp.StatusCode, response)
+	res.WriteJSON(200, response)
 }
 
 func convertNoRequestClientResponse(body *bar.BarResponse) *bar.BarResponse {

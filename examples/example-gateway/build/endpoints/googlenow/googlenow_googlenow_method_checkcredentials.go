@@ -40,10 +40,11 @@ func HandleCheckCredentialsRequest(
 	}()
 
 	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
+	expectedStatusCode := []int{202}
+	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
 		req.Logger.Warn("Unknown response status code",
 			zap.Int("status code", clientResp.StatusCode),
 		)
 	}
-	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes(202, nil)
 }
