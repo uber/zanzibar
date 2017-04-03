@@ -60,21 +60,6 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
-type clientsInterface interface {
-	CreateClients(
-		config *zanzibar.StaticConfig,
-		gateway *zanzibar.Gateway,
-	) *Clients
-}
-
-// Clients interface is a placeholder for the generated clients
-type Clients interface {
-}
-
-type endpointsInterface interface {
-	Register(g *zanzibar.Gateway, router *zanzibar.Router)
-}
-
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
 	seedConfig map[string]interface{},
