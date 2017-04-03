@@ -13,10 +13,10 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	endpoints_bar_bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 
-	clients_bar_bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	clients_foo_foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
 )
 
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".
@@ -63,7 +63,7 @@ func HandleTooManyArgsRequest(
 		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
 		return
 	}
-	var clientRespBody clients_bar_bar.BarResponse
+	var clientRespBody clientsBarBar.BarResponse
 	if err := clientRespBody.UnmarshalJSON(b); err != nil {
 		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
 		return
@@ -75,13 +75,13 @@ func HandleTooManyArgsRequest(
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
 	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
-	clientRequest.Foo = (*clients_foo_foo.FooStruct)(body.Foo)
-	clientRequest.Request = (*clients_bar_bar.BarRequest)(body.Request)
+	clientRequest.Foo = (*clientsFooFoo.FooStruct)(body.Foo)
+	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
-func convertTooManyArgsClientResponse(body *clients_bar_bar.BarResponse) *endpoints_bar_bar.BarResponse {
+func convertTooManyArgsClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpoints_bar_bar.BarResponse{}
+	downstreamResponse := &endpointsBarBar.BarResponse{}
 	return downstreamResponse
 }
