@@ -9,6 +9,9 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
 
 	"github.com/uber/zanzibar/runtime"
+
+	// TODO: (lu) remove this, to be generated
+	"github.com/uber/zanzibar/examples/example-gateway/clients/baz"
 )
 
 // Clients datastructure that holds all the generated clients
@@ -17,6 +20,9 @@ type Clients struct {
 	Bar       *barClient.BarClient
 	Contacts  *contactsClient.ContactsClient
 	GoogleNow *googlenowClient.GoogleNowClient
+
+	// TODO: (lu) remove this, to be generated
+	Baz *bazClient.BazClient
 }
 
 // CreateClients will make all clients
@@ -32,6 +38,11 @@ func CreateClients(
 			config, gateway,
 		),
 		GoogleNow: googlenowClient.NewClient(
+			config, gateway,
+		),
+
+		// TODO: (lu) remove this, to be generated
+		Baz: bazClient.NewClient(
 			config, gateway,
 		),
 	}

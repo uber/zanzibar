@@ -35,7 +35,9 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
-	tchannel "github.com/uber/tchannel-go"
+	"github.com/uber/tchannel-go"
+
+	zt "github.com/uber/zanzibar/runtime/tchannel"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -60,6 +62,7 @@ type Gateway struct {
 	RealAddr    string
 	WaitGroup   *sync.WaitGroup
 	Clients     Clients
+	Channel     *tchannel.Channel
 	Logger      zap.Logger
 	MetricScope tally.Scope
 	ServiceName string
@@ -72,7 +75,7 @@ type Gateway struct {
 	logWriter         zap.WriteSyncer
 	server            *HTTPServer
 	localServer       *HTTPServer
-	tchannelServer    *TChannelServer
+	tchannelServer    *zt.Server
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -357,7 +360,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 		&TChannelServerOptions{
 			ServiceName: config.MustGetString("tchannel.serviceName"),
 			ProcessName: config.MustGetString("tchannel.processName"),
-		})
+		}, gateway)
 
 	if err != nil {
 		return err

@@ -27,15 +27,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
-)
 
-// TChannelServer wraps a standard tchannel.Channel, but improves
-// interoperability with the tchannel client and other dependencies related to
-// zanzibar
-type TChannelServer struct {
-	*tchannel.Channel
-	Logger zap.Logger
-}
+	zt "github.com/uber/zanzibar/runtime/tchannel"
+)
 
 // TChannelServerOptions are used to initialize the TChannel wrapper struct
 type TChannelServerOptions struct {
@@ -52,18 +46,20 @@ type TChannelServerOptions struct {
 }
 
 // NewTChannelServer allocates a new TChannel wrapper struct
-func NewTChannelServer(opts *TChannelServerOptions) (*TChannelServer, error) {
+func NewTChannelServer(opts *TChannelServerOptions, gateway *Gateway) (*zt.Server, error) {
 	channel, err := tchannel.NewChannel(
 		opts.ServiceName,
 		&tchannel.ChannelOptions{
 			DefaultConnectionOptions: opts.DefaultConnectionOptions,
-			// TODO: Logger: opts.Logger,
-			OnPeerStatusChanged: opts.OnPeerStatusChanged,
-			ProcessName:         opts.ProcessName,
-			RelayHost:           opts.RelayHost,
-			RelayLocalHandlers:  opts.RelayLocalHandlers,
-			RelayMaxTimeout:     opts.RelayMaxTimeout,
-			StatsReporter:       opts.StatsReporter,
+			OnPeerStatusChanged:      opts.OnPeerStatusChanged,
+			ProcessName:              opts.ProcessName,
+			RelayHost:                opts.RelayHost,
+			RelayLocalHandlers:       opts.RelayLocalHandlers,
+			RelayMaxTimeout:          opts.RelayMaxTimeout,
+			StatsReporter:            opts.StatsReporter,
+
+			// TODO: (lu) wrap zap logger with tchannel logger interface
+			Logger: tchannel.NullLogger,
 		})
 
 	if err != nil {
@@ -72,8 +68,7 @@ func NewTChannelServer(opts *TChannelServerOptions) (*TChannelServer, error) {
 			err)
 	}
 
-	return &TChannelServer{
-		Channel: channel,
-		Logger:  opts.Logger,
-	}, nil
+	gateway.Channel = channel
+
+	return zt.NewServer(channel, gateway.Logger), nil
 }

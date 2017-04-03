@@ -19,6 +19,9 @@
 	"clients.bar.port": 4001,
 	"clients.bar.ip": "127.0.0.1",
 
+	"clients.baz.port": 4002,
+	"clients.baz.ip": "127.0.0.1",
+
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [
 		"127.0.0.1:4002"

@@ -9,6 +9,9 @@ import (
 	"{{$pkg}}"
 	{{end}}
 	"github.com/uber/zanzibar/runtime"
+
+	// TODO: (lu) remove this, to be generated
+	"github.com/uber/zanzibar/examples/example-gateway/clients/baz"
 )
 
 // Clients datastructure that holds all the generated clients
@@ -17,6 +20,8 @@ type Clients struct {
 	{{range $idx, $clientInfo := .ClientInfo -}}
 	{{$clientInfo.FieldName}} *{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
 	{{end}}
+	// TODO: (lu) remove this, to be generated
+    Baz       *bazClient.BazClient
 }
 
 // CreateClients will make all clients
@@ -30,5 +35,9 @@ func CreateClients(
 			config, gateway,
 		),
 		{{end}}
+	    // TODO: (lu) remove this, to be generated
+	    Baz:       bazClient.NewClient(
+	        config, gateway,
+	    ),
 	}
 }
