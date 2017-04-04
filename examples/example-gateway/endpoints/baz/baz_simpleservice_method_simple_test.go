@@ -69,10 +69,6 @@ func TestSimpleSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	if !assert.NoError(t, err, "failed to read response body") {
-		return
-	}
-
 	assert.Equal(t, 1, testSimpleCounter)
 	assert.Equal(t, "200 OK", res.Status)
 }
