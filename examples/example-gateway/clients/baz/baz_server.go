@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	zt "github.com/uber/zanzibar/runtime/tchannel"
+	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
@@ -21,7 +21,7 @@ type SimpleServiceServer struct {
 }
 
 // NewSimpleServiceServer wraps a handler for Baz so it can be registered with a thrift server.
-func NewSimpleServiceServer(handler TChanBaz) zt.TChanServer {
+func NewSimpleServiceServer(handler TChanBaz) zanzibar.TChanServer {
 	return &SimpleServiceServer{
 		handler,
 	}
@@ -42,7 +42,7 @@ func (s *SimpleServiceServer) Methods() []string {
 }
 
 // Handle dispatches a method call to corresponding handler.
-func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zt.RWTStruct, error) {
+func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
 	switch methodName {
 	case "Call":
 		return s.handleCall(ctx, reqHeaders, wireValue)
@@ -56,7 +56,7 @@ func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, req
 	}
 }
 
-func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zt.RWTStruct, error) {
+func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
 	var req baz.SimpleService_Call_Args
 	var res baz.SimpleService_Call_Result
 
@@ -74,7 +74,7 @@ func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[str
 	return true, respHeaders, &res, nil
 }
 
-func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zt.RWTStruct, error) {
+func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
 	var req baz.SimpleService_Simple_Args
 	var res baz.SimpleService_Simple_Result
 
@@ -99,7 +99,7 @@ func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[s
 	return err == nil, respHeaders, &res, nil
 }
 
-func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zt.RWTStruct, error) {
+func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
 	var req baz.SimpleService_SimpleFuture_Args
 	var res baz.SimpleService_SimpleFuture_Result
 
@@ -139,21 +139,21 @@ type SimpleFunc func(context.Context, map[string]string) (map[string]string, err
 type SimpleFutureFunc func(context.Context, map[string]string) (map[string]string, error)
 
 // WithCall creates a TChanServer with Call handler function registered
-func WithCall(call CallFunc) zt.TChanServer {
+func WithCall(call CallFunc) zanzibar.TChanServer {
 	return NewSimpleServiceServer(&Handler{
 		CallFunc: call,
 	})
 }
 
 // WithSimple creates a TChanServer with Simple handler function registered
-func WithSimple(simple SimpleFunc) zt.TChanServer {
+func WithSimple(simple SimpleFunc) zanzibar.TChanServer {
 	return NewSimpleServiceServer(&Handler{
 		SimpleFunc: simple,
 	})
 }
 
 // WithSimpleFuture creates a TChanServer with SimpleFuture handler function registered
-func WithSimpleFuture(simpleFuture SimpleFutureFunc) zt.TChanServer {
+func WithSimpleFuture(simpleFuture SimpleFutureFunc) zanzibar.TChanServer {
 	return NewSimpleServiceServer(&Handler{
 		SimpleFutureFunc: simpleFuture,
 	})

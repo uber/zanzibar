@@ -11,8 +11,6 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 
-	zt "github.com/uber/zanzibar/runtime/tchannel"
-
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
 )
 
@@ -33,7 +31,7 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 	port := config.MustGetInt("clients.baz.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
-	client := zt.NewClient(gateway.Channel, serviceName)
+	client := zanzibar.NewClient(gateway.Channel, serviceName)
 
 	// TODO: (lu) maybe set these at per method level
 	timeout := time.Duration(config.MustGetInt("clients.baz.timeout")) * time.Millisecond
@@ -50,7 +48,7 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 // BazClient is the client to talk to SimpleService backend.
 type BazClient struct {
 	thriftService string
-	client        zt.TChanClient
+	client        zanzibar.TChanClient
 
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration

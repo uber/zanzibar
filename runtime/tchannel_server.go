@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel
+package zanzibar
 
 import (
 	"bytes"
@@ -46,8 +46,8 @@ type handler struct {
 	postResponseCB PostResponseCB
 }
 
-// Server handles incoming TChannel calls and forwards them to the matching TChanServer.
-type Server struct {
+// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanServer.
+type TChannelServer struct {
 	sync.RWMutex
 	registrar tchan.Registrar
 	logger    zap.Logger
@@ -56,16 +56,16 @@ type Server struct {
 
 // netContextServer implements the Handler interface that consumes netContext instead of stdlib context
 type netContextServer struct {
-	server *Server
+	server *TChannelServer
 }
 
 func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCall) {
 	ncs.server.Handle(ctx, call)
 }
 
-// NewServer returns a server that can serve thrift services over TChannel.
-func NewServer(registrar tchan.Registrar, logger zap.Logger) *Server {
-	server := &Server{
+// NewTChannelServer returns a server that can serve thrift services over TChannel.
+func NewTChannelServer(registrar tchan.Registrar, logger zap.Logger) *TChannelServer {
+	server := &TChannelServer{
 		registrar: registrar,
 		logger:    logger,
 		handlers:  map[string]handler{},
@@ -73,7 +73,7 @@ func NewServer(registrar tchan.Registrar, logger zap.Logger) *Server {
 	return server
 }
 
-func (s *Server) register(svr TChanServer, h *handler) {
+func (s *TChannelServer) register(svr TChanServer, h *handler) {
 	service := svr.Service()
 	s.Lock()
 	s.handlers[service] = *h
@@ -86,13 +86,13 @@ func (s *Server) register(svr TChanServer, h *handler) {
 }
 
 // Register registers the given TChanServer to the be called on any incoming call for its services.
-func (s *Server) Register(svr TChanServer) {
+func (s *TChannelServer) Register(svr TChanServer) {
 	handler := &handler{server: svr}
 	s.register(svr, handler)
 }
 
 // RegisterWithPostResponseCB registers the given TChanServer with a PostResponseCB function
-func (s *Server) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
+func (s *TChannelServer) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
 	handler := &handler{
 		server:         svr,
 		postResponseCB: cb,
@@ -100,7 +100,7 @@ func (s *Server) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) 
 	s.register(svr, handler)
 }
 
-func (s *Server) onError(err error) {
+func (s *TChannelServer) onError(err error) {
 	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
 		s.logger.Warn("Thrift server timeout",
 			zap.String("error", err.Error()),
@@ -112,7 +112,7 @@ func (s *Server) onError(err error) {
 	}
 }
 
-func (s *Server) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
+func (s *TChannelServer) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
 	serviceName := handler.server.Service()
 
 	reader, err := call.Arg2Reader()
@@ -215,7 +215,7 @@ func getServiceMethod(method string) (string, string, bool) {
 }
 
 // Handle handles an incoming TChannel call and forwards it to the correct handler.
-func (s *Server) Handle(ctx context.Context, call *tchan.InboundCall) {
+func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
 	op := call.MethodString()
 	service, method, ok := getServiceMethod(op)
 	if !ok {

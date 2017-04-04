@@ -27,13 +27,13 @@ import (
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
 
-	zt "github.com/uber/zanzibar/runtime/tchannel"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
 	Channel  *tchannel.Channel
-	Server   *zt.Server
+	Server   *zanzibar.TChannelServer
 	IP       string
 	Port     int32
 	RealPort int32
@@ -91,7 +91,7 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 }
 
 // Register registers tchannel server handler
-func (backend *TestTChannelBackend) Register(server zt.TChanServer) {
+func (backend *TestTChannelBackend) Register(server zanzibar.TChanServer) {
 	backend.Server.Register(server)
 }
 
@@ -119,7 +119,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 	}
 
 	backend.Channel = channel
-	backend.Server = zt.NewServer(channel, testLogger)
+	backend.Server = zanzibar.NewTChannelServer(channel, testLogger)
 
 	return backend, nil
 }

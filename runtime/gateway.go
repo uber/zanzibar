@@ -36,8 +36,6 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
-
-	zt "github.com/uber/zanzibar/runtime/tchannel"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -74,7 +72,7 @@ type Gateway struct {
 	logWriter         zap.WriteSyncer
 	server            *HTTPServer
 	localServer       *HTTPServer
-	tchannelServer    *zt.Server
+	tchannelServer    *TChannelServer
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -386,7 +384,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
-	gateway.tchannelServer = zt.NewServer(channel, gateway.Logger)
+	gateway.tchannelServer = NewTChannelServer(channel, gateway.Logger)
 
 	return nil
 }
