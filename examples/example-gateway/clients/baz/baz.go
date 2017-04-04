@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 
 	zt "github.com/uber/zanzibar/runtime/tchannel"
@@ -36,12 +37,15 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 
 	client := zt.NewClient(gateway.Channel, serviceName)
 
+	// TODO: (lu) maybe set these at per method level
 	timeout := time.Duration(config.MustGetInt("clients.baz.timeout")) * time.Millisecond
+	timeoutPerAttempt := time.Duration(config.MustGetInt("clients.baz.timeoutPerAttempt")) * time.Millisecond
 
 	return &BazClient{
-		thriftService: serviceName,
-		client:        client,
-		timeout:       timeout,
+		thriftService:     serviceName,
+		client:            client,
+		timeout:           timeout,
+		timeoutPerAttempt: timeoutPerAttempt,
 	}
 }
 
@@ -49,20 +53,23 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 type BazClient struct {
 	thriftService string
 	client        zt.TChanClient
-	// timeout is the default timeout if upstream does not have one
-	timeout time.Duration
+
+	timeout           time.Duration
+	timeoutPerAttempt time.Duration
 }
 
 // Call ...
 func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error) {
 	var result baz.SimpleService_Call_Result
 
-	_, ok := ctx.Deadline()
-	if !ok {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, c.timeout)
-		defer cancel()
+	retryOpts := &tchannel.RetryOptions{
+		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
+	ctx, cancel := tchannel.NewContextBuilder(c.timeout).
+		SetParentContext(ctx).
+		SetRetryOptions(retryOpts).
+		Build()
+	defer cancel()
 
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, args, &result)
 	if err == nil && !success {
@@ -81,12 +88,14 @@ func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, args
 func (c *BazClient) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_Simple_Result
 
-	_, ok := ctx.Deadline()
-	if !ok {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, c.timeout)
-		defer cancel()
+	retryOpts := &tchannel.RetryOptions{
+		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
+	ctx, cancel := tchannel.NewContextBuilder(c.timeout).
+		SetParentContext(ctx).
+		SetRetryOptions(retryOpts).
+		Build()
+	defer cancel()
 
 	args := baz.SimpleService_Simple_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Simple", reqHeaders, &args, &result)
@@ -106,12 +115,14 @@ func (c *BazClient) Simple(ctx context.Context, reqHeaders map[string]string) (m
 func (c *BazClient) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	var result baz.SimpleService_SimpleFuture_Result
 
-	_, ok := ctx.Deadline()
-	if !ok {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, c.timeout)
-		defer cancel()
+	retryOpts := &tchannel.RetryOptions{
+		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
+	ctx, cancel := tchannel.NewContextBuilder(c.timeout).
+		SetParentContext(ctx).
+		SetRetryOptions(retryOpts).
+		Build()
+	defer cancel()
 
 	args := baz.SimpleService_SimpleFuture_Args{}
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "SimpleFuture", reqHeaders, &args, &result)
