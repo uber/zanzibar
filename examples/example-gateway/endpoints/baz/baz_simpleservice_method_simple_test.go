@@ -36,11 +36,7 @@ import (
 
 var testSimpleCounter int
 
-type testSimpleHandler struct {
-	*bazServer.Handler
-}
-
-func (h *testSimpleHandler) Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+func simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	testSimpleCounter++
 	return nil, nil
 
@@ -58,8 +54,7 @@ func TestSimpleSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	server := bazServer.NewSimpleServiceServer(&testSimpleHandler{})
-	gateway.TChannelBackends()["baz"].Register(server)
+	gateway.TChannelBackends()["baz"].Register(bazServer.WithSimple(simple))
 
 	headers := map[string]string{}
 

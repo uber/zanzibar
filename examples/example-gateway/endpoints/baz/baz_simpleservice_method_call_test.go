@@ -38,11 +38,7 @@ import (
 
 var testCallCounter int
 
-type testCallHandler struct {
-	*bazServer.Handler
-}
-
-func (h *testCallHandler) Call(
+func call(
 	ctx context.Context, reqHeaders map[string]string, r *baz.SimpleService_Call_Args,
 ) (map[string]string, *baz.BazResponse, error) {
 	testCallCounter++
@@ -68,8 +64,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	server := bazServer.NewSimpleServiceServer(&testCallHandler{})
-	gateway.TChannelBackends()["baz"].Register(server)
+	gateway.TChannelBackends()["baz"].Register(bazServer.WithCall(call))
 
 	headers := map[string]string{}
 

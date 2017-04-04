@@ -36,11 +36,7 @@ import (
 
 var testSimpleFutureCounter int
 
-type testSimpleFutureHandler struct {
-	*bazServer.Handler
-}
-
-func (h *testSimpleFutureHandler) SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+func simpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
 	testSimpleFutureCounter++
 	return nil, nil
 
@@ -60,8 +56,7 @@ func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 
 	testSimpleFutureCounter = 0
 
-	server := bazServer.NewSimpleServiceServer(&testSimpleFutureHandler{})
-	gateway.TChannelBackends()["baz"].Register(server)
+	gateway.TChannelBackends()["baz"].Register(bazServer.WithSimpleFuture(simpleFuture))
 
 	headers := map[string]string{}
 
