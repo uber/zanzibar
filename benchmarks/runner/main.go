@@ -87,7 +87,6 @@ func spawnGateway(dirName string) *exec.Cmd {
 	}
 
 	config := map[string]interface{}{
-		"ip":                     "127.0.0.1",
 		"port":                   8093,
 		"tchannel.serviceName":   "bench-gateway",
 		"tchannel.processName":   "bench-gateway",
