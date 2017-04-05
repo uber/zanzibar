@@ -6,14 +6,12 @@ package bar
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
@@ -24,20 +22,49 @@ func HandleMissingArgRequest(
 	clients *clients.Clients,
 ) {
 
-	clientRespBody, _, err := clients.Bar.MissingArg(
-		ctx, nil,
-	)
+	headers := map[string]string{}
 
+	workflow := MissingArgEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+	}
+
+	response, _, err := workflow.Handle(ctx, headers)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
-	response := convertMissingArgClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
+}
+
+// MissingArgEndpoint calls thrift client Bar.MissingArg
+type MissingArgEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+}
+
+// Handle calls thrift client.
+func (w MissingArgEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+) (*endpointsBarBar.BarResponse, map[string]string, error) {
+
+	clientRespBody, _, err := w.Clients.Bar.MissingArg(
+		ctx, nil,
+	)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, nil, err
+	}
+
+	response := convertMissingArgClientResponse(clientRespBody)
+	return response, nil, nil
 }
 
 func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
