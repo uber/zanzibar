@@ -62,6 +62,7 @@ type EndpointMeta struct {
 	PackageName        string
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
+	WorkflowName       string
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -250,20 +251,29 @@ func (t *Template) GenerateEndpointFile(
 		)
 	}
 
-	if method.Downstream == nil {
-		return nil, errors.Errorf(
-			"Could not find downstream for endpoint generation... "+
-				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-			methodName, serviceName, e.JSONFile,
-		)
+	includedPackages := m.IncludedPackages
+	if e.WorkflowImportPath != "" {
+		includedPackages = append(includedPackages, GoPackageImport{
+			PackageName: e.WorkflowImportPath,
+			AliasName:   "custom" + strings.Title(m.PackageName),
+		})
+	}
+
+	var workflowName string
+	if method.Downstream != nil {
+		workflowName = strings.Title(method.Name) + "Endpoint"
+	} else {
+		workflowName = "custom" + strings.Title(m.PackageName) + "." +
+			strings.Title(method.Name) + "Endpoint"
 	}
 
 	dest := e.TargetEndpointPath(serviceName, method.Name)
 	meta := &EndpointMeta{
 		GatewayPackageName: h.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
-		IncludedPackages:   m.IncludedPackages,
+		IncludedPackages:   includedPackages,
 		Method:             method,
+		WorkflowName:       workflowName,
 	}
 
 	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta)
@@ -294,14 +304,6 @@ func (t *Template) GenerateEndpointTestFile(
 		return nil, errors.Errorf(
 			"Could not find serviceName (%s) + methodName (%s) in module",
 			serviceName, methodName,
-		)
-	}
-
-	if method.Downstream == nil {
-		return nil, errors.Errorf(
-			"Could not find downstream for endpoint generation... "+
-				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-			methodName, serviceName, e.JSONFile,
 		)
 	}
 
@@ -526,7 +528,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 		if espec.WorkflowType == "httpClient" {
 			goPkg = espec.ModuleSpec.GoPackage
 		} else if espec.WorkflowType == "custom" {
-			goPkg = espec.WorkflowImportPath
+			goPkg = espec.ModuleSpec.GoPackage
 		} else {
 			panic("Unsupported WorkflowType: " + espec.WorkflowType)
 		}

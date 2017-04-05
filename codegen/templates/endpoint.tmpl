@@ -18,20 +18,16 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end -}}
 
+	{{if .Method.Downstream }}
 	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
 	{{$file := basePath $pkg.PackageName -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	{{- end}}
 )
 
+{{ $workflow := .WorkflowName -}}
 {{with .Method -}}
-{{- $workflow := title .Name | printf "%sEndpoint" -}}
-{{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientName := title .DownstreamService -}}
-{{- $clientMethod := .DownstreamMethod -}}
-{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
-{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientMethodName := title ($clientMethod).Name -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
 func Handle{{title .Name}}Request(
@@ -47,7 +43,7 @@ func Handle{{title .Name}}Request(
 	{{- end -}}
 
 	{{if ne .RequestType ""}}
-	var requestBody {{title .RequestType}}
+	var requestBody {{.RequestType}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -58,6 +54,7 @@ func Handle{{title .Name}}Request(
 	workflow := {{$workflow}}{
 		Clients: clients,
 		Logger: req.Logger,
+		Request: req,
 	}
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	_, err := workflow.Handle(ctx, headers)
@@ -83,10 +80,23 @@ func Handle{{title .Name}}Request(
 	{{- end -}}
 }
 
+{{end -}}
+
+{{- if .Method.Downstream }}
+{{- with .Method -}}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $clientName := title .DownstreamService -}}
+{{- $clientMethod := .DownstreamMethod -}}
+{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientMethodName := title ($clientMethod).Name -}}
+
+
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflow}} struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
@@ -167,4 +177,5 @@ func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.Response
 }
 {{end -}}
 
+{{end -}}
 {{end -}}
