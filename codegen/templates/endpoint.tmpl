@@ -16,15 +16,16 @@ import (
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+	{{end -}}
 
-	{{range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
 	{{$file := basePath $pkg.PackageName -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 )
 
 {{with .Method -}}
+{{- $workflow := title .Name | printf "%sEndpoint" -}}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientName := title .DownstreamService -}}
 {{- $clientMethod := .DownstreamMethod -}}
@@ -39,48 +40,107 @@ func Handle{{title .Name}}Request(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	{{ if .Headers -}}
+	{{- if .Headers -}}
 	if !req.CheckHeaders({{.Headers | printf "%#v" }}) {
 		return
 	}
-	{{- end}}
+	{{- end -}}
 
 	{{if ne .RequestType ""}}
-	var body {{title .RequestType}}
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody {{title .RequestType}}
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
 	{{end}}
 
-	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-	_, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
-	{{else if eq $clientReqType ""}}
-	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil,
-	)
-	{{else if eq $clientResType ""}}
-	_, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
+
+	workflow := {{$workflow}}{
+		Clients: clients,
+		Logger: req.Logger,
+	}
+	{{if and (eq .RequestType "") (eq .ResponseType "")}}
+	_, err := workflow.Handle(ctx, headers)
+	{{else if eq .RequestType ""}}
+	response, _, err := workflow.Handle(ctx, headers)
+	{{else if eq .ResponseType ""}}
+	_, err := workflow.Handle(ctx, headers, &requestBody)
 	{{else}}
-	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
-	)
-	{{end}}
+	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	{{end -}}
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
-	response := convert{{title .Name}}ClientResponse(clientRespBody)
 	res.WriteJSON({{.OKStatusCode.Code}}, response)
+	{{- end -}}
+}
+
+// {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
+type {{$workflow}} struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+}
+
+// Handle calls thrift client.
+func (w {{$workflow}}) Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	headers map[string]string,
+) (map[string]string, error) {
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	headers map[string]string,
+) (*{{.ResponseType}}, map[string]string, error) {
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	headers map[string]string,
+	r *{{.RequestType}},
+) (map[string]string, error) {
+{{else}}
+	ctx context.Context,
+	headers map[string]string,
+	r *{{.RequestType}},
+) (*{{.ResponseType}}, map[string]string, error) {
+{{- end}}
+	{{- if ne .RequestType "" -}}
+	clientRequest := convertTo{{title .Name}}ClientRequest(r)
+	{{end}}
+
+	{{if and (eq $clientReqType "") (eq $clientResType "")}}
+	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
+	{{else if eq $clientReqType ""}}
+	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil,
+	)
+	{{else if eq $clientResType ""}}
+	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{else}}
+	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{end -}}
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+	}
+
+	{{if eq .ResponseType "" -}}
+	return nil, nil
+	{{- else -}}
+	response := convert{{title .Name}}ClientResponse(clientRespBody)
+	return response, nil, nil
 	{{- end -}}
 }
 
