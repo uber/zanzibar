@@ -76,8 +76,6 @@ func Handle{{title .Name}}Request(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
