@@ -1,0 +1,12 @@
+{
+	"endpointType": "http",
+	"endpointId": "baz",
+	"handleId": "simple",
+	"thriftFile": "github.com/uber/zanzibar/endpoints/baz/baz.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::Simple",
+    "workflowType": "custom",
+    "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz",
+	"testFixtures": [],
+	"middlewares": []
+}
