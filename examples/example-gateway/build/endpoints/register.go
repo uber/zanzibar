@@ -9,14 +9,12 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
+	"github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/runtime/middlewares/logger"
 
 	"github.com/uber/zanzibar/runtime"
-
-	// TODO: (lu) remove this, to be generated
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
 type handlerFn func(
@@ -127,6 +125,36 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 		),
 	)
 	router.Register(
+		"POST", "/baz/call-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"call",
+			nil,
+			baz.HandleCallRequest,
+		),
+	)
+	router.Register(
+		"GET", "/baz/simple-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"simple",
+			nil,
+			baz.HandleSimpleRequest,
+		),
+	)
+	router.Register(
+		"GET", "/baz/simple-future-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"simpleFuture",
+			nil,
+			baz.HandleSimpleFutureRequest,
+		),
+	)
+	router.Register(
 		"POST", "/contacts/:userUUID/contacts",
 		makeEndpoint(
 			g,
@@ -157,35 +185,4 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 		),
 	)
 
-	// TODO: (lu) remove below, to be generated
-	router.Register(
-		"POST", "/baz/call-path",
-		makeEndpoint(
-			g,
-			"baz",
-			"call",
-			nil,
-			baz.HandleCallRequest,
-		),
-	)
-	router.Register(
-		"GET", "/baz/simple-path",
-		makeEndpoint(
-			g,
-			"baz",
-			"simple",
-			nil,
-			baz.HandleSimpleRequest,
-		),
-	)
-	router.Register(
-		"GET", "/baz/simple-future-path",
-		makeEndpoint(
-			g,
-			"baz",
-			"simpleFuture",
-			nil,
-			baz.HandleSimpleFutureRequest,
-		),
-	)
 }
