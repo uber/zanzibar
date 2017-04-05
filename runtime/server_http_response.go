@@ -212,15 +212,3 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 		)
 	}
 }
-
-// IsOKResponse checks if the status code is OK.
-func (res *ServerHTTPResponse) IsOKResponse(
-	statusCode int, okResponses []int,
-) bool {
-	for _, r := range okResponses {
-		if statusCode == r {
-			return true
-		}
-	}
-	return false
-}

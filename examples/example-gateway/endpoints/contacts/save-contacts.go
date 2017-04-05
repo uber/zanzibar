@@ -3,8 +3,6 @@ package contacts
 import (
 	"context"
 
-	"io/ioutil"
-
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
@@ -34,7 +32,7 @@ func HandleSaveContactsRequest(
 	body.AppVersion = req.Header.Get("x-uber-client-version")
 
 	clientBody := convertToClient(&body)
-	cres, err := clients.Contacts.SaveContacts(ctx, clientBody)
+	cres, _, err := clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
 		req.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
@@ -43,30 +41,9 @@ func HandleSaveContactsRequest(
 		return
 	}
 
-	defer func() {
-		if cerr := cres.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
+	// TODO: verify IsOKResponse() on client response status code
 
-	// Handle client respnse.
-	if !res.IsOKResponse(cres.StatusCode, []int{200, 202}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", cres.StatusCode),
-		)
-	}
-
-	bytes, err := ioutil.ReadAll(cres.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody contactsClientStructs.SaveContactsResponse
-	if err := clientRespBody.UnmarshalJSON(bytes); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-	response := convertToResponse(&clientRespBody)
+	response := convertToResponse(cres)
 	res.WriteJSON(202, response)
 }
 

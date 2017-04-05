@@ -9,16 +9,17 @@ mkdir -p ./coverage
 rm -f ./coverage/*.out
 
 start=`date +%s`
-COVER_PKGS=$(glide novendor | grep -v "test/..." | grep -v "^\.$" | \
-	grep -v "main/..." | grep -v "benchmarks/..." | \
-	awk -v ORS=, '{ print $1 }' | sed $'s/,$/\\\n/')
 
 if [ $# -eq 0 ]
 then
-    FILES=$(go list ./... | grep -v "vendor" | \
+	FILES=$(go list ./... | grep -v "vendor" | \
 		grep "test\|examples\|runtime\|codegen")
+elif [ $# -eq 1 ]
+then
+	FILES=$(go list ./... | grep -v "vendor" | \
+		grep "$1")
 else
-    FILES="$@"
+	FILES=$@
 fi
 
 rm -f ./test/.cached_binary_test_info.json
@@ -69,10 +70,11 @@ rm -f ./coverage/cover-temp.out
 gocovmerge ./coverage/cover-*.out > ./coverage/cover-temp.out
 
 cat ./coverage/cover-temp.out | \
-    grep -v "_easyjson.go" | \
-    grep -v "gen-code" | \
-    sed "s/github.com\/uber\/zanzibar/./" > \
-    ./coverage/cover.out
+	grep -v "_easyjson.go" | \
+	grep -v "gen-code" | \
+	grep -v "codegen/runner" | \
+	sed "s/github.com\/uber\/zanzibar/./" > \
+	./coverage/cover.out
 
 rm ./coverage/cover-temp.out
 

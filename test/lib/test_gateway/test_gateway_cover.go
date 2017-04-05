@@ -193,8 +193,8 @@ func createTestBinaryFile(
 	allPackages := []string{}
 	for _, folder := range allFolders {
 		if folder == "./test/..." ||
-			folder == "./main/..." ||
 			folder == "./benchmarks/..." ||
+			folder == "./scripts/..." ||
 			folder == "" {
 			continue
 		}

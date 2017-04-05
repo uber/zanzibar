@@ -5,7 +5,6 @@ package bar
 
 import (
 	"context"
-	"io/ioutil"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -30,45 +29,25 @@ func HandleTooManyArgsRequest(
 		return
 	}
 
-	// Handle request body.
 	var body TooManyArgsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToTooManyArgsClientRequest(&body)
-	clientResp, err := clients.Bar.TooManyArgs(ctx, clientRequest)
+
+	clientRespBody, _, err := clients.Bar.TooManyArgs(
+		ctx, nil, clientRequest,
+	)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	expectedStatusCode := []int{200}
-	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	b, err := ioutil.ReadAll(clientResp.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody clientsBarBar.BarResponse
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-	response := convertTooManyArgsClientResponse(&clientRespBody)
+	response := convertTooManyArgsClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
 }
 

@@ -25,34 +25,24 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
-	// Handle request body.
 	var body AddCredentialsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToAddCredentialsClientRequest(&body)
-	clientResp, err := clients.GoogleNow.AddCredentials(ctx, clientRequest)
+
+	_, err := clients.GoogleNow.AddCredentials(
+		ctx, nil, clientRequest,
+	)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	expectedStatusCode := []int{202}
-	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
 	res.WriteJSONBytes(202, nil)
 }
 

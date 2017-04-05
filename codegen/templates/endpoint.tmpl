@@ -30,6 +30,7 @@ import (
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodRequestType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientMethodName := title ($clientMethod).Name -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
 func Handle{{title .Name}}Request(
@@ -44,53 +45,41 @@ func Handle{{title .Name}}Request(
 	}
 	{{- end}}
 
-	// Handle request body.
-	{{if or (eq .RequestType "") (eq $clientMethodRequestType "") -}}
-	clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx)
+	{{if ne .RequestType ""}}
+	var body {{title .RequestType}}
+	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+		return
+	}
+	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
+	{{end}}
 
-	{{- else -}}
-		var body {{title .RequestType}}
-		if ok := req.ReadAndUnmarshalBody(&body); !ok {
-			return
-		}
-		clientRequest := convertTo{{title .Name}}ClientRequest(&body)
-		clientResp, err := clients.{{$clientName}}.{{title ($clientMethod).Name}}(ctx, clientRequest)
-	{{- end }}
+	{{if and (eq $clientMethodRequestType "") (eq $clientMethodResponseType "")}}
+	_, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
+	{{else if eq $clientMethodRequestType ""}}
+	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil,
+	)
+	{{else if eq $clientMethodResponseType ""}}
+	_, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{else}}
+	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{end}}
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
-	
-    defer func() {
-        if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-            err = cerr
-        }
-    }()
 
-	// Handle client respnse.
-	expectedStatusCode := []int{ {{.DownstreamMethod.OKStatusCode.Code}} }
-	if !res.IsOKResponse(clientResp.StatusCode, expectedStatusCode) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	{{if or (eq $clientMethodResponseType "") (eq .ResponseType "") -}}
+	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
-	b, err := ioutil.ReadAll(clientResp.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody {{$clientMethodResponseType}}
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-	 	res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-	 	return
-	}
-	response := convert{{title .Name}}ClientResponse(&clientRespBody)
+	response := convert{{title .Name}}ClientResponse(clientRespBody)
 	res.WriteJSON({{.OKStatusCode.Code}}, response)
 	{{- end -}}
 }

@@ -5,7 +5,6 @@ package contactsClient
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
@@ -34,7 +33,12 @@ func NewClient(
 }
 
 // SaveContacts calls "/:userUUID/contacts" endpoint.
-func (c *ContactsClient) SaveContacts(ctx context.Context, r *clientsContactsContacts.SaveContactsRequest) (*http.Response, error) {
+func (c *ContactsClient) SaveContacts(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsContactsContacts.SaveContactsRequest,
+) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "saveContacts", c.HTTPClient,
 	)
@@ -42,9 +46,28 @@ func (c *ContactsClient) SaveContacts(ctx context.Context, r *clientsContactsCon
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
 
-	err := req.WriteJSON("POST", fullURL, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(202)
+
+	var responseBody clientsContactsContacts.SaveContactsResponse
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
+
 }
