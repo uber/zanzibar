@@ -43,8 +43,6 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	res.WriteJSONBytes(202, nil)
 }
 

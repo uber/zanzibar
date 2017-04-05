@@ -43,8 +43,6 @@ func HandleNormalRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	response := convertNormalClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
 }

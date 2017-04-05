@@ -40,8 +40,6 @@ func HandleArgNotStructRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	res.WriteJSONBytes(200, nil)
 }
 

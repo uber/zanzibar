@@ -36,8 +36,6 @@ func HandleNoRequestRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	response := convertNoRequestClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
 }

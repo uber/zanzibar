@@ -36,8 +36,6 @@ func HandleMissingArgRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	response := convertMissingArgClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
 }

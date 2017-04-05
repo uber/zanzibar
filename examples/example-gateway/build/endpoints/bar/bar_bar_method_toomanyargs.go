@@ -47,8 +47,6 @@ func HandleTooManyArgsRequest(
 		return
 	}
 
-	// TODO: verify IsOKResponse() on client response status code
-
 	response := convertTooManyArgsClientResponse(clientRespBody)
 	res.WriteJSON(200, response)
 }
