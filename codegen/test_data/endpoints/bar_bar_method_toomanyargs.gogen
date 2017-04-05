@@ -36,6 +36,7 @@ func HandleTooManyArgsRequest(
 	workflow := TooManyArgsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	response, _, err := workflow.Handle(ctx, headers, &requestBody)
@@ -54,6 +55,7 @@ func HandleTooManyArgsRequest(
 type TooManyArgsEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.

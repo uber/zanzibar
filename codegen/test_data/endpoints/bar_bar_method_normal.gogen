@@ -32,6 +32,7 @@ func HandleNormalRequest(
 	workflow := NormalEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	response, _, err := workflow.Handle(ctx, headers, &requestBody)
@@ -50,6 +51,7 @@ func HandleNormalRequest(
 type NormalEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.

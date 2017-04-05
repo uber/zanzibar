@@ -30,6 +30,7 @@ func HandleArgNotStructRequest(
 	workflow := ArgNotStructEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	_, err := workflow.Handle(ctx, headers, &requestBody)
@@ -48,6 +49,7 @@ func HandleArgNotStructRequest(
 type ArgNotStructEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.

@@ -27,6 +27,7 @@ func HandleMissingArgRequest(
 	workflow := MissingArgEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	response, _, err := workflow.Handle(ctx, headers)
@@ -45,6 +46,7 @@ func HandleMissingArgRequest(
 type MissingArgEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.

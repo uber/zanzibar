@@ -27,6 +27,7 @@ func HandleCheckCredentialsRequest(
 	workflow := CheckCredentialsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	_, err := workflow.Handle(ctx, headers)
@@ -45,6 +46,7 @@ func HandleCheckCredentialsRequest(
 type CheckCredentialsEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.

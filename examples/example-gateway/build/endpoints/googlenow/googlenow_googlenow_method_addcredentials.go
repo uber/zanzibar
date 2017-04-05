@@ -33,6 +33,7 @@ func HandleAddCredentialsRequest(
 	workflow := AddCredentialsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
+		Request: req,
 	}
 
 	_, err := workflow.Handle(ctx, headers, &requestBody)
@@ -51,6 +52,7 @@ func HandleAddCredentialsRequest(
 type AddCredentialsEndpoint struct {
 	Clients *clients.Clients
 	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
