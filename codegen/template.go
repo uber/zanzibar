@@ -313,6 +313,11 @@ func (t *Template) GenerateEndpointTestFile(
 	var testStubs []TestStub
 	file, err := ioutil.ReadFile(testConfigPath)
 	if err != nil {
+		// If the test file does not exist then skip test generation.
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+
 		return nil, errors.Wrapf(err,
 			"Could not read endpoint test config for service %s, method %s",
 			serviceName, method.Name)
