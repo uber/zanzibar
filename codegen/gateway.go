@@ -65,8 +65,10 @@ type ClientSpec struct {
 	ModuleSpec *ModuleSpec
 	// JSONFile for this spec
 	JSONFile string
-	// ClientType, currently only "http" is supported
+	// ClientType, currently only "http" and "custom" are supported
 	ClientType string
+	// If "custom" then where to import custom code from
+	CustomImportPath string
 	// GoFileName, the absolute path where the generate client is
 	GoFileName string
 	// GoPackageName is the golang package name for the client
@@ -88,17 +90,17 @@ type ClientSpec struct {
 }
 
 // moduleClassConfig represents the generic JSON config for
-// all modules. This will be provided by the module pacakge.
+// all modules. This will be provided by the module package.
 type moduleClassConfig struct {
 	Name   string      `json:"name"`
 	Type   string      `json:"type"`
 	Config interface{} `json:"config"`
 }
 
-// httpClientClassConfig represents the specific config for
-// an http client. This is a downcast of the moduleClassConfig.
+// clientClassConfig represents the specific config for
+// a client. This is a downcast of the moduleClassConfig.
 // Config here is a map[string]string but could be any type.
-type httpClientClassConfig struct {
+type clientClassConfig struct {
 	Name   string            `json:"name"`
 	Type   string            `json:"type"`
 	Config map[string]string `json:"config"`
@@ -129,29 +131,31 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	className := classConfig.Name
 	classType := classConfig.Type
 
-	if classType == "http" {
-		clientConfig := httpClientClassConfig{}
+	clientConfig := clientClassConfig{}
 
-		if err := json.Unmarshal(bytes, &clientConfig); err != nil {
-			return nil, errors.Wrapf(
-				err, "Could not parse class config json file %s: ", jsonFile,
-			)
-		}
-
-		// Restore the properties in the old config structure
-		clientConfig.Config["clientId"] = className
-		clientConfig.Config["clientType"] = classType
-
-		return NewHTTPClientSpec(jsonFile, clientConfig.Config, h)
-	} else if classType == "tchannel" {
-		return NewTChannelClientSpec(jsonFile, &classConfig, h)
-	} else if classType == "custom" {
-		return NewCustomClientSpec(jsonFile, &classConfig, h)
+	if err := json.Unmarshal(bytes, &clientConfig); err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not parse class config json file %s: ", jsonFile,
+		)
 	}
 
-	return nil, errors.Errorf(
-		"Cannot support unknown clientType for client %s", jsonFile,
-	)
+	// Restore the properties in the old config structure
+	clientConfig.Config["clientId"] = className
+	clientConfig.Config["clientType"] = classType
+
+	switch classType {
+	case "http":
+		return NewHTTPClientSpec(jsonFile, clientConfig.Config, h)
+	case "tchannel":
+		return NewTChannelClientSpec(jsonFile, &classConfig, h)
+	case "custom":
+		return NewCustomClientSpec(jsonFile, clientConfig.Config, h)
+	default:
+		return nil, errors.Errorf(
+			"Cannot support unknown clientType for client %s", jsonFile,
+		)
+
+	}
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
@@ -162,10 +166,23 @@ func NewTChannelClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, 
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	return &ClientSpec{
-		ClientType: "custom",
-	}, nil
+func NewCustomClientSpec(jsonFile string, clientConfigObj map[string]string, h *PackageHelper) (*ClientSpec, error) {
+	customImportPath, ok := clientConfigObj["customImportPath"]
+	if !ok {
+		return nil, errors.Errorf(
+			"client config (%s) must have customImportPath field for type custom", jsonFile,
+		)
+	}
+
+	// TODO: (lu) creating module spec for non-http client, which needs no http annotations, does not really work
+	clientSpec, err := NewHTTPClientSpec(jsonFile, clientConfigObj, h)
+	if err != nil {
+		return nil, err
+	}
+	clientSpec.ClientType = "custom"
+	clientSpec.CustomImportPath = customImportPath
+
+	return clientSpec, nil
 }
 
 // NewHTTPClientSpec creates a client spec from a json file whose type is http
@@ -764,7 +781,7 @@ func NewGatewaySpec(
 		}
 
 		// TODO: Other clients should be generated
-		if cspec.ClientType == "http" {
+		if cspec.ClientType == "http" || cspec.ClientType == "custom" {
 			spec.ClientModules[cspec.JSONFile] = cspec
 		}
 	}
@@ -791,6 +808,10 @@ func NewGatewaySpec(
 // GenerateClients will generate all the clients for the gateway
 func (gateway *GatewaySpec) GenerateClients() error {
 	for _, module := range gateway.ClientModules {
+		if module.ClientType == "custom" {
+			continue
+		}
+
 		_, err := gateway.Template.GenerateClientFile(
 			module, gateway.PackageHelper,
 		)

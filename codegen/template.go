@@ -411,9 +411,14 @@ func (t *Template) GenerateClientsInitFile(
 			continue
 		}
 
+		pkgName:=clients[i].GoPackageName
+		if clients[i].ClientType == "custom" {
+			pkgName = clients[i].CustomImportPath
+		}
+
 		includedPkgs = append(
 			includedPkgs, GoPackageImport{
-				PackageName: clients[i].GoPackageName,
+				PackageName: pkgName,
 				AliasName:   "",
 			},
 		)
@@ -433,11 +438,11 @@ func (t *Template) GenerateClientsInitFile(
 			)
 		}
 
-		service := module.Services[0]
+		//service := module.Services[0]
 		clientInfo = append(clientInfo, ClientInfoMeta{
-			FieldName:   strings.Title(service.Name),
+			FieldName:   strings.Title(clients[i].ClientName),
 			PackageName: module.PackageName,
-			TypeName:    strings.Title(service.Name) + "Client",
+			TypeName:    strings.Title(clients[i].ClientName) + "Client",
 		})
 	}
 
