@@ -100,11 +100,6 @@ func (res *ServerHTTPResponse) finish() {
 	)
 }
 
-// SendError helper to send an error
-func (res *ServerHTTPResponse) SendError(statusCode int, err error) {
-	res.SendErrorString(statusCode, err.Error())
-}
-
 // SendErrorString helper to send an error string
 func (res *ServerHTTPResponse) SendErrorString(
 	statusCode int, err string,

@@ -6,16 +6,14 @@ package bar
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".
@@ -28,27 +26,58 @@ func HandleTooManyArgsRequest(
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
-
-	var body TooManyArgsHTTPRequest
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody TooManyArgsHTTPRequest
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertToTooManyArgsClientRequest(&body)
 
-	clientRespBody, _, err := clients.Bar.TooManyArgs(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
 
+	workflow := TooManyArgsEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+		Request: req,
+	}
+
+	response, _, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
+	}
+
+	res.WriteJSON(200, response)
+}
+
+// TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
+type TooManyArgsEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w TooManyArgsEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+	r *TooManyArgsHTTPRequest,
+) (*endpointsBarBar.BarResponse, map[string]string, error) {
+	clientRequest := convertToTooManyArgsClientRequest(r)
+
+	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
+		ctx, nil, clientRequest,
+	)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, nil, err
 	}
 
 	response := convertTooManyArgsClientResponse(clientRespBody)
-	res.WriteJSON(200, response)
+	return response, nil, nil
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

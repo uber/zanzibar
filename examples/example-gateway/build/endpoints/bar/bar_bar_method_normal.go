@@ -6,15 +6,13 @@ package bar
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -24,27 +22,58 @@ func HandleNormalRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-
-	var body NormalHTTPRequest
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody NormalHTTPRequest
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertToNormalClientRequest(&body)
 
-	clientRespBody, _, err := clients.Bar.Normal(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
 
+	workflow := NormalEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+		Request: req,
+	}
+
+	response, _, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
+	}
+
+	res.WriteJSON(200, response)
+}
+
+// NormalEndpoint calls thrift client Bar.Normal
+type NormalEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w NormalEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+	r *NormalHTTPRequest,
+) (*endpointsBarBar.BarResponse, map[string]string, error) {
+	clientRequest := convertToNormalClientRequest(r)
+
+	clientRespBody, _, err := w.Clients.Bar.Normal(
+		ctx, nil, clientRequest,
+	)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, nil, err
 	}
 
 	response := convertNormalClientResponse(clientRespBody)
-	res.WriteJSON(200, response)
+	return response, nil, nil
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {

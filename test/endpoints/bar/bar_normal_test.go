@@ -82,14 +82,8 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t,
-		"{\"error\":\"could not make client request:: "+
-			"Could not parse client(bar) json: "+
-			"parse error: "+
-			"invalid character 'b' after top-level value "+
-			"near offset 0 of 'bad bytes'\"}",
-		string(respBytes),
-	)
+	assert.Equal(t, string(respBytes),
+		`{"error":"Unexpected server error"}`)
 }
 
 func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
@@ -136,7 +130,6 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 		return
 	}
 
-	assert.Contains(t, string(respBytes),
-		"Could not read client(bar) response body",
-	)
+	assert.Equal(t, string(respBytes),
+		`{"error":"Unexpected server error"}`)
 }

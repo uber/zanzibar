@@ -808,10 +808,6 @@ func (gateway *GatewaySpec) GenerateClients() error {
 // GenerateEndpoints will generate all the endpoints for the gateway
 func (gateway *GatewaySpec) GenerateEndpoints() error {
 	for _, module := range gateway.EndpointModules {
-		if module.WorkflowType == "custom" {
-			continue
-		}
-
 		_, err := gateway.Template.GenerateEndpointFile(
 			module, gateway.PackageHelper,
 			module.ThriftServiceName, module.ThriftMethodName,

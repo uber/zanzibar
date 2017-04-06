@@ -6,7 +6,6 @@ package googlenow
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -24,26 +23,57 @@ func HandleAddCredentialsRequest(
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
-
-	var body AddCredentialsHTTPRequest
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody AddCredentialsHTTPRequest
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertToAddCredentialsClientRequest(&body)
 
-	_, err := clients.GoogleNow.AddCredentials(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
 
+	workflow := AddCredentialsEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+		Request: req,
+	}
+
+	_, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
 	res.WriteJSONBytes(202, nil)
+}
+
+// AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
+type AddCredentialsEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w AddCredentialsEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+	r *AddCredentialsHTTPRequest,
+) (map[string]string, error) {
+	clientRequest := convertToAddCredentialsClientRequest(r)
+
+	_, err := w.Clients.GoogleNow.AddCredentials(
+		ctx, nil, clientRequest,
+	)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {
