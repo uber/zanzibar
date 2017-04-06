@@ -6,7 +6,6 @@ package googlenow
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -23,15 +22,46 @@ func HandleCheckCredentialsRequest(
 		return
 	}
 
-	_, err := clients.GoogleNow.CheckCredentials(ctx, nil)
+	headers := map[string]string{}
 
+	workflow := CheckCredentialsEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+		Request: req,
+	}
+
+	_, err := workflow.Handle(ctx, headers)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
 	res.WriteJSONBytes(202, nil)
+}
+
+// CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
+type CheckCredentialsEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w CheckCredentialsEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+) (map[string]string, error) {
+
+	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, nil)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	return nil, nil
 }

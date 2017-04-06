@@ -6,7 +6,6 @@ package bar
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -21,26 +20,57 @@ func HandleArgNotStructRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-
-	var body ArgNotStructHTTPRequest
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody ArgNotStructHTTPRequest
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertToArgNotStructClientRequest(&body)
 
-	_, err := clients.Bar.ArgNotStruct(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
 
+	workflow := ArgNotStructEndpoint{
+		Clients: clients,
+		Logger:  req.Logger,
+		Request: req,
+	}
+
+	_, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
 	res.WriteJSONBytes(200, nil)
+}
+
+// ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
+type ArgNotStructEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w ArgNotStructEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+	r *ArgNotStructHTTPRequest,
+) (map[string]string, error) {
+	clientRequest := convertToArgNotStructClientRequest(r)
+
+	_, err := w.Clients.Bar.ArgNotStruct(
+		ctx, nil, clientRequest,
+	)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

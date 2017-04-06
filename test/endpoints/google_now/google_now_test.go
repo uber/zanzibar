@@ -362,10 +362,8 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 		return
 	}
 
-	assert.Contains(t,
-		string(bytes),
-		`{"error":"could not make client request`,
-	)
+	assert.Equal(t, string(bytes),
+		`{"error":"Unexpected server error"}`)
 
 	time.Sleep(10 * time.Millisecond)
 

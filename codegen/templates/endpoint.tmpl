@@ -16,21 +16,18 @@ import (
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+	{{end -}}
 
-	{{range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{if .Method.Downstream }}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
 	{{$file := basePath $pkg.PackageName -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	{{- end}}
 )
 
+{{ $workflow := .WorkflowName -}}
 {{with .Method -}}
-{{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientName := title .DownstreamService -}}
-{{- $clientMethod := .DownstreamMethod -}}
-{{- $clientMethodRequestType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
-{{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientMethodName := title ($clientMethod).Name -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
 func Handle{{title .Name}}Request(
@@ -39,54 +36,127 @@ func Handle{{title .Name}}Request(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	{{ if .Headers -}}
+	{{- if .Headers -}}
 	if !req.CheckHeaders({{.Headers | printf "%#v" }}) {
 		return
 	}
-	{{- end}}
+	{{- end -}}
 
 	{{if ne .RequestType ""}}
-	var body {{title .RequestType}}
-	if ok := req.ReadAndUnmarshalBody(&body); !ok {
+	var requestBody {{.RequestType}}
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
-	clientRequest := convertTo{{title .Name}}ClientRequest(&body)
 	{{end}}
 
-	{{if and (eq $clientMethodRequestType "") (eq $clientMethodResponseType "")}}
-	_, err := clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
-	{{else if eq $clientMethodRequestType ""}}
-	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil,
-	)
-	{{else if eq $clientMethodResponseType ""}}
-	_, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
-	)
+	headers := map[string]string{}
+
+	workflow := {{$workflow}}{
+		Clients: clients,
+		Logger: req.Logger,
+		Request: req,
+	}
+	{{if and (eq .RequestType "") (eq .ResponseType "")}}
+	_, err := workflow.Handle(ctx, headers)
+	{{else if eq .RequestType ""}}
+	response, _, err := workflow.Handle(ctx, headers)
+	{{else if eq .ResponseType ""}}
+	_, err := workflow.Handle(ctx, headers, &requestBody)
 	{{else}}
-	clientRespBody, _, err := clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
-	)
-	{{end}}
+	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	{{end -}}
 	if err != nil {
-		req.Logger.Warn("Could not make client request",
+		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "could not make client request:"))
+		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
 
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
 	{{- else -}}
-	response := convert{{title .Name}}ClientResponse(clientRespBody)
 	res.WriteJSON({{.OKStatusCode.Code}}, response)
 	{{- end -}}
 }
 
-{{if and (ne .RequestType "") (ne $clientMethodRequestType "") -}}
-func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientMethodRequestType}} {
-	clientRequest := &{{$clientMethodRequestType}}{}
+{{end -}}
+
+{{- if .Method.Downstream }}
+{{- with .Method -}}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $clientName := title .DownstreamService -}}
+{{- $clientMethod := .DownstreamMethod -}}
+{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientMethodName := title ($clientMethod).Name -}}
+
+
+// {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
+type {{$workflow}} struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w {{$workflow}}) Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	headers map[string]string,
+) (map[string]string, error) {
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	headers map[string]string,
+) (*{{.ResponseType}}, map[string]string, error) {
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	headers map[string]string,
+	r *{{.RequestType}},
+) (map[string]string, error) {
+{{else}}
+	ctx context.Context,
+	headers map[string]string,
+	r *{{.RequestType}},
+) (*{{.ResponseType}}, map[string]string, error) {
+{{- end}}
+	{{- if ne .RequestType "" -}}
+	clientRequest := convertTo{{title .Name}}ClientRequest(r)
+	{{end}}
+
+	{{if and (eq $clientReqType "") (eq $clientResType "")}}
+	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
+	{{else if eq $clientReqType ""}}
+	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil,
+	)
+	{{else if eq $clientResType ""}}
+	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{else}}
+	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, nil, clientRequest,
+	)
+	{{end -}}
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+	}
+
+	{{if eq .ResponseType "" -}}
+	return nil, nil
+	{{- else -}}
+	response := convert{{title .Name}}ClientResponse(clientRespBody)
+	return response, nil, nil
+	{{- end -}}
+}
+
+{{if and (ne .RequestType "") (ne $clientReqType "") -}}
+func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientReqType}} {
+	clientRequest := &{{$clientReqType}}{}
 
 	{{ range $key, $value := .RequestFieldMap -}}
 	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
@@ -99,12 +169,13 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 {{end -}}
 
 
-{{if and (ne .ResponseType "") (ne $clientMethodResponseType "") -}}
-func convert{{title .Name}}ClientResponse(body *{{$clientMethodResponseType}}) *{{.ResponseType}} {
+{{if and (ne .ResponseType "") (ne $clientResType "") -}}
+func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {
 	// TODO: Add response fields mapping here.
 	downstreamResponse := &{{.ResponseType}}{}
 	return downstreamResponse
 }
 {{end -}}
 
+{{end -}}
 {{end -}}

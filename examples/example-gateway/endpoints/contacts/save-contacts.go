@@ -3,58 +3,54 @@ package contacts
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
+	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/contacts/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// HandleSaveContactsRequest "/contacts/:userUUID/contacts"
-func HandleSaveContactsRequest(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
-) {
-	var body SaveContactsRequest
-	ok := req.ReadAndUnmarshalBody(&body)
-	if !ok {
-		return
-	}
+// SaveContactsEndpoint ...
+type SaveContactsEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
 
+// Handle "/contacts/:userUUID/contacts"
+func (w SaveContactsEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+	r *endpointContacts.SaveContactsRequest,
+) (*endpointContacts.SaveContactsResponse, map[string]string, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
-	body.UserUUID = req.Params[0].Value
-	body.AppType = req.Header.Get("x-uber-client-name")
-	body.DeviceType = req.Header.Get("x-uber-device")
-	body.AppVersion = req.Header.Get("x-uber-client-version")
+	r.UserUUID = endpointContacts.UUID(w.Request.Params[0].Value)
 
-	clientBody := convertToClient(&body)
-	cres, _, err := clients.Contacts.SaveContacts(ctx, nil, clientBody)
+	clientBody := convertToClient(r)
+	cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		w.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "Could not make client request:"))
-		return
+		return nil, nil, err
 	}
 
 	// TODO: verify IsOKResponse() on client response status code
 
 	response := convertToResponse(cres)
-	res.WriteJSON(202, response)
+	return response, nil, nil
 }
 
 func convertToResponse(
 	body *contactsClientStructs.SaveContactsResponse,
-) *SaveContactsResponse {
-	return &SaveContactsResponse{}
+) *endpointContacts.SaveContactsResponse {
+	return &endpointContacts.SaveContactsResponse{}
 }
 
 func convertToClient(
-	body *SaveContactsRequest,
+	body *endpointContacts.SaveContactsRequest,
 ) *contactsClientStructs.SaveContactsRequest {
 	clientBody := &contactsClientStructs.SaveContactsRequest{}
 	clientBody.UserUUID = contactsClientStructs.UUID(body.UserUUID)
@@ -73,7 +69,7 @@ func convertToClient(
 		clientAttributes.LastTimeContacted = attributes.LastTimeContacted
 		clientAttributes.IsStarred = attributes.IsStarred
 		clientAttributes.HasCustomRingtone = attributes.HasCustomRingtone
-		clientAttributes.IsSendToVoicemail = attributes.IsSendToVoiceMail
+		clientAttributes.IsSendToVoicemail = attributes.IsSendToVoicemail
 		clientAttributes.HasThumbnail = attributes.HasThumbnail
 		clientAttributes.NamePrefix = attributes.NamePrefix
 		clientAttributes.NameSuffix = attributes.NameSuffix
