@@ -40,6 +40,7 @@ func main() {
 
 	handleContacts := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)
+		_, _ = w.Write([]byte("{}"))
 	}
 	handleGoogleNow := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)

@@ -19,9 +19,19 @@ exception NewErr {
 }
 
 service SimpleService {
-  BazResponse Call(1: required BazRequest arg)
-  void Simple() throws (1: SimpleErr simpleErr)
-  void SimpleFuture() throws (1: SimpleErr simpleErr, 2: NewErr newErr)
+
+  BazResponse Call(
+    1: required BazRequest arg
+  )
+
+  void Simple() throws (
+    1: SimpleErr simpleErr
+  )
+
+  void SimpleFuture() throws (
+    1: SimpleErr simpleErr
+    2: NewErr newErr
+  )
 }
 
 // service SecondService {

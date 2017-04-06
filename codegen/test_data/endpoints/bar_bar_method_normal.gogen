@@ -5,7 +5,6 @@ package bar
 
 import (
 	"context"
-	"io/ioutil"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
@@ -13,9 +12,9 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 
-	clientTypeBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -26,56 +25,37 @@ func HandleNormalRequest(
 	clients *clients.Clients,
 ) {
 
-	// Handle request body.
 	var body NormalHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToNormalClientRequest(&body)
-	clientResp, err := clients.Bar.Normal(ctx, clientRequest)
+
+	clientRespBody, _, err := clients.Bar.Normal(
+		ctx, nil, clientRequest,
+	)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	b, err := ioutil.ReadAll(clientResp.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody bar.BarResponse
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-	response := convertNormalClientResponse(&clientRespBody)
-	res.WriteJSON(clientResp.StatusCode, response)
+	response := convertNormalClientResponse(clientRespBody)
+	res.WriteJSON(200, response)
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
 	clientRequest := &barClient.NormalHTTPRequest{}
 
-	clientRequest.Request = (*clientTypeBar.BarRequest)(body.Request)
+	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
-func convertNormalClientResponse(body *bar.BarResponse) *bar.BarResponse {
+func convertNormalClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &bar.BarResponse{}
+	downstreamResponse := &endpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

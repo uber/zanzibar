@@ -29,7 +29,7 @@ type Clients struct {
 func CreateClients(
 	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
-) *Clients {
+) interface{} {
 	return &Clients{
 		Bar: barClient.NewClient(
 			config, gateway,

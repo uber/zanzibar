@@ -29,12 +29,19 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
 
 func TestInvalidStatusCode(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -88,7 +95,13 @@ func TestInvalidStatusCode(t *testing.T) {
 }
 
 func TestCallingWriteJSONWithNil(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -142,7 +155,12 @@ func (f failingJsonObj) MarshalJSON() ([]byte, error) {
 }
 
 func TestCallWriteJSONWithBadJSON(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -210,7 +228,13 @@ type MyBody struct {
 }
 
 func TestResponsePeekBody(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -265,7 +289,13 @@ func TestResponsePeekBody(t *testing.T) {
 }
 
 func TestResponsePeekBodyError(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}

@@ -56,7 +56,6 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	IP          string
 	Port        int32
 	RealPort    int32
 	RealAddr    string
@@ -95,7 +94,6 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		IP:          config.MustGetString("ip"),
 		Port:        int32(config.MustGetInt("port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
@@ -140,7 +138,7 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		)
 		return errors.Wrap(err, "error listening on port")
 	}
-	if gateway.localServer.RealIP != gateway.IP {
+	if gateway.localServer.RealIP != gateway.server.RealIP {
 		_, err := gateway.server.JustListen()
 		if err != nil {
 			gateway.Logger.Error("Error listening on port",
@@ -157,6 +155,11 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 
 	gateway.WaitGroup.Add(1)
 	go gateway.server.JustServe(gateway.WaitGroup)
+
+	if gateway.server != gateway.localServer {
+		gateway.WaitGroup.Add(1)
+		go gateway.localServer.JustServe(gateway.WaitGroup)
+	}
 
 	return nil
 }

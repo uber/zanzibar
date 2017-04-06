@@ -22,34 +22,25 @@ func HandleArgNotStructRequest(
 	clients *clients.Clients,
 ) {
 
-	// Handle request body.
 	var body ArgNotStructHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&body); !ok {
 		return
 	}
 	clientRequest := convertToArgNotStructClientRequest(&body)
-	clientResp, err := clients.Bar.ArgNotStruct(ctx, clientRequest)
+
+	_, err := clients.Bar.ArgNotStruct(
+		ctx, nil, clientRequest,
+	)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes(200, nil)
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

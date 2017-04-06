@@ -5,14 +5,15 @@ package bar
 
 import (
 	"context"
-	"io/ioutil"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 )
 
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
@@ -23,44 +24,24 @@ func HandleMissingArgRequest(
 	clients *clients.Clients,
 ) {
 
-	// Handle request body.
-	clientResp, err := clients.Bar.MissingArg(ctx)
+	clientRespBody, _, err := clients.Bar.MissingArg(
+		ctx, nil,
+	)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	b, err := ioutil.ReadAll(clientResp.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody bar.BarResponse
-	if err := clientRespBody.UnmarshalJSON(b); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-	response := convertMissingArgClientResponse(&clientRespBody)
-	res.WriteJSON(clientResp.StatusCode, response)
+	response := convertMissingArgClientResponse(clientRespBody)
+	res.WriteJSON(200, response)
 }
 
-func convertMissingArgClientResponse(body *bar.BarResponse) *bar.BarResponse {
+func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &bar.BarResponse{}
+	downstreamResponse := &endpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

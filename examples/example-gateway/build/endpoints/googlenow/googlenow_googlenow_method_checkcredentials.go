@@ -23,27 +23,15 @@ func HandleCheckCredentialsRequest(
 		return
 	}
 
-	// Handle request body.
-	clientResp, err := clients.GoogleNow.CheckCredentials(ctx)
+	_, err := clients.GoogleNow.CheckCredentials(ctx, nil)
+
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		req.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		res.SendError(500, errors.Wrap(err, "could not make client request:"))
 		return
 	}
 
-	defer func() {
-		if cerr := clientResp.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	// Handle client respnse.
-	if !res.IsOKResponse(clientResp.StatusCode, []int{200, 202}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", clientResp.StatusCode),
-		)
-	}
-	res.WriteJSONBytes(clientResp.StatusCode, nil)
+	res.WriteJSONBytes(202, nil)
 }

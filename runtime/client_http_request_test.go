@@ -21,15 +21,26 @@
 package zanzibar_test
 
 import (
+	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -38,7 +49,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
-	err = req.WriteJSON("GET", "/foo", &failingJsonObj{})
+	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 
 	assert.Equal(t,
@@ -48,7 +59,12 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 }
 
 func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -57,7 +73,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
-	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil)
+	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
 
 	assert.Equal(t,
@@ -65,4 +81,79 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 			"clientID: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
+}
+
+func TestMakingClientCalLWithHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	}, clients.CreateClients, endpoints.Register)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte(r.Header.Get("Example-Header")))
+		},
+	)
+
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	client := clients.Bar.HTTPClient
+
+	req := zanzibar.NewClientHTTPRequest("bar", "bar-path", client)
+
+	err = req.WriteJSON(
+		"POST",
+		client.BaseURL+"/bar-path",
+		map[string]string{
+			"Example-Header": "Example-Value",
+		},
+		nil,
+	)
+	assert.NoError(t, err)
+
+	res, err := req.Do(context.Background())
+	assert.NoError(t, err)
+
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := res.ReadAll()
+	assert.NoError(t, err)
+
+	assert.Equal(t, []byte("Example-Value"), bytes)
+}
+
+func TestMakingClientCalLWithRespHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	}, clients.CreateClients, endpoints.Register)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Example-Header", "Example-Value")
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte("{}"))
+		},
+	)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	bClient := clients.Bar
+
+	body, headers, err := bClient.Normal(
+		context.Background(), nil, &barClient.NormalHTTPRequest{},
+	)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, body)
+	assert.Equal(t, "Example-Value", headers["Example-Header"])
+
 }

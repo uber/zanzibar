@@ -30,7 +30,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	tmpl "text/template"
 
@@ -61,7 +60,7 @@ type MainFiles struct {
 type EndpointMeta struct {
 	GatewayPackageName string
 	PackageName        string
-	IncludedPackages   []string
+	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 }
 
@@ -100,7 +99,6 @@ var funcMap = tmpl.FuncMap{
 	"title":        strings.Title,
 	"Title":        strings.Title,
 	"fullTypeName": fullTypeName,
-	"statusCodes":  statusCodes,
 	"camel":        camelCase,
 	"split":        strings.Split,
 	"dec":          decrement,
@@ -114,22 +112,6 @@ func fullTypeName(typeName, packageName string) string {
 		return typeName
 	}
 	return packageName + "." + typeName
-}
-
-func statusCodes(codes []StatusCode) string {
-	if len(codes) == 0 {
-		return "[]int{}"
-	}
-	buf := bytes.NewBufferString("[]int{")
-	for i := 0; i < len(codes)-1; i++ {
-		if _, err := buf.WriteString(strconv.Itoa(codes[i].Code) + ","); err != nil {
-			return err.Error()
-		}
-	}
-	if _, err := buf.WriteString(strconv.Itoa(codes[len(codes)-1].Code) + "}"); err != nil {
-		return err.Error()
-	}
-	return string(buf.Bytes())
 }
 
 func camelCase(src string) string {
@@ -183,7 +165,7 @@ func NewTemplate(templatePattern string) (*Template, error) {
 type ClientMeta struct {
 	PackageName      string
 	ClientID         string
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
 }
 
@@ -396,7 +378,7 @@ type ClientInfoMeta struct {
 
 // ClientsInitFilesMeta ...
 type ClientsInitFilesMeta struct {
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	ClientInfo       []ClientInfoMeta
 }
 
@@ -423,14 +405,17 @@ func (t *Template) GenerateClientsInitFile(
 	}
 	sort.Sort(sortByClientName(clients))
 
-	includedPkgs := []string{}
+	includedPkgs := []GoPackageImport{}
 	for i := 0; i < len(clients); i++ {
 		if len(clients[i].ModuleSpec.Services) == 0 {
 			continue
 		}
 
 		includedPkgs = append(
-			includedPkgs, clients[i].GoPackageName,
+			includedPkgs, GoPackageImport{
+				PackageName: clients[i].GoPackageName,
+				AliasName:   "",
+			},
 		)
 	}
 
@@ -482,7 +467,7 @@ type EndpointRegisterInfo struct {
 
 // EndpointsRegisterMeta ...
 type EndpointsRegisterMeta struct {
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	Endpoints        []EndpointRegisterInfo
 }
 
@@ -501,9 +486,9 @@ func (c sortByEndpointName) Less(i, j int) bool {
 		(c[j].EndpointID + c[j].HandleID)
 }
 
-func contains(arr []string, value string) bool {
+func contains(arr []GoPackageImport, value string) bool {
 	for i := 0; i < len(arr); i++ {
-		if arr[i] == value {
+		if arr[i].PackageName == value {
 			return true
 		}
 	}
@@ -521,8 +506,11 @@ func (t *Template) GenerateEndpointRegisterFile(
 	}
 	sort.Sort(sortByEndpointName(endpoints))
 
-	includedPkgs := []string{
-		h.GoGatewayPackageName() + "/clients",
+	includedPkgs := []GoPackageImport{
+		{
+			PackageName: h.GoGatewayPackageName() + "/clients",
+			AliasName:   "",
+		},
 	}
 	endpointsInfo := make([]EndpointRegisterInfo, 0, len(endpoints))
 
@@ -539,7 +527,10 @@ func (t *Template) GenerateEndpointRegisterFile(
 		}
 
 		if !contains(includedPkgs, goPkg) {
-			includedPkgs = append(includedPkgs, goPkg)
+			includedPkgs = append(includedPkgs, GoPackageImport{
+				PackageName: goPkg,
+				AliasName:   "",
+			})
 		}
 
 		method := findMethod(
@@ -584,7 +575,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 // MainMeta ...
 type MainMeta struct {
-	IncludedPackages        []string
+	IncludedPackages        []GoPackageImport
 	GatewayName             string
 	RelativePathToAppConfig string
 }
@@ -624,9 +615,15 @@ func (t *Template) GenerateMainFile(
 	}
 
 	meta := &MainMeta{
-		IncludedPackages: []string{
-			h.GoGatewayPackageName() + "/clients",
-			h.GoGatewayPackageName() + "/endpoints",
+		IncludedPackages: []GoPackageImport{
+			{
+				PackageName: h.GoGatewayPackageName() + "/clients",
+				AliasName:   "",
+			},
+			{
+				PackageName: h.GoGatewayPackageName() + "/endpoints",
+				AliasName:   "",
+			},
 		},
 		GatewayName:             g.gatewayName,
 		RelativePathToAppConfig: deltaPath,

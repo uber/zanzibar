@@ -5,9 +5,9 @@ package barClient
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -33,7 +33,12 @@ func NewClient(
 }
 
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
-func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest) (*http.Response, error) {
+func (c *BarClient) ArgNotStruct(
+	ctx context.Context,
+	headers map[string]string,
+	r *ArgNotStructHTTPRequest,
+) (map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argNotStruct", c.HTTPClient,
 	)
@@ -41,15 +46,36 @@ func (c *BarClient) ArgNotStruct(ctx context.Context, r *ArgNotStructHTTPRequest
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/arg-not-struct-path"
 
-	err := req.WriteJSON("POST", fullURL, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
 		return nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(200)
+
+	_, err = res.ReadAll()
+	if err != nil {
+		return respHeaders, err
+	}
+	return respHeaders, nil
+
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
-func (c *BarClient) MissingArg(ctx context.Context) (*http.Response, error) {
+func (c *BarClient) MissingArg(
+	ctx context.Context,
+	headers map[string]string,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "missingArg", c.HTTPClient,
 	)
@@ -57,15 +83,38 @@ func (c *BarClient) MissingArg(ctx context.Context) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/missing-arg-path"
 
-	err := req.WriteJSON("GET", fullURL, nil)
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(200)
+
+	var responseBody clientsBarBar.BarResponse
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
+
 }
 
 // NoRequest calls "/no-request-path" endpoint.
-func (c *BarClient) NoRequest(ctx context.Context) (*http.Response, error) {
+func (c *BarClient) NoRequest(
+	ctx context.Context,
+	headers map[string]string,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "noRequest", c.HTTPClient,
 	)
@@ -73,15 +122,39 @@ func (c *BarClient) NoRequest(ctx context.Context) (*http.Response, error) {
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/no-request-path"
 
-	err := req.WriteJSON("GET", fullURL, nil)
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(200)
+
+	var responseBody clientsBarBar.BarResponse
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
+
 }
 
 // Normal calls "/bar-path" endpoint.
-func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest) (*http.Response, error) {
+func (c *BarClient) Normal(
+	ctx context.Context,
+	headers map[string]string,
+	r *NormalHTTPRequest,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "normal", c.HTTPClient,
 	)
@@ -89,15 +162,39 @@ func (c *BarClient) Normal(ctx context.Context, r *NormalHTTPRequest) (*http.Res
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/bar-path"
 
-	err := req.WriteJSON("POST", fullURL, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(200)
+
+	var responseBody clientsBarBar.BarResponse
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
+
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
-func (c *BarClient) TooManyArgs(ctx context.Context, r *TooManyArgsHTTPRequest) (*http.Response, error) {
+func (c *BarClient) TooManyArgs(
+	ctx context.Context,
+	headers map[string]string,
+	r *TooManyArgsHTTPRequest,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "tooManyArgs", c.HTTPClient,
 	)
@@ -105,9 +202,28 @@ func (c *BarClient) TooManyArgs(ctx context.Context, r *TooManyArgsHTTPRequest) 
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/too-many-args-path"
 
-	err := req.WriteJSON("POST", fullURL, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return req.Do(ctx)
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse(200)
+
+	var responseBody clientsBarBar.BarResponse
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
+
 }
