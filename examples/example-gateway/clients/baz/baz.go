@@ -23,8 +23,8 @@ type TChanBaz interface {
 
 // NewClient returns a new http client for service Bar.
 func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazClient {
-	serviceName := "SimpleService"
-
+	// this is the service discovery service name
+	serviceName := config.MustGetString("clients.baz.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
 
 	ip := config.MustGetString("clients.baz.ip")
@@ -38,7 +38,8 @@ func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazCli
 	timeoutPerAttempt := time.Duration(config.MustGetInt("clients.baz.timeoutPerAttempt")) * time.Millisecond
 
 	return &BazClient{
-		thriftService:     serviceName,
+		// this is the thrift service name, different from service discovery service name
+		thriftService:     "SimpleService",
 		client:            client,
 		timeout:           timeout,
 		timeoutPerAttempt: timeoutPerAttempt,

@@ -43,7 +43,9 @@ func simple(ctx context.Context, reqHeaders map[string]string) (map[string]strin
 }
 
 func TestSimpleSuccessfulRequestOKResponse(t *testing.T) {
-	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		"clients.baz.serviceName": "Qux",
+	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "build", "main.go",
