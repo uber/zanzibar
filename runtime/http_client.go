@@ -21,7 +21,7 @@
 package zanzibar
 
 import "net/http"
-import "github.com/uber-go/zap"
+import "go.uber.org/zap"
 
 // HTTPClient defines a http client.
 type HTTPClient struct {

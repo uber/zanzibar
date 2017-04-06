@@ -25,8 +25,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/runtime"
 )

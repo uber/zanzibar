@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"

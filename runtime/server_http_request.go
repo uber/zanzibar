@@ -30,7 +30,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ServerHTTPRequest struct manages request

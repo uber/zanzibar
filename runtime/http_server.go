@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // HTTPServer like, http.Server but improved management of listening and serving

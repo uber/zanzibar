@@ -34,7 +34,7 @@ import (
 	"time"
 
 	"github.com/kardianos/osext"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 var logger = zap.New(zap.NewJSONEncoder())

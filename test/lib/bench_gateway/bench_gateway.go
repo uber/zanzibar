@@ -33,10 +33,10 @@ import (
 
 	"encoding/json"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"go.uber.org/zap"
 )
 
 // BenchGateway for testing

@@ -34,8 +34,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
-	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
 )
 
 const defaultM3MaxQueueSize = 10000

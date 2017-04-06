@@ -23,8 +23,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/uber-go/zap"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
+	"go.uber.org/zap"
 )
 
 // PORT that the bench server listens to

@@ -31,9 +31,10 @@ import (
 	netContext "golang.org/x/net/context"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/zap"
+	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
+	"go.uber.org/zap"
 )
 
 // PostResponseCB registers a callback that is run after a response has been

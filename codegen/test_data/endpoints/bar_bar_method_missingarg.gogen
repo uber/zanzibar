@@ -6,7 +6,12 @@ package bar
 import (
 	"context"
 
+<<<<<<< HEAD
 	"github.com/uber-go/zap"
+=======
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+>>>>>>> 2c7c798... use latest version of zap
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 

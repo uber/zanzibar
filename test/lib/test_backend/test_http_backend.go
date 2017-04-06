@@ -26,8 +26,8 @@ import (
 	"sync"
 
 	"github.com/julienschmidt/httprouter"
-	zap "github.com/uber-go/zap"
 	"github.com/uber/zanzibar/runtime"
+	zap "go.uber.org/zap"
 )
 
 // TestHTTPBackend will pretend to be a http backend

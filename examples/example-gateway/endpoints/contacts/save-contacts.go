@@ -3,11 +3,16 @@ package contacts
 import (
 	"context"
 
+<<<<<<< HEAD
 	"github.com/uber-go/zap"
+=======
+	"github.com/pkg/errors"
+>>>>>>> 2c7c798... use latest version of zap
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/contacts/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 // SaveContactsEndpoint ...

@@ -24,8 +24,8 @@ import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber-go/zap"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 type loggerMiddleware struct {
