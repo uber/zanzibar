@@ -45,7 +45,7 @@ func HandleMissingArgRequest(
 // MissingArgEndpoint calls thrift client Bar.MissingArg
 type MissingArgEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

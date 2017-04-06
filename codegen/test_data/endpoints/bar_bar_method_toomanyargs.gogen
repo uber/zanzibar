@@ -54,7 +54,7 @@ func HandleTooManyArgsRequest(
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
 type TooManyArgsEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

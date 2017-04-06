@@ -50,7 +50,7 @@ func HandleNormalRequest(
 // NormalEndpoint calls thrift client Bar.Normal
 type NormalEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

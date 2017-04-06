@@ -6,11 +6,6 @@ package googlenow
 import (
 	"context"
 
-<<<<<<< HEAD
-	"github.com/uber-go/zap"
-=======
-	"github.com/pkg/errors"
->>>>>>> 2c7c798... use latest version of zap
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -50,7 +45,7 @@ func HandleCheckCredentialsRequest(
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
 type CheckCredentialsEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

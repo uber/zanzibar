@@ -45,7 +45,7 @@ func HandleNoRequestRequest(
 // NoRequestEndpoint calls thrift client Bar.NoRequest
 type NoRequestEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
