@@ -24,7 +24,6 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
@@ -166,13 +165,14 @@ func (endpoint *Endpoint) HandleRequest(
 	fn := endpoint.HandlerFn
 
 	ctx := r.Context()
-	_, ok := ctx.Deadline()
-	if !ok {
-		var cancel context.CancelFunc
-		// TODO: (lu) get timeout from endpoint config
-		ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
-		defer cancel()
-	}
+
+	// TODO: (lu) get timeout from endpoint config
+	//_, ok := ctx.Deadline()
+	//if !ok {
+	//	var cancel context.CancelFunc
+	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
+	//	defer cancel()
+	//}
 
 	fn(ctx, req, req.res)
 
