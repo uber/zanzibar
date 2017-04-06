@@ -30,7 +30,7 @@ import (
 
 type loggerMiddleware struct {
 	options Options
-	logger  zap.Logger
+	logger  *zap.Logger
 }
 
 // Options for middleware configuration

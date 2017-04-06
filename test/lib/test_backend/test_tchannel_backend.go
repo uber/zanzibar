@@ -109,7 +109,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		Port: port,
 	}
 
-	testLogger := zap.New(zap.NewJSONEncoder())
+	testLogger := zap.NewNop()
 
 	tchannelOpts := &tchannel.ChannelOptions{
 		Logger: tchannel.NullLogger,

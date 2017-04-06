@@ -31,7 +31,6 @@ import (
 	netContext "golang.org/x/net/context"
 
 	"github.com/pkg/errors"
-	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
@@ -51,7 +50,7 @@ type handler struct {
 type TChannelServer struct {
 	sync.RWMutex
 	registrar tchan.Registrar
-	logger    zap.Logger
+	logger    *zap.Logger
 	handlers  map[string]handler
 }
 
@@ -65,7 +64,7 @@ func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCa
 }
 
 // NewTChannelServer returns a server that can serve thrift services over TChannel.
-func NewTChannelServer(registrar tchan.Registrar, logger zap.Logger) *TChannelServer {
+func NewTChannelServer(registrar tchan.Registrar, logger *zap.Logger) *TChannelServer {
 	server := &TChannelServer{
 		registrar: registrar,
 		logger:    logger,

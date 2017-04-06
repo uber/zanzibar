@@ -12,6 +12,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var cachedServer *zanzibar.Gateway
@@ -43,8 +44,11 @@ func listenOnSignals() {
 
 func TestStartGateway(t *testing.T) {
 	testLogger := zap.New(
-		zap.NewJSONEncoder(),
-		zap.Output(os.Stderr),
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stderr,
+			zap.InfoLevel,
+		),
 	)
 
 	server, err := createGateway()

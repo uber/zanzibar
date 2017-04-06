@@ -36,6 +36,7 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -49,7 +50,7 @@ type Clients interface {
 // Options configures the gateway
 type Options struct {
 	MetricsBackend tally.CachedStatsReporter
-	LogWriter      zap.WriteSyncer
+	LogWriter      zapcore.WriteSyncer
 }
 
 // Gateway type
@@ -60,7 +61,7 @@ type Gateway struct {
 	WaitGroup   *sync.WaitGroup
 	Clients     Clients
 	Channel     *tchannel.Channel
-	Logger      zap.Logger
+	Logger      *zap.Logger
 	MetricScope tally.Scope
 	ServiceName string
 	Config      *StaticConfig
@@ -69,7 +70,7 @@ type Gateway struct {
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
-	logWriter         zap.WriteSyncer
+	logWriter         zapcore.WriteSyncer
 	server            *HTTPServer
 	localServer       *HTTPServer
 	tchannelServer    *TChannelServer
@@ -83,7 +84,7 @@ func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
-	var logWriter zap.WriteSyncer
+	var logWriter zapcore.WriteSyncer
 	if opts != nil && opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
 	}
@@ -281,24 +282,27 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupLogger(config *StaticConfig) error {
-	var output zap.Option
+	var output zapcore.WriteSyncer
 	tempLogger := zap.New(
-		zap.NewJSONEncoder(),
-		zap.Output(os.Stderr),
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stderr,
+			zap.InfoLevel,
+		),
 	)
 
 	loggerFileName := config.MustGetString("logger.fileName")
 	loggerOutput := config.MustGetString("logger.output")
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
-		var writer zap.WriteSyncer
+		var writer zapcore.WriteSyncer
 		if gateway.logWriter != nil {
-			writer = zap.MultiWriteSyncer(os.Stdout, gateway.logWriter)
+			writer = zap.CombineWriteSyncers(os.Stdout, gateway.logWriter)
 		} else {
 			writer = os.Stdout
 		}
 
-		output = zap.Output(writer)
+		output = writer
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
 		if err != nil {
@@ -311,7 +315,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		loggerFile, err := os.OpenFile(
 			loggerFileName,
 			os.O_APPEND|os.O_WRONLY|os.O_CREATE,
-			0666,
+			0644,
 		)
 		if err != nil {
 			tempLogger.Error("Error opening log file",
@@ -320,15 +324,16 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 			return errors.Wrap(err, "Error opening log file")
 		}
 		gateway.loggerFile = loggerFile
-		output = zap.Output(loggerFile)
+		output = loggerFile
 	}
 
 	// Default to a STDOUT logger
 	gateway.Logger = zap.New(
-		zap.NewJSONEncoder(
-			zap.RFC3339Formatter("ts"),
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			output,
+			zap.InfoLevel,
 		),
-		output,
 	)
 	return nil
 }

@@ -22,16 +22,24 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // PORT that the bench server listens to
 var PORT int32 = 8092
 
 func main() {
-	logger := zap.New(zap.NewJSONEncoder())
+	var logger = zap.New(
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stderr,
+			zap.InfoLevel,
+		),
+	)
 	backend := testBackend.CreateHTTPBackend(PORT)
 	err := backend.Bootstrap()
 	if err != nil {

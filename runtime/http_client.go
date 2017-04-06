@@ -28,7 +28,7 @@ type HTTPClient struct {
 	gateway *Gateway
 
 	Client  *http.Client
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	BaseURL string
 }
 

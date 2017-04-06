@@ -36,7 +36,7 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // BenchGateway for testing
@@ -133,7 +133,7 @@ func CreateGateway(
 	}, seedConfig)
 
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		LogWriter: zap.AddSync(benchGateway.logBytes),
+		LogWriter: zapcore.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err

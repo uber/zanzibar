@@ -42,7 +42,7 @@ type ServerHTTPRequest struct {
 	startTime   time.Time
 	metrics     *EndpointMetrics
 
-	Logger zap.Logger
+	Logger *zap.Logger
 	Scope  tally.Scope
 
 	EndpointName string

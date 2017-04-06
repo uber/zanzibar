@@ -108,8 +108,7 @@ func CreateHTTPBackend(port int32) *TestHTTPBackend {
 		},
 	}
 
-	testLogger := zap.New(zap.NewJSONEncoder())
-
+	testLogger := zap.NewNop()
 	backend.Server = &zanzibar.HTTPServer{
 		Server: &http.Server{
 			Addr:    backend.IP + ":" + strconv.Itoa(int(port)),

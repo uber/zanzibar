@@ -42,7 +42,7 @@ type ClientHTTPRequest struct {
 
 	ClientName string
 	MethodName string
-	Logger     zap.Logger
+	Logger     *zap.Logger
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest

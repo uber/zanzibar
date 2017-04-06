@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -49,8 +50,11 @@ func listenOnSignals() {
 
 func TestStartGateway(t *testing.T) {
 	testLogger := zap.New(
-		zap.NewJSONEncoder(),
-		zap.Output(os.Stderr),
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stderr,
+			zap.InfoLevel,
+		),
 	)
 
 	server, err := createGateway()

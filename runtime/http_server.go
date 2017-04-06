@@ -34,7 +34,7 @@ import (
 // Allows you to listen on port 0, query for real OS port and then serve requests
 type HTTPServer struct {
 	*http.Server
-	Logger zap.Logger
+	Logger *zap.Logger
 
 	listeningSocket net.Listener
 	closing         bool
