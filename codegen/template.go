@@ -411,7 +411,7 @@ func (t *Template) GenerateClientsInitFile(
 			continue
 		}
 
-		pkgName:=clients[i].GoPackageName
+		pkgName := clients[i].GoPackageName
 		if clients[i].ClientType == "custom" {
 			pkgName = clients[i].CustomImportPath
 		}
