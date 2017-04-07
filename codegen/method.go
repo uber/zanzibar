@@ -90,6 +90,61 @@ const (
 	antHandler         = "zanzibar.handler"
 )
 
+// NewMethod creates new method specification.
+func NewMethod(
+	thriftFile string,
+	funcSpec *compile.FunctionSpec,
+	packageHelper *PackageHelper,
+	wantAnnot bool,
+) (*MethodSpec, error) {
+	method := &MethodSpec{}
+	method.CompiledThriftSpec = funcSpec
+	var err error
+	var ok bool
+	method.Name = funcSpec.MethodName()
+
+	if err = method.setResponseType(
+		thriftFile, funcSpec.ResultSpec, packageHelper,
+	); err != nil {
+		return nil, err
+	}
+	if err = method.setRequestType(
+		thriftFile, funcSpec, packageHelper,
+	); err != nil {
+		return nil, err
+	}
+
+	if !wantAnnot {
+		return method, nil
+	}
+
+	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
+		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
+	}
+
+	method.EndpointName = funcSpec.Annotations[antHandler]
+	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
+
+	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {
+		return nil, err
+	}
+	if err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus]); err != nil {
+		return nil, err
+	}
+
+	if method.HTTPMethod == "GET" && method.RequestType != "" {
+		return nil, errors.Errorf("invalid annotation: HTTP GET method with body type")
+	}
+
+	var httpPath string
+	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
+		return nil, errors.Errorf("missing anotation '%s' for HTTP path", antHTTPPath)
+	}
+	method.setHTTPPath(httpPath, funcSpec)
+
+	return method, nil
+}
+
 // setRequestType sets the request type of the method specification. If the
 // "zanzibar.http.req.def.boxed" is true, then the first parameter will be used as
 // the request body; otherwise a new struct is generated to bundle the request
