@@ -24,7 +24,7 @@ func (e SimpleFutureEndpoint) Handle(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
-	cRespHeaders, err := e.Clients.Baz.Simple(ctx, headers)
+	cRespHeaders, err := e.Clients.Baz.SimpleFuture(ctx, headers)
 	if err != nil {
 		// TODO: (lu) error type handling
 		switch err.(type) {

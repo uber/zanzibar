@@ -74,5 +74,5 @@ func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, 1, testSimpleFutureCounter)
-	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, "204 No Content", res.Status)
 }

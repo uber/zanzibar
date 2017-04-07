@@ -15,7 +15,7 @@ import (
 
 // TChanBaz is the interface that defines the server handler and client interface.
 type TChanBaz interface {
-	Call(ctx context.Context, reqHeaders map[string]string, r *baz.SimpleService_Call_Args) (map[string]string, *baz.BazResponse, error)
+	Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (map[string]string, *baz.BazResponse, error)
 	Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 	SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 }
@@ -57,10 +57,10 @@ type BazClient struct {
 }
 
 // Call ...
-func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, req *baz.BazRequest) (map[string]string, *baz.BazResponse, error) {
+func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, arg *baz.BazRequest) (map[string]string, *baz.BazResponse, error) {
 	var result baz.SimpleService_Call_Result
 	args := baz.SimpleService_Call_Args{
-		Arg: req,
+		Arg: arg,
 	}
 
 	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, &args, &result)
