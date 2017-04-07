@@ -1,8 +1,8 @@
 namespace java com.uber.zanzibar.clients.baz
 
 struct BazRequest {
-  1: required bool b1,
-  2: required string s2,
+  1: required bool b1
+  2: required string s2
   3: required i32 i3
 }
 
@@ -27,6 +27,7 @@ service SimpleService {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/baz/call-path"
     zanzibar.handler = "baz.call"
+    zanzibar.http.req.def = "true"
   )
 
   void Simple() throws (
