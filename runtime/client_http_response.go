@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ClientHTTPResponse is the struct managing the client response

@@ -6,9 +6,9 @@ package bar
 import (
 	"context"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
@@ -50,7 +50,7 @@ func HandleNormalRequest(
 // NormalEndpoint calls thrift client Bar.Normal
 type NormalEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

@@ -30,7 +30,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ServerHTTPRequest struct manages request
@@ -42,7 +42,7 @@ type ServerHTTPRequest struct {
 	startTime   time.Time
 	metrics     *EndpointMetrics
 
-	Logger zap.Logger
+	Logger *zap.Logger
 	Scope  tally.Scope
 
 	EndpointName string

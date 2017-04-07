@@ -10,8 +10,8 @@ import:
   - buffer
   - jlexer
   - jwriter
-- package: github.com/uber-go/zap
-  version: a5783ee4b216a927da8f839c45cfbf9d694e1467
+- package: go.uber.org/zap
+  version: 1.1.0
 - package: github.com/pkg/errors
   version: ^0.8.0
 - package: github.com/uber-go/atomic

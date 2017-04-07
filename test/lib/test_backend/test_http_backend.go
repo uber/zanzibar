@@ -26,8 +26,8 @@ import (
 	"sync"
 
 	"github.com/julienschmidt/httprouter"
-	zap "github.com/uber-go/zap"
 	"github.com/uber/zanzibar/runtime"
+	zap "go.uber.org/zap"
 )
 
 // TestHTTPBackend will pretend to be a http backend
@@ -108,8 +108,7 @@ func CreateHTTPBackend(port int32) *TestHTTPBackend {
 		},
 	}
 
-	testLogger := zap.New(zap.NewJSONEncoder())
-
+	testLogger := zap.NewNop()
 	backend.Server = &zanzibar.HTTPServer{
 		Server: &http.Server{
 			Addr:    backend.IP + ":" + strconv.Itoa(int(port)),

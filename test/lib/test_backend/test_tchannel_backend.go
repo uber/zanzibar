@@ -25,8 +25,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/runtime"
 )
@@ -109,7 +109,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		Port: port,
 	}
 
-	testLogger := zap.New(zap.NewJSONEncoder())
+	testLogger := zap.NewNop()
 
 	tchannelOpts := &tchannel.ChannelOptions{
 		Logger: tchannel.NullLogger,

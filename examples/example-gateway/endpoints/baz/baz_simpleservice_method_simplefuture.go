@@ -5,9 +5,9 @@ package baz
 import (
 	"context"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 
 	bazClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
 )
@@ -15,7 +15,7 @@ import (
 // SimpleFutureEndpoint is the simple future handler struct
 type SimpleFutureEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

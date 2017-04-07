@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
     "github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -54,7 +54,7 @@ func createGateway() (*zanzibar.Gateway, error) {
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started {{.GatewayName | pascal}}",
 		zap.String("realAddr", server.RealAddr),
-		zap.Object("config", server.InspectOrDie()),
+		zap.Any("config", server.InspectOrDie()),
 	)
 
 	// TODO: handle sigterm gracefully

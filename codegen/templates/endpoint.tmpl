@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 	"{{.GatewayPackageName}}/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -95,7 +95,7 @@ func Handle{{title .Name}}Request(
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflow}} struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

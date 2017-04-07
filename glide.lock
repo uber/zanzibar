@@ -1,5 +1,5 @@
-hash: 905b6a0f87ff1b7379f4f468772515352d315d9bf251da776d05318e46b8d8ac
-updated: 2017-03-24T10:11:06.195210714-07:00
+hash: 4e1e8f2c690dc0dff87665119ebb8b24f45517e1c7cf4d94f820daa666b92838
+updated: 2017-04-05T17:11:41.369865028-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -28,19 +28,19 @@ imports:
 - name: github.com/mailru/easyjson
   version: 9d6630dc8c577b56cb9687a9cf9e8578aca7298a
   subpackages:
+  - bootstrap
   - buffer
+  - gen
   - jlexer
   - jwriter
-  - bootstrap
-  - gen
   - parser
 - name: github.com/mcuadros/go-jsonschema-generator
   version: b230f1338bcd899d31970d8f08207cfb955592c3
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
-  - log
   - ext
+  - log
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -61,47 +61,53 @@ imports:
   - m3/customtransports
   - m3/thrift
   - m3/thriftudp
-- name: github.com/uber-go/zap
-  version: a5783ee4b216a927da8f839c45cfbf9d694e1467
 - name: github.com/uber/tchannel-go
   version: 79387824978f91318be3bfb43ae12e04c38cfe97
   subpackages:
-  - thrift
   - internal/argreader
   - relay
+  - testutils/testreader
   - tnet
   - trand
   - typed
-  - thrift/gen-go/meta
 - name: go.uber.org/atomic
   version: 0c9e689d64f004564b79d9a663634756df322902
 - name: go.uber.org/thriftrw
   version: c98a13058faa5dd41584a77221a268d2c72d832d
   subpackages:
+  - ast
   - compile
   - gen
-  - version
-  - wire
-  - ast
   - idl
-  - internal
-  - internal/curry
-  - internal/goast
-  - internal/plugin
-  - internal/semver
-  - plugin/api
-  - ptr
   - idl/internal
+  - internal
   - internal/concurrent
+  - internal/curry
   - internal/envelope
-  - internal/multiplex
-  - internal/process
-  - protocol
   - internal/envelope/exception
   - internal/frame
+  - internal/goast
+  - internal/multiplex
+  - internal/plugin
+  - internal/process
+  - internal/semver
+  - plugin/api
+  - protocol
   - protocol/binary
+  - ptr
+  - version
+  - wire
+- name: go.uber.org/zap
+  version: a2773be06b9ac7c318a3a105b5c310af5730c6b4
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - internal/multierror
+  - zapcore
 - name: golang.org/x/net
   version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
   subpackages:
   - context
-devImports: []
+testImports: []

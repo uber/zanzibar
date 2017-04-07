@@ -6,9 +6,9 @@ package googlenow
 import (
 	"context"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
 )
@@ -51,7 +51,7 @@ func HandleAddCredentialsRequest(
 // AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
 type AddCredentialsEndpoint struct {
 	Clients *clients.Clients
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 

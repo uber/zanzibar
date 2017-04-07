@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 func getDirName() string {
@@ -52,7 +52,7 @@ func createGateway() (*zanzibar.Gateway, error) {
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started ExampleGateway",
 		zap.String("realAddr", server.RealAddr),
-		zap.Object("config", server.InspectOrDie()),
+		zap.Any("config", server.InspectOrDie()),
 	)
 
 	// TODO: handle sigterm gracefully

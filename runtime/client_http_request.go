@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ClientHTTPRequest is the struct for making client
@@ -42,7 +42,7 @@ type ClientHTTPRequest struct {
 
 	ClientName string
 	MethodName string
-	Logger     zap.Logger
+	Logger     *zap.Logger
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest

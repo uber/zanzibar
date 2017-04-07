@@ -27,14 +27,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // HTTPServer like, http.Server but improved management of listening and serving
 // Allows you to listen on port 0, query for real OS port and then serve requests
 type HTTPServer struct {
 	*http.Server
-	Logger zap.Logger
+	Logger *zap.Logger
 
 	listeningSocket net.Listener
 	closing         bool

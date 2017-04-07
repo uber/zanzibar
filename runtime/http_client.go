@@ -21,14 +21,14 @@
 package zanzibar
 
 import "net/http"
-import "github.com/uber-go/zap"
+import "go.uber.org/zap"
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
 	gateway *Gateway
 
 	Client  *http.Client
-	Logger  zap.Logger
+	Logger  *zap.Logger
 	BaseURL string
 }
 

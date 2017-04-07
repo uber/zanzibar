@@ -34,10 +34,17 @@ import (
 	"time"
 
 	"github.com/kardianos/osext"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var logger = zap.New(zap.NewJSONEncoder())
+var logger = zap.New(
+	zapcore.NewCore(
+		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+		os.Stderr,
+		zap.InfoLevel,
+	),
+)
 
 func spawnBenchServer(dirName string) *exec.Cmd {
 	benchServerPath := path.Join(dirName, "..", "benchserver", "benchserver")

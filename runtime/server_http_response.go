@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ServerHTTPResponse struct manages request
