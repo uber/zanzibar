@@ -98,7 +98,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse({{.OKStatusCode.Code}})
+	res.CheckOKResponse([]int{
+		{{- range $index, $code := .ValidStatusCodes -}}
+		{{if $index}},{{end}}{{$code}}
+		{{- end -}}
+	})
 
 	{{if eq .ResponseType ""}}
 	_, err = res.ReadAll()
