@@ -31,6 +31,8 @@ import (
 type ModuleSpec struct {
 	// Source thrift file to generate the code.
 	ThriftFile string
+	// Whether the ThriftFile should have annotations or not
+	WantAnnot bool
 	// Go package path of this module.
 	GoPackage string
 	// Go package name, generated base on module name.
@@ -54,6 +56,8 @@ type ServiceSpec struct {
 	Name string
 	// Source thrift file to generate the code.
 	ThriftFile string
+	// Whether the service should have annotations or not
+	WantAnnot bool
 	// List of methods/endpoints of the service
 	Methods []*MethodSpec
 	// thriftrw compile spec.
@@ -72,11 +76,12 @@ func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) 
 	}
 
 	moduleSpec := &ModuleSpec{
+		WantAnnot:   wantAnnot,
 		ThriftFile:  module.ThriftPath,
 		GoPackage:   targetPackage,
 		PackageName: module.GetName(),
 	}
-	if err := moduleSpec.AddServices(module, wantAnnot, packageHelper); err != nil {
+	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
 		return nil, err
 	}
 	if err := moduleSpec.AddImports(module, packageHelper); err != nil {
@@ -101,14 +106,14 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 }
 
 // AddServices adds services in ModuleSpec in alphabetical order of service names.
-func (ms *ModuleSpec) AddServices(module *compile.Module, wantAnnot bool, packageHelper *PackageHelper) error {
+func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *PackageHelper) error {
 	names := make([]string, 0, len(module.Services))
 	for name := range module.Services {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		serviceSpec, err := NewServiceSpec(module.Services[name], wantAnnot, packageHelper)
+		serviceSpec, err := NewServiceSpec(module.Services[name], ms.WantAnnot, packageHelper)
 		if err != nil {
 			return err
 		}
@@ -120,6 +125,7 @@ func (ms *ModuleSpec) AddServices(module *compile.Module, wantAnnot bool, packag
 // NewServiceSpec creates a service specification from given thrift file path.
 func NewServiceSpec(spec *compile.ServiceSpec, wantAnnot bool, packageHelper *PackageHelper) (*ServiceSpec, error) {
 	serviceSpec := &ServiceSpec{
+		WantAnnot:   wantAnnot,
 		Name:        spec.Name,
 		ThriftFile:  spec.File,
 		CompileSpec: spec,
@@ -130,7 +136,7 @@ func NewServiceSpec(spec *compile.ServiceSpec, wantAnnot bool, packageHelper *Pa
 	}
 	sort.Strings(funcNames)
 	for _, funcName := range funcNames {
-		method, err := serviceSpec.NewMethod(spec.Functions[funcName], wantAnnot, packageHelper)
+		method, err := serviceSpec.NewMethod(spec.Functions[funcName], packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(err, "service %s method %s", spec.Name, funcName)
 		}
@@ -237,7 +243,7 @@ func (ms *ModuleSpec) SetDownstream(
 }
 
 // NewMethod creates new method specification.
-func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, wantAnnot bool, packageHelper *PackageHelper) (*MethodSpec, error) {
+func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) (*MethodSpec, error) {
 	method := &MethodSpec{}
 	method.CompiledThriftSpec = funcSpec
 	var err error
@@ -249,7 +255,7 @@ func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, wantAnnot bool, 
 	if err = method.setRequestType(s.ThriftFile, funcSpec, packageHelper); err != nil {
 		return nil, err
 	}
-	if !wantAnnot {
+	if !s.WantAnnot {
 		return method, nil
 	}
 
