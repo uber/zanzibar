@@ -36,7 +36,7 @@ const parsedBarFile = "test_data/bar.json"
 
 func TestModuleSpec(t *testing.T) {
 	barThrift := "../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
-	m, err := codegen.NewModuleSpec(barThrift, newPackageHelper(t))
+	m, err := codegen.NewModuleSpec(barThrift, true, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the thrift file")
 	convertThriftPathToRelative(m)
 	actual, err := json.MarshalIndent(m, "", "\t")

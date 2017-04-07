@@ -120,18 +120,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	classConfig := moduleClassConfig{}
-	err = json.Unmarshal(bytes, &classConfig)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not parse json file %s: ", jsonFile,
-		)
-	}
-
-	className := classConfig.Name
-	classType := classConfig.Type
-
-	clientConfig := clientClassConfig{}
+	clientConfig := &clientClassConfig{}
 
 	if err := json.Unmarshal(bytes, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
@@ -140,56 +129,60 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 	}
 
 	// Restore the properties in the old config structure
-	clientConfig.Config["clientId"] = className
-	clientConfig.Config["clientType"] = classType
+	clientConfig.Config["clientId"] = clientConfig.Name
+	clientConfig.Config["clientType"] = clientConfig.Type
 
-	switch classType {
+	switch clientConfig.Type {
 	case "http":
-		return NewHTTPClientSpec(jsonFile, clientConfig.Config, h)
+		return NewHTTPClientSpec(jsonFile, clientConfig, h)
 	case "tchannel":
-		return NewTChannelClientSpec(jsonFile, &classConfig, h)
+		return NewTChannelClientSpec(jsonFile, clientConfig, h)
 	case "custom":
-		return NewCustomClientSpec(jsonFile, clientConfig.Config, h)
+		return NewCustomClientSpec(jsonFile, clientConfig, h)
 	default:
 		return nil, errors.Errorf(
 			"Cannot support unknown clientType for client %s", jsonFile,
 		)
-
 	}
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfigObj *moduleClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewTChannelClientSpec(jsonFile string, clientConfigObj *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return &ClientSpec{
 		ClientType: "tchannel",
 	}, nil
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfigObj map[string]string, h *PackageHelper) (*ClientSpec, error) {
-	customImportPath, ok := clientConfigObj["customImportPath"]
+func NewCustomClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+	customImportPath, ok := clientConfig.Config["customImportPath"]
 	if !ok {
 		return nil, errors.Errorf(
 			"client config (%s) must have customImportPath field for type custom", jsonFile,
 		)
 	}
 
-	// TODO: (lu) creating module spec for non-http client, which needs no http annotations, does not really work
-	clientSpec, err := NewHTTPClientSpec(jsonFile, clientConfigObj, h)
+	clientSpec, err := newClientSpec(jsonFile, clientConfig, false, h)
 	if err != nil {
 		return nil, err
 	}
-	clientSpec.ClientType = "custom"
 	clientSpec.CustomImportPath = customImportPath
 
 	return clientSpec, nil
 }
 
 // NewHTTPClientSpec creates a client spec from a json file whose type is http
-func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *PackageHelper) (*ClientSpec, error) {
+func NewHTTPClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+	return newClientSpec(jsonFile, clientConfig, true, h)
+
+}
+
+func newClientSpec(jsonFile string, clientConfig *clientClassConfig, wantAnnot bool, h *PackageHelper) (*ClientSpec, error) {
+	config := clientConfig.Config
+
 	for i := 0; i < len(mandatoryClientFields); i++ {
 		fieldName := mandatoryClientFields[i]
-		if clientConfigObj[fieldName] == "" {
+		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
 				"client config (%s) must have %s field", jsonFile, fieldName,
 			)
@@ -197,10 +190,10 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 	}
 
 	thriftFile := filepath.Join(
-		h.ThriftIDLPath(), clientConfigObj["thriftFile"],
+		h.ThriftIDLPath(), config["thriftFile"],
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, h)
+	mspec, err := NewModuleSpec(thriftFile, wantAnnot, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,
@@ -233,14 +226,14 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 	return &ClientSpec{
 		ModuleSpec:        mspec,
 		JSONFile:          jsonFile,
-		ClientType:        "http",
+		ClientType:        clientConfig.Type,
 		GoFileName:        goFileName,
 		GoPackageName:     goPackageName,
 		GoStructsFileName: goStructsFileName,
 		ThriftFile:        thriftFile,
-		ClientID:          clientConfigObj["clientId"],
-		ClientName:        clientConfigObj["clientName"],
-		ThriftServiceName: clientConfigObj["serviceName"],
+		ClientID:          config["clientId"],
+		ClientName:        config["clientName"],
+		ThriftServiceName: config["serviceName"],
 	}, nil
 }
 
@@ -381,7 +374,7 @@ func NewEndpointSpec(
 		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, h)
+	mspec, err := NewModuleSpec(thriftFile, true, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,
