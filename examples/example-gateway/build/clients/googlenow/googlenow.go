@@ -59,7 +59,7 @@ func (c *GoogleNowClient) AddCredentials(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(202)
+	res.CheckOKResponse([]int{202})
 
 	_, err = res.ReadAll()
 	if err != nil {
@@ -96,7 +96,7 @@ func (c *GoogleNowClient) CheckCredentials(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(202)
+	res.CheckOKResponse([]int{202})
 
 	_, err = res.ReadAll()
 	if err != nil {

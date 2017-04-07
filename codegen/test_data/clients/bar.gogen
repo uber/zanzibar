@@ -60,7 +60,7 @@ func (c *BarClient) ArgNotStruct(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
 	_, err = res.ReadAll()
 	if err != nil {
@@ -97,7 +97,7 @@ func (c *BarClient) MissingArg(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
@@ -136,7 +136,7 @@ func (c *BarClient) NoRequest(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
@@ -176,7 +176,7 @@ func (c *BarClient) Normal(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
@@ -216,7 +216,7 @@ func (c *BarClient) TooManyArgs(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
