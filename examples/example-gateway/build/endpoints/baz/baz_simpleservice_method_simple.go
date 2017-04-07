@@ -6,9 +6,9 @@ package baz
 import (
 	"context"
 
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
