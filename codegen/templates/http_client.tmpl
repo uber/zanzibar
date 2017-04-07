@@ -104,13 +104,41 @@ func (c *{{$clientName}}) {{title .Name}}(
 		{{- end -}}
 	})
 
-	{{if eq .ResponseType ""}}
+	{{if and (eq .ResponseType "") (eq (len .Exceptions) 0)}}
 	_, err = res.ReadAll()
 	if err != nil {
 		return respHeaders, err
 	}
 	return respHeaders, nil
+	{{else if eq .ResponseType ""}}
+	switch res.StatusCode {
+		{{range $idx, $exception := .Exceptions}}
+		case {{$exception.StatusCode.Code}}:
+			var exception {{$exception.Type}}
+			err = res.ReadAndUnmarshalBody(&exception)
+			if err != nil {
+				break
+			}
+			return respHeaders, &exception
+		{{end}}
+		default:
+			_, err = res.ReadAll()
+	}
+
+	if err != nil {
+		return respHeaders, err
+	}
+	return respHeaders, nil
+	{{else if eq (len .Exceptions) 0}}
+	var responseBody {{.ResponseType}}
+	err = res.ReadAndUnmarshalBody(&responseBody)
+	if err != nil {
+		return nil, respHeaders, err
+	}
+
+	return &responseBody, respHeaders, nil
 	{{else}}
+	// TODO also parse Exceptions
 	var responseBody {{.ResponseType}}
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
