@@ -119,7 +119,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
 
 // CheckOKResponse checks if the status code is OK.
 func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
-	for okResponse := range okResponses {
+	for _, okResponse := range okResponses {
 		if res.rawResponse.StatusCode == okResponse {
 			return
 		}
