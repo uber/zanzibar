@@ -5,43 +5,37 @@ package baz
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
+	bazClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
 )
 
-// HandleSimpleFutureRequest handles "/baz/simple-future-path".
-func HandleSimpleFutureRequest(
+// SimpleFutureEndpoint is the simple future handler struct
+type SimpleFutureEndpoint struct {
+	Clients *clients.Clients
+	Logger  zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle "/baz/simple-future-path".
+func (e SimpleFutureEndpoint) Handle(
 	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
-) {
-	// Handle request headers.
-	//h := http.Header{}
-	var clientReqHeaders map[string]string
-
-	_, err := clients.Baz.SimpleFuture(ctx, clientReqHeaders)
-
+	headers map[string]string,
+) (map[string]string, error) {
+	cRespHeaders, err := e.Clients.Baz.Simple(ctx, headers)
 	if err != nil {
+		// TODO: (lu) error type handling
 		switch err.(type) {
-		case *baz.SimpleErr:
-			res.SendError(400, errors.Wrap(err, "simple error"))
-		case *baz.NewErr:
-			res.SendError(400, errors.Wrap(err, "new error"))
+		case *bazClientStructs.SimpleErr:
+			return nil, err
+		case *bazClientStructs.NewErr:
+			return nil, err
 		default:
-			req.Logger.Error("Client request returned error",
-				zap.String("error", err.Error()),
-			)
-			res.SendError(500, errors.Wrap(err, "could not make client request:"))
+			return nil, err
 		}
-		return
 	}
 
-	// TODO: (lu) convert rpc response to http response status code
-	statusCode := 200
-	res.WriteJSONBytes(statusCode, nil)
+	return cRespHeaders, nil
 }

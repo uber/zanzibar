@@ -8,6 +8,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
