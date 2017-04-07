@@ -51,11 +51,12 @@ type MethodSpec struct {
 	HTTPPath     string
 	PathSegments []PathSegment
 	// Headers needed, generated from "zanzibar.http.headers"
-	Headers      []string
-	RequestType  string
-	ResponseType string
-	OKStatusCode StatusCode
-	Exceptions   []ExceptionSpec
+	Headers          []string
+	RequestType      string
+	ResponseType     string
+	OKStatusCode     StatusCode
+	Exceptions       []ExceptionSpec
+	ValidStatusCodes []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
 	RequestStruct []StructSpec
@@ -140,6 +141,8 @@ func NewMethod(
 	if err != nil {
 		return nil, err
 	}
+
+	method.setValidStatusCodes()
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
 		return nil, errors.Errorf(
@@ -236,6 +239,15 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	}
 
 	return nil
+}
+
+func (ms *MethodSpec) setValidStatusCodes() {
+	ms.ValidStatusCodes = make([]int, len(ms.Exceptions)+1)
+
+	ms.ValidStatusCodes[0] = ms.OKStatusCode.Code
+	for i := 0; i < len(ms.Exceptions); i++ {
+		ms.ValidStatusCodes[i+1] = ms.Exceptions[i].StatusCode.Code
+	}
 }
 
 func (ms *MethodSpec) setExceptions(
