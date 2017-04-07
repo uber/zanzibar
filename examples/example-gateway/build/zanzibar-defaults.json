@@ -4,6 +4,7 @@
 	"env": "production",
 
 	"logger.fileName": "/var/log/my-gateway/my-gateway.log",
+	"logger.datacenterFile": "/etc/datacenter",
 	"logger.output": "disk",
 
 	"metrics.type": "m3",

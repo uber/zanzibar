@@ -37,6 +37,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io/ioutil"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -327,13 +328,36 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		output = loggerFile
 	}
 
-	// Default to a STDOUT logger
-	gateway.Logger = zap.New(
+	zapLogger := zap.New(
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 			output,
 			zap.InfoLevel,
 		),
+	)
+
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+
+	dcFile := gateway.Config.MustGetString("logger.datacenterFile")
+	bytes, err := ioutil.ReadFile(dcFile)
+	if err != nil {
+		bytes = []byte("unknown")
+
+		if !os.IsNotExist(err) {
+			zapLogger.Warn("Could not read datacenterFile",
+				zap.String("datacenterFile", dcFile),
+			)
+		}
+	}
+
+	// Default to a STDOUT logger
+	gateway.Logger = zapLogger.With(
+		zap.String("hostname", host),
+		zap.Int("pid", os.Getpid()),
+		zap.String("zone", string(bytes)),
 	)
 	return nil
 }
