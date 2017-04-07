@@ -62,7 +62,20 @@ func (c *BarClient) ArgNotStruct(
 
 	res.CheckOKResponse([]int{200, 403})
 
-	_, err = res.ReadAll()
+	switch res.StatusCode {
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			break
+		}
+		return respHeaders, &exception
+
+	default:
+		_, err = res.ReadAll()
+	}
+
 	if err != nil {
 		return respHeaders, err
 	}
@@ -99,6 +112,7 @@ func (c *BarClient) MissingArg(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	// TODO also parse Exceptions
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
@@ -138,6 +152,7 @@ func (c *BarClient) NoRequest(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	// TODO also parse Exceptions
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
@@ -178,6 +193,7 @@ func (c *BarClient) Normal(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	// TODO also parse Exceptions
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
@@ -218,6 +234,7 @@ func (c *BarClient) TooManyArgs(
 
 	res.CheckOKResponse([]int{200, 403})
 
+	// TODO also parse Exceptions
 	var responseBody clientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
