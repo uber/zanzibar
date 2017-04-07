@@ -21,54 +21,215 @@
 package zanzibar
 
 import (
-	"time"
+	"bytes"
+	"context"
+	"fmt"
+	"strings"
+	"sync"
 
-	"github.com/opentracing/opentracing-go"
+	tchan "github.com/uber/tchannel-go"
+	netContext "golang.org/x/net/context"
+
 	"github.com/pkg/errors"
 	"github.com/uber-go/zap"
-	"github.com/uber/tchannel-go"
-
-	zt "github.com/uber/zanzibar/runtime/tchannel"
+	"go.uber.org/thriftrw/protocol"
+	"go.uber.org/thriftrw/wire"
 )
 
-// TChannelServerOptions are used to initialize the TChannel wrapper struct
-type TChannelServerOptions struct {
-	DefaultConnectionOptions tchannel.ConnectionOptions
-	Logger                   zap.Logger
-	OnPeerStatusChanged      func(*tchannel.Peer)
-	ProcessName              string
-	RelayHost                tchannel.RelayHost
-	RelayLocalHandlers       []string
-	RelayMaxTimeout          time.Duration
-	ServiceName              string
-	StatsReporter            tchannel.StatsReporter
-	Tracer                   opentracing.Tracer
+// PostResponseCB registers a callback that is run after a response has been
+// completely processed (e.g. written to the channel).
+// This gives the server a chance to clean up resources from the response object
+type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
+
+type handler struct {
+	server         TChanServer
+	postResponseCB PostResponseCB
 }
 
-// NewTChannelServer allocates a new TChannel wrapper struct
-func NewTChannelServer(opts *TChannelServerOptions, gateway *Gateway) (*zt.Server, error) {
-	channel, err := tchannel.NewChannel(
-		opts.ServiceName,
-		&tchannel.ChannelOptions{
-			DefaultConnectionOptions: opts.DefaultConnectionOptions,
-			OnPeerStatusChanged:      opts.OnPeerStatusChanged,
-			ProcessName:              opts.ProcessName,
-			RelayHost:                opts.RelayHost,
-			RelayLocalHandlers:       opts.RelayLocalHandlers,
-			RelayMaxTimeout:          opts.RelayMaxTimeout,
-			StatsReporter:            opts.StatsReporter,
+// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanServer.
+type TChannelServer struct {
+	sync.RWMutex
+	registrar tchan.Registrar
+	logger    zap.Logger
+	handlers  map[string]handler
+}
 
-			// TODO: (lu) wrap zap logger with tchannel logger interface
-			Logger: tchannel.NullLogger,
-		})
+// netContextServer implements the Handler interface that consumes netContext instead of stdlib context
+type netContextServer struct {
+	server *TChannelServer
+}
 
+func (ncs netContextServer) Handle(ctx netContext.Context, call *tchan.InboundCall) {
+	ncs.server.Handle(ctx, call)
+}
+
+// NewTChannelServer returns a server that can serve thrift services over TChannel.
+func NewTChannelServer(registrar tchan.Registrar, logger zap.Logger) *TChannelServer {
+	server := &TChannelServer{
+		registrar: registrar,
+		logger:    logger,
+		handlers:  map[string]handler{},
+	}
+	return server
+}
+
+func (s *TChannelServer) register(svr TChanServer, h *handler) {
+	service := svr.Service()
+	s.Lock()
+	s.handlers[service] = *h
+	s.Unlock()
+
+	ncs := netContextServer{server: s}
+	for _, m := range svr.Methods() {
+		s.registrar.Register(ncs, service+"::"+m)
+	}
+}
+
+// Register registers the given TChanServer to the be called on any incoming call for its services.
+func (s *TChannelServer) Register(svr TChanServer) {
+	handler := &handler{server: svr}
+	s.register(svr, handler)
+}
+
+// RegisterWithPostResponseCB registers the given TChanServer with a PostResponseCB function
+func (s *TChannelServer) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
+	handler := &handler{
+		server:         svr,
+		postResponseCB: cb,
+	}
+	s.register(svr, handler)
+}
+
+func (s *TChannelServer) onError(err error) {
+	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
+		s.logger.Warn("Thrift server timeout",
+			zap.String("error", err.Error()),
+		)
+	} else {
+		s.logger.Error("Thrift server error.",
+			zap.String("error", err.Error()),
+		)
+	}
+}
+
+func (s *TChannelServer) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
+	serviceName := handler.server.Service()
+
+	reader, err := call.Arg2Reader()
 	if err != nil {
-		return nil, errors.Errorf(
-			"Error creating TChannel Server:\n    %s",
-			err)
+		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", serviceName, method)
+	}
+	headers, err := ReadHeaders(reader)
+	if err != nil {
+		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", serviceName, method)
+	}
+	if err := EnsureEmpty(reader, "reading request headers"); err != nil {
+		return errors.Wrapf(err, "could not ensure arg2reader is empty for inbound call: %s::%s", serviceName, method)
 	}
 
-	gateway.Channel = channel
+	if err := reader.Close(); err != nil {
+		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", serviceName, method)
+	}
 
-	return zt.NewServer(channel, gateway.Logger), nil
+	reader, err = call.Arg3Reader()
+	if err != nil {
+		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", serviceName, method)
+	}
+
+	buf := GetBuffer()
+	defer PutBuffer(buf)
+	if _, err := buf.ReadFrom(reader); err != nil {
+		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", serviceName, method)
+	}
+
+	tracer := tchan.TracerFromRegistrar(s.registrar)
+	ctx = tchan.ExtractInboundSpan(ctx, call, headers, tracer)
+
+	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
+	if err != nil {
+		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", serviceName, method)
+	}
+
+	success, respHeaders, resp, err := handler.server.Handle(ctx, method, headers, &wireValue)
+
+	if handler.postResponseCB != nil {
+		defer handler.postResponseCB(ctx, method, resp)
+	}
+
+	if err != nil {
+		if er := reader.Close(); er != nil {
+			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", serviceName, method)
+		}
+		return call.Response().SendSystemError(err)
+	}
+
+	if err := EnsureEmpty(reader, "reading request body"); err != nil {
+		return errors.Wrapf(err, "could not ensure arg3reader is empty for inbound call: %s::%s", serviceName, method)
+	}
+	if err := reader.Close(); err != nil {
+		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", serviceName, method)
+	}
+
+	if !success {
+		if err := call.Response().SetApplicationError(); err != nil {
+			return err
+		}
+	}
+
+	writer, err := call.Response().Arg2Writer()
+	if err != nil {
+		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", serviceName, method)
+	}
+
+	if err := WriteHeaders(writer, respHeaders); err != nil {
+		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", serviceName, method)
+	}
+	if err := writer.Close(); err != nil {
+		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", serviceName, method)
+	}
+
+	writer, err = call.Response().Arg3Writer()
+	if err != nil {
+		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", serviceName, method)
+	}
+
+	err = WriteStruct(writer, resp)
+	if err != nil {
+		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", serviceName, method)
+	}
+
+	if err := writer.Close(); err != nil {
+		return errors.Wrapf(err, "could not close arg3writer for inbound call response: %s::%s", serviceName, method)
+	}
+
+	return nil
+}
+
+func getServiceMethod(method string) (string, string, bool) {
+	s := string(method)
+	sep := strings.Index(s, "::")
+	if sep == -1 {
+		return "", "", false
+	}
+	return s[:sep], s[sep+2:], true
+}
+
+// Handle handles an incoming TChannel call and forwards it to the correct handler.
+func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
+	op := call.MethodString()
+	service, method, ok := getServiceMethod(op)
+	if !ok {
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
+	}
+
+	s.RLock()
+	handler, ok := s.handlers[service]
+	s.RUnlock()
+	if !ok {
+		s.logger.Error(fmt.Sprintf("Handle got call for service %s which is not registered", service))
+	}
+
+	if err := s.handle(ctx, handler, method, call); err != nil {
+		s.onError(err)
+	}
 }

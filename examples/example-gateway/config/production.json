@@ -21,6 +21,9 @@
 
 	"clients.baz.port": 4002,
 	"clients.baz.ip": "127.0.0.1",
+	"clients.baz.serviceName": "Qux",
+	"clients.baz.timeout": 1000,
+	"clients.baz.timeoutPerAttempt": 1000,
 
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [

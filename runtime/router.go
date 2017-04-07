@@ -163,7 +163,18 @@ func (endpoint *Endpoint) HandleRequest(
 	req := NewServerHTTPRequest(w, r, params, endpoint)
 
 	fn := endpoint.HandlerFn
-	fn(r.Context(), req, req.res)
+
+	ctx := r.Context()
+
+	// TODO: (lu) get timeout from endpoint config
+	//_, ok := ctx.Deadline()
+	//if !ok {
+	//	var cancel context.CancelFunc
+	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
+	//	defer cancel()
+	//}
+
+	fn(ctx, req, req.res)
 
 	req.res.flush()
 }

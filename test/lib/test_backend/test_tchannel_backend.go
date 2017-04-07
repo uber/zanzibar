@@ -21,19 +21,20 @@
 package testBackend
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
 
-	zt "github.com/uber/zanzibar/runtime/tchannel"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
 	Channel  *tchannel.Channel
-	Server   *zt.Server
+	Server   *zanzibar.TChannelServer
 	IP       string
 	Port     int32
 	RealPort int32
@@ -48,7 +49,14 @@ func BuildTChannelBackends(
 	result := make(map[string]*TestTChannelBackend, n)
 
 	for i := 0; i < n; i++ {
-		serviceName := knownTChannelBackends[i]
+		clientName := knownTChannelBackends[i]
+
+		val, ok := cfg["clients."+clientName+".serviceName"]
+		if !ok {
+			return nil, fmt.Errorf("Missing \"clients.%s.serviceName\" in config", clientName)
+		}
+		serviceName := val.(string)
+
 		backend, err := CreateTChannelBackend(0, serviceName)
 		if err != nil {
 			return nil, err
@@ -59,9 +67,9 @@ func BuildTChannelBackends(
 			return nil, err
 		}
 
-		result[serviceName] = backend
-		cfg["clients."+serviceName+".ip"] = "127.0.0.1"
-		cfg["clients."+serviceName+".port"] = int64(backend.RealPort)
+		result[clientName] = backend
+		cfg["clients."+clientName+".ip"] = "127.0.0.1"
+		cfg["clients."+clientName+".port"] = int64(backend.RealPort)
 	}
 
 	return result, nil
@@ -85,7 +93,7 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 }
 
 // Register registers tchannel server handler
-func (backend *TestTChannelBackend) Register(server zt.TChanServer) {
+func (backend *TestTChannelBackend) Register(server zanzibar.TChanServer) {
 	backend.Server.Register(server)
 }
 
@@ -113,7 +121,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 	}
 
 	backend.Channel = channel
-	backend.Server = zt.NewServer(channel, testLogger)
+	backend.Server = zanzibar.NewTChannelServer(channel, testLogger)
 
 	return backend, nil
 }

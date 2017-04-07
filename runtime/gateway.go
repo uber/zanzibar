@@ -36,8 +36,6 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber-go/zap"
 	"github.com/uber/tchannel-go"
-
-	zt "github.com/uber/zanzibar/runtime/tchannel"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -74,7 +72,7 @@ type Gateway struct {
 	logWriter         zap.WriteSyncer
 	server            *HTTPServer
 	localServer       *HTTPServer
-	tchannelServer    *zt.Server
+	tchannelServer    *TChannelServer
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -359,17 +357,35 @@ func (gateway *Gateway) setupHTTPServer() error {
 }
 
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
-	tchannelServer, err := NewTChannelServer(
-		&TChannelServerOptions{
-			ServiceName: config.MustGetString("tchannel.serviceName"),
-			ProcessName: config.MustGetString("tchannel.processName"),
-		}, gateway)
+	serviceName := config.MustGetString("tchannel.serviceName")
+	processName := config.MustGetString("tchannel.processName")
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName: processName,
+
+			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
+			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
+			//RelayHost:                opts.RelayHost,
+			//RelayLocalHandlers:       opts.RelayLocalHandlers,
+			//RelayMaxTimeout:          opts.RelayMaxTimeout,
+			//StatsReporter:            opts.StatsReporter,
+			//Tracer:
+
+			// TODO: (lu) wrap zap logger with tchannel logger interface
+			Logger: tchannel.NullLogger,
+		})
 
 	if err != nil {
-		return err
+		return errors.Errorf(
+			"Error creating top channel:\n    %s",
+			err)
 	}
 
-	gateway.tchannelServer = tchannelServer
+	gateway.Channel = channel
+	gateway.tchannelServer = NewTChannelServer(channel, gateway.Logger)
+
 	return nil
 }
 

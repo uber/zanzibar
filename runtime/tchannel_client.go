@@ -18,10 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package tchannel
+package zanzibar
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
@@ -29,24 +30,35 @@ import (
 	netContext "golang.org/x/net/context"
 )
 
-// Client implements TChanClient and makes outgoing Thrift calls.
-type Client struct {
-	ch          *tchannel.Channel
-	sc          *tchannel.SubChannel
-	serviceName string
+// TChannelClientOption is used when creating a new TChannelClient
+type TChannelClientOption struct {
+	ServiceName       string
+	Timeout           time.Duration
+	TimeoutPerAttempt time.Duration
 }
 
-// NewClient returns a Client that makes calls over the given tchannel to the given thrift service.
-func NewClient(ch *tchannel.Channel, serviceName string) TChanClient {
-	client := &Client{
-		ch:          ch,
-		sc:          ch.GetSubChannel(serviceName),
-		serviceName: serviceName,
+// TChannelClient implements TChanClient and makes outgoing Thrift calls.
+type TChannelClient struct {
+	ch                *tchannel.Channel
+	sc                *tchannel.SubChannel
+	serviceName       string
+	timeout           time.Duration
+	timeoutPerAttempt time.Duration
+}
+
+// NewTChannelClient returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
+func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChanClient {
+	client := &TChannelClient{
+		ch:                ch,
+		sc:                ch.GetSubChannel(opt.ServiceName),
+		serviceName:       opt.ServiceName,
+		timeout:           opt.Timeout,
+		timeoutPerAttempt: opt.TimeoutPerAttempt,
 	}
 	return client
 }
 
-func (c *Client) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
+func (c *TChannelClient) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
 	writer, err := call.Arg2Writer()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for outbound call %s: ", c.serviceName)
@@ -73,7 +85,7 @@ func (c *Client) writeArgs(call *tchannel.OutboundCall, headers map[string]strin
 
 // readResponse reads the response struct into resp, and returns:
 // (response headers, whether there was an application error, unexpected error).
-func (c *Client) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[string]string, bool, error) {
+func (c *TChannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[string]string, bool, error) {
 	reader, err := response.Arg2Reader()
 	if err != nil {
 		return nil, false, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
@@ -110,9 +122,18 @@ func (c *Client) readResponse(response *tchannel.OutboundCallResponse, resp RWTS
 }
 
 // Call makes a RPC call to the given service.
-func (c *Client) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (map[string]string, bool, error) {
+func (c *TChannelClient) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (map[string]string, bool, error) {
 	var respHeaders map[string]string
 	var isOK bool
+
+	retryOpts := &tchannel.RetryOptions{
+		TimeoutPerAttempt: c.timeoutPerAttempt,
+	}
+	ctx, cancel := tchannel.NewContextBuilder(c.timeout).
+		SetParentContext(ctx).
+		SetRetryOptions(retryOpts).
+		Build()
+	defer cancel()
 
 	arg1 := thriftService + "::" + methodName
 	err := c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) error {

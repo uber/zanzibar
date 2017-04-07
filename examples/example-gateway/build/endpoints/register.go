@@ -8,6 +8,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
@@ -121,6 +122,36 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 			"tooManyArgs",
 			nil,
 			bar.HandleTooManyArgsRequest,
+		),
+	)
+	router.Register(
+		"POST", "/baz/call-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"call",
+			nil,
+			baz.HandleCallRequest,
+		),
+	)
+	router.Register(
+		"GET", "/baz/simple-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"simple",
+			nil,
+			baz.HandleSimpleRequest,
+		),
+	)
+	router.Register(
+		"GET", "/baz/simple-future-path",
+		makeEndpoint(
+			g,
+			"baz",
+			"simpleFuture",
+			nil,
+			baz.HandleSimpleFutureRequest,
 		),
 	)
 	router.Register(
