@@ -37,4 +37,3 @@ func (e SimpleEndpoint) Handle(
 
 	return cRespHeaders, nil
 }
-
