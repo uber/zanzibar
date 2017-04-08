@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -122,6 +123,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 			return respHeaders, &exception
 		{{end}}
 		default:
+			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 	}
 
@@ -138,14 +140,38 @@ func (c *{{$clientName}}) {{title .Name}}(
 
 	return &responseBody, respHeaders, nil
 	{{else}}
-	// TODO also parse Exceptions
-	var responseBody {{.ResponseType}}
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			var responseBody {{.ResponseType}}
+			err = res.ReadAndUnmarshalBody(&responseBody)
+			if err != nil {
+				return nil, respHeaders, err
+			}
+
+			return &responseBody, respHeaders, nil
+		{{range $idx, $exception := .Exceptions}}
+		case {{$exception.StatusCode.Code}}:
+			var exception {{$exception.Type}}
+			err = res.ReadAndUnmarshalBody(&exception)
+			if err != nil {
+				return nil, respHeaders, err
+			}
+			return nil, respHeaders, &exception
+		{{end}}
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return nil, respHeaders, err
+			}
+
+			return nil, respHeaders, errors.Errorf(
+				"Unexpected http client response (%d)", res.StatusCode,
+			)
 	}
 
-	return &responseBody, respHeaders, nil
+	// TODO: error about dead code?
+
 	{{end}}
 }
 {{end}} {{- /* <range .Methods> */ -}}
