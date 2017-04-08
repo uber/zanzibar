@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -73,6 +74,7 @@ func (c *BarClient) ArgNotStruct(
 		return respHeaders, &exception
 
 	default:
+		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 	}
 
@@ -112,14 +114,37 @@ func (c *BarClient) MissingArg(
 
 	res.CheckOKResponse([]int{200, 403})
 
-	// TODO also parse Exceptions
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return nil, respHeaders, errors.Errorf(
+			"Unexpected http client response (%d)", res.StatusCode,
+		)
 	}
 
-	return &responseBody, respHeaders, nil
+	// TODO: error about dead code?
 
 }
 
@@ -152,14 +177,37 @@ func (c *BarClient) NoRequest(
 
 	res.CheckOKResponse([]int{200, 403})
 
-	// TODO also parse Exceptions
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return nil, respHeaders, errors.Errorf(
+			"Unexpected http client response (%d)", res.StatusCode,
+		)
 	}
 
-	return &responseBody, respHeaders, nil
+	// TODO: error about dead code?
 
 }
 
@@ -193,14 +241,37 @@ func (c *BarClient) Normal(
 
 	res.CheckOKResponse([]int{200, 403})
 
-	// TODO also parse Exceptions
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return nil, respHeaders, errors.Errorf(
+			"Unexpected http client response (%d)", res.StatusCode,
+		)
 	}
 
-	return &responseBody, respHeaders, nil
+	// TODO: error about dead code?
 
 }
 
@@ -234,13 +305,36 @@ func (c *BarClient) TooManyArgs(
 
 	res.CheckOKResponse([]int{200, 403})
 
-	// TODO also parse Exceptions
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return nil, respHeaders, errors.Errorf(
+			"Unexpected http client response (%d)", res.StatusCode,
+		)
 	}
 
-	return &responseBody, respHeaders, nil
+	// TODO: error about dead code?
 
 }
