@@ -233,13 +233,19 @@ func (gateway *Gateway) Wait() {
 }
 
 func (gateway *Gateway) setupConfig(config *StaticConfig) {
-	dcFile := config.MustGetString("datacenterFile")
-	bytes, err := ioutil.ReadFile(dcFile)
-	if err != nil {
-		bytes = []byte("unknown")
-	}
+	useDC := config.MustGetBoolean("useDatacenter")
 
-	config.SetOrDie("datacenter", string(bytes))
+	if useDC {
+		dcFile := config.MustGetString("datacenterFile")
+		bytes, err := ioutil.ReadFile(dcFile)
+		if err != nil {
+			panic("expected datacenterFile: " + dcFile + " to exist")
+		}
+
+		config.SetOrDie("datacenter", string(bytes))
+	} else {
+		config.SetOrDie("datacenter", "unknown")
+	}
 }
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
