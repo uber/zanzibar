@@ -2,7 +2,7 @@
 	"name": "googlenow",
 	"type": "http",
 	"config": {
-		"thriftFile": "github.com/uber/zanzibar/clients/googlenow/googlenow.thrift",
+		"thriftFile": "clients/googlenow/googlenow.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"clientName": "GoogleNow",
 		"serviceName": "GoogleNow"

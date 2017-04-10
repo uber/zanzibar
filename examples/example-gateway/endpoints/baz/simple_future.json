@@ -2,7 +2,7 @@
 	"endpointType": "http",
 	"endpointId": "baz",
 	"handleId": "simpleFuture",
-	"thriftFile": "github.com/uber/zanzibar/endpoints/baz/baz.thrift",
+	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::SimpleFuture",
     "workflowType": "custom",

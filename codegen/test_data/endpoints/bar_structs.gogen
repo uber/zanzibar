@@ -6,8 +6,8 @@ package bar
 import (
 	"runtime"
 
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 	"github.com/uber/zanzibar/runtime"
 )
 

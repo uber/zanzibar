@@ -10,7 +10,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/contacts/contacts"
+	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 )
 

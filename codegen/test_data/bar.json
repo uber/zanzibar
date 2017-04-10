@@ -1,23 +1,23 @@
 {
-	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
 	"WantAnnot": true,
 	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
 		{
-			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo",
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo",
 			"AliasName": "endpointsFooFoo"
 		},
 		{
-			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar",
 			"AliasName": "endpointsBarBar"
 		}
 	],
 	"Services": [
 		{
 			"Name": "Bar",
-			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
 			"WantAnnot": true,
 			"Methods": [
 				{

@@ -11,9 +11,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".

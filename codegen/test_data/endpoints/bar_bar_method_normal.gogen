@@ -11,8 +11,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".

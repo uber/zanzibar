@@ -7,7 +7,7 @@ import (
 	"context"
 	"strconv"
 
-	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
+	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
 )
 

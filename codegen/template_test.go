@@ -63,7 +63,7 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
-		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
+		"github.com/uber/zanzibar",
 		"./clients",
 		"./endpoints",
 		"./middlewares/middleware-config.json",

@@ -7,7 +7,7 @@ import (
 	"context"
 	"strconv"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
 

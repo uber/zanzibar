@@ -9,8 +9,8 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
-	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
+	bar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 )
 
 // suppress unused package warning

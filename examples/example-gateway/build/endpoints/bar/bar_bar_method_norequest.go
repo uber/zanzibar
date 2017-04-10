@@ -10,8 +10,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
 // HandleNoRequestRequest handles "/bar/no-request-path".

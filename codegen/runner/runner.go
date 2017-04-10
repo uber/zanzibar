@@ -64,9 +64,7 @@ func main() {
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
 		config.MustGetString("genCodePackage"),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
-		filepath.Join(
-			configDirName, config.MustGetString("gatewayThriftRootDir"),
-		),
+		config.MustGetString("gatewayNamespace"),
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
 		config.MustGetString("middlewareConfig"),

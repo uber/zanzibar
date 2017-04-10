@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
-	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/contacts/contacts"
+	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 )
