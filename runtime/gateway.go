@@ -103,6 +103,9 @@ func CreateGateway(
 		metricsBackend: metricsBackend,
 	}
 
+	gateway.setupConfig(config)
+	config.Freeze()
+
 	gateway.Router = NewRouter(gateway)
 
 	if err := gateway.setupLogger(config); err != nil {
@@ -229,6 +232,16 @@ func (gateway *Gateway) Wait() {
 	gateway.WaitGroup.Wait()
 }
 
+func (gateway *Gateway) setupConfig(config *StaticConfig) {
+	dcFile := config.MustGetString("datacenterFile")
+	bytes, err := ioutil.ReadFile(dcFile)
+	if err != nil {
+		bytes = []byte("unknown")
+	}
+
+	config.SetOrDie("datacenter", string(bytes))
+}
+
 func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 	metricsType := config.MustGetString("metrics.type")
 
@@ -341,23 +354,13 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		host = "unknown"
 	}
 
-	dcFile := gateway.Config.MustGetString("logger.datacenterFile")
-	bytes, err := ioutil.ReadFile(dcFile)
-	if err != nil {
-		bytes = []byte("unknown")
-
-		if !os.IsNotExist(err) {
-			zapLogger.Warn("Could not read datacenterFile",
-				zap.String("datacenterFile", dcFile),
-			)
-		}
-	}
+	datacenter := gateway.Config.MustGetString("datacenter")
 
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
 		zap.String("hostname", host),
 		zap.Int("pid", os.Getpid()),
-		zap.String("zone", string(bytes)),
+		zap.String("zone", datacenter),
 	)
 	return nil
 }
