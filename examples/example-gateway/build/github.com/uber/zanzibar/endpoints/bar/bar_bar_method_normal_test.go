@@ -13,13 +13,13 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
+func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "..", "..", "..", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -27,7 +27,7 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeNoRequest := func(w http.ResponseWriter, r *http.Request) {
+	fakeNormal := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte(`{}`)); err != nil {
@@ -37,14 +37,14 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"GET", "/no-request-path", fakeNoRequest,
+		"POST", "/bar-path", fakeNormal,
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
-		"GET",
-		"/bar/no-request-path",
+		"POST",
+		"/bar/bar-path",
 		headers,
 		bytes.NewReader([]byte(`{}`)),
 	)

@@ -13,13 +13,13 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
+func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "..", "..", "..", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -27,7 +27,7 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeMissingArg := func(w http.ResponseWriter, r *http.Request) {
+	fakeArgNotStruct := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte(`{}`)); err != nil {
@@ -37,14 +37,14 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"GET", "/missing-arg-path", fakeMissingArg,
+		"POST", "/arg-not-struct-path", fakeArgNotStruct,
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
-		"GET",
-		"/bar/missing-arg-path",
+		"POST",
+		"/bar/arg-not-struct-path",
 		headers,
 		bytes.NewReader([]byte(`{}`)),
 	)

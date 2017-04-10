@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
@@ -154,7 +153,6 @@ func (p PackageHelper) GoFileGenPath(thrift string, goFileName string) (string, 
 		filepath.Dir(thrift[idx+len(p.thriftRootDir):]),
 		goFileName,
 	)
-	fmt.Printf("thrift %s -> Go File: %s\n", thrift, goFilePath)
 	return goFilePath, nil
 }
 

@@ -427,18 +427,20 @@ func NewEndpointSpec(
 	}
 
 	dirName := filepath.Base(filepath.Dir(jsonFile))
-	goFolderName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"endpoints",
-		dirName,
-	)
 
-	goStructsFileName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"endpoints",
-		dirName,
-		dirName+"_structs.go",
-	)
+	goFolderName, err := h.GoFileGenPath(thriftFile, "")
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not generate Go folder for thrift %s: ", thriftFile,
+		)
+	}
+
+	goStructsFileName, err := h.GoFileGenPath(thriftFile, dirName+"_structs.go")
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not generate Go structs file name for thrift %s: ", thriftFile,
+		)
+	}
 
 	thriftInfo := endpointConfigObj["thriftMethodName"].(string)
 	parts := strings.Split(thriftInfo, "::")

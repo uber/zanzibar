@@ -19,7 +19,7 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "..", "..", "..", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
