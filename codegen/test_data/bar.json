@@ -1,16 +1,16 @@
 {
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
-	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
+	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/github.com/uber/zanzibar/endpoints/bar",
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
 		{
 			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo",
-			"AliasName": "endpointsFooFoo"
+			"AliasName": "githubComUberZanzibarEndpointsFooFoo"
 		},
 		{
 			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
-			"AliasName": "endpointsBarBar"
+			"AliasName": "githubComUberZanzibarEndpointsBarBar"
 		}
 	],
 	"Services": [
@@ -82,7 +82,7 @@
 					],
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "githubComUberZanzibarEndpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -121,7 +121,7 @@
 					],
 					"Headers": null,
 					"RequestType": "",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "githubComUberZanzibarEndpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -160,7 +160,7 @@
 					],
 					"Headers": null,
 					"RequestType": "NormalHTTPRequest",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "githubComUberZanzibarEndpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -174,7 +174,7 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*endpointsBarBar.BarRequest",
+							"Type": "*githubComUberZanzibarEndpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						}
@@ -208,7 +208,7 @@
 						"x-token"
 					],
 					"RequestType": "TooManyArgsHTTPRequest",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "githubComUberZanzibarEndpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -222,12 +222,12 @@
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*endpointsBarBar.BarRequest",
+							"Type": "*githubComUberZanzibarEndpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						},
 						{
-							"Type": "*endpointsFooFoo.FooStruct",
+							"Type": "*githubComUberZanzibarEndpointsFooFoo.FooStruct",
 							"Name": "foo",
 							"Annotations": null
 						}

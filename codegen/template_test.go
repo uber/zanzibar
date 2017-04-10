@@ -63,7 +63,7 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
-		filepath.Join(absGatewayPath, "idl/github.com/uber/zanzibar"),
+		"github.com/uber/zanzibar",
 		"./clients",
 		"./endpoints",
 		"./middlewares/middleware-config.json",
@@ -80,12 +80,14 @@ func TestGenerateBar(t *testing.T) {
 
 	cmpGoldenFile(
 		t,
-		filepath.Join(tmpDir, "clients", "bar", "bar.go"),
+		filepath.Join(tmpDir, "github.com/uber/zanzibar",
+			"clients", "bar", "bar.go"),
 		"./test_data/clients",
 	)
 	cmpGoldenFile(
 		t,
-		filepath.Join(tmpDir, "clients", "bar", "bar_structs.go"),
+		filepath.Join(tmpDir, "github.com/uber/zanzibar",
+			"clients", "bar", "bar_structs.go"),
 		"./test_data/clients",
 	)
 
@@ -95,7 +97,8 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	endpoints, err := ioutil.ReadDir(
-		filepath.Join(tmpDir, "endpoints", "bar"),
+		filepath.Join(tmpDir, "github.com/uber/zanzibar",
+			"endpoints", "bar"),
 	)
 	if !assert.NoError(t, err, "cannot read dir %s", err) {
 		return
@@ -109,13 +112,15 @@ func TestGenerateBar(t *testing.T) {
 
 		cmpGoldenFile(
 			t,
-			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			filepath.Join(tmpDir, "github.com/uber/zanzibar",
+				"endpoints", "bar", file.Name()),
 			"./test_data/endpoints",
 		)
 	}
 	cmpGoldenFile(
 		t,
-		filepath.Join(tmpDir, "endpoints", "bar", "bar_structs.go"),
+		filepath.Join(tmpDir, "github.com/uber/zanzibar",
+			"endpoints", "bar", "bar_structs.go"),
 		"./test_data/endpoints",
 	)
 
@@ -127,7 +132,8 @@ func TestGenerateBar(t *testing.T) {
 
 		cmpGoldenFile(
 			t,
-			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			filepath.Join(tmpDir, "github.com/uber/zanzibar",
+				"endpoints", "bar", file.Name()),
 			"./test_data/endpoint_tests",
 		)
 	}

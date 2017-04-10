@@ -210,25 +210,26 @@ func NewHTTPClientSpec(jsonFile string, clientConfigObj map[string]string, h *Pa
 
 	baseName := filepath.Base(filepath.Dir(jsonFile))
 
-	goFileName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"clients",
-		baseName,
-		baseName+".go",
-	)
+	goFileName, err := h.GoFileGenPath(thriftFile, baseName+".go")
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not generate Go file name for thrift %s: ", thriftFile,
+		)
+	}
 
-	goPackageName := filepath.Join(
-		h.GoGatewayPackageName(),
-		"clients",
-		baseName,
-	)
+	goPackageName, err := h.PackageGenPath(thriftFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not generate Go package name for thrift %s: ", thriftFile,
+		)
+	}
 
-	goStructsFileName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"clients",
-		baseName,
-		baseName+"_structs.go",
-	)
+	goStructsFileName, err := h.GoFileGenPath(thriftFile, baseName+"_structs.go")
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not generate Go structs file name for thrift %s: ", thriftFile,
+		)
+	}
 
 	return &ClientSpec{
 		ModuleSpec:        mspec,
@@ -426,7 +427,6 @@ func NewEndpointSpec(
 	}
 
 	dirName := filepath.Base(filepath.Dir(jsonFile))
-
 	goFolderName := filepath.Join(
 		h.CodeGenTargetPath(),
 		"endpoints",

@@ -10,7 +10,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
+	"github.com/uber/zanzibar/examples/example-gateway/build/github.com/uber/zanzibar/clients/googlenow"
 )
 
 // HandleAddCredentialsRequest handles "/googlenow/add-credentials".

@@ -19,7 +19,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(in *jlexer.Lexer, out *AddCredentialsHTTPRequest) {
+func easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(in *jlexer.Lexer, out *AddCredentialsHTTPRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +50,7 @@ func easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 		in.Consumed()
 	}
 }
-func easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(out *jwriter.Writer, in AddCredentialsHTTPRequest) {
+func easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(out *jwriter.Writer, in AddCredentialsHTTPRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -66,23 +66,23 @@ func easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildClien
 // MarshalJSON supports json.Marshaler interface
 func (v AddCredentialsHTTPRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(&w, v)
+	easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v AddCredentialsHTTPRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(w, v)
+	easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *AddCredentialsHTTPRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(&r, v)
+	easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *AddCredentialsHTTPRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildClientsGooglenow(l, v)
+	easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGithubComUberZanzibarClientsGooglenow(l, v)
 }

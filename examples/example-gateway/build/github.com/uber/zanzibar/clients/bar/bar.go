@@ -7,7 +7,7 @@ import (
 	"context"
 	"strconv"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	githubComUberZanzibarClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -74,7 +74,7 @@ func (c *BarClient) ArgNotStruct(
 func (c *BarClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarClientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "missingArg", c.HTTPClient,
@@ -99,7 +99,7 @@ func (c *BarClient) MissingArg(
 
 	res.CheckOKResponse(200)
 
-	var responseBody clientsBarBar.BarResponse
+	var responseBody githubComUberZanzibarClientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, respHeaders, err
@@ -113,7 +113,7 @@ func (c *BarClient) MissingArg(
 func (c *BarClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarClientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "noRequest", c.HTTPClient,
@@ -138,7 +138,7 @@ func (c *BarClient) NoRequest(
 
 	res.CheckOKResponse(200)
 
-	var responseBody clientsBarBar.BarResponse
+	var responseBody githubComUberZanzibarClientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, respHeaders, err
@@ -153,7 +153,7 @@ func (c *BarClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
 	r *NormalHTTPRequest,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarClientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "normal", c.HTTPClient,
@@ -178,7 +178,7 @@ func (c *BarClient) Normal(
 
 	res.CheckOKResponse(200)
 
-	var responseBody clientsBarBar.BarResponse
+	var responseBody githubComUberZanzibarClientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, respHeaders, err
@@ -193,7 +193,7 @@ func (c *BarClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
 	r *TooManyArgsHTTPRequest,
-) (*clientsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarClientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "tooManyArgs", c.HTTPClient,
@@ -218,7 +218,7 @@ func (c *BarClient) TooManyArgs(
 
 	res.CheckOKResponse(200)
 
-	var responseBody clientsBarBar.BarResponse
+	var responseBody githubComUberZanzibarClientsBarBar.BarResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, respHeaders, err

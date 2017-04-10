@@ -10,9 +10,9 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	githubComUberZanzibarClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	githubComUberZanzibarEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/build/github.com/uber/zanzibar/clients/bar"
 )
 
 // HandleNormalRequest handles "/bar/bar-path".
@@ -59,7 +59,7 @@ func (w NormalEndpoint) Handle(
 	ctx context.Context,
 	headers map[string]string,
 	r *NormalHTTPRequest,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarEndpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientRespBody, _, err := w.Clients.Bar.Normal(
@@ -79,12 +79,12 @@ func (w NormalEndpoint) Handle(
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
 	clientRequest := &barClient.NormalHTTPRequest{}
 
-	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
+	clientRequest.Request = (*githubComUberZanzibarClientsBarBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
-func convertNormalClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertNormalClientResponse(body *githubComUberZanzibarClientsBarBar.BarResponse) *githubComUberZanzibarEndpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpointsBarBar.BarResponse{}
+	downstreamResponse := &githubComUberZanzibarEndpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

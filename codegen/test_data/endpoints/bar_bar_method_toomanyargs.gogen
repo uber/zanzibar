@@ -10,10 +10,10 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	"github.com/uber/zanzibar/.tmp_gen/github.com/uber/zanzibar/clients/bar"
+	githubComUberZanzibarClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	githubComUberZanzibarClientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo"
+	githubComUberZanzibarEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
 // HandleTooManyArgsRequest handles "/bar/too-many-args-path".
@@ -63,7 +63,7 @@ func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
 	headers map[string]string,
 	r *TooManyArgsHTTPRequest,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarEndpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
@@ -83,13 +83,13 @@ func (w TooManyArgsEndpoint) Handle(
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
 	clientRequest := &barClient.TooManyArgsHTTPRequest{}
 
-	clientRequest.Foo = (*clientsFooFoo.FooStruct)(body.Foo)
-	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
+	clientRequest.Foo = (*githubComUberZanzibarClientsFooFoo.FooStruct)(body.Foo)
+	clientRequest.Request = (*githubComUberZanzibarClientsBarBar.BarRequest)(body.Request)
 
 	return clientRequest
 }
-func convertTooManyArgsClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertTooManyArgsClientResponse(body *githubComUberZanzibarClientsBarBar.BarResponse) *githubComUberZanzibarEndpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpointsBarBar.BarResponse{}
+	downstreamResponse := &githubComUberZanzibarEndpointsBarBar.BarResponse{}
 	return downstreamResponse
 }
