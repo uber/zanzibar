@@ -127,11 +127,10 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	}
 
 	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
-	gatewayThriftRootDir := filepath.Join(p.thriftRootDir, p.gatewayNamespace)
 	return path.Join(
 		p.gatewayNamespace,
 		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
-		filepath.Dir(thrift[idx+len(gatewayThriftRootDir):]),
+		filepath.Dir(thrift[idx+len(p.thriftRootDir):]),
 	), nil
 }
 

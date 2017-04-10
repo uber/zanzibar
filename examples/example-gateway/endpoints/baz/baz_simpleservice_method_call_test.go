@@ -32,7 +32,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/clients/baz"
 )
 

@@ -7,7 +7,7 @@ import (
 	"context"
 	"strconv"
 
-	githubComUberZanzibarClientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
+	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -36,8 +36,8 @@ func NewClient(
 func (c *ContactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
-	r *githubComUberZanzibarClientsContactsContacts.SaveContactsRequest,
-) (*githubComUberZanzibarClientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+	r *clientsContactsContacts.SaveContactsRequest,
+) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "saveContacts", c.HTTPClient,
@@ -62,7 +62,7 @@ func (c *ContactsClient) SaveContacts(
 
 	res.CheckOKResponse(202)
 
-	var responseBody githubComUberZanzibarClientsContactsContacts.SaveContactsResponse
+	var responseBody clientsContactsContacts.SaveContactsResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
 		return nil, respHeaders, err

@@ -10,8 +10,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	githubComUberZanzibarClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	githubComUberZanzibarEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
 // HandleNoRequestRequest handles "/bar/no-request-path".
@@ -53,7 +53,7 @@ type NoRequestEndpoint struct {
 func (w NoRequestEndpoint) Handle(
 	ctx context.Context,
 	headers map[string]string,
-) (*githubComUberZanzibarEndpointsBarBar.BarResponse, map[string]string, error) {
+) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientRespBody, _, err := w.Clients.Bar.NoRequest(
 		ctx, nil,
@@ -69,8 +69,8 @@ func (w NoRequestEndpoint) Handle(
 	return response, nil, nil
 }
 
-func convertNoRequestClientResponse(body *githubComUberZanzibarClientsBarBar.BarResponse) *githubComUberZanzibarEndpointsBarBar.BarResponse {
+func convertNoRequestClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &githubComUberZanzibarEndpointsBarBar.BarResponse{}
+	downstreamResponse := &endpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

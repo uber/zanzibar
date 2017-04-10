@@ -12,7 +12,7 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/baz/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 // SimpleServiceServer is the Baz backend service

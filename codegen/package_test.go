@@ -33,7 +33,7 @@ var fooThrift = filepath.Join(
 	os.Getenv("GOPATH"),
 	"/src/github.com/uber/zanzibar/",
 	"examples/example-gateway/idl/",
-	"github.com/uber/zanzibar/clients/foo/foo.thrift")
+	"clients/foo/foo.thrift")
 
 func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 	relativeGatewayPath := "../examples/example-gateway"
@@ -58,7 +58,7 @@ func TestImportPath(t *testing.T) {
 	h := newPackageHelper(t)
 	p, err := h.TypeImportPath(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/foo/foo", p, "wrong type import path")
+	assert.Equal(t, "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo", p, "wrong type import path")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.go")
 	assert.Error(t, err, "should return error for not a thrift file")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/zanzibar/clients/foo/foo.thrift")
@@ -69,7 +69,7 @@ func TestTypePackageName(t *testing.T) {
 	h := newPackageHelper(t)
 	packageName, err := h.TypePackageName(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "githubComUberZanzibarClientsFooFoo", packageName, "wrong package name")
+	assert.Equal(t, "clientsFooFoo", packageName, "wrong package name")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.txt")
 	assert.Error(t, err, "should return error for not a thrift file")
 }

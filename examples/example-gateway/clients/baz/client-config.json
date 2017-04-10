@@ -3,7 +3,7 @@
 	"type": "custom",
 	"config": {
 		"customImportPath": "github.com/uber/zanzibar/examples/example-gateway/clients/baz",
-		"thriftFile": "github.com/uber/zanzibar/clients/baz/baz.thrift",
+		"thriftFile": "clients/baz/baz.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"clientName": "Baz",
 		"serviceName": "Qux"
