@@ -64,24 +64,34 @@ func (c *BarClient) ArgNotStruct(
 	res.CheckOKResponse([]int{200, 403})
 
 	switch res.StatusCode {
+	case 200:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+
+		return respHeaders, nil
 
 	case 403:
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			break
+			return respHeaders, err
 		}
 		return respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
 	}
 
-	if err != nil {
-		return respHeaders, err
-	}
-	return respHeaders, nil
+	return respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -138,13 +148,11 @@ func (c *BarClient) MissingArg(
 		if err != nil {
 			return nil, respHeaders, err
 		}
-
-		return nil, respHeaders, errors.Errorf(
-			"Unexpected http client response (%d)", res.StatusCode,
-		)
 	}
 
-	// TODO: error about dead code?
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -201,13 +209,11 @@ func (c *BarClient) NoRequest(
 		if err != nil {
 			return nil, respHeaders, err
 		}
-
-		return nil, respHeaders, errors.Errorf(
-			"Unexpected http client response (%d)", res.StatusCode,
-		)
 	}
 
-	// TODO: error about dead code?
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -265,13 +271,11 @@ func (c *BarClient) Normal(
 		if err != nil {
 			return nil, respHeaders, err
 		}
-
-		return nil, respHeaders, errors.Errorf(
-			"Unexpected http client response (%d)", res.StatusCode,
-		)
 	}
 
-	// TODO: error about dead code?
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -329,12 +333,10 @@ func (c *BarClient) TooManyArgs(
 		if err != nil {
 			return nil, respHeaders, err
 		}
-
-		return nil, respHeaders, errors.Errorf(
-			"Unexpected http client response (%d)", res.StatusCode,
-		)
 	}
 
-	// TODO: error about dead code?
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
