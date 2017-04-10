@@ -1,4 +1,4 @@
-namespace java com.uber.zanzibar.clients.googlenow
+namespace java com.googlenow
 
 // Service specification for generating Google Now client.
 service GoogleNow {

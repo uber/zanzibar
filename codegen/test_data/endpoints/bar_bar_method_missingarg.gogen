@@ -10,8 +10,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
+	githubComUberZanzibarClientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	githubComUberZanzibarEndpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar"
 )
 
 // HandleMissingArgRequest handles "/bar/missing-arg-path".
@@ -53,7 +53,7 @@ type MissingArgEndpoint struct {
 func (w MissingArgEndpoint) Handle(
 	ctx context.Context,
 	headers map[string]string,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*githubComUberZanzibarEndpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientRespBody, _, err := w.Clients.Bar.MissingArg(
 		ctx, nil,
@@ -69,8 +69,8 @@ func (w MissingArgEndpoint) Handle(
 	return response, nil, nil
 }
 
-func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertMissingArgClientResponse(body *githubComUberZanzibarClientsBarBar.BarResponse) *githubComUberZanzibarEndpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpointsBarBar.BarResponse{}
+	downstreamResponse := &githubComUberZanzibarEndpointsBarBar.BarResponse{}
 	return downstreamResponse
 }

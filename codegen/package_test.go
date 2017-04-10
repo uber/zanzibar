@@ -69,7 +69,7 @@ func TestTypePackageName(t *testing.T) {
 	h := newPackageHelper(t)
 	packageName, err := h.TypePackageName(fooThrift)
 	assert.Nil(t, err, "should not return error")
-	assert.Equal(t, "clientsFooFoo", packageName, "wrong package name")
+	assert.Equal(t, "githubComUberZanzibarClientsFooFoo", packageName, "wrong package name")
 	_, err = h.TypeImportPath("/Users/xxx/go/src/github.com/uber/zanzibar/examples/example-gateway/build/idl/github.com/uber/zanzibar/clients/foo/foo.txt")
 	assert.Error(t, err, "should return error for not a thrift file")
 }

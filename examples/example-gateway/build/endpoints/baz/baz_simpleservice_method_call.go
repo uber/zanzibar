@@ -10,7 +10,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/baz/baz"
+	githubComUberZanzibarEndpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
@@ -21,7 +21,7 @@ func HandleCallRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	var requestBody endpointsBazBaz.BazRequest
+	var requestBody githubComUberZanzibarEndpointsBazBaz.BazRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}

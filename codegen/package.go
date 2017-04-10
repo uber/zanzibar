@@ -149,8 +149,7 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	}
 
 	// Strip the leading / and strip the .thrift on the end.
-	gatewayThriftRootDir := filepath.Join(p.thriftRootDir, p.gatewayNamespace)
-	thriftSegment := thrift[idx+len(gatewayThriftRootDir)+1 : len(thrift)-7]
+	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(thrift)-7]
 
 	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
 	return camelCase(thriftPackageName), nil
