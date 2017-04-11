@@ -36,14 +36,14 @@ type RWTStruct interface {
 type TChanClient interface {
 	// Call should be passed the method to call, headers and the request/response thriftrw structs.
 	// The arguments returned are (whether there was an application error, unexpected error)
-	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (respHeaders map[string]string, success bool, err error)
+	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (success bool, respHeaders map[string]string, err error)
 }
 
 // TChanServer abstracts handling of an RPC that is implemented by the generated server code.
 type TChanServer interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
-	Handle(ctx context.Context, method string, reqHeaders map[string]string, wireValue *wire.Value) (success bool, respHeaders map[string]string, resp RWTStruct, err error)
+	Handle(ctx context.Context, method string, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp RWTStruct, respHeaders map[string]string, err error)
 
 	// Service returns the service name.
 	Service() string

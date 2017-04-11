@@ -28,7 +28,7 @@ func (e CallEndpoint) Handle(
 ) (*endpointBaz.BazResponse, map[string]string, error) {
 	req := (*bazClientStructs.BazRequest)(r)
 
-	cRespHeaders, cResp, err := e.Clients.Baz.Call(ctx, headers, req)
+	cResp, cRespHeaders, err := e.Clients.Baz.Call(ctx, headers, req)
 	if err != nil {
 		switch err.(type) {
 		default:

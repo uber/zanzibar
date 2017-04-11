@@ -42,7 +42,7 @@ func (s *SimpleServiceServer) Methods() []string {
 }
 
 // Handle dispatches a method call to corresponding handler.
-func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
+func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, reqHeaders map[string]string, wireValue *wire.Value) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	switch methodName {
 	case "Call":
 		return s.handleCall(ctx, reqHeaders, wireValue)
@@ -56,7 +56,7 @@ func (s *SimpleServiceServer) Handle(ctx context.Context, methodName string, req
 	}
 }
 
-func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
+func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req baz.SimpleService_Call_Args
 	var res baz.SimpleService_Call_Result
 
@@ -64,17 +64,17 @@ func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[str
 		return false, nil, nil, err
 	}
 
-	respHeaders, r, err := s.handler.Call(ctx, reqHeaders, req.Arg)
+	r, respHeaders, err := s.handler.Call(ctx, reqHeaders, req.Arg)
 
 	if err != nil {
 		return false, nil, nil, err
 	}
 
 	res.Success = r
-	return true, respHeaders, &res, nil
+	return true, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
+func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req baz.SimpleService_Simple_Args
 	var res baz.SimpleService_Simple_Result
 
@@ -96,10 +96,10 @@ func (s *SimpleServiceServer) handleSimple(ctx context.Context, reqHeaders map[s
 		}
 	}
 
-	return err == nil, respHeaders, &res, nil
+	return err == nil, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, map[string]string, zanzibar.RWTStruct, error) {
+func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var req baz.SimpleService_SimpleFuture_Args
 	var res baz.SimpleService_SimpleFuture_Result
 
@@ -126,11 +126,11 @@ func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders
 		}
 	}
 
-	return err == nil, respHeaders, &res, nil
+	return err == nil, &res, respHeaders, nil
 }
 
 // CallFunc ...
-type CallFunc func(context.Context, map[string]string, *baz.BazRequest) (map[string]string, *baz.BazResponse, error)
+type CallFunc func(context.Context, map[string]string, *baz.BazRequest) (*baz.BazResponse, map[string]string, error)
 
 // SimpleFunc ...
 type SimpleFunc func(context.Context, map[string]string) (map[string]string, error)
@@ -167,7 +167,7 @@ type Handler struct {
 }
 
 // Call ...
-func (h *Handler) Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (map[string]string, *baz.BazResponse, error) {
+func (h *Handler) Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (*baz.BazResponse, map[string]string, error) {
 	if h.CallFunc == nil {
 		return nil, nil, errors.New("not implemented")
 	}

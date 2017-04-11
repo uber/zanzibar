@@ -15,7 +15,7 @@ import (
 
 // TChanBaz is the interface that defines the server handler and client interface.
 type TChanBaz interface {
-	Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (map[string]string, *baz.BazResponse, error)
+	Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (*baz.BazResponse, map[string]string, error)
 	Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 	SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 }
@@ -57,13 +57,13 @@ type BazClient struct {
 }
 
 // Call ...
-func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, arg *baz.BazRequest) (map[string]string, *baz.BazResponse, error) {
+func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, arg *baz.BazRequest) (*baz.BazResponse, map[string]string, error) {
 	var result baz.SimpleService_Call_Result
 	args := baz.SimpleService_Call_Args{
 		Arg: arg,
 	}
 
-	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, &args, &result)
+	success, respHeaders, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, &args, &result)
 	if err == nil && !success {
 		err = errors.New("received no result or unknown exception for Call")
 	}
@@ -73,7 +73,7 @@ func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, arg 
 
 	resp, err := baz.SimpleService_Call_Helper.UnwrapResponse(&result)
 
-	return respHeaders, resp, err
+	return resp, respHeaders, err
 }
 
 // Simple ...
@@ -81,7 +81,7 @@ func (c *BazClient) Simple(ctx context.Context, reqHeaders map[string]string) (m
 	var result baz.SimpleService_Simple_Result
 
 	args := baz.SimpleService_Simple_Args{}
-	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "Simple", reqHeaders, &args, &result)
+	success, respHeaders, err := c.client.Call(ctx, c.thriftService, "Simple", reqHeaders, &args, &result)
 	if err == nil && !success {
 		switch {
 		case result.SimpleErr != nil:
@@ -99,7 +99,7 @@ func (c *BazClient) SimpleFuture(ctx context.Context, reqHeaders map[string]stri
 	var result baz.SimpleService_SimpleFuture_Result
 
 	args := baz.SimpleService_SimpleFuture_Args{}
-	respHeaders, success, err := c.client.Call(ctx, c.thriftService, "SimpleFuture", reqHeaders, &args, &result)
+	success, respHeaders, err := c.client.Call(ctx, c.thriftService, "SimpleFuture", reqHeaders, &args, &result)
 	if err == nil && !success {
 		switch {
 		case result.SimpleErr != nil:
