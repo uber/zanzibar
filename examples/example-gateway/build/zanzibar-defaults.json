@@ -2,10 +2,8 @@
 	"serviceName": "my-gateway",
 	"port": 4000,
 	"env": "production",
-	"datacenterFile": "/etc/datacenter",
 
-	"logger.fileName": "/var/log/my-gateway/my-gateway.log",
-	"logger.output": "disk",
+	"logger.output": "stdout",
 
 	"metrics.type": "m3",
 	"metrics.tally.flushInterval": 1000,
