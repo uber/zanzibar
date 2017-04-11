@@ -118,12 +118,16 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
 }
 
 // CheckOKResponse checks if the status code is OK.
-func (res *ClientHTTPResponse) CheckOKResponse(okResponse int) {
-	if res.rawResponse.StatusCode != okResponse {
-		res.req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", res.rawResponse.StatusCode),
-		)
+func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
+	for _, okResponse := range okResponses {
+		if res.rawResponse.StatusCode == okResponse {
+			return
+		}
 	}
+
+	res.req.Logger.Warn("Unknown response status code",
+		zap.Int("status code", res.rawResponse.StatusCode),
+	)
 }
 
 // finish()

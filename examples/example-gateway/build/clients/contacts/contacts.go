@@ -60,7 +60,7 @@ func (c *ContactsClient) SaveContacts(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(202)
+	res.CheckOKResponse([]int{202})
 
 	var responseBody clientsContactsContacts.SaveContactsResponse
 	err = res.ReadAndUnmarshalBody(&responseBody)

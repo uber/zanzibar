@@ -107,7 +107,7 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 	gateway.HTTPBackends()["bar"].Server.ConnState =
 		func(conn net.Conn, state http.ConnState) {
 			_, _ = conn.Write([]byte(
-				"HTTP/1.1 500 Internal Server Error\n" +
+				"HTTP/1.1 200 OK\n" +
 					"Content-Length: 12\n" +
 					"\n" +
 					"abc\n"))

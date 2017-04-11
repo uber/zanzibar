@@ -29,6 +29,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -155,5 +156,94 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 
 	assert.NotNil(t, body)
 	assert.Equal(t, "Example-Value", headers["Example-Header"])
+}
 
+func TestMakingClientCallWithThriftException(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	}, clients.CreateClients, endpoints.Register)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(403)
+			_, _ = w.Write([]byte(`{"stringField":"test"}`))
+		},
+	)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	bClient := clients.Bar
+
+	body, _, err := bClient.Normal(
+		context.Background(), nil, &barClient.NormalHTTPRequest{},
+	)
+	assert.Error(t, err)
+	assert.Nil(t, body)
+
+	realError := err.(*clientsBarBar.BarException)
+	assert.Equal(t, realError.StringField, "test")
+}
+
+func TestMakingClientCallWithBadStatusCode(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	}, clients.CreateClients, endpoints.Register)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(402)
+			_, _ = w.Write([]byte(`{"stringField":"test"}`))
+		},
+	)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	bClient := clients.Bar
+
+	body, _, err := bClient.Normal(
+		context.Background(), nil, &barClient.NormalHTTPRequest{},
+	)
+	assert.Error(t, err)
+	assert.Nil(t, body)
+
+	assert.Equal(t, "Unexpected http client response (402)", err.Error())
+}
+
+func TestMakingCallWithThriftException(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+	}, clients.CreateClients, endpoints.Register)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/arg-not-struct-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(403)
+			_, _ = w.Write([]byte(`{"stringField":"test"}`))
+		},
+	)
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+
+	_, err = clients.Bar.ArgNotStruct(
+		context.Background(), nil,
+		&barClient.ArgNotStructHTTPRequest{
+			Request: "request",
+		},
+	)
+	assert.Error(t, err)
+
+	realError := err.(*clientsBarBar.BarException)
+	assert.Equal(t, realError.StringField, "test")
 }

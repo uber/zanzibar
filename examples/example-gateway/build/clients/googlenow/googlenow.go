@@ -59,8 +59,9 @@ func (c *GoogleNowClient) AddCredentials(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(202)
+	res.CheckOKResponse([]int{202})
 
+	// TODO: log about unexpected body bytes?
 	_, err = res.ReadAll()
 	if err != nil {
 		return respHeaders, err
@@ -96,8 +97,9 @@ func (c *GoogleNowClient) CheckCredentials(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(202)
+	res.CheckOKResponse([]int{202})
 
+	// TODO: log about unexpected body bytes?
 	_, err = res.ReadAll()
 	if err != nil {
 		return respHeaders, err

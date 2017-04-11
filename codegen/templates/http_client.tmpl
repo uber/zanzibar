@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -98,15 +99,20 @@ func (c *{{$clientName}}) {{title .Name}}(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse({{.OKStatusCode.Code}})
+	res.CheckOKResponse([]int{
+		{{- range $index, $code := .ValidStatusCodes -}}
+		{{if $index}},{{end}}{{$code}}
+		{{- end -}}
+	})
 
-	{{if eq .ResponseType ""}}
+	{{if and (eq .ResponseType "") (eq (len .Exceptions) 0)}}
+	// TODO: log about unexpected body bytes?
 	_, err = res.ReadAll()
 	if err != nil {
 		return respHeaders, err
 	}
 	return respHeaders, nil
-	{{else}}
+	{{else if eq (len .Exceptions) 0}}
 	var responseBody {{.ResponseType}}
 	err = res.ReadAndUnmarshalBody(&responseBody)
 	if err != nil {
@@ -114,6 +120,66 @@ func (c *{{$clientName}}) {{title .Name}}(
 	}
 
 	return &responseBody, respHeaders, nil
+	{{else if eq .ResponseType ""}}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return respHeaders, err
+			}
+
+			return respHeaders, nil
+		{{range $idx, $exception := .Exceptions}}
+		case {{$exception.StatusCode.Code}}:
+			var exception {{$exception.Type}}
+			err = res.ReadAndUnmarshalBody(&exception)
+			if err != nil {
+				return respHeaders, err
+			}
+			return respHeaders, &exception
+		{{end}}
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return respHeaders, err
+			}
+	}
+
+	return respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+	{{else}}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			var responseBody {{.ResponseType}}
+			err = res.ReadAndUnmarshalBody(&responseBody)
+			if err != nil {
+				return nil, respHeaders, err
+			}
+
+			return &responseBody, respHeaders, nil
+		{{range $idx, $exception := .Exceptions}}
+		case {{$exception.StatusCode.Code}}:
+			var exception {{$exception.Type}}
+			err = res.ReadAndUnmarshalBody(&exception)
+			if err != nil {
+				return nil, respHeaders, err
+			}
+			return nil, respHeaders, &exception
+		{{end}}
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return nil, respHeaders, err
+			}
+	}
+
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 	{{end}}
 }
 {{end}} {{- /* <range .Methods> */ -}}

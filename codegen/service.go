@@ -243,47 +243,10 @@ func (ms *ModuleSpec) SetDownstream(
 }
 
 // NewMethod creates new method specification.
-func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) (*MethodSpec, error) {
-	method := &MethodSpec{}
-	method.CompiledThriftSpec = funcSpec
-	var err error
-	var ok bool
-	method.Name = funcSpec.MethodName()
-	if err = method.setResponseType(s.ThriftFile, funcSpec.ResultSpec, packageHelper); err != nil {
-		return nil, err
-	}
-	if err = method.setRequestType(s.ThriftFile, funcSpec, packageHelper); err != nil {
-		return nil, err
-	}
-	if !s.WantAnnot {
-		return method, nil
-	}
-
-	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
-		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
-	}
-
-	method.EndpointName = funcSpec.Annotations[antHandler]
-	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
-
-	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {
-		return nil, err
-	}
-	if err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus]); err != nil {
-		return nil, err
-	}
-
-	if method.HTTPMethod == "GET" && method.RequestType != "" {
-		return nil, errors.Errorf("invalid annotation: HTTP GET method with body type")
-	}
-
-	var httpPath string
-	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
-		return nil, errors.Errorf("missing anotation '%s' for HTTP path", antHTTPPath)
-	}
-	method.setHTTPPath(httpPath, funcSpec)
-
-	return method, nil
+func (s *ServiceSpec) NewMethod(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) (*MethodSpec, error) {
+	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot)
 }
 
 func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {

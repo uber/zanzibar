@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -60,13 +61,37 @@ func (c *BarClient) ArgNotStruct(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
-	_, err = res.ReadAll()
-	if err != nil {
-		return respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+
+		return respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
 	}
-	return respHeaders, nil
+
+	return respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -97,15 +122,37 @@ func (c *BarClient) MissingArg(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
 	}
 
-	return &responseBody, respHeaders, nil
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -136,15 +183,37 @@ func (c *BarClient) NoRequest(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
 	}
 
-	return &responseBody, respHeaders, nil
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -176,15 +245,37 @@ func (c *BarClient) Normal(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
 	}
 
-	return &responseBody, respHeaders, nil
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }
 
@@ -216,14 +307,36 @@ func (c *BarClient) TooManyArgs(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse(200)
+	res.CheckOKResponse([]int{200, 403})
 
-	var responseBody clientsBarBar.BarResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		return nil, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return nil, respHeaders, err
+		}
 	}
 
-	return &responseBody, respHeaders, nil
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 
 }

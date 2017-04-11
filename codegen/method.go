@@ -35,6 +35,13 @@ type PathSegment struct {
 	BodyIdentifier string
 }
 
+// ExceptionSpec contains information about thrift exceptions
+type ExceptionSpec struct {
+	StructSpec
+
+	StatusCode StatusCode
+}
+
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
 	Name       string
@@ -44,11 +51,12 @@ type MethodSpec struct {
 	HTTPPath     string
 	PathSegments []PathSegment
 	// Headers needed, generated from "zanzibar.http.headers"
-	Headers             []string
-	RequestType         string
-	ResponseType        string
-	OKStatusCode        StatusCode
-	ExceptionStatusCode []StatusCode
+	Headers          []string
+	RequestType      string
+	ResponseType     string
+	OKStatusCode     StatusCode
+	Exceptions       []ExceptionSpec
+	ValidStatusCodes []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
 	RequestStruct []StructSpec
@@ -89,6 +97,69 @@ const (
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
 )
+
+// NewMethod creates new method specification.
+func NewMethod(
+	thriftFile string,
+	funcSpec *compile.FunctionSpec,
+	packageHelper *PackageHelper,
+	wantAnnot bool,
+) (*MethodSpec, error) {
+	method := &MethodSpec{}
+	method.CompiledThriftSpec = funcSpec
+	var err error
+	var ok bool
+	method.Name = funcSpec.MethodName()
+
+	err = method.setResponseType(thriftFile, funcSpec.ResultSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setRequestType(thriftFile, funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	if !wantAnnot {
+		return method, nil
+	}
+
+	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
+		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
+	}
+
+	method.EndpointName = funcSpec.Annotations[antHandler]
+	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
+
+	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	method.setValidStatusCodes()
+
+	if method.HTTPMethod == "GET" && method.RequestType != "" {
+		return nil, errors.Errorf(
+			"invalid annotation: HTTP GET method with body type",
+		)
+	}
+
+	var httpPath string
+	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
+		return nil, errors.Errorf(
+			"missing anotation '%s' for HTTP path", antHTTPPath,
+		)
+	}
+	method.setHTTPPath(httpPath, funcSpec)
+
+	return method, nil
+}
 
 // setRequestType sets the request type of the method specification. If the
 // "zanzibar.http.req.def.boxed" is true, then the first parameter will be used as
@@ -170,16 +241,64 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	return nil
 }
 
-func (ms *MethodSpec) setExceptionStatusCode(resultSpec *compile.ResultSpec) error {
-	ms.ExceptionStatusCode = make([]StatusCode, len(resultSpec.Exceptions))
+func (ms *MethodSpec) setValidStatusCodes() {
+	ms.ValidStatusCodes = make([]int, len(ms.Exceptions)+1)
+
+	ms.ValidStatusCodes[0] = ms.OKStatusCode.Code
+	for i := 0; i < len(ms.Exceptions); i++ {
+		ms.ValidStatusCodes[i+1] = ms.Exceptions[i].StatusCode.Code
+	}
+}
+
+func (ms *MethodSpec) setExceptions(
+	curThriftFile string,
+	resultSpec *compile.ResultSpec,
+	h *PackageHelper,
+) error {
+	seenStatusCodes := map[int]bool{
+		ms.OKStatusCode.Code: true,
+	}
+	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
+
 	for i, e := range resultSpec.Exceptions {
 		code, err := strconv.Atoi(e.Annotations[antHTTPStatus])
 		if err != nil {
-			return errors.Wrapf(err, "cannot parse the annotation %s for exception %s", antHTTPStatus, e.Name)
+			return errors.Wrapf(
+				err,
+				"cannot parse the annotation %s for exception %s", antHTTPStatus, e.Name,
+			)
 		}
-		ms.ExceptionStatusCode[i] = StatusCode{
-			Code:    code,
-			Message: e.Name,
+
+		if seenStatusCodes[code] {
+			return errors.Wrapf(
+				err,
+				"cannot have duplicate status code %s for exception %s",
+				antHTTPStatus,
+				e.Name,
+			)
+		}
+		seenStatusCodes[code] = true
+
+		typeName, err := h.TypeFullName(curThriftFile, e.Type)
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"cannot resolve type full name for %s for exception %s",
+				e.Type,
+				e.Name,
+			)
+		}
+
+		ms.Exceptions[i] = ExceptionSpec{
+			StructSpec: StructSpec{
+				Type:        typeName,
+				Name:        e.Name,
+				Annotations: e.Annotations,
+			},
+			StatusCode: StatusCode{
+				Code:    code,
+				Message: e.Name,
+			},
 		}
 	}
 	return nil
