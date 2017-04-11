@@ -30,10 +30,10 @@ import (
 
 // NewTChannelLogger creates a TChannel logger given a zap logger
 func NewTChannelLogger(logger *zap.Logger) tchannel.Logger {
-	return &TChanLogger{logger}
+	return TChanLogger{logger: logger}
 }
 
-// TChanLogger warps a zap logger to be used for tchannel internal logging
+// TChanLogger warps a zap logger to be used for TChannel internal logging
 type TChanLogger struct {
 	logger *zap.Logger
 }
@@ -104,9 +104,9 @@ func (l TChanLogger) Debug(msg string) {
 
 // Fields returns the fields that this logger contains.
 func (l TChanLogger) Fields() tchannel.LogFields {
-	// TODO: (lu) is it ok to return nil?
 	// zap logger does not expose the fields
 	// zap.With writes the field to underlying buffer
+	// fortunately TChannel-go does not call this method except in tests
 	return nil
 }
 
@@ -117,5 +117,5 @@ func (l TChanLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger {
 		zf := zap.Any(tf.Key, tf.Value)
 		zfields = append(zfields, zf)
 	}
-	return &TChanLogger{l.logger.With(zfields...)}
+	return TChanLogger{logger: l.logger.With(zfields...)}
 }
