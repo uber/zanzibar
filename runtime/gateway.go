@@ -411,8 +411,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			//StatsReporter:            opts.StatsReporter,
 			//Tracer:
 
-			// TODO: (lu) wrap zap logger with tchannel logger interface
-			Logger: tchannel.NullLogger,
+			Logger: NewTChannelLogger(gateway.Logger),
 		})
 
 	if err != nil {
