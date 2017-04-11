@@ -29,7 +29,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/bar/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
