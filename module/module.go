@@ -78,7 +78,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	for _, moduleType := range class.ClassDependencies {
 		if moduleSystem.classes[moduleType] == nil {
 			return errors.Errorf(
-				"The module class %s depends on class type %s,"+
+				"The module class %s depends on class type %s, "+
 					"which is not yet defined",
 				name,
 				moduleType,
@@ -320,7 +320,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if generator == nil {
 				fmt.Printf(
-					"Skipping generation of %s %s class of type %s"+
+					"Skipping generation of %s %s class of type %s "+
 						"as generator is not defined\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
@@ -333,7 +333,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating %s %s class of type %s"+
+					"Error generating %s %s class of type %s "+
 						"as generator is not defined\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
