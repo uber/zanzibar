@@ -359,12 +359,12 @@ func (moduleSystem *System) GenerateBuild(
 					filePath,
 				)
 
-				if err := ioutil.WriteFile(
-					resolvedPath,
-					content,
-					0644,
-				); err != nil {
-					return err
+				if err := writeFile(resolvedPath, content); err != nil {
+					return errors.Wrapf(
+						err,
+						"Error writing to file %s",
+						resolvedPath,
+					)
 				}
 
 				// HACK: The module system writer shouldn't
@@ -516,4 +516,42 @@ func (jsonConfig *JSONClassConfig) Read(
 	}
 
 	return configFile, nil
+}
+
+func writeFile(filePath string, bytes []byte) error {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+			return errors.Wrapf(
+				err, "could not make directory: %s", filePath,
+			)
+		}
+	}
+
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	defer closeFile(file)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Could not open file for writing: %s", filePath,
+		)
+	}
+
+	n, err := file.Write(bytes)
+
+	if err != nil {
+		return errors.Wrapf(err, "Error writing to file %s", filePath)
+	}
+
+	if n != len(bytes) {
+		return errors.Wrapf(
+			err,
+			"Error writing full contents to file: %s",
+			filePath,
+		)
+	}
+
+	return nil
+}
+
+func closeFile(file *os.File) {
+	_ = file.Close()
 }
