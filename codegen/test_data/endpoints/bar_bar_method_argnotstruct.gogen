@@ -61,7 +61,7 @@ func (w ArgNotStructEndpoint) Handle(
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	_, err := w.Clients.Bar.ArgNotStruct(
-		ctx, nil, clientRequest,
+		ctx, headers, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

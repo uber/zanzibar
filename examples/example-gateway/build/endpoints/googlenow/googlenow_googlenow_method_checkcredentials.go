@@ -55,7 +55,7 @@ func (w CheckCredentialsEndpoint) Handle(
 	headers map[string]string,
 ) (map[string]string, error) {
 
-	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, nil)
+	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, headers)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),

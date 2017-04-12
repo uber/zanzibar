@@ -63,7 +63,7 @@ func (w NormalEndpoint) Handle(
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientRespBody, _, err := w.Clients.Bar.Normal(
-		ctx, nil, clientRequest,
+		ctx, headers, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

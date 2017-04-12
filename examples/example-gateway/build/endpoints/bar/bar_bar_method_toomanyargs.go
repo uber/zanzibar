@@ -67,7 +67,7 @@ func (w TooManyArgsEndpoint) Handle(
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
-		ctx, nil, clientRequest,
+		ctx, headers, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

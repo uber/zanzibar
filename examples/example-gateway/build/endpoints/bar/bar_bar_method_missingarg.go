@@ -56,7 +56,7 @@ func (w MissingArgEndpoint) Handle(
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientRespBody, _, err := w.Clients.Bar.MissingArg(
-		ctx, nil,
+		ctx, headers,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

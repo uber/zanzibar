@@ -56,7 +56,7 @@ func (w NoRequestEndpoint) Handle(
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientRespBody, _, err := w.Clients.Bar.NoRequest(
-		ctx, nil,
+		ctx, headers,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

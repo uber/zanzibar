@@ -64,7 +64,7 @@ func (w AddCredentialsEndpoint) Handle(
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	_, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, nil, clientRequest,
+		ctx, headers, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

@@ -63,7 +63,7 @@ func Handle{{title .Name}}Request(
 	{{else if eq .ResponseType ""}}
 	_, err := workflow.Handle(ctx, headers, &requestBody)
 	{{else}}
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	{{end -}}
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
@@ -125,18 +125,18 @@ func (w {{$workflow}}) Handle(
 	{{end}}
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, nil)
+	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, headers)
 	{{else if eq $clientReqType ""}}
-	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil,
+	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, headers,
 	)
 	{{else if eq $clientResType ""}}
 	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
+		ctx, headers, clientRequest,
 	)
 	{{else}}
-	clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, nil, clientRequest,
+	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		ctx, headers, clientRequest,
 	)
 	{{end -}}
 	if err != nil {
@@ -147,10 +147,10 @@ func (w {{$workflow}}) Handle(
 	}
 
 	{{if eq .ResponseType "" -}}
-	return nil, nil
+	return respHeaders, nil
 	{{- else -}}
 	response := convert{{title .Name}}ClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, respHeaders, nil
 	{{- end -}}
 }
 
