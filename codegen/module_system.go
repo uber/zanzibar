@@ -21,8 +21,6 @@
 package codegen
 
 import (
-	"bufio"
-	"bytes"
 	"path/filepath"
 
 	"encoding/json"
@@ -113,45 +111,23 @@ func (generator *HTTPClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 	}
 
-	// TODO: add helper to template to return byte array
-	clientBuffer := bytes.NewBuffer(nil)
-	clientWriter := bufio.NewWriter(clientBuffer)
-	if err := generator.templates.template.ExecuteTemplate(
-		clientWriter,
+	client, err := generator.templates.execTemplate(
 		"http_client.tmpl",
 		clientMeta,
-	); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error executing HTTP Client template for %s",
-			instance.InstanceName,
-		)
-	}
-	if err := clientWriter.Flush(); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating HTTP client from template for %s",
-			instance.InstanceName,
-		)
-	}
-
-	structsBuffer := bytes.NewBuffer(nil)
-	structsWriter := bufio.NewWriter(structsBuffer)
-	if err := generator.templates.template.ExecuteTemplate(
-		structsWriter,
-		"structs.tmpl",
-		clientMeta,
-	); err != nil {
+	)
+	if err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error executing HTTP client structs template for %s",
 			instance.InstanceName,
 		)
 	}
-	if err := structsWriter.Flush(); err != nil {
+
+	structs, err := generator.templates.execTemplate("structs.tmpl", clientMeta)
+	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error generating HTTP client structs from template for %s",
+			"Error executing HTTP client structs template for %s",
 			instance.InstanceName,
 		)
 	}
@@ -176,8 +152,8 @@ func (generator *HTTPClientGenerator) Generate(
 
 	// Return the client files
 	files := map[string][]byte{}
-	files[clientFilePath] = clientBuffer.Bytes()
-	files[structFilePath] = structsBuffer.Bytes()
+	files[clientFilePath] = client
+	files[structFilePath] = structs
 	return files, nil
 }
 
