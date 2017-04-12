@@ -518,6 +518,7 @@ func (jsonConfig *JSONClassConfig) Read(
 	return configFile, nil
 }
 
+// writeFile is like ioutil.WriteFile with a mkdirp step
 func writeFile(filePath string, bytes []byte) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
