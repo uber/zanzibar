@@ -688,26 +688,13 @@ type GatewaySpec struct {
 
 // NewGatewaySpec sets up gateway spec
 func NewGatewaySpec(
+	packageHelper *PackageHelper,
 	configDirName string,
-	thriftRootDir string,
-	genCodePackage string,
-	targetGenDir string,
-	gatewayThriftRootDir string,
 	clientConfig string,
 	endpointConfig string,
 	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
-	packageHelper, err := NewPackageHelper(
-		thriftRootDir,
-		genCodePackage,
-		targetGenDir,
-		gatewayThriftRootDir,
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "Cannot build package helper")
-	}
-
 	tmpl, err := NewTemplate(templateDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
@@ -798,21 +785,8 @@ func NewGatewaySpec(
 	return spec, nil
 }
 
-// GenerateClients will generate all the clients for the gateway
-func (gateway *GatewaySpec) GenerateClients() error {
-	for _, module := range gateway.ClientModules {
-		if module.ClientType == "custom" {
-			continue
-		}
-
-		_, err := gateway.Template.GenerateClientFile(
-			module, gateway.PackageHelper,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
+// GenerateClientsInit will generate the clients init code for the gateway
+func (gateway *GatewaySpec) GenerateClientsInit() error {
 	_, err := gateway.Template.GenerateClientsInitFile(
 		gateway.ClientModules, gateway.PackageHelper,
 	)
