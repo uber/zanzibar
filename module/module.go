@@ -280,7 +280,10 @@ func readDeps(jsonDeps map[string][]string) []Dependency {
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory
-func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
+func (moduleSystem *System) GenerateBuild(
+	baseDirectory string,
+	targetGenDir string,
+) error {
 	resolvedModules, err := moduleSystem.ResolveModules(baseDirectory)
 
 	if err != nil {
@@ -299,8 +302,7 @@ func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
 		for _, classInstance := range classInstances {
 			moduleIndex++
 			buildPath := filepath.Join(
-				classInstance.BaseDirectory,
-				"build",
+				targetGenDir,
 				classInstance.Directory,
 			)
 			fmt.Printf(

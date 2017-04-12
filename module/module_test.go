@@ -145,7 +145,10 @@ func TestExampleService(t *testing.T) {
 
 	// TODO: this doesn't yet generate the build to a dir
 	// TODO: this should return a collection of errors if they occur
-	err = moduleSystem.GenerateBuild(testServiceDir)
+	err = moduleSystem.GenerateBuild(
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
 	}
