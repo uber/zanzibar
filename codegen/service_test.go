@@ -30,7 +30,7 @@ import (
 	"github.com/uber/zanzibar/codegen"
 )
 
-var updateGoldenFile = flag.Bool("update", true, "Updates the golden files with expected response.")
+var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with expected response.")
 
 const parsedBarFile = "test_data/bar.json"
 
