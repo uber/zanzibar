@@ -386,7 +386,7 @@ func NewEndpointSpec(
 	var clientMethod string
 
 	workflowType := endpointConfigObj["workflowType"].(string)
-	if workflowType == "httpClient" {
+	if workflowType == "httpClient" || workflowType == "tchannelClient" {
 		iclientName, ok := endpointConfigObj["clientName"]
 		if !ok {
 			return nil, errors.Errorf(

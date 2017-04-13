@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"fmt"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -60,7 +61,11 @@ type MethodSpec struct {
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
 	RequestStruct []StructSpec
-	// The triftrw compiled spec, used to extract type information
+	// Thrift service name the method belongs to.
+	ThriftService string
+	// Whether the method needs annotation or not.
+	WantAnnot bool
+	// The thriftrw compiled spec, used to extract type information
 	CompiledThriftSpec *compile.FunctionSpec
 	// The downstream service method set by endpoint config
 	Downstream *ModuleSpec
@@ -104,12 +109,15 @@ func NewMethod(
 	funcSpec *compile.FunctionSpec,
 	packageHelper *PackageHelper,
 	wantAnnot bool,
+	thriftService string,
 ) (*MethodSpec, error) {
 	method := &MethodSpec{}
 	method.CompiledThriftSpec = funcSpec
 	var err error
 	var ok bool
 	method.Name = funcSpec.MethodName()
+	method.WantAnnot = wantAnnot
+	method.ThriftService = thriftService
 
 	err = method.setResponseType(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
@@ -191,7 +199,22 @@ func isStructType(spec compile.TypeSpec) bool {
 }
 
 func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSpec, h *PackageHelper) (string, error) {
-	requestType := strings.Title(f.Name) + "HTTPRequest"
+	var requestType string
+	// TODO: (lu) the assumption here is 'no annotation == tchannel', good enough until new protocol is introduced
+	if ms.WantAnnot {
+		requestType = strings.Title(f.Name) + "HTTPRequest"
+	} else {
+		pkgName, err := h.TypePackageName(curThriftFile)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to generate new request type")
+		}
+		requestType = fmt.Sprintf(
+			"%s.%s_%s_Args",
+			pkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
+		)
+
+	}
+
 	ms.RequestStruct = make([]StructSpec, len(f.ArgsSpec))
 	for i, arg := range f.ArgsSpec {
 		typeName, err := h.TypeFullName(curThriftFile, arg.Type)
