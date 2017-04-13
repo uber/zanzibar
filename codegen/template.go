@@ -659,6 +659,27 @@ func (t *Template) GenerateMainFile(
 	}, nil
 }
 
+func (t *Template) execTemplate(
+	tplName string,
+	tplData interface{},
+) ([]byte, error) {
+	tplBuffer := bytes.NewBuffer(nil)
+
+	if err := t.template.ExecuteTemplate(
+		tplBuffer,
+		tplName,
+		tplData,
+	); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating template %s",
+			tplName,
+		)
+	}
+
+	return tplBuffer.Bytes(), nil
+}
+
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {
 	file, err := openFileOrCreate(filePath)
 	if err != nil {
