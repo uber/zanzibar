@@ -9,8 +9,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
-
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
 // HandleSimpleFutureRequest handles "/baz/simple-future-path".
@@ -23,7 +21,7 @@ func HandleSimpleFutureRequest(
 
 	headers := map[string]string{}
 
-	workflow := customBaz.SimpleFutureEndpoint{
+	workflow := SimpleFutureEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -39,4 +37,28 @@ func HandleSimpleFutureRequest(
 	}
 
 	res.WriteJSONBytes(204, nil)
+}
+
+// SimpleFutureEndpoint calls thrift client Baz.SimpleFuture
+type SimpleFutureEndpoint struct {
+	Clients *clients.Clients
+	Logger  *zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w SimpleFutureEndpoint) Handle(
+	ctx context.Context,
+	headers map[string]string,
+) (map[string]string, error) {
+
+	_, err := w.Clients.Baz.SimpleFuture(ctx, nil)
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	return nil, nil
 }
