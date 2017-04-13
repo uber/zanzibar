@@ -28,6 +28,10 @@ func HandleNormalRequest(
 	}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string(nil) {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := NormalEndpoint{
 		Clients: clients,
@@ -35,7 +39,7 @@ func HandleNormalRequest(
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -44,7 +48,13 @@ func HandleNormalRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string(nil) {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSON(200, endRespHead, response)
 }
 
 // NormalEndpoint calls thrift client Bar.Normal
@@ -62,7 +72,7 @@ func (w NormalEndpoint) Handle(
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
-	clientRespBody, _, err := w.Clients.Bar.Normal(
+	clientRespBody, respHeaders, err := w.Clients.Bar.Normal(
 		ctx, headers, clientRequest,
 	)
 	if err != nil {
@@ -73,7 +83,7 @@ func (w NormalEndpoint) Handle(
 	}
 
 	response := convertNormalClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, respHeaders, nil
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {

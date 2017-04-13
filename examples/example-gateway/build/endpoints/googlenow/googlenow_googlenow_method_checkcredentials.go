@@ -23,6 +23,10 @@ func HandleCheckCredentialsRequest(
 	}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string{"x-uuid", "x-token"} {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := CheckCredentialsEndpoint{
 		Clients: clients,
@@ -30,7 +34,7 @@ func HandleCheckCredentialsRequest(
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, headers)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -39,7 +43,13 @@ func HandleCheckCredentialsRequest(
 		return
 	}
 
-	res.WriteJSONBytes(202, nil)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string{"x-uuid", "x-token"} {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSONBytes(202, endRespHead, nil)
 }
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
@@ -55,7 +65,7 @@ func (w CheckCredentialsEndpoint) Handle(
 	headers map[string]string,
 ) (map[string]string, error) {
 
-	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, headers)
+	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, headers)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -63,5 +73,5 @@ func (w CheckCredentialsEndpoint) Handle(
 		return nil, err
 	}
 
-	return nil, nil
+	return respHeaders, nil
 }

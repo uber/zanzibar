@@ -23,6 +23,10 @@ func HandleMissingArgRequest(
 ) {
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string(nil) {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := MissingArgEndpoint{
 		Clients: clients,
@@ -30,7 +34,7 @@ func HandleMissingArgRequest(
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers)
+	response, respHeaders, err := workflow.Handle(ctx, headers)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -39,7 +43,13 @@ func HandleMissingArgRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string(nil) {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSON(200, endRespHead, response)
 }
 
 // MissingArgEndpoint calls thrift client Bar.MissingArg
@@ -55,7 +65,7 @@ func (w MissingArgEndpoint) Handle(
 	headers map[string]string,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
-	clientRespBody, _, err := w.Clients.Bar.MissingArg(
+	clientRespBody, respHeaders, err := w.Clients.Bar.MissingArg(
 		ctx, headers,
 	)
 	if err != nil {
@@ -66,7 +76,7 @@ func (w MissingArgEndpoint) Handle(
 	}
 
 	response := convertMissingArgClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, respHeaders, nil
 }
 
 func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {

@@ -22,6 +22,10 @@ func HandleSimpleRequest(
 ) {
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string(nil) {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := customBaz.SimpleEndpoint{
 		Clients: clients,
@@ -29,7 +33,7 @@ func HandleSimpleRequest(
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, headers)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -38,5 +42,11 @@ func HandleSimpleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(204, nil)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string(nil) {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSONBytes(204, endRespHead, nil)
 }

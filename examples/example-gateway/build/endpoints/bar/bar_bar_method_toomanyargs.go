@@ -32,6 +32,10 @@ func HandleTooManyArgsRequest(
 	}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string{"x-uuid", "x-token"} {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := TooManyArgsEndpoint{
 		Clients: clients,
@@ -39,7 +43,7 @@ func HandleTooManyArgsRequest(
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -48,7 +52,13 @@ func HandleTooManyArgsRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string{"x-uuid", "x-token"} {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSON(200, endRespHead, response)
 }
 
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
@@ -66,7 +76,7 @@ func (w TooManyArgsEndpoint) Handle(
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
-	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
+	clientRespBody, respHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, headers, clientRequest,
 	)
 	if err != nil {
@@ -77,7 +87,7 @@ func (w TooManyArgsEndpoint) Handle(
 	}
 
 	response := convertTooManyArgsClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, respHeaders, nil
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

@@ -27,6 +27,10 @@ func HandleSaveContactsRequest(
 	}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string(nil) {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := customContacts.SaveContactsEndpoint{
 		Clients: clients,
@@ -34,7 +38,7 @@ func HandleSaveContactsRequest(
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -43,5 +47,11 @@ func HandleSaveContactsRequest(
 		return
 	}
 
-	res.WriteJSON(202, response)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string(nil) {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSON(202, endRespHead, response)
 }

@@ -57,7 +57,7 @@ func TestInvalidStatusCode(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSONBytes(999, []byte("true"))
+				res.WriteJSONBytes(999, nil, []byte("true"))
 			},
 		),
 	)
@@ -117,7 +117,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, nil)
+				res.WriteJSON(200, nil, nil)
 			},
 		),
 	)
@@ -176,7 +176,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, failingJsonObj{})
+				res.WriteJSON(200, nil, failingJsonObj{})
 			},
 		),
 	)
@@ -250,7 +250,7 @@ func TestResponsePeekBody(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, &MyBody{
+				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",
@@ -311,7 +311,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, &MyBody{
+				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",

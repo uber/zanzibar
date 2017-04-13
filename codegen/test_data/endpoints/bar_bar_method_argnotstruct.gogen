@@ -26,6 +26,10 @@ func HandleArgNotStructRequest(
 	}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range []string(nil) {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := ArgNotStructEndpoint{
 		Clients: clients,
@@ -33,7 +37,7 @@ func HandleArgNotStructRequest(
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers, &requestBody)
+	respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -42,7 +46,13 @@ func HandleArgNotStructRequest(
 		return
 	}
 
-	res.WriteJSONBytes(200, nil)
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range []string(nil) {
+		endRespHead[k] = respHeaders[k]
+	}
+
+	res.WriteJSONBytes(200, endRespHead, nil)
 }
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
@@ -60,7 +70,7 @@ func (w ArgNotStructEndpoint) Handle(
 ) (map[string]string, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
-	_, err := w.Clients.Bar.ArgNotStruct(
+	respHeaders, err := w.Clients.Bar.ArgNotStruct(
 		ctx, headers, clientRequest,
 	)
 	if err != nil {
@@ -70,7 +80,7 @@ func (w ArgNotStructEndpoint) Handle(
 		return nil, err
 	}
 
-	return nil, nil
+	return respHeaders, nil
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"fmt" 
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"{{.GatewayPackageName}}/clients"
@@ -50,18 +52,23 @@ func Handle{{title .Name}}Request(
 	{{end}}
 
 	headers := map[string]string{}
+	// TODO(sindelar): Add optional headers in addition to required.
+	for _, k := range {{.Headers | printf "%#v" }} {
+		headers[k] = req.Header.Get(k)
+	}
 
 	workflow := {{$workflow}}{
 		Clients: clients,
 		Logger: req.Logger,
 		Request: req,
 	}
+
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	_, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, headers)
 	{{else if eq .RequestType ""}}
-	response, _, err := workflow.Handle(ctx, headers)
+	response, respHeaders, err := workflow.Handle(ctx, headers)
 	{{else if eq .ResponseType ""}}
-	_, err := workflow.Handle(ctx, headers, &requestBody)
+	respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	{{else}}
 	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
 	{{end -}}
@@ -73,10 +80,16 @@ func Handle{{title .Name}}Request(
 		return
 	}
 
+	// TODO(sindelar): Add response headers as an thrift spec annotation.
+	endRespHead := map[string]string{}
+	for _, k := range {{.Headers | printf "%#v" }} {
+		endRespHead[k] = respHeaders[k]
+	}
+
 	{{if eq .ResponseType "" -}}
-	res.WriteJSONBytes({{.OKStatusCode.Code}}, nil)
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, endRespHead, nil)
 	{{- else -}}
-	res.WriteJSON({{.OKStatusCode.Code}}, response)
+	res.WriteJSON({{.OKStatusCode.Code}}, endRespHead, response)
 	{{- end -}}
 }
 
@@ -131,7 +144,7 @@ func (w {{$workflow}}) Handle(
 		ctx, headers,
 	)
 	{{else if eq $clientResType ""}}
-	_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 		ctx, headers, clientRequest,
 	)
 	{{else}}
