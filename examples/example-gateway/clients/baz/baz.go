@@ -57,13 +57,10 @@ type BazClient struct {
 }
 
 // Call ...
-func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, arg *baz.BazRequest) (*baz.BazResponse, map[string]string, error) {
+func (c *BazClient) Call(ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args) (*baz.BazResponse, map[string]string, error) {
 	var result baz.SimpleService_Call_Result
-	args := baz.SimpleService_Call_Args{
-		Arg: arg,
-	}
 
-	success, respHeaders, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, &args, &result)
+	success, respHeaders, err := c.client.Call(ctx, c.thriftService, "Call", reqHeaders, args, &result)
 	if err == nil && !success {
 		err = errors.New("received no result or unknown exception for Call")
 	}
