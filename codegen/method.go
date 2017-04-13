@@ -66,7 +66,7 @@ type MethodSpec struct {
 	Downstream *ModuleSpec
 	// the downstream service name
 	DownstreamService string
-	// The downstream methdo spec for the endpoint
+	// The downstream method spec for the endpoint
 	DownstreamMethod *MethodSpec
 	// A map from upstream to downstream field names in the requests.
 	RequestFieldMap map[string]string
@@ -409,8 +409,8 @@ func (ms *MethodSpec) setDownstream(
 	}
 	if downstreamMethod == nil {
 		return errors.Errorf(
-			"Downstream method (%s) is not found: %s",
-			clientModule.ThriftFile, clientMethod,
+			"\n Downstream method '%s' is not found in '%s'",
+			clientMethod, clientModule.ThriftFile,
 		)
 	}
 	// Remove irrelevant services and methods.

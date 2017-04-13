@@ -789,7 +789,7 @@ func NewGatewaySpec(
 		err = espec.SetDownstream(spec, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot parse downstream info for endpoint : %s", json,
+				err, "Cannot parse downstream info for endpoint: %s", json,
 			)
 		}
 		spec.EndpointModules[espec.JSONFile] = espec

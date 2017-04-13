@@ -36,7 +36,7 @@ const templateDir = "./codegen/templates/*.tmpl"
 
 func checkError(err error, message string) {
 	if err != nil {
-		fmt.Printf("%s: %s \n", message, err)
+		fmt.Printf("%s:\n %s \n", message, err)
 		os.Exit(1)
 	}
 }
@@ -72,7 +72,7 @@ func main() {
 		config.MustGetString("gatewayName"),
 	)
 	checkError(
-		err, fmt.Sprintf("can't create gateway spec %#v", gatewaySpec),
+		err, fmt.Sprintf("Cannot create gateway spec %#v", gatewaySpec),
 	)
 
 	fmt.Printf("Generating clients for gateway \n")
