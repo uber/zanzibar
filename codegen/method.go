@@ -208,6 +208,7 @@ func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSp
 		if err != nil {
 			return "", errors.Wrap(err, "failed to generate new request type")
 		}
+		// This is specifically generating the "Args" type that thriftrw generates.
 		requestType = fmt.Sprintf(
 			"%s.%s_%s_Args",
 			pkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
