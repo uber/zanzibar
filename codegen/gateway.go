@@ -317,6 +317,11 @@ type EndpointSpec struct {
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec
 
+	// ReqHeaderMap, maps headers from server to client.
+	ReqHeaderMap map[string]string
+	// ResHeaderMap, maps headers from client to server.
+	ResHeaderMap map[string]string
+
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
@@ -484,6 +489,31 @@ func NewEndpointSpec(
 		}
 	}
 
+	reqHeaderMap := make(map[string]string)
+	m, ok := endpointConfigObj["reqHeaderMap"]
+	if ok {
+		// Do a deep cast to enforce a string -> string map
+		castMap := m.(map[string]interface{})
+		for key, value := range castMap {
+			switch value := value.(type) {
+			case string:
+				reqHeaderMap[key] = value
+			}
+		}
+	}
+	resHeaderMap := make(map[string]string)
+	m2, ok := endpointConfigObj["resHeaderMap"]
+	if ok {
+		// Do a deep cast to enforce a string -> string map
+		castMap := m2.(map[string]interface{})
+		for key, value := range castMap {
+			switch value := value.(type) {
+			case string:
+				resHeaderMap[key] = value
+			}
+		}
+	}
+
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           jsonFile,
@@ -497,6 +527,8 @@ func NewEndpointSpec(
 		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
 		Middlewares:        middlewares,
+		ReqHeaderMap:       reqHeaderMap,
+		ResHeaderMap:       resHeaderMap,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,

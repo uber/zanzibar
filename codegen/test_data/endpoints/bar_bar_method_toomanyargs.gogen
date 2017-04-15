@@ -23,9 +23,6 @@ func HandleTooManyArgsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
 	var requestBody TooManyArgsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -33,8 +30,8 @@ func HandleTooManyArgsRequest(
 
 	headers := map[string]string{}
 	// TODO(sindelar): Add optional headers in addition to required.
-	for _, k := range []string{"x-uuid", "x-token"} {
-		headers[k] = req.Header.Get(k)
+	for k, v := range map[string]string{} {
+		headers[v] = req.Header.Get(k)
 	}
 
 	workflow := TooManyArgsEndpoint{
@@ -54,8 +51,8 @@ func HandleTooManyArgsRequest(
 
 	// TODO(sindelar): Add response headers as an thrift spec annotation.
 	endRespHead := map[string]string{}
-	for _, k := range []string{"x-uuid", "x-token"} {
-		endRespHead[k] = respHeaders[k]
+	for k, v := range map[string]string{} {
+		endRespHead[v] = respHeaders[k]
 	}
 
 	res.WriteJSON(200, endRespHead, response)

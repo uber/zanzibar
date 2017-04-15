@@ -20,9 +20,6 @@ func HandleAddCredentialsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
 	var requestBody AddCredentialsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -30,8 +27,8 @@ func HandleAddCredentialsRequest(
 
 	headers := map[string]string{}
 	// TODO(sindelar): Add optional headers in addition to required.
-	for _, k := range []string{"x-uuid", "x-token"} {
-		headers[k] = req.Header.Get(k)
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+		headers[v] = req.Header.Get(k)
 	}
 
 	workflow := AddCredentialsEndpoint{
@@ -51,8 +48,8 @@ func HandleAddCredentialsRequest(
 
 	// TODO(sindelar): Add response headers as an thrift spec annotation.
 	endRespHead := map[string]string{}
-	for _, k := range []string{"x-uuid", "x-token"} {
-		endRespHead[k] = respHeaders[k]
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+		endRespHead[v] = respHeaders[k]
 	}
 
 	res.WriteJSONBytes(202, endRespHead, nil)

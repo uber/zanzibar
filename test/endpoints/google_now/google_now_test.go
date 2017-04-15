@@ -443,7 +443,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", nil,
+		"POST", "/googlenow/check-credentials", nil,
 		bytes.NewReader([]byte("bad bytes")),
 	)
 	if !assert.NoError(t, err, "got http error") {

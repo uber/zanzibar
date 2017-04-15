@@ -27,8 +27,8 @@ func HandleArgNotStructRequest(
 
 	headers := map[string]string{}
 	// TODO(sindelar): Add optional headers in addition to required.
-	for _, k := range []string(nil) {
-		headers[k] = req.Header.Get(k)
+	for k, v := range map[string]string{} {
+		headers[v] = req.Header.Get(k)
 	}
 
 	workflow := ArgNotStructEndpoint{
@@ -48,8 +48,8 @@ func HandleArgNotStructRequest(
 
 	// TODO(sindelar): Add response headers as an thrift spec annotation.
 	endRespHead := map[string]string{}
-	for _, k := range []string(nil) {
-		endRespHead[k] = respHeaders[k]
+	for k, v := range map[string]string{} {
+		endRespHead[v] = respHeaders[k]
 	}
 
 	res.WriteJSONBytes(200, endRespHead, nil)

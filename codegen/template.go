@@ -63,6 +63,8 @@ type EndpointMeta struct {
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	WorkflowName       string
+	ReqHeaderMap       map[string]string
+	ResHeaderMap       map[string]string
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -273,6 +275,8 @@ func (t *Template) GenerateEndpointFile(
 		PackageName:        m.PackageName,
 		IncludedPackages:   includedPackages,
 		Method:             method,
+		ReqHeaderMap:       e.ReqHeaderMap,
+		ResHeaderMap:       e.ResHeaderMap,
 		WorkflowName:       workflowName,
 	}
 

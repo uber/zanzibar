@@ -41,8 +41,6 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	)
 
 	headers := map[string]string{}
-	headers["x-uuid"] = "placeholder"
-	headers["x-token"] = "placeholder"
 
 	res, err := gateway.MakeRequest(
 		"POST",

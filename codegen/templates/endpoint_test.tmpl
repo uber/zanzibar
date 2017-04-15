@@ -23,7 +23,7 @@ import (
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $headers := .Headers }}
+{{- $headers := .ReqHeaders }}
 
 
 {{range $.TestStubs}}

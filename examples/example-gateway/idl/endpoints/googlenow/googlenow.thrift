@@ -16,6 +16,7 @@ service GoogleNow {
         zanzibar.http.path = "/googlenow/check-credentials"
         zanzibar.http.status = "202"
         // comma sparated list for required headers
-        zanzibar.http.headers = "x-uuid,x-token"
+        zanzibar.http.reqHeaders = "x-uuid,x-token"
+        zanzibar.http.resHeaders = "x-uuid,x-token"
     )
 }

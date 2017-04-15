@@ -9,8 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"fmt" 
-
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"{{.GatewayPackageName}}/clients"
@@ -29,6 +27,8 @@ import (
 )
 
 {{ $workflow := .WorkflowName -}}
+{{ $reqHeaderMap := .ReqHeaderMap -}}
+{{ $resHeaderMap := .ResHeaderMap -}}
 {{with .Method -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
@@ -38,8 +38,8 @@ func Handle{{title .Name}}Request(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	{{- if .Headers -}}
-	if !req.CheckHeaders({{.Headers | printf "%#v" }}) {
+	{{- if .ReqHeaders -}}
+	if !req.CheckHeaders({{.ReqHeaders | printf "%#v" }}) {
 		return
 	}
 	{{- end -}}
@@ -53,8 +53,8 @@ func Handle{{title .Name}}Request(
 
 	headers := map[string]string{}
 	// TODO(sindelar): Add optional headers in addition to required.
-	for _, k := range {{.Headers | printf "%#v" }} {
-		headers[k] = req.Header.Get(k)
+	for k, v := range {{ $reqHeaderMap | printf "%#v" }} {
+		headers[v] = req.Header.Get(k)
 	}
 
 	workflow := {{$workflow}}{
@@ -82,8 +82,8 @@ func Handle{{title .Name}}Request(
 
 	// TODO(sindelar): Add response headers as an thrift spec annotation.
 	endRespHead := map[string]string{}
-	for _, k := range {{.Headers | printf "%#v" }} {
-		endRespHead[k] = respHeaders[k]
+	for k, v := range {{$resHeaderMap | printf "%#v" }} {
+		endRespHead[v] = respHeaders[k]
 	}
 
 	{{if eq .ResponseType "" -}}
