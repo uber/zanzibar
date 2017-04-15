@@ -85,6 +85,6 @@ func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTP
 }
 func convertNormalClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpointsBarBar.BarResponse{}
+	downstreamResponse := (*endpointsBarBar.BarResponse)(body)
 	return downstreamResponse
 }

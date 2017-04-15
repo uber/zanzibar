@@ -150,7 +150,7 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", serviceName, method)
 	}
 
-	success, respHeaders, resp, err := handler.server.Handle(ctx, method, headers, &wireValue)
+	success, resp, respHeaders, err := handler.server.Handle(ctx, method, headers, &wireValue)
 
 	if handler.postResponseCB != nil {
 		defer handler.postResponseCB(ctx, method, resp)

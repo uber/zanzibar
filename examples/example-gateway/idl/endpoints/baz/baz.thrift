@@ -27,7 +27,6 @@ service SimpleService {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/baz/call-path"
     zanzibar.handler = "baz.call"
-    zanzibar.http.req.def = "true"
   )
 
   void Simple() throws (

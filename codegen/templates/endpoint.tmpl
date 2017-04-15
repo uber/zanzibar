@@ -27,6 +27,7 @@ import (
 )
 
 {{ $workflow := .WorkflowName -}}
+{{ $clientName := title .ClientName -}}
 {{with .Method -}}
 
 // Handle{{title .Name}}Request handles "{{.HTTPPath}}".
@@ -85,7 +86,6 @@ func Handle{{title .Name}}Request(
 {{- if .Method.Downstream }}
 {{- with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientName := title .DownstreamService -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
@@ -172,7 +172,7 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
 func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &{{.ResponseType}}{}
+	downstreamResponse := (*{{.ResponseType}})(body)
 	return downstreamResponse
 }
 {{end -}}

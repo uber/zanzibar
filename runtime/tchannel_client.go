@@ -85,44 +85,44 @@ func (c *TChannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 
 // readResponse reads the response struct into resp, and returns:
 // (response headers, whether there was an application error, unexpected error).
-func (c *TChannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (map[string]string, bool, error) {
+func (c *TChannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (bool, map[string]string, error) {
 	reader, err := response.Arg2Reader()
 	if err != nil {
-		return nil, false, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
 	}
 
 	headers, err := ReadHeaders(reader)
 	if err != nil {
-		return nil, false, errors.Wrapf(err, "could not read headers for outbound call response: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not read headers for outbound call response: %s", c.serviceName)
 	}
 
 	if err := EnsureEmpty(reader, "reading response headers"); err != nil {
-		return nil, false, errors.Wrapf(err, "could not ensure arg2reader is empty for outbound call response: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not ensure arg2reader is empty for outbound call response: %s", c.serviceName)
 	}
 
 	if err := reader.Close(); err != nil {
-		return nil, false, errors.Wrapf(err, "could not close arg2reader for outbound call response: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not close arg2reader for outbound call response: %s", c.serviceName)
 	}
 
 	success := !response.ApplicationError()
 	reader, err = response.Arg3Reader()
 	if err != nil {
-		return headers, success, errors.Wrapf(err, "could not create arg3Reader for outbound call response: %s", c.serviceName)
+		return success, headers, errors.Wrapf(err, "could not create arg3Reader for outbound call response: %s", c.serviceName)
 	}
 
 	if err := ReadStruct(reader, resp); err != nil {
-		return headers, success, errors.Wrapf(err, "could not read outbound call response: %s", c.serviceName)
+		return success, headers, errors.Wrapf(err, "could not read outbound call response: %s", c.serviceName)
 	}
 
 	if err := EnsureEmpty(reader, "reading response body"); err != nil {
-		return nil, false, errors.Wrapf(err, "could not ensure arg3reader is empty for outbound call response: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not ensure arg3reader is empty for outbound call response: %s", c.serviceName)
 	}
 
-	return headers, success, reader.Close()
+	return success, headers, reader.Close()
 }
 
 // Call makes a RPC call to the given service.
-func (c *TChannelClient) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (map[string]string, bool, error) {
+func (c *TChannelClient) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (bool, map[string]string, error) {
 	var respHeaders map[string]string
 	var isOK bool
 
@@ -151,12 +151,12 @@ func (c *TChannelClient) Call(ctx context.Context, thriftService, methodName str
 			return err
 		}
 
-		respHeaders, isOK, err = c.readResponse(call.Response(), resp)
+		isOK, respHeaders, err = c.readResponse(call.Response(), resp)
 		return err
 	})
 	if err != nil {
-		return nil, false, errors.Wrapf(err, "could not make outbound call: %s", c.serviceName)
+		return false, nil, errors.Wrapf(err, "could not make outbound call: %s", c.serviceName)
 	}
 
-	return respHeaders, isOK, nil
+	return isOK, respHeaders, nil
 }
