@@ -475,7 +475,10 @@ type EndpointRegisterInfo struct {
 	HTTPPath    string
 	EndpointID  string
 	HandlerID   string
+	PackageName string
 	HandlerType string
+	MethodName  string
+	HandlerName string
 	Middlewares []MiddlewareSpec
 }
 
@@ -560,14 +563,17 @@ func (t *Template) GenerateEndpointRegisterFile(
 		}
 
 		handlerType := espec.ModuleSpec.PackageName +
-			".Handle" + strings.Title(method.Name) + "Request"
+			"." + strings.Title(method.Name) + "Handler"
 
 		info := EndpointRegisterInfo{
 			EndpointID:  espec.EndpointID,
 			HandlerID:   espec.HandleID,
 			Method:      method.HTTPMethod,
 			HTTPPath:    method.HTTPPath,
+			PackageName: espec.ModuleSpec.PackageName,
 			HandlerType: handlerType,
+			MethodName:  strings.Title(method.Name),
+			HandlerName: strings.Title(method.Name) + "Handler",
 			Middlewares: espec.Middlewares,
 		}
 		endpointsInfo = append(endpointsInfo, info)

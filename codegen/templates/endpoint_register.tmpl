@@ -14,63 +14,39 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-type handlerFn func(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
-)
-
-type myEndpoint struct {
-	HandlerFn handlerFn
-	Clients   *clients.Clients
+// Endpoints is a struct that holds all the endpoints
+type Endpoints struct {
+	{{range $idx, $endpoint := .Endpoints -}}
+	{{$endpoint.HandlerName}} *{{$endpoint.HandlerType}}
+	{{end}}
 }
 
-func (endpoint *myEndpoint) handle(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-) {
-	fn := endpoint.HandlerFn
-	fn(ctx, req, res, endpoint.Clients)
-}
-
-func makeEndpoint(
-	g *zanzibar.Gateway,
-	endpointName string,
-	handlerName string,
-	middlewares []zanzibar.MiddlewareHandle,
-	handlerFn handlerFn,
-) *zanzibar.Endpoint {
-	myEndpoint := &myEndpoint{
-		Clients:   g.Clients.(*clients.Clients),
-		HandlerFn: handlerFn,
+// CreateEndpoints bootstraps the endpoints.
+func CreateEndpoints(
+	gateway *zanzibar.Gateway,
+) interface{} {
+	return &Endpoints{
+		{{range $idx, $e := .Endpoints -}}
+		{{$e.HandlerName}}: {{$e.PackageName}}.
+			New{{$e.MethodName}}Endpoint(gateway),
+		{{end}}
 	}
-
-	return zanzibar.NewEndpoint(
-		g,
-		endpointName,
-		handlerName,
-		zanzibar.NewStack(
-			middlewares,
-			myEndpoint.handle,
-		).Handle,
-	)
 }
 
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
+	endpoints := CreateEndpoints(g).(*Endpoints)
+
 	{{range $idx, $endpoint := .Endpoints -}}
 	router.Register(
 		"{{$endpoint.Method}}", "{{$endpoint.HTTPPath}}",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"{{$endpoint.EndpointID}}",
 			"{{$endpoint.HandlerID}}",
 			{{ if len $endpoint.Middlewares | ne 0 -}}
-			
-			[]zanzibar.MiddlewareHandle{
-			{{range $idx, $middleware := $endpoint.Middlewares -}}
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				{{range $idx, $middleware := $endpoint.Middlewares -}}
 				{{$middleware.Name}}.NewMiddleWare(
 					g,
 						{{$middleware.Name}}.Options{
@@ -79,12 +55,12 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 						{{end -}}
 						},
 				),
-			{{end -}}
-			},
+				{{end -}}
+			}, endpoints.{{$endpoint.HandlerName}}.HandleRequest).Handle,
 			{{- else -}}
-			nil,
+			endpoints.{{$endpoint.HandlerName}}.HandleRequest,
 			{{- end}}
-			{{$endpoint.HandlerType}},
+			
 		),
 	)
 	{{end}}
