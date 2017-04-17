@@ -26,8 +26,9 @@ func HandleSaveContactsRequest(
 		return
 	}
 
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers := map[string]string{}
-	// TODO(sindelar): Add optional headers in addition to required.
 	for k, v := range map[string]string{} {
 		headers[v] = req.Header.Get(k)
 	}
@@ -47,11 +48,5 @@ func HandleSaveContactsRequest(
 		return
 	}
 
-	// TODO(sindelar): Add response headers as an thrift spec annotation.
-	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
-
-	res.WriteJSON(202, endRespHead, response)
+	res.WriteJSON(202, respHeaders, response)
 }

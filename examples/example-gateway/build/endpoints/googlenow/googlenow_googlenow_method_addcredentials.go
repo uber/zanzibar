@@ -25,8 +25,9 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers := map[string]string{}
-	// TODO(sindelar): Add optional headers in addition to required.
 	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
 		headers[v] = req.Header.Get(k)
 	}
@@ -46,13 +47,7 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
-	// TODO(sindelar): Add response headers as an thrift spec annotation.
-	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
-		endRespHead[v] = respHeaders[k]
-	}
-
-	res.WriteJSONBytes(202, endRespHead, nil)
+	res.WriteJSONBytes(202, respHeaders, nil)
 }
 
 // AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
@@ -70,8 +65,13 @@ func (w AddCredentialsEndpoint) Handle(
 ) (map[string]string, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
+	clientHeaders := map[string]string{}
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+		headers[v] = headers[k]
+	}
+
 	respHeaders, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, headers, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
@@ -80,7 +80,12 @@ func (w AddCredentialsEndpoint) Handle(
 		return nil, err
 	}
 
-	return respHeaders, nil
+	endRespHead := map[string]string{}
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+		endRespHead[v] = respHeaders[k]
+	}
+
+	return endRespHead, nil
 }
 
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {

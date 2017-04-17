@@ -119,13 +119,13 @@ func (res *ServerHTTPResponse) SendErrorString(
 func (res *ServerHTTPResponse) WriteJSONBytes(
 	statusCode int, headers map[string]string, bytes []byte,
 ) {
-	// TODO: mark header as pending ?
-	res.responseWriter.Header().
-		Set("content-type", "application/json")
-
 	for k, v := range headers {
 		res.responseWriter.Header().Set(k, v)
 	}
+
+	// TODO: mark header as pending ?
+	res.responseWriter.Header().
+		Set("content-type", "application/json")
 
 	res.pendingStatusCode = statusCode
 	res.pendingBodyBytes = bytes

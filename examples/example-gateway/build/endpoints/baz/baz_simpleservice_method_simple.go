@@ -21,8 +21,9 @@ func HandleSimpleRequest(
 	clients *clients.Clients,
 ) {
 
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers := map[string]string{}
-	// TODO(sindelar): Add optional headers in addition to required.
 	for k, v := range map[string]string{} {
 		headers[v] = req.Header.Get(k)
 	}
@@ -42,11 +43,5 @@ func HandleSimpleRequest(
 		return
 	}
 
-	// TODO(sindelar): Add response headers as an thrift spec annotation.
-	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
-
-	res.WriteJSONBytes(204, endRespHead, nil)
+	res.WriteJSONBytes(204, respHeaders, nil)
 }

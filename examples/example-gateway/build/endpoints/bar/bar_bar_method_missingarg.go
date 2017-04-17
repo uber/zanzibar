@@ -22,8 +22,9 @@ func HandleMissingArgRequest(
 	clients *clients.Clients,
 ) {
 
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers := map[string]string{}
-	// TODO(sindelar): Add optional headers in addition to required.
 	for k, v := range map[string]string{} {
 		headers[v] = req.Header.Get(k)
 	}
@@ -43,13 +44,7 @@ func HandleMissingArgRequest(
 		return
 	}
 
-	// TODO(sindelar): Add response headers as an thrift spec annotation.
-	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
-
-	res.WriteJSON(200, endRespHead, response)
+	res.WriteJSON(200, respHeaders, response)
 }
 
 // MissingArgEndpoint calls thrift client Bar.MissingArg
@@ -65,8 +60,13 @@ func (w MissingArgEndpoint) Handle(
 	headers map[string]string,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
+	clientHeaders := map[string]string{}
+	for k, v := range map[string]string{} {
+		headers[v] = headers[k]
+	}
+
 	clientRespBody, respHeaders, err := w.Clients.Bar.MissingArg(
-		ctx, headers,
+		ctx, clientHeaders,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
@@ -75,8 +75,13 @@ func (w MissingArgEndpoint) Handle(
 		return nil, nil, err
 	}
 
+	endRespHead := map[string]string{}
+	for k, v := range map[string]string{} {
+		endRespHead[v] = respHeaders[k]
+	}
+
 	response := convertMissingArgClientResponse(clientRespBody)
-	return response, respHeaders, nil
+	return response, endRespHead, nil
 }
 
 func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {

@@ -51,8 +51,9 @@ func Handle{{title .Name}}Request(
 	}
 	{{end}}
 
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
+ 	// generation is implemented.
 	headers := map[string]string{}
-	// TODO(sindelar): Add optional headers in addition to required.
 	for k, v := range {{ $reqHeaderMap | printf "%#v" }} {
 		headers[v] = req.Header.Get(k)
 	}
@@ -80,16 +81,10 @@ func Handle{{title .Name}}Request(
 		return
 	}
 
-	// TODO(sindelar): Add response headers as an thrift spec annotation.
-	endRespHead := map[string]string{}
-	for k, v := range {{$resHeaderMap | printf "%#v" }} {
-		endRespHead[v] = respHeaders[k]
-	}
-
 	{{if eq .ResponseType "" -}}
-	res.WriteJSONBytes({{.OKStatusCode.Code}}, endRespHead, nil)
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, respHeaders, nil)
 	{{- else -}}
-	res.WriteJSON({{.OKStatusCode.Code}}, endRespHead, response)
+	res.WriteJSON({{.OKStatusCode.Code}}, respHeaders, response)
 	{{- end -}}
 }
 
@@ -136,20 +131,24 @@ func (w {{$workflow}}) Handle(
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
+	clientHeaders := map[string]string{}
+	for k, v := range {{ $reqHeaderMap | printf "%#v" }} {
+		headers[v] = headers[k]
+	}
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, headers)
+	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 	{{else if eq $clientReqType ""}}
 	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, headers,
+		ctx, clientHeaders,
 	)
 	{{else if eq $clientResType ""}}
 	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, headers, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
 	{{else}}
 	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, headers, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
 	{{end -}}
 	if err != nil {
@@ -159,11 +158,16 @@ func (w {{$workflow}}) Handle(
 		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
 	}
 
+	endRespHead := map[string]string{}
+	for k, v := range {{$resHeaderMap | printf "%#v" }} {
+		endRespHead[v] = respHeaders[k]
+	}
+
 	{{if eq .ResponseType "" -}}
-	return respHeaders, nil
+	return endRespHead, nil
 	{{- else -}}
 	response := convert{{title .Name}}ClientResponse(clientRespBody)
-	return response, respHeaders, nil
+	return response, endRespHead, nil
 	{{- end -}}
 }
 
