@@ -70,6 +70,8 @@
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -121,6 +123,8 @@
 					],
 					"RequestBoxed": false,
 					"RequestStruct": null,
+					"ThriftService": "Bar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -172,6 +176,8 @@
 					],
 					"RequestBoxed": false,
 					"RequestStruct": null,
+					"ThriftService": "Bar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -229,6 +235,8 @@
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -291,6 +299,8 @@
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",

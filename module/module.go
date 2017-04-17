@@ -78,7 +78,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	for _, moduleType := range class.ClassDependencies {
 		if moduleSystem.classes[moduleType] == nil {
 			return errors.Errorf(
-				"The module class %s depends on class type %s,"+
+				"The module class %s depends on class type %s, "+
 					"which is not yet defined",
 				name,
 				moduleType,
@@ -280,7 +280,10 @@ func readDeps(jsonDeps map[string][]string) []Dependency {
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory
-func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
+func (moduleSystem *System) GenerateBuild(
+	baseDirectory string,
+	targetGenDir string,
+) error {
 	resolvedModules, err := moduleSystem.ResolveModules(baseDirectory)
 
 	if err != nil {
@@ -299,8 +302,7 @@ func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
 		for _, classInstance := range classInstances {
 			moduleIndex++
 			buildPath := filepath.Join(
-				classInstance.BaseDirectory,
-				"build",
+				targetGenDir,
 				classInstance.Directory,
 			)
 			fmt.Printf(
@@ -318,7 +320,7 @@ func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
 
 			if generator == nil {
 				fmt.Printf(
-					"Skipping generation of %s %s class of type %s"+
+					"Skipping generation of %s %s class of type %s "+
 						"as generator is not defined\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
@@ -331,7 +333,7 @@ func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating %s %s class of type %s"+
+					"Error generating %s %s class of type %s "+
 						"as generator is not defined\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
@@ -357,12 +359,12 @@ func (moduleSystem *System) GenerateBuild(baseDirectory string) error {
 					filePath,
 				)
 
-				if err := ioutil.WriteFile(
-					resolvedPath,
-					content,
-					0644,
-				); err != nil {
-					return err
+				if err := writeFile(resolvedPath, content); err != nil {
+					return errors.Wrapf(
+						err,
+						"Error writing to file %s",
+						resolvedPath,
+					)
 				}
 
 				// HACK: The module system writer shouldn't
@@ -514,4 +516,43 @@ func (jsonConfig *JSONClassConfig) Read(
 	}
 
 	return configFile, nil
+}
+
+// writeFile is like ioutil.WriteFile with a mkdirp step
+func writeFile(filePath string, bytes []byte) error {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+			return errors.Wrapf(
+				err, "could not make directory: %s", filePath,
+			)
+		}
+	}
+
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	defer closeFile(file)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Could not open file for writing: %s", filePath,
+		)
+	}
+
+	n, err := file.Write(bytes)
+
+	if err != nil {
+		return errors.Wrapf(err, "Error writing to file %s", filePath)
+	}
+
+	if n != len(bytes) {
+		return errors.Wrapf(
+			err,
+			"Error writing full contents to file: %s",
+			filePath,
+		)
+	}
+
+	return nil
+}
+
+func closeFile(file *os.File) {
+	_ = file.Close()
 }

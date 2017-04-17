@@ -58,12 +58,24 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	gateway, err := codegen.NewGatewaySpec(
-		absGatewayPath,
+	packageHelper, err := codegen.NewPackageHelper(
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		"github.com/uber/zanzibar",
+	)
+	if !assert.NoError(t, err, "failed to create package helper", err) {
+		return
+	}
+
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
+	if !assert.NoError(t, err, "failed to create module system", err) {
+		return
+	}
+
+	gateway, err := codegen.NewGatewaySpec(
+		packageHelper,
+		absGatewayPath,
 		"./clients",
 		"./endpoints",
 		"./middlewares/middleware-config.json",
@@ -73,8 +85,16 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	err = gateway.GenerateClients()
-	if !assert.NoError(t, err, "failed to create clients %s", err) {
+	err = moduleSystem.GenerateBuild(
+		absGatewayPath,
+		packageHelper.CodeGenTargetPath(),
+	)
+	if !assert.NoError(t, err, "failed to create clients init %s", err) {
+		return
+	}
+
+	err = gateway.GenerateClientsInit()
+	if !assert.NoError(t, err, "failed to create clients init %s", err) {
 		return
 	}
 

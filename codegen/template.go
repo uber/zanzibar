@@ -62,6 +62,7 @@ type EndpointMeta struct {
 	PackageName        string
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
+	ClientName         string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
 	ResHeaderMap       map[string]string
@@ -226,7 +227,7 @@ func findMethod(
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
 func (t *Template) GenerateEndpointFile(
-	e *EndpointSpec, h *PackageHelper, serviceName string, methodName string,
+	e *EndpointSpec, h *PackageHelper, thriftServiceName string, methodName string,
 ) (*EndpointFiles, error) {
 	m := e.ModuleSpec
 
@@ -245,11 +246,11 @@ func (t *Template) GenerateEndpointFile(
 		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
 		StructFile:   e.GoStructsFileName,
 	}
-	method := findMethod(m, serviceName, methodName)
+	method := findMethod(m, thriftServiceName, methodName)
 	if method == nil {
 		return nil, errors.Errorf(
-			"Could not find serviceName (%s) + methodName (%s) in module",
-			serviceName, methodName,
+			"Could not find thriftServiceName (%s) + methodName (%s) in module",
+			thriftServiceName, methodName,
 		)
 	}
 
@@ -269,7 +270,7 @@ func (t *Template) GenerateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
-	dest := e.TargetEndpointPath(serviceName, method.Name)
+	dest := e.TargetEndpointPath(thriftServiceName, method.Name)
 	meta := &EndpointMeta{
 		GatewayPackageName: h.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
@@ -277,6 +278,7 @@ func (t *Template) GenerateEndpointFile(
 		Method:             method,
 		ReqHeaderMap:       e.ReqHeaderMap,
 		ResHeaderMap:       e.ResHeaderMap,
+		ClientName:         e.ClientName,
 		WorkflowName:       workflowName,
 	}
 
@@ -534,7 +536,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 		espec := endpoints[i]
 
 		var goPkg string
-		if espec.WorkflowType == "httpClient" {
+		if espec.WorkflowType == "httpClient" || espec.WorkflowType == "tchannelClient" {
 			goPkg = espec.ModuleSpec.GoPackage
 		} else if espec.WorkflowType == "custom" {
 			goPkg = espec.ModuleSpec.GoPackage
@@ -661,6 +663,27 @@ func (t *Template) GenerateMainFile(
 		MainFile:     mainFile,
 		MainTestFile: mainTestFile,
 	}, nil
+}
+
+func (t *Template) execTemplate(
+	tplName string,
+	tplData interface{},
+) ([]byte, error) {
+	tplBuffer := bytes.NewBuffer(nil)
+
+	if err := t.template.ExecuteTemplate(
+		tplBuffer,
+		tplName,
+		tplData,
+	); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating template %s",
+			tplName,
+		)
+	}
+
+	return tplBuffer.Bytes(), nil
 }
 
 func (t *Template) execTemplateAndFmt(templName string, filePath string, data interface{}) error {

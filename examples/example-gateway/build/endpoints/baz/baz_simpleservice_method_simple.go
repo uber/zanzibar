@@ -5,12 +5,11 @@ package baz
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
-
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
 // HandleSimpleRequest handles "/baz/simple-path".
@@ -21,7 +20,7 @@ func HandleSimpleRequest(
 	clients *clients.Clients,
 ) {
 
-	workflow := customBaz.SimpleEndpoint{
+	workflow := SimpleEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -37,4 +36,39 @@ func HandleSimpleRequest(
 	}
 
 	res.WriteJSONBytes(204, respHeaders, nil)
+}
+
+// SimpleEndpoint calls thrift client Baz.Simple
+type SimpleEndpoint struct {
+	Clients *clients.Clients
+	Logger  *zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w SimpleEndpoint) Handle(
+	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
+	headers http.Header,
+) (map[string]string, error) {
+
+	clientHeaders := map[string]string{}
+	for k, v := range map[string]string{} {
+		clientHeaders[v] = headers.Get(k)
+	}
+
+	_, err := w.Clients.Baz.Simple(ctx, clientHeaders)
+
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	// Filter and map response headers from client to server response.
+	endRespHead := map[string]string{}
+
+	return endRespHead, nil
 }

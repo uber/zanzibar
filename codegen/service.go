@@ -161,7 +161,7 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if service == nil {
 		return errors.Errorf(
-			"Module does not have service (%s)", serviceName,
+			"Module does not have service (%s)\n", serviceName,
 		)
 	}
 
@@ -175,12 +175,12 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if method == nil {
 		return errors.Errorf(
-			"Service (%s) does not have method (%s)", serviceName, methodName,
+			"Service (%s) does not have method (%s)\n", serviceName, methodName,
 		)
 	}
 
 	err := method.setDownstream(
-		clientSpec.ModuleSpec, clientService, clientMethod,
+		clientSpec.ModuleSpec, serviceName, clientMethod,
 	)
 	if err != nil {
 		return err
@@ -246,7 +246,7 @@ func (ms *ModuleSpec) SetDownstream(
 func (s *ServiceSpec) NewMethod(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) (*MethodSpec, error) {
-	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot)
+	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.Name)
 }
 
 func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {

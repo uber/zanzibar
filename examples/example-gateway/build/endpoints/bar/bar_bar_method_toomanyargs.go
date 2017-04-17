@@ -97,6 +97,6 @@ func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.
 }
 func convertTooManyArgsClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	// TODO: Add response fields mapping here.
-	downstreamResponse := &endpointsBarBar.BarResponse{}
+	downstreamResponse := (*endpointsBarBar.BarResponse)(body)
 	return downstreamResponse
 }

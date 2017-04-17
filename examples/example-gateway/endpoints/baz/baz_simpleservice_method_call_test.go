@@ -40,7 +40,7 @@ var testCallCounter int
 
 func call(
 	ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest,
-) (map[string]string, *baz.BazResponse, error) {
+) (*baz.BazResponse, map[string]string, error) {
 	testCallCounter++
 	var resp *baz.BazResponse
 	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
@@ -48,7 +48,7 @@ func call(
 			Message: "yo",
 		}
 	}
-	return nil, resp, nil
+	return resp, nil, nil
 
 }
 
@@ -74,7 +74,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/baz/call-path",
 		headers,
-		bytes.NewReader([]byte(`{"b1":true,"s2":"hello","i3":42}`)),
+		bytes.NewReader([]byte(`{"Arg":{"b1":true,"s2":"hello","i3":42}}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {

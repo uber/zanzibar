@@ -5,13 +5,14 @@ package baz
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
 // HandleCallRequest handles "/baz/call-path".
@@ -21,12 +22,12 @@ func HandleCallRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
-	var requestBody endpointsBazBaz.BazRequest
+	var requestBody CallHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
 
-	workflow := customBaz.CallEndpoint{
+	workflow := CallEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -42,4 +43,57 @@ func HandleCallRequest(
 	}
 
 	res.WriteJSON(200, respHeaders, response)
+}
+
+// CallEndpoint calls thrift client Baz.Call
+type CallEndpoint struct {
+	Clients *clients.Clients
+	Logger  *zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
+
+// Handle calls thrift client.
+func (w CallEndpoint) Handle(
+	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
+	headers http.Header,
+	r *CallHTTPRequest,
+) (*endpointsBazBaz.BazResponse, map[string]string, error) {
+	clientRequest := convertToCallClientRequest(r)
+
+	clientHeaders := map[string]string{}
+	for k, v := range map[string]string{} {
+		clientHeaders[v] = headers.Get(k)
+	}
+
+	clientRespBody, _, err := w.Clients.Baz.Call(
+		ctx, clientHeaders, clientRequest,
+	)
+
+	if err != nil {
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		return nil, nil, err
+	}
+
+	// Filter and map response headers from client to server response.
+	endRespHead := map[string]string{}
+
+	response := convertCallClientResponse(clientRespBody)
+	return response, endRespHead, nil
+}
+
+func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleService_Call_Args {
+	clientRequest := &clientsBazBaz.SimpleService_Call_Args{}
+
+	clientRequest.Arg = (*clientsBazBaz.BazRequest)(body.Arg)
+
+	return clientRequest
+}
+func convertCallClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+	// TODO: Add response fields mapping here.
+	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
+	return downstreamResponse
 }

@@ -5,7 +5,9 @@
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::SimpleFuture",
-    "workflowType": "custom",
+    "workflowType": "tchannelClient",
+	"clientName": "Baz",
+	"clientMethod": "SimpleFuture",
     "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz",
 	"testFixtures": [],
 	"middlewares": []
