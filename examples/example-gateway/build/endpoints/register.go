@@ -54,7 +54,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 
 	router.Register(
 		"POST", "/bar/arg-not-struct-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"argNotStruct",
@@ -63,7 +63,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"GET", "/bar/missing-arg-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"missingArg",
@@ -72,7 +72,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"GET", "/bar/no-request-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"noRequest",
@@ -81,7 +81,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/bar/bar-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"normal",
@@ -101,7 +101,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/bar/too-many-args-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"tooManyArgs",
@@ -110,7 +110,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/baz/call-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"call",
@@ -119,7 +119,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"GET", "/baz/simple-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"simple",
@@ -128,7 +128,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"GET", "/baz/simple-future-path",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"simpleFuture",
@@ -137,7 +137,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/contacts/:userUUID/contacts",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"contacts",
 			"saveContacts",
@@ -146,7 +146,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/googlenow/add-credentials",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"googlenow",
 			"addCredentials",
@@ -155,7 +155,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	)
 	router.Register(
 		"POST", "/googlenow/check-credentials",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"googlenow",
 			"checkCredentials",

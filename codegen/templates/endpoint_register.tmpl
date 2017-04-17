@@ -40,7 +40,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	{{range $idx, $endpoint := .Endpoints -}}
 	router.Register(
 		"{{$endpoint.Method}}", "{{$endpoint.HTTPPath}}",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			g,
 			"{{$endpoint.EndpointID}}",
 			"{{$endpoint.HandlerID}}",
