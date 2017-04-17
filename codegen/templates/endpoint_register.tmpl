@@ -27,8 +27,8 @@ func CreateEndpoints(
 ) interface{} {
 	return &Endpoints{
 		{{range $idx, $e := .Endpoints -}}
-		{{$e.HandlerName}}: {{$e.PackageName}}.
-			New{{$e.MethodName}}Endpoint(gateway),
+		{{$e.HandlerName}}:
+			{{$e.PackageName}}.New{{$e.MethodName}}Endpoint(gateway),
 		{{end}}
 	}
 }

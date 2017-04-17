@@ -34,28 +34,17 @@ func CreateEndpoints(
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Endpoints{
-		ArgNotStructHandler: bar.
-			NewArgNotStructEndpoint(gateway),
-		MissingArgHandler: bar.
-			NewMissingArgEndpoint(gateway),
-		NoRequestHandler: bar.
-			NewNoRequestEndpoint(gateway),
-		NormalHandler: bar.
-			NewNormalEndpoint(gateway),
-		TooManyArgsHandler: bar.
-			NewTooManyArgsEndpoint(gateway),
-		CallHandler: baz.
-			NewCallEndpoint(gateway),
-		SimpleHandler: baz.
-			NewSimpleEndpoint(gateway),
-		SimpleFutureHandler: baz.
-			NewSimpleFutureEndpoint(gateway),
-		SaveContactsHandler: contacts.
-			NewSaveContactsEndpoint(gateway),
-		AddCredentialsHandler: googlenow.
-			NewAddCredentialsEndpoint(gateway),
-		CheckCredentialsHandler: googlenow.
-			NewCheckCredentialsEndpoint(gateway),
+		ArgNotStructHandler:     bar.NewArgNotStructEndpoint(gateway),
+		MissingArgHandler:       bar.NewMissingArgEndpoint(gateway),
+		NoRequestHandler:        bar.NewNoRequestEndpoint(gateway),
+		NormalHandler:           bar.NewNormalEndpoint(gateway),
+		TooManyArgsHandler:      bar.NewTooManyArgsEndpoint(gateway),
+		CallHandler:             baz.NewCallEndpoint(gateway),
+		SimpleHandler:           baz.NewSimpleEndpoint(gateway),
+		SimpleFutureHandler:     baz.NewSimpleFutureEndpoint(gateway),
+		SaveContactsHandler:     contacts.NewSaveContactsEndpoint(gateway),
+		AddCredentialsHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
+		CheckCredentialsHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
 	}
 }
 
