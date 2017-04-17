@@ -65,13 +65,13 @@ func Handle{{title .Name}}Request(
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	respHeaders, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, respHeaders, err := workflow.Handle(ctx, headers)
+	response, respHeaders, err := workflow.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
+	respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
