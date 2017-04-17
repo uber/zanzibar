@@ -15,7 +15,9 @@ import (
 
 // TChanBaz is the interface that defines the server handler and client interface.
 type TChanBaz interface {
-	Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (*baz.BazResponse, map[string]string, error)
+	Call(
+		ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
+	) (*baz.BazResponse, map[string]string, error)
 	Simple(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 	SimpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error)
 }

@@ -64,7 +64,7 @@ func (s *SimpleServiceServer) handleCall(ctx context.Context, reqHeaders map[str
 		return false, nil, nil, err
 	}
 
-	r, respHeaders, err := s.handler.Call(ctx, reqHeaders, req.Arg)
+	r, respHeaders, err := s.handler.Call(ctx, reqHeaders, &req)
 
 	if err != nil {
 		return false, nil, nil, err
@@ -130,7 +130,7 @@ func (s *SimpleServiceServer) handleSimpleFuture(ctx context.Context, reqHeaders
 }
 
 // CallFunc ...
-type CallFunc func(context.Context, map[string]string, *baz.BazRequest) (*baz.BazResponse, map[string]string, error)
+type CallFunc func(context.Context, map[string]string, *baz.SimpleService_Call_Args) (*baz.BazResponse, map[string]string, error)
 
 // SimpleFunc ...
 type SimpleFunc func(context.Context, map[string]string) (map[string]string, error)
@@ -167,11 +167,13 @@ type Handler struct {
 }
 
 // Call ...
-func (h *Handler) Call(ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest) (*baz.BazResponse, map[string]string, error) {
+func (h *Handler) Call(
+	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
+) (*baz.BazResponse, map[string]string, error) {
 	if h.CallFunc == nil {
 		return nil, nil, errors.New("not implemented")
 	}
-	return h.CallFunc(ctx, reqHeaders, r)
+	return h.CallFunc(ctx, reqHeaders, args)
 }
 
 // Simple ...

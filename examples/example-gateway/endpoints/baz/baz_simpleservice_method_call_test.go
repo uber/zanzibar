@@ -39,10 +39,11 @@ import (
 var testCallCounter int
 
 func call(
-	ctx context.Context, reqHeaders map[string]string, r *baz.BazRequest,
+	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
 ) (*baz.BazResponse, map[string]string, error) {
 	testCallCounter++
 	var resp *baz.BazResponse
+	r := args.Arg
 	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
 		resp = &baz.BazResponse{
 			Message: "yo",
