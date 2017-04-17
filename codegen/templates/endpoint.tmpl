@@ -138,19 +138,41 @@ func (w {{$workflow}}) Handle(
 	}
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		{{if (eq (len $resHeaderMap) 0) -}}
+		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		{{else}}
+		respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		{{- end }}
 	{{else if eq $clientReqType ""}}
-	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, clientHeaders,
-	)
+		{{if (eq (len $resHeaderMap) 0) -}}
+		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders,
+		)
+		{{else}}
+		clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders,
+		)
+		{{- end }}
 	{{else if eq $clientResType ""}}
-	respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, clientHeaders, clientRequest,
-	)
+		{{if (eq (len $resHeaderMap) 0) -}}
+		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{else}}
+		respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{- end }}
 	{{else}}
-	clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-		ctx, clientHeaders, clientRequest,
-	)
+		{{if (eq (len $resHeaderMap) 0) -}}
+		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{else}}
+		clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{- end }}
 	{{end -}}
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
@@ -159,10 +181,13 @@ func (w {{$workflow}}) Handle(
 		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
 	}
 
+	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
+	{{if (ne (len $resHeaderMap) 0) -}}
 	for k, v := range {{$resHeaderMap | printf "%#v" }} {
 		endRespHead[v] = respHeaders[k]
 	}
+	{{- end }}
 
 	{{if eq .ResponseType "" -}}
 	return endRespHead, nil

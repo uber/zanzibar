@@ -61,7 +61,8 @@ func (w CheckCredentialsEndpoint) Handle(
 		clientHeaders[v] = headers.Get(k)
 	}
 
-	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
+	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -69,10 +70,8 @@ func (w CheckCredentialsEndpoint) Handle(
 		return nil, err
 	}
 
+	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
 
 	return endRespHead, nil
 }

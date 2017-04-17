@@ -66,9 +66,10 @@ func (w ArgNotStructEndpoint) Handle(
 		clientHeaders[v] = headers.Get(k)
 	}
 
-	respHeaders, err := w.Clients.Bar.ArgNotStruct(
+	_, err := w.Clients.Bar.ArgNotStruct(
 		ctx, clientHeaders, clientRequest,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -76,10 +77,8 @@ func (w ArgNotStructEndpoint) Handle(
 		return nil, err
 	}
 
+	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
 
 	return endRespHead, nil
 }

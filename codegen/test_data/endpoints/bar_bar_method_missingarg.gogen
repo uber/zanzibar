@@ -61,9 +61,10 @@ func (w MissingArgEndpoint) Handle(
 		clientHeaders[v] = headers.Get(k)
 	}
 
-	clientRespBody, respHeaders, err := w.Clients.Bar.MissingArg(
+	clientRespBody, _, err := w.Clients.Bar.MissingArg(
 		ctx, clientHeaders,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -71,10 +72,8 @@ func (w MissingArgEndpoint) Handle(
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
 
 	response := convertMissingArgClientResponse(clientRespBody)
 	return response, endRespHead, nil

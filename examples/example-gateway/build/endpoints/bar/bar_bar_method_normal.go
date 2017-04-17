@@ -68,9 +68,10 @@ func (w NormalEndpoint) Handle(
 		clientHeaders[v] = headers.Get(k)
 	}
 
-	clientRespBody, respHeaders, err := w.Clients.Bar.Normal(
+	clientRespBody, _, err := w.Clients.Bar.Normal(
 		ctx, clientHeaders, clientRequest,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -78,10 +79,8 @@ func (w NormalEndpoint) Handle(
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{} {
-		endRespHead[v] = respHeaders[k]
-	}
 
 	response := convertNormalClientResponse(clientRespBody)
 	return response, endRespHead, nil
