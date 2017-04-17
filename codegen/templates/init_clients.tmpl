@@ -21,14 +21,11 @@ type Clients struct {
 
 // CreateClients will make all clients
 func CreateClients(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: {{$cinfo.PackageName}}.NewClient(
-			config, gateway,
-		),
+		{{$cinfo.FieldName}}: {{$cinfo.PackageName}}.NewClient(gateway),
 		{{end}}
 	}
 }

@@ -28,11 +28,10 @@ type {{$clientName}} struct {
 
 // NewClient returns a new http client for service {{.Name}}.
 func NewClient(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
-	ip := config.MustGetString("clients.{{.Name | camel}}.ip")
-	port := config.MustGetInt("clients.{{.Name | camel}}.port")
+	ip := gateway.Config.MustGetString("clients.{{.Name | camel}}.ip")
+	port := gateway.Config.MustGetInt("clients.{{.Name | camel}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
