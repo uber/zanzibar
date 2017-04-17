@@ -62,7 +62,7 @@ func (w AddCredentialsEndpoint) Handle(
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+	for k, v := range map[string]string{"x-token": "x-token", "x-uuid": "x-uuid"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 
@@ -78,7 +78,7 @@ func (w AddCredentialsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"x-token": "x-token", "x-uuid": "x-uuid"} {
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
 		endRespHead[v] = respHeaders[k]
 	}
 
