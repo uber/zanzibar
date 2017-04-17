@@ -14,12 +14,25 @@ import (
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 )
 
-// HandleSaveContactsRequest handles "/contacts/:userUUID/contacts".
-func HandleSaveContactsRequest(
+// SaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
+type SaveContactsHandler struct {
+	Clients *clients.Clients
+}
+
+// NewSaveContactsEndpoint creates a handler
+func NewSaveContactsEndpoint(
+	gateway *zanzibar.Gateway,
+) *SaveContactsHandler {
+	return &SaveContactsHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/contacts/:userUUID/contacts".
+func (handler *SaveContactsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	var requestBody endpointsContactsContacts.SaveContactsRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
@@ -29,7 +42,7 @@ func HandleSaveContactsRequest(
 	headers := map[string]string{}
 
 	workflow := customContacts.SaveContactsEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

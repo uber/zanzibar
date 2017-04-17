@@ -28,7 +28,7 @@ import (
 
 {{ $workflow := .WorkflowName -}}
 {{ $clientName := title .ClientName -}}
-{{ $handlerName := title .Method.Name | printf "%sHandler" }}pattern
+{{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"

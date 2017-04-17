@@ -4,9 +4,6 @@
 package endpoints
 
 import (
-	"context"
-
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
@@ -17,89 +14,89 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-type handlerFn func(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
-)
-
-type myEndpoint struct {
-	HandlerFn handlerFn
-	Clients   *clients.Clients
+// Endpoints is a struct that holds all the endpoints
+type Endpoints struct {
+	ArgNotStructHandler     *bar.ArgNotStructHandler
+	MissingArgHandler       *bar.MissingArgHandler
+	NoRequestHandler        *bar.NoRequestHandler
+	NormalHandler           *bar.NormalHandler
+	TooManyArgsHandler      *bar.TooManyArgsHandler
+	CallHandler             *baz.CallHandler
+	SimpleHandler           *baz.SimpleHandler
+	SimpleFutureHandler     *baz.SimpleFutureHandler
+	SaveContactsHandler     *contacts.SaveContactsHandler
+	AddCredentialsHandler   *googlenow.AddCredentialsHandler
+	CheckCredentialsHandler *googlenow.CheckCredentialsHandler
 }
 
-func (endpoint *myEndpoint) handle(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-) {
-	fn := endpoint.HandlerFn
-	fn(ctx, req, res, endpoint.Clients)
-}
-
-func makeEndpoint(
-	g *zanzibar.Gateway,
-	endpointName string,
-	handlerName string,
-	middlewares []zanzibar.MiddlewareHandle,
-	handlerFn handlerFn,
-) *zanzibar.Endpoint {
-	myEndpoint := &myEndpoint{
-		Clients:   g.Clients.(*clients.Clients),
-		HandlerFn: handlerFn,
+// CreateEndpoints bootstraps the endpoints.
+func CreateEndpoints(
+	gateway *zanzibar.Gateway,
+) interface{} {
+	return &Endpoints{
+		ArgNotStructHandler: bar.
+			NewArgNotStructEndpoint(gateway),
+		MissingArgHandler: bar.
+			NewMissingArgEndpoint(gateway),
+		NoRequestHandler: bar.
+			NewNoRequestEndpoint(gateway),
+		NormalHandler: bar.
+			NewNormalEndpoint(gateway),
+		TooManyArgsHandler: bar.
+			NewTooManyArgsEndpoint(gateway),
+		CallHandler: baz.
+			NewCallEndpoint(gateway),
+		SimpleHandler: baz.
+			NewSimpleEndpoint(gateway),
+		SimpleFutureHandler: baz.
+			NewSimpleFutureEndpoint(gateway),
+		SaveContactsHandler: contacts.
+			NewSaveContactsEndpoint(gateway),
+		AddCredentialsHandler: googlenow.
+			NewAddCredentialsEndpoint(gateway),
+		CheckCredentialsHandler: googlenow.
+			NewCheckCredentialsEndpoint(gateway),
 	}
-
-	return zanzibar.NewEndpoint(
-		g,
-		endpointName,
-		handlerName,
-		zanzibar.NewStack(
-			middlewares,
-			myEndpoint.handle,
-		).Handle,
-	)
 }
 
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
+	endpoints := CreateEndpoints(g).(*Endpoints)
+
 	router.Register(
 		"POST", "/bar/arg-not-struct-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"bar",
 			"argNotStruct",
-			nil,
-			bar.HandleArgNotStructRequest,
+			endpoints.ArgNotStructHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"GET", "/bar/missing-arg-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"bar",
 			"missingArg",
-			nil,
-			bar.HandleMissingArgRequest,
+			endpoints.MissingArgHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"GET", "/bar/no-request-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"bar",
 			"noRequest",
-			nil,
-			bar.HandleNoRequestRequest,
+			endpoints.NoRequestHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"POST", "/bar/bar-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"bar",
 			"normal",
-			[]zanzibar.MiddlewareHandle{
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 				example.NewMiddleWare(
 					g,
 					example.Options{
@@ -110,78 +107,70 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 					g,
 					logger.Options{},
 				),
-			},
-			bar.HandleNormalRequest,
+			}, endpoints.NormalHandler.HandleRequest).Handle,
 		),
 	)
 	router.Register(
 		"POST", "/bar/too-many-args-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"bar",
 			"tooManyArgs",
-			nil,
-			bar.HandleTooManyArgsRequest,
+			endpoints.TooManyArgsHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"POST", "/baz/call-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"baz",
 			"call",
-			nil,
-			baz.HandleCallRequest,
+			endpoints.CallHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"GET", "/baz/simple-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"baz",
 			"simple",
-			nil,
-			baz.HandleSimpleRequest,
+			endpoints.SimpleHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"GET", "/baz/simple-future-path",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"baz",
 			"simpleFuture",
-			nil,
-			baz.HandleSimpleFutureRequest,
+			endpoints.SimpleFutureHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"POST", "/contacts/:userUUID/contacts",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"contacts",
 			"saveContacts",
-			nil,
-			contacts.HandleSaveContactsRequest,
+			endpoints.SaveContactsHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"POST", "/googlenow/add-credentials",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"googlenow",
 			"addCredentials",
-			nil,
-			googlenow.HandleAddCredentialsRequest,
+			endpoints.AddCredentialsHandler.HandleRequest,
 		),
 	)
 	router.Register(
 		"POST", "/googlenow/check-credentials",
-		makeEndpoint(
+		zanzibar.NewEndpoint(
 			g,
 			"googlenow",
 			"checkCredentials",
-			nil,
-			googlenow.HandleCheckCredentialsRequest,
+			endpoints.CheckCredentialsHandler.HandleRequest,
 		),
 	)
 
