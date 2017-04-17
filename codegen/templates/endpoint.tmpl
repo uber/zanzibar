@@ -111,20 +111,20 @@ type {{$workflow}} struct {
 func (w {{$workflow}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 ) (map[string]string, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 ) (*{{.ResponseType}}, map[string]string, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 	r *{{.RequestType}},
 ) (map[string]string, error) {
 {{else}}
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 	r *{{.RequestType}},
 ) (*{{.ResponseType}}, map[string]string, error) {
 {{- end}}
@@ -133,7 +133,7 @@ func (w {{$workflow}}) Handle(
 	{{end}}
 	clientHeaders := map[string]string{}
 	for k, v := range {{ $reqHeaderMap | printf "%#v" }} {
-		headers[v] = headers[k]
+		clientHeaders[v] = headers.Get(k)
 	}
 
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}

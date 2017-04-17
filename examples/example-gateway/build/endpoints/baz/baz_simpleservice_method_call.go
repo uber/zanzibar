@@ -39,7 +39,7 @@ func HandleCallRequest(
 		Request: req,
 	}
 
-	response, respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
+	response, respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),

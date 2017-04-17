@@ -34,7 +34,7 @@ func HandleSimpleFutureRequest(
 		Request: req,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),

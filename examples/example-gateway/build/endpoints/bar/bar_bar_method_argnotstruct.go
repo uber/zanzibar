@@ -5,6 +5,7 @@ package bar
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -38,7 +39,7 @@ func HandleArgNotStructRequest(
 		Request: req,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, headers, &requestBody)
+	respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -60,14 +61,14 @@ type ArgNotStructEndpoint struct {
 // Handle calls thrift client.
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 	r *ArgNotStructHTTPRequest,
 ) (map[string]string, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}
 	for k, v := range map[string]string{} {
-		headers[v] = headers[k]
+		clientHeaders[v] = headers.Get(k)
 	}
 
 	respHeaders, err := w.Clients.Bar.ArgNotStruct(

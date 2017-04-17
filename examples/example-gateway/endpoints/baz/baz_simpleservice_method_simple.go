@@ -4,6 +4,7 @@ package baz
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -22,9 +23,15 @@ type SimpleEndpoint struct {
 // Handle "/baz/simple-path".
 func (e SimpleEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 ) (map[string]string, error) {
-	cRespHeaders, err := e.Clients.Baz.Simple(ctx, headers)
+
+	clientHeaders := map[string]string{}
+	for k := range headers {
+		clientHeaders[k] = headers.Get(k)
+	}
+
+	cRespHeaders, err := e.Clients.Baz.Simple(ctx, clientHeaders)
 	if err != nil {
 		// TODO: (lu) error type handling
 		switch err.(type) {

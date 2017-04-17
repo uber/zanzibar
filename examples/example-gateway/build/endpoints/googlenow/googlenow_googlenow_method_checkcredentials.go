@@ -5,6 +5,7 @@ package googlenow
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -35,7 +36,7 @@ func HandleCheckCredentialsRequest(
 		Request: req,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, headers)
+	respHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -57,12 +58,12 @@ type CheckCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
 	for k, v := range map[string]string{} {
-		headers[v] = headers[k]
+		clientHeaders[v] = headers.Get(k)
 	}
 
 	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)

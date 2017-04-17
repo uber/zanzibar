@@ -9,6 +9,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	"net/http"
+
 	bazClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
@@ -23,12 +25,17 @@ type CallEndpoint struct {
 // Handle "/baz/call-path".
 func (e CallEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	headers http.Header,
 	r *endpointBaz.BazRequest,
 ) (*endpointBaz.BazResponse, map[string]string, error) {
 	req := (*bazClientStructs.BazRequest)(r)
 
-	cRespHeaders, cResp, err := e.Clients.Baz.Call(ctx, headers, req)
+	clientHeaders := map[string]string{}
+	for k := range headers {
+		clientHeaders[k] = headers.Get(k)
+	}
+
+	cRespHeaders, cResp, err := e.Clients.Baz.Call(ctx, clientHeaders, req)
 	if err != nil {
 		switch err.(type) {
 		default:
