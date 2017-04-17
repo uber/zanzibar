@@ -29,13 +29,6 @@ func HandleTooManyArgsRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := TooManyArgsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -64,6 +57,8 @@ type TooManyArgsEndpoint struct {
 // Handle calls thrift client.
 func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 	r *TooManyArgsHTTPRequest,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {

@@ -28,13 +28,6 @@ func HandleNormalRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := NormalEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -63,6 +56,8 @@ type NormalEndpoint struct {
 // Handle calls thrift client.
 func (w NormalEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 	r *NormalHTTPRequest,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {

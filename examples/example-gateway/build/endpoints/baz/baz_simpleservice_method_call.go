@@ -26,13 +26,6 @@ func HandleCallRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := customBaz.CallEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,

@@ -26,13 +26,6 @@ func HandleAddCredentialsRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := AddCredentialsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -61,13 +54,15 @@ type AddCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w AddCredentialsEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 	r *AddCredentialsHTTPRequest,
 ) (map[string]string, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+	for k, v := range map[string]string{"x-token": "x-token", "x-uuid": "x-uuid"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 

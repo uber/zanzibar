@@ -23,13 +23,6 @@ func HandleNoRequestRequest(
 	clients *clients.Clients,
 ) {
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := NoRequestEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -58,6 +51,8 @@ type NoRequestEndpoint struct {
 // Handle calls thrift client.
 func (w NoRequestEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 

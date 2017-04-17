@@ -23,13 +23,6 @@ func HandleMissingArgRequest(
 	clients *clients.Clients,
 ) {
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := MissingArgEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -58,6 +51,8 @@ type MissingArgEndpoint struct {
 // Handle calls thrift client.
 func (w MissingArgEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 

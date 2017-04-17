@@ -26,13 +26,6 @@ func HandleArgNotStructRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := ArgNotStructEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -61,6 +54,8 @@ type ArgNotStructEndpoint struct {
 // Handle calls thrift client.
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 	r *ArgNotStructHTTPRequest,
 ) (map[string]string, error) {

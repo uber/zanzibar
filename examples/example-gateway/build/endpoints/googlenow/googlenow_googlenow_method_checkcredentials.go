@@ -23,13 +23,6 @@ func HandleCheckCredentialsRequest(
 		return
 	}
 
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers := map[string]string{}
-	for k, v := range map[string]string{} {
-		headers[v] = req.Header.Get(k)
-	}
-
 	workflow := CheckCredentialsEndpoint{
 		Clients: clients,
 		Logger:  req.Logger,
@@ -58,6 +51,8 @@ type CheckCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
+	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
+	// generation is implemented.
 	headers http.Header,
 ) (map[string]string, error) {
 
