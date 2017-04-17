@@ -23,21 +23,12 @@ type Clients struct {
 
 // CreateClients will make all clients
 func CreateClients(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Clients{
-		Bar: barClient.NewClient(
-			config, gateway,
-		),
-		Baz: bazClient.NewClient(
-			config, gateway,
-		),
-		Contacts: contactsClient.NewClient(
-			config, gateway,
-		),
-		GoogleNow: googlenowClient.NewClient(
-			config, gateway,
-		),
+		Bar:       barClient.NewClient(gateway),
+		Baz:       bazClient.NewClient(gateway),
+		Contacts:  contactsClient.NewClient(gateway),
+		GoogleNow: googlenowClient.NewClient(gateway),
 	}
 }
