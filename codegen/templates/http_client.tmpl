@@ -105,20 +105,26 @@ func (c *{{$clientName}}) {{title .Name}}(
 	})
 
 	{{if and (eq .ResponseType "") (eq (len .Exceptions) 0)}}
-	// TODO: log about unexpected body bytes?
-	_, err = res.ReadAll()
-	if err != nil {
-		return respHeaders, err
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return respHeaders, err
+			}
+			return respHeaders, nil
 	}
-	return respHeaders, nil
 	{{else if eq (len .Exceptions) 0}}
-	var responseBody {{.ResponseType}}
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
-	}
+	switch res.StatusCode {
+		case {{.OKStatusCode.Code}}:
+			var responseBody {{.ResponseType}}
+			err = res.ReadAndUnmarshalBody(&responseBody)
+			if err != nil {
+				return nil, respHeaders, err
+			}
 
-	return &responseBody, respHeaders, nil
+			return &responseBody, respHeaders, nil
+	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
@@ -145,10 +151,6 @@ func (c *{{$clientName}}) {{title .Name}}(
 				return respHeaders, err
 			}
 	}
-
-	return respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
@@ -175,11 +177,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 				return nil, respHeaders, err
 			}
 	}
+	{{end}}
 
-	return nil, respHeaders, errors.Errorf(
+	return {{if ne .ResponseType ""}}nil, {{end}}respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-	{{end}}
 }
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
