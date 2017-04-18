@@ -147,10 +147,8 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfigObj *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	return &ClientSpec{
-		ClientType: "tchannel",
-	}, nil
+func NewTChannelClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+	return newClientSpec(jsonFile, clientConfig, false, h)
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
@@ -760,10 +758,7 @@ func NewGatewaySpec(
 			)
 		}
 
-		// TODO: Other clients should be generated
-		if cspec.ClientType == "http" || cspec.ClientType == "custom" {
-			spec.ClientModules[cspec.JSONFile] = cspec
-		}
+		spec.ClientModules[cspec.JSONFile] = cspec
 	}
 	for _, json := range endpointJsons {
 		espec, err := NewEndpointSpec(json, packageHelper, spec.MiddlewareModules)
