@@ -43,7 +43,7 @@ func createGateway() (*zanzibar.Gateway, error) {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(config, gateway)
+	clients := clients.CreateClients(gateway)
 	gateway.Clients = clients
 
 	return gateway, nil

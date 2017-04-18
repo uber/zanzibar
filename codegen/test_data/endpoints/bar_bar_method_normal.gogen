@@ -16,12 +16,25 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// HandleNormalRequest handles "/bar/bar-path".
-func HandleNormalRequest(
+// NormalHandler is the handler for "/bar/bar-path"
+type NormalHandler struct {
+	Clients *clients.Clients
+}
+
+// NewNormalEndpoint creates a handler
+func NewNormalEndpoint(
+	gateway *zanzibar.Gateway,
+) *NormalHandler {
+	return &NormalHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/bar/bar-path".
+func (handler *NormalHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	var requestBody NormalHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
@@ -29,7 +42,7 @@ func HandleNormalRequest(
 	}
 
 	workflow := NormalEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

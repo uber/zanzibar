@@ -17,12 +17,25 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// HandleTooManyArgsRequest handles "/bar/too-many-args-path".
-func HandleTooManyArgsRequest(
+// TooManyArgsHandler is the handler for "/bar/too-many-args-path"
+type TooManyArgsHandler struct {
+	Clients *clients.Clients
+}
+
+// NewTooManyArgsEndpoint creates a handler
+func NewTooManyArgsEndpoint(
+	gateway *zanzibar.Gateway,
+) *TooManyArgsHandler {
+	return &TooManyArgsHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/bar/too-many-args-path".
+func (handler *TooManyArgsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
@@ -33,7 +46,7 @@ func HandleTooManyArgsRequest(
 	}
 
 	workflow := TooManyArgsEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

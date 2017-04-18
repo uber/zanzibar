@@ -153,7 +153,7 @@ func createTestBinaryFile(
 	mainPath string,
 	config map[string]interface{},
 ) (*testBinaryInfo, error) {
-	if os.Getenv("COVER_ON") == "1" && cachedBinaryFile == nil {
+	if cachedBinaryFile == nil {
 		// Try to load cachedBinaryFile from disk
 		tryLoadCachedBinaryTestInfo(mainPath)
 	}
@@ -227,8 +227,6 @@ func createTestBinaryFile(
 		CoverProfileFile: coverProfileFile,
 		MainFile:         mainPath,
 	}
-	if os.Getenv("COVER_ON") == "1" {
-		tryWriteCachedBinaryTestInfo()
-	}
+	tryWriteCachedBinaryTestInfo()
 	return cachedBinaryFile, nil
 }

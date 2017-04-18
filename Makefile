@@ -92,10 +92,15 @@ test: generate lint
 
 .PHONY: test-only
 test-only:
-	go test ./examples/example-gateway/... | grep -v '\[no test files\]'
-	go test ./codegen/... | grep -v '\[no test files\]'
-	go test ./runtime/... | grep -v '\[no test files\]'
-	go test ./test/... | grep -v '\[no test files\]'
+	rm -f ./test/.cached_binary_test_info.json
+	go test ./test/health_test.go # preload the binary cache.
+	go test \
+		./examples/example-gateway/... \
+		./codegen/... \
+		./runtime/... \
+		./test/... | \
+		grep -v '\[no test files\]'
+	rm -f ./test/.cached_binary_test_info.json
 	echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
 .PHONY: travis-coveralls
