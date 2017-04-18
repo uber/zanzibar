@@ -129,6 +129,11 @@ func NewMethod(
 		return nil, err
 	}
 
+	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
 	if !wantAnnot {
 		return method, nil
 	}
@@ -141,11 +146,6 @@ func NewMethod(
 	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
 
 	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
-	if err != nil {
-		return nil, err
-	}
-
-	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +285,26 @@ func (ms *MethodSpec) setExceptions(
 	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
 
 	for i, e := range resultSpec.Exceptions {
+		typeName, err := h.TypeFullName(curThriftFile, e.Type)
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"cannot resolve type full name for %s for exception %s",
+				e.Type,
+				e.Name,
+			)
+		}
+
+		if !ms.WantAnnot {
+			ms.Exceptions[i] = ExceptionSpec{
+				StructSpec: StructSpec{
+					Type: typeName,
+					Name: e.Type.ThriftName(),
+				},
+			}
+			continue
+		}
+
 		code, err := strconv.Atoi(e.Annotations[antHTTPStatus])
 		if err != nil {
 			return errors.Wrapf(
@@ -302,16 +322,6 @@ func (ms *MethodSpec) setExceptions(
 			)
 		}
 		seenStatusCodes[code] = true
-
-		typeName, err := h.TypeFullName(curThriftFile, e.Type)
-		if err != nil {
-			return errors.Wrapf(
-				err,
-				"cannot resolve type full name for %s for exception %s",
-				e.Type,
-				e.Name,
-			)
-		}
 
 		ms.Exceptions[i] = ExceptionSpec{
 			StructSpec: StructSpec{
