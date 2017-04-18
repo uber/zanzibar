@@ -13,12 +13,25 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
 )
 
-// HandleAddCredentialsRequest handles "/googlenow/add-credentials".
-func HandleAddCredentialsRequest(
+// AddCredentialsHandler is the handler for "/googlenow/add-credentials"
+type AddCredentialsHandler struct {
+	Clients *clients.Clients
+}
+
+// NewAddCredentialsEndpoint creates a handler
+func NewAddCredentialsEndpoint(
+	gateway *zanzibar.Gateway,
+) *AddCredentialsHandler {
+	return &AddCredentialsHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/googlenow/add-credentials".
+func (handler *AddCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
@@ -31,7 +44,7 @@ func HandleAddCredentialsRequest(
 	headers := map[string]string{}
 
 	workflow := AddCredentialsEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

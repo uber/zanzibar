@@ -14,18 +14,31 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// HandleNoRequestRequest handles "/bar/no-request-path".
-func HandleNoRequestRequest(
+// NoRequestHandler is the handler for "/bar/no-request-path"
+type NoRequestHandler struct {
+	Clients *clients.Clients
+}
+
+// NewNoRequestEndpoint creates a handler
+func NewNoRequestEndpoint(
+	gateway *zanzibar.Gateway,
+) *NoRequestHandler {
+	return &NoRequestHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/bar/no-request-path".
+func (handler *NoRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 
 	headers := map[string]string{}
 
 	workflow := NoRequestEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

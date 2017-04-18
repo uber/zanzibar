@@ -11,12 +11,25 @@ import (
 	"go.uber.org/zap"
 )
 
-// HandleCheckCredentialsRequest handles "/googlenow/check-credentials".
-func HandleCheckCredentialsRequest(
+// CheckCredentialsHandler is the handler for "/googlenow/check-credentials"
+type CheckCredentialsHandler struct {
+	Clients *clients.Clients
+}
+
+// NewCheckCredentialsEndpoint creates a handler
+func NewCheckCredentialsEndpoint(
+	gateway *zanzibar.Gateway,
+) *CheckCredentialsHandler {
+	return &CheckCredentialsHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/googlenow/check-credentials".
+func (handler *CheckCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
@@ -25,7 +38,7 @@ func HandleCheckCredentialsRequest(
 	headers := map[string]string{}
 
 	workflow := CheckCredentialsEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

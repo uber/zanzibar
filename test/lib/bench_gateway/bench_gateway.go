@@ -61,12 +61,18 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
+// CreateClientsFn ...
+type CreateClientsFn func(gateway *zanzibar.Gateway) interface{}
+
+// RegisterFn ...
+type RegisterFn func(g *zanzibar.Gateway, router *zanzibar.Router)
+
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
 	seedConfig map[string]interface{},
 	opts *testGateway.Options,
-	createClients func(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) interface{},
-	regEndpoints func(g *zanzibar.Gateway, router *zanzibar.Router),
+	createClients CreateClientsFn,
+	regEndpoints RegisterFn,
 ) (testGateway.TestGateway, error) {
 	if seedConfig == nil {
 		seedConfig = map[string]interface{}{}
@@ -138,10 +144,10 @@ func CreateGateway(
 	if err != nil {
 		return nil, err
 	}
-	gateway.Clients = createClients(config, gateway)
+	gateway.Clients = createClients(gateway)
 
 	benchGateway.ActualGateway = gateway
-	err = gateway.Bootstrap(regEndpoints)
+	err = gateway.Bootstrap(zanzibar.RegisterFn(regEndpoints))
 	if err != nil {
 		return nil, err
 	}

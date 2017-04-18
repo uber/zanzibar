@@ -28,14 +28,28 @@ import (
 
 {{ $workflow := .WorkflowName -}}
 {{ $clientName := title .ClientName -}}
+{{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{with .Method -}}
 
-// Handle{{title .Name}}Request handles "{{.HTTPPath}}".
-func Handle{{title .Name}}Request(
+// {{$handlerName}} is the handler for "{{.HTTPPath}}"
+type {{$handlerName}} struct {
+	Clients *clients.Clients
+}
+
+// New{{title .Name}}Endpoint creates a handler
+func New{{title .Name}}Endpoint(
+	gateway *zanzibar.Gateway,
+) *{{$handlerName}} {
+	return &{{$handlerName}}{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "{{.HTTPPath}}".
+func (handler *{{$handlerName}}) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	{{- if .Headers -}}
 	if !req.CheckHeaders({{.Headers | printf "%#v" }}) {
@@ -53,7 +67,7 @@ func Handle{{title .Name}}Request(
 	headers := map[string]string{}
 
 	workflow := {{$workflow}}{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger: req.Logger,
 		Request: req,
 	}

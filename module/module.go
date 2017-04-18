@@ -305,12 +305,17 @@ func (moduleSystem *System) GenerateBuild(
 				targetGenDir,
 				classInstance.Directory,
 			)
+			prettyBuildPath := filepath.Join(
+				".",
+				filepath.Base(targetGenDir),
+				classInstance.Directory,
+			)
 			fmt.Printf(
-				"Generating %s %s %s in %s %d/%d\n",
+				"Generating %8s %s %-10s in %-30s %d/%d\n",
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
-				buildPath,
+				prettyBuildPath,
 				moduleIndex,
 				moduleCount,
 			)

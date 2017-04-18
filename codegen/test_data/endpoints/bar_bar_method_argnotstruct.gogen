@@ -13,12 +13,25 @@ import (
 	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
 )
 
-// HandleArgNotStructRequest handles "/bar/arg-not-struct-path".
-func HandleArgNotStructRequest(
+// ArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
+type ArgNotStructHandler struct {
+	Clients *clients.Clients
+}
+
+// NewArgNotStructEndpoint creates a handler
+func NewArgNotStructEndpoint(
+	gateway *zanzibar.Gateway,
+) *ArgNotStructHandler {
+	return &ArgNotStructHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/bar/arg-not-struct-path".
+func (handler *ArgNotStructHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 	var requestBody ArgNotStructHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
@@ -28,7 +41,7 @@ func HandleArgNotStructRequest(
 	headers := map[string]string{}
 
 	workflow := ArgNotStructEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

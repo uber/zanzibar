@@ -110,9 +110,9 @@ type EndpointMetrics struct {
 	statusCodes    map[int]tally.Counter
 }
 
-// Endpoint struct represents an endpoint that can be registered
+// RouterEndpoint struct represents an endpoint that can be registered
 // into the router itself.
-type Endpoint struct {
+type RouterEndpoint struct {
 	EndpointName string
 	HandlerName  string
 	HandlerFn    HandlerFn
@@ -121,13 +121,13 @@ type Endpoint struct {
 	gateway *Gateway
 }
 
-// NewEndpoint creates an endpoint with all the necessary data
-func NewEndpoint(
+// NewRouterEndpoint creates an endpoint with all the necessary data
+func NewRouterEndpoint(
 	gateway *Gateway,
 	endpointName string,
 	handlerName string,
 	handler HandlerFn,
-) *Endpoint {
+) *RouterEndpoint {
 	endpointTags := map[string]string{
 		"endpoint": endpointName,
 		"handler":  handlerName,
@@ -142,7 +142,7 @@ func NewEndpoint(
 		statusCodes[statusCode] = endpointScope.Counter(metricName)
 	}
 
-	return &Endpoint{
+	return &RouterEndpoint{
 		EndpointName: endpointName,
 		HandlerName:  handlerName,
 		HandlerFn:    handler,
@@ -157,11 +157,10 @@ func NewEndpoint(
 }
 
 // HandleRequest is called by the router and starts the request
-func (endpoint *Endpoint) HandleRequest(
+func (endpoint *RouterEndpoint) HandleRequest(
 	w http.ResponseWriter, r *http.Request, params httprouter.Params,
 ) {
 	req := NewServerHTTPRequest(w, r, params, endpoint)
-
 	fn := endpoint.HandlerFn
 
 	ctx := r.Context()
@@ -220,7 +219,7 @@ func (router *Router) RegisterRaw(
 
 // Register will register an endpoint with the router.
 func (router *Router) Register(
-	method string, urlpattern string, endpoint *Endpoint,
+	method string, urlpattern string, endpoint *RouterEndpoint,
 ) {
 	canonicalPattern := urlpattern
 	if canonicalPattern[len(canonicalPattern)-1] == '/' {

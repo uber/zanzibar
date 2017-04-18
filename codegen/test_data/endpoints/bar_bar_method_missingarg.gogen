@@ -14,18 +14,31 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// HandleMissingArgRequest handles "/bar/missing-arg-path".
-func HandleMissingArgRequest(
+// MissingArgHandler is the handler for "/bar/missing-arg-path"
+type MissingArgHandler struct {
+	Clients *clients.Clients
+}
+
+// NewMissingArgEndpoint creates a handler
+func NewMissingArgEndpoint(
+	gateway *zanzibar.Gateway,
+) *MissingArgHandler {
+	return &MissingArgHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/bar/missing-arg-path".
+func (handler *MissingArgHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 
 	headers := map[string]string{}
 
 	workflow := MissingArgEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

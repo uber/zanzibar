@@ -11,18 +11,31 @@ import (
 	"go.uber.org/zap"
 )
 
-// HandleSimpleRequest handles "/baz/simple-path".
-func HandleSimpleRequest(
+// SimpleHandler is the handler for "/baz/simple-path"
+type SimpleHandler struct {
+	Clients *clients.Clients
+}
+
+// NewSimpleEndpoint creates a handler
+func NewSimpleEndpoint(
+	gateway *zanzibar.Gateway,
+) *SimpleHandler {
+	return &SimpleHandler{
+		Clients: gateway.Clients.(*clients.Clients),
+	}
+}
+
+// HandleRequest handles "/baz/simple-path".
+func (handler *SimpleHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
 ) {
 
 	headers := map[string]string{}
 
 	workflow := SimpleEndpoint{
-		Clients: clients,
+		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

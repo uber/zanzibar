@@ -18,11 +18,10 @@ type GoogleNowClient struct {
 
 // NewClient returns a new http client for service GoogleNow.
 func NewClient(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) *GoogleNowClient {
-	ip := config.MustGetString("clients.googleNow.ip")
-	port := config.MustGetInt("clients.googleNow.port")
+	ip := gateway.Config.MustGetString("clients.googleNow.ip")
+	port := gateway.Config.MustGetInt("clients.googleNow.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &GoogleNowClient{

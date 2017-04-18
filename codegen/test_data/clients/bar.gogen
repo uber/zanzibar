@@ -20,11 +20,10 @@ type BarClient struct {
 
 // NewClient returns a new http client for service Bar.
 func NewClient(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) *BarClient {
-	ip := config.MustGetString("clients.bar.ip")
-	port := config.MustGetInt("clients.bar.port")
+	ip := gateway.Config.MustGetString("clients.bar.ip")
+	port := gateway.Config.MustGetInt("clients.bar.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &BarClient{

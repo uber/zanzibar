@@ -187,7 +187,7 @@ func (gateway *Gateway) register(register RegisterFn) {
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
 
-	gateway.Router.Register("GET", "/health", NewEndpoint(
+	gateway.Router.Register("GET", "/health", NewRouterEndpoint(
 		gateway, "health", "health", gateway.handleHealthRequest,
 	))
 

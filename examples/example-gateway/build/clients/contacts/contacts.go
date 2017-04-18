@@ -19,11 +19,10 @@ type ContactsClient struct {
 
 // NewClient returns a new http client for service Contacts.
 func NewClient(
-	config *zanzibar.StaticConfig,
 	gateway *zanzibar.Gateway,
 ) *ContactsClient {
-	ip := config.MustGetString("clients.contacts.ip")
-	port := config.MustGetInt("clients.contacts.port")
+	ip := gateway.Config.MustGetString("clients.contacts.ip")
+	port := gateway.Config.MustGetInt("clients.contacts.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &ContactsClient{
