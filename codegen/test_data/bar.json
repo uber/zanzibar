@@ -70,6 +70,7 @@
 						}
 					],
 					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -122,6 +123,7 @@
 					"RequestBoxed": false,
 					"RequestStruct": null,
 					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -174,6 +176,7 @@
 					"RequestBoxed": false,
 					"RequestStruct": null,
 					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -232,6 +235,7 @@
 						}
 					],
 					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -298,6 +302,7 @@
 						}
 					],
 					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,

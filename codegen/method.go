@@ -63,6 +63,8 @@ type MethodSpec struct {
 	RequestStruct []StructSpec
 	// Thrift service name the method belongs to.
 	ThriftService string
+	// The thriftrw-generated go package name
+	GenCodePkgName string
 	// Whether the method needs annotation or not.
 	WantAnnot bool
 	// The thriftrw compiled spec, used to extract type information
@@ -118,6 +120,11 @@ func NewMethod(
 	method.Name = funcSpec.MethodName()
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
+
+	method.GenCodePkgName, err = packageHelper.TypePackageName(thriftFile)
+	if err != nil {
+		return nil, err
+	}
 
 	err = method.setResponseType(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
@@ -204,14 +211,10 @@ func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSp
 	if ms.WantAnnot {
 		requestType = strings.Title(f.Name) + "HTTPRequest"
 	} else {
-		pkgName, err := h.TypePackageName(curThriftFile)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to generate new request type")
-		}
 		// This is specifically generating the "Args" type that thriftrw generates.
 		requestType = fmt.Sprintf(
 			"%s.%s_%s_Args",
-			pkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
+			ms.GenCodePkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
 		)
 
 	}
