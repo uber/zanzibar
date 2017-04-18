@@ -47,19 +47,19 @@ type TChanBaz interface {
 }
 
 // NewClient returns a new TChannel client for service baz.
-func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *BazClient {
-	serviceName := config.MustGetString("clients.baz.serviceName")
+func NewClient(gateway *zanzibar.Gateway) *BazClient {
+	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
 
-	ip := config.MustGetString("clients.baz.ip")
-	port := config.MustGetInt("clients.baz.port")
+	ip := gateway.Config.MustGetString("clients.baz.ip")
+	port := gateway.Config.MustGetInt("clients.baz.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	timeout := time.Millisecond * time.Duration(
-		config.MustGetInt("clients.baz.timeout"),
+		gateway.Config.MustGetInt("clients.baz.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		config.MustGetInt("clients.baz.timeoutPerAttempt"),
+		gateway.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
 	)
 
 	client := zanzibar.NewTChannelClient(gateway.Channel,

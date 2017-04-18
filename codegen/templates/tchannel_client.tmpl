@@ -67,21 +67,21 @@ type TChan{{title $clientID}} interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func NewClient(config *zanzibar.StaticConfig, gateway *zanzibar.Gateway) *{{$clientName}} {
+func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
     {{- /* this is the service discovery service name */}}
-	serviceName := config.MustGetString("clients.{{$clientID}}.serviceName")
+	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
 
-	ip := config.MustGetString("clients.{{$clientID}}.ip")
-	port := config.MustGetInt("clients.{{$clientID}}.port")
+	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-	    config.MustGetInt("clients.{{$clientID}}.timeout"),
+	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-	    config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	client := zanzibar.NewTChannelClient(gateway.Channel,
