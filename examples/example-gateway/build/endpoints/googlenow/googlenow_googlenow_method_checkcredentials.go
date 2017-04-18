@@ -57,7 +57,7 @@ func (w CheckCredentialsEndpoint) Handle(
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
+	for k, v := range map[string]string{"X-Token": "X-Token", "X-Uuid": "X-Uuid"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 

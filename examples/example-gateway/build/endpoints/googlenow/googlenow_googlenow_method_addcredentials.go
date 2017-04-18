@@ -82,7 +82,7 @@ func (w AddCredentialsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
+	for k, v := range map[string]string{"X-Token": "X-Token", "X-Uuid": "X-Uuid"} {
 		endRespHead[v] = respHeaders[k]
 	}
 

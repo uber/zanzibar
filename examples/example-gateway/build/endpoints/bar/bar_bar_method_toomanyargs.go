@@ -68,7 +68,7 @@ func (w TooManyArgsEndpoint) Handle(
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Token": "X-Token", "X-Uuid": "X-Uuid"} {
+	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 
