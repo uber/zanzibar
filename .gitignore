@@ -24,3 +24,4 @@ scripts/easy_json/easy_json
 *.pprof
 *.prof
 node_modules/
+./test/.cached_binary_test_info.json
