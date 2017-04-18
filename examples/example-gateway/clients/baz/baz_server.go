@@ -12,16 +12,17 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 // SimpleServiceServer is the Baz backend service
 type SimpleServiceServer struct {
-	handler TChanBaz
+	handler clientsBazBaz.TChanBaz
 }
 
 // NewSimpleServiceServer wraps a handler for Baz so it can be registered with a thrift server.
-func NewSimpleServiceServer(handler TChanBaz) zanzibar.TChanServer {
+func NewSimpleServiceServer(handler clientsBazBaz.TChanBaz) zanzibar.TChanServer {
 	return &SimpleServiceServer{
 		handler,
 	}
