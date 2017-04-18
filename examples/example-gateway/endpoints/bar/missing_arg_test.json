@@ -3,12 +3,16 @@
     "endpointId": "bar",
     "handlerId": "missingArg",
     "endpointRequest": {},
+    "endpointReqHeaders": {},
     "endpointResponse": {},
+    "endpointResHeaders": {},
 
     "clientStubs": [{
         "clientId": "bar",
         "clientMethod": "missingArg",
         "clientRequest": {},
-        "clientResponse": {}
+        "clientReqHeaders": {},
+        "clientResponse": {},
+        "clientResHeaders": {}
     }]
 }]

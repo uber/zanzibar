@@ -82,8 +82,10 @@ type TestStub struct {
 	HandlerID              string
 	EndpointRequest        map[string]interface{} // Json blob
 	EndpointRequestString  string
+	EndpointReqHeaders     map[string]string      // Json blob
 	EndpointResponse       map[string]interface{} // Json blob
 	EndpointResponseString string
+	EndpointResHeaders     map[string]string // Json blob
 
 	ClientStubs []ClientStub
 }
@@ -94,8 +96,10 @@ type ClientStub struct {
 	ClientMethod         string
 	ClientRequest        map[string]interface{} // Json blob
 	ClientRequestString  string
+	ClientReqHeaders     map[string]string      // Json blob
 	ClientResponse       map[string]interface{} // Json blob
 	ClientResponseString string
+	ClientResHeaders     map[string]string // Json blob
 }
 
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")

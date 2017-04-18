@@ -44,7 +44,19 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 
 	{{range .ClientStubs}}
 	fake{{.ClientMethod | Title}} := func(w http.ResponseWriter, r *http.Request) {
+
+		{{range $k, $v := .ClientReqHeaders -}}
+		assert.Equal(
+			t,
+			"{{$v}}",
+			r.Header.Get("{{$k}}"))
+		{{end}}
+
+		{{range $k, $v := .ClientResHeaders -}}
+		w.Header().Set("{{$k}}", "{{$v}}")
+		{{end}}
 		w.WriteHeader({{$.Method.OKStatusCode.Code}})
+		
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte( `{{.ClientResponseString}}`)); err != nil {
 			t.Fatal("can't write fake response")
@@ -60,8 +72,8 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 	{{ if $headers -}}
-	{{range $idx, $headerName := $headers -}}
-	headers["{{$headerName}}"] = "placeholder"
+	{{range $k, $v := .EndpointReqHeaders -}}
+	headers["{{$k}}"] = "{{$v}}"
 	{{end}}
 	{{- end}}
 
@@ -76,6 +88,12 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
+	{{range $k, $v := .EndpointResHeaders -}}
+	assert.Equal(
+		t,
+		"{{$v}}",
+		res.Header.Get("{{$k}}"))	
+	{{end}}
 	assert.Equal(t, 1, counter)
 }
 

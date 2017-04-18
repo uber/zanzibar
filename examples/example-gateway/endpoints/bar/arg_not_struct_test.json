@@ -3,12 +3,16 @@
     "endpointId": "bar",
     "handlerId": "argNotStruct",
     "endpointRequest": {},
+    "endpointReqHeaders": {},
     "endpointResponse": {},
+    "endpointResHeaders": {},
 
     "clientStubs": [{
         "clientId": "bar",
         "clientMethod": "argNotStruct",
         "clientRequest": {},
-        "clientResponse": {}
+        "clientReqHeaders": {},
+        "clientResponse": {},
+        "clientResHeaders": {}
     }]
 }]

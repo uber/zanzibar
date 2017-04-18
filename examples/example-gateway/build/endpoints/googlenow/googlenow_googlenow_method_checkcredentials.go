@@ -57,7 +57,7 @@ func (w CheckCredentialsEndpoint) Handle(
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 
@@ -66,12 +66,13 @@ func (w CheckCredentialsEndpoint) Handle(
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"x-token": "x-token", "x-uuid": "x-uuid"} {
+	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
 		endRespHead[v] = respHeaders[k]
 	}
 

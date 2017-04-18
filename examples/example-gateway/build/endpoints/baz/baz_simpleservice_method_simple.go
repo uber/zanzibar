@@ -64,6 +64,7 @@ func (w SimpleEndpoint) Handle(
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
