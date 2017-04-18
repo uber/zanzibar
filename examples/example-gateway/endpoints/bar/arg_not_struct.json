@@ -9,5 +9,7 @@
 	"clientName": "Bar",
 	"clientMethod": "argNotStruct",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}	
 }

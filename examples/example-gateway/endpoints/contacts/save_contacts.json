@@ -8,5 +8,7 @@
     "workflowType": "custom",
     "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}	
 }

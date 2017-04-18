@@ -491,26 +491,46 @@ func NewEndpointSpec(
 
 	reqHeaderMap := make(map[string]string)
 	m, ok := endpointConfigObj["reqHeaderMap"]
-	if ok {
-		// Do a deep cast to enforce a string -> string map
-		castMap := m.(map[string]interface{})
-		for key, value := range castMap {
-			switch value := value.(type) {
-			case string:
-				reqHeaderMap[key] = value
-			}
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse reqHeaderMap %s",
+			reqHeaderMap,
+		)
+	}
+	// Do a deep cast to enforce a string -> string map
+	castMap := m.(map[string]interface{})
+	for key, value := range castMap {
+		switch value := value.(type) {
+		case string:
+			reqHeaderMap[key] = value
+		default:
+			return nil, errors.Errorf(
+				"Unable to parse string %s in reqHeaderMap %s",
+				value,
+				reqHeaderMap,
+			)
 		}
 	}
 	resHeaderMap := make(map[string]string)
 	m2, ok := endpointConfigObj["resHeaderMap"]
-	if ok {
-		// Do a deep cast to enforce a string -> string map
-		castMap := m2.(map[string]interface{})
-		for key, value := range castMap {
-			switch value := value.(type) {
-			case string:
-				resHeaderMap[key] = value
-			}
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse resHeaderMap %s",
+			resHeaderMap,
+		)
+	}
+	// Do a deep cast to enforce a string -> string map
+	castMap = m2.(map[string]interface{})
+	for key, value := range castMap {
+		switch value := value.(type) {
+		case string:
+			resHeaderMap[key] = value
+		default:
+			return nil, errors.Errorf(
+				"Unable to parse string %s in resHeaderMap %s",
+				value,
+				resHeaderMap,
+			)
 		}
 	}
 

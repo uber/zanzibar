@@ -24,6 +24,9 @@ func HandleTooManyArgsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+		return
+	}
 	var requestBody TooManyArgsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -65,14 +68,13 @@ func (w TooManyArgsEndpoint) Handle(
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 
-	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
+	clientRespBody, respHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,
 	)
-
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -82,6 +84,9 @@ func (w TooManyArgsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
+	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+		endRespHead[v] = respHeaders[k]
+	}
 
 	response := convertTooManyArgsClientResponse(clientRespBody)
 	return response, endRespHead, nil

@@ -8,7 +8,8 @@ service GoogleNow {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/googlenow/add-credentials"
         zanzibar.http.status = "202"
-        zanzibar.http.headers = "x-uuid,x-token"
+        zanzibar.http.reqHeaders = "x-uuid,x-token"
+        zanzibar.http.resHeaders = "x-uuid,x-token"
     )
     void checkCredentials(
     ) (

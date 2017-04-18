@@ -21,6 +21,9 @@ func HandleAddCredentialsRequest(
 	res *zanzibar.ServerHTTPResponse,
 	clients *clients.Clients,
 ) {
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+		return
+	}
 	var requestBody AddCredentialsHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -78,7 +81,7 @@ func (w AddCredentialsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"x-uuid": "x-uuid", "x-token": "x-token"} {
+	for k, v := range map[string]string{"x-token": "x-token", "x-uuid": "x-uuid"} {
 		endRespHead[v] = respHeaders[k]
 	}
 
