@@ -75,6 +75,10 @@ func Handle{{title .Name}}Request(
 		return
 	}
 
+	{{- if .ResHeaders -}}
+	// TODO(sindelar): implement check headers on response
+	{{- end }}
+
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, respHeaders, nil)
 	{{- else -}}

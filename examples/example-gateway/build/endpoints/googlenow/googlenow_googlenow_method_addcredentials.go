@@ -42,7 +42,7 @@ func HandleAddCredentialsRequest(
 		)
 		res.SendErrorString(500, "Unexpected server error")
 		return
-	}
+	} // TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(202, respHeaders, nil)
 }
