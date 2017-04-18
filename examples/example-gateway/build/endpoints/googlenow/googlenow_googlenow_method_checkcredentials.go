@@ -49,7 +49,8 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 		)
 		res.SendErrorString(500, "Unexpected server error")
 		return
-	} // TODO(sindelar): implement check headers on response
+	}
+	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(202, respHeaders, nil)
 }
@@ -70,7 +71,7 @@ func (w CheckCredentialsEndpoint) Handle(
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Token": "X-Token", "X-Uuid": "X-Uuid"} {
+	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
 		clientHeaders[v] = headers.Get(k)
 	}
 

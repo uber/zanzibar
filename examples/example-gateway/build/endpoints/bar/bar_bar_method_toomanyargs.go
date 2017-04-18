@@ -58,7 +58,8 @@ func (handler *TooManyArgsHandler) HandleRequest(
 		)
 		res.SendErrorString(500, "Unexpected server error")
 		return
-	} // TODO(sindelar): implement check headers on response
+	}
+	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSON(200, respHeaders, response)
 }

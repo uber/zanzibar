@@ -306,7 +306,7 @@ func TestResponseSetHeaders(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
