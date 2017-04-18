@@ -17,5 +17,5 @@ func getDirName() string {
 
 // CallHTTPRequest is the http body type for endpoint Call.
 type CallHTTPRequest struct {
-	Arg *endpointsBazBaz.BazRequest
+	Arg *endpointsBazBaz.BazRequest `json:"arg"`
 }

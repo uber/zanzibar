@@ -18,16 +18,16 @@ func getDirName() string {
 
 // ArgNotStructHTTPRequest is the http body type for endpoint argNotStruct.
 type ArgNotStructHTTPRequest struct {
-	Request string
+	Request string `json:"request"`
 }
 
 // NormalHTTPRequest is the http body type for endpoint normal.
 type NormalHTTPRequest struct {
-	Request *clientsBarBar.BarRequest
+	Request *clientsBarBar.BarRequest `json:"request"`
 }
 
 // TooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
 type TooManyArgsHTTPRequest struct {
-	Request *clientsBarBar.BarRequest
-	Foo     *clientsFooFoo.FooStruct
+	Request *clientsBarBar.BarRequest `json:"request"`
+	Foo     *clientsFooFoo.FooStruct  `json:"foo"`
 }

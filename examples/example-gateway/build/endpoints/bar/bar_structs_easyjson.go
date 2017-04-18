@@ -40,7 +40,7 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 			continue
 		}
 		switch key {
-		case "Request":
+		case "request":
 			if in.IsNull() {
 				in.Skip()
 				out.Request = nil
@@ -50,7 +50,7 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 				}
 				(*out.Request).UnmarshalEasyJSON(in)
 			}
-		case "Foo":
+		case "foo":
 			if in.IsNull() {
 				in.Skip()
 				out.Foo = nil
@@ -78,7 +78,7 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Request\":")
+	out.RawString("\"request\":")
 	if in.Request == nil {
 		out.RawString("null")
 	} else {
@@ -88,7 +88,7 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Foo\":")
+	out.RawString("\"foo\":")
 	if in.Foo == nil {
 		out.RawString("null")
 	} else {
@@ -139,7 +139,7 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 			continue
 		}
 		switch key {
-		case "Request":
+		case "request":
 			if in.IsNull() {
 				in.Skip()
 				out.Request = nil
@@ -167,7 +167,7 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Request\":")
+	out.RawString("\"request\":")
 	if in.Request == nil {
 		out.RawString("null")
 	} else {
@@ -218,7 +218,7 @@ func easyjsonCa6a3ed2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 			continue
 		}
 		switch key {
-		case "Request":
+		case "request":
 			out.Request = string(in.String())
 		default:
 			in.SkipRecursive()
@@ -238,7 +238,7 @@ func easyjsonCa6a3ed2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Request\":")
+	out.RawString("\"request\":")
 	out.String(string(in.Request))
 	out.RawByte('}')
 }

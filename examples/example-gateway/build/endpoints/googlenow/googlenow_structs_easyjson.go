@@ -38,7 +38,7 @@ func easyjson5cf1a88aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 			continue
 		}
 		switch key {
-		case "AuthCode":
+		case "authCode":
 			out.AuthCode = string(in.String())
 		default:
 			in.SkipRecursive()
@@ -58,7 +58,7 @@ func easyjson5cf1a88aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"AuthCode\":")
+	out.RawString("\"authCode\":")
 	out.String(string(in.AuthCode))
 	out.RawByte('}')
 }
