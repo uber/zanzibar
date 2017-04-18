@@ -288,6 +288,56 @@ func TestResponsePeekBody(t *testing.T) {
 	)
 }
 
+func TestResponseSetHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	headers := map[string]string{
+		"foo": "bar",
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, headers, &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				})
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	assert.Equal(
+		t,
+		resp.Header.Get("foo"),
+		"bar",
+	)
+}
+
 func TestResponsePeekBodyError(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		nil,
