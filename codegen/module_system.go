@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"path/filepath"
+	"strings"
 
 	"encoding/json"
 
@@ -228,6 +229,18 @@ func (generator *TCahnnelClientGenerator) Generate(
 		)
 	}
 
+	server, err := generator.templates.execTemplate(
+		"tchannel_server.tmpl",
+		clientMeta,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error executing TChannel server template for %s",
+			instance.InstanceName,
+		)
+	}
+
 	clientDirectory := filepath.Join(
 		generator.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
@@ -238,9 +251,13 @@ func (generator *TCahnnelClientGenerator) Generate(
 		clientFilePath = clientSpec.GoFileName
 	}
 
+	// TODO:(lu) the location of tchannel server file is tentative
+	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_server.go"
+
 	// Return the client files
 	files := map[string][]byte{}
 	files[clientFilePath] = client
+	files[serverFilePath] = server
 	return files, nil
 }
 
