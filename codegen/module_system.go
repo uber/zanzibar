@@ -236,7 +236,7 @@ func (generator *TChannelClientGenerator) Generate(
 	}
 
 	server, err := generator.templates.execTemplate(
-		"tchannel_server.tmpl",
+		"tchannel_client_test_server.tmpl",
 		clientMeta,
 		generator.packageHelper,
 	)
@@ -249,7 +249,7 @@ func (generator *TChannelClientGenerator) Generate(
 	}
 
 	handler, err := generator.templates.execTemplate(
-		"tchannel_handler.tmpl",
+		"tchannel_client_test_handler.tmpl",
 		clientMeta,
 		generator.packageHelper,
 	)
@@ -271,9 +271,8 @@ func (generator *TChannelClientGenerator) Generate(
 		clientFilePath = clientSpec.GoFileName
 	}
 
-	// TODO:(lu) the locations of tchannel server and handler files are tentative
-	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_server.go"
-	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_handler.go"
+	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_server.go"
+	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_handler.go"
 
 	// Return the client files
 	return map[string][]byte{

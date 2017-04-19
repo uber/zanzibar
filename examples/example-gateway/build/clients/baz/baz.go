@@ -43,36 +43,23 @@ type TChanBaz interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
-	) (
-		map[string]string, error,
-	)
+	) (map[string]string, error)
 
 	Compare(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (
-		*clientsBazBaz.BazResponse,
-		map[string]string,
-		error,
-	)
+	) (*clientsBazBaz.BazResponse, map[string]string, error)
 
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (
-		*clientsBazBaz.BazResponse,
-		map[string]string,
-		error,
-	)
+	) (*clientsBazBaz.BazResponse, map[string]string, error)
 
 	SillyNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (
-		map[string]string,
-		error,
-	)
+	) (map[string]string, error)
 }
 
 // NewClient returns a new TChannel client for service baz.
@@ -128,7 +115,7 @@ func (c *BazClient) Call(
 		case result.AuthErr != nil:
 			err = result.AuthErr
 		default:
-			err = errors.New("received no result or unknown exception for Call")
+			err = errors.New("BazClient received no result or unknown exception for Call")
 		}
 	}
 	if err != nil {
@@ -155,7 +142,7 @@ func (c *BazClient) Compare(
 		case result.AuthErr != nil:
 			err = result.AuthErr
 		default:
-			err = errors.New("received no result or unknown exception for Compare")
+			err = errors.New("BazClient received no result or unknown exception for Compare")
 		}
 	}
 	if err != nil {
@@ -182,7 +169,7 @@ func (c *BazClient) Ping(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("received no result or unknown exception for Ping")
+			err = errors.New("BazClient received no result or unknown exception for Ping")
 		}
 	}
 	if err != nil {
@@ -213,7 +200,7 @@ func (c *BazClient) SillyNoop(
 		case result.ServerErr != nil:
 			err = result.ServerErr
 		default:
-			err = errors.New("received no result or unknown exception for SimpleService")
+			err = errors.New("BazClient received no result or unknown exception for SimpleService")
 		}
 	}
 	if err != nil {
