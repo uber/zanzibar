@@ -79,8 +79,8 @@ func (v *SimpleService_Call_Args) EnvelopeType() wire.EnvelopeType {
 var SimpleService_Call_Helper = struct {
 	Args           func(arg *BazRequest) *SimpleService_Call_Args
 	IsException    func(error) bool
-	WrapResponse   func(*BazResponse, error) (*SimpleService_Call_Result, error)
-	UnwrapResponse func(*SimpleService_Call_Result) (*BazResponse, error)
+	WrapResponse   func(error) (*SimpleService_Call_Result, error)
+	UnwrapResponse func(*SimpleService_Call_Result) error
 }{}
 
 func init() {
@@ -89,28 +89,36 @@ func init() {
 	}
 	SimpleService_Call_Helper.IsException = func(err error) bool {
 		switch err.(type) {
+		case *AuthErr:
+			return true
 		default:
 			return false
 		}
 	}
-	SimpleService_Call_Helper.WrapResponse = func(success *BazResponse, err error) (*SimpleService_Call_Result, error) {
+	SimpleService_Call_Helper.WrapResponse = func(err error) (*SimpleService_Call_Result, error) {
 		if err == nil {
-			return &SimpleService_Call_Result{Success: success}, nil
+			return &SimpleService_Call_Result{}, nil
+		}
+		switch e := err.(type) {
+		case *AuthErr:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_Call_Result.AuthErr")
+			}
+			return &SimpleService_Call_Result{AuthErr: e}, nil
 		}
 		return nil, err
 	}
-	SimpleService_Call_Helper.UnwrapResponse = func(result *SimpleService_Call_Result) (success *BazResponse, err error) {
-		if result.Success != nil {
-			success = result.Success
+	SimpleService_Call_Helper.UnwrapResponse = func(result *SimpleService_Call_Result) (err error) {
+		if result.AuthErr != nil {
+			err = result.AuthErr
 			return
 		}
-		err = errors.New("expected a non-void result")
 		return
 	}
 }
 
 type SimpleService_Call_Result struct {
-	Success *BazResponse `json:"success,omitempty"`
+	AuthErr *AuthErr `json:"authErr,omitempty"`
 }
 
 func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
@@ -120,22 +128,22 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 		w      wire.Value
 		err    error
 	)
-	if v.Success != nil {
-		w, err = v.Success.ToWire()
+	if v.AuthErr != nil {
+		w, err = v.AuthErr.ToWire()
 		if err != nil {
 			return w, err
 		}
-		fields[i] = wire.Field{ID: 0, Value: w}
+		fields[i] = wire.Field{ID: 1, Value: w}
 		i++
 	}
-	if i != 1 {
-		return wire.Value{}, fmt.Errorf("SimpleService_Call_Result should have exactly one field: got %v fields", i)
+	if i > 1 {
+		return wire.Value{}, fmt.Errorf("SimpleService_Call_Result should have at most one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazResponse_Read(w wire.Value) (*BazResponse, error) {
-	var v BazResponse
+func _AuthErr_Read(w wire.Value) (*AuthErr, error) {
+	var v AuthErr
 	err := v.FromWire(w)
 	return &v, err
 }
@@ -144,9 +152,9 @@ func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
-		case 0:
+		case 1:
 			if field.Value.Type() == wire.TStruct {
-				v.Success, err = _BazResponse_Read(field.Value)
+				v.AuthErr, err = _AuthErr_Read(field.Value)
 				if err != nil {
 					return err
 				}
@@ -154,11 +162,11 @@ func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
 		}
 	}
 	count := 0
-	if v.Success != nil {
+	if v.AuthErr != nil {
 		count++
 	}
-	if count != 1 {
-		return fmt.Errorf("SimpleService_Call_Result should have exactly one field: got %v fields", count)
+	if count > 1 {
+		return fmt.Errorf("SimpleService_Call_Result should have at most one field: got %v fields", count)
 	}
 	return nil
 }
@@ -166,8 +174,8 @@ func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
 func (v *SimpleService_Call_Result) String() string {
 	var fields [1]string
 	i := 0
-	if v.Success != nil {
-		fields[i] = fmt.Sprintf("Success: %v", v.Success)
+	if v.AuthErr != nil {
+		fields[i] = fmt.Sprintf("AuthErr: %v", v.AuthErr)
 		i++
 	}
 	return fmt.Sprintf("SimpleService_Call_Result{%v}", strings.Join(fields[:i], ", "))

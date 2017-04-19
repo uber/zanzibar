@@ -39,3 +39,9 @@ func getDirName() string {
 type CallHTTPRequest struct {
 	Arg *endpointsBazBaz.BazRequest `json:"arg"`
 }
+
+// CompareHTTPRequest is the http body type for endpoint Compare.
+type CompareHTTPRequest struct {
+	Arg1 *endpointsBazBaz.BazRequest
+	Arg2 *endpointsBazBaz.BazRequest
+}

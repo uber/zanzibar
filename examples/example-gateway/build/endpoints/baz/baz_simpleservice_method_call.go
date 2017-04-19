@@ -34,7 +34,7 @@ import (
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
-// CallHandler is the handler for "/baz/call-path"
+// CallHandler is the handler for "/baz/call"
 type CallHandler struct {
 	Clients *clients.Clients
 }
@@ -48,7 +48,7 @@ func NewCallEndpoint(
 	}
 }
 
-// HandleRequest handles "/baz/call-path".
+// HandleRequest handles "/baz/call".
 func (handler *CallHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,

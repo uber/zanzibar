@@ -44,20 +44,29 @@ type TChanBaz interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
 	) (
+		map[string]string, error,
+	)
+
+	Compare(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_Compare_Args,
+	) (
 		*clientsBazBaz.BazResponse,
 		map[string]string,
 		error,
 	)
 
-	Simple(
+	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (
+		*clientsBazBaz.BazResponse,
 		map[string]string,
 		error,
 	)
 
-	SimpleFuture(
+	SillyNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (
@@ -107,7 +116,7 @@ func (c *BazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Call_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error) {
+) (map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Call_Result
 
 	success, respHeaders, err := c.client.Call(
@@ -116,37 +125,10 @@ func (c *BazClient) Call(
 
 	if err == nil && !success {
 		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
 		default:
 			err = errors.New("received no result or unknown exception for Call")
-		}
-	}
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resp, err := clientsBazBaz.SimpleService_Call_Helper.UnwrapResponse(&result)
-
-	return resp, respHeaders, err
-}
-
-// Simple ...
-func (c *BazClient) Simple(
-	ctx context.Context,
-	reqHeaders map[string]string,
-) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_Simple_Result
-
-	args := &clientsBazBaz.SimpleService_Simple_Args{}
-	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "Simple", reqHeaders, args, &result,
-	)
-
-	if err == nil && !success {
-		switch {
-		case result.SimpleErr != nil:
-			err = result.SimpleErr
-		default:
-			err = errors.New("received no result or unknown exception for SimpleService")
 		}
 	}
 	if err != nil {
@@ -156,24 +138,80 @@ func (c *BazClient) Simple(
 	return respHeaders, err
 }
 
-// SimpleFuture ...
-func (c *BazClient) SimpleFuture(
+// Compare ...
+func (c *BazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_SimpleFuture_Result
+	args *clientsBazBaz.SimpleService_Compare_Args,
+) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_Compare_Result
 
-	args := &clientsBazBaz.SimpleService_SimpleFuture_Args{}
 	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "SimpleFuture", reqHeaders, args, &result,
+		ctx, c.thriftService, "Compare", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {
 		switch {
-		case result.SimpleErr != nil:
-			err = result.SimpleErr
-		case result.NewErr != nil:
-			err = result.NewErr
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		default:
+			err = errors.New("received no result or unknown exception for Compare")
+		}
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+
+	return resp, respHeaders, err
+}
+
+// Ping ...
+func (c *BazClient) Ping(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_Ping_Result
+
+	args := &clientsBazBaz.SimpleService_Ping_Args{}
+	success, respHeaders, err := c.client.Call(
+		ctx, c.thriftService, "Ping", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("received no result or unknown exception for Ping")
+		}
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
+
+	return resp, respHeaders, err
+}
+
+// SillyNoop ...
+func (c *BazClient) SillyNoop(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (map[string]string, error) {
+	var result clientsBazBaz.SimpleService_SillyNoop_Result
+
+	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
+	success, respHeaders, err := c.client.Call(
+		ctx, c.thriftService, "SillyNoop", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		case result.ServerErr != nil:
+			err = result.ServerErr
 		default:
 			err = errors.New("received no result or unknown exception for SimpleService")
 		}

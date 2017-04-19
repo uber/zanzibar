@@ -35,23 +35,29 @@ import (
 
 // SimpleServiceHandler is the handler struct for TChannel service SimpleService.
 type SimpleServiceHandler struct {
-	CallFunc         SimpleServiceCallFunc
-	SimpleFunc       SimpleServiceSimpleFunc
-	SimpleFutureFunc SimpleServiceSimpleFutureFunc
+	CallFunc      SimpleServiceCallFunc
+	CompareFunc   SimpleServiceCompareFunc
+	PingFunc      SimpleServicePingFunc
+	SillyNoopFunc SimpleServiceSillyNoopFunc
 }
 
 // SimpleServiceCallFunc ...
 type SimpleServiceCallFunc func(
 	context.Context, map[string]string, *clientsBazBaz.SimpleService_Call_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error)
-
-// SimpleServiceSimpleFunc ...
-type SimpleServiceSimpleFunc func(
-	context.Context, map[string]string,
 ) (map[string]string, error)
 
-// SimpleServiceSimpleFutureFunc ...
-type SimpleServiceSimpleFutureFunc func(
+// SimpleServiceCompareFunc ...
+type SimpleServiceCompareFunc func(
+	context.Context, map[string]string, *clientsBazBaz.SimpleService_Compare_Args,
+) (*clientsBazBaz.BazResponse, map[string]string, error)
+
+// SimpleServicePingFunc ...
+type SimpleServicePingFunc func(
+	context.Context, map[string]string,
+) (*clientsBazBaz.BazResponse, map[string]string, error)
+
+// SimpleServiceSillyNoopFunc ...
+type SimpleServiceSillyNoopFunc func(
 	context.Context, map[string]string,
 ) (map[string]string, error)
 
@@ -62,46 +68,63 @@ func NewServerWithSimpleServiceCall(arg SimpleServiceCallFunc) zanzibar.TChanSer
 	})
 }
 
-// NewServerWithSimpleServiceSimple creates a TChanServer with given handler function registered.
-func NewServerWithSimpleServiceSimple(arg SimpleServiceSimpleFunc) zanzibar.TChanServer {
+// NewServerWithSimpleServiceCompare creates a TChanServer with given handler function registered.
+func NewServerWithSimpleServiceCompare(arg SimpleServiceCompareFunc) zanzibar.TChanServer {
 	return NewSimpleServiceServer(&SimpleServiceHandler{
-		SimpleFunc: arg,
+		CompareFunc: arg,
 	})
 }
 
-// NewServerWithSimpleServiceSimpleFuture creates a TChanServer with given handler function registered.
-func NewServerWithSimpleServiceSimpleFuture(arg SimpleServiceSimpleFutureFunc) zanzibar.TChanServer {
+// NewServerWithSimpleServicePing creates a TChanServer with given handler function registered.
+func NewServerWithSimpleServicePing(arg SimpleServicePingFunc) zanzibar.TChanServer {
 	return NewSimpleServiceServer(&SimpleServiceHandler{
-		SimpleFutureFunc: arg,
+		PingFunc: arg,
+	})
+}
+
+// NewServerWithSimpleServiceSillyNoop creates a TChanServer with given handler function registered.
+func NewServerWithSimpleServiceSillyNoop(arg SimpleServiceSillyNoopFunc) zanzibar.TChanServer {
+	return NewSimpleServiceServer(&SimpleServiceHandler{
+		SillyNoopFunc: arg,
 	})
 }
 
 // Call ...
 func (h *SimpleServiceHandler) Call(
 	ctx context.Context, reqHeaders map[string]string, args *clientsBazBaz.SimpleService_Call_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error) {
+) (map[string]string, error) {
 	if h.CallFunc == nil {
-		return nil, nil, errors.New("CallFunc is not defined")
+		return nil, errors.New("CallFunc is not defined")
 	}
 	return h.CallFunc(ctx, reqHeaders, args)
 }
 
-// Simple ...
-func (h *SimpleServiceHandler) Simple(
-	ctx context.Context, reqHeaders map[string]string,
-) (map[string]string, error) {
-	if h.SimpleFunc == nil {
-		return nil, errors.New("SimpleFunc is not defined")
+// Compare ...
+func (h *SimpleServiceHandler) Compare(
+	ctx context.Context, reqHeaders map[string]string, args *clientsBazBaz.SimpleService_Compare_Args,
+) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	if h.CompareFunc == nil {
+		return nil, nil, errors.New("CompareFunc is not defined")
 	}
-	return h.SimpleFunc(ctx, reqHeaders)
+	return h.CompareFunc(ctx, reqHeaders, args)
 }
 
-// SimpleFuture ...
-func (h *SimpleServiceHandler) SimpleFuture(
+// Ping ...
+func (h *SimpleServiceHandler) Ping(
+	ctx context.Context, reqHeaders map[string]string,
+) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	if h.PingFunc == nil {
+		return nil, nil, errors.New("PingFunc is not defined")
+	}
+	return h.PingFunc(ctx, reqHeaders)
+}
+
+// SillyNoop ...
+func (h *SimpleServiceHandler) SillyNoop(
 	ctx context.Context, reqHeaders map[string]string,
 ) (map[string]string, error) {
-	if h.SimpleFutureFunc == nil {
-		return nil, errors.New("SimpleFutureFunc is not defined")
+	if h.SillyNoopFunc == nil {
+		return nil, errors.New("SillyNoopFunc is not defined")
 	}
-	return h.SimpleFutureFunc(ctx, reqHeaders)
+	return h.SillyNoopFunc(ctx, reqHeaders)
 }

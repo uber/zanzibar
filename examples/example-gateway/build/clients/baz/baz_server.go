@@ -56,8 +56,9 @@ func (s *SimpleServiceServer) Service() string {
 func (s *SimpleServiceServer) Methods() []string {
 	return []string{
 		"Call",
-		"Simple",
-		"SimpleFuture",
+		"Compare",
+		"Ping",
+		"SillyNoop",
 	}
 }
 
@@ -71,10 +72,12 @@ func (s *SimpleServiceServer) Handle(
 	switch methodName {
 	case "Call":
 		return s.handleCall(ctx, reqHeaders, wireValue)
-	case "Simple":
-		return s.handleSimple(ctx, reqHeaders, wireValue)
-	case "SimpleFuture":
-		return s.handleSimpleFuture(ctx, reqHeaders, wireValue)
+	case "Compare":
+		return s.handleCompare(ctx, reqHeaders, wireValue)
+	case "Ping":
+		return s.handlePing(ctx, reqHeaders, wireValue)
+	case "SillyNoop":
+		return s.handleSillyNoop(ctx, reqHeaders, wireValue)
 	default:
 		return false, nil, nil, fmt.Errorf(
 			"method %v not found in service %v", methodName, s.Service(),
@@ -93,7 +96,69 @@ func (s *SimpleServiceServer) handleCall(
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	r, respHeaders, err := s.handler.Call(ctx, reqHeaders, &req)
+	respHeaders, err := s.handler.Call(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
+func (s *SimpleServiceServer) handleCompare(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_Compare_Args
+	var res clientsBazBaz.SimpleService_Compare_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := s.handler.Compare(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
+func (s *SimpleServiceServer) handlePing(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_Ping_Args
+	var res clientsBazBaz.SimpleService_Ping_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := s.handler.Ping(ctx, reqHeaders)
 
 	if err != nil {
 		return false, nil, nil, err
@@ -103,65 +168,35 @@ func (s *SimpleServiceServer) handleCall(
 	return err == nil, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handleSimple(
+func (s *SimpleServiceServer) handleSillyNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_Simple_Args
-	var res clientsBazBaz.SimpleService_Simple_Result
+	var req clientsBazBaz.SimpleService_SillyNoop_Args
+	var res clientsBazBaz.SimpleService_SillyNoop_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	respHeaders, err := s.handler.Simple(ctx, reqHeaders)
+	respHeaders, err := s.handler.SillyNoop(ctx, reqHeaders)
 
 	if err != nil {
 		switch v := err.(type) {
-		case *clientsBazBaz.SimpleErr:
+		case *clientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for SimpleErr returned non-nil error type *SimpleErr but nil value",
+					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
 				)
 			}
-			res.SimpleErr = v
-		default:
-			return false, nil, nil, err
-		}
-	}
-
-	return err == nil, &res, respHeaders, nil
-}
-
-func (s *SimpleServiceServer) handleSimpleFuture(
-	ctx context.Context,
-	reqHeaders map[string]string,
-	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SimpleService_SimpleFuture_Args
-	var res clientsBazBaz.SimpleService_SimpleFuture_Result
-
-	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
-	}
-	respHeaders, err := s.handler.SimpleFuture(ctx, reqHeaders)
-
-	if err != nil {
-		switch v := err.(type) {
-		case *clientsBazBaz.SimpleErr:
+			res.AuthErr = v
+		case *clientsBazBaz.ServerErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for SimpleErr returned non-nil error type *SimpleErr but nil value",
+					"Handler for ServerErr returned non-nil error type *ServerErr but nil value",
 				)
 			}
-			res.SimpleErr = v
-		case *clientsBazBaz.NewErr:
-			if v == nil {
-				return false, nil, nil, errors.New(
-					"Handler for NewErr returned non-nil error type *NewErr but nil value",
-				)
-			}
-			res.NewErr = v
+			res.ServerErr = v
 		default:
 			return false, nil, nil, err
 		}

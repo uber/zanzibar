@@ -31,22 +31,22 @@ import (
 	"go.uber.org/zap"
 )
 
-// SimpleHandler is the handler for "/baz/simple-path"
-type SimpleHandler struct {
+// SillyNoopHandler is the handler for "/baz/silly-noop"
+type SillyNoopHandler struct {
 	Clients *clients.Clients
 }
 
-// NewSimpleEndpoint creates a handler
-func NewSimpleEndpoint(
+// NewSillyNoopEndpoint creates a handler
+func NewSillyNoopEndpoint(
 	gateway *zanzibar.Gateway,
-) *SimpleHandler {
-	return &SimpleHandler{
+) *SillyNoopHandler {
+	return &SillyNoopHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/baz/simple-path".
-func (handler *SimpleHandler) HandleRequest(
+// HandleRequest handles "/baz/silly-noop".
+func (handler *SillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -70,15 +70,15 @@ func (handler *SimpleHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// SimpleEndpoint calls thrift client Baz.Simple
-type SimpleEndpoint struct {
+// SillyNoopEndpoint calls thrift client Baz.SillyNoop
+type SillyNoopEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w SimpleEndpoint) Handle(
+func (w SillyNoopEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (zanzibar.Header, error) {
