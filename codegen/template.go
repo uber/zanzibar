@@ -85,9 +85,11 @@ type TestStub struct {
 	EndpointRequest        map[string]interface{} // Json blob
 	EndpointRequestString  string
 	EndpointReqHeaders     map[string]string      // Json blob
+	EndpointReqHeaderKeys  []string               // To keep in canonical order
 	EndpointResponse       map[string]interface{} // Json blob
 	EndpointResponseString string
 	EndpointResHeaders     map[string]string // Json blob
+	EndpointResHeaderKeys  []string          // To keep in canonical order
 
 	ClientStubs []ClientStub
 }
@@ -99,9 +101,11 @@ type ClientStub struct {
 	ClientRequest        map[string]interface{} // Json blob
 	ClientRequestString  string
 	ClientReqHeaders     map[string]string      // Json blob
+	ClientReqHeaderKeys  []string               // To keep in canonical order
 	ClientResponse       map[string]interface{} // Json blob
 	ClientResponseString string
 	ClientResHeaders     map[string]string // Json blob
+	ClientResHeaderKeys  []string          // To keep in canonical order
 }
 
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
@@ -372,7 +376,48 @@ func (t *Template) GenerateEndpointTestFile(
 				return nil, errors.Wrapf(err,
 					"Error parsing JSON in test config.")
 			}
+			// Build canonicalized key list to keep templates in order
+			// when comparing to golden files.
+			clientStub.ClientReqHeaderKeys = make(
+				[]string,
+				len(clientStub.ClientReqHeaders))
+			i := 0
+			for k := range clientStub.ClientReqHeaders {
+				clientStub.ClientReqHeaderKeys[i] = k
+				i++
+			}
+			sort.Strings(clientStub.ClientReqHeaderKeys)
+			clientStub.ClientResHeaderKeys = make(
+				[]string,
+				len(clientStub.ClientResHeaders))
+			i = 0
+			for k := range clientStub.ClientResHeaders {
+				clientStub.ClientResHeaderKeys[i] = k
+				i++
+			}
+			sort.Strings(clientStub.ClientResHeaderKeys)
+
 		}
+		// Build canonicalized key list to keep templates in order
+		// when comparing to golden files.
+		testStub.EndpointReqHeaderKeys = make(
+			[]string,
+			len(testStub.EndpointReqHeaders))
+		i := 0
+		for k := range testStub.EndpointReqHeaders {
+			testStub.EndpointReqHeaderKeys[i] = k
+			i++
+		}
+		sort.Strings(testStub.EndpointReqHeaderKeys)
+		testStub.EndpointResHeaderKeys = make(
+			[]string,
+			len(testStub.EndpointResHeaders))
+		i = 0
+		for k := range testStub.EndpointResHeaders {
+			testStub.EndpointResHeaderKeys[i] = k
+			i++
+		}
+		sort.Strings(testStub.EndpointResHeaderKeys)
 	}
 
 	meta := &EndpointTestMeta{
