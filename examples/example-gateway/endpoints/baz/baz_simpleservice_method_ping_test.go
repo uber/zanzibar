@@ -25,7 +25,7 @@ package baz
 import (
 	"bytes"
 	"context"
-	"errors"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -36,20 +36,18 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-var testCallCounter int
+var testPingCounter int
 
-func call(
-	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
-) (map[string]string, error) {
-	testCallCounter++
-	r := args.Arg
-	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
-		return nil, nil
+func ping(ctx context.Context, reqHeaders map[string]string) (*baz.BazResponse, map[string]string, error) {
+	testPingCounter++
+	res := baz.BazResponse{
+		Message: "pong",
 	}
-	return nil, errors.New("Wrong Args")
+	return &res, nil, nil
+
 }
 
-func TestCallSuccessfulRequestOKResponse(t *testing.T) {
+func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
@@ -63,21 +61,28 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceCall(call))
+	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServicePing(ping))
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
-		"POST",
-		"/baz/call",
+		"GET",
+		"/baz/ping",
 		headers,
-		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
+		bytes.NewReader([]byte(`{}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
 
-	assert.Equal(t, 1, testCallCounter)
-	assert.Equal(t, "204 No Content", res.Status)
+	defer func() { _ = res.Body.Close() }()
+	data, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "failed to read response body") {
+		return
+	}
+
+	assert.Equal(t, 1, testPingCounter)
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, `{"message":"pong"}`, string(data))
 }

@@ -34,15 +34,15 @@ import (
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 )
 
-var testSimpleFutureCounter int
+var testSillyNoopCounter int
 
-func simpleFuture(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
-	testSimpleFutureCounter++
+func sillyNoop(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+	testSillyNoopCounter++
 	return nil, nil
 
 }
 
-func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
+func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
@@ -56,15 +56,13 @@ func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	testSimpleFutureCounter = 0
-
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceSimpleFuture(simpleFuture))
+	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceSillyNoop(sillyNoop))
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/baz/simple-future-path",
+		"/baz/silly-noop",
 		headers,
 		bytes.NewReader([]byte(`{}`)),
 	)
@@ -73,6 +71,6 @@ func TestSimpleFutureSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testSimpleFutureCounter)
+	assert.Equal(t, 1, testSillyNoopCounter)
 	assert.Equal(t, "204 No Content", res.Status)
 }
