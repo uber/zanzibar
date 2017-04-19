@@ -59,7 +59,7 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 		)
 	}
 
-	if err := system.RegisterClassType("client", "tchannel", &TCahnnelClientGenerator{
+	if err := system.RegisterClassType("client", "tchannel", &TChannelClientGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
@@ -177,15 +177,15 @@ func (generator *HTTPClientGenerator) Generate(
  * TChannel Client Generator
  */
 
-// TCahnnelClientGenerator generates an instance of a zanzibar TChannel client
-type TCahnnelClientGenerator struct {
+// TChannelClientGenerator generates an instance of a zanzibar TChannel client
+type TChannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 }
 
 // Generate returns the TChannel client generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
-func (generator *TCahnnelClientGenerator) Generate(
+func (generator *TChannelClientGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
