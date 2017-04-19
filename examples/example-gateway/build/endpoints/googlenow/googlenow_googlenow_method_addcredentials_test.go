@@ -31,14 +31,9 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 
 		assert.Equal(
 			t,
-			"test-token",
-			r.Header.Get("X-Token"))
-		assert.Equal(
-			t,
 			"test-uuid",
 			r.Header.Get("X-Uuid"))
 
-		w.Header().Set("X-Token", "test-token")
 		w.Header().Set("X-Uuid", "test-uuid")
 
 		w.WriteHeader(202)
@@ -69,10 +64,6 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, 202, res.StatusCode)
-	assert.Equal(
-		t,
-		"test-token",
-		res.Header.Get("X-Token"))
 	assert.Equal(
 		t,
 		"test-uuid",
