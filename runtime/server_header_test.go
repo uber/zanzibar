@@ -28,7 +28,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["foo"] = []string{"headOne"}
 	zh["bar"] = []string{"otherHeader"}
 
@@ -38,7 +38,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetMissingKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 
 	v, ok := zh.Get("foo")
 	assert.Equal(t, false, ok)
@@ -46,7 +46,7 @@ func TestGetMissingKey(t *testing.T) {
 }
 
 func TestGetMultivalueKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["foo"] = []string{"headOne", "headTwo"}
 	zh["bar"] = []string{"otherHeader"}
 
@@ -56,7 +56,7 @@ func TestGetMultivalueKey(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["bar"] = []string{"otherHeader"}
 
 	zh.Add("foo", "headOne")
@@ -64,7 +64,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestAddMultivalueKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["foo"] = []string{"headOne"}
 	zh["bar"] = []string{"otherHeader"}
 
@@ -74,7 +74,7 @@ func TestAddMultivalueKey(t *testing.T) {
 }
 
 func TestSetOverwriteOldKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["foo"] = []string{"headOne"}
 	zh["bar"] = []string{"otherHeader"}
 
@@ -84,7 +84,7 @@ func TestSetOverwriteOldKey(t *testing.T) {
 }
 
 func TestSetNewKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["bar"] = []string{"otherHeader"}
 
 	zh.Set("foo", "headOne")
@@ -92,7 +92,7 @@ func TestSetNewKey(t *testing.T) {
 }
 
 func TestSetOverwriteMultiKey(t *testing.T) {
-	zh := zanzibar.ServerHeader{}
+	zh := zanzibar.ServerHTTPHeader{}
 	zh["foo"] = []string{"headOne", "headTwo"}
 	zh["bar"] = []string{"otherHeader"}
 

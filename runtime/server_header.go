@@ -20,13 +20,27 @@
 
 package zanzibar
 
-// ServerHeader struct manages request
-type ServerHeader map[string][]string
+import (
+	"net/http"
+)
+
+// ServerHeaderInterface defines methods on ServerHeaders
+type ServerHeaderInterface interface {
+	Get(key string) (string, bool)
+	Add(key string, value string)
+	Set(key string, value string)
+}
+
+// ServerHTTPHeader wrapper to implement ServerHeaderInterface
+// on http.Header
+type ServerHTTPHeader http.Header
+
+// TODO: Add a TChannel Implementation
 
 // Get retrieves the first string stored on a given header. Bool
 // return value is used to distinguish between the presence of a
 // header with golang's zerovalue string and the absence of the string.
-func (zh ServerHeader) Get(
+func (zh ServerHTTPHeader) Get(
 	key string,
 ) (string, bool) {
 	// TODO: Canonicalize strings before lookup.
@@ -39,7 +53,7 @@ func (zh ServerHeader) Get(
 }
 
 // Add appends a value for a given header.
-func (zh ServerHeader) Add(
+func (zh ServerHTTPHeader) Add(
 	key string, value string,
 ) {
 	// TODO: Canonicalize strings before inserting
@@ -48,7 +62,7 @@ func (zh ServerHeader) Add(
 }
 
 // Set sets a value for a given header, overwriting all previous values.
-func (zh ServerHeader) Set(
+func (zh ServerHTTPHeader) Set(
 	key string, value string,
 ) {
 	// TODO: Canonicalize strings before inserting
