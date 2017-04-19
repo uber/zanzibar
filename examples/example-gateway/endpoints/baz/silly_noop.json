@@ -1,0 +1,14 @@
+{
+	"endpointType": "http",
+	"endpointId": "baz",
+	"handleId": "sillyNoop",
+	"thriftFile": "endpoints/baz/baz.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::SillyNoop",
+    "workflowType": "tchannelClient",
+	"clientName": "Baz",
+	"clientMethod": "SillyNoop",
+    "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz",
+	"testFixtures": [],
+	"middlewares": []
+}

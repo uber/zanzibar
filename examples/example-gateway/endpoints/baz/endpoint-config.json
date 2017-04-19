@@ -1,7 +1,8 @@
 {
     "endpoints": [
         "call.json",
-        "simple.json",
-        "simple_future.json"
+        "compare.json",
+        "ping.json",
+        "silly_noop.json"
     ]
 }
