@@ -82,9 +82,9 @@ func (w TooManyArgsEndpoint) Handle(
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
-		clientHeaders[v] = headers.Get(k)
-	}
+
+	clientHeaders["X-Token"] = headers.Get("X-Token")
+	clientHeaders["X-Uuid"] = headers.Get("X-Uuid")
 
 	clientRespBody, respHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,
@@ -99,9 +99,9 @@ func (w TooManyArgsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
-		endRespHead[v] = respHeaders[k]
-	}
+
+	endRespHead["X-Token"] = respHeaders["X-Token"]
+	endRespHead["X-Uuid"] = respHeaders["X-Uuid"]
 
 	response := convertTooManyArgsClientResponse(clientRespBody)
 	return response, endRespHead, nil

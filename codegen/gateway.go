@@ -28,6 +28,8 @@ import (
 	"runtime"
 	"strings"
 
+	"sort"
+
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -318,9 +320,15 @@ type EndpointSpec struct {
 	Middlewares []MiddlewareSpec
 
 	// ReqHeaderMap, maps headers from server to client.
-	ReqHeaderMap map[string]string
+	// Keeps keys in a sorted array so that goldenfiles have
+	// deterministic orderings
+	ReqHeaderMap     map[string]string
+	ReqHeaderMapKeys []string
 	// ResHeaderMap, maps headers from client to server.
-	ResHeaderMap map[string]string
+	// Keeps keys in a sorted array so that goldenfiles have
+	// deterministic orderings
+	ResHeaderMap     map[string]string
+	ResHeaderMapKeys []string
 
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
@@ -511,6 +519,14 @@ func NewEndpointSpec(
 			)
 		}
 	}
+	reqHeaderMapKeys := make([]string, len(reqHeaderMap))
+	i := 0
+	for k := range reqHeaderMap {
+		reqHeaderMapKeys[i] = k
+		i++
+	}
+	sort.Strings(reqHeaderMapKeys)
+
 	resHeaderMap := make(map[string]string)
 	m2, ok := endpointConfigObj["resHeaderMap"]
 	if !ok {
@@ -533,6 +549,13 @@ func NewEndpointSpec(
 			)
 		}
 	}
+	resHeaderMapKeys := make([]string, len(resHeaderMap))
+	i = 0
+	for k := range resHeaderMap {
+		resHeaderMapKeys[i] = k
+		i++
+	}
+	sort.Strings(resHeaderMapKeys)
 
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
@@ -548,7 +571,9 @@ func NewEndpointSpec(
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
 		Middlewares:        middlewares,
 		ReqHeaderMap:       reqHeaderMap,
+		ReqHeaderMapKeys:   reqHeaderMapKeys,
 		ResHeaderMap:       resHeaderMap,
+		ResHeaderMapKeys:   resHeaderMapKeys,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,

@@ -71,9 +71,9 @@ func (w CheckCredentialsEndpoint) Handle(
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
-		clientHeaders[v] = headers.Get(k)
-	}
+
+	clientHeaders["X-Token"] = headers.Get("X-Token")
+	clientHeaders["X-Uuid"] = headers.Get("X-Uuid")
 
 	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 	if err != nil {
@@ -86,9 +86,9 @@ func (w CheckCredentialsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
-		endRespHead[v] = respHeaders[k]
-	}
+
+	endRespHead["X-Token"] = respHeaders["X-Token"]
+	endRespHead["X-Uuid"] = respHeaders["X-Uuid"]
 
 	return endRespHead, nil
 }

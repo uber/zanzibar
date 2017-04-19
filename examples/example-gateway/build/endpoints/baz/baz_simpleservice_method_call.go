@@ -76,9 +76,6 @@ func (w CallEndpoint) Handle(
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
-		clientHeaders[v] = headers.Get(k)
-	}
 
 	clientRespBody, _, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,

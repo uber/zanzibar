@@ -79,9 +79,9 @@ func (w AddCredentialsEndpoint) Handle(
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{"X-Uuid": "X-Uuid", "X-Token": "X-Token"} {
-		clientHeaders[v] = headers.Get(k)
-	}
+
+	clientHeaders["X-Token"] = headers.Get("X-Token")
+	clientHeaders["X-Uuid"] = headers.Get("X-Uuid")
 
 	respHeaders, err := w.Clients.GoogleNow.AddCredentials(
 		ctx, clientHeaders, clientRequest,
@@ -96,9 +96,9 @@ func (w AddCredentialsEndpoint) Handle(
 
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
-	for k, v := range map[string]string{"X-Token": "X-Token", "X-Uuid": "X-Uuid"} {
-		endRespHead[v] = respHeaders[k]
-	}
+
+	endRespHead["X-Token"] = respHeaders["X-Token"]
+	endRespHead["X-Uuid"] = respHeaders["X-Uuid"]
 
 	return endRespHead, nil
 }

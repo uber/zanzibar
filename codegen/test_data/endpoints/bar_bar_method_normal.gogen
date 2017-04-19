@@ -77,9 +77,6 @@ func (w NormalEndpoint) Handle(
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
-		clientHeaders[v] = headers.Get(k)
-	}
 
 	clientRespBody, _, err := w.Clients.Bar.Normal(
 		ctx, clientHeaders, clientRequest,

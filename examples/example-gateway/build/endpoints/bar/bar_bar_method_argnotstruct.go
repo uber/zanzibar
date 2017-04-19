@@ -75,9 +75,6 @@ func (w ArgNotStructEndpoint) Handle(
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
-		clientHeaders[v] = headers.Get(k)
-	}
 
 	_, err := w.Clients.Bar.ArgNotStruct(
 		ctx, clientHeaders, clientRequest,

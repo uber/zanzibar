@@ -67,9 +67,6 @@ func (w SimpleEndpoint) Handle(
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
-		clientHeaders[v] = headers.Get(k)
-	}
 
 	_, err := w.Clients.Baz.Simple(ctx, clientHeaders)
 

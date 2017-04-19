@@ -65,7 +65,9 @@ type EndpointMeta struct {
 	ClientName         string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
+	ReqHeaderMapKeys   []string
 	ResHeaderMap       map[string]string
+	ResHeaderMapKeys   []string
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -281,7 +283,9 @@ func (t *Template) GenerateEndpointFile(
 		IncludedPackages:   includedPackages,
 		Method:             method,
 		ReqHeaderMap:       e.ReqHeaderMap,
+		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
 		ResHeaderMap:       e.ResHeaderMap,
+		ResHeaderMapKeys:   e.ResHeaderMapKeys,
 		ClientName:         e.ClientName,
 		WorkflowName:       workflowName,
 	}

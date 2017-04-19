@@ -28,7 +28,9 @@ import (
 
 {{ $workflow := .WorkflowName -}}
 {{ $reqHeaderMap := .ReqHeaderMap -}}
+{{ $reqHeaderMapKeys := .ReqHeaderMapKeys -}}
 {{ $resHeaderMap := .ResHeaderMap -}}
+{{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
 {{ $clientName := title .ClientName -}}
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{with .Method -}}
@@ -151,10 +153,9 @@ func (w {{$workflow}}) Handle(
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
 	clientHeaders := map[string]string{}
-	for k, v := range {{ $reqHeaderMap | printf "%#v" }} {
-		clientHeaders[v] = headers.Get(k)
-	}
-
+	{{range $i, $k := $reqHeaderMapKeys}}
+	clientHeaders["{{index $reqHeaderMap $k}}"] = headers.Get("{{$k}}")
+	{{- end}}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
@@ -203,9 +204,9 @@ func (w {{$workflow}}) Handle(
 	// Filter and map response headers from client to server response.
 	endRespHead := map[string]string{}
 	{{if (ne (len $resHeaderMap) 0) -}}
-	for k, v := range {{$resHeaderMap | printf "%#v" }} {
-		endRespHead[v] = respHeaders[k]
-	}
+	{{range $i, $k := $resHeaderMapKeys}}
+	endRespHead["{{index $resHeaderMap $k}}"] = respHeaders["{{$k}}"]
+	{{- end}}
 	{{- end }}
 
 	{{if eq .ResponseType "" -}}

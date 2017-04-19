@@ -70,9 +70,6 @@ func (w NoRequestEndpoint) Handle(
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientHeaders := map[string]string{}
-	for k, v := range map[string]string{} {
-		clientHeaders[v] = headers.Get(k)
-	}
 
 	clientRespBody, _, err := w.Clients.Bar.NoRequest(
 		ctx, clientHeaders,
