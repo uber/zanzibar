@@ -86,7 +86,7 @@ If you want to update a dependency:
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
 
-## Update golden file
+## Update golden files
 
 ```
 go test ./codegen/ -update
