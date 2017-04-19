@@ -10,42 +10,57 @@ struct BazResponse {
   1: required string message
 }
 
-exception SimpleErr {
+exception AuthErr {
   1: required string message
 }
 
-exception NewErr {
+exception ServerErr {
   1: required string message
 }
 
 service SimpleService {
-
-  BazResponse Call(
-    1: required BazRequest arg
+  // have both request body and response body
+  BazResponse Compare(
+    1: required BazRequest arg1
+    2: required BazRequest arg2
+  ) throws (
+    1: AuthErr authErr (zanzibar.http.status = "403")
   ) (
     zanzibar.http.status = "200"
     zanzibar.http.method = "POST"
-    zanzibar.http.path = "/baz/call-path"
+    zanzibar.http.path = "/baz/compare"
+    zanzibar.handler = "baz.compare"
+  )
+
+  // no response body
+  void Call(
+    1: required BazRequest arg
+  ) throws (
+    1: AuthErr authErr (zanzibar.http.status = "403")
+  ) (
+    zanzibar.http.status = "204"
+    zanzibar.http.method = "POST"
+    zanzibar.http.path = "/baz/call"
     zanzibar.handler = "baz.call"
   )
 
-  void Simple() throws (
-    1: SimpleErr simpleErr (zanzibar.http.status = "403")
-  ) (
-    zanzibar.http.status = "204"
+  // no request body
+  BazResponse Ping() (
+    zanzibar.http.status = "200"
     zanzibar.http.method = "GET"
-    zanzibar.http.path = "/baz/simple-path"
-    zanzibar.handler = "baz.simple"
+    zanzibar.http.path = "/baz/ping"
+    zanzibar.handler = "baz.multiArgs"
   )
 
-  void SimpleFuture() throws (
-    1: SimpleErr simpleErr (zanzibar.http.status = "403")
-    2: NewErr newErr (zanzibar.http.status = "404")
+  // neither request body nor response body
+  void SillyNoop() throws (
+    1: AuthErr authErr (zanzibar.http.status = "403")
+    2: ServerErr serverErr (zanzibar.http.status = "500")
   ) (
     zanzibar.http.status = "204"
     zanzibar.http.method = "GET"
-    zanzibar.http.path = "/baz/simple-future-path"
-    zanzibar.handler = "baz.simpleFuture"
+    zanzibar.http.path = "/baz/silly-noop"
+    zanzibar.handler = "baz.sillyNoop"
   )
 }
 
