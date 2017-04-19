@@ -162,10 +162,10 @@ func (generator *HTTPClientGenerator) Generate(
 	}
 
 	// Return the client files
-	files := map[string][]byte{}
-	files[clientFilePath] = client
-	files[structFilePath] = structs
-	return files, nil
+	return map[string][]byte{
+		clientFilePath: client,
+		structFilePath: structs,
+	}, nil
 }
 
 /*
@@ -268,11 +268,11 @@ func (generator *TCahnnelClientGenerator) Generate(
 	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_handler.go"
 
 	// Return the client files
-	files := map[string][]byte{}
-	files[clientFilePath] = client
-	files[serverFilePath] = server
-	files[handlerFilePath] = handler
-	return files, nil
+	return map[string][]byte{
+		clientFilePath:  client,
+		serverFilePath:  server,
+		handlerFilePath: handler,
+	}, nil
 }
 
 func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
