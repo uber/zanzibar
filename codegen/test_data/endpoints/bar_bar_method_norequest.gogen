@@ -5,7 +5,6 @@ package bar
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -66,7 +65,7 @@ func (w NoRequestEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 
 	clientHeaders := map[string]string{}

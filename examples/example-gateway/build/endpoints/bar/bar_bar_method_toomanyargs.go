@@ -5,8 +5,8 @@ package bar
 
 import (
 	"context"
-	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -76,15 +76,33 @@ func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *TooManyArgsHTTPRequest,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
-	clientHeaders["X-Token"] = headers.Get("X-Token")
-	clientHeaders["X-Uuid"] = headers.Get("X-Uuid")
+	var ok bool
+
+	clientHeaders["X-Token"], ok = headers.Get("X-Token")
+	if !ok {
+		err := errors.New("Missing required header X-Token")
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		// TODO(sindelar): Consider returning partial headers in error case.
+		return nil, nil, err
+	}
+	clientHeaders["X-Uuid"], ok = headers.Get("X-Uuid")
+	if !ok {
+		err := errors.New("Missing required header X-Uuid")
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		// TODO(sindelar): Consider returning partial headers in error case.
+		return nil, nil, err
+	}
 
 	clientRespBody, respHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,

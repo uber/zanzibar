@@ -2,7 +2,6 @@ package contacts
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
@@ -21,7 +20,7 @@ type SaveContactsEndpoint struct {
 // Handle "/contacts/:userUUID/contacts"
 func (w SaveContactsEndpoint) Handle(
 	ctx context.Context,
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *endpointContacts.SaveContactsRequest,
 ) (*endpointContacts.SaveContactsResponse, map[string]string, error) {
 	// TODO AuthenticatedRequest()

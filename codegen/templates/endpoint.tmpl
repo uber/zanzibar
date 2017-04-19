@@ -33,6 +33,7 @@ import (
 {{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
 {{ $clientName := title .ClientName -}}
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
+{{ $responseType := .Method.ResponseType}}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -99,7 +100,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, respHeaders, nil)
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, respHeaders, response)
-	{{- end -}}
+	{{- end }}
 }
 
 {{end -}}
@@ -126,26 +127,26 @@ func (w {{$workflow}}) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
  	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 ) (map[string]string, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
  	// generation is implemented.	
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 ) (*{{.ResponseType}}, map[string]string, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
  	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *{{.RequestType}},
 ) (map[string]string, error) {
 {{else}}
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
  	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *{{.RequestType}},
 ) (*{{.ResponseType}}, map[string]string, error) {
 {{- end}}
@@ -153,8 +154,19 @@ func (w {{$workflow}}) Handle(
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
 	clientHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	var ok bool
+	{{- end}}
 	{{range $i, $k := $reqHeaderMapKeys}}
-	clientHeaders["{{index $reqHeaderMap $k}}"] = headers.Get("{{$k}}")
+	clientHeaders["{{index $reqHeaderMap $k}}"], ok = headers.Get("{{$k}}")
+	if !ok {
+		err := errors.New("Missing required header {{$k}}")
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		// TODO(sindelar): Consider returning partial headers in error case.
+		return {{if eq $responseType ""}}nil, err{{else}}nil, nil, err{{end}}
+	}
 	{{- end}}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}

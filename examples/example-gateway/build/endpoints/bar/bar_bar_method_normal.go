@@ -5,7 +5,6 @@ package bar
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -71,7 +70,7 @@ func (w NormalEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *NormalHTTPRequest,
 ) (*endpointsBarBar.BarResponse, map[string]string, error) {
 	clientRequest := convertToNormalClientRequest(r)

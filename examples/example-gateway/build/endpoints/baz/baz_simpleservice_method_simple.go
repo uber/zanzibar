@@ -5,7 +5,6 @@ package baz
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -63,7 +62,7 @@ func (w SimpleEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}

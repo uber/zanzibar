@@ -5,8 +5,8 @@ package googlenow
 
 import (
 	"context"
-	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -67,13 +67,31 @@ func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 ) (map[string]string, error) {
 
 	clientHeaders := map[string]string{}
 
-	clientHeaders["X-Token"] = headers.Get("X-Token")
-	clientHeaders["X-Uuid"] = headers.Get("X-Uuid")
+	var ok bool
+
+	clientHeaders["X-Token"], ok = headers.Get("X-Token")
+	if !ok {
+		err := errors.New("Missing required header X-Token")
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		// TODO(sindelar): Consider returning partial headers in error case.
+		return nil, err
+	}
+	clientHeaders["X-Uuid"], ok = headers.Get("X-Uuid")
+	if !ok {
+		err := errors.New("Missing required header X-Uuid")
+		w.Logger.Warn("Could not make client request",
+			zap.String("error", err.Error()),
+		)
+		// TODO(sindelar): Consider returning partial headers in error case.
+		return nil, err
+	}
 
 	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 	if err != nil {

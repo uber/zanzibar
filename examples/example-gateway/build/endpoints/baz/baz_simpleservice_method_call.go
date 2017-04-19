@@ -5,7 +5,6 @@ package baz
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -70,7 +69,7 @@ func (w CallEndpoint) Handle(
 	ctx context.Context,
 	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
 	// generation is implemented.
-	headers http.Header,
+	headers zanzibar.ServerHeaderInterface,
 	r *CallHTTPRequest,
 ) (*endpointsBazBaz.BazResponse, map[string]string, error) {
 	clientRequest := convertToCallClientRequest(r)
