@@ -302,15 +302,26 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
-			if r.FormValue("authCode") != "" {
-				if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
-					t.Fatal("can't write fake response")
+
+			bytes, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				t.Fatal("Cannot read bytes")
+			}
+
+			if string(bytes) == `{"authCode":"abcdef"}` {
+				w.WriteHeader(202)
+				_, err := w.Write([]byte(`{"statusCode":202}`))
+				if err != nil {
+					t.Fatal("cannot write response")
 				}
 				counter++
 			} else {
-				if _, err := w.Write([]byte("{\"statusCode\":500}")); err != nil {
-					t.Fatal("can't write fake response")
+				w.WriteHeader(500)
+				_, err := w.Write([]byte(`{"statusCode":500}`))
+				if err != nil {
+					t.Fatal("cannot write response")
 				}
+				counter++
 			}
 		},
 	)
@@ -323,8 +334,19 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "202 Accepted", res.Status)
-	assert.Equal(t, 0, counter)
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+	assert.Equal(t, 1, counter)
+
+	res2, err2 := gateway.MakeRequest(
+		"POST", "/googlenow/add-credentials", headers,
+		bytes.NewReader(benchBytes),
+	)
+	if !assert.NoError(t, err2, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "202 Accepted", res2.Status)
+	assert.Equal(t, 2, counter)
 }
 
 func TestAddCredentialsBackendDown(t *testing.T) {
@@ -384,7 +406,6 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	assert.Contains(t, errorMsg, "dial tcp")
 }
 
-// TODO: how do we want to test this edge case ?
 func TestAddCredentialsWrongStatusCode(t *testing.T) {
 	var counter int = 0
 
@@ -418,14 +439,14 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "202 Accepted", res.Status)
+	assert.Equal(t, "500 Internal Server Error", res.Status)
 
 	bytes, err := ioutil.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got bytes read error") {
 		return
 	}
 
-	assert.Equal(t, "", string(bytes))
+	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
 	assert.Equal(t, 1, counter)
 }
 

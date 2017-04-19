@@ -91,7 +91,6 @@ func (c *BarClient) ArgNotStruct(
 	return respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
@@ -152,7 +151,6 @@ func (c *BarClient) MissingArg(
 	return nil, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-
 }
 
 // NoRequest calls "/no-request-path" endpoint.
@@ -213,7 +211,6 @@ func (c *BarClient) NoRequest(
 	return nil, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-
 }
 
 // Normal calls "/bar-path" endpoint.
@@ -275,7 +272,6 @@ func (c *BarClient) Normal(
 	return nil, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
@@ -337,5 +333,4 @@ func (c *BarClient) TooManyArgs(
 	return nil, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
-
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -61,12 +62,18 @@ func (c *ContactsClient) SaveContacts(
 
 	res.CheckOKResponse([]int{202})
 
-	var responseBody clientsContactsContacts.SaveContactsResponse
-	err = res.ReadAndUnmarshalBody(&responseBody)
-	if err != nil {
-		return nil, respHeaders, err
+	switch res.StatusCode {
+	case 202:
+		var responseBody clientsContactsContacts.SaveContactsResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+
+		return &responseBody, respHeaders, nil
 	}
 
-	return &responseBody, respHeaders, nil
-
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 }

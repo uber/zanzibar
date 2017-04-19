@@ -93,8 +93,8 @@ test: generate lint
 .PHONY: test-only
 test-only:
 	rm -f ./test/.cached_binary_test_info.json
-	go test ./test/health_test.go # preload the binary cache.
-	go test \
+	ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache.
+	ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
 		./runtime/... \

@@ -74,7 +74,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/baz/call-path",
 		headers,
-		bytes.NewReader([]byte(`{"Arg":{"b1":true,"s2":"hello","i3":42}}`)),
+		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {

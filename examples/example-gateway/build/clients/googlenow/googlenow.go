@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -60,13 +61,19 @@ func (c *GoogleNowClient) AddCredentials(
 
 	res.CheckOKResponse([]int{202})
 
-	// TODO: log about unexpected body bytes?
-	_, err = res.ReadAll()
-	if err != nil {
-		return respHeaders, err
+	switch res.StatusCode {
+	case 202:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
 	}
-	return respHeaders, nil
 
+	return respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
@@ -98,11 +105,17 @@ func (c *GoogleNowClient) CheckCredentials(
 
 	res.CheckOKResponse([]int{202})
 
-	// TODO: log about unexpected body bytes?
-	_, err = res.ReadAll()
-	if err != nil {
-		return respHeaders, err
+	switch res.StatusCode {
+	case 202:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
 	}
-	return respHeaders, nil
 
+	return respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
 }

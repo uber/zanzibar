@@ -40,7 +40,8 @@ for file in "${FILES_ARR[@]}"; do
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
 	COVERNAME="./coverage/cover-unit-$RAND.out"
 
-	COVER_ON=1 go test -cover -coverprofile coverage.tmp $file 2>&1 | \
+	COVER_ON=1 ZANZIBAR_CACHE=1 go test \
+		-cover -coverprofile coverage.tmp $file 2>&1 | \
 		tee test.tmp.out >>test.out && \
 		mv coverage.tmp "$COVERNAME" 2>/dev/null || true
 
