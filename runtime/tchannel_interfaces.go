@@ -39,15 +39,15 @@ type TChanClient interface {
 	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (success bool, respHeaders map[string]string, err error)
 }
 
-// TChanServer abstracts handling of an RPC that is implemented by the generated server code.
-type TChanServer interface {
+// TChanHandler abstracts handling of an RPC that is implemented by the generated server code.
+type TChanHandler interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
-	Handle(ctx context.Context, method string, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp RWTStruct, respHeaders map[string]string, err error)
+	Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp RWTStruct, respHeaders map[string]string, err error)
 
 	// Service returns the service name.
 	Service() string
 
-	// Methods returns the method names handled by this server.
-	Methods() []string
+	// Methods returns the method name handled by this handler.
+	Method() string
 }

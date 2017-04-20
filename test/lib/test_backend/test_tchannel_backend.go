@@ -93,7 +93,7 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 }
 
 // Register registers tchannel server handler
-func (backend *TestTChannelBackend) Register(server zanzibar.TChanServer) {
+func (backend *TestTChannelBackend) Register(server zanzibar.TChanHandler) {
 	backend.Server.Register(server)
 }
 

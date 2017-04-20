@@ -42,11 +42,11 @@ import (
 type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 type handler struct {
-	server         TChanServer
+	handler        TChanHandler
 	postResponseCB PostResponseCB
 }
 
-// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanServer.
+// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanHandler.
 type TChannelServer struct {
 	sync.RWMutex
 	registrar tchan.Registrar
@@ -73,31 +73,51 @@ func NewTChannelServer(registrar tchan.Registrar, logger *zap.Logger) *TChannelS
 	return server
 }
 
-func (s *TChannelServer) register(svr TChanServer, h *handler) {
-	service := svr.Service()
+// Register registers the given TChanHandler to be called on an incoming call for its method.
+func (s *TChannelServer) Register(h TChanHandler) {
+	handler := &handler{handler: h}
+	s.register(handler)
+}
+
+// RegisterWithPostResponseCB registers the given TChanHandler with a PostResponseCB function
+func (s *TChannelServer) RegisterWithPostResponseCB(h TChanHandler, cb PostResponseCB) {
+	handler := &handler{
+		handler:        h,
+		postResponseCB: cb,
+	}
+	s.register(handler)
+}
+
+func (s *TChannelServer) register(h *handler) {
+	service := h.handler.Service()
+	method := h.handler.Method()
+	key := service + "::" + method
+
 	s.Lock()
-	s.handlers[service] = *h
+	s.handlers[key] = *h
 	s.Unlock()
 
 	ncs := netContextServer{server: s}
-	for _, m := range svr.Methods() {
-		s.registrar.Register(ncs, service+"::"+m)
-	}
+	s.registrar.Register(ncs, key)
 }
 
-// Register registers the given TChanServer to the be called on any incoming call for its services.
-func (s *TChannelServer) Register(svr TChanServer) {
-	handler := &handler{server: svr}
-	s.register(svr, handler)
-}
-
-// RegisterWithPostResponseCB registers the given TChanServer with a PostResponseCB function
-func (s *TChannelServer) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
-	handler := &handler{
-		server:         svr,
-		postResponseCB: cb,
+// Handle handles an incoming TChannel call and forwards it to the correct handler.
+func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
+	op := call.MethodString()
+	if strings.Index(op, "::") == -1 {
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
 	}
-	s.register(svr, handler)
+
+	s.RLock()
+	handler, ok := s.handlers[op]
+	s.RUnlock()
+	if !ok {
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which is not registered", op))
+	}
+
+	if err := s.handle(ctx, handler, call); err != nil {
+		s.onError(err)
+	}
 }
 
 func (s *TChannelServer) onError(err error) {
@@ -112,8 +132,9 @@ func (s *TChannelServer) onError(err error) {
 	}
 }
 
-func (s *TChannelServer) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
-	serviceName := handler.server.Service()
+func (s *TChannelServer) handle(ctx context.Context, handler handler, call *tchan.InboundCall) error {
+	serviceName := handler.handler.Service()
+	method := handler.handler.Method()
 
 	reader, err := call.Arg2Reader()
 	if err != nil {
@@ -150,7 +171,7 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", serviceName, method)
 	}
 
-	success, resp, respHeaders, err := handler.server.Handle(ctx, method, headers, &wireValue)
+	success, resp, respHeaders, err := handler.handler.Handle(ctx, headers, &wireValue)
 
 	if handler.postResponseCB != nil {
 		defer handler.postResponseCB(ctx, method, resp)
@@ -203,33 +224,4 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 	}
 
 	return nil
-}
-
-func getServiceMethod(method string) (string, string, bool) {
-	s := string(method)
-	sep := strings.Index(s, "::")
-	if sep == -1 {
-		return "", "", false
-	}
-	return s[:sep], s[sep+2:], true
-}
-
-// Handle handles an incoming TChannel call and forwards it to the correct handler.
-func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
-	op := call.MethodString()
-	service, method, ok := getServiceMethod(op)
-	if !ok {
-		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
-	}
-
-	s.RLock()
-	handler, ok := s.handlers[service]
-	s.RUnlock()
-	if !ok {
-		s.logger.Error(fmt.Sprintf("Handle got call for service %s which is not registered", service))
-	}
-
-	if err := s.handle(ctx, handler, method, call); err != nil {
-		s.onError(err)
-	}
 }
