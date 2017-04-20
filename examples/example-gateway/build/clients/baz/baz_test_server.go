@@ -27,7 +27,6 @@ package bazClient
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
@@ -35,57 +34,35 @@ import (
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-// SimpleServiceServer is the TChannel backend for SimpleService service.
-type SimpleServiceServer struct {
-	handler TChanBaz
+// SimpleServiceCallFunc is the handler function for "Call" method of thrift service "SimpleService".
+type SimpleServiceCallFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_Call_Args,
+) (map[string]string, error)
+
+// NewSimpleServiceCallHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceCallHandler(f SimpleServiceCallFunc) zanzibar.TChanHandler {
+	return &SimpleServiceCallHandler{f}
 }
 
-// NewSimpleServiceServer wraps a handler for Baz so it can be registered with a thrift server.
-func NewSimpleServiceServer(handler TChanBaz) zanzibar.TChanServer {
-	return &SimpleServiceServer{
-		handler,
-	}
+// SimpleServiceCallHandler handles the "Call" method call of thrift service "SimpleService".
+type SimpleServiceCallHandler struct {
+	call SimpleServiceCallFunc
 }
 
 // Service returns the service name.
-func (s *SimpleServiceServer) Service() string {
+func (h *SimpleServiceCallHandler) Service() string {
 	return "SimpleService"
 }
 
-// Methods returns the method names handled by this server.
-func (s *SimpleServiceServer) Methods() []string {
-	return []string{
-		"Call",
-		"Compare",
-		"Ping",
-		"SillyNoop",
-	}
+// Method returns the method name.
+func (h *SimpleServiceCallHandler) Method() string {
+	return "Call"
 }
 
-// Handle dispatches a method call to corresponding handler.
-func (s *SimpleServiceServer) Handle(
-	ctx context.Context,
-	methodName string,
-	reqHeaders map[string]string,
-	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	switch methodName {
-	case "Call":
-		return s.handleCall(ctx, reqHeaders, wireValue)
-	case "Compare":
-		return s.handleCompare(ctx, reqHeaders, wireValue)
-	case "Ping":
-		return s.handlePing(ctx, reqHeaders, wireValue)
-	case "SillyNoop":
-		return s.handleSillyNoop(ctx, reqHeaders, wireValue)
-	default:
-		return false, nil, nil, fmt.Errorf(
-			"method %v not found in service %v", methodName, s.Service(),
-		)
-	}
-}
-
-func (s *SimpleServiceServer) handleCall(
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -96,14 +73,14 @@ func (s *SimpleServiceServer) handleCall(
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	respHeaders, err := s.handler.Call(ctx, reqHeaders, &req)
+	respHeaders, err := h.call(ctx, reqHeaders, &req)
 
 	if err != nil {
 		switch v := err.(type) {
 		case *clientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
+					"Handler for Call returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
@@ -115,7 +92,35 @@ func (s *SimpleServiceServer) handleCall(
 	return err == nil, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handleCompare(
+// SimpleServiceCompareFunc is the handler function for "Compare" method of thrift service "SimpleService".
+type SimpleServiceCompareFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_Compare_Args,
+) (*clientsBazBaz.BazResponse, map[string]string, error)
+
+// NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChanHandler {
+	return &SimpleServiceCompareHandler{f}
+}
+
+// SimpleServiceCompareHandler handles the "Compare" method call of thrift service "SimpleService".
+type SimpleServiceCompareHandler struct {
+	compare SimpleServiceCompareFunc
+}
+
+// Service returns the service name.
+func (h *SimpleServiceCompareHandler) Service() string {
+	return "SimpleService"
+}
+
+// Method returns the method name.
+func (h *SimpleServiceCompareHandler) Method() string {
+	return "Compare"
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceCompareHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -126,14 +131,14 @@ func (s *SimpleServiceServer) handleCompare(
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	r, respHeaders, err := s.handler.Compare(ctx, reqHeaders, &req)
+	r, respHeaders, err := h.compare(ctx, reqHeaders, &req)
 
 	if err != nil {
 		switch v := err.(type) {
 		case *clientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
+					"Handler for Compare returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
@@ -147,7 +152,34 @@ func (s *SimpleServiceServer) handleCompare(
 	return err == nil, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handlePing(
+// SimpleServicePingFunc is the handler function for "Ping" method of thrift service "SimpleService".
+type SimpleServicePingFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (*clientsBazBaz.BazResponse, map[string]string, error)
+
+// NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChanHandler {
+	return &SimpleServicePingHandler{f}
+}
+
+// SimpleServicePingHandler handles the "Ping" method call of thrift service "SimpleService".
+type SimpleServicePingHandler struct {
+	ping SimpleServicePingFunc
+}
+
+// Service returns the service name.
+func (h *SimpleServicePingHandler) Service() string {
+	return "SimpleService"
+}
+
+// Method returns the method name.
+func (h *SimpleServicePingHandler) Method() string {
+	return "Ping"
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServicePingHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -158,7 +190,7 @@ func (s *SimpleServiceServer) handlePing(
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	r, respHeaders, err := s.handler.Ping(ctx, reqHeaders)
+	r, respHeaders, err := h.ping(ctx, reqHeaders)
 
 	if err != nil {
 		return false, nil, nil, err
@@ -168,7 +200,34 @@ func (s *SimpleServiceServer) handlePing(
 	return err == nil, &res, respHeaders, nil
 }
 
-func (s *SimpleServiceServer) handleSillyNoop(
+// SimpleServiceSillyNoopFunc is the handler function for "SillyNoop" method of thrift service "SimpleService".
+type SimpleServiceSillyNoopFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (map[string]string, error)
+
+// NewSimpleServiceSillyNoopHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceSillyNoopHandler(f SimpleServiceSillyNoopFunc) zanzibar.TChanHandler {
+	return &SimpleServiceSillyNoopHandler{f}
+}
+
+// SimpleServiceSillyNoopHandler handles the "SillyNoop" method call of thrift service "SimpleService".
+type SimpleServiceSillyNoopHandler struct {
+	sillynoop SimpleServiceSillyNoopFunc
+}
+
+// Service returns the service name.
+func (h *SimpleServiceSillyNoopHandler) Service() string {
+	return "SimpleService"
+}
+
+// Method returns the method name.
+func (h *SimpleServiceSillyNoopHandler) Method() string {
+	return "SillyNoop"
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceSillyNoopHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -179,21 +238,21 @@ func (s *SimpleServiceServer) handleSillyNoop(
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	respHeaders, err := s.handler.SillyNoop(ctx, reqHeaders)
+	respHeaders, err := h.sillynoop(ctx, reqHeaders)
 
 	if err != nil {
 		switch v := err.(type) {
 		case *clientsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for AuthErr returned non-nil error type *AuthErr but nil value",
+					"Handler for SillyNoop returned non-nil error type *AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
 		case *clientsBazBaz.ServerErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
-					"Handler for ServerErr returned non-nil error type *ServerErr but nil value",
+					"Handler for SillyNoop returned non-nil error type *ServerErr but nil value",
 				)
 			}
 			res.ServerErr = v

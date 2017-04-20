@@ -61,7 +61,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServicePing(ping))
+	gateway.TChannelBackends()["baz"].Register(bazServer.NewSimpleServicePingHandler(ping))
 
 	headers := map[string]string{}
 

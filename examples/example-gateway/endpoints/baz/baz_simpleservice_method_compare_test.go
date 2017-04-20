@@ -68,7 +68,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceCompare(compare))
+	gateway.TChannelBackends()["baz"].Register(bazServer.NewSimpleServiceCompareHandler(compare))
 
 	headers := map[string]string{}
 
@@ -76,7 +76,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/baz/compare",
 		headers,
-		bytes.NewReader([]byte(`{"Arg1":{"b1":true,"s2":"hello","i3":42},"Arg2":{"b1":true,"s2":"hola","i3":42}}`)),
+		bytes.NewReader([]byte(`{"arg1":{"b1":true,"s2":"hello","i3":42},"arg2":{"b1":true,"s2":"hola","i3":42}}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {

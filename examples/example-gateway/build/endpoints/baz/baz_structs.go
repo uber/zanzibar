@@ -42,6 +42,6 @@ type CallHTTPRequest struct {
 
 // CompareHTTPRequest is the http body type for endpoint Compare.
 type CompareHTTPRequest struct {
-	Arg1 *endpointsBazBaz.BazRequest
-	Arg2 *endpointsBazBaz.BazRequest
+	Arg1 *endpointsBazBaz.BazRequest `json:"arg1"`
+	Arg2 *endpointsBazBaz.BazRequest `json:"arg2"`
 }

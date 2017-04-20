@@ -39,7 +39,7 @@ func easyjson62ef335aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 			continue
 		}
 		switch key {
-		case "Arg1":
+		case "arg1":
 			if in.IsNull() {
 				in.Skip()
 				out.Arg1 = nil
@@ -49,7 +49,7 @@ func easyjson62ef335aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 				}
 				(*out.Arg1).UnmarshalEasyJSON(in)
 			}
-		case "Arg2":
+		case "arg2":
 			if in.IsNull() {
 				in.Skip()
 				out.Arg2 = nil
@@ -77,7 +77,7 @@ func easyjson62ef335aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Arg1\":")
+	out.RawString("\"arg1\":")
 	if in.Arg1 == nil {
 		out.RawString("null")
 	} else {
@@ -87,7 +87,7 @@ func easyjson62ef335aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildEndpo
 		out.RawByte(',')
 	}
 	first = false
-	out.RawString("\"Arg2\":")
+	out.RawString("\"arg2\":")
 	if in.Arg2 == nil {
 		out.RawString("null")
 	} else {
