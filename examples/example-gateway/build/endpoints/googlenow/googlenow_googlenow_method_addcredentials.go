@@ -41,15 +41,13 @@ func (handler *AddCredentialsHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := AddCredentialsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers, &requestBody)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -57,8 +55,9 @@ func (handler *AddCredentialsHandler) HandleRequest(
 		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
+	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSONBytes(202, nil)
+	res.WriteJSONBytes(202, cliRespHeaders, nil)
 }
 
 // AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
@@ -71,22 +70,39 @@ type AddCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w AddCredentialsEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *AddCredentialsHTTPRequest,
-) (map[string]string, error) {
+) (zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
-	_, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, nil, clientRequest,
+	clientHeaders := map[string]string{}
+
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
+
+	cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
+		ctx, clientHeaders, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
-	return nil, nil
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+
+	return resHeaders, nil
 }
 
 func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {

@@ -39,15 +39,13 @@ func (handler *SaveContactsHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := customContacts.SaveContactsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -56,5 +54,5 @@ func (handler *SaveContactsHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(202, response)
+	res.WriteJSON(202, cliRespHeaders, response)
 }

@@ -32,15 +32,13 @@ func (handler *SimpleHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	headers := map[string]string{}
-
 	workflow := SimpleEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -49,7 +47,7 @@ func (handler *SimpleHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(204, nil)
+	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
 // SimpleEndpoint calls thrift client Baz.Simple
@@ -62,16 +60,25 @@ type SimpleEndpoint struct {
 // Handle calls thrift client.
 func (w SimpleEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
-) (map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (zanzibar.ServerHeaderInterface, error) {
 
-	_, err := w.Clients.Baz.Simple(ctx, nil)
+	clientHeaders := map[string]string{}
+
+	_, err := w.Clients.Baz.Simple(ctx, clientHeaders)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
-	return nil, nil
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	return resHeaders, nil
 }

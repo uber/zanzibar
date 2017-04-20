@@ -104,32 +104,39 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.HTTPBackends()["bar"].Server.ConnState =
-		func(conn net.Conn, state http.ConnState) {
-			_, _ = conn.Write([]byte(
-				"HTTP/1.1 200 OK\n" +
-					"Content-Length: 12\n" +
-					"\n" +
-					"abc\n"))
-			_ = conn.Close()
+	endpoints := map[string]string{
+		"/bar/bar-path":            `{"stringField":"foo"}`,
+		"/bar/arg-not-struct-path": `{}`,
+	}
+
+	for k, v := range endpoints {
+		gateway.HTTPBackends()["bar"].Server.ConnState =
+			func(conn net.Conn, state http.ConnState) {
+				_, _ = conn.Write([]byte(
+					"HTTP/1.1 200 OK\n" +
+						"Content-Length: 12\n" +
+						"\n" +
+						"abc\n"))
+				_ = conn.Close()
+			}
+
+		res, err := gateway.MakeRequest(
+			"POST", k, nil,
+			bytes.NewReader([]byte(v)),
+		)
+		if !assert.NoError(t, err, "got http error") {
+			return
 		}
 
-	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
-	)
-	if !assert.NoError(t, err, "got http error") {
-		return
+		assert.Equal(t, "500 Internal Server Error", res.Status)
+		assert.Equal(t, 0, counter)
+
+		respBytes, err := ioutil.ReadAll(res.Body)
+		if !assert.NoError(t, err, "got http resp error") {
+			return
+		}
+
+		assert.Equal(t, string(respBytes),
+			`{"error":"Unexpected server error"}`)
 	}
-
-	assert.Equal(t, "500 Internal Server Error", res.Status)
-	assert.Equal(t, 0, counter)
-
-	respBytes, err := ioutil.ReadAll(res.Body)
-	if !assert.NoError(t, err, "got http resp error") {
-		return
-	}
-
-	assert.Equal(t, string(respBytes),
-		`{"error":"Unexpected server error"}`)
 }

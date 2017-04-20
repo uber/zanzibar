@@ -101,7 +101,7 @@ func (c *countMiddleware) HandleRequest(
 ) bool {
 	c.reqCounter++
 	if !c.reqBail {
-		res.WriteJSONBytes(200, []byte(""))
+		res.WriteJSONBytes(200, nil, []byte(""))
 	}
 
 	return !c.reqBail
@@ -291,6 +291,6 @@ func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	res.WriteJSONBytes(200, []byte(""))
+	res.WriteJSONBytes(200, nil, []byte(""))
 	return
 }

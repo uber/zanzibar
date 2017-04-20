@@ -28,7 +28,16 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	fakeAddCredentials := func(w http.ResponseWriter, r *http.Request) {
+
+		assert.Equal(
+			t,
+			"test-uuid",
+			r.Header.Get("X-Uuid"))
+
+		w.Header().Set("X-Uuid", "test-uuid")
+
 		w.WriteHeader(202)
+
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte(`{"status":"200 OK"}`)); err != nil {
 			t.Fatal("can't write fake response")
@@ -41,8 +50,8 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	)
 
 	headers := map[string]string{}
-	headers["x-uuid"] = "placeholder"
-	headers["x-token"] = "placeholder"
+	headers["X-Token"] = "test-token"
+	headers["X-Uuid"] = "test-uuid"
 
 	res, err := gateway.MakeRequest(
 		"POST",
@@ -55,5 +64,10 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, 202, res.StatusCode)
+	assert.Equal(
+		t,
+		"test-uuid",
+		res.Header.Get("X-Uuid"))
+
 	assert.Equal(t, 1, counter)
 }

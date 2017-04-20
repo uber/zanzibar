@@ -40,15 +40,13 @@ func (handler *NormalHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := NormalEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -57,7 +55,7 @@ func (handler *NormalHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // NormalEndpoint calls thrift client Bar.Normal
@@ -70,23 +68,32 @@ type NormalEndpoint struct {
 // Handle calls thrift client.
 func (w NormalEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *NormalHTTPRequest,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
+	clientHeaders := map[string]string{}
+
 	clientRespBody, _, err := w.Clients.Bar.Normal(
-		ctx, nil, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
 	response := convertNormalClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, resHeaders, nil
 }
 
 func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {

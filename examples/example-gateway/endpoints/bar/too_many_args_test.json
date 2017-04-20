@@ -3,12 +3,28 @@
     "endpointId": "bar",
     "handlerId": "tooManyArgs",
     "endpointRequest": {},
+    "endpointReqHeaders":  {
+        "X-Uuid": "test-uuid", 
+        "X-Token": "test-token"
+    },
     "endpointResponse": {},
+    "endpointResHeaders": {
+        "X-Uuid": "test-uuid", 
+        "X-Token": "test-token"
+    },
 
     "clientStubs": [{
         "clientId": "bar",
         "clientMethod": "tooManyArgs",
         "clientRequest": {},
-        "clientResponse": {}
+        "clientReqHeaders":  {
+            "X-Uuid": "test-uuid", 
+            "X-Token": "test-token"
+        },
+        "clientResponse": {},
+        "clientResHeaders":  {
+            "X-Uuid": "test-uuid", 
+            "X-Token": "test-token"
+        }
     }]
 }]

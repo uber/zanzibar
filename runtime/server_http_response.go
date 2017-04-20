@@ -110,15 +110,24 @@ func (res *ServerHTTPResponse) SendErrorString(
 		zap.String("path", res.Request.URL.Path),
 	)
 
-	res.WriteJSONBytes(statusCode,
+	res.WriteJSONBytes(statusCode, nil,
 		[]byte(`{"error":"`+err+`"}`),
 	)
 }
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
 func (res *ServerHTTPResponse) WriteJSONBytes(
-	statusCode int, bytes []byte,
+	statusCode int, headers ServerHeaderInterface, bytes []byte,
 ) {
+	if headers != nil {
+		for _, k := range headers.Keys() {
+			v, ok := headers.Get(k)
+			if ok {
+				res.responseWriter.Header().Set(k, v)
+			}
+		}
+	}
+
 	// TODO: mark header as pending ?
 	res.responseWriter.Header().
 		Set("content-type", "application/json")
@@ -129,7 +138,7 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 
 // WriteJSON writes a json serializable struct to Response
 func (res *ServerHTTPResponse) WriteJSON(
-	statusCode int, body json.Marshaler,
+	statusCode int, headers ServerHeaderInterface, body json.Marshaler,
 ) {
 	if body == nil {
 		res.SendErrorString(500, "Could not serialize json response")
@@ -144,6 +153,15 @@ func (res *ServerHTTPResponse) WriteJSON(
 			zap.String("error", err.Error()),
 		)
 		return
+	}
+
+	if headers != nil {
+		for _, k := range headers.Keys() {
+			v, ok := headers.Get(k)
+			if ok {
+				res.responseWriter.Header().Set(k, v)
+			}
+		}
 	}
 
 	// TODO: mark header as pending ?

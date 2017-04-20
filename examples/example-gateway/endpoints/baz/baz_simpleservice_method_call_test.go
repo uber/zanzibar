@@ -32,8 +32,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
+	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	bazServer "github.com/uber/zanzibar/examples/example-gateway/clients/baz"
 )
 
 var testCallCounter int
@@ -67,7 +67,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.WithCall(call))
+	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceCall(call))
 
 	headers := map[string]string{}
 

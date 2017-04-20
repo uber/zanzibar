@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"path/filepath"
+	"strings"
 
 	"encoding/json"
 
@@ -161,10 +162,10 @@ func (generator *HTTPClientGenerator) Generate(
 	}
 
 	// Return the client files
-	files := map[string][]byte{}
-	files[clientFilePath] = client
-	files[structFilePath] = structs
-	return files, nil
+	return map[string][]byte{
+		clientFilePath: client,
+		structFilePath: structs,
+	}, nil
 }
 
 /*
@@ -228,6 +229,30 @@ func (generator *TCahnnelClientGenerator) Generate(
 		)
 	}
 
+	server, err := generator.templates.execTemplate(
+		"tchannel_server.tmpl",
+		clientMeta,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error executing TChannel server template for %s",
+			instance.InstanceName,
+		)
+	}
+
+	handler, err := generator.templates.execTemplate(
+		"tchannel_handler.tmpl",
+		clientMeta,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error executing TChannel handler template for %s",
+			instance.InstanceName,
+		)
+	}
+
 	clientDirectory := filepath.Join(
 		generator.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
@@ -238,10 +263,16 @@ func (generator *TCahnnelClientGenerator) Generate(
 		clientFilePath = clientSpec.GoFileName
 	}
 
+	// TODO:(lu) the locations of tchannel server and handler files are tentative
+	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_server.go"
+	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_handler.go"
+
 	// Return the client files
-	files := map[string][]byte{}
-	files[clientFilePath] = client
-	return files, nil
+	return map[string][]byte{
+		clientFilePath:  client,
+		serverFilePath:  server,
+		handlerFilePath: handler,
+	}, nil
 }
 
 func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {

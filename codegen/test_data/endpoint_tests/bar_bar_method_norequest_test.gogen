@@ -28,7 +28,9 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	fakeNoRequest := func(w http.ResponseWriter, r *http.Request) {
+
 		w.WriteHeader(200)
+
 		// TODO(zw): generate client response.
 		if _, err := w.Write([]byte(`{}`)); err != nil {
 			t.Fatal("can't write fake response")
@@ -53,5 +55,6 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
+
 	assert.Equal(t, 1, counter)
 }

@@ -57,7 +57,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				resp *zanzibar.ServerHTTPResponse,
 			) {
-				resp.WriteJSONBytes(200, []byte("foo\n"))
+				resp.WriteJSONBytes(200, nil, []byte("foo\n"))
 			},
 		),
 	)
@@ -72,7 +72,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				resp *zanzibar.ServerHTTPResponse,
 			) {
-				resp.WriteJSONBytes(200, []byte("bar\n"))
+				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
 			},
 		),
 	)

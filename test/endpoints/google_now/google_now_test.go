@@ -44,8 +44,8 @@ import (
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 var noAuthCodeBytes = []byte("{}")
 var headers map[string]string = map[string]string{
-	"x-uuid":  "uuid",
-	"x-token": "token",
+	"X-Uuid":  "uuid",
+	"X-Token": "token",
 }
 
 func BenchmarkGoogleNowAddCredentials(b *testing.B) {
@@ -464,7 +464,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 	defer gateway.Close()
 
 	res, err := gateway.MakeRequest(
-		"POST", "/googlenow/add-credentials", nil,
+		"POST", "/googlenow/check-credentials", nil,
 		bytes.NewReader([]byte("bad bytes")),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -482,4 +482,173 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 		`{"error":"Missing mandatory header: x-uuid"}`,
 		string(respBytes),
 	)
+}
+
+func TestAddCredentialsMissingOneHeader(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(202)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST",
+		"/googlenow/add-credentials",
+		map[string]string{
+			"x-uuid": "uuid",
+		},
+		bytes.NewReader(benchBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Missing mandatory header: x-token"}`,
+		string(respBytes),
+	)
+}
+
+func TestAddCredentialsHeaderMapping(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["googleNow"].HandleFunc(
+		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(
+				t,
+				"uuid",
+				r.Header.Get("X-Uuid"))
+
+			// Verify non-proxy headers aren't sent
+			assert.Equal(
+				t,
+				"",
+				r.Header.Get("X-Token"))
+			w.Header().Set("X-Uuid", "uuid")
+
+			w.WriteHeader(202)
+			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST",
+		"/googlenow/add-credentials",
+		headers,
+		bytes.NewReader(benchBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "202 Accepted", res.Status)
+	assert.Equal(
+		t,
+		"uuid",
+		res.Header.Get("X-Uuid"))
+
+	// Verify non-proxy headers aren't returned
+	assert.Equal(
+		t,
+		"",
+		res.Header.Get("X-Token"))
+
+	assert.Equal(t, 1, counter)
+}
+
+func TestCheckCredentialsBackendDown(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"googleNow"},
+		LogWhitelist: map[string]bool{
+			"Could not make client request": true,
+		},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	// Close backend
+	gateway.HTTPBackends()["googleNow"].Close()
+
+	res, err := gateway.MakeRequest(
+		"POST", "/googlenow/check-credentials", headers,
+		bytes.NewReader(noAuthCodeBytes),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got bytes read error") {
+		return
+	}
+
+	assert.Equal(t, string(bytes),
+		`{"error":"Unexpected server error"}`)
+
+	time.Sleep(10 * time.Millisecond)
+
+	errorLogs := gateway.GetErrorLogs()
+	logLines := errorLogs["Could not make client request"]
+
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
+		return
+	}
+
+	errorMsg := lineStruct["error"].(string)
+	assert.Contains(t, errorMsg, "dial tcp")
 }

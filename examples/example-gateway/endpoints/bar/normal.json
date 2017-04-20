@@ -17,5 +17,7 @@
 		},
 		{"name" : "logger"}
 
-		]
+		],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
 }

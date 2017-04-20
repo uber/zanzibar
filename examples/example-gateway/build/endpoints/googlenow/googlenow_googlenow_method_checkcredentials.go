@@ -35,15 +35,13 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := CheckCredentialsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -51,8 +49,9 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
+	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSONBytes(202, nil)
+	res.WriteJSONBytes(202, cliRespHeaders, nil)
 }
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
@@ -65,16 +64,33 @@ type CheckCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
-) (map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (zanzibar.ServerHeaderInterface, error) {
 
-	_, err := w.Clients.GoogleNow.CheckCredentials(ctx, nil)
+	clientHeaders := map[string]string{}
+
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
+
+	cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
-	return nil, nil
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+
+	return resHeaders, nil
 }

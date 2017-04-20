@@ -44,15 +44,13 @@ func (handler *TooManyArgsHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := TooManyArgsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -60,8 +58,9 @@ func (handler *TooManyArgsHandler) HandleRequest(
 		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
+	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSON(200, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
@@ -74,23 +73,45 @@ type TooManyArgsEndpoint struct {
 // Handle calls thrift client.
 func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *TooManyArgsHTTPRequest,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
-	clientRespBody, _, err := w.Clients.Bar.TooManyArgs(
-		ctx, nil, clientRequest,
+	clientHeaders := map[string]string{}
+
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
+	}
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
+
+	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
+		ctx, clientHeaders, clientRequest,
 	)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
+	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+
 	response := convertTooManyArgsClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, resHeaders, nil
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
