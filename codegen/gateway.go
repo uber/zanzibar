@@ -778,7 +778,8 @@ func NewGatewaySpec(
 		copyrightHeaderFile,
 	))
 	if err != nil {
-		return nil, errors.Wrap(err, "Cannot read copyright config")
+		// Default to an empty copyright for now
+		copyright = []byte("")
 	}
 	packageHelper.copyrightHeader = string(copyright)
 
