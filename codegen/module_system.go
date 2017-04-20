@@ -248,19 +248,6 @@ func (generator *TChannelClientGenerator) Generate(
 		)
 	}
 
-	handler, err := generator.templates.execTemplate(
-		"tchannel_client_test_handler.tmpl",
-		clientMeta,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error executing TChannel handler template for %s",
-			instance.InstanceName,
-		)
-	}
-
 	clientDirectory := filepath.Join(
 		generator.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
@@ -272,13 +259,11 @@ func (generator *TChannelClientGenerator) Generate(
 	}
 
 	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_server.go"
-	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_handler.go"
 
 	// Return the client files
 	return map[string][]byte{
-		clientFilePath:  client,
-		serverFilePath:  server,
-		handlerFilePath: handler,
+		clientFilePath: client,
+		serverFilePath: server,
 	}, nil
 }
 
