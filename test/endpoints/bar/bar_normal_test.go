@@ -140,3 +140,117 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 			`{"error":"Unexpected server error"}`)
 	}
 }
+
+func TestBarExceptionCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(403)
+			if _, err := w.Write([]byte("{}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/bar/bar-path", nil,
+		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "403 Forbidden", res.Status)
+	assert.Equal(t, 1, counter)
+}
+
+func TestMalformedBarExceptionCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(403)
+			if _, err := w.Write([]byte("")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/bar/bar-path", nil,
+		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+	assert.Equal(t, 1, counter)
+}
+
+func TestBarExceptionInvalidStatusCode(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(402)
+			if _, err := w.Write([]byte("{}")); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/bar/bar-path", nil,
+		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+	assert.Equal(t, 1, counter)
+}
