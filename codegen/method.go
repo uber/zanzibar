@@ -63,6 +63,8 @@ type MethodSpec struct {
 	RequestStruct []StructSpec
 	// Thrift service name the method belongs to.
 	ThriftService string
+	// The thriftrw-generated go package name
+	GenCodePkgName string
 	// Whether the method needs annotation or not.
 	WantAnnot bool
 	// The thriftrw compiled spec, used to extract type information
@@ -119,12 +121,22 @@ func NewMethod(
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
 
+	method.GenCodePkgName, err = packageHelper.TypePackageName(thriftFile)
+	if err != nil {
+		return nil, err
+	}
+
 	err = method.setResponseType(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
 
 	err = method.setRequestType(thriftFile, funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
@@ -141,11 +153,6 @@ func NewMethod(
 	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
 
 	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
-	if err != nil {
-		return nil, err
-	}
-
-	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
@@ -204,14 +211,10 @@ func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSp
 	if ms.WantAnnot {
 		requestType = strings.Title(f.Name) + "HTTPRequest"
 	} else {
-		pkgName, err := h.TypePackageName(curThriftFile)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to generate new request type")
-		}
 		// This is specifically generating the "Args" type that thriftrw generates.
 		requestType = fmt.Sprintf(
 			"%s.%s_%s_Args",
-			pkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
+			ms.GenCodePkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
 		)
 
 	}
@@ -285,6 +288,26 @@ func (ms *MethodSpec) setExceptions(
 	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
 
 	for i, e := range resultSpec.Exceptions {
+		typeName, err := h.TypeFullName(curThriftFile, e.Type)
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"cannot resolve type full name for %s for exception %s",
+				e.Type,
+				e.Name,
+			)
+		}
+
+		if !ms.WantAnnot {
+			ms.Exceptions[i] = ExceptionSpec{
+				StructSpec: StructSpec{
+					Type: typeName,
+					Name: e.Type.ThriftName(),
+				},
+			}
+			continue
+		}
+
 		code, err := strconv.Atoi(e.Annotations[antHTTPStatus])
 		if err != nil {
 			return errors.Wrapf(
@@ -302,16 +325,6 @@ func (ms *MethodSpec) setExceptions(
 			)
 		}
 		seenStatusCodes[code] = true
-
-		typeName, err := h.TypeFullName(curThriftFile, e.Type)
-		if err != nil {
-			return errors.Wrapf(
-				err,
-				"cannot resolve type full name for %s for exception %s",
-				e.Type,
-				e.Name,
-			)
-		}
 
 		ms.Exceptions[i] = ExceptionSpec{
 			StructSpec: StructSpec{

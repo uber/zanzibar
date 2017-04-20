@@ -1,8 +1,7 @@
 {
 	"name": "baz",
-	"type": "custom",
+	"type": "tchannel",
 	"config": {
-		"customImportPath": "github.com/uber/zanzibar/examples/example-gateway/clients/baz",
 		"thriftFile": "clients/baz/baz.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"clientName": "Baz",

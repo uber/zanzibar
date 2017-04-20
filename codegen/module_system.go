@@ -58,6 +58,16 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 		)
 	}
 
+	if err := system.RegisterClassType("client", "tchannel", &TCahnnelClientGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering TChannel client class type",
+		)
+	}
+
 	// TODO: Register endpoint module class and type generators
 	return system, nil
 }
@@ -78,7 +88,7 @@ func (generator *HTTPClientGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
-	clientConfig, err := generator.readConfig(instance.JSONFileRaw)
+	clientConfig, err := readClientConfig(instance.JSONFileRaw)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -118,7 +128,7 @@ func (generator *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing HTTP client structs template for %s",
+			"Error executing HTTP client template for %s",
 			instance.InstanceName,
 		)
 	}
@@ -157,10 +167,84 @@ func (generator *HTTPClientGenerator) Generate(
 	return files, nil
 }
 
-// ReadConfig parses the raw interface config to an HTTPClientConfig struct
-func (*HTTPClientGenerator) readConfig(
-	rawConfig []byte,
-) (*clientClassConfig, error) {
+/*
+ * TChannel Client Generator
+ */
+
+// TCahnnelClientGenerator generates an instance of a zanzibar TChannel client
+type TCahnnelClientGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+}
+
+// Generate returns the TChannel client generated files as a map of relative file
+// path (relative to the target build directory) to file bytes.
+func (generator *TCahnnelClientGenerator) Generate(
+	instance *module.Instance,
+) (map[string][]byte, error) {
+	// Parse the client config from the endpoint JSON file
+	clientConfig, err := readClientConfig(instance.JSONFileRaw)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading TChannel client %s JSON config",
+			instance.InstanceName,
+		)
+	}
+
+	clientSpec, err := NewTChannelClientSpec(
+		filepath.Join(
+			instance.BaseDirectory,
+			instance.Directory,
+			instance.JSONFileName,
+		),
+		clientConfig,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error initializing TChannelClientSpec for %s",
+			instance.InstanceName,
+		)
+	}
+
+	clientMeta := &ClientMeta{
+		PackageName:      clientSpec.ModuleSpec.PackageName,
+		Services:         clientSpec.ModuleSpec.Services,
+		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
+		ClientID:         clientSpec.ClientID,
+	}
+
+	client, err := generator.templates.execTemplate(
+		"tchannel_client.tmpl",
+		clientMeta,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error executing TChannel client template for %s",
+			instance.InstanceName,
+		)
+	}
+
+	clientDirectory := filepath.Join(
+		generator.packageHelper.CodeGenTargetPath(),
+		instance.Directory,
+	)
+
+	clientFilePath, err := filepath.Rel(clientDirectory, clientSpec.GoFileName)
+	if err != nil {
+		clientFilePath = clientSpec.GoFileName
+	}
+
+	// Return the client files
+	files := map[string][]byte{}
+	files[clientFilePath] = client
+	return files, nil
+}
+
+func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
 	var clientConfig clientClassConfig
 	if err := json.Unmarshal(rawConfig, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
