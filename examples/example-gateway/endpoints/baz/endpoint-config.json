@@ -1,0 +1,7 @@
+{
+    "endpoints": [
+        "call.json",
+        "simple.json",
+        "simple_future.json"
+    ]
+}

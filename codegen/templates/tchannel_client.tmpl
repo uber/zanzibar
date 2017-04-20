@@ -1,0 +1,227 @@
+{{- /* template to render edge gateway tchannel client code */ -}}
+
+// Package {{.PackageName}} is generated code used to make or handle TChannel calls using Thrift.
+package {{.PackageName}}
+
+import (
+	"context"
+	"errors"
+	"strconv"
+	"time"
+
+	"github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+)
+
+// Interfaces for the service and client for the services defined in the IDL.
+{{$clientID := .ClientID -}}
+{{$clientName := title .ClientID | printf "%sClient" -}}
+{{range $svc := .Services}}
+// TChan{{title $clientID}} is the interface that defines the server handler and client interface.
+type TChan{{title $clientID}} interface {
+	{{range .Methods}}
+	    {{if and (eq .RequestType "") (eq .ResponseType "")}}
+		    {{- .Name}}(
+		        ctx context.Context,
+		        reqHeaders map[string]string,
+		    ) (
+		        map[string]string,
+		        error,
+		    )
+	    {{else if eq .RequestType ""}}
+		    {{- .Name}}(
+		        ctx context.Context,
+		        reqHeaders map[string]string,
+		    ) (
+		        *{{.ResponseType}},
+		        map[string]string,
+		        error,
+		    )
+	    {{else if eq .ResponseType ""}}
+		    {{- .Name}}(
+		        ctx context.Context,
+		        reqHeaders map[string]string,
+		        args *{{.RequestType}},
+		    ) (
+		        map[string]string, error,
+		    )
+		{{else}}
+		    {{- .Name}}(
+		        ctx context.Context,
+		        reqHeaders map[string]string,
+		        args *{{.RequestType}},
+		    ) (
+		        *{{.ResponseType}},
+		        map[string]string,
+		        error,
+		    )
+		{{end}}
+	{{end -}}
+}
+
+// NewClient returns a new TChannel client for service {{$clientID}}.
+func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
+    {{- /* this is the service discovery service name */}}
+	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	sc := gateway.Channel.GetSubChannel(serviceName)
+
+	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+
+	{{/* TODO: (lu) maybe set these at per method level */ -}}
+	timeout := time.Millisecond * time.Duration(
+	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+	)
+	timeoutPerAttempt := time.Millisecond * time.Duration(
+	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+	)
+
+	client := zanzibar.NewTChannelClient(gateway.Channel,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+		},
+	)
+
+	return &{{$clientName}}{
+    	{{- /* this is the thrift service name, different from service discovery service name */}}
+		thriftService: "{{$svc.Name}}",
+		client:        client,
+	}
+}
+
+// {{$clientName}} is the TChannel client for downstream service.
+type {{$clientName}} struct {
+	thriftService string
+	client        zanzibar.TChanClient
+}
+
+{{range .Methods}}
+    {{- if and (eq .RequestType "") (eq .ResponseType "")}}
+        // {{.Name}} ...
+        func (c *{{$clientName}}) {{.Name}}(
+            ctx context.Context,
+            reqHeaders map[string]string,
+            ) (map[string]string, error) {
+            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+
+            args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+	        success, respHeaders, err := c.client.Call(
+	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+	        )
+
+	        if err == nil && !success {
+		        switch {
+		            {{range .Exceptions -}}
+		            case result.{{.Name}} != nil:
+			            err = result.{{.Name}}
+		            {{end -}}
+		            default:
+			            err = errors.New("received no result or unknown exception for {{$svc.Name}}")
+		        }
+	        }
+	        if err != nil {
+	            return nil, err
+	        }
+
+		    return respHeaders, err
+        }
+    {{- else if eq .RequestType ""}}
+        // {{.Name}} ...
+        func (c *{{$clientName}}) {{.Name}}(
+            ctx context.Context,
+            reqHeaders map[string]string,
+        ) (*{{.ResponseType}}, map[string]string, error) {
+            var result {{.ResponseType}}
+
+            args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+	        success, respHeaders, err := c.client.Call(
+	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+	        )
+
+	        if err == nil && !success {
+		        switch {
+		            {{range .Exceptions -}}
+		            case result.{{.Name}} != nil:
+			            err = result.{{.Name}}
+		            {{end -}}
+		            default:
+			            err = errors.New("received no result or unknown exception for {{.Name}}")
+		        }
+	        }
+	        if err != nil {
+	            return nil, nil, err
+	        }
+
+	        resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+
+		    return resp, respHeaders, err
+        }
+    {{- else if eq .ResponseType ""}}
+        // {{.Name}} ...
+        func (c *{{$clientName}}) {{.Name}}(
+	        ctx context.Context,
+	        reqHeaders map[string]string,
+	        args *{{.RequestType}},
+	    ) (map[string]string, error) {
+            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+
+	        success, respHeaders, err := c.client.Call(
+	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+	        )
+
+	        if err == nil && !success {
+		        switch {
+		        {{range .Exceptions -}}
+		            case result.{{.Name}} != nil:
+			            err = result.{{.Name}}
+		        {{end -}}
+		            default:
+			            err = errors.New("received no result or unknown exception for {{.Name}}")
+		        }
+	        }
+	        if err != nil {
+	            return nil, err
+	        }
+
+		    return respHeaders, err
+        }
+	{{- else}}
+        // {{.Name}} ...
+	    func (c *{{$clientName}}) {{.Name}}(
+	        ctx context.Context,
+	        reqHeaders map[string]string,
+	        args *{{.RequestType}},
+	    ) (*{{.ResponseType}}, map[string]string, error) {
+            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+
+	        success, respHeaders, err := c.client.Call(
+	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+	        )
+
+	        if err == nil && !success {
+		        switch {
+		            {{range .Exceptions -}}
+		            case result.{{.Name}} != nil:
+			            err = result.{{.Name}}
+		            {{end -}}
+		            default:
+			            err = errors.New("received no result or unknown exception for {{.Name}}")
+		        }
+	        }
+	        if err != nil {
+	            return nil, nil, err
+	        }
+
+	        resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+
+		    return resp, respHeaders, err
+        }
+	{{- end}}
+{{end -}}
+{{end}}

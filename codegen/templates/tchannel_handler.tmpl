@@ -1,0 +1,99 @@
+{{- /* template to render edge gateway tchannel handler code */ -}}
+
+// Package {{.PackageName}} is generated code used to make or handle TChannel calls using Thrift.
+package {{.PackageName}}
+
+import (
+	"context"
+	"errors"
+
+	"github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+)
+
+{{range $svc := .Services}}
+{{$handler := printf "%sHandler" $svc.Name}}
+// {{$handler}} is the handler struct for TChannel service {{$svc.Name}}.
+type {{$handler}} struct {
+	{{range .Methods -}}
+	    {{.Name}}Func {{$svc.Name}}{{.Name}}Func
+	{{end -}}
+}
+
+{{range .Methods -}}
+    {{- $func := printf "%s%sFunc" $svc.Name .Name -}}
+    // {{$func}} ...
+    {{- if and (eq .RequestType "") (eq .ResponseType "")}}
+        type {{$func}} func(
+            context.Context, map[string]string,
+        ) (map[string]string, error)
+    {{- else if eq .RequestType ""}}
+        type {{$func}} func(
+            context.Context, map[string]string,
+        ) (*{{.ResponseType}}, map[string]string, error)
+    {{- else if eq .ResponseType ""}}
+        type {{$func}} func(
+            context.Context, map[string]string, *{{.RequestType}},
+            ) (map[string]string, error)
+	{{- else}}
+        type {{$func}} func(
+            context.Context, map[string]string, *{{.RequestType}},
+        ) (*{{.ResponseType}}, map[string]string, error)
+	{{- end}}
+{{end -}}
+
+{{range .Methods -}}
+    {{- $type := printf "%s%sFunc" $svc.Name .Name -}}
+    // NewServerWith{{$svc.Name}}{{.Name}} creates a TChanServer with given handler function registered.
+    func NewServerWith{{$svc.Name}}{{.Name}}(arg {{$type}}) zanzibar.TChanServer {
+        return New{{$svc.Name}}Server(&{{$svc.Name}}Handler{
+            {{.Name}}Func: arg,
+        })
+    }
+{{end -}}
+
+{{range .Methods -}}
+    // {{.Name}} ...
+    {{- if and (eq .RequestType "") (eq .ResponseType "")}}
+        func (h *{{$handler}}) {{.Name}}(
+            ctx context.Context, reqHeaders map[string]string,
+        ) (map[string]string, error) {
+            if h.{{.Name}}Func == nil {
+                return nil, errors.New("{{.Name}}Func is not defined")
+            }
+            return h.{{.Name}}Func(ctx, reqHeaders)
+        }
+    {{- else if eq .RequestType ""}}
+        func (h *{{$handler}}) {{.Name}}(
+            ctx context.Context, reqHeaders map[string]string,
+        ) (*{{.ResponseType}}, map[string]string, error) {
+            if h.{{.Name}}Func == nil {
+                return nil, nil, errors.New("{{.Name}}Func is not defined")
+            }
+            return h.{{.Name}}Func(ctx, reqHeaders)
+        }
+    {{- else if eq .ResponseType ""}}
+        func (h *{{$handler}}) {{.Name}}(
+            ctx context.Context, reqHeaders map[string]string, args *{{.RequestType}},
+        ) (map[string]string, error) {
+            if h.{{.Name}}Func == nil {
+                return nil, errors.New("{{.Name}}Func is not defined")
+            }
+            return h.{{.Name}}Func(ctx, reqHeaders, args)
+        }
+	{{- else}}
+	    func (h *{{$handler}}) {{.Name}}(
+            ctx context.Context, reqHeaders map[string]string, args *{{.RequestType}},
+        ) (*{{.ResponseType}}, map[string]string, error) {
+            if h.{{.Name}}Func == nil {
+                return nil, nil, errors.New("{{.Name}}Func is not defined")
+            }
+            return h.{{.Name}}Func(ctx, reqHeaders, args)
+        }
+	{{- end}}
+{{end -}}
+
+{{end}}

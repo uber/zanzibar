@@ -1,0 +1,10 @@
+{
+	"name": "baz",
+	"type": "tchannel",
+	"config": {
+		"thriftFile": "clients/baz/baz.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"clientName": "Baz",
+		"serviceName": "Qux"
+	}
+}
