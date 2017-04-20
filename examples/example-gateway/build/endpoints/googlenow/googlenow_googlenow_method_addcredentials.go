@@ -79,10 +79,6 @@ func (w AddCredentialsEndpoint) Handle(
 
 	var ok bool
 	var h string
-	h, ok = reqHeaders.Get("X-Token")
-	if ok {
-		clientHeaders["X-Token"] = h
-	}
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
@@ -104,7 +100,6 @@ func (w AddCredentialsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
 	return resHeaders, nil
