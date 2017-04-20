@@ -51,8 +51,11 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
-	// Headers needed, generated from "zanzibar.http.headers"
-	Headers          []string
+	// ReqHeaders needed, generated from "zanzibar.http.reqHeaders"
+	ReqHeaders []string
+	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
+	ResHeaders []string
+
 	RequestType      string
 	ResponseType     string
 	OKStatusCode     StatusCode
@@ -99,7 +102,8 @@ const (
 	antHTTPPath        = "zanzibar.http.path"
 	antHTTPStatus      = "zanzibar.http.status"
 	antHTTPReqDefBoxed = "zanzibar.http.req.def"
-	antHTTPHeaders     = "zanzibar.http.headers"
+	antHTTPReqHeaders  = "zanzibar.http.reqHeaders"
+	antHTTPResHeaders  = "zanzibar.http.resHeaders"
 	antHTTPRef         = "zanzibar.http.ref"
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
@@ -150,7 +154,8 @@ func NewMethod(
 	}
 
 	method.EndpointName = funcSpec.Annotations[antHandler]
-	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
+	method.ReqHeaders = headers(funcSpec.Annotations[antHTTPReqHeaders])
+	method.ResHeaders = headers(funcSpec.Annotations[antHTTPResHeaders])
 
 	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
 	if err != nil {

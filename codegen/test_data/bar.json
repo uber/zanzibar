@@ -37,7 +37,8 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "ArgNotStructHTTPRequest",
 					"ResponseType": "",
 					"OKStatusCode": {
@@ -96,7 +97,8 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "",
 					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -149,7 +151,8 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "",
 					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -202,7 +205,8 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "NormalHTTPRequest",
 					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -261,7 +265,11 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": [
+					"ReqHeaders": [
+						"x-uuid",
+						"x-token"
+					],
+					"ResHeaders": [
 						"x-uuid",
 						"x-token"
 					],

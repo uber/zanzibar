@@ -35,15 +35,13 @@ func (handler *NoRequestHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	headers := map[string]string{}
-
 	workflow := NoRequestEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -52,7 +50,7 @@ func (handler *NoRequestHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // NoRequestEndpoint calls thrift client Bar.NoRequest
@@ -65,21 +63,30 @@ type NoRequestEndpoint struct {
 // Handle calls thrift client.
 func (w NoRequestEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
+
+	clientHeaders := map[string]string{}
 
 	clientRespBody, _, err := w.Clients.Bar.NoRequest(
-		ctx, nil,
+		ctx, clientHeaders,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
 	response := convertNoRequestClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, resHeaders, nil
 }
 
 func convertNoRequestClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {

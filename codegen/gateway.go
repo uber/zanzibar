@@ -28,6 +28,8 @@ import (
 	"runtime"
 	"strings"
 
+	"sort"
+
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -315,6 +317,17 @@ type EndpointSpec struct {
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec
 
+	// ReqHeaderMap, maps headers from server to client.
+	// Keeps keys in a sorted array so that goldenfiles have
+	// deterministic orderings
+	ReqHeaderMap     map[string]string
+	ReqHeaderMapKeys []string
+	// ResHeaderMap, maps headers from client to server.
+	// Keeps keys in a sorted array so that goldenfiles have
+	// deterministic orderings
+	ResHeaderMap     map[string]string
+	ResHeaderMapKeys []string
+
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
@@ -482,6 +495,66 @@ func NewEndpointSpec(
 		}
 	}
 
+	reqHeaderMap := make(map[string]string)
+	m, ok := endpointConfigObj["reqHeaderMap"]
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse reqHeaderMap %s",
+			reqHeaderMap,
+		)
+	}
+	// Do a deep cast to enforce a string -> string map
+	castMap := m.(map[string]interface{})
+	for key, value := range castMap {
+		switch value := value.(type) {
+		case string:
+			reqHeaderMap[key] = value
+		default:
+			return nil, errors.Errorf(
+				"Unable to parse string %s in reqHeaderMap %s",
+				value,
+				reqHeaderMap,
+			)
+		}
+	}
+	reqHeaderMapKeys := make([]string, len(reqHeaderMap))
+	i := 0
+	for k := range reqHeaderMap {
+		reqHeaderMapKeys[i] = k
+		i++
+	}
+	sort.Strings(reqHeaderMapKeys)
+
+	resHeaderMap := make(map[string]string)
+	m2, ok := endpointConfigObj["resHeaderMap"]
+	if !ok {
+		return nil, errors.Errorf(
+			"Unable to parse resHeaderMap %s",
+			resHeaderMap,
+		)
+	}
+	// Do a deep cast to enforce a string -> string map
+	castMap = m2.(map[string]interface{})
+	for key, value := range castMap {
+		switch value := value.(type) {
+		case string:
+			resHeaderMap[key] = value
+		default:
+			return nil, errors.Errorf(
+				"Unable to parse string %s in resHeaderMap %s",
+				value,
+				resHeaderMap,
+			)
+		}
+	}
+	resHeaderMapKeys := make([]string, len(resHeaderMap))
+	i = 0
+	for k := range resHeaderMap {
+		resHeaderMapKeys[i] = k
+		i++
+	}
+	sort.Strings(resHeaderMapKeys)
+
 	return &EndpointSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           jsonFile,
@@ -495,6 +568,10 @@ func NewEndpointSpec(
 		ThriftMethodName:   parts[1],
 		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
 		Middlewares:        middlewares,
+		ReqHeaderMap:       reqHeaderMap,
+		ReqHeaderMapKeys:   reqHeaderMapKeys,
+		ResHeaderMap:       resHeaderMap,
+		ResHeaderMapKeys:   resHeaderMapKeys,
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
 		ClientName:         clientName,

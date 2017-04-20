@@ -9,5 +9,13 @@
 	"clientName": "Bar",
 	"clientMethod": "tooManyArgs",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {
+        "X-Uuid": "X-Uuid", 
+		"X-Token": "X-Token"
+	},
+	"resHeaderMap": {
+        "X-Uuid": "X-Uuid", 
+		"X-Token": "X-Token"
+	}	
 }

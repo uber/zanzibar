@@ -50,7 +50,7 @@ type ServerHTTPRequest struct {
 	URL          *url.URL
 	Method       string
 	Params       httprouter.Params
-	Header       http.Header
+	Header       ServerHeaderInterface
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -68,7 +68,7 @@ func NewServerHTTPRequest(
 		URL:     r.URL,
 		Method:  r.Method,
 		Params:  params,
-		Header:  r.Header,
+		Header:  ServerHTTPHeader(r.Header),
 		metrics: &endpoint.metrics,
 	}
 	req.res = NewServerHTTPResponse(w, req)

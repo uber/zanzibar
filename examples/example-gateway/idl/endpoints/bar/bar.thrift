@@ -69,6 +69,8 @@ service Bar {
     zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
+    zanzibar.http.reqHeaders = "x-uuid,x-token"
+    zanzibar.http.resHeaders = "x-uuid,x-token"
   )
   void argNotStruct (
     1: required string request

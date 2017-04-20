@@ -38,15 +38,13 @@ func (handler *ArgNotStructHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := ArgNotStructEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	_, err := workflow.Handle(ctx, headers, &requestBody)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -55,7 +53,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(200, nil)
+	res.WriteJSONBytes(200, cliRespHeaders, nil)
 }
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
@@ -68,22 +66,31 @@ type ArgNotStructEndpoint struct {
 // Handle calls thrift client.
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *ArgNotStructHTTPRequest,
-) (map[string]string, error) {
+) (zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
+	clientHeaders := map[string]string{}
+
 	_, err := w.Clients.Bar.ArgNotStruct(
-		ctx, nil, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, err
 	}
 
-	return nil, nil
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	return resHeaders, nil
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

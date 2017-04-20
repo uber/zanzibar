@@ -31,13 +31,14 @@ import (
 	"sync"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"io/ioutil"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -204,7 +205,7 @@ func (gateway *Gateway) handleHealthRequest(
 		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
 	)
 
-	res.WriteJSONBytes(200, bytes)
+	res.WriteJSONBytes(200, nil, bytes)
 }
 
 // Close the http server
