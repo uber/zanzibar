@@ -72,6 +72,11 @@ generate:
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
+.PHONY: template-bindata
+template-bindata:
+	@go get -u github.com/jteeuwen/go-bindata/...
+	@go-bindata -pkg codegen -prefix codegen/templates -o codegen/template_files.go codegen/templates/...
+
 .PHONY: test-all
 test-all: test cover fast-bench bins install-wrk
 	make test-benchmark-runner
@@ -87,7 +92,7 @@ install-wrk:
 	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make >install_wrk.log)
 
 .PHONY: test
-test: generate lint
+test: template-bindata generate lint
 	make test-only
 
 .PHONY: test-only

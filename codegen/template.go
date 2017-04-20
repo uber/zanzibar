@@ -152,11 +152,29 @@ type Template struct {
 	template *tmpl.Template
 }
 
+var templateFiles = []string{
+	"endpoint.tmpl",
+	"endpoint_register.tmpl",
+	"endpoint_test.tmpl",
+	"http_client.tmpl",
+	"init_clients.tmpl",
+	"main.tmpl",
+	"main_test.tmpl",
+	"structs.tmpl",
+	"tchannel_client.tmpl",
+}
+
 // NewTemplate creates a bundle of templates.
 func NewTemplate(templatePattern string) (*Template, error) {
-	t, err := tmpl.New("main").Funcs(funcMap).ParseGlob(templatePattern)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse template files")
+	t := tmpl.New("main").Funcs(funcMap)
+	for _, file := range templateFiles {
+		fileContent, err := Asset(file)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not read bin data for template %s", file)
+		}
+		if _, err := t.New(file).Parse(string(fileContent)); err != nil {
+			return nil, errors.Wrapf(err, "Could not parse template %s", file)
+		}
 	}
 	return &Template{
 		template: t,
