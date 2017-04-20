@@ -44,18 +44,15 @@ type TChanBaz interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error)
-
 	Compare(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBaz.BazResponse, map[string]string, error)
-
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (*clientsBazBaz.BazResponse, map[string]string, error)
-
 	SillyNoop(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -150,7 +147,6 @@ func (c *BazClient) Compare(
 	}
 
 	resp, err := clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
-
 	return resp, respHeaders, err
 }
 
@@ -177,7 +173,6 @@ func (c *BazClient) Ping(
 	}
 
 	resp, err := clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
-
 	return resp, respHeaders, err
 }
 
@@ -200,7 +195,7 @@ func (c *BazClient) SillyNoop(
 		case result.ServerErr != nil:
 			err = result.ServerErr
 		default:
-			err = errors.New("BazClient received no result or unknown exception for SimpleService")
+			err = errors.New("BazClient received no result or unknown exception for SillyNoop")
 		}
 	}
 	if err != nil {
