@@ -39,15 +39,13 @@ func (handler *CompareHandler) HandleRequest(
 		return
 	}
 
-	headers := map[string]string{}
-
 	workflow := CompareEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -56,7 +54,7 @@ func (handler *CompareHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // CompareEndpoint calls thrift client Baz.Compare
@@ -69,23 +67,32 @@ type CompareEndpoint struct {
 // Handle calls thrift client.
 func (w CompareEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *CompareHTTPRequest,
-) (*endpointsBazBaz.BazResponse, map[string]string, error) {
+) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToCompareClientRequest(r)
 
+	clientHeaders := map[string]string{}
+
 	clientRespBody, _, err := w.Clients.Baz.Compare(
-		ctx, nil, clientRequest,
+		ctx, clientHeaders, clientRequest,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
 	response := convertCompareClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, resHeaders, nil
 }
 
 func convertToCompareClientRequest(body *CompareHTTPRequest) *clientsBazBaz.SimpleService_Compare_Args {

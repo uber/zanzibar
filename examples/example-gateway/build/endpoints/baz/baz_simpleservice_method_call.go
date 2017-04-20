@@ -31,7 +31,6 @@ import (
 	"go.uber.org/zap"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
 // CallHandler is the handler for "/baz/call"
@@ -65,7 +64,7 @@ func (handler *CallHandler) HandleRequest(
 		Request: req,
 	}
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -74,7 +73,7 @@ func (handler *CallHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, cliRespHeaders, response)
+	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
 // CallEndpoint calls thrift client Baz.Call
@@ -94,7 +93,7 @@ func (w CallEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	clientRespBody, _, err := w.Clients.Baz.Call(
+	_, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -103,7 +102,7 @@ func (w CallEndpoint) Handle(
 			zap.String("error", err.Error()),
 		)
 		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Filter and map response headers from client to server response.
@@ -111,8 +110,7 @@ func (w CallEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertCallClientResponse(clientRespBody)
-	return response, resHeaders, nil
+	return resHeaders, nil
 }
 
 func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleService_Call_Args {
@@ -121,9 +119,4 @@ func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleServ
 	clientRequest.Arg = (*clientsBazBaz.BazRequest)(body.Arg)
 
 	return clientRequest
-}
-func convertCallClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
-	return downstreamResponse
 }

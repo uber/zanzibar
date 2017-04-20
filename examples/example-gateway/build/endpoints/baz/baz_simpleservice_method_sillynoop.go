@@ -52,7 +52,7 @@ func (handler *SillyNoopHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := SimpleEndpoint{
+	workflow := SillyNoopEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -85,7 +85,7 @@ func (w SillyNoopEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.Simple(ctx, clientHeaders)
+	_, err := w.Clients.Baz.SillyNoop(ctx, clientHeaders)
 
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

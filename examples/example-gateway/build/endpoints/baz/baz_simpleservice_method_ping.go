@@ -35,15 +35,13 @@ func (handler *PingHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	headers := map[string]string{}
-
 	workflow := PingEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, _, err := workflow.Handle(ctx, headers)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -52,7 +50,7 @@ func (handler *PingHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // PingEndpoint calls thrift client Baz.Ping
@@ -65,21 +63,30 @@ type PingEndpoint struct {
 // Handle calls thrift client.
 func (w PingEndpoint) Handle(
 	ctx context.Context,
-	headers map[string]string,
-) (*endpointsBazBaz.BazResponse, map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeaderInterface, error) {
+
+	clientHeaders := map[string]string{}
 
 	clientRespBody, _, err := w.Clients.Baz.Ping(
-		ctx, nil,
+		ctx, clientHeaders,
 	)
+
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
+		// TODO(sindelar): Consider returning partial headers in error case.
 		return nil, nil, err
 	}
 
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
 	response := convertPingClientResponse(clientRespBody)
-	return response, nil, nil
+	return response, resHeaders, nil
 }
 
 func convertPingClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
