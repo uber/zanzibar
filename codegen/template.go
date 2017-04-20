@@ -154,7 +154,7 @@ type Template struct {
 }
 
 // NewTemplate creates a bundle of templates.
-func NewTemplate(templatePattern string) (*Template, error) {
+func NewTemplate() (*Template, error) {
 	t := tmpl.New("main").Funcs(funcMap)
 	for _, file := range tmpldata.AssetNames() {
 		fileContent, err := tmpldata.Asset(file)

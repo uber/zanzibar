@@ -37,7 +37,6 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
-var templateDir = filepath.Join(getDirName(), "templates", "*.tmpl")
 var mandatoryClientFields = []string{
 	"clientType",
 	"clientId",
@@ -693,7 +692,7 @@ func NewGatewaySpec(
 	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
-	tmpl, err := NewTemplate(templateDir)
+	tmpl, err := NewTemplate()
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
 	}
