@@ -67,11 +67,15 @@ func (handler *SaveContactsHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSON(202, cliRespHeaders, response)

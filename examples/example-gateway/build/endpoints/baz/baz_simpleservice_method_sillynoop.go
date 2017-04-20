@@ -29,6 +29,9 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
 // SillyNoopHandler is the handler for "/baz/silly-noop"
@@ -60,11 +63,27 @@ func (handler *SillyNoopHandler) HandleRequest(
 
 	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		case *endpointsBazBaz.AuthErr:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
+		case *endpointsBazBaz.ServerErr:
+			res.WriteJSON(
+				500, cliRespHeaders, errValue,
+			)
+			return
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
@@ -88,11 +107,33 @@ func (w SillyNoopEndpoint) Handle(
 	_, err := w.Clients.Baz.SillyNoop(ctx, clientHeaders)
 
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+		switch errValue := err.(type) {
+
+		case *clientsBazBaz.AuthErr:
+			serverErr := convertSillyNoopAuthErr(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, serverErr
+
+		case *clientsBazBaz.ServerErr:
+			serverErr := convertSillyNoopServerErr(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, serverErr
+
+		default:
+			w.Logger.Warn("Could not make client request",
+				zap.String("error", errValue.Error()),
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, err
+
+		}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -101,4 +142,19 @@ func (w SillyNoopEndpoint) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	return resHeaders, nil
+}
+
+func convertSillyNoopAuthErr(
+	clientError *clientsBazBaz.AuthErr,
+) *endpointsBazBaz.AuthErr {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBazBaz.AuthErr{}
+	return serverError
+}
+func convertSillyNoopServerErr(
+	clientError *clientsBazBaz.ServerErr,
+) *endpointsBazBaz.ServerErr {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBazBaz.ServerErr{}
+	return serverError
 }

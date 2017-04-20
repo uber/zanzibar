@@ -63,11 +63,21 @@ func (handler *MissingArgHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		case *endpointsBarBar.BarException:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
@@ -93,11 +103,25 @@ func (w MissingArgEndpoint) Handle(
 	)
 
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+		switch errValue := err.(type) {
+
+		case *clientsBarBar.BarException:
+			serverErr := convertMissingArgBarException(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, serverErr
+
+		default:
+			w.Logger.Warn("Could not make client request",
+				zap.String("error", errValue.Error()),
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, err
+
+		}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -107,6 +131,14 @@ func (w MissingArgEndpoint) Handle(
 
 	response := convertMissingArgClientResponse(clientRespBody)
 	return response, resHeaders, nil
+}
+
+func convertMissingArgBarException(
+	clientError *clientsBarBar.BarException,
+) *endpointsBarBar.BarException {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBarBar.BarException{}
+	return serverError
 }
 
 func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
