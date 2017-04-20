@@ -34,7 +34,7 @@ import (
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/tmpldata"
+	"github.com/uber/zanzibar/codegen/templates"
 )
 
 const zanzibarPath = "github.com/uber/zanzibar"
@@ -156,8 +156,8 @@ type Template struct {
 // NewTemplate creates a bundle of templates.
 func NewTemplate() (*Template, error) {
 	t := tmpl.New("main").Funcs(funcMap)
-	for _, file := range tmpldata.AssetNames() {
-		fileContent, err := tmpldata.Asset(file)
+	for _, file := range templates.AssetNames() {
+		fileContent, err := templates.Asset(file)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Could not read bin data for template %s", file)
 		}
