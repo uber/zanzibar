@@ -22,7 +22,7 @@ func (w SaveContactsEndpoint) Handle(
 	ctx context.Context,
 	headers zanzibar.ServerHeaderInterface,
 	r *endpointContacts.SaveContactsRequest,
-) (*endpointContacts.SaveContactsResponse, map[string]string, error) {
+) (*endpointContacts.SaveContactsResponse, zanzibar.ServerHeaderInterface, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 

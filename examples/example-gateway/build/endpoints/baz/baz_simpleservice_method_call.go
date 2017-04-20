@@ -45,7 +45,7 @@ func (handler *CallHandler) HandleRequest(
 		Request: req,
 	}
 
-	response, respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -54,7 +54,7 @@ func (handler *CallHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, respHeaders, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // CallEndpoint calls thrift client Baz.Call
@@ -67,11 +67,9 @@ type CallEndpoint struct {
 // Handle calls thrift client.
 func (w CallEndpoint) Handle(
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *CallHTTPRequest,
-) (*endpointsBazBaz.BazResponse, map[string]string, error) {
+) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -89,10 +87,12 @@ func (w CallEndpoint) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertCallClientResponse(clientRespBody)
-	return response, endRespHead, nil
+	return response, resHeaders, nil
 }
 
 func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleService_Call_Args {

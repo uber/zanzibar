@@ -41,7 +41,7 @@ func (handler *MissingArgHandler) HandleRequest(
 		Request: req,
 	}
 
-	response, respHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -50,7 +50,7 @@ func (handler *MissingArgHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSON(200, respHeaders, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // MissingArgEndpoint calls thrift client Bar.MissingArg
@@ -63,10 +63,8 @@ type MissingArgEndpoint struct {
 // Handle calls thrift client.
 func (w MissingArgEndpoint) Handle(
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -83,10 +81,12 @@ func (w MissingArgEndpoint) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertMissingArgClientResponse(clientRespBody)
-	return response, endRespHead, nil
+	return response, resHeaders, nil
 }
 
 func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {

@@ -100,3 +100,18 @@ func TestSetOverwriteMultiKey(t *testing.T) {
 	assert.Equal(t, "newHeader", zh["foo"][0])
 	assert.Equal(t, 1, len(zh["foo"]))
 }
+
+func TestMissingKey(t *testing.T) {
+	zh := zanzibar.ServerHTTPHeader{}
+	emptyAr := make([]string, 0)
+	assert.Equal(t, emptyAr, zh.Keys())
+}
+
+func TestKeys(t *testing.T) {
+	zh := zanzibar.ServerHTTPHeader{}
+
+	zh["foo"] = []string{"headOne"}
+	zh["bar"] = []string{"otherHeader"}
+
+	assert.Equal(t, 2, len(zh.Keys()))
+}

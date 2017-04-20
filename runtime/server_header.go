@@ -29,6 +29,7 @@ type ServerHeaderInterface interface {
 	Get(key string) (string, bool)
 	Add(key string, value string)
 	Set(key string, value string)
+	Keys() []string
 }
 
 // ServerHTTPHeader wrapper to implement ServerHeaderInterface
@@ -70,4 +71,15 @@ func (zh ServerHTTPHeader) Set(
 	h := make([]string, 1)
 	h[0] = value
 	zh[key] = h
+}
+
+// Keys returns a slice of header keys.
+func (zh ServerHTTPHeader) Keys() []string {
+	keys := make([]string, len(zh))
+	i := 0
+	for k := range zh {
+		keys[i] = k
+		i++
+	}
+	return keys
 }

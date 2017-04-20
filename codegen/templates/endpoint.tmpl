@@ -76,13 +76,13 @@ func (handler *{{$handlerName}}) HandleRequest(
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	respHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, respHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
@@ -92,14 +92,14 @@ func (handler *{{$handlerName}}) HandleRequest(
 		return
 	}
 
-	{{- if .ResHeaders }}
+	{{- if .ReqHeaders }}
 	// TODO(sindelar): implement check headers on response
 	{{- end }}
 
 	{{if eq .ResponseType "" -}}
-	res.WriteJSONBytes({{.OKStatusCode.Code}}, respHeaders, nil)
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else -}}
-	res.WriteJSON({{.OKStatusCode.Code}}, respHeaders, response)
+	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
 	{{- end }}
 }
 
@@ -125,30 +125,22 @@ type {{$workflow}} struct {
 func (w {{$workflow}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
- 	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
-) (map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (zanzibar.ServerHeaderInterface, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
- 	// generation is implemented.	
-	headers zanzibar.ServerHeaderInterface,
-) (*{{.ResponseType}}, map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (*{{.ResponseType}}, zanzibar.ServerHeaderInterface, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
- 	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *{{.RequestType}},
-) (map[string]string, error) {
+) (zanzibar.ServerHeaderInterface, error) {
 {{else}}
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel 
- 	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeaderInterface,	
 	r *{{.RequestType}},
-) (*{{.ResponseType}}, map[string]string, error) {
+) (*{{.ResponseType}}, zanzibar.ServerHeaderInterface, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
@@ -156,23 +148,19 @@ func (w {{$workflow}}) Handle(
 	clientHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
-	{{- end}}
+	var h string
+	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
-	clientHeaders["{{index $reqHeaderMap $k}}"], ok = headers.Get("{{$k}}")
-	if !ok {
-		err := errors.New("Missing required header {{$k}}")
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return {{if eq $responseType ""}}nil, err{{else}}nil, nil, err{{end}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		clientHeaders["{{index $reqHeaderMap $k}}"] = h
 	}
 	{{- end}}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{else}}
-		respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
 		{{- end }}
 	{{else if eq $clientReqType ""}}
 		{{if (eq (len $resHeaderMap) 0) -}}
@@ -180,7 +168,7 @@ func (w {{$workflow}}) Handle(
 			ctx, clientHeaders,
 		)
 		{{else}}
-		clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders,
 		)
 		{{- end }}
@@ -190,7 +178,7 @@ func (w {{$workflow}}) Handle(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
@@ -200,7 +188,7 @@ func (w {{$workflow}}) Handle(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{else}}
-		clientRespBody, respHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
 			ctx, clientHeaders, clientRequest,
 		)
 		{{- end }}
@@ -214,18 +202,18 @@ func (w {{$workflow}}) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
-	{{if (ne (len $resHeaderMap) 0) -}}
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{range $i, $k := $resHeaderMapKeys}}
-	endRespHead["{{index $resHeaderMap $k}}"] = respHeaders["{{$k}}"]
+	resHeaders.Set("{{index $resHeaderMap $k}}", cliRespHeaders["{{$k}}"])
 	{{- end}}
-	{{- end }}
 
 	{{if eq .ResponseType "" -}}
-	return endRespHead, nil
+	return resHeaders, nil
 	{{- else -}}
 	response := convert{{title .Name}}ClientResponse(clientRespBody)
-	return response, endRespHead, nil
+	return response, resHeaders, nil
 	{{- end -}}
 }
 

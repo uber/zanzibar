@@ -6,7 +6,6 @@ package googlenow
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -42,7 +41,7 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 		Request: req,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -52,7 +51,7 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 	}
 	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSONBytes(202, respHeaders, nil)
+	res.WriteJSONBytes(202, cliRespHeaders, nil)
 }
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
@@ -65,35 +64,23 @@ type CheckCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
-) (map[string]string, error) {
+	reqHeaders zanzibar.ServerHeaderInterface,
+) (zanzibar.ServerHeaderInterface, error) {
 
 	clientHeaders := map[string]string{}
 
 	var ok bool
-
-	clientHeaders["X-Token"], ok = headers.Get("X-Token")
-	if !ok {
-		err := errors.New("Missing required header X-Token")
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
 	}
-	clientHeaders["X-Uuid"], ok = headers.Get("X-Uuid")
-	if !ok {
-		err := errors.New("Missing required header X-Uuid")
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
 	}
 
-	respHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
+	cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
@@ -103,10 +90,12 @@ func (w CheckCredentialsEndpoint) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
 
-	endRespHead["X-Token"] = respHeaders["X-Token"]
-	endRespHead["X-Uuid"] = respHeaders["X-Uuid"]
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return endRespHead, nil
+	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
+	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
+
+	return resHeaders, nil
 }

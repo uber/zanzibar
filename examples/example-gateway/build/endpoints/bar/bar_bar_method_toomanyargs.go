@@ -6,7 +6,6 @@ package bar
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -51,7 +50,7 @@ func (handler *TooManyArgsHandler) HandleRequest(
 		Request: req,
 	}
 
-	response, respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -61,7 +60,7 @@ func (handler *TooManyArgsHandler) HandleRequest(
 	}
 	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSON(200, respHeaders, response)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
@@ -74,37 +73,25 @@ type TooManyArgsEndpoint struct {
 // Handle calls thrift client.
 func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *TooManyArgsHTTPRequest,
-) (*endpointsBarBar.BarResponse, map[string]string, error) {
+) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
 	var ok bool
-
-	clientHeaders["X-Token"], ok = headers.Get("X-Token")
-	if !ok {
-		err := errors.New("Missing required header X-Token")
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
 	}
-	clientHeaders["X-Uuid"], ok = headers.Get("X-Uuid")
-	if !ok {
-		err := errors.New("Missing required header X-Uuid")
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
 	}
 
-	clientRespBody, respHeaders, err := w.Clients.Bar.TooManyArgs(
+	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,
 	)
 	if err != nil {
@@ -116,13 +103,15 @@ func (w TooManyArgsEndpoint) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
 
-	endRespHead["X-Token"] = respHeaders["X-Token"]
-	endRespHead["X-Uuid"] = respHeaders["X-Uuid"]
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
+	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
 	response := convertTooManyArgsClientResponse(clientRespBody)
-	return response, endRespHead, nil
+	return response, resHeaders, nil
 }
 
 func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {

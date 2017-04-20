@@ -44,7 +44,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 		Request: req,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -53,7 +53,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(200, respHeaders, nil)
+	res.WriteJSONBytes(200, cliRespHeaders, nil)
 }
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
@@ -66,11 +66,9 @@ type ArgNotStructEndpoint struct {
 // Handle calls thrift client.
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
-	// TODO(sindelar): Switch to zanzibar.Headers when tchannel
-	// generation is implemented.
-	headers zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeaderInterface,
 	r *ArgNotStructHTTPRequest,
-) (map[string]string, error) {
+) (zanzibar.ServerHeaderInterface, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}
@@ -88,9 +86,11 @@ func (w ArgNotStructEndpoint) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-	endRespHead := map[string]string{}
 
-	return endRespHead, nil
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	return resHeaders, nil
 }
 
 func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {

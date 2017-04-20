@@ -300,9 +300,8 @@ func TestResponseSetHeaders(t *testing.T) {
 		return
 	}
 
-	headers := map[string]string{
-		"foo": "bar",
-	}
+	headers := zanzibar.ServerHTTPHeader{}
+	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
