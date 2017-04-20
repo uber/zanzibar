@@ -312,7 +312,7 @@ func (ms *MethodSpec) setExceptions(
 			exception := ExceptionSpec{
 				StructSpec: StructSpec{
 					Type: typeName,
-					Name: e.Type.ThriftName(),
+					Name: e.Name,
 				},
 			}
 			ms.Exceptions[i] = exception

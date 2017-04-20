@@ -80,11 +80,11 @@ type {{$clientName}} struct {
 		if err == nil && !success {
 			switch {
 				{{range .Exceptions -}}
-				case result.{{.Name}} != nil:
-					err = result.{{.Name}}
+				case result.{{title .Name}} != nil:
+					err = result.{{title .Name}}
 				{{end -}}
 				default:
-					err = errors.New("{{$clientName}} received no result or unknown exception for {{.Name}}")
+					err = errors.New("{{$clientName}} received no result or unknown exception for {{title .Name}}")
 			}
 		}
 		if err != nil {
