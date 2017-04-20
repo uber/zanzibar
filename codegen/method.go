@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -60,6 +61,7 @@ type MethodSpec struct {
 	ResponseType     string
 	OKStatusCode     StatusCode
 	Exceptions       []ExceptionSpec
+	ExceptionsIndex  map[string]ExceptionSpec
 	ValidStatusCodes []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
@@ -291,6 +293,9 @@ func (ms *MethodSpec) setExceptions(
 		ms.OKStatusCode.Code: true,
 	}
 	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
+	ms.ExceptionsIndex = make(
+		map[string]ExceptionSpec, len(resultSpec.Exceptions),
+	)
 
 	for i, e := range resultSpec.Exceptions {
 		typeName, err := h.TypeFullName(curThriftFile, e.Type)
@@ -304,12 +309,14 @@ func (ms *MethodSpec) setExceptions(
 		}
 
 		if !ms.WantAnnot {
-			ms.Exceptions[i] = ExceptionSpec{
+			exception := ExceptionSpec{
 				StructSpec: StructSpec{
 					Type: typeName,
 					Name: e.Type.ThriftName(),
 				},
 			}
+			ms.Exceptions[i] = exception
+			ms.ExceptionsIndex[e.Name] = exception
 			continue
 		}
 
@@ -331,7 +338,7 @@ func (ms *MethodSpec) setExceptions(
 		}
 		seenStatusCodes[code] = true
 
-		ms.Exceptions[i] = ExceptionSpec{
+		exception := ExceptionSpec{
 			StructSpec: StructSpec{
 				Type:        typeName,
 				Name:        e.Name,
@@ -342,6 +349,8 @@ func (ms *MethodSpec) setExceptions(
 				Message: e.Name,
 			},
 		}
+		ms.Exceptions[i] = exception
+		ms.ExceptionsIndex[e.Name] = exception
 	}
 	return nil
 }
