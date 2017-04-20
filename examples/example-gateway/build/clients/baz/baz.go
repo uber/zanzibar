@@ -35,30 +35,6 @@ import (
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-// Interfaces for the service and client for the services defined in the IDL.
-
-// TChanBaz is the interface that defines the server handler and client interface.
-type TChanBaz interface {
-	Call(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Call_Args,
-	) (map[string]string, error)
-	Compare(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (*clientsBazBaz.BazResponse, map[string]string, error)
-	Ping(
-		ctx context.Context,
-		reqHeaders map[string]string,
-	) (*clientsBazBaz.BazResponse, map[string]string, error)
-	SillyNoop(
-		ctx context.Context,
-		reqHeaders map[string]string,
-	) (map[string]string, error)
-}
-
 // NewClient returns a new TChannel client for service baz.
 func NewClient(gateway *zanzibar.Gateway) *BazClient {
 	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
