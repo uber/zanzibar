@@ -27,19 +27,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // HTTPServer like, http.Server but improved management of listening and serving
 // Allows you to listen on port 0, query for real OS port and then serve requests
 type HTTPServer struct {
 	*http.Server
-	Logger zap.Logger
+	Logger *zap.Logger
 
 	listeningSocket net.Listener
 	closing         bool
 
 	RealPort int32
+	RealIP   string
 	RealAddr string
 }
 
@@ -59,6 +60,7 @@ func (server *HTTPServer) JustListen() (net.Listener, error) {
 
 	realAddr := ln.Addr().(*net.TCPAddr)
 	server.RealPort = int32(realAddr.Port)
+	server.RealIP = realAddr.IP.String()
 	server.RealAddr = realAddr.IP.String() + ":" +
 		strconv.Itoa(int(server.RealPort))
 

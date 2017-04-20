@@ -3,81 +3,54 @@ package contacts
 import (
 	"context"
 
-	"io/ioutil"
-
-	"github.com/pkg/errors"
-	"github.com/uber-go/zap"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/clients/contacts/contacts"
+	contactsClientStructs "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
-// HandleSaveContactsRequest "/contacts/:userUUID/contacts"
-func HandleSaveContactsRequest(
-	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	clients *clients.Clients,
-) {
-	var body SaveContactsRequest
-	ok := req.ReadAndUnmarshalBody(&body)
-	if !ok {
-		return
-	}
+// SaveContactsEndpoint ...
+type SaveContactsEndpoint struct {
+	Clients *clients.Clients
+	Logger  *zap.Logger
+	Request *zanzibar.ServerHTTPRequest
+}
 
+// Handle "/contacts/:userUUID/contacts"
+func (w SaveContactsEndpoint) Handle(
+	ctx context.Context,
+	headers zanzibar.ServerHeaderInterface,
+	r *endpointContacts.SaveContactsRequest,
+) (*endpointContacts.SaveContactsResponse, zanzibar.ServerHeaderInterface, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
-	body.UserUUID = req.Params[0].Value
-	body.AppType = req.Header.Get("x-uber-client-name")
-	body.DeviceType = req.Header.Get("x-uber-device")
-	body.AppVersion = req.Header.Get("x-uber-client-version")
+	r.UserUUID = endpointContacts.UUID(w.Request.Params[0].Value)
 
-	clientBody := convertToClient(&body)
-	cres, err := clients.Contacts.SaveContacts(ctx, clientBody)
+	clientBody := convertToClient(r)
+	cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
-		req.Logger.Error("Could not make client request",
+		w.Logger.Error("Could not make client request",
 			zap.String("error", err.Error()),
 		)
-		res.SendError(500, errors.Wrap(err, "Could not make client request:"))
-		return
+		return nil, nil, err
 	}
 
-	defer func() {
-		if cerr := cres.Body.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
+	// TODO: verify IsOKResponse() on client response status code
 
-	// Handle client respnse.
-	if !res.IsOKResponse(cres.StatusCode, []int{200, 202}) {
-		req.Logger.Warn("Unknown response status code",
-			zap.Int("status code", cres.StatusCode),
-		)
-	}
-
-	bytes, err := ioutil.ReadAll(cres.Body)
-	if err != nil {
-		res.SendError(500, errors.Wrap(err, "could not read client response body:"))
-		return
-	}
-	var clientRespBody contactsClientStructs.SaveContactsResponse
-	if err := clientRespBody.UnmarshalJSON(bytes); err != nil {
-		res.SendError(500, errors.Wrap(err, "could not unmarshal client response body:"))
-		return
-	}
-	response := convertToResponse(&clientRespBody)
-	res.WriteJSON(cres.StatusCode, response)
+	response := convertToResponse(cres)
+	return response, nil, nil
 }
 
 func convertToResponse(
 	body *contactsClientStructs.SaveContactsResponse,
-) *SaveContactsResponse {
-	return &SaveContactsResponse{}
+) *endpointContacts.SaveContactsResponse {
+	return &endpointContacts.SaveContactsResponse{}
 }
 
 func convertToClient(
-	body *SaveContactsRequest,
+	body *endpointContacts.SaveContactsRequest,
 ) *contactsClientStructs.SaveContactsRequest {
 	clientBody := &contactsClientStructs.SaveContactsRequest{}
 	clientBody.UserUUID = contactsClientStructs.UUID(body.UserUUID)
@@ -96,7 +69,7 @@ func convertToClient(
 		clientAttributes.LastTimeContacted = attributes.LastTimeContacted
 		clientAttributes.IsStarred = attributes.IsStarred
 		clientAttributes.HasCustomRingtone = attributes.HasCustomRingtone
-		clientAttributes.IsSendToVoicemail = attributes.IsSendToVoiceMail
+		clientAttributes.IsSendToVoicemail = attributes.IsSendToVoicemail
 		clientAttributes.HasThumbnail = attributes.HasThumbnail
 		clientAttributes.NamePrefix = attributes.NamePrefix
 		clientAttributes.NameSuffix = attributes.NameSuffix

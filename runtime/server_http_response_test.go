@@ -29,19 +29,26 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
 
 func TestInvalidStatusCode(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -50,7 +57,7 @@ func TestInvalidStatusCode(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSONBytes(999, []byte("true"))
+				res.WriteJSONBytes(999, nil, []byte("true"))
 			},
 		),
 	)
@@ -88,14 +95,20 @@ func TestInvalidStatusCode(t *testing.T) {
 }
 
 func TestCallingWriteJSONWithNil(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -104,7 +117,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, nil)
+				res.WriteJSON(200, nil, nil)
 			},
 		),
 	)
@@ -142,14 +155,19 @@ func (f failingJsonObj) MarshalJSON() ([]byte, error) {
 }
 
 func TestCallWriteJSONWithBadJSON(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -158,7 +176,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, failingJsonObj{})
+				res.WriteJSON(200, nil, failingJsonObj{})
 			},
 		),
 	)
@@ -210,14 +228,20 @@ type MyBody struct {
 }
 
 func TestResponsePeekBody(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -226,7 +250,7 @@ func TestResponsePeekBody(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, &MyBody{
+				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",
@@ -264,15 +288,24 @@ func TestResponsePeekBody(t *testing.T) {
 	)
 }
 
-func TestResponsePeekBodyError(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+func TestResponseSetHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if !assert.NoError(t, err) {
 		return
 	}
 
+	headers := zanzibar.ServerHTTPHeader{}
+	headers.Set("foo", "bar")
+
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.Router.Register(
-		"GET", "/foo", zanzibar.NewEndpoint(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -281,7 +314,53 @@ func TestResponsePeekBodyError(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				res.WriteJSON(200, &MyBody{
+				res.WriteJSON(200, headers, &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				})
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	assert.Equal(
+		t,
+		resp.Header.Get("foo"),
+		"bar",
+	)
+}
+
+func TestResponsePeekBodyError(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.Router.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSON(200, nil, &MyBody{
 					Token: "myToken",
 					Client: MyBodyClient{
 						Token: "myClientToken",

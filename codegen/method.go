@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"fmt"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -35,6 +36,13 @@ type PathSegment struct {
 	BodyIdentifier string
 }
 
+// ExceptionSpec contains information about thrift exceptions
+type ExceptionSpec struct {
+	StructSpec
+
+	StatusCode StatusCode
+}
+
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
 	Name       string
@@ -43,22 +51,32 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
-	// Headers needed, generated from "zanzibar.http.headers"
-	Headers             []string
-	RequestType         string
-	ResponseType        string
-	OKStatusCode        []StatusCode
-	ExceptionStatusCode []StatusCode
+	// ReqHeaders needed, generated from "zanzibar.http.reqHeaders"
+	ReqHeaders []string
+	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
+	ResHeaders []string
+
+	RequestType      string
+	ResponseType     string
+	OKStatusCode     StatusCode
+	Exceptions       []ExceptionSpec
+	ValidStatusCodes []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed  bool
 	RequestStruct []StructSpec
-	// The triftrw compiled spec, used to extract type information
+	// Thrift service name the method belongs to.
+	ThriftService string
+	// The thriftrw-generated go package name
+	GenCodePkgName string
+	// Whether the method needs annotation or not.
+	WantAnnot bool
+	// The thriftrw compiled spec, used to extract type information
 	CompiledThriftSpec *compile.FunctionSpec
 	// The downstream service method set by endpoint config
 	Downstream *ModuleSpec
 	// the downstream service name
 	DownstreamService string
-	// The downstream methdo spec for the endpoint
+	// The downstream method spec for the endpoint
 	DownstreamMethod *MethodSpec
 	// A map from upstream to downstream field names in the requests.
 	RequestFieldMap map[string]string
@@ -84,11 +102,84 @@ const (
 	antHTTPPath        = "zanzibar.http.path"
 	antHTTPStatus      = "zanzibar.http.status"
 	antHTTPReqDefBoxed = "zanzibar.http.req.def"
-	antHTTPHeaders     = "zanzibar.http.headers"
+	antHTTPReqHeaders  = "zanzibar.http.reqHeaders"
+	antHTTPResHeaders  = "zanzibar.http.resHeaders"
 	antHTTPRef         = "zanzibar.http.ref"
 	antMeta            = "zanzibar.meta"
 	antHandler         = "zanzibar.handler"
 )
+
+// NewMethod creates new method specification.
+func NewMethod(
+	thriftFile string,
+	funcSpec *compile.FunctionSpec,
+	packageHelper *PackageHelper,
+	wantAnnot bool,
+	thriftService string,
+) (*MethodSpec, error) {
+	method := &MethodSpec{}
+	method.CompiledThriftSpec = funcSpec
+	var err error
+	var ok bool
+	method.Name = funcSpec.MethodName()
+	method.WantAnnot = wantAnnot
+	method.ThriftService = thriftService
+
+	method.GenCodePkgName, err = packageHelper.TypePackageName(thriftFile)
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setResponseType(thriftFile, funcSpec.ResultSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setRequestType(thriftFile, funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+
+	if !wantAnnot {
+		return method, nil
+	}
+
+	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
+		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
+	}
+
+	method.EndpointName = funcSpec.Annotations[antHandler]
+	method.ReqHeaders = headers(funcSpec.Annotations[antHTTPReqHeaders])
+	method.ResHeaders = headers(funcSpec.Annotations[antHTTPResHeaders])
+
+	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
+	if err != nil {
+		return nil, err
+	}
+
+	method.setValidStatusCodes()
+
+	if method.HTTPMethod == "GET" && method.RequestType != "" {
+		return nil, errors.Errorf(
+			"invalid annotation: HTTP GET method with body type",
+		)
+	}
+
+	var httpPath string
+	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
+		return nil, errors.Errorf(
+			"missing anotation '%s' for HTTP path", antHTTPPath,
+		)
+	}
+	method.setHTTPPath(httpPath, funcSpec)
+
+	return method, nil
+}
 
 // setRequestType sets the request type of the method specification. If the
 // "zanzibar.http.req.def.boxed" is true, then the first parameter will be used as
@@ -120,7 +211,19 @@ func isStructType(spec compile.TypeSpec) bool {
 }
 
 func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSpec, h *PackageHelper) (string, error) {
-	requestType := strings.Title(f.Name) + "HTTPRequest"
+	var requestType string
+	// TODO: (lu) the assumption here is 'no annotation == tchannel', good enough until new protocol is introduced
+	if ms.WantAnnot {
+		requestType = strings.Title(f.Name) + "HTTPRequest"
+	} else {
+		// This is specifically generating the "Args" type that thriftrw generates.
+		requestType = fmt.Sprintf(
+			"%s.%s_%s_Args",
+			ms.GenCodePkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
+		)
+
+	}
+
 	ms.RequestStruct = make([]StructSpec, len(f.ArgsSpec))
 	for i, arg := range f.ArgsSpec {
 		typeName, err := h.TypeFullName(curThriftFile, arg.Type)
@@ -155,28 +258,89 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	if statusCode == "" {
 		return errors.Errorf("no http OK status code set by annotation '%s' ", antHTTPStatus)
 	}
-	scode := strings.Split(statusCode, ",")
-	ms.OKStatusCode = make([]StatusCode, len(scode))
-	var err error
-	for i, c := range scode {
-		ms.OKStatusCode[i].Code, err = strconv.Atoi(c)
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse the annotation %s for ok response status")
-		}
+
+	code, err := strconv.Atoi(statusCode)
+	if err != nil {
+		return errors.Wrapf(err,
+			"Could not parse status code annotation (%s) for ok response",
+			statusCode,
+		)
 	}
+	ms.OKStatusCode = StatusCode{
+		Code: code,
+	}
+
 	return nil
 }
 
-func (ms *MethodSpec) setExceptionStatusCode(resultSpec *compile.ResultSpec) error {
-	ms.ExceptionStatusCode = make([]StatusCode, len(resultSpec.Exceptions))
+func (ms *MethodSpec) setValidStatusCodes() {
+	ms.ValidStatusCodes = make([]int, len(ms.Exceptions)+1)
+
+	ms.ValidStatusCodes[0] = ms.OKStatusCode.Code
+	for i := 0; i < len(ms.Exceptions); i++ {
+		ms.ValidStatusCodes[i+1] = ms.Exceptions[i].StatusCode.Code
+	}
+}
+
+func (ms *MethodSpec) setExceptions(
+	curThriftFile string,
+	resultSpec *compile.ResultSpec,
+	h *PackageHelper,
+) error {
+	seenStatusCodes := map[int]bool{
+		ms.OKStatusCode.Code: true,
+	}
+	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
+
 	for i, e := range resultSpec.Exceptions {
+		typeName, err := h.TypeFullName(curThriftFile, e.Type)
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"cannot resolve type full name for %s for exception %s",
+				e.Type,
+				e.Name,
+			)
+		}
+
+		if !ms.WantAnnot {
+			ms.Exceptions[i] = ExceptionSpec{
+				StructSpec: StructSpec{
+					Type: typeName,
+					Name: e.Type.ThriftName(),
+				},
+			}
+			continue
+		}
+
 		code, err := strconv.Atoi(e.Annotations[antHTTPStatus])
 		if err != nil {
-			return errors.Wrapf(err, "cannot parse the annotation %s for exception %s", antHTTPStatus, e.Name)
+			return errors.Wrapf(
+				err,
+				"cannot parse the annotation %s for exception %s", antHTTPStatus, e.Name,
+			)
 		}
-		ms.ExceptionStatusCode[i] = StatusCode{
-			Code:    code,
-			Message: e.Name,
+
+		if seenStatusCodes[code] {
+			return errors.Wrapf(
+				err,
+				"cannot have duplicate status code %s for exception %s",
+				antHTTPStatus,
+				e.Name,
+			)
+		}
+		seenStatusCodes[code] = true
+
+		ms.Exceptions[i] = ExceptionSpec{
+			StructSpec: StructSpec{
+				Type:        typeName,
+				Name:        e.Name,
+				Annotations: e.Annotations,
+			},
+			StatusCode: StatusCode{
+				Code:    code,
+				Message: e.Name,
+			},
 		}
 	}
 	return nil
@@ -287,8 +451,8 @@ func (ms *MethodSpec) setDownstream(
 	}
 	if downstreamMethod == nil {
 		return errors.Errorf(
-			"Downstream method (%s) is not found: %s",
-			clientModule.ThriftFile, clientMethod,
+			"\n Downstream method '%s' is not found in '%s'",
+			clientMethod, clientModule.ThriftFile,
 		)
 	}
 	// Remove irrelevant services and methods.
@@ -301,6 +465,7 @@ func (ms *MethodSpec) setDownstream(
 func (ms *MethodSpec) setRequestFieldMap(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
+	h *PackageHelper,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 	ms.RequestFieldMap = map[string]string{}
@@ -335,9 +500,12 @@ func (ms *MethodSpec) setRequestFieldMap(
 			*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
 			ms.RequestTypeMap[field.Name] = field.Type.ThriftName()
 		default:
-			thriftPkgNameParts := strings.Split(field.Type.ThriftFile(), "/")
-			thriftPkgName := thriftPkgNameParts[len(thriftPkgNameParts)-2]
-			ms.RequestTypeMap[field.Name] = "(*clientType" + strings.Title(thriftPkgName) + "." + field.Type.ThriftName() + ")"
+			pkgName, err := h.TypePackageName(downstreamField.Type.ThriftFile())
+			if err != nil {
+				return err
+			}
+			ms.RequestTypeMap[field.Name] =
+				"(*" + pkgName + "." + field.Type.ThriftName() + ")"
 		}
 	}
 	return nil

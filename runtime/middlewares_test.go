@@ -27,11 +27,11 @@ import (
 
 	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
-	// TODO(sindelar): Refactor into a unit test and remove the
-	// example middleware (which creates a cyclic dependency)
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
 
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
@@ -57,7 +57,12 @@ func TestHandlers(t *testing.T) {
 	// TODO(sindelar): Refactor. We some helpers to build zanzibar
 	// request/responses without setting up a backend and register.
 	// Currently they require endpoints to instantiate.
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -66,7 +71,7 @@ func TestHandlers(t *testing.T) {
 
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/foo",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -96,7 +101,7 @@ func (c *countMiddleware) HandleRequest(
 ) bool {
 	c.reqCounter++
 	if !c.reqBail {
-		res.WriteJSONBytes(200, []byte(""))
+		res.WriteJSONBytes(200, nil, []byte(""))
 	}
 
 	return !c.reqBail
@@ -138,7 +143,12 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	middlewares := middlewareStack.Middlewares()
 	assert.Equal(t, 3, len(middlewares))
 
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -147,7 +157,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/foo",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -187,7 +197,12 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	middlewares := middlewareStack.Middlewares()
 	assert.Equal(t, 3, len(middlewares))
 
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -196,7 +211,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/foo",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -244,7 +259,12 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	// TODO(sindelar): Refactor. We some helpers to build zanzibar
 	// request/responses without setting up a backend and register.
 	// Currently they require endpoints to instantiate.
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -253,7 +273,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/foo",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -271,6 +291,6 @@ func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	res.WriteJSONBytes(200, []byte(""))
+	res.WriteJSONBytes(200, nil, []byte(""))
 	return
 }

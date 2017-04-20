@@ -1,16 +1,24 @@
 {
-	"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
+	"WantAnnot": true,
 	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
-		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/bar/bar",
-		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/github.com/uber/zanzibar/endpoints/foo/foo"
+		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo",
+			"AliasName": "endpointsFooFoo"
+		},
+		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar",
+			"AliasName": "endpointsBarBar"
+		}
 	],
 	"Services": [
 		{
 			"Name": "Bar",
-			"ThriftFile": "zanzibar/examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
+			"WantAnnot": true,
 			"Methods": [
 				{
 					"Name": "argNotStruct",
@@ -29,20 +37,30 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "ArgNotStructHTTPRequest",
 					"ResponseType": "",
-					"OKStatusCode": [
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
 						{
-							"Code": 200,
-							"Message": ""
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
 						}
 					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
+					"ValidStatusCodes": [
+						200,
+						403
 					],
 					"RequestBoxed": false,
 					"RequestStruct": [
@@ -52,6 +70,9 @@
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -76,23 +97,36 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
+					"ResponseType": "endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
 						{
-							"Code": 200,
-							"Message": ""
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
 						}
 					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
+					"ValidStatusCodes": [
+						200,
+						403
 					],
 					"RequestBoxed": false,
 					"RequestStruct": null,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -117,23 +151,36 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
+					"ResponseType": "endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
 						{
-							"Code": 200,
-							"Message": ""
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
 						}
 					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
+					"ValidStatusCodes": [
+						200,
+						403
 					],
 					"RequestBoxed": false,
 					"RequestStruct": null,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -158,29 +205,42 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
 					"RequestType": "NormalHTTPRequest",
-					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
+					"ResponseType": "endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
 						{
-							"Code": 200,
-							"Message": ""
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
 						}
 					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
+					"ValidStatusCodes": [
+						200,
+						403
 					],
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*bar.BarRequest",
+							"Type": "*endpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",
@@ -205,37 +265,53 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"Headers": [
+					"ReqHeaders": [
+						"x-uuid",
+						"x-token"
+					],
+					"ResHeaders": [
 						"x-uuid",
 						"x-token"
 					],
 					"RequestType": "TooManyArgsHTTPRequest",
-					"ResponseType": "bar.BarResponse",
-					"OKStatusCode": [
+					"ResponseType": "endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
 						{
-							"Code": 200,
-							"Message": ""
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
 						}
 					],
-					"ExceptionStatusCode": [
-						{
-							"Code": 403,
-							"Message": "barException"
-						}
+					"ValidStatusCodes": [
+						200,
+						403
 					],
 					"RequestBoxed": false,
 					"RequestStruct": [
 						{
-							"Type": "*bar.BarRequest",
+							"Type": "*endpointsBarBar.BarRequest",
 							"Name": "request",
 							"Annotations": null
 						},
 						{
-							"Type": "*foo.FooStruct",
+							"Type": "*endpointsFooFoo.FooStruct",
 							"Name": "foo",
 							"Annotations": null
 						}
 					],
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
 					"DownstreamService": "",

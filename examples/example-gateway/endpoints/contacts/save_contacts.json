@@ -2,11 +2,13 @@
 	"endpointType": "http",
 	"endpointId": "contacts",
 	"handleId": "saveContacts",
-	"thriftFile": "github.com/uber/zanzibar/endpoints/contacts/contacts.thrift",
+	"thriftFile": "endpoints/contacts/contacts.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Contacts::saveContacts",
     "workflowType": "custom",
     "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}	
 }

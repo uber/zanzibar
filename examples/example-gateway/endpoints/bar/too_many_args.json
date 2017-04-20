@@ -2,12 +2,20 @@
 	"endpointType": "http",
 	"endpointId": "bar",
 	"handleId": "tooManyArgs",
-	"thriftFile": "github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"thriftFile": "endpoints/bar/bar.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::tooManyArgs",
 	"workflowType": "httpClient",
 	"clientName": "Bar",
 	"clientMethod": "tooManyArgs",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {
+        "X-Uuid": "X-Uuid", 
+		"X-Token": "X-Token"
+	},
+	"resHeaderMap": {
+        "X-Uuid": "X-Uuid", 
+		"X-Token": "X-Token"
+	}	
 }

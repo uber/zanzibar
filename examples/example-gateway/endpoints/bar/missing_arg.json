@@ -2,12 +2,14 @@
 	"endpointType": "http",
 	"endpointId": "bar",
 	"handleId": "missingArg",
-	"thriftFile": "github.com/uber/zanzibar/endpoints/bar/bar.thrift",
+	"thriftFile": "endpoints/bar/bar.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::missingArg",
 	"workflowType": "httpClient",
 	"clientName": "Bar",
 	"clientMethod": "missingArg",
 	"testFixtures": [],
-	"middlewares": []
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}	
 }

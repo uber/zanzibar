@@ -31,6 +31,8 @@ import (
 type ModuleSpec struct {
 	// Source thrift file to generate the code.
 	ThriftFile string
+	// Whether the ThriftFile should have annotations or not
+	WantAnnot bool
 	// Go package path of this module.
 	GoPackage string
 	// Go package name, generated base on module name.
@@ -38,8 +40,14 @@ type ModuleSpec struct {
 	// Go client types file path, generated from thrift file.
 	GoThriftTypesFilePath string
 	// Generated imports
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
+}
+
+// GoPackageImport ...
+type GoPackageImport struct {
+	PackageName string
+	AliasName   string
 }
 
 // ServiceSpec specifies a service.
@@ -48,6 +56,8 @@ type ServiceSpec struct {
 	Name string
 	// Source thrift file to generate the code.
 	ThriftFile string
+	// Whether the service should have annotations or not
+	WantAnnot bool
 	// List of methods/endpoints of the service
 	Methods []*MethodSpec
 	// thriftrw compile spec.
@@ -55,7 +65,7 @@ type ServiceSpec struct {
 }
 
 // NewModuleSpec returns a specification for a thrift module
-func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, error) {
+func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) (*ModuleSpec, error) {
 	module, err := compile.Compile(thrift)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
@@ -66,6 +76,7 @@ func NewModuleSpec(thrift string, packageHelper *PackageHelper) (*ModuleSpec, er
 	}
 
 	moduleSpec := &ModuleSpec{
+		WantAnnot:   wantAnnot,
 		ThriftFile:  module.ThriftPath,
 		GoPackage:   targetPackage,
 		PackageName: module.GetName(),
@@ -91,7 +102,6 @@ func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageH
 		return errors.Wrapf(err, "can't add import %s", ms.ThriftFile)
 	}
 
-	sort.Strings(ms.IncludedPackages)
 	return nil
 }
 
@@ -103,7 +113,7 @@ func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *Package
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		serviceSpec, err := NewServiceSpec(module.Services[name], packageHelper)
+		serviceSpec, err := NewServiceSpec(module.Services[name], ms.WantAnnot, packageHelper)
 		if err != nil {
 			return err
 		}
@@ -113,8 +123,9 @@ func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *Package
 }
 
 // NewServiceSpec creates a service specification from given thrift file path.
-func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*ServiceSpec, error) {
+func NewServiceSpec(spec *compile.ServiceSpec, wantAnnot bool, packageHelper *PackageHelper) (*ServiceSpec, error) {
 	serviceSpec := &ServiceSpec{
+		WantAnnot:   wantAnnot,
 		Name:        spec.Name,
 		ThriftFile:  spec.File,
 		CompileSpec: spec,
@@ -138,6 +149,7 @@ func NewServiceSpec(spec *compile.ServiceSpec, packageHelper *PackageHelper) (*S
 func (ms *ModuleSpec) SetDownstream(
 	serviceName string, methodName string,
 	clientSpec *ClientSpec, clientService string, clientMethod string,
+	h *PackageHelper,
 ) error {
 	var service *ServiceSpec
 	for _, v := range ms.Services {
@@ -149,7 +161,7 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if service == nil {
 		return errors.Errorf(
-			"Module does not have service (%s)", serviceName,
+			"Module does not have service (%s)\n", serviceName,
 		)
 	}
 
@@ -163,12 +175,12 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if method == nil {
 		return errors.Errorf(
-			"Service (%s) does not have method (%s)", serviceName, methodName,
+			"Service (%s) does not have method (%s)\n", serviceName, methodName,
 		)
 	}
 
 	err := method.setDownstream(
-		clientSpec.ModuleSpec, clientService, clientMethod,
+		clientSpec.ModuleSpec, serviceName, clientMethod,
 	)
 	if err != nil {
 		return err
@@ -190,7 +202,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err := method.setRequestFieldMap(funcSpec, downstreamSpec)
+		err := method.setRequestFieldMap(funcSpec, downstreamSpec, h)
 		if err != nil {
 			return err
 		}
@@ -198,8 +210,12 @@ func (ms *ModuleSpec) SetDownstream(
 
 	// Adds imports for downstream services.
 	if !ms.isPackageIncluded(clientSpec.GoPackageName) {
+
 		ms.IncludedPackages = append(
-			ms.IncludedPackages, clientSpec.GoPackageName,
+			ms.IncludedPackages, GoPackageImport{
+				PackageName: clientSpec.GoPackageName,
+				AliasName:   "",
+			},
 		)
 	}
 
@@ -214,7 +230,10 @@ func (ms *ModuleSpec) SetDownstream(
 				}
 
 				ms.IncludedPackages = append(
-					ms.IncludedPackages, method.Downstream.GoThriftTypesFilePath,
+					ms.IncludedPackages, GoPackageImport{
+						PackageName: method.Downstream.GoThriftTypesFilePath,
+						AliasName:   "",
+					},
 				)
 			}
 		}
@@ -224,42 +243,10 @@ func (ms *ModuleSpec) SetDownstream(
 }
 
 // NewMethod creates new method specification.
-func (s *ServiceSpec) NewMethod(funcSpec *compile.FunctionSpec, packageHelper *PackageHelper) (*MethodSpec, error) {
-	method := &MethodSpec{}
-	method.CompiledThriftSpec = funcSpec
-	var err error
-	var ok bool
-	method.Name = funcSpec.MethodName()
-	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
-		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
-	}
-
-	method.EndpointName = funcSpec.Annotations[antHandler]
-	method.Headers = headers(funcSpec.Annotations[antHTTPHeaders])
-
-	if err = method.setExceptionStatusCode(funcSpec.ResultSpec); err != nil {
-		return nil, err
-	}
-	if err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus]); err != nil {
-		return nil, err
-	}
-	if err = method.setResponseType(s.ThriftFile, funcSpec.ResultSpec, packageHelper); err != nil {
-		return nil, err
-	}
-	if err = method.setRequestType(s.ThriftFile, funcSpec, packageHelper); err != nil {
-		return nil, err
-	}
-	if method.HTTPMethod == "GET" && method.RequestType != "" {
-		return nil, errors.Errorf("invalid annotation: HTTP GET method with body type")
-	}
-
-	var httpPath string
-	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
-		return nil, errors.Errorf("missing anotation '%s' for HTTP path", antHTTPPath)
-	}
-	method.setHTTPPath(httpPath, funcSpec)
-
-	return method, nil
+func (s *ServiceSpec) NewMethod(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) (*MethodSpec, error) {
+	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.Name)
 }
 
 func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {
@@ -267,15 +254,25 @@ func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHel
 	if err != nil {
 		return err
 	}
+	aliasName, err := packageHelper.TypePackageName(thriftPath)
+	if err != nil {
+		return err
+	}
+
 	if !ms.isPackageIncluded(newPkg) {
-		ms.IncludedPackages = append(ms.IncludedPackages, newPkg)
+		ms.IncludedPackages = append(
+			ms.IncludedPackages, GoPackageImport{
+				PackageName: newPkg,
+				AliasName:   aliasName,
+			},
+		)
 	}
 	return nil
 }
 
 func (ms *ModuleSpec) isPackageIncluded(pkg string) bool {
 	for _, includedPkg := range ms.IncludedPackages {
-		if pkg == includedPkg {
+		if pkg == includedPkg.PackageName {
 			return true
 		}
 	}

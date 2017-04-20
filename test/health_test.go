@@ -31,6 +31,9 @@ import (
 	m3 "github.com/uber-go/tally/m3/thrift"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 )
 
 var testBinary = filepath.Join(
@@ -63,7 +66,13 @@ func TestHealthCall(t *testing.T) {
 }
 
 func BenchmarkHealthCall(b *testing.B) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
+
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return

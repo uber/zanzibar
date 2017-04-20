@@ -29,7 +29,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
@@ -37,9 +39,14 @@ import (
 var benchBytes = []byte("{\"contacts\":[{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}}],\"appType\":\"MY_APP\"}")
 
 func BenchmarkSaveContacts(b *testing.B) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"contacts"},
-	})
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		&testGateway.Options{
+			KnownHTTPBackends: []string{"contacts"},
+		},
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
 		return
@@ -113,8 +120,8 @@ func TestSaveContactsCall(t *testing.T) {
 		},
 	)
 
-	saveContacts := &contacts.SaveContactsRequest{
-		Contacts: []*contacts.Contact{},
+	saveContacts := &endpointContacts.SaveContactsRequest{
+		Contacts: []*endpointContacts.Contact{},
 	}
 	rawBody, _ := saveContacts.MarshalJSON()
 

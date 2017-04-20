@@ -85,3 +85,9 @@ If you want to update a dependency:
 [ci]: https://travis-ci.org/uber/zanzibar
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
+
+## Update golden files
+
+```
+go test ./codegen/ -update
+```

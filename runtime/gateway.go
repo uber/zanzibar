@@ -31,10 +31,14 @@ import (
 	"sync"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
-	"github.com/uber-go/zap"
+	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -48,18 +52,18 @@ type Clients interface {
 // Options configures the gateway
 type Options struct {
 	MetricsBackend tally.CachedStatsReporter
-	LogWriter      zap.WriteSyncer
+	LogWriter      zapcore.WriteSyncer
 }
 
 // Gateway type
 type Gateway struct {
-	IP          string
 	Port        int32
 	RealPort    int32
 	RealAddr    string
 	WaitGroup   *sync.WaitGroup
 	Clients     Clients
-	Logger      zap.Logger
+	Channel     *tchannel.Channel
+	Logger      *zap.Logger
 	MetricScope tally.Scope
 	ServiceName string
 	Config      *StaticConfig
@@ -68,8 +72,9 @@ type Gateway struct {
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
-	logWriter         zap.WriteSyncer
+	logWriter         zapcore.WriteSyncer
 	server            *HTTPServer
+	localServer       *HTTPServer
 	tchannelServer    *TChannelServer
 	// clients?
 	//	- panic ???
@@ -81,7 +86,7 @@ func CreateGateway(
 	config *StaticConfig, opts *Options,
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
-	var logWriter zap.WriteSyncer
+	var logWriter zapcore.WriteSyncer
 	if opts != nil && opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
 	}
@@ -90,7 +95,6 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		IP:          config.MustGetString("ip"),
 		Port:        int32(config.MustGetInt("port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
@@ -99,6 +103,9 @@ func CreateGateway(
 		logWriter:      logWriter,
 		metricsBackend: metricsBackend,
 	}
+
+	gateway.setupConfig(config)
+	config.Freeze()
 
 	gateway.Router = NewRouter(gateway)
 
@@ -128,19 +135,35 @@ type RegisterFn func(gateway *Gateway, router *Router)
 func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 	gateway.register(register)
 
-	_, err := gateway.server.JustListen()
+	_, err := gateway.localServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port",
 			zap.String("error", err.Error()),
 		)
 		return errors.Wrap(err, "error listening on port")
 	}
-
+	if gateway.localServer.RealIP != gateway.server.RealIP {
+		_, err := gateway.server.JustListen()
+		if err != nil {
+			gateway.Logger.Error("Error listening on port",
+				zap.String("error", err.Error()),
+			)
+			return errors.Wrap(err, "error listening on port")
+		}
+	} else {
+		// Do not start at the same IP
+		gateway.server = gateway.localServer
+	}
 	gateway.RealPort = gateway.server.RealPort
 	gateway.RealAddr = gateway.server.RealAddr
 
 	gateway.WaitGroup.Add(1)
 	go gateway.server.JustServe(gateway.WaitGroup)
+
+	if gateway.server != gateway.localServer {
+		gateway.WaitGroup.Add(1)
+		go gateway.localServer.JustServe(gateway.WaitGroup)
+	}
 
 	return nil
 }
@@ -165,7 +188,7 @@ func (gateway *Gateway) register(register RegisterFn) {
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
 
-	gateway.Router.Register("GET", "/health", NewEndpoint(
+	gateway.Router.Register("GET", "/health", NewRouterEndpoint(
 		gateway, "health", "health", gateway.handleHealthRequest,
 	))
 
@@ -182,7 +205,7 @@ func (gateway *Gateway) handleHealthRequest(
 		"{\"ok\":true,\"message\":\"" + message + "\"}\n",
 	)
 
-	res.WriteJSONBytes(200, bytes)
+	res.WriteJSONBytes(200, nil, bytes)
 }
 
 // Close the http server
@@ -194,6 +217,9 @@ func (gateway *Gateway) Close() {
 
 	gateway.metricsBackend.Flush()
 	_ = gateway.metricScopeCloser.Close()
+	if gateway.localServer != gateway.server {
+		gateway.localServer.Close()
+	}
 	gateway.server.Close()
 }
 
@@ -205,6 +231,22 @@ func (gateway *Gateway) InspectOrDie() map[string]interface{} {
 // Wait for gateway to close the server
 func (gateway *Gateway) Wait() {
 	gateway.WaitGroup.Wait()
+}
+
+func (gateway *Gateway) setupConfig(config *StaticConfig) {
+	useDC := config.MustGetBoolean("useDatacenter")
+
+	if useDC {
+		dcFile := config.MustGetString("datacenterFile")
+		bytes, err := ioutil.ReadFile(dcFile)
+		if err != nil {
+			panic("expected datacenterFile: " + dcFile + " to exist")
+		}
+
+		config.SetOrDie("datacenter", string(bytes))
+	} else {
+		config.SetOrDie("datacenter", "unknown")
+	}
 }
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
@@ -261,24 +303,27 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupLogger(config *StaticConfig) error {
-	var output zap.Option
+	var output zapcore.WriteSyncer
 	tempLogger := zap.New(
-		zap.NewJSONEncoder(),
-		zap.Output(os.Stderr),
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stderr,
+			zap.InfoLevel,
+		),
 	)
 
 	loggerFileName := config.MustGetString("logger.fileName")
 	loggerOutput := config.MustGetString("logger.output")
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
-		var writer zap.WriteSyncer
+		var writer zapcore.WriteSyncer
 		if gateway.logWriter != nil {
-			writer = zap.MultiWriteSyncer(os.Stdout, gateway.logWriter)
+			writer = zap.CombineWriteSyncers(os.Stdout, gateway.logWriter)
 		} else {
 			writer = os.Stdout
 		}
 
-		output = zap.Output(writer)
+		output = writer
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
 		if err != nil {
@@ -291,7 +336,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		loggerFile, err := os.OpenFile(
 			loggerFileName,
 			os.O_APPEND|os.O_WRONLY|os.O_CREATE,
-			0666,
+			0644,
 		)
 		if err != nil {
 			tempLogger.Error("Error opening log file",
@@ -300,43 +345,85 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 			return errors.Wrap(err, "Error opening log file")
 		}
 		gateway.loggerFile = loggerFile
-		output = zap.Output(loggerFile)
+		output = loggerFile
 	}
 
-	// Default to a STDOUT logger
-	gateway.Logger = zap.New(
-		zap.NewJSONEncoder(
-			zap.RFC3339Formatter("ts"),
+	zapLogger := zap.New(
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			output,
+			zap.InfoLevel,
 		),
-		output,
+	)
+
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+
+	datacenter := gateway.Config.MustGetString("datacenter")
+
+	// Default to a STDOUT logger
+	gateway.Logger = zapLogger.With(
+		zap.String("hostname", host),
+		zap.Int("pid", os.Getpid()),
+		zap.String("zone", datacenter),
 	)
 	return nil
 }
 
 func (gateway *Gateway) setupHTTPServer() error {
+	listenIP, err := tchannel.ListenIP()
+	if err != nil {
+		return errors.Wrap(err, "error finding the best IP")
+	}
 	gateway.server = &HTTPServer{
 		Server: &http.Server{
-			Addr:    gateway.IP + ":" + strconv.FormatInt(int64(gateway.Port), 10),
+			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.Port), 10),
 			Handler: gateway.Router,
 		},
 		Logger: gateway.Logger,
 	}
 
+	gateway.localServer = &HTTPServer{
+		Server: &http.Server{
+			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.Port), 10),
+			Handler: gateway.Router,
+		},
+		Logger: gateway.Logger,
+	}
 	return nil
 }
 
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
-	tchannelServer, err := NewTChannelServer(
-		&TChannelServerOptions{
-			ServiceName: config.MustGetString("tchannel.serviceName"),
-			ProcessName: config.MustGetString("tchannel.processName"),
+	serviceName := config.MustGetString("tchannel.serviceName")
+	processName := config.MustGetString("tchannel.processName")
+
+	channel, err := tchannel.NewChannel(
+		serviceName,
+		&tchannel.ChannelOptions{
+			ProcessName: processName,
+
+			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
+			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
+			//RelayHost:                opts.RelayHost,
+			//RelayLocalHandlers:       opts.RelayLocalHandlers,
+			//RelayMaxTimeout:          opts.RelayMaxTimeout,
+			//StatsReporter:            opts.StatsReporter,
+			//Tracer:
+
+			Logger: NewTChannelLogger(gateway.Logger),
 		})
 
 	if err != nil {
-		return err
+		return errors.Errorf(
+			"Error creating top channel:\n    %s",
+			err)
 	}
 
-	gateway.tchannelServer = tchannelServer
+	gateway.Channel = channel
+	gateway.tchannelServer = NewTChannelServer(channel, gateway.Logger)
+
 	return nil
 }
 

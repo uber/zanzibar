@@ -31,7 +31,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	tmpl "text/template"
 
@@ -62,8 +61,14 @@ type MainFiles struct {
 type EndpointMeta struct {
 	GatewayPackageName string
 	PackageName        string
-	IncludedPackages   []string
+	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
+	ClientName         string
+	WorkflowName       string
+	ReqHeaderMap       map[string]string
+	ReqHeaderMapKeys   []string
+	ResHeaderMap       map[string]string
+	ResHeaderMapKeys   []string
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -80,8 +85,12 @@ type TestStub struct {
 	HandlerID              string
 	EndpointRequest        map[string]interface{} // Json blob
 	EndpointRequestString  string
+	EndpointReqHeaders     map[string]string      // Json blob
+	EndpointReqHeaderKeys  []string               // To keep in canonical order
 	EndpointResponse       map[string]interface{} // Json blob
 	EndpointResponseString string
+	EndpointResHeaders     map[string]string // Json blob
+	EndpointResHeaderKeys  []string          // To keep in canonical order
 
 	ClientStubs []ClientStub
 }
@@ -92,8 +101,12 @@ type ClientStub struct {
 	ClientMethod         string
 	ClientRequest        map[string]interface{} // Json blob
 	ClientRequestString  string
+	ClientReqHeaders     map[string]string      // Json blob
+	ClientReqHeaderKeys  []string               // To keep in canonical order
 	ClientResponse       map[string]interface{} // Json blob
 	ClientResponseString string
+	ClientResHeaders     map[string]string // Json blob
+	ClientResHeaderKeys  []string          // To keep in canonical order
 }
 
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
@@ -101,7 +114,6 @@ var funcMap = tmpl.FuncMap{
 	"title":        strings.Title,
 	"Title":        strings.Title,
 	"fullTypeName": fullTypeName,
-	"statusCodes":  statusCodes,
 	"camel":        camelCase,
 	"split":        strings.Split,
 	"dec":          decrement,
@@ -115,22 +127,6 @@ func fullTypeName(typeName, packageName string) string {
 		return typeName
 	}
 	return packageName + "." + typeName
-}
-
-func statusCodes(codes []StatusCode) string {
-	if len(codes) == 0 {
-		return "[]int{}"
-	}
-	buf := bytes.NewBufferString("[]int{")
-	for i := 0; i < len(codes)-1; i++ {
-		if _, err := buf.WriteString(strconv.Itoa(codes[i].Code) + ","); err != nil {
-			return err.Error()
-		}
-	}
-	if _, err := buf.WriteString(strconv.Itoa(codes[len(codes)-1].Code) + "}"); err != nil {
-		return err.Error()
-	}
-	return string(buf.Bytes())
 }
 
 func camelCase(src string) string {
@@ -180,6 +176,14 @@ func NewTemplate(templatePattern string) (*Template, error) {
 	}, nil
 }
 
+// ClientMeta ...
+type ClientMeta struct {
+	PackageName      string
+	ClientID         string
+	IncludedPackages []GoPackageImport
+	Services         []*ServiceSpec
+}
+
 // GenerateClientFile generates Go http code for services defined in thrift file.
 // It returns the path of generated client file and struct file or an error.
 func (t *Template) GenerateClientFile(
@@ -191,12 +195,18 @@ func (t *Template) GenerateClientFile(
 		return nil, nil
 	}
 
-	m.PackageName = m.PackageName + "Client"
+	clientMeta := &ClientMeta{
+		PackageName:      m.PackageName,
+		Services:         m.Services,
+		IncludedPackages: m.IncludedPackages,
+		ClientID:         c.ClientID,
+	}
 	err := t.execTemplateAndFmt(
 		"http_client.tmpl",
 		c.GoFileName,
-		m,
-		h.copyrightHeader)
+		clientMeta,
+		h.copyrightHeader,
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run http_client template")
 	}
@@ -204,7 +214,7 @@ func (t *Template) GenerateClientFile(
 	err = t.execTemplateAndFmt(
 		"structs.tmpl",
 		c.GoStructsFileName,
-		m,
+		clientMeta,
 		h.copyrightHeader)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run structs template")
@@ -237,7 +247,7 @@ func findMethod(
 // thrift file. It returns the path of generated method files, struct file or
 // an error.
 func (t *Template) GenerateEndpointFile(
-	e *EndpointSpec, h *PackageHelper, serviceName string, methodName string,
+	e *EndpointSpec, h *PackageHelper, thriftServiceName string, methodName string,
 ) (*EndpointFiles, error) {
 	m := e.ModuleSpec
 
@@ -256,28 +266,42 @@ func (t *Template) GenerateEndpointFile(
 		HandlerFiles: make([]string, 0, len(m.Services[0].Methods)),
 		StructFile:   e.GoStructsFileName,
 	}
-	method := findMethod(m, serviceName, methodName)
+	method := findMethod(m, thriftServiceName, methodName)
 	if method == nil {
 		return nil, errors.Errorf(
-			"Could not find serviceName (%s) + methodName (%s) in module",
-			serviceName, methodName,
+			"Could not find thriftServiceName (%s) + methodName (%s) in module",
+			thriftServiceName, methodName,
 		)
 	}
 
-	if method.Downstream == nil {
-		return nil, errors.Errorf(
-			"Could not find downstream for endpoint generation... "+
-				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-			methodName, serviceName, e.JSONFile,
-		)
+	includedPackages := m.IncludedPackages
+	if e.WorkflowImportPath != "" {
+		includedPackages = append(includedPackages, GoPackageImport{
+			PackageName: e.WorkflowImportPath,
+			AliasName:   "custom" + strings.Title(m.PackageName),
+		})
 	}
 
-	dest := e.TargetEndpointPath(serviceName, method.Name)
+	var workflowName string
+	if method.Downstream != nil {
+		workflowName = strings.Title(method.Name) + "Endpoint"
+	} else {
+		workflowName = "custom" + strings.Title(m.PackageName) + "." +
+			strings.Title(method.Name) + "Endpoint"
+	}
+
+	dest := e.TargetEndpointPath(thriftServiceName, method.Name)
 	meta := &EndpointMeta{
 		GatewayPackageName: h.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
-		IncludedPackages:   m.IncludedPackages,
+		IncludedPackages:   includedPackages,
 		Method:             method,
+		ReqHeaderMap:       e.ReqHeaderMap,
+		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
+		ResHeaderMap:       e.ResHeaderMap,
+		ResHeaderMapKeys:   e.ResHeaderMapKeys,
+		ClientName:         e.ClientName,
+		WorkflowName:       workflowName,
 	}
 
 	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta, h.copyrightHeader)
@@ -311,14 +335,6 @@ func (t *Template) GenerateEndpointTestFile(
 		)
 	}
 
-	if method.Downstream == nil {
-		return nil, errors.Errorf(
-			"Could not find downstream for endpoint generation... "+
-				"methodName: (%s), serviceName: (%s), jsonFile: (%s)",
-			methodName, serviceName, e.JSONFile,
-		)
-	}
-
 	dest := e.TargetEndpointTestPath(serviceName, methodName)
 
 	// Read test configurations
@@ -327,6 +343,11 @@ func (t *Template) GenerateEndpointTestFile(
 	var testStubs []TestStub
 	file, err := ioutil.ReadFile(testConfigPath)
 	if err != nil {
+		// If the test file does not exist then skip test generation.
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+
 		return nil, errors.Wrapf(err,
 			"Could not read endpoint test config for service %s, method %s",
 			serviceName, method.Name)
@@ -365,7 +386,48 @@ func (t *Template) GenerateEndpointTestFile(
 				return nil, errors.Wrapf(err,
 					"Error parsing JSON in test config.")
 			}
+			// Build canonicalized key list to keep templates in order
+			// when comparing to golden files.
+			clientStub.ClientReqHeaderKeys = make(
+				[]string,
+				len(clientStub.ClientReqHeaders))
+			i := 0
+			for k := range clientStub.ClientReqHeaders {
+				clientStub.ClientReqHeaderKeys[i] = k
+				i++
+			}
+			sort.Strings(clientStub.ClientReqHeaderKeys)
+			clientStub.ClientResHeaderKeys = make(
+				[]string,
+				len(clientStub.ClientResHeaders))
+			i = 0
+			for k := range clientStub.ClientResHeaders {
+				clientStub.ClientResHeaderKeys[i] = k
+				i++
+			}
+			sort.Strings(clientStub.ClientResHeaderKeys)
+
 		}
+		// Build canonicalized key list to keep templates in order
+		// when comparing to golden files.
+		testStub.EndpointReqHeaderKeys = make(
+			[]string,
+			len(testStub.EndpointReqHeaders))
+		i := 0
+		for k := range testStub.EndpointReqHeaders {
+			testStub.EndpointReqHeaderKeys[i] = k
+			i++
+		}
+		sort.Strings(testStub.EndpointReqHeaderKeys)
+		testStub.EndpointResHeaderKeys = make(
+			[]string,
+			len(testStub.EndpointResHeaders))
+		i = 0
+		for k := range testStub.EndpointResHeaders {
+			testStub.EndpointResHeaderKeys[i] = k
+			i++
+		}
+		sort.Strings(testStub.EndpointResHeaderKeys)
 	}
 
 	meta := &EndpointTestMeta{
@@ -396,7 +458,7 @@ type ClientInfoMeta struct {
 
 // ClientsInitFilesMeta ...
 type ClientsInitFilesMeta struct {
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	ClientInfo       []ClientInfoMeta
 }
 
@@ -423,14 +485,22 @@ func (t *Template) GenerateClientsInitFile(
 	}
 	sort.Sort(sortByClientName(clients))
 
-	includedPkgs := []string{}
+	includedPkgs := []GoPackageImport{}
 	for i := 0; i < len(clients); i++ {
 		if len(clients[i].ModuleSpec.Services) == 0 {
 			continue
 		}
 
+		pkgName := clients[i].GoPackageName
+		if clients[i].ClientType == "custom" {
+			pkgName = clients[i].CustomImportPath
+		}
+
 		includedPkgs = append(
-			includedPkgs, clients[i].GoPackageName,
+			includedPkgs, GoPackageImport{
+				PackageName: pkgName,
+				AliasName:   "",
+			},
 		)
 	}
 
@@ -448,11 +518,11 @@ func (t *Template) GenerateClientsInitFile(
 			)
 		}
 
-		service := module.Services[0]
+		//service := module.Services[0]
 		clientInfo = append(clientInfo, ClientInfoMeta{
-			FieldName:   strings.Title(service.Name),
+			FieldName:   strings.Title(clients[i].ClientName),
 			PackageName: module.PackageName,
-			TypeName:    strings.Title(service.Name) + "Client",
+			TypeName:    strings.Title(clients[i].ClientName) + "Client",
 		})
 	}
 
@@ -480,13 +550,16 @@ type EndpointRegisterInfo struct {
 	HTTPPath    string
 	EndpointID  string
 	HandlerID   string
+	PackageName string
 	HandlerType string
+	MethodName  string
+	HandlerName string
 	Middlewares []MiddlewareSpec
 }
 
 // EndpointsRegisterMeta ...
 type EndpointsRegisterMeta struct {
-	IncludedPackages []string
+	IncludedPackages []GoPackageImport
 	Endpoints        []EndpointRegisterInfo
 }
 
@@ -505,9 +578,9 @@ func (c sortByEndpointName) Less(i, j int) bool {
 		(c[j].EndpointID + c[j].HandleID)
 }
 
-func contains(arr []string, value string) bool {
+func contains(arr []GoPackageImport, value string) bool {
 	for i := 0; i < len(arr); i++ {
-		if arr[i] == value {
+		if arr[i].PackageName == value {
 			return true
 		}
 	}
@@ -525,8 +598,11 @@ func (t *Template) GenerateEndpointRegisterFile(
 	}
 	sort.Sort(sortByEndpointName(endpoints))
 
-	includedPkgs := []string{
-		h.GoGatewayPackageName() + "/clients",
+	includedPkgs := []GoPackageImport{
+		{
+			PackageName: h.GoGatewayPackageName() + "/clients",
+			AliasName:   "",
+		},
 	}
 	endpointsInfo := make([]EndpointRegisterInfo, 0, len(endpoints))
 
@@ -534,16 +610,19 @@ func (t *Template) GenerateEndpointRegisterFile(
 		espec := endpoints[i]
 
 		var goPkg string
-		if espec.WorkflowType == "httpClient" {
+		if espec.WorkflowType == "httpClient" || espec.WorkflowType == "tchannelClient" {
 			goPkg = espec.ModuleSpec.GoPackage
 		} else if espec.WorkflowType == "custom" {
-			goPkg = espec.WorkflowImportPath
+			goPkg = espec.ModuleSpec.GoPackage
 		} else {
 			panic("Unsupported WorkflowType: " + espec.WorkflowType)
 		}
 
 		if !contains(includedPkgs, goPkg) {
-			includedPkgs = append(includedPkgs, goPkg)
+			includedPkgs = append(includedPkgs, GoPackageImport{
+				PackageName: goPkg,
+				AliasName:   "",
+			})
 		}
 
 		method := findMethod(
@@ -559,14 +638,17 @@ func (t *Template) GenerateEndpointRegisterFile(
 		}
 
 		handlerType := espec.ModuleSpec.PackageName +
-			".Handle" + strings.Title(method.Name) + "Request"
+			"." + strings.Title(method.Name) + "Handler"
 
 		info := EndpointRegisterInfo{
 			EndpointID:  espec.EndpointID,
 			HandlerID:   espec.HandleID,
 			Method:      method.HTTPMethod,
 			HTTPPath:    method.HTTPPath,
+			PackageName: espec.ModuleSpec.PackageName,
 			HandlerType: handlerType,
+			MethodName:  strings.Title(method.Name),
+			HandlerName: strings.Title(method.Name) + "Handler",
 			Middlewares: espec.Middlewares,
 		}
 		endpointsInfo = append(endpointsInfo, info)
@@ -592,7 +674,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 // MainMeta ...
 type MainMeta struct {
-	IncludedPackages        []string
+	IncludedPackages        []GoPackageImport
 	GatewayName             string
 	RelativePathToAppConfig string
 }
@@ -632,9 +714,15 @@ func (t *Template) GenerateMainFile(
 	}
 
 	meta := &MainMeta{
-		IncludedPackages: []string{
-			h.GoGatewayPackageName() + "/clients",
-			h.GoGatewayPackageName() + "/endpoints",
+		IncludedPackages: []GoPackageImport{
+			{
+				PackageName: h.GoGatewayPackageName() + "/clients",
+				AliasName:   "",
+			},
+			{
+				PackageName: h.GoGatewayPackageName() + "/endpoints",
+				AliasName:   "",
+			},
 		},
 		GatewayName:             g.gatewayName,
 		RelativePathToAppConfig: deltaPath,
@@ -668,16 +756,23 @@ func (t *Template) execTemplateAndFmt(
 	data interface{},
 	copyrightHeader string,
 ) error {
+
 	file, err := openFileOrCreate(filePath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open file: %s", err)
+	}
+
+	_, err = io.WriteString(file, "// Code generated by zanzibar \n"+
+		"// @generated \n")
+	if err != nil {
+		return errors.Wrapf(err, "failed to write to file: %s", err)
 	}
 
 	_, err = io.WriteString(file, copyrightHeader)
 	if err != nil {
 		return errors.Wrapf(err, "failed to write to file: %s", err)
 	}
-	_, err = io.WriteString(file, "\n")
+	_, err = io.WriteString(file, "\n\n")
 	if err != nil {
 		return errors.Wrapf(err, "failed to write to file: %s", err)
 	}
@@ -707,6 +802,27 @@ func (t *Template) execTemplateAndFmt(
 	}
 
 	return nil
+}
+
+func (t *Template) execTemplate(
+	tplName string,
+	tplData interface{},
+) ([]byte, error) {
+	tplBuffer := bytes.NewBuffer(nil)
+
+	if err := t.template.ExecuteTemplate(
+		tplBuffer,
+		tplName,
+		tplData,
+	); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating template %s",
+			tplName,
+		)
+	}
+
+	return tplBuffer.Bytes(), nil
 }
 
 func openFileOrCreate(file string) (*os.File, error) {

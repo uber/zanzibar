@@ -2,7 +2,7 @@
 	"name": "bar",
 	"type": "http",
 	"config": {
-		"thriftFile": "github.com/uber/zanzibar/clients/bar/bar.thrift",
+		"thriftFile": "clients/bar/bar.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"clientName": "Bar",
 		"serviceName": "Bar"

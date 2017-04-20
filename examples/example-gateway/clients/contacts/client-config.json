@@ -2,7 +2,7 @@
 	"name": "contacts",
 	"type": "http",
 	"config": {
-		"thriftFile": "github.com/uber/zanzibar/clients/contacts/contacts.thrift",
+		"thriftFile": "clients/contacts/contacts.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"clientName": "Contacts",
 		"serviceName": "Contacts"

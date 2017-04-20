@@ -30,7 +30,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 // ServerHTTPRequest struct manages request
@@ -42,7 +42,7 @@ type ServerHTTPRequest struct {
 	startTime   time.Time
 	metrics     *EndpointMetrics
 
-	Logger zap.Logger
+	Logger *zap.Logger
 	Scope  tally.Scope
 
 	EndpointName string
@@ -50,13 +50,13 @@ type ServerHTTPRequest struct {
 	URL          *url.URL
 	Method       string
 	Params       httprouter.Params
-	Header       http.Header
+	Header       ServerHeaderInterface
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
 func NewServerHTTPRequest(
 	w http.ResponseWriter, r *http.Request,
-	params httprouter.Params, endpoint *Endpoint,
+	params httprouter.Params, endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
 		gateway:     endpoint.gateway,
@@ -68,7 +68,7 @@ func NewServerHTTPRequest(
 		URL:     r.URL,
 		Method:  r.Method,
 		Params:  params,
-		Header:  r.Header,
+		Header:  ServerHTTPHeader(r.Header),
 		metrics: &endpoint.metrics,
 	}
 	req.res = NewServerHTTPResponse(w, req)

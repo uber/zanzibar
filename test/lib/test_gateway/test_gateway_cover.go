@@ -153,7 +153,7 @@ func createTestBinaryFile(
 	mainPath string,
 	config map[string]interface{},
 ) (*testBinaryInfo, error) {
-	if os.Getenv("COVER_ON") == "1" && cachedBinaryFile == nil {
+	if os.Getenv("ZANZIBAR_CACHE") == "1" && cachedBinaryFile == nil {
 		// Try to load cachedBinaryFile from disk
 		tryLoadCachedBinaryTestInfo(mainPath)
 	}
@@ -193,8 +193,8 @@ func createTestBinaryFile(
 	allPackages := []string{}
 	for _, folder := range allFolders {
 		if folder == "./test/..." ||
-			folder == "./main/..." ||
 			folder == "./benchmarks/..." ||
+			folder == "./scripts/..." ||
 			folder == "" {
 			continue
 		}
@@ -227,7 +227,7 @@ func createTestBinaryFile(
 		CoverProfileFile: coverProfileFile,
 		MainFile:         mainPath,
 	}
-	if os.Getenv("COVER_ON") == "1" {
+	if os.Getenv("ZANZIBAR_CACHE") == "1" {
 		tryWriteCachedBinaryTestInfo()
 	}
 	return cachedBinaryFile, nil

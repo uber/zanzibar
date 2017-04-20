@@ -21,12 +21,14 @@
 package zanzibar
 
 import "net/http"
+import "go.uber.org/zap"
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
 	gateway *Gateway
 
 	Client  *http.Client
+	Logger  *zap.Logger
 	BaseURL string
 }
 
@@ -37,6 +39,7 @@ func NewHTTPClient(
 	return &HTTPClient{
 		gateway: gateway,
 
+		Logger: gateway.Logger,
 		Client: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,

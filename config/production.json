@@ -1,11 +1,9 @@
 {
 	"serviceName": "my-gateway",
-	"ip": "127.0.0.1",
 	"port": 4000,
 	"env": "production",
 
-	"logger.fileName": "/var/log/my-gateway/my-gateway.log",
-	"logger.output": "disk",
+	"logger.output": "stdout",
 
 	"metrics.type": "m3",
 	"metrics.tally.flushInterval": 1000,

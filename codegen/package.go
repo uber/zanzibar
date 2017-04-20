@@ -33,10 +33,8 @@ import (
 type PackageHelper struct {
 	// The root directory containing thrift files.
 	thriftRootDir string
-	// The root directory just for the gateway thrift files.
-	gatewayThriftRootDir string
 	// Namespace under thrift folder
-	gatewayThriftNamespace string
+	gatewayNamespace string
 	// The go package name of where all the generated structs are
 	genCodePackage string
 	// The directory to put the generated service code.
@@ -52,34 +50,27 @@ func NewPackageHelper(
 	thriftRootDir string,
 	genCodePackage string,
 	targetGenDir string,
-	gatewayThriftRootDir string,
-	copyrightHeader string,
+	gatewayNamespace string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
 	if err != nil {
 		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
 	}
 
-	gatewayThriftRootDir = path.Clean(gatewayThriftRootDir)
-	idlIndex := strings.Index(gatewayThriftRootDir, "idl/") + 4
-	gatewayThriftNamespace := gatewayThriftRootDir[idlIndex:]
-
-	genDirIndex := strings.Index(genDir, gatewayThriftNamespace)
+	genDirIndex := strings.Index(genDir, gatewayNamespace)
 	if genDirIndex == -1 {
 		return nil, errors.Errorf(
-			"gatewayThriftNamespace (%s) must be inside targetGenDir (%s)",
-			gatewayThriftNamespace,
+			"gatewayNamespace (%s) must be inside targetGenDir (%s)",
+			gatewayNamespace,
 			genDir,
 		)
 	}
 
 	p := &PackageHelper{
-		thriftRootDir:          path.Clean(thriftRootDir),
-		genCodePackage:         genCodePackage,
-		gatewayThriftRootDir:   gatewayThriftRootDir,
-		gatewayThriftNamespace: gatewayThriftNamespace,
-		targetGenDir:           genDir,
-		copyrightHeader:        copyrightHeader,
+		thriftRootDir:    path.Clean(thriftRootDir),
+		genCodePackage:   genCodePackage,
+		gatewayNamespace: gatewayNamespace,
+		targetGenDir:     genDir,
 	}
 	return p, nil
 }
@@ -105,11 +96,10 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 
 // GoGatewayPackageName returns the name of the gateway package
 func (p PackageHelper) GoGatewayPackageName() string {
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayThriftNamespace)
-
+	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
 	return path.Join(
-		p.gatewayThriftNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayThriftNamespace):],
+		p.gatewayNamespace,
+		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
 	)
 }
 
@@ -129,22 +119,20 @@ func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	root := path.Clean(p.gatewayThriftRootDir)
 
-	idx := strings.Index(thrift, root)
+	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in thrift dir (%s)",
-			thrift, p.gatewayThriftRootDir,
+			thrift, p.thriftRootDir,
 		)
 	}
 
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayThriftNamespace)
-
+	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
 	return path.Join(
-		p.gatewayThriftNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayThriftNamespace):],
-		filepath.Dir(thrift[idx+len(root):]),
+		p.gatewayNamespace,
+		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
+		filepath.Dir(thrift[idx+len(p.thriftRootDir):]),
 	), nil
 }
 
@@ -153,23 +141,33 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
 		return "", errors.Errorf("file %s is not .thrift", thrift)
 	}
-	file := path.Base(thrift)
-	return file[:len(file)-7], nil
-}
-
-func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
-	}
-	root := path.Clean(p.gatewayThriftRootDir)
-	idx := strings.Index(thrift, root)
+	idx := strings.Index(thrift, p.thriftRootDir)
 	if idx == -1 {
 		return "", errors.Errorf(
 			"file %s is not in thrift dir (%s)",
 			thrift, p.thriftRootDir,
 		)
 	}
-	return thrift[idx+len(root):], nil
+
+	// Strip the leading / and strip the .thrift on the end.
+	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(thrift)-7]
+
+	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
+	return camelCase(thriftPackageName), nil
+}
+
+func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {
+	if !strings.HasSuffix(thrift, ".thrift") {
+		return "", errors.Errorf("file %s is not .thrift", thrift)
+	}
+	idx := strings.Index(thrift, p.thriftRootDir)
+	if idx == -1 {
+		return "", errors.Errorf(
+			"file %s is not in thrift dir (%s)",
+			thrift, p.thriftRootDir,
+		)
+	}
+	return thrift[idx+len(p.thriftRootDir):], nil
 }
 
 // TargetClientsInitPath returns where the clients init should go

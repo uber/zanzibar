@@ -27,12 +27,19 @@ import (
 	"io/ioutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 )
 
 func TestTrailingSlashRoutes(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -41,7 +48,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/foo",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
 			"foo",
@@ -50,13 +57,13 @@ func TestTrailingSlashRoutes(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				resp *zanzibar.ServerHTTPResponse,
 			) {
-				resp.WriteJSONBytes(200, []byte("foo\n"))
+				resp.WriteJSONBytes(200, nil, []byte("foo\n"))
 			},
 		),
 	)
 	bgateway.ActualGateway.Router.Register(
 		"GET", "/bar/",
-		zanzibar.NewEndpoint(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"bar",
 			"bar",
@@ -65,7 +72,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				resp *zanzibar.ServerHTTPResponse,
 			) {
-				resp.WriteJSONBytes(200, []byte("bar\n"))
+				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
 			},
 		),
 	)
@@ -96,7 +103,12 @@ func TestTrailingSlashRoutes(t *testing.T) {
 }
 
 func TestRouterNotFound(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -118,7 +130,12 @@ func TestRouterNotFound(t *testing.T) {
 }
 
 func TestRouterInvalidMethod(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, nil)
+	gateway, err := benchGateway.CreateGateway(
+		nil,
+		nil,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}

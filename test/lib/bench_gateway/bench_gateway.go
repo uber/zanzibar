@@ -33,23 +33,22 @@ import (
 
 	"encoding/json"
 
-	"github.com/uber-go/zap"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"go.uber.org/zap/zapcore"
 )
 
 // BenchGateway for testing
 type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
 
-	backendsHTTP map[string]*testBackend.TestHTTPBackend
-	logBytes     *bytes.Buffer
-	readLogs     bool
-	errorLogs    map[string][]string
-	httpClient   *http.Client
+	backendsHTTP     map[string]*testBackend.TestHTTPBackend
+	backendsTChannel map[string]*testBackend.TestTChannelBackend
+	logBytes         *bytes.Buffer
+	readLogs         bool
+	errorLogs        map[string][]string
+	httpClient       *http.Client
 }
 
 func getDirName() string {
@@ -62,9 +61,18 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
+// CreateClientsFn ...
+type CreateClientsFn func(gateway *zanzibar.Gateway) interface{}
+
+// RegisterFn ...
+type RegisterFn func(g *zanzibar.Gateway, router *zanzibar.Router)
+
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
-	seedConfig map[string]interface{}, opts *testGateway.Options,
+	seedConfig map[string]interface{},
+	opts *testGateway.Options,
+	createClients CreateClientsFn,
+	regEndpoints RegisterFn,
 ) (testGateway.TestGateway, error) {
 	if seedConfig == nil {
 		seedConfig = map[string]interface{}{}
@@ -74,6 +82,11 @@ func CreateGateway(
 	}
 
 	backendsHTTP, err := testBackend.BuildHTTPBackends(seedConfig, opts.KnownHTTPBackends)
+	if err != nil {
+		return nil, err
+	}
+
+	backendsTChannel, err := testBackend.BuildTChannelBackends(seedConfig, opts.KnownTChannelBackends)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +116,9 @@ func CreateGateway(
 			},
 			Timeout: 30 * 1000 * time.Millisecond,
 		},
-		backendsHTTP: backendsHTTP,
-		logBytes:     bytes.NewBuffer(nil),
+		backendsHTTP:     backendsHTTP,
+		backendsTChannel: backendsTChannel,
+		logBytes:         bytes.NewBuffer(nil),
 
 		readLogs:  false,
 		errorLogs: map[string][]string{},
@@ -125,15 +139,15 @@ func CreateGateway(
 	}, seedConfig)
 
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
-		LogWriter: zap.AddSync(benchGateway.logBytes),
+		LogWriter: zapcore.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
 	}
-	gateway.Clients = clients.CreateClients(config, gateway)
+	gateway.Clients = createClients(gateway)
 
 	benchGateway.ActualGateway = gateway
-	err = gateway.Bootstrap(endpoints.Register)
+	err = gateway.Bootstrap(zanzibar.RegisterFn(regEndpoints))
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +198,11 @@ func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
 // HTTPBackends returns the HTTP backends of the gateway
 func (gateway *BenchGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
 	return gateway.backendsHTTP
+}
+
+// TChannelBackends returns the TChannel backends of the gateway
+func (gateway *BenchGateway) TChannelBackends() map[string]*testBackend.TestTChannelBackend {
+	return gateway.backendsTChannel
 }
 
 // MakeRequest helper
