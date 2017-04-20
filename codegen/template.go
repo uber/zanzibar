@@ -34,6 +34,7 @@ import (
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/tmpldata"
 )
 
 const zanzibarPath = "github.com/uber/zanzibar"
@@ -152,23 +153,11 @@ type Template struct {
 	template *tmpl.Template
 }
 
-var templateFiles = []string{
-	"endpoint.tmpl",
-	"endpoint_register.tmpl",
-	"endpoint_test.tmpl",
-	"http_client.tmpl",
-	"init_clients.tmpl",
-	"main.tmpl",
-	"main_test.tmpl",
-	"structs.tmpl",
-	"tchannel_client.tmpl",
-}
-
 // NewTemplate creates a bundle of templates.
 func NewTemplate(templatePattern string) (*Template, error) {
 	t := tmpl.New("main").Funcs(funcMap)
-	for _, file := range templateFiles {
-		fileContent, err := Asset(file)
+	for _, file := range tmpldata.AssetNames() {
+		fileContent, err := tmpldata.Asset(file)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Could not read bin data for template %s", file)
 		}
