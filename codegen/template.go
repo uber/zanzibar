@@ -112,6 +112,7 @@ type ClientStub struct {
 
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 var funcMap = tmpl.FuncMap{
+	"lower":        strings.ToLower,
 	"title":        strings.Title,
 	"Title":        strings.Title,
 	"fullTypeName": fullTypeName,
