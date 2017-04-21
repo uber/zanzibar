@@ -25,7 +25,6 @@ package baz
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
@@ -37,30 +36,25 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-var testCompareCounter int
+var testPingCounter int
 
-func compare(
-	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Compare_Args,
-) (*baz.BazResponse, map[string]string, error) {
-	testCompareCounter++
-	r1 := args.Arg1
-	r2 := args.Arg2
-	if r1.B1 && r1.S2 == "hello" && r1.I3 == 42 && r2.B1 && r2.S2 == "hola" && r2.I3 == 42 {
-		return &baz.BazResponse{
-			Message: "different",
-		}, nil, nil
+func ping(ctx context.Context, reqHeaders map[string]string) (*baz.BazResponse, map[string]string, error) {
+	testPingCounter++
+	res := baz.BazResponse{
+		Message: "pong",
 	}
-	return nil, nil, errors.New("Wrong Args")
+	return &res, nil, nil
 
 }
 
-func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
+func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "build", "main.go",
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -70,17 +64,17 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Compare",
-		bazServer.NewSimpleServiceCompareHandler(compare),
+		"Ping",
+		bazServer.NewSimpleServicePingHandler(ping),
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
-		"POST",
-		"/baz/compare",
+		"GET",
+		"/baz/ping",
 		headers,
-		bytes.NewReader([]byte(`{"arg1":{"b1":true,"s2":"hello","i3":42},"arg2":{"b1":true,"s2":"hola","i3":42}}`)),
+		bytes.NewReader([]byte(`{}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {
@@ -93,7 +87,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testCompareCounter)
+	assert.Equal(t, 1, testPingCounter)
 	assert.Equal(t, "200 OK", res.Status)
-	assert.Equal(t, `{"message":"different"}`, string(data))
+	assert.Equal(t, `{"message":"pong"}`, string(data))
 }

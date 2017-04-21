@@ -25,6 +25,7 @@ package baz
 import (
 	"bytes"
 	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 
@@ -32,23 +33,30 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-var testSillyNoopCounter int
+var testCallCounter int
 
-func sillyNoop(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
-	testSillyNoopCounter++
-	return nil, nil
-
+func call(
+	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
+) (map[string]string, error) {
+	testCallCounter++
+	r := args.Arg
+	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
+		return nil, nil
+	}
+	return nil, errors.New("Wrong Args")
 }
 
-func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
+func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "build", "main.go",
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -58,23 +66,23 @@ func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"SillyNoop",
-		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
+		"Call",
+		bazServer.NewSimpleServiceCallHandler(call),
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
-		"GET",
-		"/baz/silly-noop",
+		"POST",
+		"/baz/call",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
 
-	assert.Equal(t, 1, testSillyNoopCounter)
+	assert.Equal(t, 1, testCallCounter)
 	assert.Equal(t, "204 No Content", res.Status)
 }

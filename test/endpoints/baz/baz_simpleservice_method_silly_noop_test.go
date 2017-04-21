@@ -25,7 +25,6 @@ package baz
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -33,27 +32,24 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-var testPingCounter int
+var testSillyNoopCounter int
 
-func ping(ctx context.Context, reqHeaders map[string]string) (*baz.BazResponse, map[string]string, error) {
-	testPingCounter++
-	res := baz.BazResponse{
-		Message: "pong",
-	}
-	return &res, nil, nil
+func sillyNoop(ctx context.Context, reqHeaders map[string]string) (map[string]string, error) {
+	testSillyNoopCounter++
+	return nil, nil
 
 }
 
-func TestPingSuccessfulRequestOKResponse(t *testing.T) {
+func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "build", "main.go",
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -63,15 +59,15 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Ping",
-		bazServer.NewSimpleServicePingHandler(ping),
+		"SillyNoop",
+		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/baz/ping",
+		"/baz/silly-noop",
 		headers,
 		bytes.NewReader([]byte(`{}`)),
 	)
@@ -80,13 +76,6 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	defer func() { _ = res.Body.Close() }()
-	data, err := ioutil.ReadAll(res.Body)
-	if !assert.NoError(t, err, "failed to read response body") {
-		return
-	}
-
-	assert.Equal(t, 1, testPingCounter)
-	assert.Equal(t, "200 OK", res.Status)
-	assert.Equal(t, `{"message":"pong"}`, string(data))
+	assert.Equal(t, 1, testSillyNoopCounter)
+	assert.Equal(t, "204 No Content", res.Status)
 }

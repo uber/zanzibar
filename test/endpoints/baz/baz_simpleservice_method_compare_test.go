@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -36,26 +37,31 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-var testCallCounter int
+var testCompareCounter int
 
-func call(
-	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
-) (map[string]string, error) {
-	testCallCounter++
-	r := args.Arg
-	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
-		return nil, nil
+func compare(
+	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Compare_Args,
+) (*baz.BazResponse, map[string]string, error) {
+	testCompareCounter++
+	r1 := args.Arg1
+	r2 := args.Arg2
+	if r1.B1 && r1.S2 == "hello" && r1.I3 == 42 && r2.B1 && r2.S2 == "hola" && r2.I3 == 42 {
+		return &baz.BazResponse{
+			Message: "different",
+		}, nil, nil
 	}
-	return nil, errors.New("Wrong Args")
+	return nil, nil, errors.New("Wrong Args")
+
 }
 
-func TestCallSuccessfulRequestOKResponse(t *testing.T) {
+func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "Qux",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "build", "main.go",
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -65,23 +71,30 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Call",
-		bazServer.NewSimpleServiceCallHandler(call),
+		"Compare",
+		bazServer.NewSimpleServiceCompareHandler(compare),
 	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
 		"POST",
-		"/baz/call",
+		"/baz/compare",
 		headers,
-		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
+		bytes.NewReader([]byte(`{"arg1":{"b1":true,"s2":"hello","i3":42},"arg2":{"b1":true,"s2":"hola","i3":42}}`)),
 	)
 
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
 
-	assert.Equal(t, 1, testCallCounter)
-	assert.Equal(t, "204 No Content", res.Status)
+	defer func() { _ = res.Body.Close() }()
+	data, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "failed to read response body") {
+		return
+	}
+
+	assert.Equal(t, 1, testCompareCounter)
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, `{"message":"different"}`, string(data))
 }
