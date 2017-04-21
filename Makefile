@@ -21,12 +21,12 @@ PROGS = examples/example-gateway/build/example-gateway \
 .PHONY: check-licence
 check-licence:
 	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
-	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!templates' --dir '!template_bundle'
+	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
 	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
-	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!templates' --dir '!template_bundle'
+	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: install
 install:
