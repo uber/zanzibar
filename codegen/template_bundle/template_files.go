@@ -93,7 +93,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6955, mode: os.FileMode(420), modTime: time.Unix(1492806075, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6955, mode: os.FileMode(420), modTime: time.Unix(1492809227, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
