@@ -20,9 +20,9 @@ type SaveContactsEndpoint struct {
 // Handle "/contacts/:userUUID/contacts"
 func (w SaveContactsEndpoint) Handle(
 	ctx context.Context,
-	headers zanzibar.ServerHeaderInterface,
+	headers zanzibar.ServerHeader,
 	r *endpointContacts.SaveContactsRequest,
-) (*endpointContacts.SaveContactsResponse, zanzibar.ServerHeaderInterface, error) {
+) (*endpointContacts.SaveContactsResponse, zanzibar.ServerHeader, error) {
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 

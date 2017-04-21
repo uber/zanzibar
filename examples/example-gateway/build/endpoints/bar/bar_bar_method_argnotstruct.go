@@ -86,9 +86,9 @@ type ArgNotStructEndpoint struct {
 // Handle calls thrift client.
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeader,
 	r *ArgNotStructHTTPRequest,
-) (zanzibar.ServerHeaderInterface, error) {
+) (zanzibar.ServerHeader, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}

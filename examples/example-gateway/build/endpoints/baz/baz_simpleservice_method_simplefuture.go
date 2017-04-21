@@ -80,8 +80,8 @@ type SimpleFutureEndpoint struct {
 // Handle calls thrift client.
 func (w SimpleFutureEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.ServerHeader,
+) (zanzibar.ServerHeader, error) {
 
 	clientHeaders := map[string]string{}
 

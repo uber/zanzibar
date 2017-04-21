@@ -123,22 +123,22 @@ type {{$workflow}} struct {
 func (w {{$workflow}}) Handle(
 {{- if and (eq .RequestType "") (eq .ResponseType "") }}
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.ServerHeader,
+) (zanzibar.ServerHeader, error) {
 {{else if eq .RequestType "" }}
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (*{{.ResponseType}}, zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.ServerHeader,
+) (*{{.ResponseType}}, zanzibar.ServerHeader, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeader,
 	r *{{.RequestType}},
-) (zanzibar.ServerHeaderInterface, error) {
+) (zanzibar.ServerHeader, error) {
 {{else}}
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,	
+	reqHeaders zanzibar.ServerHeader,	
 	r *{{.RequestType}},
-) (*{{.ResponseType}}, zanzibar.ServerHeaderInterface, error) {
+) (*{{.ResponseType}}, zanzibar.ServerHeader, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)

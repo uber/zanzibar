@@ -84,8 +84,8 @@ type CheckCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w CheckCredentialsEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.ServerHeader,
+) (zanzibar.ServerHeader, error) {
 
 	clientHeaders := map[string]string{}
 

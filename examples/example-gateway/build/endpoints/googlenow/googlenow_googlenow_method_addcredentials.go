@@ -90,9 +90,9 @@ type AddCredentialsEndpoint struct {
 // Handle calls thrift client.
 func (w AddCredentialsEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.ServerHeader,
 	r *AddCredentialsHTTPRequest,
-) (zanzibar.ServerHeaderInterface, error) {
+) (zanzibar.ServerHeader, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
 	clientHeaders := map[string]string{}
