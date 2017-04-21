@@ -21,35 +21,35 @@ import (
 {{range $svc := .Services}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
-    {{- /* this is the service discovery service name */}}
+	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
 
-    {{/* TODO: (lu) support multiple host port */ -}}
+	{{/* TODO: (lu) support multiple host port */ -}}
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+		gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	client := zanzibar.NewTChannelClient(gateway.Channel,
-	    &zanzibar.TChannelClientOption{
-	    	ServiceName:       serviceName,
-	    	Timeout:           timeout,
-	    	TimeoutPerAttempt: timeoutPerAttempt,
-	    },
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+		},
 	)
 
 	return &{{$clientName}}{
-    	{{- /* this is the thrift service name, different from service discovery service name */}}
-	    thriftService: "{{$svc.Name}}",
-	    client:        client,
+		{{- /* this is the thrift service name, different from service discovery service name */}}
+		thriftService: "{{$svc.Name}}",
+		client:        client,
 	}
 }
 
@@ -60,47 +60,47 @@ type {{$clientName}} struct {
 }
 
 {{range .Methods}}
-    // {{.Name}} ...
-    func (c *{{$clientName}}) {{.Name}}(
-        ctx context.Context,
-        reqHeaders map[string]string,
-        {{if ne .RequestType "" -}}
-        args *{{.RequestType}},
-        {{end -}}
-    ) ({{- if ne .ResponseType "" -}} *{{.ResponseType}}, {{- end -}}map[string]string, error) {
-        var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+	// {{.Name}} ...
+	func (c *{{$clientName}}) {{.Name}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args *{{.RequestType}},
+		{{end -}}
+	) ({{- if ne .ResponseType "" -}} *{{.ResponseType}}, {{- end -}}map[string]string, error) {
+		var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
 
-        {{if eq .RequestType "" -}}
-            args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
-        {{end -}}
-	    success, respHeaders, err := c.client.Call(
-	        ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
-	    )
+		{{if eq .RequestType "" -}}
+			args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+		{{end -}}
+		success, respHeaders, err := c.client.Call(
+			ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+		)
 
-	    if err == nil && !success {
-	        switch {
-	            {{range .Exceptions -}}
-	            case result.{{.Name}} != nil:
-	                err = result.{{.Name}}
-	            {{end -}}
-	            default:
-	                err = errors.New("{{$clientName}} received no result or unknown exception for {{.Name}}")
-	        }
-	    }
-	    if err != nil {
-        {{if eq .ResponseType "" -}}
-	        return nil, err
-	    {{else -}}
-	        return nil, nil, err
-	    {{end -}}
-	    }
+		if err == nil && !success {
+			switch {
+				{{range .Exceptions -}}
+				case result.{{.Name}} != nil:
+					err = result.{{.Name}}
+				{{end -}}
+				default:
+					err = errors.New("{{$clientName}} received no result or unknown exception for {{.Name}}")
+			}
+		}
+		if err != nil {
+		{{if eq .ResponseType "" -}}
+			return nil, err
+		{{else -}}
+			return nil, nil, err
+		{{end -}}
+		}
 
-        {{if eq .ResponseType "" -}}
-	        return respHeaders, err
-	    {{else -}}
-	        resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
-	        return resp, respHeaders, err
-	    {{end -}}
-    }
+		{{if eq .ResponseType "" -}}
+			return respHeaders, err
+		{{else -}}
+			resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+			return resp, respHeaders, err
+		{{end -}}
+	}
 {{end -}}
 {{end}}
