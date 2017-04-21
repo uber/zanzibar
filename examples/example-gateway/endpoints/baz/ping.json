@@ -8,7 +8,6 @@
     "workflowType": "tchannelClient",
 	"clientName": "Baz",
 	"clientMethod": "Ping",
-    "workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz",
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},
