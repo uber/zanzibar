@@ -1,0 +1,15 @@
+{
+	"endpointType": "tchannel",
+	"endpointId": "baz",
+	"handleId": "call_tchannel",
+	"thriftFile": "endpoints/baz/baz.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::Call",
+    "workflowType": "tchannelClient",
+	"clientName": "Baz",
+	"clientMethod": "Call",
+	"testFixtures": [],
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
+}
