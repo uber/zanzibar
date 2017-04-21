@@ -125,6 +125,7 @@ func (generator *HTTPClientGenerator) Generate(
 	client, err := generator.templates.execTemplate(
 		"http_client.tmpl",
 		clientMeta,
+		generator.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -134,7 +135,11 @@ func (generator *HTTPClientGenerator) Generate(
 		)
 	}
 
-	structs, err := generator.templates.execTemplate("structs.tmpl", clientMeta)
+	structs, err := generator.templates.execTemplate(
+		"structs.tmpl",
+		clientMeta,
+		generator.packageHelper,
+	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -220,6 +225,7 @@ func (generator *TCahnnelClientGenerator) Generate(
 	client, err := generator.templates.execTemplate(
 		"tchannel_client.tmpl",
 		clientMeta,
+		generator.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -232,6 +238,7 @@ func (generator *TCahnnelClientGenerator) Generate(
 	server, err := generator.templates.execTemplate(
 		"tchannel_server.tmpl",
 		clientMeta,
+		generator.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -244,6 +251,7 @@ func (generator *TCahnnelClientGenerator) Generate(
 	handler, err := generator.templates.execTemplate(
 		"tchannel_handler.tmpl",
 		clientMeta,
+		generator.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(

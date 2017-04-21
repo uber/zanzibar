@@ -23,6 +23,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -59,11 +60,21 @@ func main() {
 		err, fmt.Sprintf("can not get abs path of config dir %s", configDirName),
 	)
 
+	copyright, err := ioutil.ReadFile(filepath.Join(
+		configDirName,
+		config.MustGetString("copyrightHeader"),
+	))
+	if err != nil {
+		// Default to an empty copyright for now
+		copyright = []byte("")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
 		config.MustGetString("genCodePackage"),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
 		config.MustGetString("gatewayNamespace"),
+		string(copyright),
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configDirName),
@@ -80,7 +91,6 @@ func main() {
 		config.MustGetString("clientConfig"),
 		config.MustGetString("endpointConfig"),
 		config.MustGetString("middlewareConfig"),
-		config.MustGetString("copyrightHeader"),
 		config.MustGetString("gatewayName"),
 	)
 	checkError(

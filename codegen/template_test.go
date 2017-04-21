@@ -63,6 +63,7 @@ func TestGenerateBar(t *testing.T) {
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		"github.com/uber/zanzibar",
+		testCopyrightHeader,
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {
 		return
@@ -79,7 +80,6 @@ func TestGenerateBar(t *testing.T) {
 		"./clients",
 		"./endpoints",
 		"./middlewares/middleware-config.json",
-		"./copyright_header.txt",
 		"example-gateway",
 	)
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {

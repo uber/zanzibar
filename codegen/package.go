@@ -51,6 +51,7 @@ func NewPackageHelper(
 	genCodePackage string,
 	targetGenDir string,
 	gatewayNamespace string,
+	copyrightHeader string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
 	if err != nil {
@@ -71,6 +72,7 @@ func NewPackageHelper(
 		genCodePackage:   genCodePackage,
 		gatewayNamespace: gatewayNamespace,
 		targetGenDir:     genDir,
+		copyrightHeader:  copyrightHeader,
 	}
 	return p, nil
 }

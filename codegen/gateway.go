@@ -769,19 +769,8 @@ func NewGatewaySpec(
 	clientConfig string,
 	endpointConfig string,
 	middlewareConfig string,
-	copyrightHeaderFile string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
-
-	copyright, err := ioutil.ReadFile(filepath.Join(
-		configDirName,
-		copyrightHeaderFile,
-	))
-	if err != nil {
-		// Default to an empty copyright for now
-		copyright = []byte("")
-	}
-	packageHelper.copyrightHeader = string(copyright)
 
 	tmpl, err := NewTemplate(templateDir)
 	if err != nil {
