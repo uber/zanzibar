@@ -87,9 +87,9 @@ type CompareEndpoint struct {
 // Handle calls thrift client.
 func (w CompareEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.Header,
 	r *CompareHTTPRequest,
-) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeaderInterface, error) {
+) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
 	clientRequest := convertToCompareClientRequest(r)
 
 	clientHeaders := map[string]string{}

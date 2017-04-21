@@ -83,8 +83,8 @@ type PingEndpoint struct {
 // Handle calls thrift client.
 func (w PingEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.Header,
+) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 

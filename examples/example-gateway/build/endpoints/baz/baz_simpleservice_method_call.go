@@ -88,7 +88,7 @@ func (w CallEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *CallHTTPRequest,
-) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
+) (zanzibar.Header, error) {
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
