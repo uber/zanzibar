@@ -24,8 +24,8 @@ import (
 	"net/http"
 )
 
-// ServerHeaderInterface defines methods on ServerHeaders
-type ServerHeaderInterface interface {
+// Header defines methods on ServerHeaders
+type Header interface {
 	Get(key string) (string, bool)
 	Add(key string, value string)
 	Set(key string, value string)

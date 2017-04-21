@@ -93,9 +93,9 @@ type TooManyArgsEndpoint struct {
 // Handle calls thrift client.
 func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.Header,
 	r *TooManyArgsHTTPRequest,
-) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
+) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
 	clientHeaders := map[string]string{}

@@ -50,7 +50,7 @@ type ServerHTTPRequest struct {
 	URL          *url.URL
 	Method       string
 	Params       httprouter.Params
-	Header       ServerHeaderInterface
+	Header       Header
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest

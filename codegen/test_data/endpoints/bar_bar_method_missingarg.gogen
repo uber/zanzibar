@@ -83,8 +83,8 @@ type MissingArgEndpoint struct {
 // Handle calls thrift client.
 func (w MissingArgEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
-) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
+	reqHeaders zanzibar.Header,
+) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 

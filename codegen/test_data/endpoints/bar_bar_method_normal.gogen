@@ -88,9 +88,9 @@ type NormalEndpoint struct {
 // Handle calls thrift client.
 func (w NormalEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeaderInterface,
+	reqHeaders zanzibar.Header,
 	r *NormalHTTPRequest,
-) (*endpointsBarBar.BarResponse, zanzibar.ServerHeaderInterface, error) {
+) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientHeaders := map[string]string{}
