@@ -11,7 +11,7 @@ GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
 	-o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/"
 
 # list all executables
 PROGS = examples/example-gateway/build/example-gateway \
@@ -21,12 +21,12 @@ PROGS = examples/example-gateway/build/example-gateway \
 .PHONY: check-licence
 check-licence:
 	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
-	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen'
+	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!templates'
 
 .PHONY: fix-licence
 fix-licence:
 	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
-	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen'
+	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!templates'
 
 .PHONY: install
 install:
@@ -69,6 +69,9 @@ lint: check-licence
 
 .PHONY: generate
 generate:
+	@go get -u github.com/jteeuwen/go-bindata/...
+	@go-bindata -pkg templates -prefix codegen/templates -o codegen/templates/template_files.go codegen/templates/...
+	@gofmt -w -e -s "codegen/templates/template_files.go"
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 

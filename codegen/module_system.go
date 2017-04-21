@@ -34,7 +34,7 @@ import (
 // module system (clients, endpoints)
 func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 	system := module.NewSystem()
-	tmpl, err := NewTemplate(templateDir)
+	tmpl, err := NewTemplate()
 
 	if err != nil {
 		return nil, err
