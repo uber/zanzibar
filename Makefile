@@ -1,5 +1,3 @@
-
-
 PKGS = $(shell glide novendor)
 PKG_FILES = benchmarks codegen examples runtime test
 
@@ -20,12 +18,12 @@ PROGS = examples/example-gateway/build/example-gateway \
 
 .PHONY: check-licence
 check-licence:
-	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
+	ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
-	ls ./node_modules/.bin/uber-licence 2>/dev/null || npm i uber-licence
+	ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: install
@@ -36,8 +34,18 @@ install:
 	glide --version || go get -u -f github.com/Masterminds/glide
 	glide install
 
+.PHONY: eclint-check
+eclint-check:
+	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
+	./node_modules/.bin/eclint check "./{codegen,example}/**/*.{json,tmpl}"
+
+.PHONY: eclint-fix
+eclint-fix:
+	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
+	./node_modules/.bin/eclint fix "./{codegen,example}/**/*.{json,tmpl}"
+
 .PHONY: lint
-lint: check-licence
+lint: check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@gofmt -d -s $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log

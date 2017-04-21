@@ -1,14 +1,14 @@
 [{
-    "testName": "successfulRequest",
-    "endpointId": "bar",
-    "handlerId": "argNotStruct",
-    "endpointRequest": "{}",
-    "endpointResponse": "{}",
+	"testName": "successfulRequest",
+	"endpointId": "bar",
+	"handlerId": "argNotStruct",
+	"endpointRequest": "{}",
+	"endpointResponse": "{}",
 
-    "clientStubs": [{
-        "clientId": "bar",
-        "clientMethod": "argNotStruct",
-        "clientRequest": "{}",
-        "clientResponse": "{}"
-    }]
+	"clientStubs": [{
+		"clientId": "bar",
+		"clientMethod": "argNotStruct",
+		"clientRequest": "{}",
+		"clientResponse": "{}"
+	}]
 }]

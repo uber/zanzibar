@@ -1,14 +1,14 @@
 [{
-    "testName": "successfulRequest",
-    "endpointId": "bar",
-    "handlerId": "missingArg",
-    "endpointRequest": "{}",
-    "endpointResponse": "{}",
+	"testName": "successfulRequest",
+	"endpointId": "bar",
+	"handlerId": "missingArg",
+	"endpointRequest": "{}",
+	"endpointResponse": "{}",
 
-    "clientStubs": [{
-        "clientId": "bar",
-        "clientMethod": "missingArg",
-        "clientRequest": "{}",
-        "clientResponse": "{}"
-    }]
+	"clientStubs": [{
+		"clientId": "bar",
+		"clientMethod": "missingArg",
+		"clientRequest": "{}",
+		"clientResponse": "{}"
+	}]
 }]
