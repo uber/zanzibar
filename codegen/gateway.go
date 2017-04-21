@@ -754,11 +754,12 @@ type GatewaySpec struct {
 	EndpointModules   map[string]*EndpointSpec
 	MiddlewareModules map[string]*MiddlewareSpec
 
-	gatewayName       string
-	configDirName     string
-	clientConfigDir   string
-	endpointConfigDir string
-	middlewareConfig  string
+	gatewayName         string
+	configDirName       string
+	clientConfigDir     string
+	endpointConfigDir   string
+	middlewareConfig    string
+	copyrightHeaderFile string
 }
 
 // NewGatewaySpec sets up gateway spec
@@ -770,6 +771,7 @@ func NewGatewaySpec(
 	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
+
 	tmpl, err := NewTemplate(templateDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
