@@ -56,7 +56,11 @@ func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop))
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"SillyNoop",
+		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
+	)
 
 	headers := map[string]string{}
 

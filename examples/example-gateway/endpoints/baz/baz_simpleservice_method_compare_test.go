@@ -68,7 +68,11 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewSimpleServiceCompareHandler(compare))
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"Compare",
+		bazServer.NewSimpleServiceCompareHandler(compare),
+	)
 
 	headers := map[string]string{}
 

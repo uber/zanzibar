@@ -44,10 +44,4 @@ type TChanHandler interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
 	Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp RWTStruct, respHeaders map[string]string, err error)
-
-	// Service returns the service name.
-	Service() string
-
-	// Methods returns the method name handled by this handler.
-	Method() string
 }
