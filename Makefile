@@ -48,13 +48,13 @@ lint: check-licence
 	@echo "Checking vet..."
 	@$(foreach dir,$(PKG_FILES),go tool vet $(VET_RULES) $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking lint..."
-	@go get github.com/golang/lint/golint
+	@go get -u github.com/golang/lint/golint
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking errcheck..."
-	@go get github.com/kisielk/errcheck
+	@go get -u github.com/kisielk/errcheck
 	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
-	@go get honnef.co/go/tools/cmd/staticcheck
+	@go get -u honnef.co/go/tools/cmd/staticcheck
 	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
@@ -69,7 +69,7 @@ lint: check-licence
 
 .PHONY: generate
 generate:
-	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
+	@goimports -h 2>/dev/null || go get -u golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
 .PHONY: test-all
@@ -156,7 +156,7 @@ cover: clean-cover
 
 .PHONY: generate-istanbul-json
 generate-istanbul-json:
-	@go get github.com/axw/gocov/gocov
+	@go get -u github.com/axw/gocov/gocov
 	@gocov convert ./coverage/cover.out > coverage/gocov.json
 	@node ./scripts/gocov-to-istanbul-coverage.js ./coverage/gocov.json \
 		> coverage/istanbul.json
@@ -173,7 +173,7 @@ view-istanbul: generate-istanbul-json
 
 .PHONY: view-gocov
 view-gocov:
-	@go get github.com/axw/gocov/gocov
+	@go get -u github.com/axw/gocov/gocov
 	@go get -u gopkg.in/matm/v1/gocov-html
 	@gocov convert ./coverage/cover.out > coverage/gocov.json
 	@cat coverage/gocov.json | gocov-html > ./coverage/index.html
