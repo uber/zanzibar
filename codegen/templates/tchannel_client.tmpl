@@ -23,48 +23,48 @@ import (
 // TChan{{title $clientID}} is the interface that defines the server handler and client interface.
 type TChan{{title $clientID}} interface {
 	{{range .Methods}}
-	    {{if and (eq .RequestType "") (eq .ResponseType "")}}
-		    {{- .Name}}(
-		        ctx context.Context,
-		        reqHeaders map[string]string,
-		    ) (
-		        map[string]string,
-		        error,
-		    )
-	    {{else if eq .RequestType ""}}
-		    {{- .Name}}(
-		        ctx context.Context,
-		        reqHeaders map[string]string,
-		    ) (
-		        *{{.ResponseType}},
-		        map[string]string,
-		        error,
-		    )
-	    {{else if eq .ResponseType ""}}
-		    {{- .Name}}(
-		        ctx context.Context,
-		        reqHeaders map[string]string,
-		        args *{{.RequestType}},
-		    ) (
-		        map[string]string, error,
-		    )
+		{{if and (eq .RequestType "") (eq .ResponseType "")}}
+			{{- .Name}}(
+				ctx context.Context,
+				reqHeaders map[string]string,
+			) (
+				map[string]string,
+				error,
+			)
+		{{else if eq .RequestType ""}}
+			{{- .Name}}(
+				ctx context.Context,
+				reqHeaders map[string]string,
+			) (
+				*{{.ResponseType}},
+				map[string]string,
+				error,
+			)
+		{{else if eq .ResponseType ""}}
+			{{- .Name}}(
+				ctx context.Context,
+				reqHeaders map[string]string,
+				args *{{.RequestType}},
+			) (
+				map[string]string, error,
+			)
 		{{else}}
-		    {{- .Name}}(
-		        ctx context.Context,
-		        reqHeaders map[string]string,
-		        args *{{.RequestType}},
-		    ) (
-		        *{{.ResponseType}},
-		        map[string]string,
-		        error,
-		    )
+			{{- .Name}}(
+				ctx context.Context,
+				reqHeaders map[string]string,
+				args *{{.RequestType}},
+			) (
+				*{{.ResponseType}},
+				map[string]string,
+				error,
+			)
 		{{end}}
 	{{end -}}
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
-    {{- /* this is the service discovery service name */}}
+	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
 
@@ -74,10 +74,10 @@ func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+		gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-	    gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	client := zanzibar.NewTChannelClient(gateway.Channel,
@@ -89,7 +89,7 @@ func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 	)
 
 	return &{{$clientName}}{
-    	{{- /* this is the thrift service name, different from service discovery service name */}}
+		{{- /* this is the thrift service name, different from service discovery service name */}}
 		thriftService: "{{$svc.Name}}",
 		client:        client,
 	}
@@ -102,126 +102,126 @@ type {{$clientName}} struct {
 }
 
 {{range .Methods}}
-    {{- if and (eq .RequestType "") (eq .ResponseType "")}}
-        // {{.Name}} ...
-        func (c *{{$clientName}}) {{.Name}}(
-            ctx context.Context,
-            reqHeaders map[string]string,
-            ) (map[string]string, error) {
-            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+	{{- if and (eq .RequestType "") (eq .ResponseType "")}}
+		// {{.Name}} ...
+		func (c *{{$clientName}}) {{.Name}}(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			) (map[string]string, error) {
+			var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
 
-            args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
-	        success, respHeaders, err := c.client.Call(
-	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
-	        )
+			args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+			success, respHeaders, err := c.client.Call(
+				ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			)
 
-	        if err == nil && !success {
-		        switch {
-		            {{range .Exceptions -}}
-		            case result.{{.Name}} != nil:
-			            err = result.{{.Name}}
-		            {{end -}}
-		            default:
-			            err = errors.New("received no result or unknown exception for {{$svc.Name}}")
-		        }
-	        }
-	        if err != nil {
-	            return nil, err
-	        }
+			if err == nil && !success {
+				switch {
+					{{range .Exceptions -}}
+					case result.{{.Name}} != nil:
+						err = result.{{.Name}}
+					{{end -}}
+					default:
+						err = errors.New("received no result or unknown exception for {{$svc.Name}}")
+				}
+			}
+			if err != nil {
+				return nil, err
+			}
 
-		    return respHeaders, err
-        }
-    {{- else if eq .RequestType ""}}
-        // {{.Name}} ...
-        func (c *{{$clientName}}) {{.Name}}(
-            ctx context.Context,
-            reqHeaders map[string]string,
-        ) (*{{.ResponseType}}, map[string]string, error) {
-            var result {{.ResponseType}}
+			return respHeaders, err
+		}
+	{{- else if eq .RequestType ""}}
+		// {{.Name}} ...
+		func (c *{{$clientName}}) {{.Name}}(
+			ctx context.Context,
+			reqHeaders map[string]string,
+		) (*{{.ResponseType}}, map[string]string, error) {
+			var result {{.ResponseType}}
 
-            args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
-	        success, respHeaders, err := c.client.Call(
-	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
-	        )
+			args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+			success, respHeaders, err := c.client.Call(
+				ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			)
 
-	        if err == nil && !success {
-		        switch {
-		            {{range .Exceptions -}}
-		            case result.{{.Name}} != nil:
-			            err = result.{{.Name}}
-		            {{end -}}
-		            default:
-			            err = errors.New("received no result or unknown exception for {{.Name}}")
-		        }
-	        }
-	        if err != nil {
-	            return nil, nil, err
-	        }
+			if err == nil && !success {
+				switch {
+					{{range .Exceptions -}}
+					case result.{{.Name}} != nil:
+						err = result.{{.Name}}
+					{{end -}}
+					default:
+						err = errors.New("received no result or unknown exception for {{.Name}}")
+				}
+			}
+			if err != nil {
+				return nil, nil, err
+			}
 
-	        resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+			resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
 
-		    return resp, respHeaders, err
-        }
-    {{- else if eq .ResponseType ""}}
-        // {{.Name}} ...
-        func (c *{{$clientName}}) {{.Name}}(
-	        ctx context.Context,
-	        reqHeaders map[string]string,
-	        args *{{.RequestType}},
-	    ) (map[string]string, error) {
-            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+			return resp, respHeaders, err
+		}
+	{{- else if eq .ResponseType ""}}
+		// {{.Name}} ...
+		func (c *{{$clientName}}) {{.Name}}(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *{{.RequestType}},
+		) (map[string]string, error) {
+			var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
 
-	        success, respHeaders, err := c.client.Call(
-	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
-	        )
+			success, respHeaders, err := c.client.Call(
+				ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			)
 
-	        if err == nil && !success {
-		        switch {
-		        {{range .Exceptions -}}
-		            case result.{{.Name}} != nil:
-			            err = result.{{.Name}}
-		        {{end -}}
-		            default:
-			            err = errors.New("received no result or unknown exception for {{.Name}}")
-		        }
-	        }
-	        if err != nil {
-	            return nil, err
-	        }
+			if err == nil && !success {
+				switch {
+				{{range .Exceptions -}}
+					case result.{{.Name}} != nil:
+						err = result.{{.Name}}
+				{{end -}}
+					default:
+						err = errors.New("received no result or unknown exception for {{.Name}}")
+				}
+			}
+			if err != nil {
+				return nil, err
+			}
 
-		    return respHeaders, err
-        }
+			return respHeaders, err
+		}
 	{{- else}}
-        // {{.Name}} ...
-	    func (c *{{$clientName}}) {{.Name}}(
-	        ctx context.Context,
-	        reqHeaders map[string]string,
-	        args *{{.RequestType}},
-	    ) (*{{.ResponseType}}, map[string]string, error) {
-            var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+		// {{.Name}} ...
+		func (c *{{$clientName}}) {{.Name}}(
+			ctx context.Context,
+			reqHeaders map[string]string,
+			args *{{.RequestType}},
+		) (*{{.ResponseType}}, map[string]string, error) {
+			var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
 
-	        success, respHeaders, err := c.client.Call(
-	            ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
-	        )
+			success, respHeaders, err := c.client.Call(
+				ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			)
 
-	        if err == nil && !success {
-		        switch {
-		            {{range .Exceptions -}}
-		            case result.{{.Name}} != nil:
-			            err = result.{{.Name}}
-		            {{end -}}
-		            default:
-			            err = errors.New("received no result or unknown exception for {{.Name}}")
-		        }
-	        }
-	        if err != nil {
-	            return nil, nil, err
-	        }
+			if err == nil && !success {
+				switch {
+					{{range .Exceptions -}}
+					case result.{{.Name}} != nil:
+						err = result.{{.Name}}
+					{{end -}}
+					default:
+						err = errors.New("received no result or unknown exception for {{.Name}}")
+				}
+			}
+			if err != nil {
+				return nil, nil, err
+			}
 
-	        resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+			resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
 
-		    return resp, respHeaders, err
-        }
+			return resp, respHeaders, err
+		}
 	{{- end}}
 {{end -}}
 {{end}}
