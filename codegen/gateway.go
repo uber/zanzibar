@@ -365,7 +365,8 @@ func NewEndpointSpec(
 		)
 	}
 
-	if endpointConfigObj["endpointType"] != "http" {
+	endpointType := endpointConfigObj["endpointType"]
+	if endpointType != "http" && endpointType != "tchannel" {
 		return nil, errors.Errorf(
 			"Cannot support unknown endpointType for endpoint %s", jsonFile,
 		)
@@ -384,7 +385,7 @@ func NewEndpointSpec(
 		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, true, h)
+	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,

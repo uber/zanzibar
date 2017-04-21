@@ -221,11 +221,14 @@ func (t *Template) GenerateEndpointFile(
 		return nil, nil
 	}
 
-	err := t.execTemplateAndFmt(
-		"structs.tmpl", e.GoStructsFileName, m, h,
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not run structs template")
+	var err error
+	if e.EndpointType == "http" {
+		err = t.execTemplateAndFmt(
+			"structs.tmpl", e.GoStructsFileName, m, h,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not run structs template")
+		}
 	}
 
 	endpointFiles := &EndpointFiles{
@@ -257,6 +260,10 @@ func (t *Template) GenerateEndpointFile(
 	}
 
 	dest := e.TargetEndpointPath(thriftServiceName, method.Name)
+	// TODO: (lu) tmp way to differentiate endpoint of different types
+	if e.EndpointType == "tchannel" {
+		dest = strings.TrimRight(dest, ".go") + "_tchannel.go"
+	}
 	meta := &EndpointMeta{
 		GatewayPackageName: h.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
@@ -270,7 +277,14 @@ func (t *Template) GenerateEndpointFile(
 		WorkflowName:       workflowName,
 	}
 
-	err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta, h)
+	if e.EndpointType == "http" {
+		err = t.execTemplateAndFmt("endpoint.tmpl", dest, meta, h)
+	} else if e.EndpointType == "tchannel" {
+		err = t.execTemplateAndFmt("tchannel_endpoint.tmpl", dest, meta, h)
+	} else {
+		err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
+	}
+
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run endpoint template")
 	}
@@ -574,6 +588,9 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 	for i := 0; i < len(endpoints); i++ {
 		espec := endpoints[i]
+		if espec.EndpointType == "tchannel" {
+			continue
+		}
 
 		var goPkg string
 		if espec.WorkflowType == "httpClient" || espec.WorkflowType == "tchannelClient" {
