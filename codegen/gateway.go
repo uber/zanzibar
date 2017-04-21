@@ -753,11 +753,12 @@ type GatewaySpec struct {
 	EndpointModules   map[string]*EndpointSpec
 	MiddlewareModules map[string]*MiddlewareSpec
 
-	gatewayName       string
-	configDirName     string
-	clientConfigDir   string
-	endpointConfigDir string
-	middlewareConfig  string
+	gatewayName         string
+	configDirName       string
+	clientConfigDir     string
+	endpointConfigDir   string
+	middlewareConfig    string
+	copyrightHeaderFile string
 }
 
 // NewGatewaySpec sets up gateway spec
