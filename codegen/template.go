@@ -35,7 +35,7 @@ import (
 	tmpl "text/template"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/codegen/templates"
+	"github.com/uber/zanzibar/codegen/template_bundle"
 )
 
 const zanzibarPath = "github.com/uber/zanzibar"
