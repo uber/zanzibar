@@ -117,7 +117,7 @@ func (res *ServerHTTPResponse) SendErrorString(
 
 // WriteJSONBytes writes a byte[] slice that is valid json to Response
 func (res *ServerHTTPResponse) WriteJSONBytes(
-	statusCode int, headers ServerHeader, bytes []byte,
+	statusCode int, headers Header, bytes []byte,
 ) {
 	if headers != nil {
 		for _, k := range headers.Keys() {
@@ -138,7 +138,7 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 
 // WriteJSON writes a json serializable struct to Response
 func (res *ServerHTTPResponse) WriteJSON(
-	statusCode int, headers ServerHeader, body json.Marshaler,
+	statusCode int, headers Header, body json.Marshaler,
 ) {
 	if body == nil {
 		res.SendErrorString(500, "Could not serialize json response")

@@ -87,9 +87,9 @@ type CallEndpoint struct {
 // Handle calls thrift client.
 func (w CallEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeader,
+	reqHeaders zanzibar.Header,
 	r *CallHTTPRequest,
-) (*endpointsBazBaz.BazResponse, zanzibar.ServerHeader, error) {
+) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}

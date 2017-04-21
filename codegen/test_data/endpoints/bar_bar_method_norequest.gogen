@@ -83,8 +83,8 @@ type NoRequestEndpoint struct {
 // Handle calls thrift client.
 func (w NoRequestEndpoint) Handle(
 	ctx context.Context,
-	reqHeaders zanzibar.ServerHeader,
-) (*endpointsBarBar.BarResponse, zanzibar.ServerHeader, error) {
+	reqHeaders zanzibar.Header,
+) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
