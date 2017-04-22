@@ -31,28 +31,28 @@ import (
 	"go.uber.org/zap"
 )
 
-// SimpleFutureHandler is the handler for "/baz/simple-future-path"
-type SimpleFutureHandler struct {
+// SillyNoopHandler is the handler for "/baz/silly-noop"
+type SillyNoopHandler struct {
 	Clients *clients.Clients
 }
 
-// NewSimpleFutureEndpoint creates a handler
-func NewSimpleFutureEndpoint(
+// NewSillyNoopEndpoint creates a handler
+func NewSillyNoopEndpoint(
 	gateway *zanzibar.Gateway,
-) *SimpleFutureHandler {
-	return &SimpleFutureHandler{
+) *SillyNoopHandler {
+	return &SillyNoopHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/baz/simple-future-path".
-func (handler *SimpleFutureHandler) HandleRequest(
+// HandleRequest handles "/baz/silly-noop".
+func (handler *SillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := SimpleFutureEndpoint{
+	workflow := SillyNoopEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -70,22 +70,22 @@ func (handler *SimpleFutureHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// SimpleFutureEndpoint calls thrift client Baz.SimpleFuture
-type SimpleFutureEndpoint struct {
+// SillyNoopEndpoint calls thrift client Baz.SillyNoop
+type SillyNoopEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w SimpleFutureEndpoint) Handle(
+func (w SillyNoopEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.SimpleFuture(ctx, clientHeaders)
+	_, err := w.Clients.Baz.SillyNoop(ctx, clientHeaders)
 
 	if err != nil {
 		w.Logger.Warn("Could not make client request",

@@ -10,27 +10,33 @@ struct BazResponse {
   1: required string message
 }
 
-exception SimpleErr {
+exception AuthErr {
   1: required string message
 }
 
-exception NewErr {
+exception ServerErr {
   1: required string message
 }
 
 service SimpleService {
+  BazResponse Compare(
+    1: required BazRequest arg1
+    2: required BazRequest arg2
+  ) throws (
+    1: AuthErr authErr
+  )
 
-  BazResponse Call(
+  void Call(
     1: required BazRequest arg
+  ) throws (
+    1: AuthErr authErr
   )
 
-  void Simple() throws (
-    1: SimpleErr simpleErr
-  )
+  BazResponse Ping() ()
 
-  void SimpleFuture() throws (
-    1: SimpleErr simpleErr
-    2: NewErr newErr
+  void SillyNoop() throws (
+    1: AuthErr authErr
+    2: ServerErr serverErr
   )
 }
 

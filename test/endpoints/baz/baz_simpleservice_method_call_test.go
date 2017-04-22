@@ -25,7 +25,7 @@ package baz
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"errors"
 	"path/filepath"
 	"testing"
 
@@ -40,17 +40,13 @@ var testCallCounter int
 
 func call(
 	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Call_Args,
-) (*baz.BazResponse, map[string]string, error) {
+) (map[string]string, error) {
 	testCallCounter++
-	var resp *baz.BazResponse
 	r := args.Arg
 	if r.B1 && r.S2 == "hello" && r.I3 == 42 {
-		resp = &baz.BazResponse{
-			Message: "yo",
-		}
+		return nil, nil
 	}
-	return resp, nil, nil
-
+	return nil, errors.New("Wrong Args")
 }
 
 func TestCallSuccessfulRequestOKResponse(t *testing.T) {
@@ -59,7 +55,8 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "build", "main.go",
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -67,13 +64,17 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	gateway.TChannelBackends()["baz"].Register(bazServer.NewServerWithSimpleServiceCall(call))
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"Call",
+		bazServer.NewSimpleServiceCallHandler(call),
+	)
 
 	headers := map[string]string{}
 
 	res, err := gateway.MakeRequest(
 		"POST",
-		"/baz/call-path",
+		"/baz/call",
 		headers,
 		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
 	)
@@ -82,13 +83,6 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	defer func() { _ = res.Body.Close() }()
-	data, err := ioutil.ReadAll(res.Body)
-	if !assert.NoError(t, err, "failed to read response body") {
-		return
-	}
-
 	assert.Equal(t, 1, testCallCounter)
-	assert.Equal(t, "200 OK", res.Status)
-	assert.Equal(t, `{"message":"yo"}`, string(data))
+	assert.Equal(t, "204 No Content", res.Status)
 }

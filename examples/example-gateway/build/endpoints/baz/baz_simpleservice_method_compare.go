@@ -29,36 +29,43 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
-// SimpleHandler is the handler for "/baz/simple-path"
-type SimpleHandler struct {
+// CompareHandler is the handler for "/baz/compare"
+type CompareHandler struct {
 	Clients *clients.Clients
 }
 
-// NewSimpleEndpoint creates a handler
-func NewSimpleEndpoint(
+// NewCompareEndpoint creates a handler
+func NewCompareEndpoint(
 	gateway *zanzibar.Gateway,
-) *SimpleHandler {
-	return &SimpleHandler{
+) *CompareHandler {
+	return &CompareHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/baz/simple-path".
-func (handler *SimpleHandler) HandleRequest(
+// HandleRequest handles "/baz/compare".
+func (handler *CompareHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	var requestBody CompareHTTPRequest
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
+		return
+	}
 
-	workflow := SimpleEndpoint{
+	workflow := CompareEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -67,32 +74,36 @@ func (handler *SimpleHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(204, cliRespHeaders, nil)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// SimpleEndpoint calls thrift client Baz.Simple
-type SimpleEndpoint struct {
+// CompareEndpoint calls thrift client Baz.Compare
+type CompareEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w SimpleEndpoint) Handle(
+func (w CompareEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
+	r *CompareHTTPRequest,
+) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
+	clientRequest := convertToCompareClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.Simple(ctx, clientHeaders)
+	clientRespBody, _, err := w.Clients.Baz.Compare(
+		ctx, clientHeaders, clientRequest,
+	)
 
 	if err != nil {
 		w.Logger.Warn("Could not make client request",
 			zap.String("error", err.Error()),
 		)
 		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Filter and map response headers from client to server response.
@@ -100,5 +111,20 @@ func (w SimpleEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	response := convertCompareClientResponse(clientRespBody)
+	return response, resHeaders, nil
+}
+
+func convertToCompareClientRequest(body *CompareHTTPRequest) *clientsBazBaz.SimpleService_Compare_Args {
+	clientRequest := &clientsBazBaz.SimpleService_Compare_Args{}
+
+	clientRequest.Arg1 = (*clientsBazBaz.BazRequest)(body.Arg1)
+	clientRequest.Arg2 = (*clientsBazBaz.BazRequest)(body.Arg2)
+
+	return clientRequest
+}
+func convertCompareClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+	// TODO: Add response fields mapping here.
+	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
+	return downstreamResponse
 }

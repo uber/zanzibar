@@ -10,6 +10,59 @@ import (
 	"strings"
 )
 
+type AuthErr struct {
+	Message string `json:"message"`
+}
+
+func (v *AuthErr) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	w, err = wire.NewValueString(v.Message), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func (v *AuthErr) FromWire(w wire.Value) error {
+	var err error
+	messageIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Message, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				messageIsSet = true
+			}
+		}
+	}
+	if !messageIsSet {
+		return errors.New("field Message of AuthErr is required")
+	}
+	return nil
+}
+
+func (v *AuthErr) String() string {
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Message: %v", v.Message)
+	i++
+	return fmt.Sprintf("AuthErr{%v}", strings.Join(fields[:i], ", "))
+}
+
+func (v *AuthErr) Error() string {
+	return v.String()
+}
+
 type BazRequest struct {
 	B1 bool   `json:"b1"`
 	S2 string `json:"s2"`
@@ -150,11 +203,11 @@ func (v *BazResponse) String() string {
 	return fmt.Sprintf("BazResponse{%v}", strings.Join(fields[:i], ", "))
 }
 
-type NewErr struct {
+type ServerErr struct {
 	Message string `json:"message"`
 }
 
-func (v *NewErr) ToWire() (wire.Value, error) {
+func (v *ServerErr) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -170,7 +223,7 @@ func (v *NewErr) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *NewErr) FromWire(w wire.Value) error {
+func (v *ServerErr) FromWire(w wire.Value) error {
 	var err error
 	messageIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -186,72 +239,19 @@ func (v *NewErr) FromWire(w wire.Value) error {
 		}
 	}
 	if !messageIsSet {
-		return errors.New("field Message of NewErr is required")
+		return errors.New("field Message of ServerErr is required")
 	}
 	return nil
 }
 
-func (v *NewErr) String() string {
+func (v *ServerErr) String() string {
 	var fields [1]string
 	i := 0
 	fields[i] = fmt.Sprintf("Message: %v", v.Message)
 	i++
-	return fmt.Sprintf("NewErr{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("ServerErr{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *NewErr) Error() string {
-	return v.String()
-}
-
-type SimpleErr struct {
-	Message string `json:"message"`
-}
-
-func (v *SimpleErr) ToWire() (wire.Value, error) {
-	var (
-		fields [1]wire.Field
-		i      int = 0
-		w      wire.Value
-		err    error
-	)
-	w, err = wire.NewValueString(v.Message), error(nil)
-	if err != nil {
-		return w, err
-	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
-	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func (v *SimpleErr) FromWire(w wire.Value) error {
-	var err error
-	messageIsSet := false
-	for _, field := range w.GetStruct().Fields {
-		switch field.ID {
-		case 1:
-			if field.Value.Type() == wire.TBinary {
-				v.Message, err = field.Value.GetString(), error(nil)
-				if err != nil {
-					return err
-				}
-				messageIsSet = true
-			}
-		}
-	}
-	if !messageIsSet {
-		return errors.New("field Message of SimpleErr is required")
-	}
-	return nil
-}
-
-func (v *SimpleErr) String() string {
-	var fields [1]string
-	i := 0
-	fields[i] = fmt.Sprintf("Message: %v", v.Message)
-	i++
-	return fmt.Sprintf("SimpleErr{%v}", strings.Join(fields[:i], ", "))
-}
-
-func (v *SimpleErr) Error() string {
+func (v *ServerErr) Error() string {
 	return v.String()
 }

@@ -42,11 +42,11 @@ import (
 type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 type handler struct {
-	server         TChanServer
+	tchanHandler   TChanHandler
 	postResponseCB PostResponseCB
 }
 
-// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanServer.
+// TChannelServer handles incoming TChannel calls and forwards them to the matching TChanHandler.
 type TChannelServer struct {
 	sync.RWMutex
 	registrar tchan.Registrar
@@ -73,31 +73,50 @@ func NewTChannelServer(registrar tchan.Registrar, logger *zap.Logger) *TChannelS
 	return server
 }
 
-func (s *TChannelServer) register(svr TChanServer, h *handler) {
-	service := svr.Service()
+// Register registers the given TChanHandler to be called on an incoming call for its method.
+func (s *TChannelServer) Register(service string, method string, h TChanHandler) {
+	handler := &handler{tchanHandler: h}
+	s.register(service, method, handler)
+}
+
+// RegisterWithPostResponseCB registers the given TChanHandler with a PostResponseCB function
+func (s *TChannelServer) RegisterWithPostResponseCB(service string, method string, h TChanHandler, cb PostResponseCB) {
+	handler := &handler{
+		tchanHandler:   h,
+		postResponseCB: cb,
+	}
+	s.register(service, method, handler)
+}
+
+func (s *TChannelServer) register(service string, method string, h *handler) {
+	key := service + "::" + method
+
 	s.Lock()
-	s.handlers[service] = *h
+	s.handlers[key] = *h
 	s.Unlock()
 
 	ncs := netContextServer{server: s}
-	for _, m := range svr.Methods() {
-		s.registrar.Register(ncs, service+"::"+m)
-	}
+	s.registrar.Register(ncs, key)
 }
 
-// Register registers the given TChanServer to the be called on any incoming call for its services.
-func (s *TChannelServer) Register(svr TChanServer) {
-	handler := &handler{server: svr}
-	s.register(svr, handler)
-}
-
-// RegisterWithPostResponseCB registers the given TChanServer with a PostResponseCB function
-func (s *TChannelServer) RegisterWithPostResponseCB(svr TChanServer, cb PostResponseCB) {
-	handler := &handler{
-		server:         svr,
-		postResponseCB: cb,
+// Handle handles an incoming TChannel call and forwards it to the correct handler.
+func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
+	op := call.MethodString()
+	service, method, ok := getServiceMethod(op)
+	if !ok {
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
 	}
-	s.register(svr, handler)
+
+	s.RLock()
+	handler, ok := s.handlers[op]
+	s.RUnlock()
+	if !ok {
+		s.logger.Error(fmt.Sprintf("Handle got call for %s which is not registered", op))
+	}
+
+	if err := s.handle(ctx, handler, service, method, call); err != nil {
+		s.onError(err)
+	}
 }
 
 func (s *TChannelServer) onError(err error) {
@@ -112,34 +131,32 @@ func (s *TChannelServer) onError(err error) {
 	}
 }
 
-func (s *TChannelServer) handle(ctx context.Context, handler handler, method string, call *tchan.InboundCall) error {
-	serviceName := handler.server.Service()
-
+func (s *TChannelServer) handle(ctx context.Context, handler handler, service string, method string, call *tchan.InboundCall) error {
 	reader, err := call.Arg2Reader()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", service, method)
 	}
 	headers, err := ReadHeaders(reader)
 	if err != nil {
-		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", service, method)
 	}
 	if err := EnsureEmpty(reader, "reading request headers"); err != nil {
-		return errors.Wrapf(err, "could not ensure arg2reader is empty for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not ensure arg2reader is empty for inbound call: %s::%s", service, method)
 	}
 
 	if err := reader.Close(); err != nil {
-		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", service, method)
 	}
 
 	reader, err = call.Arg3Reader()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", service, method)
 	}
 
 	buf := GetBuffer()
 	defer PutBuffer(buf)
 	if _, err := buf.ReadFrom(reader); err != nil {
-		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", service, method)
 	}
 
 	tracer := tchan.TracerFromRegistrar(s.registrar)
@@ -147,10 +164,10 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 
 	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
-		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", service, method)
 	}
 
-	success, resp, respHeaders, err := handler.server.Handle(ctx, method, headers, &wireValue)
+	success, resp, respHeaders, err := handler.tchanHandler.Handle(ctx, headers, &wireValue)
 
 	if handler.postResponseCB != nil {
 		defer handler.postResponseCB(ctx, method, resp)
@@ -158,16 +175,16 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 
 	if err != nil {
 		if er := reader.Close(); er != nil {
-			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", serviceName, method)
+			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", service, method)
 		}
 		return call.Response().SendSystemError(err)
 	}
 
 	if err := EnsureEmpty(reader, "reading request body"); err != nil {
-		return errors.Wrapf(err, "could not ensure arg3reader is empty for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not ensure arg3reader is empty for inbound call: %s::%s", service, method)
 	}
 	if err := reader.Close(); err != nil {
-		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", service, method)
 	}
 
 	if !success {
@@ -178,28 +195,28 @@ func (s *TChannelServer) handle(ctx context.Context, handler handler, method str
 
 	writer, err := call.Response().Arg2Writer()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", service, method)
 	}
 
 	if err := WriteHeaders(writer, respHeaders); err != nil {
-		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", service, method)
 	}
 	if err := writer.Close(); err != nil {
-		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", service, method)
 	}
 
 	writer, err = call.Response().Arg3Writer()
 	if err != nil {
-		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", service, method)
 	}
 
 	err = WriteStruct(writer, resp)
 	if err != nil {
-		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", service, method)
 	}
 
 	if err := writer.Close(); err != nil {
-		return errors.Wrapf(err, "could not close arg3writer for inbound call response: %s::%s", serviceName, method)
+		return errors.Wrapf(err, "could not close arg3writer for inbound call response: %s::%s", service, method)
 	}
 
 	return nil
@@ -212,24 +229,4 @@ func getServiceMethod(method string) (string, string, bool) {
 		return "", "", false
 	}
 	return s[:sep], s[sep+2:], true
-}
-
-// Handle handles an incoming TChannel call and forwards it to the correct handler.
-func (s *TChannelServer) Handle(ctx context.Context, call *tchan.InboundCall) {
-	op := call.MethodString()
-	service, method, ok := getServiceMethod(op)
-	if !ok {
-		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", op))
-	}
-
-	s.RLock()
-	handler, ok := s.handlers[service]
-	s.RUnlock()
-	if !ok {
-		s.logger.Error(fmt.Sprintf("Handle got call for service %s which is not registered", service))
-	}
-
-	if err := s.handle(ctx, handler, method, call); err != nil {
-		s.onError(err)
-	}
 }

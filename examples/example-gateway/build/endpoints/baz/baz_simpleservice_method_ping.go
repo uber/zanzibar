@@ -31,40 +31,37 @@ import (
 	"go.uber.org/zap"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
-// CallHandler is the handler for "/baz/call"
-type CallHandler struct {
+// PingHandler is the handler for "/baz/ping"
+type PingHandler struct {
 	Clients *clients.Clients
 }
 
-// NewCallEndpoint creates a handler
-func NewCallEndpoint(
+// NewPingEndpoint creates a handler
+func NewPingEndpoint(
 	gateway *zanzibar.Gateway,
-) *CallHandler {
-	return &CallHandler{
+) *PingHandler {
+	return &PingHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/baz/call".
-func (handler *CallHandler) HandleRequest(
+// HandleRequest handles "/baz/ping".
+func (handler *PingHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	var requestBody CallHTTPRequest
-	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
-	}
 
-	workflow := CallEndpoint{
+	workflow := PingEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		req.Logger.Warn("Workflow for endpoint returned error",
 			zap.String("error", err.Error()),
@@ -73,28 +70,26 @@ func (handler *CallHandler) HandleRequest(
 		return
 	}
 
-	res.WriteJSONBytes(204, cliRespHeaders, nil)
+	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// CallEndpoint calls thrift client Baz.Call
-type CallEndpoint struct {
+// PingEndpoint calls thrift client Baz.Ping
+type PingEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w CallEndpoint) Handle(
+func (w PingEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *CallHTTPRequest,
-) (zanzibar.Header, error) {
-	clientRequest := convertToCallClientRequest(r)
+) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.Call(
-		ctx, clientHeaders, clientRequest,
+	clientRespBody, _, err := w.Clients.Baz.Ping(
+		ctx, clientHeaders,
 	)
 
 	if err != nil {
@@ -102,7 +97,7 @@ func (w CallEndpoint) Handle(
 			zap.String("error", err.Error()),
 		)
 		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Filter and map response headers from client to server response.
@@ -110,13 +105,12 @@ func (w CallEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	return resHeaders, nil
+	response := convertPingClientResponse(clientRespBody)
+	return response, resHeaders, nil
 }
 
-func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleService_Call_Args {
-	clientRequest := &clientsBazBaz.SimpleService_Call_Args{}
-
-	clientRequest.Arg = (*clientsBazBaz.BazRequest)(body.Arg)
-
-	return clientRequest
+func convertPingClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+	// TODO: Add response fields mapping here.
+	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
+	return downstreamResponse
 }

@@ -42,8 +42,9 @@ type Endpoints struct {
 	NormalHandler           *bar.NormalHandler
 	TooManyArgsHandler      *bar.TooManyArgsHandler
 	CallHandler             *baz.CallHandler
-	SimpleHandler           *baz.SimpleHandler
-	SimpleFutureHandler     *baz.SimpleFutureHandler
+	CompareHandler          *baz.CompareHandler
+	PingHandler             *baz.PingHandler
+	SillyNoopHandler        *baz.SillyNoopHandler
 	SaveContactsHandler     *contacts.SaveContactsHandler
 	AddCredentialsHandler   *googlenow.AddCredentialsHandler
 	CheckCredentialsHandler *googlenow.CheckCredentialsHandler
@@ -60,8 +61,9 @@ func CreateEndpoints(
 		NormalHandler:           bar.NewNormalEndpoint(gateway),
 		TooManyArgsHandler:      bar.NewTooManyArgsEndpoint(gateway),
 		CallHandler:             baz.NewCallEndpoint(gateway),
-		SimpleHandler:           baz.NewSimpleEndpoint(gateway),
-		SimpleFutureHandler:     baz.NewSimpleFutureEndpoint(gateway),
+		CompareHandler:          baz.NewCompareEndpoint(gateway),
+		PingHandler:             baz.NewPingEndpoint(gateway),
+		SillyNoopHandler:        baz.NewSillyNoopEndpoint(gateway),
 		SaveContactsHandler:     contacts.NewSaveContactsEndpoint(gateway),
 		AddCredentialsHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
 		CheckCredentialsHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
@@ -129,7 +131,7 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 		),
 	)
 	router.Register(
-		"POST", "/baz/call-path",
+		"POST", "/baz/call",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
@@ -138,21 +140,30 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 		),
 	)
 	router.Register(
-		"GET", "/baz/simple-path",
+		"POST", "/baz/compare",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
-			"simple",
-			endpoints.SimpleHandler.HandleRequest,
+			"compare",
+			endpoints.CompareHandler.HandleRequest,
 		),
 	)
 	router.Register(
-		"GET", "/baz/simple-future-path",
+		"GET", "/baz/ping",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
-			"simpleFuture",
-			endpoints.SimpleFutureHandler.HandleRequest,
+			"ping",
+			endpoints.PingHandler.HandleRequest,
+		),
+	)
+	router.Register(
+		"GET", "/baz/silly-noop",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"sillyNoop",
+			endpoints.SillyNoopHandler.HandleRequest,
 		),
 	)
 	router.Register(

@@ -59,7 +59,7 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 		)
 	}
 
-	if err := system.RegisterClassType("client", "tchannel", &TCahnnelClientGenerator{
+	if err := system.RegisterClassType("client", "tchannel", &TChannelClientGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
@@ -177,15 +177,15 @@ func (generator *HTTPClientGenerator) Generate(
  * TChannel Client Generator
  */
 
-// TCahnnelClientGenerator generates an instance of a zanzibar TChannel client
-type TCahnnelClientGenerator struct {
+// TChannelClientGenerator generates an instance of a zanzibar TChannel client
+type TChannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
 }
 
 // Generate returns the TChannel client generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
-func (generator *TCahnnelClientGenerator) Generate(
+func (generator *TChannelClientGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
@@ -236,7 +236,7 @@ func (generator *TCahnnelClientGenerator) Generate(
 	}
 
 	server, err := generator.templates.execTemplate(
-		"tchannel_server.tmpl",
+		"tchannel_client_test_server.tmpl",
 		clientMeta,
 		generator.packageHelper,
 	)
@@ -244,19 +244,6 @@ func (generator *TCahnnelClientGenerator) Generate(
 		return nil, errors.Wrapf(
 			err,
 			"Error executing TChannel server template for %s",
-			instance.InstanceName,
-		)
-	}
-
-	handler, err := generator.templates.execTemplate(
-		"tchannel_handler.tmpl",
-		clientMeta,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error executing TChannel handler template for %s",
 			instance.InstanceName,
 		)
 	}
@@ -271,15 +258,12 @@ func (generator *TCahnnelClientGenerator) Generate(
 		clientFilePath = clientSpec.GoFileName
 	}
 
-	// TODO:(lu) the locations of tchannel server and handler files are tentative
-	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_server.go"
-	handlerFilePath := strings.TrimRight(clientFilePath, ".go") + "_handler.go"
+	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_server.go"
 
 	// Return the client files
 	return map[string][]byte{
-		clientFilePath:  client,
-		serverFilePath:  server,
-		handlerFilePath: handler,
+		clientFilePath: client,
+		serverFilePath: server,
 	}, nil
 }
 
