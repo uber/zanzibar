@@ -63,11 +63,15 @@ func (handler *PingHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
@@ -93,11 +97,17 @@ func (w PingEndpoint) Handle(
 	)
 
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+		switch errValue := err.(type) {
+
+		default:
+			w.Logger.Warn("Could not make client request",
+				zap.String("error", errValue.Error()),
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, err
+
+		}
 	}
 
 	// Filter and map response headers from client to server response.

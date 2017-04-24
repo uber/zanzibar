@@ -67,11 +67,21 @@ func (handler *CompareHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		case *endpointsBazBaz.AuthErr:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
@@ -99,11 +109,25 @@ func (w CompareEndpoint) Handle(
 	)
 
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, nil, err
+		switch errValue := err.(type) {
+
+		case *clientsBazBaz.AuthErr:
+			serverErr := convertCompareAuthErr(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, serverErr
+
+		default:
+			w.Logger.Warn("Could not make client request",
+				zap.String("error", errValue.Error()),
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, err
+
+		}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -123,6 +147,15 @@ func convertToCompareClientRequest(body *CompareHTTPRequest) *clientsBazBaz.Simp
 
 	return clientRequest
 }
+
+func convertCompareAuthErr(
+	clientError *clientsBazBaz.AuthErr,
+) *endpointsBazBaz.AuthErr {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBazBaz.AuthErr{}
+	return serverError
+}
+
 func convertCompareClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
 	// TODO: Add response fields mapping here.
 	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)

@@ -58,6 +58,19 @@
 							}
 						}
 					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
 					"ValidStatusCodes": [
 						200,
 						403
@@ -118,6 +131,19 @@
 							}
 						}
 					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
 					"ValidStatusCodes": [
 						200,
 						403
@@ -172,6 +198,19 @@
 							}
 						}
 					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
 					"ValidStatusCodes": [
 						200,
 						403
@@ -226,6 +265,19 @@
 							}
 						}
 					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
 					"ValidStatusCodes": [
 						200,
 						403
@@ -292,6 +344,19 @@
 							}
 						}
 					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "endpointsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
 					"ValidStatusCodes": [
 						200,
 						403

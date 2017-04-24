@@ -84,13 +84,13 @@ func (h *{{$handler}}) Handle(
 			switch v := err.(type) {
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
-				case *{{$genCodePkg}}.{{.Name}}:
+				case *{{$genCodePkg}}.{{title .Name}}:
 					if v == nil {
 						return false, nil, nil, errors.New(
-							"Handler for {{$method}} returned non-nil error type *{{.Name}} but nil value",
+							"Handler for {{$method}} returned non-nil error type *{{title .Name}} but nil value",
 						)
 					}
-					res.{{.Name}} = v
+					res.{{title .Name}} = v
 			{{end -}}
 				default:
 					return false, nil, nil, err

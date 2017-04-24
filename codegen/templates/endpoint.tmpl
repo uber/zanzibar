@@ -83,11 +83,21 @@ func (handler *{{$handlerName}}) HandleRequest(
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+			{{range $idx, $exception := .Exceptions}}
+			case *{{$exception.Type}}:
+				res.WriteJSON(
+					{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
+				)
+				return
+			{{end}}
+			default:
+				req.Logger.Warn("Workflow for endpoint returned error",
+					zap.String("error", errValue.Error()),
+				)
+				res.SendErrorString(500, "Unexpected server error")
+				return
+		}
 	}
 
 	{{- if .ReqHeaders }}
@@ -105,12 +115,13 @@ func (handler *{{$handlerName}}) HandleRequest(
 
 {{- if .Method.Downstream }}
 {{- with .Method -}}
+{{- $methodName := title .Name }}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 {{- $clientMethodName := title ($clientMethod).Name -}}
-
+{{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflow}} struct {
@@ -191,12 +202,33 @@ func (w {{$workflow}}) Handle(
 		)
 		{{- end }}
 	{{end -}}
+
+	{{- $responseType := .ResponseType }}
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		switch errValue := err.(type) {
+			{{range $idx, $cException := $clientExceptions}}
+			case *{{$cException.Type}}:
+				serverErr := convert{{$methodName}}{{title $cException.Name}}(
+					errValue,
+				)
+				// TODO(sindelar): Consider returning partial headers
+				{{if eq $responseType ""}}
+				return nil, serverErr
+				{{else}}
+				return nil, nil, serverErr
+				{{end}}
+			{{end}}
+			default:
+				w.Logger.Warn("Could not make client request",
+					zap.String("error", errValue.Error()),
+				)
+				// TODO(sindelar): Consider returning partial headers
+				{{if eq $responseType ""}}
+				return nil, err
+				{{else}}
+				return nil, nil, err
+				{{end}}
+		}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -229,6 +261,18 @@ func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$cli
 }
 {{end -}}
 
+{{- $exceptionIndex := .ExceptionsIndex }}
+{{range $idx, $cException := $clientExceptions}}
+{{- $sException := index $exceptionIndex $cException.Name -}}
+
+func convert{{$methodName}}{{title $cException.Name}}(
+	clientError *{{$cException.Type}},
+) *{{$sException.Type}} {
+	// TODO: Add error fields mapping here.
+	serverError := &{{$sException.Type}}{}
+	return serverError
+}
+{{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
 func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {

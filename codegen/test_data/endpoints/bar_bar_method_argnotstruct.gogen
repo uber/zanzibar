@@ -31,6 +31,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
 // ArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
@@ -66,11 +68,21 @@ func (handler *ArgNotStructHandler) HandleRequest(
 
 	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
-		req.Logger.Warn("Workflow for endpoint returned error",
-			zap.String("error", err.Error()),
-		)
-		res.SendErrorString(500, "Unexpected server error")
-		return
+		switch errValue := err.(type) {
+
+		case *endpointsBarBar.BarException:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
+		default:
+			req.Logger.Warn("Workflow for endpoint returned error",
+				zap.String("error", errValue.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+		}
 	}
 
 	res.WriteJSONBytes(200, cliRespHeaders, nil)
@@ -98,11 +110,25 @@ func (w ArgNotStructEndpoint) Handle(
 	)
 
 	if err != nil {
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		// TODO(sindelar): Consider returning partial headers in error case.
-		return nil, err
+		switch errValue := err.(type) {
+
+		case *clientsBarBar.BarException:
+			serverErr := convertArgNotStructBarException(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, serverErr
+
+		default:
+			w.Logger.Warn("Could not make client request",
+				zap.String("error", errValue.Error()),
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, err
+
+		}
 	}
 
 	// Filter and map response headers from client to server response.
@@ -119,4 +145,12 @@ func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClien
 	clientRequest.Request = string(body.Request)
 
 	return clientRequest
+}
+
+func convertArgNotStructBarException(
+	clientError *clientsBarBar.BarException,
+) *endpointsBarBar.BarException {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBarBar.BarException{}
+	return serverError
 }
