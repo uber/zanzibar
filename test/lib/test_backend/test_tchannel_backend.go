@@ -103,6 +103,7 @@ func (backend *TestTChannelBackend) Close() {
 }
 
 // CreateTChannelBackend creates a TChannel backend for testing
+// "serviceName" is the service discovery name, not necessarily same as the thrift service name.
 func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend, error) {
 	backend := &TestTChannelBackend{
 		IP:   "127.0.0.1",
