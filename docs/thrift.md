@@ -10,6 +10,8 @@ The structs defined in the thrift file are serialized into
 JSON. When parsing, any fields on the wire not defined
 in the thrift struct are ignored.
 
+## JSON semantics
+
 ## Annotations
 
 ### `zanzibar.http.method`
@@ -77,6 +79,33 @@ The list of required headers on the http request.
 optional. Annotation on thrift method
 
 The list of required headers on the http response.
+
+### `zanzibar.validation.type`
+
+optional. 
+
+This annotation allows the JSON parser to be lax and 
+parse multiple types into a single thrift field.
+
+For example :
+
+ - `optional double a (zanzibar.validation.type = "string,number")`
+ - `optional string a (zanzibar.validation.type = "string,number")`
+ - `optional i32 a (zanzibar.validation.type = "string,number")`
+ - `optional bool a (zanzibar.validation.type = "boolean,number")`
+ - `optional i32 a (zanzibar.validation.type = "boolean,number")`
+ - `optional bool a (zanzibar.validation.type = "string,boolean")`
+
+ The coercions available are :
+
+ - `double` may be parsed from a string containing a number
+ - `string` may be parsed from a number into a string
+ - `i32` may be parsed from a string containing an integer
+ - `bool` may be parsed from a number, 0 is false, positive is true
+ - `i32` may be parsed from a boolean, false is 0, true is 1
+ - `bool` may be parsed from a string `"false"` is false, `"true"` is true
+
+###
 
 # TChannel + Thrift
 
