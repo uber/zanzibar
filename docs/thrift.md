@@ -10,6 +10,14 @@ The structs defined in the thrift file are serialized into
 JSON. When parsing, any fields on the wire not defined
 in the thrift struct are ignored.
 
+Each go struct has a Pascal name field based on either
+the thrift field name or the thrift method argument name.
+On the wire, in JSON format, all JSON objects have the fieldName
+that matches 1:1 to the thrift field name / thrift argument name.
+
+This means each Go struct has a json annotation to specify what
+the go struct field serializes into/out of in the JSON wire format.
+
 ## JSON semantics
 
 Thrift contains structs with nested types. Each thrift method
