@@ -15,7 +15,7 @@ import:
 - package: github.com/pkg/errors
   version: ^0.8.0
 - package: github.com/uber-go/atomic
-  version: ^1.0.0
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
 - package: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
   subpackages:
