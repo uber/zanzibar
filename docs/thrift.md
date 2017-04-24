@@ -14,7 +14,7 @@ in the thrift struct are ignored.
 
 ### `zanzibar.http.method`
 
-required.
+required. Annotation on thrift method
 
 The HTTP method to use, this is mandatory and can be
 "GET", "POST", "DELETE", "UPDATE", "PATCH"
@@ -25,14 +25,14 @@ to query parameters or params.
 
 ### `zanzibar.http.path`
 
-required.
+required. Annotation on thrift method
 
 The HTTP path necessary to send a request. This HTTP
 path may contain parameter segments.
 
 ### `zanzibar.http.status`
 
-required.
+required. Annotation on thrift method or exception
 
 The HTTP status code for the thrift function return
 value. This can be set on both the thrift function
@@ -40,7 +40,7 @@ and the exceptions thrown by a thrift function
 
 ### `zanzibar.http.ref`
 
-optional.
+optional. Annotation on thrift struct field or function argument
 
 Zanzibar allows for customizing how a body struct is
 parsed from the HTTP+JSON request on the wire ( and 
@@ -61,20 +61,20 @@ how its serialized for the client ).
 
 ### `zanzibar.http.headerGroups`
 
-optional.
+optional. Annotation on thrift method
 
 `headerGroups` is a comma seperated list of struct names
 which define mandatory headers to apply to this method.
 
 ### `zanzibar.http.reqHeaders`
 
-optional.
+optional. Annotation on thrift method
 
 The list of required headers on the http request.
 
 ### `zanzibar.http.resHeaders`
 
-optional.
+optional. Annotation on thrift method
 
 The list of required headers on the http response.
 
