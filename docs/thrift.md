@@ -20,8 +20,8 @@ The HTTP method to use, this is mandatory and can be
 "GET", "POST", "DELETE", "UPDATE", "PATCH"
 
 If the method is GET then the function arguments
-must have http.ref annotations remapping arguments
-to query parameters or params.
+must have zanzibar.http.ref annotations remapping arguments
+to query parameters, params or headers.
 
 ### `zanzibar.http.path`
 
