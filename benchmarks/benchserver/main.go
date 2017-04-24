@@ -25,7 +25,7 @@ import (
 	"net/http"
 	"os"
 
-	baz "github.com/uber/zanzibar/.tmp_gen/clients/baz"
+	baz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	"go.uber.org/zap"
