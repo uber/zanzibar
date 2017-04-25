@@ -92,7 +92,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8149, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8149, mode: os.FileMode(420), modTime: time.Unix(1493085885, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -112,7 +112,7 @@ func endpoint_registerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1595, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1595, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -132,7 +132,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2503, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2503, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -152,7 +152,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 4932, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 4932, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -172,7 +172,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 747, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 747, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -192,7 +192,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1551, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1551, mode: os.FileMode(420), modTime: time.Unix(1493067038, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -212,7 +212,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1399, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1399, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -232,7 +232,7 @@ func structsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "structs.tmpl", size: 851, mode: os.FileMode(436), modTime: time.Unix(1493076585, 0)}
+	info := bindataFileInfo{name: "structs.tmpl", size: 851, mode: os.FileMode(420), modTime: time.Unix(1492811297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -252,7 +252,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3104, mode: os.FileMode(436), modTime: time.Unix(1493076676, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3104, mode: os.FileMode(420), modTime: time.Unix(1493085885, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -272,7 +272,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2982, mode: os.FileMode(436), modTime: time.Unix(1493076695, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2982, mode: os.FileMode(420), modTime: time.Unix(1493085885, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
