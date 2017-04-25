@@ -1,5 +1,5 @@
-hash: 4e1e8f2c690dc0dff87665119ebb8b24f45517e1c7cf4d94f820daa666b92838
-updated: 2017-04-05T17:11:41.369865028-07:00
+hash: c0c6b848f9db93e682597950764cd9e95dba1a48833d7d1ed1cf3e43b7f8aef7
+updated: 2017-04-24T18:48:02.662642459-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -53,7 +53,7 @@ imports:
   - assert
   - require
 - name: github.com/uber-go/atomic
-  version: 3b8db5e93c4c02efbc313e17b2e796b0914a01fb
+  version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
   version: 34be4a565ce6286a0ba91a54a81be3f6181ca2e2
   subpackages:
@@ -71,7 +71,7 @@ imports:
   - trand
   - typed
 - name: go.uber.org/atomic
-  version: 0c9e689d64f004564b79d9a663634756df322902
+  version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/thriftrw
   version: c98a13058faa5dd41584a77221a268d2c72d832d
   subpackages:
@@ -106,8 +106,9 @@ imports:
   - internal/exit
   - internal/multierror
   - zapcore
+  - zaptest/observer
 - name: golang.org/x/net
-  version: a689eb3bc4b53af70390acc3cf68c9f549b6b8d6
+  version: 6c23252515492caf9b228a9d5cabcdbde29f7f82
   subpackages:
   - context
 testImports: []
