@@ -36,8 +36,8 @@ import (
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
@@ -56,89 +56,44 @@ type SimpleServiceCallHandler struct {
 	Logger  *zap.Logger
 }
 
-// Service returns the service name.
-func (h *SimpleServiceCallHandler) Service() string {
-	return "SimpleService"
-}
-
-// Method returns the method name.
-func (h *SimpleServiceCallHandler) Method() string {
-	return "Call"
-}
-
 // Handle handles RPC call of "SimpleService::Call".
 func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	var res endpointsBazBaz.SimpleService_Call_Result
 
 	var req endpointsBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	workflow := TChanCallEndpoint{
+	workflow := customBaz.CallEndpoint{
 		Clients: h.Clients,
 		Logger:  h.Logger,
 	}
 
-	respHeaders, err := workflow.Handle(ctx, reqHeaders, &req)
+	wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+
+	respHeaders := map[string]string{}
+	for _, key := range wfRespHeaders.Keys() {
+		respHeaders[key], _ = wfReqHeaders.Get(key)
+	}
+
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsBazBaz.AuthErr:
 			if v == nil {
-				return false, nil, nil, errors.New(
-					"Handler for Call returned non-nil error type *AuthErr but nil value",
+				return false, nil, respHeaders, errors.New(
+					"Handler for Call returned non-nil error type *authErr but nil value",
 				)
 			}
 			res.AuthErr = v
 		default:
-			return false, nil, nil, err
+			return false, nil, respHeaders, err
 		}
 	}
 
 	return err == nil, &res, respHeaders, nil
-}
-
-// TChanCallEndpoint calls thrift client Baz.Call
-type TChanCallEndpoint struct {
-	Clients *clients.Clients
-	Logger  *zap.Logger
-}
-
-// Handle calls thrift client.
-func (w TChanCallEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders map[string]string,
-	r *endpointsBazBaz.SimpleService_Call_Args,
-) (map[string]string, error) {
-	clientRequest := convertToCallClientRequestTChan(r)
-	clientHeaders := map[string]string{}
-
-	_, err := w.Clients.Baz.Call(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		// TODO: (lu) exception conversion from client to endpoint
-		w.Logger.Warn("Could not make client request",
-			zap.String("error", err.Error()),
-		)
-		return nil, err
-	}
-
-	// Filter and map response headers from client to server response.
-
-	resHeaders := map[string]string{}
-
-	return resHeaders, nil
-}
-
-func convertToCallClientRequestTChan(body *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
-	clientRequest := &clientsBazBaz.SimpleService_Call_Args{}
-
-	clientRequest.Arg = (*clientsBazBaz.BazRequest)(body.Arg)
-
-	return clientRequest
 }
