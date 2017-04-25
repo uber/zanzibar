@@ -30,9 +30,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
@@ -90,4 +93,55 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Equal(t, 1, testPingCounter)
 	assert.Equal(t, "200 OK", res.Status)
 	assert.Equal(t, `{"message":"pong"}`, string(data))
+}
+
+func BenchmarkPing(b *testing.B) {
+	gateway, err := benchGateway.CreateGateway(
+		map[string]interface{}{
+			"clients.baz.serviceName": "Qux",
+		},
+		&testGateway.Options{
+			KnownTChannelBackends: []string{"baz"},
+		},
+		clients.CreateClients,
+		endpoints.Register,
+	)
+	if err != nil {
+		b.Error("got bootstrap err: " + err.Error())
+		return
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"Ping",
+		bazServer.NewSimpleServicePingHandler(ping),
+	)
+
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			res, err := gateway.MakeRequest(
+				"GET", "/baz/ping", nil,
+				bytes.NewReader([]byte(`{}`)),
+			)
+			if err != nil {
+				b.Error("got http error: " + err.Error())
+				break
+			}
+			if res.Status != "200 OK" {
+				b.Error("got bad status error: " + res.Status)
+				break
+			}
+			_, err = ioutil.ReadAll(res.Body)
+			if err != nil {
+				b.Error("could not read response: " + res.Status)
+				break
+			}
+			_ = res.Body.Close()
+		}
+	})
+
+	b.StopTimer()
+	gateway.Close()
 }
