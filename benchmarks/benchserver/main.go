@@ -25,11 +25,12 @@ import (
 	"net/http"
 	"os"
 
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	baz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -45,11 +46,14 @@ func main() {
 			zap.InfoLevel,
 		),
 	)
-	serverTChannel(logger)
-	serveHTTP(logger)
+
+	httpBackend := serveHTTP(logger)
+	_ = serverTChannel(logger)
+
+	httpBackend.Wait()
 }
 
-func serveHTTP(logger *zap.Logger) {
+func serveHTTP(logger *zap.Logger) *testBackend.TestHTTPBackend {
 	httpBackend := testBackend.CreateHTTPBackend(httpPort)
 	err := httpBackend.Bootstrap()
 	if err != nil {
@@ -67,11 +71,10 @@ func serveHTTP(logger *zap.Logger) {
 
 	logger.Info("HTTP server listening on port & serving")
 
-	httpBackend.Wait()
+	return httpBackend
 }
 
-func serverTChannel(logger *zap.Logger) {
-	logger.Info("Setting up TChannel server")
+func serverTChannel(logger *zap.Logger) *testBackend.TestTChannelBackend {
 	tchannelBackend, err := testBackend.CreateTChannelBackend(tchannelPort, "Qux")
 	if err != nil {
 		panic(err)
@@ -95,4 +98,5 @@ func serverTChannel(logger *zap.Logger) {
 	}
 
 	logger.Info("TChannel server listening on port & serving")
+	return tchannelBackend
 }
