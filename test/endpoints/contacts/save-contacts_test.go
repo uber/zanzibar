@@ -79,7 +79,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 
 			_, err = ioutil.ReadAll(res.Body)
 			if err != nil {
-				b.Error("could not write response: " + res.Status)
+				b.Error("could not read response: " + res.Status)
 				break
 			}
 			_ = res.Body.Close()
