@@ -21,16 +21,22 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 
-	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	baz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 )
 
-// PORT that the bench server listens to
-var PORT int32 = 8092
+const (
+	httpPort     int32 = 8092
+	tchannelPort int32 = 8094
+)
 
 func main() {
 	var logger = zap.New(
@@ -40,12 +46,19 @@ func main() {
 			zap.InfoLevel,
 		),
 	)
-	backend := testBackend.CreateHTTPBackend(PORT)
-	err := backend.Bootstrap()
+
+	httpBackend := serveHTTP(logger)
+	_ = serverTChannel(logger)
+
+	httpBackend.Wait()
+}
+
+func serveHTTP(logger *zap.Logger) *testBackend.TestHTTPBackend {
+	httpBackend := testBackend.CreateHTTPBackend(httpPort)
+	err := httpBackend.Bootstrap()
 	if err != nil {
 		panic(err)
 	}
-
 	handleContacts := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)
 		_, _ = w.Write([]byte("{}"))
@@ -53,10 +66,37 @@ func main() {
 	handleGoogleNow := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)
 	}
-	backend.HandleFunc("POST", "/foo/contacts", handleContacts)
-	backend.HandleFunc("POST", "/add-credentials", handleGoogleNow)
+	httpBackend.HandleFunc("POST", "/foo/contacts", handleContacts)
+	httpBackend.HandleFunc("POST", "/add-credentials", handleGoogleNow)
 
-	logger.Info("Listening on port & serving")
+	logger.Info("HTTP server listening on port & serving")
 
-	backend.Wait()
+	return httpBackend
+}
+
+func serverTChannel(logger *zap.Logger) *testBackend.TestTChannelBackend {
+	tchannelBackend, err := testBackend.CreateTChannelBackend(tchannelPort, "Qux")
+	if err != nil {
+		panic(err)
+	}
+
+	handleSimpleServiceCall := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_Call_Args,
+	) (map[string]string, error) {
+		return nil, nil
+	}
+	simpleServiceCallHandler := baz.NewSimpleServiceCallHandler(handleSimpleServiceCall)
+
+	// must register handler first before bootstrap
+	tchannelBackend.Register("SimpleService", "Call", simpleServiceCallHandler)
+
+	err = tchannelBackend.Bootstrap()
+	if err != nil {
+		panic(err)
+	}
+
+	logger.Info("TChannel server listening on port & serving")
+	return tchannelBackend
 }

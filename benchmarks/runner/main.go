@@ -102,6 +102,7 @@ func spawnGateway(dirName string) *exec.Cmd {
 		"logger.fileName":        path.Join(logTempDir, "zanzibar.log"),
 		"clients.contacts.port":  8092,
 		"clients.googleNow.port": 8092,
+		"clients.baz.port":       8094,
 		"clients.contacts.ip":    "127.0.0.1",
 	}
 

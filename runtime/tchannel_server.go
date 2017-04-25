@@ -74,6 +74,7 @@ func NewTChannelServer(registrar tchan.Registrar, logger *zap.Logger) *TChannelS
 }
 
 // Register registers the given TChanHandler to be called on an incoming call for its method.
+// "service" is the thrift service name as in the thrift definition.
 func (s *TChannelServer) Register(service string, method string, h TChanHandler) {
 	handler := &handler{tchanHandler: h}
 	s.register(service, method, handler)
