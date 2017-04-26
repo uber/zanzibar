@@ -1358,29 +1358,29 @@ func (h *{{$handlerName}}) Handle(
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .RequestType ""}}
-	r, wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders)
+	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
 	{{else if eq .ResponseType ""}}
-	wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{else}}
-	r, wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
 	{{- if .ResHeaders}}
-	if err := wfRespHeaders.Ensure({{.ResHeaders | printf "%#v" }}); err != nil {
+	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}); err != nil {
 		return false, nil, nil, err
 	}
 	{{- end}}
 
-	respHeaders := map[string]string{}
-	for _, key := range wfRespHeaders.Keys() {
-		respHeaders[key], _ = wfReqHeaders.Get(key)
+	resHeaders := map[string]string{}
+	for _, key := range wfResHeaders.Keys() {
+		resHeaders[key], _ = wfResHeaders.Get(key)
 	}
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			return false, nil, respHeaders, err
+			return false, nil, resHeaders, err
 		}
 		res.Success = r
 	{{else -}}
@@ -1390,21 +1390,21 @@ func (h *{{$handlerName}}) Handle(
 			{{range .Exceptions -}}
 				case *{{.Type}}:
 					if v == nil {
-						return false, nil, respHeaders, errors.New(
+						return false, nil, resHeaders, errors.New(
 							"Handler for {{$method}} returned non-nil error type *{{.Type}} but nil value",
 						)
 					}
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					return false, nil, respHeaders, err
+					return false, nil, resHeaders, err
 			}
 		} {{if ne .ResponseType "" -}} else {
 			res.Success = r
 		} {{end -}}
 	{{end}}
 
-	return err == nil, &res, respHeaders, nil
+	return err == nil, &res, resHeaders, nil
 }
 
 {{end -}}
@@ -1420,7 +1420,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3177, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3165, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

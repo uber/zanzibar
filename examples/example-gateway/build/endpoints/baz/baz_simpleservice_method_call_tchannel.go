@@ -78,30 +78,30 @@ func (h *SimpleServiceCallHandler) Handle(
 		Logger:  h.Logger,
 	}
 
-	wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
-	if err := wfRespHeaders.Ensure([]string{"some-res-header"}); err != nil {
+	if err := wfResHeaders.Ensure([]string{"some-res-header"}); err != nil {
 		return false, nil, nil, err
 	}
 
-	respHeaders := map[string]string{}
-	for _, key := range wfRespHeaders.Keys() {
-		respHeaders[key], _ = wfReqHeaders.Get(key)
+	resHeaders := map[string]string{}
+	for _, key := range wfResHeaders.Keys() {
+		resHeaders[key], _ = wfResHeaders.Get(key)
 	}
 
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsBazBaz.AuthErr:
 			if v == nil {
-				return false, nil, respHeaders, errors.New(
+				return false, nil, resHeaders, errors.New(
 					"Handler for Call returned non-nil error type *endpointsBazBaz.AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
 		default:
-			return false, nil, respHeaders, err
+			return false, nil, resHeaders, err
 		}
 	}
 
-	return err == nil, &res, respHeaders, nil
+	return err == nil, &res, resHeaders, nil
 }
