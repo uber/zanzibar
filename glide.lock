@@ -1,5 +1,5 @@
-hash: 83f016d453b382275f6ec29a32284ac2784e57b7df9805168d6ca654c16f119c
-updated: 2017-04-28T13:53:17.293315362-07:00
+hash: 8ce2c2cef74f1ff26528492ca354512ef5f15dbf00df1a9ffa99f37e3d8f9736
+updated: 2017-04-28T16:13:35.562474295-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
+  version: 0648c820cd4e564706597268ae2d2c7d9e6900c6
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -50,7 +50,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
   subpackages:
   - assert
   - require
@@ -75,7 +75,7 @@ imports:
 - name: go.uber.org/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/thriftrw
-  version: c98a13058faa5dd41584a77221a268d2c72d832d
+  version: 6cfec5edaffbc93bd779eeb36b8a08c7339f0672
   subpackages:
   - ast
   - compile
@@ -97,6 +97,7 @@ imports:
   - protocol
   - protocol/binary
   - ptr
+  - thriftreflect
   - version
   - wire
 - name: go.uber.org/zap

@@ -45,6 +45,7 @@ rm -rf "$BUILD_DIR/gen-code"
 mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
     "$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
+		--no-embed-idl \
         --thrift-root="$CONFIG_DIR/idl" "$tfile"
 done
 
