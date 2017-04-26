@@ -116,6 +116,16 @@ func TestKeys(t *testing.T) {
 	assert.Equal(t, 2, len(zh.Keys()))
 }
 
+func TestEnsure(t *testing.T) {
+	zh := zanzibar.ServerHTTPHeader{}
+
+	zh["foo"] = []string{"headOne"}
+	zh["bar"] = []string{"otherHeader"}
+
+	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
+	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
+}
+
 func TestSTHGet(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 	zh["foo"] = "headOne"

@@ -31,6 +31,7 @@ type Header interface {
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
+	Ensure(keys []string) error
 }
 
 // ServerHTTPHeader wrapper to implement zanzibar Header interface
@@ -81,6 +82,17 @@ func (zh ServerHTTPHeader) Keys() []string {
 		i++
 	}
 	return keys
+}
+
+// Ensure returns error if the headers do not have the given keys
+func (zh ServerHTTPHeader) Ensure(keys []string) error {
+	for _, headerName := range keys {
+		_, ok := zh[headerName]
+		if !ok {
+			return errors.New("Missing manditory header: " + headerName)
+		}
+	}
+	return nil
 }
 
 // ServerTChannelHeader wrapper to implement zanzibar Header interface
