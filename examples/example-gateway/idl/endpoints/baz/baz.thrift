@@ -42,6 +42,8 @@ service SimpleService {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/baz/call"
     zanzibar.handler = "baz.call"
+    zanzibar.http.reqHeaders = "x-uuid,x-token"
+    zanzibar.http.resHeaders = "some-res-header"
   )
 
   // no request body

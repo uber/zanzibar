@@ -63,6 +63,10 @@ func (h *SimpleServiceCallHandler) Handle(
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
+	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}); err != nil {
+		return false, nil, nil, err
+	}
+
 	var res endpointsBazBaz.SimpleService_Call_Result
 
 	var req endpointsBazBaz.SimpleService_Call_Args
@@ -75,6 +79,10 @@ func (h *SimpleServiceCallHandler) Handle(
 	}
 
 	wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+
+	if err := wfRespHeaders.Ensure([]string{"some-res-header"}); err != nil {
+		return false, nil, nil, err
+	}
 
 	respHeaders := map[string]string{}
 	for _, key := range wfRespHeaders.Keys() {

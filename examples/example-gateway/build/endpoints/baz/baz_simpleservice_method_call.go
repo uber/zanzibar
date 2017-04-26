@@ -54,6 +54,9 @@ func (handler *CallHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+		return
+	}
 	var requestBody CallHTTPRequest
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -83,6 +86,7 @@ func (handler *CallHandler) HandleRequest(
 			return
 		}
 	}
+	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
