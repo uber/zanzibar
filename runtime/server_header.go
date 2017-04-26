@@ -41,9 +41,7 @@ type ServerHTTPHeader http.Header
 // Get retrieves the first string stored on a given header. Bool
 // return value is used to distinguish between the presence of a
 // header with golang's zerovalue string and the absence of the string.
-func (zh ServerHTTPHeader) Get(
-	key string,
-) (string, bool) {
+func (zh ServerHTTPHeader) Get(key string) (string, bool) {
 	// TODO: Canonicalize strings before lookup.
 	// Use textproto.CanonicalMIMEHeaderKey
 	h := zh[key]
@@ -55,9 +53,7 @@ func (zh ServerHTTPHeader) Get(
 
 // GetOrEmptyStr retrieves the first string stored on a given header or
 // the empty string (golang's zero vlaue for string types)
-func (zh ServerHTTPHeader) GetOrEmptyStr(
-	key string,
-) string {
+func (zh ServerHTTPHeader) GetOrEmptyStr(key string) string {
 	value, ok := zh.Get(key)
 	if ok {
 		return value
@@ -66,18 +62,14 @@ func (zh ServerHTTPHeader) GetOrEmptyStr(
 }
 
 // Add appends a value for a given header.
-func (zh ServerHTTPHeader) Add(
-	key string, value string,
-) {
+func (zh ServerHTTPHeader) Add(key string, value string) {
 	// TODO: Canonicalize strings before inserting
 	// Use textproto.CanonicalMIMEHeaderKey
 	zh[key] = append(zh[key], value)
 }
 
 // Set sets a value for a given header, overwriting all previous values.
-func (zh ServerHTTPHeader) Set(
-	key string, value string,
-) {
+func (zh ServerHTTPHeader) Set(key string, value string) {
 	// TODO: Canonicalize strings before inserting
 	// Use textproto.CanonicalMIMEHeaderKey
 	h := make([]string, 1)
