@@ -1,0 +1,24 @@
+[{
+    "testName": "successfulRequest",
+    "endpointId": "baz",
+    "handlerId": "call",
+    "endpointRequest": {
+		"arg": {
+			"b1": true,
+			"s2": "hello",
+			"i3": 42
+		}
+	},
+    "endpointReqHeaders": {},
+    "endpointResponse": {},
+    "endpointResHeaders": {},
+
+    "clientStubs": [{
+        "clientId": "baz",
+        "clientMethod": "call",
+        "clientRequest": {},
+        "clientReqHeaders": {},
+        "clientResponse": {},
+        "clientResHeaders": {}
+    }]
+}]

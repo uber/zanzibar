@@ -1,0 +1,33 @@
+[{
+    "testName": "successfulRequest",
+    "endpointId": "baz",
+    "handlerId": "compare",
+    "endpointRequest": {
+		"arg1": {
+			"b1": true,
+			"s2": "hello",
+			"i3": 42
+		},
+		"arg2": {
+			"b1": true,
+			"s2": "hola",
+			"i3": 42
+		}
+	},
+    "endpointReqHeaders": {},
+    "endpointResponse": {
+		"message": "different"
+	},
+    "endpointResHeaders": {},
+
+    "clientStubs": [{
+        "clientId": "baz",
+        "clientMethod": "compare",
+        "clientRequest": {},
+        "clientReqHeaders": {},
+        "clientResponse": {
+			"message": "different"
+		},
+        "clientResHeaders": {}
+    }]
+}]
