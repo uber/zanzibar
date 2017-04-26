@@ -41,16 +41,6 @@ type {{$handler}} struct {
 	{{$privateName}} {{$func}}
 }
 
-// Service returns the service name.
-func (h *{{$handler}}) Service() string {
-	return "{{$svc.Name}}"
-}
-
-// Method returns the method name.
-func (h *{{$handler}}) Method() string {
-	return "{{.Name}}"
-}
-
 // Handle parses request from wire value and calls corresponding handler function.
 func (h *{{$handler}}) Handle(
 	ctx context.Context,
