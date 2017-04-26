@@ -18,18 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO: (lu) to be generated
-
 package baz
 
 import (
 	"bytes"
 	"context"
 	"io/ioutil"
-	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
@@ -48,51 +44,6 @@ func ping(ctx context.Context, reqHeaders map[string]string) (*baz.BazResponse, 
 	}
 	return &res, nil, nil
 
-}
-
-func TestPingSuccessfulRequestOKResponse(t *testing.T) {
-	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
-		"clients.baz.serviceName": "Qux",
-	}, &testGateway.Options{
-		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
-		),
-	})
-	if !assert.NoError(t, err, "got bootstrap err") {
-		return
-	}
-	defer gateway.Close()
-
-	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"Ping",
-		bazServer.NewSimpleServicePingHandler(ping),
-	)
-
-	headers := map[string]string{}
-
-	res, err := gateway.MakeRequest(
-		"GET",
-		"/baz/ping",
-		headers,
-		bytes.NewReader([]byte(`{}`)),
-	)
-
-	if !assert.NoError(t, err, "got http error") {
-		return
-	}
-
-	defer func() { _ = res.Body.Close() }()
-	data, err := ioutil.ReadAll(res.Body)
-	if !assert.NoError(t, err, "failed to read response body") {
-		return
-	}
-
-	assert.Equal(t, 1, testPingCounter)
-	assert.Equal(t, "200 OK", res.Status)
-	assert.Equal(t, `{"message":"pong"}`, string(data))
 }
 
 func BenchmarkPing(b *testing.B) {

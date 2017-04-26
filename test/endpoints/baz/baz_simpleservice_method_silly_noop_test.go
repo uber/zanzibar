@@ -18,17 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO: (lu) to be generated
-
 package baz
 
 import (
 	"bytes"
 	"context"
-	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
@@ -43,44 +39,6 @@ func sillyNoop(ctx context.Context, reqHeaders map[string]string) (map[string]st
 	testSillyNoopCounter++
 	return nil, nil
 
-}
-
-func TestSillyNoopFutureSuccessfulRequestOKResponse(t *testing.T) {
-	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
-		"clients.baz.serviceName": "Qux",
-	}, &testGateway.Options{
-		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
-		),
-	})
-	if !assert.NoError(t, err, "got bootstrap err") {
-		return
-	}
-	defer gateway.Close()
-
-	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"SillyNoop",
-		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
-	)
-
-	headers := map[string]string{}
-
-	res, err := gateway.MakeRequest(
-		"GET",
-		"/baz/silly-noop",
-		headers,
-		bytes.NewReader([]byte(`{}`)),
-	)
-
-	if !assert.NoError(t, err, "got http error") {
-		return
-	}
-
-	assert.Equal(t, 1, testSillyNoopCounter)
-	assert.Equal(t, "204 No Content", res.Status)
 }
 
 func BenchmarkSillyNoop(b *testing.B) {

@@ -18,18 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO: (lu) to be generated
-
 package baz
 
 import (
 	"bytes"
 	"context"
 	"errors"
-	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
@@ -50,47 +46,6 @@ func call(
 		return nil, nil
 	}
 	return nil, errors.New("Wrong Args")
-}
-
-func TestCallSuccessfulRequestOKResponse(t *testing.T) {
-	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
-		"clients.baz.serviceName": "Qux",
-	}, &testGateway.Options{
-		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
-		),
-	})
-	if !assert.NoError(t, err, "got bootstrap err") {
-		return
-	}
-	defer gateway.Close()
-
-	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"Call",
-		bazServer.NewSimpleServiceCallHandler(call),
-	)
-
-	headers := map[string]string{
-		"x-uuid":  "uuid",
-		"x-token": "token",
-	}
-
-	res, err := gateway.MakeRequest(
-		"POST",
-		"/baz/call",
-		headers,
-		bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
-	)
-
-	if !assert.NoError(t, err, "got http error") {
-		return
-	}
-
-	assert.Equal(t, 1, testCallCounter)
-	assert.Equal(t, "204 No Content", res.Status)
 }
 
 func BenchmarkCall(b *testing.B) {
