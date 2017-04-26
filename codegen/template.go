@@ -74,9 +74,11 @@ type EndpointMeta struct {
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
 type EndpointTestMeta struct {
-	PackageName string
-	Method      *MethodSpec
-	TestStubs   []TestStub
+	PackageName      string
+	Method           *MethodSpec
+	TestStubs        []TestStub
+	ClientName       string
+	IncludedPackages []GoPackageImport
 }
 
 // TestStub saves stubbed requests/responses for an endpoint test.
@@ -416,11 +418,32 @@ func (t *Template) GenerateEndpointTestFile(
 		TestStubs:   testStubs,
 	}
 
-	err = t.execTemplateAndFmt(
-		"endpoint_test.tmpl",
-		dest,
-		meta,
-		h)
+	tempName := "endpoint_test.tmpl"
+	if e.WorkflowType == "tchannelClient" {
+		meta.ClientName = e.ClientName
+
+		genCodeClientPkgName, err := h.TypeImportPath(method.Downstream.ThriftFile)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not run endpoint_test template")
+		}
+		genCodeClientAliasName, err := h.TypePackageName(method.Downstream.ThriftFile)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not run endpoint_test template")
+		}
+		meta.IncludedPackages = []GoPackageImport{
+			{
+				AliasName:   method.Downstream.PackageName,
+				PackageName: method.Downstream.GoPackage,
+			},
+			{
+				AliasName:   genCodeClientAliasName,
+				PackageName: genCodeClientPkgName,
+			},
+		}
+		tempName = "endpoint_test_tchannel_client.tmpl"
+	}
+
+	err = t.execTemplateAndFmt(tempName, dest, meta, h)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run endpoint_test template")
 	}
