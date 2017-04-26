@@ -86,7 +86,7 @@ func (h *SimpleServiceCallHandler) Handle(
 		case *endpointsBazBaz.AuthErr:
 			if v == nil {
 				return false, nil, respHeaders, errors.New(
-					"Handler for Call returned non-nil error type *authErr but nil value",
+					"Handler for Call returned non-nil error type *endpointsBazBaz.AuthErr but nil value",
 				)
 			}
 			res.AuthErr = v
