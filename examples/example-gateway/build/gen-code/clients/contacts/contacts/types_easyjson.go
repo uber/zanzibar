@@ -6,6 +6,7 @@ package contacts
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -87,6 +88,8 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var UserUUIDSet bool
+	var ContactsSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -99,6 +102,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "userUUID":
 			out.UserUUID = UUID(in.String())
+			UserUUIDSet = true
 		case "contacts":
 			if in.IsNull() {
 				in.Skip()
@@ -126,6 +130,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				}
 				in.Delim(']')
 			}
+			ContactsSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -134,6 +139,12 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !UserUUIDSet {
+		in.AddError(fmt.Errorf("key 'userUUID' is required"))
+	}
+	if !ContactsSet {
+		in.AddError(fmt.Errorf("key 'contacts' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts1(out *jwriter.Writer, in SaveContactsRequest) {
