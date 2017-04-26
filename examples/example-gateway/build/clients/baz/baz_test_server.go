@@ -51,16 +51,6 @@ type SimpleServiceCallHandler struct {
 	call SimpleServiceCallFunc
 }
 
-// Service returns the service name.
-func (h *SimpleServiceCallHandler) Service() string {
-	return "SimpleService"
-}
-
-// Method returns the method name.
-func (h *SimpleServiceCallHandler) Method() string {
-	return "Call"
-}
-
 // Handle parses request from wire value and calls corresponding handler function.
 func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
@@ -107,16 +97,6 @@ func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChanHa
 // SimpleServiceCompareHandler handles the "Compare" method call of thrift service "SimpleService".
 type SimpleServiceCompareHandler struct {
 	compare SimpleServiceCompareFunc
-}
-
-// Service returns the service name.
-func (h *SimpleServiceCompareHandler) Service() string {
-	return "SimpleService"
-}
-
-// Method returns the method name.
-func (h *SimpleServiceCompareHandler) Method() string {
-	return "Compare"
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -168,16 +148,6 @@ type SimpleServicePingHandler struct {
 	ping SimpleServicePingFunc
 }
 
-// Service returns the service name.
-func (h *SimpleServicePingHandler) Service() string {
-	return "SimpleService"
-}
-
-// Method returns the method name.
-func (h *SimpleServicePingHandler) Method() string {
-	return "Ping"
-}
-
 // Handle parses request from wire value and calls corresponding handler function.
 func (h *SimpleServicePingHandler) Handle(
 	ctx context.Context,
@@ -214,16 +184,6 @@ func NewSimpleServiceSillyNoopHandler(f SimpleServiceSillyNoopFunc) zanzibar.TCh
 // SimpleServiceSillyNoopHandler handles the "SillyNoop" method call of thrift service "SimpleService".
 type SimpleServiceSillyNoopHandler struct {
 	sillynoop SimpleServiceSillyNoopFunc
-}
-
-// Service returns the service name.
-func (h *SimpleServiceSillyNoopHandler) Service() string {
-	return "SimpleService"
-}
-
-// Method returns the method name.
-func (h *SimpleServiceSillyNoopHandler) Method() string {
-	return "SillyNoop"
 }
 
 // Handle parses request from wire value and calls corresponding handler function.

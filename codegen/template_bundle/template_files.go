@@ -1206,16 +1206,6 @@ type {{$handler}} struct {
 	{{$privateName}} {{$func}}
 }
 
-// Service returns the service name.
-func (h *{{$handler}}) Service() string {
-	return "{{$svc.Name}}"
-}
-
-// Method returns the method name.
-func (h *{{$handler}}) Method() string {
-	return "{{.Name}}"
-}
-
 // Handle parses request from wire value and calls corresponding handler function.
 func (h *{{$handler}}) Handle(
 	ctx context.Context,
@@ -1282,7 +1272,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2982, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2777, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
