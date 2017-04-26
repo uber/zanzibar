@@ -56,7 +56,10 @@ func (w CallEndpoint) Handle(
 		case *clientBaz.AuthErr:
 			return respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			w.Logger.Error("baz.Call returned unexpected error")
+			w.Logger.Error(
+				"baz.Call returned unexpected error",
+				zap.String("error", err.Error()),
+			)
 			return respHeaders, err
 		}
 	}
