@@ -1338,10 +1338,10 @@ func (h *{{$handlerName}}) Handle(
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
-	if err := wfReqHeadersf.Ensure({{.ReqHeaders | printf "%#v" }}); err != nil {
+	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}); err != nil {
 		return false, nil, nil, err
 	}
-	{{- end -}}
+	{{- end}}
 
 	var res {{$genCodePkg}}.{{.ThriftService}}_{{.Name}}_Result
 
@@ -1366,6 +1366,12 @@ func (h *{{$handlerName}}) Handle(
 	{{else}}
 	r, wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
+
+	{{- if .ResHeaders}}
+	if err := wfRespHeaders.Ensure({{.ResHeaders | printf "%#v" }}); err != nil {
+		return false, nil, nil, err
+	}
+	{{- end}}
 
 	respHeaders := map[string]string{}
 	for _, key := range wfRespHeaders.Keys() {
@@ -1414,7 +1420,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3177, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

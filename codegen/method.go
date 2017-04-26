@@ -147,6 +147,9 @@ func NewMethod(
 		return nil, err
 	}
 
+	method.ReqHeaders = headers(funcSpec.Annotations[antHTTPReqHeaders])
+	method.ResHeaders = headers(funcSpec.Annotations[antHTTPResHeaders])
+
 	if !wantAnnot {
 		return method, nil
 	}
@@ -156,8 +159,6 @@ func NewMethod(
 	}
 
 	method.EndpointName = funcSpec.Annotations[antHandler]
-	method.ReqHeaders = headers(funcSpec.Annotations[antHTTPReqHeaders])
-	method.ResHeaders = headers(funcSpec.Annotations[antHTTPResHeaders])
 
 	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
 	if err != nil {
