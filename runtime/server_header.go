@@ -102,26 +102,18 @@ type ServerTChannelHeader map[string]string
 // Get retrieves the string value stored on a given header. Bool
 // return value is used to distinguish between the presence of a
 // header with golang's zerovalue string and the absence of the string.
-func (th ServerTChannelHeader) Get(
-	key string,
-) (string, bool) {
-	// TODO: Canonicalize strings before lookup.
-	// Use textproto.CanonicalMIMEHeaderKey
+func (th ServerTChannelHeader) Get(key string) (string, bool) {
 	value, ok := th[key]
 	return value, ok
 }
 
 // Add is an alias to Set.
-func (th ServerTChannelHeader) Add(
-	key string, value string,
-) {
+func (th ServerTChannelHeader) Add(key string, value string) {
 	th.Set(key, value)
 }
 
 // Set sets a value for a given header, overwriting the previous value.
-func (th ServerTChannelHeader) Set(
-	key string, value string,
-) {
+func (th ServerTChannelHeader) Set(key string, value string) {
 	// TODO: Canonicalize strings before inserting
 	// Use textproto.CanonicalMIMEHeaderKey
 	th[key] = value
