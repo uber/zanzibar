@@ -3,6 +3,7 @@
 // codegen/templates/endpoint.tmpl
 // codegen/templates/endpoint_register.tmpl
 // codegen/templates/endpoint_test.tmpl
+// codegen/templates/endpoint_test_tchannel_client.tmpl
 // codegen/templates/http_client.tmpl
 // codegen/templates/init_clients.tmpl
 // codegen/templates/main.tmpl
@@ -552,6 +553,164 @@ func endpoint_testTmpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _endpoint_test_tchannel_clientTmpl = []byte(`{{/* template to render gateway http endpoint tests */}}
+
+package {{.PackageName}}
+
+import (
+	"bytes"
+	"context"
+	{{if ne .Method.DownstreamMethod.ResponseType "" -}}
+	"encoding/json"
+	{{end -}}
+	"path/filepath"
+	"testing"
+	{{if ne .Method.ResponseType "" -}}
+	"io/ioutil"
+	{{end}}
+
+	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+)
+
+{{- $clientName := camel .ClientName -}}
+
+{{with .Method -}}
+{{- $responseType := .ResponseType -}}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $thriftService := .DownstreamMethod.ThriftService -}}
+{{- $clientMethod := .DownstreamMethod -}}
+{{- $clientMethodName := title $clientMethod.Name -}}
+{{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $headers := .ReqHeaders -}}
+{{- $counter := printf "test%sCounter" $clientMethodName -}}
+
+{{range $.TestStubs}}
+func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+	{{$counter}} := 0
+
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		{{/* the serviceName here is service discovery name, therefore is ok to be arbitrary */ -}}
+		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
+	}, &testGateway.Options{
+	KnownTChannelBackends: []string{"{{$clientName}}"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	{{range .ClientStubs}}
+	{{$clientFunc := printf "fake%s" (Title .ClientMethod) -}}
+	{{$clientFunc}} := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne $clientMethod.RequestType "" -}}
+		args *{{$clientMethodRequestType}},
+		{{end -}}
+	) ({{- if ne $clientMethod.ResponseType "" -}}*{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+		{{$counter}}++
+
+		{{range $k, $v := .ClientReqHeaders -}}
+		assert.Equal(
+			t,
+			"{{$v}}",
+			reqHeaders["{{$k}}"])
+		{{end -}}
+
+		var resHeaders map[string]string
+		{{if ne (len .ClientResHeaders) 0 -}}
+		resHeaders = map[string]string{}
+		{{end -}}
+		{{range $k, $v := .ClientResHeaders -}}
+		resHeaders["{{$k}}"] = "{{$v}}"
+		{{end}}
+
+		{{if ne $clientMethod.ResponseType "" -}}
+		var res {{$clientMethod.ResponseType}}
+		err := json.Unmarshal([]byte(` + "`" + `{{.ClientResponseString}}` + "`" + `), &res)
+		if err!= nil {
+			t.Fatal("cant't unmarshal client response json to client response struct")
+			return nil, resHeaders, err
+		}
+		return &res, resHeaders, nil
+		{{else -}}
+		return resHeaders, nil
+		{{end -}}
+	}
+
+	gateway.TChannelBackends()["{{$clientName}}"].Register(
+		"{{$thriftService}}",
+		"{{$clientMethodName}}",
+		{{$clientPackage}}.New{{$thriftService}}{{$clientMethodName}}Handler({{$clientFunc}}),
+	)
+	{{end}}
+
+	headers := map[string]string{}
+	{{ if $headers -}}
+	{{range $k, $v := .EndpointReqHeaders -}}
+	headers["{{$k}}"] = "{{$v}}"
+	{{end}}
+	{{- end}}
+
+	res, err := gateway.MakeRequest(
+		"{{$.Method.HTTPMethod}}",
+		"{{$.Method.HTTPPath}}",
+		headers,
+		bytes.NewReader([]byte(` + "`" + `{{.EndpointRequestString}}` + "`" + `)),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	{{if ne $responseType "" -}}
+	defer func() { _ = res.Body.Close() }()
+	data, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "failed to read response body") {
+		return
+	}
+	{{end}}
+
+	assert.Equal(t, 1, {{$counter}})
+	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
+	{{range $k, $v := .EndpointResHeaders -}}
+	assert.Equal(
+		t,
+		"{{$v}}",
+		res.Header.Get("{{$k}}"))
+	{{end -}}
+	{{if ne $responseType "" -}}
+		assert.Equal(t, ` + "`" + `{{.EndpointResponseString}}` + "`" + `, string(data))
+	{{end -}}
+}
+
+{{end -}}
+{{end -}}
+`)
+
+func endpoint_test_tchannel_clientTmplBytes() ([]byte, error) {
+	return _endpoint_test_tchannel_clientTmpl, nil
+}
+
+func endpoint_test_tchannel_clientTmpl() (*asset, error) {
+	bytes, err := endpoint_test_tchannel_clientTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3852, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1467,17 +1626,18 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"endpoint.tmpl":                    endpointTmpl,
-	"endpoint_register.tmpl":           endpoint_registerTmpl,
-	"endpoint_test.tmpl":               endpoint_testTmpl,
-	"http_client.tmpl":                 http_clientTmpl,
-	"init_clients.tmpl":                init_clientsTmpl,
-	"main.tmpl":                        mainTmpl,
-	"main_test.tmpl":                   main_testTmpl,
-	"structs.tmpl":                     structsTmpl,
-	"tchannel_client.tmpl":             tchannel_clientTmpl,
-	"tchannel_client_test_server.tmpl": tchannel_client_test_serverTmpl,
-	"tchannel_endpoint.tmpl":           tchannel_endpointTmpl,
+	"endpoint.tmpl":                      endpointTmpl,
+	"endpoint_register.tmpl":             endpoint_registerTmpl,
+	"endpoint_test.tmpl":                 endpoint_testTmpl,
+	"endpoint_test_tchannel_client.tmpl": endpoint_test_tchannel_clientTmpl,
+	"http_client.tmpl":                   http_clientTmpl,
+	"init_clients.tmpl":                  init_clientsTmpl,
+	"main.tmpl":                          mainTmpl,
+	"main_test.tmpl":                     main_testTmpl,
+	"structs.tmpl":                       structsTmpl,
+	"tchannel_client.tmpl":               tchannel_clientTmpl,
+	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
+	"tchannel_endpoint.tmpl":             tchannel_endpointTmpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -1521,17 +1681,18 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"endpoint.tmpl":                    {endpointTmpl, map[string]*bintree{}},
-	"endpoint_register.tmpl":           {endpoint_registerTmpl, map[string]*bintree{}},
-	"endpoint_test.tmpl":               {endpoint_testTmpl, map[string]*bintree{}},
-	"http_client.tmpl":                 {http_clientTmpl, map[string]*bintree{}},
-	"init_clients.tmpl":                {init_clientsTmpl, map[string]*bintree{}},
-	"main.tmpl":                        {mainTmpl, map[string]*bintree{}},
-	"main_test.tmpl":                   {main_testTmpl, map[string]*bintree{}},
-	"structs.tmpl":                     {structsTmpl, map[string]*bintree{}},
-	"tchannel_client.tmpl":             {tchannel_clientTmpl, map[string]*bintree{}},
-	"tchannel_client_test_server.tmpl": {tchannel_client_test_serverTmpl, map[string]*bintree{}},
-	"tchannel_endpoint.tmpl":           {tchannel_endpointTmpl, map[string]*bintree{}},
+	"endpoint.tmpl":                      {endpointTmpl, map[string]*bintree{}},
+	"endpoint_register.tmpl":             {endpoint_registerTmpl, map[string]*bintree{}},
+	"endpoint_test.tmpl":                 {endpoint_testTmpl, map[string]*bintree{}},
+	"endpoint_test_tchannel_client.tmpl": {endpoint_test_tchannel_clientTmpl, map[string]*bintree{}},
+	"http_client.tmpl":                   {http_clientTmpl, map[string]*bintree{}},
+	"init_clients.tmpl":                  {init_clientsTmpl, map[string]*bintree{}},
+	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
+	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
+	"structs.tmpl":                       {structsTmpl, map[string]*bintree{}},
+	"tchannel_client.tmpl":               {tchannel_clientTmpl, map[string]*bintree{}},
+	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},
+	"tchannel_endpoint.tmpl":             {tchannel_endpointTmpl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
