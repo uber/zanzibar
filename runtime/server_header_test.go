@@ -37,6 +37,21 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, "headOne", v)
 }
 
+func TestGetOrEmpty(t *testing.T) {
+	zh := zanzibar.ServerHTTPHeader{}
+	zh["foo"] = []string{"headOne"}
+	zh["bar"] = []string{""}
+
+	v := zh.GetOrEmptyStr("foo")
+	assert.Equal(t, "headOne", v)
+
+	v = zh.GetOrEmptyStr("missing")
+	assert.Equal(t, "", v)
+
+	v = zh.GetOrEmptyStr("bar")
+	assert.Equal(t, "", v)
+}
+
 func TestGetMissingKey(t *testing.T) {
 	zh := zanzibar.ServerHTTPHeader{}
 

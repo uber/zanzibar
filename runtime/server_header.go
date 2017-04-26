@@ -53,6 +53,18 @@ func (zh ServerHTTPHeader) Get(
 	return "", false
 }
 
+// GetOrEmptyStr retrieves the first string stored on a given header or
+// the empty string (golang's zero vlaue for string types)
+func (zh ServerHTTPHeader) GetOrEmptyStr(
+	key string,
+) string {
+	value, ok := zh.Get(key)
+	if ok {
+		return value
+	}
+	return ""
+}
+
 // Add appends a value for a given header.
 func (zh ServerHTTPHeader) Add(
 	key string, value string,
