@@ -21,12 +21,18 @@
 package zanzibar
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
+	"go.uber.org/zap/zapcore"
 )
 
 var knownStatusCodes = []int{
@@ -205,6 +211,11 @@ func NewRouter(gateway *Gateway) *Router {
 }
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	err := router.logRequest(r)
+	if err != nil {
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return
+	}
 	router.httpRouter.ServeHTTP(w, r)
 }
 
@@ -250,4 +261,40 @@ func (router *Router) handleMethodNotAllowed(
 		http.StatusText(http.StatusMethodNotAllowed),
 		http.StatusMethodNotAllowed,
 	)
+}
+
+func (router *Router) logRequest(r *http.Request) error {
+	// TODO: Allocating a fixed size array causes the zap logger to fail
+	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
+	// further to see if we can avoid reallocating underlying arrays for slices.
+	fields := make([]zapcore.Field, 0)
+	for k, v := range r.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String(k, v[0]))
+		}
+	}
+
+	fields = append(fields, zap.String("method", r.Method))
+	fields = append(fields, zap.Int64("content-length", r.ContentLength))
+	fields = append(fields, zap.String("host", r.Host))
+	body, err := ioutil.ReadAll(r.Body)
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	fields = append(fields, zap.String("body", string(body)))
+	fields = append(fields, zap.String("pathname", r.URL.RequestURI()))
+	fields = append(fields, zap.String("host", r.Host))
+	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
+
+	router.gateway.Logger.Info(
+		"Incoming Request",
+		fields...,
+	)
+	if err != nil {
+		fields = append(fields, zap.Error(err))
+		router.gateway.Logger.Error(
+			"Failed to Read Body",
+			fields...,
+		)
+	}
+	return err
 }

@@ -99,6 +99,8 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		}
 
 		assert.Equal(t, []byte(testReq.expected), bytes)
+
+		// Verify logged values
 	}
 }
 
@@ -127,6 +129,8 @@ func TestRouterNotFound(t *testing.T) {
 	}
 
 	assert.Equal(t, bytes, []byte("404 page not found\n"))
+
+	// Verify logged values
 }
 
 func TestRouterInvalidMethod(t *testing.T) {

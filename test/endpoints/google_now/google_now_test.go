@@ -163,7 +163,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		LogWhitelist: map[string]bool{
-			"Could not ReadAll() body": true,
+			"Failed to Read Body": true,
 		},
 		KnownHTTPBackends: []string{"googleNow"},
 		TestBinary: filepath.Join(
@@ -219,7 +219,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	errLogs := gateway.GetErrorLogs()
 
-	logLines := errLogs["Could not ReadAll() body"]
+	logLines := errLogs["Failed to Read Body"]
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
