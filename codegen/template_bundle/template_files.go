@@ -1367,10 +1367,10 @@ func (h *{{$handlerName}}) Handle(
 	r, wfRespHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
-    respHeaders := map[string]string{}
-    for _, key := range wfRespHeaders.Keys() {
-        respHeaders[key], _ = wfReqHeaders.Get(key)
-    }
+	respHeaders := map[string]string{}
+	for _, key := range wfRespHeaders.Keys() {
+		respHeaders[key], _ = wfReqHeaders.Get(key)
+	}
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
@@ -1414,7 +1414,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3049, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
