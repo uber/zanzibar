@@ -268,7 +268,7 @@ func (router *Router) logRequest(r *http.Request) error {
 	fields := make([]zapcore.Field, 0)
 	for k, v := range r.Header {
 		if len(v) > 0 {
-			fields = append(fields, zap.String(k, v[0]))
+			fields = append(fields, zap.String("Header-"+k, v[0]))
 		}
 	}
 
