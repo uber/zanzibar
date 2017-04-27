@@ -1,5 +1,15 @@
 {
+	"name": "contacts",
+	"type": "http",
+	"config": {
+		"rateLimit": 100
+	},
 	"endpoints": [
 		"./save_contacts.json"
-	]
+	],
+	"dependencies": {
+		"client": [
+			"contacts"
+		]
+	}
 }

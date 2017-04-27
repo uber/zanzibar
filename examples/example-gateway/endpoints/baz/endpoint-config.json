@@ -1,9 +1,18 @@
 {
+	"name": "baz",
+	"type": "http",
+	"config": {
+		"rateLimit": 100
+	},
 	"endpoints": [
 		"call.json",
-		"call_tchannel.json",
 		"compare.json",
 		"ping.json",
 		"silly_noop.json"
-	]
+	],
+	"dependencies": {
+		"client": [
+			"baz"
+		]
+	}
 }

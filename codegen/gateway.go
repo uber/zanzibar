@@ -666,9 +666,14 @@ func (e *EndpointSpec) SetDownstream(
 	)
 }
 
-// EndpointGroupInfo ...
-type EndpointGroupInfo struct {
-	Endpoints []string
+// EndpointClassConfig represents the specific config for
+// an endpoint group. This is a downcast of the moduleClassConfig.
+type endpointClassConfig struct {
+	Name         string              `json:"name"`
+	Type         string              `json:"type"`
+	Config       interface{}         `json:"config"`
+	Endpoints    []string            `json:"endpoints"`
+	Dependencies map[string][]string `json:"dependencies"`
 }
 
 func parseEndpointJsons(
@@ -685,8 +690,8 @@ func parseEndpointJsons(
 			)
 		}
 
-		var endpointGroupInfo EndpointGroupInfo
-		err = json.Unmarshal(bytes, &endpointGroupInfo)
+		var endpointConfig endpointClassConfig
+		err = json.Unmarshal(bytes, &endpointConfig)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse json for endpoint group config: %s",
@@ -695,7 +700,7 @@ func parseEndpointJsons(
 		}
 
 		endpointConfigDir := filepath.Dir(endpointGroupJSON)
-		for _, fileName := range endpointGroupInfo.Endpoints {
+		for _, fileName := range endpointConfig.Endpoints {
 			endpointJsons = append(
 				endpointJsons, filepath.Join(endpointConfigDir, fileName),
 			)
