@@ -64,7 +64,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
+			w.WriteHeader(202)
 			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
 				panic(errors.New("can't write fake response"))
 			}
@@ -84,7 +84,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 				b.Error("got http error: " + err.Error())
 				break
 			}
-			if res.Status != "200 OK" {
+			if res.Status != "202 Accepted" {
 				b.Error("got bad status error: " + res.Status)
 				break
 			}
@@ -127,7 +127,7 @@ func TestAddCredentials(t *testing.T) {
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(202)
-			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+			if _, err := w.Write([]byte("{\"statusCode\":202}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++
@@ -179,8 +179,8 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials",
 		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+			w.WriteHeader(202)
+			if _, err := w.Write([]byte("{\"statusCode\":202}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++
@@ -251,8 +251,8 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+			w.WriteHeader(202)
+			if _, err := w.Write([]byte("{\"statusCode\":202}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++
@@ -502,7 +502,7 @@ func TestAddCredentialsMissingOneHeader(t *testing.T) {
 	gateway.HTTPBackends()["googleNow"].HandleFunc(
 		"POST", "/add-credentials", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(202)
-			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+			if _, err := w.Write([]byte("{\"statusCode\":202}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++
@@ -564,7 +564,7 @@ func TestAddCredentialsHeaderMapping(t *testing.T) {
 			w.Header().Set("X-Uuid", "uuid")
 
 			w.WriteHeader(202)
-			if _, err := w.Write([]byte("{\"statusCode\":200}")); err != nil {
+			if _, err := w.Write([]byte("{\"statusCode\":202}")); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++
