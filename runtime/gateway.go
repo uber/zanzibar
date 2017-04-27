@@ -345,7 +345,12 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 			return errors.Wrap(err, "Error opening log file")
 		}
 		gateway.loggerFile = loggerFile
-		output = loggerFile
+		if gateway.logWriter != nil {
+			writer := zap.CombineWriteSyncers(loggerFile, gateway.logWriter)
+			output = writer
+		} else {
+			output = loggerFile
+		}
 	}
 
 	zapLogger := zap.New(

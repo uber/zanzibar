@@ -100,6 +100,7 @@ func spawnGateway(dirName string) *exec.Cmd {
 		"metrics.m3.hostPort":    "127.0.0.1:8053",
 		"metrics.tally.service":  "bench-gateway",
 		"logger.fileName":        path.Join(logTempDir, "zanzibar.log"),
+		"logger.output":          "disk",
 		"clients.contacts.port":  8092,
 		"clients.googleNow.port": 8092,
 		"clients.baz.port":       8094,
