@@ -210,8 +210,12 @@ func NewRouter(gateway *Gateway) *Router {
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := router.logRequest(r)
+	// TODO: Remove coverage ignore when body unmarshaling supported.
+	/* coverage ignore next line */
 	if err != nil {
+		/* coverage ignore next line */
 		http.Error(w, "can't read body", http.StatusBadRequest)
+		/* coverage ignore next line */
 		return
 	}
 	router.httpRouter.ServeHTTP(w, r)
