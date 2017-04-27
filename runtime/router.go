@@ -21,9 +21,7 @@
 package zanzibar
 
 import (
-	"bytes"
 	"context"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -276,25 +274,32 @@ func (router *Router) logRequest(r *http.Request) error {
 
 	fields = append(fields, zap.String("method", r.Method))
 	fields = append(fields, zap.Int64("content-length", r.ContentLength))
-	fields = append(fields, zap.String("host", r.Host))
-	body, err := ioutil.ReadAll(r.Body)
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
-	fields = append(fields, zap.String("body", string(body)))
+	fields = append(fields, zap.String("remoteAddr", r.RemoteAddr))
 	fields = append(fields, zap.String("pathname", r.URL.RequestURI()))
 	fields = append(fields, zap.String("host", r.Host))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
+	// TODO add endpoint.id and endpoint.handlerId
+	// TODO log jaeger trace span
+
+	// Do not log body by default because PII and bandwidth.
+	// TODO: Add a gateway level configurable body unmarshaller
+	// to extract only non-PII info.
+
+	// body, err := ioutil.ReadAll(r.Body)
+	// r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	// fields = append(fields, zap.String("body", string(body)))
 
 	router.gateway.Logger.Info(
 		"Incoming Request",
 		fields...,
 	)
-	if err != nil {
-		fields = append(fields, zap.Error(err))
-		router.gateway.Logger.Error(
-			"Failed to Read Body",
-			fields...,
-		)
-	}
-	return err
+	// if err != nil {
+	// 	fields = append(fields, zap.Error(err))
+	// 	router.gateway.Logger.Error(
+	// 		"Failed to Read Body",
+	// 		fields...,
+	// 	)
+	// }
+	// return err
+	return nil
 }
