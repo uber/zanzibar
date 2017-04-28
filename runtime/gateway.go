@@ -57,18 +57,18 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	Port           int32
-	RealPort       int32
-	RealAddr       string
-	WaitGroup      *sync.WaitGroup
-	Clients        Clients
-	Channel        *tchannel.Channel
-	Logger         *zap.Logger
-	MetricScope    tally.Scope
-	ServiceName    string
-	Config         *StaticConfig
-	Router         *Router
-	TChannelServer *TChannelServer
+	Port        int32
+	RealPort    int32
+	RealAddr    string
+	WaitGroup   *sync.WaitGroup
+	Clients     Clients
+	Channel     *tchannel.Channel
+	Logger      *zap.Logger
+	MetricScope tally.Scope
+	ServiceName string
+	Config      *StaticConfig
+	Router      *Router
+	TChanRouter *TChanRouter
 
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
@@ -442,7 +442,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
-	gateway.TChannelServer = NewTChannelServer(channel, gateway.Logger)
+	gateway.TChanRouter = NewTChanRouter(channel, gateway.Logger)
 
 	return nil
 }

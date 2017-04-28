@@ -75,7 +75,7 @@ func CreateEndpoints(
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway) {
 	router := g.Router
-	tchannelServer := g.TChannelServer
+	tchanRouter := g.TChanRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
 	router.Register(
@@ -197,6 +197,5 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.GooglenowCheckCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-	tchannelServer.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
-
+	tchanRouter.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
 }
