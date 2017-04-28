@@ -1,10 +1,10 @@
-hash: 8ce2c2cef74f1ff26528492ca354512ef5f15dbf00df1a9ffa99f37e3d8f9736
-updated: 2017-04-28T16:13:35.562474295-07:00
+hash: a7233ff4eb6445f8b4fd18354024755ed26c960db017a27163db6b532bad09f0
+updated: 2017-04-28T16:14:27.572113103-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
-  version: 19baeefd8c38d62085891d7956349601f79448b3
+  version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
   repo: git://git.apache.org/thrift.git
   vcs: git
   subpackages:
