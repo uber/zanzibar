@@ -124,7 +124,7 @@ func NewDefaultModuleSystem(
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
 
-	if err := system.RegisterClassType("endpoint", "http", &HTTPEndpointGenerator{
+	if err := system.RegisterClassType("endpoint", "http", &EndpointGenerator{
 		templates:       tmpl,
 		clientSpecs:     clientSpecs,
 		middlewareSpecs: middlewareSpecs,
@@ -132,7 +132,18 @@ func NewDefaultModuleSystem(
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error registering http endpoint class type",
+			"Error registering HTTP endpoint class type",
+		)
+	}
+
+	if err := system.RegisterClassType("endpoint", "tchannel", &EndpointGenerator{
+		templates:     tmpl,
+		clientSpecs:   clientSpecs,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering HTTP endpoint class type",
 		)
 	}
 	return system, nil
@@ -363,20 +374,20 @@ func (g *TChannelClientGenerator) Generate(
 }
 
 /*
- * HTTP endpoint Generator
+ * Endpoint Generator
  */
 
-// HTTPEndpointGenerator generates a group of zanzibar http endpoints that proxy corresponding clients
-type HTTPEndpointGenerator struct {
+// EndpointGenerator generates a group of zanzibar http endpoints that proxy corresponding clients
+type EndpointGenerator struct {
 	templates       *Template
 	packageHelper   *PackageHelper
 	clientSpecs     map[string]*ClientSpec
 	middlewareSpecs map[string]*MiddlewareSpec
 }
 
-// Generate returns the HTTP endpoint generated files as a map of relative file
+// Generate returns the endpoint generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
-func (g *HTTPEndpointGenerator) Generate(
+func (g *EndpointGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	ret := map[string][]byte{}
@@ -426,7 +437,7 @@ func (g *HTTPEndpointGenerator) Generate(
 	return ret, nil
 }
 
-func (g *HTTPEndpointGenerator) generateEndpointFile(
+func (g *EndpointGenerator) generateEndpointFile(
 	e *EndpointSpec, instance *module.Instance, out map[string][]byte,
 ) error {
 	m := e.ModuleSpec
@@ -437,19 +448,23 @@ func (g *HTTPEndpointGenerator) generateEndpointFile(
 		return nil
 	}
 
-	structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
-	if err != nil {
-		return err
-	}
 	endpointDirectory := filepath.Join(
 		g.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
 	)
 
-	// TODO: this is regenerated multiple times?
-	structFilePath, err := filepath.Rel(endpointDirectory, e.GoStructsFileName)
-	if err != nil {
-		structFilePath = e.GoStructsFileName
+	var err error
+	if e.EndpointType == "http" {
+		structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
+		if err != nil {
+			return err
+		}
+		// TODO: this is regenerated multiple times?
+		structFilePath, err := filepath.Rel(endpointDirectory, e.GoStructsFileName)
+		if err != nil {
+			structFilePath = e.GoStructsFileName
+		}
+		out[structFilePath] = structs
 	}
 
 	method := findMethod(m, thriftServiceName, methodName)
@@ -489,19 +504,30 @@ func (g *HTTPEndpointGenerator) generateEndpointFile(
 		WorkflowName:       workflowName,
 	}
 
-	endpoint, err := g.templates.execTemplate("endpoint.tmpl", meta, g.packageHelper)
+	var endpoint []byte
+	if e.EndpointType == "http" {
+		endpoint, err = g.templates.execTemplate("endpoint.tmpl", meta, g.packageHelper)
+	} else if e.EndpointType == "tchannel" {
+		endpoint, err = g.templates.execTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
+	} else {
+		err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
+	}
+
 	if err != nil {
-		return errors.Wrap(err, "Error executing HTTP endpoint template")
+		return errors.Wrap(err, "Error executing endpoint template")
 	}
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
+	if e.EndpointType == "tchannel" {
+		targetPath = strings.TrimRight(targetPath, ".go") + "_tchannel.go"
+	}
 	endpointFilePath, err := filepath.Rel(endpointDirectory, targetPath)
 	if err != nil {
 		endpointFilePath = targetPath
 	}
 
-	out[structFilePath] = structs
 	out[endpointFilePath] = endpoint
+
 	return nil
 }
 
