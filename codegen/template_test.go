@@ -114,8 +114,8 @@ func TestGenerateBar(t *testing.T) {
 		"./test_data/clients",
 	)
 
-	err = gateway.GenerateEndpoints()
-	if !assert.NoError(t, err, "failed to create endpoints %s", err) {
+	err = gateway.GenerateEndpointRegisterFile()
+	if !assert.NoError(t, err, "failed to create endpoint index %s", err) {
 		return
 	}
 

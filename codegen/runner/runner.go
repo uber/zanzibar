@@ -114,7 +114,7 @@ func main() {
 	err = gatewaySpec.GenerateClientsInit()
 	checkError(err, "Failed to generate client index.")
 
-	fmt.Printf("Generating endpoint code for gateway \n")
-	err = gatewaySpec.GenerateEndpoints()
-	checkError(err, "Failed to generate endpoint files.")
+	fmt.Printf("Generating endpoint index code for gateway \n")
+	err = gatewaySpec.GenerateEndpointRegisterFile()
+	checkError(err, "Failed to generate endpoint index file.")
 }

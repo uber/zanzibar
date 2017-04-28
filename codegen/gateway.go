@@ -900,18 +900,8 @@ func (gateway *GatewaySpec) GenerateClientsInit() error {
 	return err
 }
 
-// GenerateEndpoints will generate all the endpoints for the gateway
-func (gateway *GatewaySpec) GenerateEndpoints() error {
-	for _, module := range gateway.EndpointModules {
-		_, err := gateway.Template.GenerateEndpointTestFile(
-			module, gateway.PackageHelper,
-			module.ThriftServiceName, module.ThriftMethodName,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
+// GenerateEndpointRegisterFile will generate endpoints registration for the gateway
+func (gateway *GatewaySpec) GenerateEndpointRegisterFile() error {
 	_, err := gateway.Template.GenerateEndpointRegisterFile(
 		gateway.EndpointModules, gateway.PackageHelper,
 	)
