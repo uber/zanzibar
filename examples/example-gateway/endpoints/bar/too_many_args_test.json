@@ -21,7 +21,13 @@
 			"X-Uuid": "test-uuid", 
 			"X-Token": "test-token"
 		},
-		"clientResponse": {},
+		"clientResponse": {
+			"stringField": "foo",
+			"intWithRange": 0,
+			"intWithoutRange": 1,
+			"mapIntWithRange": {},
+			"mapIntWithoutRange": {}
+		}
 		"clientResHeaders":  {
 			"X-Uuid": "test-uuid", 
 			"X-Token": "test-token"

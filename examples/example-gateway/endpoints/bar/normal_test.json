@@ -12,7 +12,13 @@
 		"clientMethod": "normal",
 		"clientRequest": {},
 		"clientReqHeaders": {},
-		"clientResponse": {},
+		"clientResponse": {
+			"stringField": "foo",
+			"intWithRange": 0,
+			"intWithoutRange": 1,
+			"mapIntWithRange": {},
+			"mapIntWithoutRange": {}
+		},
 		"clientResHeaders": {}
 	}]
 }]
