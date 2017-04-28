@@ -1,15 +1,15 @@
 [{
 	"testName": "successfulRequest",
-	"endpointId": "bar",
-	"handlerId": "normal",
+	"endpointId": "baz",
+	"handlerId": "sillyNoop",
 	"endpointRequest": {},
 	"endpointReqHeaders": {},
 	"endpointResponse": {},
 	"endpointResHeaders": {},
 
 	"clientStubs": [{
-		"clientId": "bar",
-		"clientMethod": "normal",
+		"clientId": "baz",
+		"clientMethod": "sillyNoop",
 		"clientRequest": {},
 		"clientReqHeaders": {},
 		"clientResponse": {},

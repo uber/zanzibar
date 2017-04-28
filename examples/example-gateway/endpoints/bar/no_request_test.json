@@ -1,18 +1,18 @@
 [{
-    "testName": "successfulRequest",
-    "endpointId": "bar",
-    "handlerId": "noRequest",
-    "endpointRequest": {},
-    "endpointReqHeaders": {},
-    "endpointResponse": {},
-    "endpointResHeaders": {},
+	"testName": "successfulRequest",
+	"endpointId": "bar",
+	"handlerId": "noRequest",
+	"endpointRequest": {},
+	"endpointReqHeaders": {},
+	"endpointResponse": {},
+	"endpointResHeaders": {},
 
-    "clientStubs": [{
-        "clientId": "bar",
-        "clientMethod": "noRequest",
-        "clientRequest": {},
-        "clientReqHeaders": {},
-        "clientResponse": {},
-        "clientResHeaders": {}
-    }]
+	"clientStubs": [{
+		"clientId": "bar",
+		"clientMethod": "noRequest",
+		"clientRequest": {},
+		"clientReqHeaders": {},
+		"clientResponse": {},
+		"clientResHeaders": {}
+	}]
 }]
