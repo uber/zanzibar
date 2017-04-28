@@ -1,9 +1,9 @@
 {
-    "endpoints": [
-        "arg_not_struct.json",
-        "missing_arg.json",
-        "no_request.json",
-        "normal.json",
-        "too_many_args.json"
-    ]
+	"endpoints": [
+		"arg_not_struct.json",
+		"missing_arg.json",
+		"no_request.json",
+		"normal.json",
+		"too_many_args.json"
+	]
 }

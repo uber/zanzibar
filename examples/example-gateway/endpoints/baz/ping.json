@@ -5,7 +5,7 @@
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::Ping",
-    "workflowType": "tchannelClient",
+	"workflowType": "tchannelClient",
 	"clientName": "Baz",
 	"clientMethod": "Ping",
 	"testFixtures": [],

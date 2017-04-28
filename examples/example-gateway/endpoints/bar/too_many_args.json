@@ -11,11 +11,11 @@
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {
-        "X-Uuid": "X-Uuid", 
+		"X-Uuid": "X-Uuid", 
 		"X-Token": "X-Token"
 	},
 	"resHeaderMap": {
-        "X-Uuid": "X-Uuid", 
+		"X-Uuid": "X-Uuid", 
 		"X-Token": "X-Token"
 	}	
 }

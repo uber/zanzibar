@@ -37,12 +37,12 @@ install:
 .PHONY: eclint-check
 eclint-check:
 	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
-	./node_modules/.bin/eclint check "./{codegen,example}/**/*.{json,tmpl}"
+	./node_modules/.bin/eclint check "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: eclint-fix
 eclint-fix:
 	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
-	./node_modules/.bin/eclint fix "./{codegen,example}/**/*.{json,tmpl}"
+	./node_modules/.bin/eclint fix "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: lint
 lint: check-licence eclint-check

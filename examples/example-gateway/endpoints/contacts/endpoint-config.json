@@ -1,5 +1,5 @@
 {
-    "endpoints": [
-        "./save_contacts.json"
-    ]
+	"endpoints": [
+		"./save_contacts.json"
+	]
 }

@@ -1,22 +1,22 @@
 [{
-    "testName": "successfulRequest",
-    "endpointId": "baz",
-    "handlerId": "ping",
-    "endpointRequest": {},
-    "endpointReqHeaders": {},
-    "endpointResponse": {
+	"testName": "successfulRequest",
+	"endpointId": "baz",
+	"handlerId": "ping",
+	"endpointRequest": {},
+	"endpointReqHeaders": {},
+	"endpointResponse": {
 		"message": "pong"
 	},
-    "endpointResHeaders": {},
+	"endpointResHeaders": {},
 
-    "clientStubs": [{
-        "clientId": "baz",
-        "clientMethod": "ping",
-        "clientRequest": {},
-        "clientReqHeaders": {},
-        "clientResponse": {
+	"clientStubs": [{
+		"clientId": "baz",
+		"clientMethod": "ping",
+		"clientRequest": {},
+		"clientReqHeaders": {},
+		"clientResponse": {
 			"message": "pong"
 		},
-        "clientResHeaders": {}
-    }]
+		"clientResHeaders": {}
+	}]
 }]
