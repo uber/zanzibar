@@ -132,7 +132,7 @@ travis-coveralls:
 fast-bench:
 	@rm -f bench.log bench-fail.log
 	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 1s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'  | tee -a bench.log"
-	@cat bench.log | grep "FAIL" > bench-fail.log
+	@cat bench.log | grep "FAIL" | tee -a bench-fail.log
 	@[ ! -s bench-fail.log ]
 
 .PHONY: bench
