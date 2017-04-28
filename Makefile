@@ -93,7 +93,15 @@ check-generate:
 	@[ ! -s git-status.log ] || ( cat git-status.log ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
-test-all: test cover fast-bench bins install-wrk
+test-all: 
+	make generate 
+	make check-generate 
+	make lint 
+	make test-only 
+	make cover 
+	make fast-bench 
+	make bins 
+	make install-wrk
 	make test-benchmark-runner
 
 .PHONY: test-benchmark-runner
