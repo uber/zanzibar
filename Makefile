@@ -78,6 +78,7 @@ lint: check-licence eclint-check
 .PHONY: generate
 generate:
 	@go get -u github.com/jteeuwen/go-bindata/...
+	@chmod 644 ./codegen/templates/*.tmpl
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
