@@ -1,10 +1,12 @@
-hash: c0c6b848f9db93e682597950764cd9e95dba1a48833d7d1ed1cf3e43b7f8aef7
-updated: 2017-04-24T18:48:02.662642459-07:00
+hash: 83f016d453b382275f6ec29a32284ac2784e57b7df9805168d6ca654c16f119c
+updated: 2017-04-28T13:53:17.293315362-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
-  version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
+  version: 19baeefd8c38d62085891d7956349601f79448b3
+  repo: git://git.apache.org/thrift.git
+  vcs: git
   subpackages:
   - lib/go/thrift
 - name: github.com/buger/jsonparser
@@ -108,7 +110,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 6c23252515492caf9b228a9d5cabcdbde29f7f82
+  version: da118f7b8e5954f39d0d2130ab35d4bf0e3cb344
   subpackages:
   - context
 testImports: []

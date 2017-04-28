@@ -98,7 +98,8 @@ func CreateGateway(
 	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.tally.service"] = "bench-gateway"
-	seedConfig["logger.output"] = "stdout"
+	seedConfig["logger.output"] = "disk"
+	seedConfig["logger.fileName"] = "zanzibar.log"
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{

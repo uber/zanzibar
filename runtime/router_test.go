@@ -99,6 +99,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		}
 
 		assert.Equal(t, []byte(testReq.expected), bytes)
+		assert.Equal(t, 1, len(bgateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
 	}
 }
 
@@ -127,6 +128,7 @@ func TestRouterNotFound(t *testing.T) {
 	}
 
 	assert.Equal(t, bytes, []byte("404 page not found\n"))
+	assert.Equal(t, 1, len(gateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
 }
 
 func TestRouterInvalidMethod(t *testing.T) {
@@ -154,4 +156,5 @@ func TestRouterInvalidMethod(t *testing.T) {
 	}
 
 	assert.Equal(t, bytes, []byte("Method Not Allowed\n"))
+	assert.Equal(t, 1, len(gateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
 }
