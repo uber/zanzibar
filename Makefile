@@ -12,9 +12,12 @@ GO_FILES := $(shell \
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
 # list all executables
-PROGS = examples/example-gateway/build/services/example-gateway/example-gateway \
-	benchmarks/benchserver/benchserver \
+PROGS = benchmarks/benchserver/benchserver \
 	benchmarks/runner/runner
+
+EXAMPLE_BASE_DIR = examples/example-gateway/
+EXAMPLE_SERVICES_DIR = $(EXAMPLE_BASE_DIR)build/services/
+EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 
 .PHONY: check-licence
 check-licence:
@@ -144,15 +147,21 @@ $(PROGS): $(GO_FILES)
 	@echo Building $@
 	go build -o $@ $(dir ./$@)
 
+$(EXAMPLE_SERVICES): $(GO_FILES)
+	@echo Building $@
+	go build -o "$@../../../bin/$(shell basename $@)" ./$@
+
+run-%: $(EXAMPLE_SERVICES_DIR)%/
+	cd "$(EXAMPLE_BASE_DIR)"; \
+		ENVIRONMENT=production \
+		CONFIG_DIR=./config \
+		./bin/$*
+
 .PHONY: bins
 bins: generate $(PROGS)
 
 .PHONY: run
-run: examples/example-gateway/build/services/example-gateway/example-gateway
-	cd ./examples/example-gateway; \
-		ENVIRONMENT=production \
-		CONFIG_DIR=./config \
-		./build/services/example-gateway/example-gateway
+run: run-example-gateway
 
 .PHONY: go-docs
 go-docs:
