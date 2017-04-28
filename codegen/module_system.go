@@ -249,7 +249,7 @@ func (g *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading HTTP client \"%s\" JSON config",
+			"Error reading HTTP client %q JSON config",
 			instance.InstanceName,
 		)
 	}
@@ -266,7 +266,7 @@ func (g *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error initializing HTTPClientSpec for \"%s\"",
+			"Error initializing HTTPClientSpec for %q",
 			instance.InstanceName,
 		)
 	}
@@ -288,7 +288,7 @@ func (g *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing HTTP client template for \"%s\"",
+			"Error executing HTTP client template for %q",
 			instance.InstanceName,
 		)
 	}
@@ -301,7 +301,7 @@ func (g *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing HTTP client structs template for \"%s\"",
+			"Error executing HTTP client structs template for %q",
 			instance.InstanceName,
 		)
 	}
@@ -352,7 +352,7 @@ func (g *TChannelClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading TChannel client \"%s\" JSON config",
+			"Error reading TChannel client %q JSON config",
 			instance.InstanceName,
 		)
 	}
@@ -369,7 +369,7 @@ func (g *TChannelClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error initializing TChannelClientSpec for \"%s\"",
+			"Error initializing TChannelClientSpec for %q",
 			instance.InstanceName,
 		)
 	}
@@ -391,7 +391,7 @@ func (g *TChannelClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing TChannel client template for \"%s\"",
+			"Error executing TChannel client template for %q",
 			instance.InstanceName,
 		)
 	}
@@ -404,7 +404,7 @@ func (g *TChannelClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing TChannel server template for \"%s\"",
+			"Error executing TChannel server template for %q",
 			instance.InstanceName,
 		)
 	}
@@ -452,7 +452,7 @@ func (g *EndpointGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading HTTP endpoint \"%s\" JSON config",
+			"Error reading HTTP endpoint %q JSON config",
 			instance.InstanceName,
 		)
 	}
@@ -485,7 +485,7 @@ func (g *EndpointGenerator) Generate(
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Error executing endpoint template \"%s\"",
+				"Error executing endpoint template %q",
 				instance.InstanceName,
 			)
 		}
@@ -494,7 +494,7 @@ func (g *EndpointGenerator) Generate(
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Error executing endpoint test template \"%s\"",
+				"Error executing endpoint test template %q",
 				instance.InstanceName,
 			)
 		}
@@ -536,7 +536,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	method := findMethod(m, thriftServiceName, methodName)
 	if method == nil {
 		return errors.Errorf(
-			"Could not find thriftServiceName \"%s\" + methodName \"%s\" in module",
+			"Could not find thriftServiceName %q + methodName %q in module",
 			thriftServiceName, methodName,
 		)
 	}
@@ -692,7 +692,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	method := findMethod(m, serviceName, methodName)
 	if method == nil {
 		return errors.Errorf(
-			"Could not find thriftServiceName \"%s\" + methodName \"%s\" in module",
+			"Could not find thriftServiceName %q + methodName %q in module",
 			serviceName, methodName,
 		)
 	}
@@ -709,7 +709,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		}
 
 		return errors.Wrapf(err,
-			"Error reading endpoint test config for service \"%s\", method \"%s\"",
+			"Error reading endpoint test config for service %q, method %q",
 			serviceName, method.Name)
 	}
 	err = json.Unmarshal(file, &testStubs)

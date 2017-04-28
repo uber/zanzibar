@@ -402,7 +402,7 @@ func formatGoFile(filePath string) error {
 	goimportsCmd.Stderr = os.Stderr
 
 	if err := goimportsCmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed to goimports file: \"%s\"", filePath)
+		return errors.Wrapf(err, "failed to goimports file: %q", filePath)
 	}
 
 	return nil
@@ -485,7 +485,7 @@ func (jsonConfig *JSONClassConfig) Read(
 	if readErr != nil {
 		return nil, errors.Wrapf(
 			readErr,
-			"Error reading class config \"%s\"",
+			"Error reading class config %q",
 			classConfigPath,
 		)
 	}
@@ -495,21 +495,21 @@ func (jsonConfig *JSONClassConfig) Read(
 	if parseErr != nil {
 		return nil, errors.Wrapf(
 			parseErr,
-			"Error JSON parsing clss config \"%s\"",
+			"Error JSON parsing clss config %q",
 			configFile,
 		)
 	}
 
 	if jsonConfig.Name == "" {
 		return nil, errors.Errorf(
-			"Error reading instance name from \"%s\"",
+			"Error reading instance name from %q",
 			classConfigPath,
 		)
 	}
 
 	if jsonConfig.Type == "" {
 		return nil, errors.Errorf(
-			"Error reading instance type from \"%s\"",
+			"Error reading instance type from %q",
 			classConfigPath,
 		)
 	}
@@ -526,7 +526,7 @@ func writeFile(filePath string, bytes []byte) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
 			return errors.Wrapf(
-				err, "could not make directory: \"%s\"", filePath,
+				err, "could not make directory: %q", filePath,
 			)
 		}
 	}
@@ -535,20 +535,20 @@ func writeFile(filePath string, bytes []byte) error {
 	defer closeFile(file)
 	if err != nil {
 		return errors.Wrapf(
-			err, "Could not open file for writing: \"%s\"", filePath,
+			err, "Could not open file for writing: %q", filePath,
 		)
 	}
 
 	n, err := file.Write(bytes)
 
 	if err != nil {
-		return errors.Wrapf(err, "Error writing to file \"%s\"", filePath)
+		return errors.Wrapf(err, "Error writing to file %q", filePath)
 	}
 
 	if n != len(bytes) {
 		return errors.Wrapf(
 			err,
-			"Error writing full contents to file: \"%s\"",
+			"Error writing full contents to file: %q",
 			filePath,
 		)
 	}
