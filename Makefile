@@ -158,7 +158,7 @@ run-%: $(EXAMPLE_SERVICES_DIR)%/
 		./bin/$*
 
 .PHONY: bins
-bins: generate $(PROGS)
+bins: generate $(PROGS) $(EXAMPLE_SERVICES)
 
 .PHONY: run
 run: run-example-gateway
