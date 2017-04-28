@@ -65,7 +65,7 @@ func getZanzibarDirName() string {
 type CreateClientsFn func(gateway *zanzibar.Gateway) interface{}
 
 // RegisterFn ...
-type RegisterFn func(g *zanzibar.Gateway, router *zanzibar.Router)
+type RegisterFn func(g *zanzibar.Gateway)
 
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(

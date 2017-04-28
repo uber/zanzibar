@@ -57,17 +57,18 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	Port        int32
-	RealPort    int32
-	RealAddr    string
-	WaitGroup   *sync.WaitGroup
-	Clients     Clients
-	Channel     *tchannel.Channel
-	Logger      *zap.Logger
-	MetricScope tally.Scope
-	ServiceName string
-	Config      *StaticConfig
-	Router      *Router
+	Port           int32
+	RealPort       int32
+	RealAddr       string
+	WaitGroup      *sync.WaitGroup
+	Clients        Clients
+	Channel        *tchannel.Channel
+	Logger         *zap.Logger
+	MetricScope    tally.Scope
+	ServiceName    string
+	Config         *StaticConfig
+	Router         *Router
+	TChannelServer *TChannelServer
 
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
@@ -75,7 +76,6 @@ type Gateway struct {
 	logWriter         zapcore.WriteSyncer
 	server            *HTTPServer
 	localServer       *HTTPServer
-	tchannelServer    *TChannelServer
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -128,13 +128,16 @@ func CreateGateway(
 	return gateway, nil
 }
 
-// RegisterFn type used to avoid cyclic dependencies
-type RegisterFn func(gateway *Gateway, router *Router)
+// RegisterFn type to register generated endpoints.
+// Not importing the "endpoints" package avoids cyclic dependencies.
+type RegisterFn func(gateway *Gateway)
 
 // Bootstrap func
 func (gateway *Gateway) Bootstrap(register RegisterFn) error {
-	gateway.register(register)
+	gateway.registerPredefined()
+	register(gateway)
 
+	// start HTTP server
 	_, err := gateway.localServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port",
@@ -165,10 +168,24 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		go gateway.localServer.JustServe(gateway.WaitGroup)
 	}
 
+	// start TChannel server
+	//addr := backend.IP + ":" + strconv.Itoa(int(backend.Port))
+	//ln, err := net.Listen("tcp", addr)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//realAddr := ln.Addr().(*net.TCPAddr)
+	//backend.RealPort = int32(realAddr.Port)
+	//backend.RealAddr = realAddr.IP.String() + ":" + strconv.Itoa(int(backend.RealPort))
+	//
+	//// tchannel serve does not block, connection handling is done in different goroutine
+	//err = backend.Channel.Serve(ln)
+
 	return nil
 }
 
-func (gateway *Gateway) register(register RegisterFn) {
+func (gateway *Gateway) registerPredefined() {
 	gateway.Router.RegisterRaw("GET", "/debug/pprof", pprof.Index)
 	gateway.Router.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
 	gateway.Router.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
@@ -191,8 +208,6 @@ func (gateway *Gateway) register(register RegisterFn) {
 	gateway.Router.Register("GET", "/health", NewRouterEndpoint(
 		gateway, "health", "health", gateway.handleHealthRequest,
 	))
-
-	register(gateway, gateway.Router)
 }
 
 func (gateway *Gateway) handleHealthRequest(
@@ -427,7 +442,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
-	gateway.tchannelServer = NewTChannelServer(channel, gateway.Logger)
+	gateway.TChannelServer = NewTChannelServer(channel, gateway.Logger)
 
 	return nil
 }
