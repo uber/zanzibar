@@ -37,7 +37,7 @@ import (
 	"go.uber.org/zap"
 
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz"
+	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz-tchan"
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
