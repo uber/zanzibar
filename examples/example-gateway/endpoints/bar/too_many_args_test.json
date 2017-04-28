@@ -27,7 +27,7 @@
 			"intWithoutRange": 1,
 			"mapIntWithRange": {},
 			"mapIntWithoutRange": {}
-		}
+		},
 		"clientResHeaders":  {
 			"X-Uuid": "test-uuid", 
 			"X-Token": "test-token"
