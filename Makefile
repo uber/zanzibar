@@ -83,6 +83,14 @@ generate:
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
 
+.PHONY: check-generate
+check-generate:
+	@rm -f git-status.log
+	rm -rf ./examples/example-gateway/build
+	make generate
+	git status --porcelain > git-status.log
+	@[ ! -s git-status.log ]
+
 .PHONY: test-all
 test-all: test cover fast-bench bins install-wrk
 	make test-benchmark-runner

@@ -22,6 +22,7 @@ install:
   - make install
 script:
   - make generate
+  - make check-generate
   - make lint
   - make test-only
   - make cover
