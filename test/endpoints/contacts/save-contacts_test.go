@@ -104,7 +104,8 @@ func TestSaveContactsCall(t *testing.T) {
 		KnownHTTPBackends: []string{"contacts"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

@@ -37,7 +37,9 @@ import (
 )
 
 var testBinary = filepath.Join(
-	getDirName(), "..", "examples", "example-gateway", "build", "main.go",
+	getDirName(),
+	"..", "examples", "example-gateway",
+	"build", "services", "example-gateway", "main.go",
 )
 
 func getDirName() string {

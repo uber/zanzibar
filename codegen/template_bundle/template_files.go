@@ -475,7 +475,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientName | camel}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -552,7 +552,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2534, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -604,7 +604,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -710,7 +710,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3852, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3883, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -994,6 +994,7 @@ func getConfigDirName() string {
 
 func getConfig() *zanzibar.StaticConfig {
 	return zanzibar.NewStaticConfigOrDie([]string{
+		// TODO: zanzibar-defaults should be bundled in the binary
 		filepath.Join(getDirName(), "zanzibar-defaults.json"),
 		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
@@ -1050,7 +1051,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1551, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1612, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

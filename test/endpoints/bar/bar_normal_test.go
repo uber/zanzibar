@@ -47,7 +47,8 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -96,7 +97,8 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 		},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -148,7 +150,8 @@ func TestBarExceptionCode(t *testing.T) {
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -186,7 +189,8 @@ func TestMalformedBarExceptionCode(t *testing.T) {
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -224,7 +228,8 @@ func TestBarExceptionInvalidStatusCode(t *testing.T) {
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build", "main.go",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

@@ -12,7 +12,7 @@ GO_FILES := $(shell \
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
 # list all executables
-PROGS = examples/example-gateway/build/example-gateway \
+PROGS = examples/example-gateway/build/services/example-gateway/example-gateway \
 	benchmarks/benchserver/benchserver \
 	benchmarks/runner/runner
 
@@ -148,11 +148,11 @@ $(PROGS): $(GO_FILES)
 bins: generate $(PROGS)
 
 .PHONY: run
-run: examples/example-gateway/build/example-gateway
+run: examples/example-gateway/build/services/example-gateway/example-gateway
 	cd ./examples/example-gateway; \
 		ENVIRONMENT=production \
 		CONFIG_DIR=./config \
-		./build/example-gateway
+		./build/services/example-gateway/example-gateway
 
 .PHONY: go-docs
 go-docs:

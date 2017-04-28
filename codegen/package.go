@@ -183,22 +183,6 @@ func (p PackageHelper) TargetEndpointsRegisterPath() string {
 	return path.Join(p.targetGenDir, "endpoints", "register.go")
 }
 
-// TargetMainPath returns where the main.go file should go.
-func (p PackageHelper) TargetMainPath() string {
-	return path.Join(p.targetGenDir, "main.go")
-}
-
-// TargetMainTestPath returns where the main.go file should go.
-func (p PackageHelper) TargetMainTestPath() string {
-	return path.Join(p.targetGenDir, "main_test.go")
-}
-
-// TargetProductionConfigFilePath returns where config/production.json
-// should be copied to in a gateway.
-func (p PackageHelper) TargetProductionConfigFilePath() string {
-	return path.Join(p.targetGenDir, "zanzibar-defaults.json")
-}
-
 // EndpointTestConfigPath returns the path for the endpoint test configs
 func (p PackageHelper) EndpointTestConfigPath(
 	serviceName, methodName string,
