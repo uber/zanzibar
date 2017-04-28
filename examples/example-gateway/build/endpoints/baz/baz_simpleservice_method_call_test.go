@@ -71,6 +71,8 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	)
 
 	headers := map[string]string{}
+	headers["x-token"] = "token"
+	headers["x-uuid"] = "uuid"
 
 	res, err := gateway.MakeRequest(
 		"POST",

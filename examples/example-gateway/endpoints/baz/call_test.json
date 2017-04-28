@@ -9,7 +9,10 @@
 			"i3": 42
 		}
 	},
-	"endpointReqHeaders": {},
+	"endpointReqHeaders": {
+		"x-uuid": "uuid",
+		"x-token": "token"
+	},
 	"endpointResponse": {},
 	"endpointResHeaders": {},
 
