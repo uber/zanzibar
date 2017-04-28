@@ -1,6 +1,7 @@
 {
     "endpoints": [
         "call.json",
+        "call_tchannel.json",
         "compare.json",
         "ping.json",
         "silly_noop.json"

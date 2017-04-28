@@ -73,7 +73,10 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		bazServer.NewSimpleServiceCallHandler(call),
 	)
 
-	headers := map[string]string{}
+	headers := map[string]string{
+		"x-uuid":  "uuid",
+		"x-token": "token",
+	}
 
 	res, err := gateway.MakeRequest(
 		"POST",

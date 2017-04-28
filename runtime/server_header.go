@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"errors"
 	"net/http"
 )
 
@@ -30,13 +31,12 @@ type Header interface {
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
+	Ensure(keys []string) error
 }
 
-// ServerHTTPHeader wrapper to implement ServerHeaderInterface
+// ServerHTTPHeader wrapper to implement zanzibar Header interface
 // on http.Header
 type ServerHTTPHeader http.Header
-
-// TODO: Add a TChannel Implementation
 
 // Get retrieves the first string stored on a given header. Bool
 // return value is used to distinguish between the presence of a
@@ -86,4 +86,61 @@ func (zh ServerHTTPHeader) Keys() []string {
 		i++
 	}
 	return keys
+}
+
+// Ensure returns error if the headers do not have the given keys
+func (zh ServerHTTPHeader) Ensure(keys []string) error {
+	for _, headerName := range keys {
+		_, ok := zh[headerName]
+		if !ok {
+			return errors.New("Missing manditory header: " + headerName)
+		}
+	}
+	return nil
+}
+
+// ServerTChannelHeader wrapper to implement zanzibar Header interface
+// on map[string]string
+type ServerTChannelHeader map[string]string
+
+// Get retrieves the string value stored on a given header. Bool
+// return value is used to distinguish between the presence of a
+// header with golang's zerovalue string and the absence of the string.
+func (th ServerTChannelHeader) Get(key string) (string, bool) {
+	value, ok := th[key]
+	return value, ok
+}
+
+// Add is an alias to Set.
+func (th ServerTChannelHeader) Add(key string, value string) {
+	th.Set(key, value)
+}
+
+// Set sets a value for a given header, overwriting the previous value.
+func (th ServerTChannelHeader) Set(key string, value string) {
+	// TODO: Canonicalize strings before inserting
+	// Use textproto.CanonicalMIMEHeaderKey
+	th[key] = value
+}
+
+// Keys returns a slice of header keys.
+func (th ServerTChannelHeader) Keys() []string {
+	keys := make([]string, len(th))
+	i := 0
+	for k := range th {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
+// Ensure returns error if the headers do not have the given keys
+func (th ServerTChannelHeader) Ensure(keys []string) error {
+	for _, headerName := range keys {
+		_, ok := th[headerName]
+		if !ok {
+			return errors.New("Missing manditory header: " + headerName)
+		}
+	}
+	return nil
 }

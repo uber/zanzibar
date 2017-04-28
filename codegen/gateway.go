@@ -55,6 +55,8 @@ var mandatoryEndpointFields = []string{
 	"thriftFileSha",
 	"thriftMethodName",
 	"workflowType",
+}
+var mandatoryHTTPEndpointFields = []string{
 	"testFixtures",
 	"middlewares",
 }
@@ -339,6 +341,18 @@ type EndpointSpec struct {
 	ClientMethod string
 }
 
+func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
+	for i := 0; i < len(mandatoryFields); i++ {
+		fieldName := mandatoryFields[i]
+		if _, ok := config[fieldName]; !ok {
+			return errors.Errorf(
+				"config (%s) must have %s field", jsonFile, fieldName,
+			)
+		}
+	}
+	return nil
+}
+
 // NewEndpointSpec creates an endpoint spec from a json file.
 func NewEndpointSpec(
 	jsonFile string,
@@ -365,26 +379,28 @@ func NewEndpointSpec(
 		)
 	}
 
-	if endpointConfigObj["endpointType"] != "http" {
+	if err := ensureFields(endpointConfigObj, mandatoryEndpointFields, jsonFile); err != nil {
+		return nil, err
+	}
+
+	endpointType := endpointConfigObj["endpointType"]
+	if endpointType == "http" {
+		if err := ensureFields(endpointConfigObj, mandatoryHTTPEndpointFields, jsonFile); err != nil {
+			return nil, err
+		}
+
+	}
+	if endpointType != "http" && endpointType != "tchannel" {
 		return nil, errors.Errorf(
 			"Cannot support unknown endpointType for endpoint %s", jsonFile,
 		)
-	}
-
-	for i := 0; i < len(mandatoryEndpointFields); i++ {
-		fieldName := mandatoryEndpointFields[i]
-		if endpointConfigObj[fieldName] == "" {
-			return nil, errors.Errorf(
-				"endpoint config (%s) must have %s field", jsonFile, fieldName,
-			)
-		}
 	}
 
 	thriftFile := filepath.Join(
 		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, true, h)
+	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,
@@ -452,6 +468,36 @@ func NewEndpointSpec(
 		)
 	}
 
+	espec := &EndpointSpec{
+		ModuleSpec:         mspec,
+		JSONFile:           jsonFile,
+		GoStructsFileName:  goStructsFileName,
+		GoFolderName:       goFolderName,
+		EndpointType:       endpointConfigObj["endpointType"].(string),
+		EndpointID:         endpointConfigObj["endpointId"].(string),
+		HandleID:           endpointConfigObj["handleId"].(string),
+		ThriftFile:         thriftFile,
+		ThriftServiceName:  parts[0],
+		ThriftMethodName:   parts[1],
+		WorkflowType:       workflowType,
+		WorkflowImportPath: workflowImportPath,
+		ClientName:         clientName,
+		ClientMethod:       clientMethod,
+	}
+
+	if endpointType == "tchannel" {
+		return espec, nil
+	}
+	return augmentHTTPEndpointSpec(espec, endpointConfigObj, midSpecs)
+}
+
+func augmentHTTPEndpointSpec(
+	espec *EndpointSpec,
+	endpointConfigObj map[string]interface{},
+	midSpecs map[string]*MiddlewareSpec,
+) (*EndpointSpec, error) {
+	espec.TestFixtures = endpointConfigObj["testFixtures"].([]interface{})
+
 	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 	if !ok {
 		return nil, errors.Errorf(
@@ -493,6 +539,7 @@ func NewEndpointSpec(
 			Options: opts,
 		}
 	}
+	espec.Middlewares = middlewares
 
 	reqHeaderMap := make(map[string]string)
 	m, ok := endpointConfigObj["reqHeaderMap"]
@@ -523,6 +570,8 @@ func NewEndpointSpec(
 		i++
 	}
 	sort.Strings(reqHeaderMapKeys)
+	espec.ReqHeaderMap = reqHeaderMap
+	espec.ReqHeaderMapKeys = reqHeaderMapKeys
 
 	resHeaderMap := make(map[string]string)
 	m2, ok := endpointConfigObj["resHeaderMap"]
@@ -553,29 +602,10 @@ func NewEndpointSpec(
 		i++
 	}
 	sort.Strings(resHeaderMapKeys)
+	espec.ResHeaderMap = resHeaderMap
+	espec.ResHeaderMapKeys = resHeaderMapKeys
 
-	return &EndpointSpec{
-		ModuleSpec:         mspec,
-		JSONFile:           jsonFile,
-		GoStructsFileName:  goStructsFileName,
-		GoFolderName:       goFolderName,
-		EndpointType:       endpointConfigObj["endpointType"].(string),
-		EndpointID:         endpointConfigObj["endpointId"].(string),
-		HandleID:           endpointConfigObj["handleId"].(string),
-		ThriftFile:         thriftFile,
-		ThriftServiceName:  parts[0],
-		ThriftMethodName:   parts[1],
-		TestFixtures:       endpointConfigObj["testFixtures"].([]interface{}),
-		Middlewares:        middlewares,
-		ReqHeaderMap:       reqHeaderMap,
-		ReqHeaderMapKeys:   reqHeaderMapKeys,
-		ResHeaderMap:       resHeaderMap,
-		ResHeaderMapKeys:   resHeaderMapKeys,
-		WorkflowType:       workflowType,
-		WorkflowImportPath: workflowImportPath,
-		ClientName:         clientName,
-		ClientMethod:       clientMethod,
-	}, nil
+	return espec, nil
 }
 
 // TargetEndpointPath generates a filepath for each endpoint method

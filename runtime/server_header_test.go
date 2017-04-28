@@ -130,3 +130,78 @@ func TestKeys(t *testing.T) {
 
 	assert.Equal(t, 2, len(zh.Keys()))
 }
+
+func TestEnsure(t *testing.T) {
+	zh := zanzibar.ServerHTTPHeader{}
+
+	zh["foo"] = []string{"headOne"}
+	zh["bar"] = []string{"otherHeader"}
+
+	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
+	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
+}
+
+func TestSTHGet(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+	zh["foo"] = "headOne"
+
+	v, ok := zh.Get("foo")
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "headOne", v)
+}
+
+func TestSTHGetMissingKey(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+
+	v, ok := zh.Get("foo")
+	assert.Equal(t, false, ok)
+	assert.Equal(t, "", v)
+}
+
+func TestSTHAdd(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+
+	zh.Add("foo", "headOne")
+	assert.Equal(t, "headOne", zh["foo"])
+}
+
+func TestSTHSetOverwriteOldKey(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+	zh["foo"] = "headOne"
+
+	zh.Set("foo", "newHeader")
+	assert.Equal(t, "newHeader", zh["foo"])
+}
+
+func TestSTHSetNewKey(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+	zh["bar"] = "otherHeader"
+
+	zh.Set("foo", "headOne")
+	assert.Equal(t, "headOne", zh["foo"])
+}
+
+func TestSTHMissingKey(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+	emptyAr := make([]string, 0)
+	assert.Equal(t, emptyAr, zh.Keys())
+}
+
+func TestSTHkeys(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+
+	zh["foo"] = "headOne"
+	zh["bar"] = "otherHeader"
+
+	assert.Equal(t, 2, len(zh.Keys()))
+}
+
+func TestSTHEnsure(t *testing.T) {
+	zh := zanzibar.ServerTChannelHeader{}
+
+	zh["foo"] = "headOne"
+	zh["bar"] = "otherHeader"
+
+	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
+	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
+}
