@@ -385,7 +385,6 @@ func (moduleSystem *System) GenerateBuild(
 		}
 	}
 
-	print("\nDone.\n")
 	return nil
 }
 

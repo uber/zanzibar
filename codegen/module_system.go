@@ -520,16 +520,17 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	var err error
 	if e.EndpointType == "http" {
-		structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
-		if err != nil {
-			return err
-		}
-		// TODO: this is regenerated multiple times?
 		structFilePath, err := filepath.Rel(endpointDirectory, e.GoStructsFileName)
 		if err != nil {
 			structFilePath = e.GoStructsFileName
 		}
-		out[structFilePath] = structs
+		if _, ok := out[structFilePath]; !ok {
+			structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
+			if err != nil {
+				return err
+			}
+			out[structFilePath] = structs
+		}
 	}
 
 	method := findMethod(m, thriftServiceName, methodName)
