@@ -550,15 +550,15 @@ func (t *Template) GenerateClientsInitFile(
 
 // EndpointRegisterInfo ...
 type EndpointRegisterInfo struct {
-	Method      string
-	HTTPPath    string
-	EndpointID  string
-	HandlerID   string
-	PackageName string
-	HandlerType string
-	MethodName  string
-	HandlerName string
-	Middlewares []MiddlewareSpec
+	EndpointType string
+	Constructor  string
+	Method       *MethodSpec
+	EndpointID   string
+	HandlerID    string
+	PackageName  string
+	HandlerType  string
+	HandlerName  string
+	Middlewares  []MiddlewareSpec
 }
 
 // EndpointsRegisterMeta ...
@@ -578,6 +578,9 @@ func (c sortByEndpointName) Swap(i, j int) {
 }
 
 func (c sortByEndpointName) Less(i, j int) bool {
+	if c[i].EndpointType != c[j].EndpointType {
+		return c[i].EndpointType < c[j].EndpointType
+	}
 	return (c[i].EndpointID + c[i].HandleID) <
 		(c[j].EndpointID + c[j].HandleID)
 }
@@ -612,16 +615,41 @@ func (t *Template) GenerateEndpointRegisterFile(
 
 	for i := 0; i < len(endpoints); i++ {
 		espec := endpoints[i]
-		if espec.EndpointType == "tchannel" {
-			continue
+
+		method := findMethod(
+			espec.ModuleSpec,
+			espec.ThriftServiceName,
+			espec.ThriftMethodName,
+		)
+		if method == nil {
+			return "", errors.Errorf(
+				"Could not find serviceName %q + methodName %q in module",
+				espec.ThriftServiceName, espec.ThriftMethodName,
+			)
+		}
+
+		// TODO: unify constructor naming
+		var endpointType, handlerType, constructor string
+		switch espec.EndpointType {
+		case "http":
+			endpointType = "HTTP"
+			handlerType = "*" + espec.ModuleSpec.PackageName + "." +
+				strings.Title(method.Name) + "Handler"
+			constructor = "New" + strings.Title(method.Name) + "Endpoint"
+		case "tchannel":
+			endpointType = "TChannel"
+			handlerType = "zanzibar.TChanHandler"
+			constructor = "New" + strings.Title(method.ThriftService) +
+				strings.Title(method.Name) + "Handler"
+		default:
+			panic("Unsupported endpoint type: " + espec.EndpointType)
 		}
 
 		var goPkg string
-		if espec.WorkflowType == "httpClient" || espec.WorkflowType == "tchannelClient" {
+		switch espec.WorkflowType {
+		case "httpClient", "tchannelClient", "custom":
 			goPkg = espec.ModuleSpec.GoPackage
-		} else if espec.WorkflowType == "custom" {
-			goPkg = espec.ModuleSpec.GoPackage
-		} else {
+		default:
 			panic("Unsupported WorkflowType: " + espec.WorkflowType)
 		}
 
@@ -632,31 +660,19 @@ func (t *Template) GenerateEndpointRegisterFile(
 			})
 		}
 
-		method := findMethod(
-			espec.ModuleSpec,
-			espec.ThriftServiceName,
-			espec.ThriftMethodName,
-		)
-		if method == nil {
-			return "", errors.Errorf(
-				"Could not find serviceName (%s) + methodName (%s) in module",
-				espec.ThriftServiceName, espec.ThriftMethodName,
-			)
-		}
-
-		handlerType := espec.ModuleSpec.PackageName +
-			"." + strings.Title(method.Name) + "Handler"
+		handlerName := strings.Title(espec.EndpointID) + strings.Title(method.Name) +
+			endpointType + "Handler"
 
 		info := EndpointRegisterInfo{
-			EndpointID:  espec.EndpointID,
-			HandlerID:   espec.HandleID,
-			Method:      method.HTTPMethod,
-			HTTPPath:    method.HTTPPath,
-			PackageName: espec.ModuleSpec.PackageName,
-			HandlerType: handlerType,
-			MethodName:  strings.Title(method.Name),
-			HandlerName: strings.Title(method.Name) + "Handler",
-			Middlewares: espec.Middlewares,
+			EndpointType: endpointType,
+			Constructor:  constructor,
+			EndpointID:   espec.EndpointID,
+			HandlerID:    espec.HandleID,
+			Method:       method,
+			PackageName:  espec.ModuleSpec.PackageName,
+			HandlerType:  handlerType,
+			HandlerName:  handlerName,
+			Middlewares:  espec.Middlewares,
 		}
 		endpointsInfo = append(endpointsInfo, info)
 	}
