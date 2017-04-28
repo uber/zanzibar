@@ -34,7 +34,11 @@ import (
 
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
 // module system (clients, endpoints)
-func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
+func NewDefaultModuleSystem(
+	configDirName string,
+	middlewareConfig string,
+	h *PackageHelper,
+) (*module.System, error) {
 	system := module.NewSystem()
 	tmpl, err := NewTemplate()
 
@@ -51,8 +55,11 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
 
+	clientSpecs := map[string]*ClientSpec{}
+
 	if err := system.RegisterClassType("client", "http", &HTTPClientGenerator{
 		templates:     tmpl,
+		genSpecs:      clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -63,6 +70,7 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 
 	if err := system.RegisterClassType("client", "tchannel", &TChannelClientGenerator{
 		templates:     tmpl,
+		genSpecs:      clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -92,8 +100,66 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 		)
 	}
 
-	// TODO: Register endpoint module class and type generators
+	middlewareSpecs := map[string]*MiddlewareSpec{}
+	middleConfig := filepath.Join(
+		configDirName,
+		middlewareConfig,
+	)
+	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load middlewares:")
+	}
+
+	for _, mspec := range middlewares {
+		middlewareSpecs[mspec.Name] = mspec
+	}
+
+	// Register endpoint module class and type generators
+	if err := system.RegisterClass("endpoint", module.Class{
+		Directory:         "endpoints",
+		ClassType:         module.MultiModule,
+		ClassDependencies: []string{"client"},
+	}); err != nil {
+		return nil, errors.Wrapf(err, "Error registering endpoint class")
+	}
+
+	if err := system.RegisterClassType("endpoint", "http", &HTTPEndpointGenerator{
+		templates:       tmpl,
+		clientSpecs:     clientSpecs,
+		middlewareSpecs: middlewareSpecs,
+		packageHelper:   h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering http endpoint class type",
+		)
+	}
 	return system, nil
+}
+
+func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
+	var clientConfig clientClassConfig
+	if err := json.Unmarshal(rawConfig, &clientConfig); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading config for client instance",
+		)
+	}
+	clientConfig.Config["clientId"] = clientConfig.Name
+	clientConfig.Config["clientType"] = clientConfig.Type
+	return &clientConfig, nil
+}
+
+func readEndpointConfig(rawConfig []byte) (*endpointClassConfig, error) {
+	var endpointConfig endpointClassConfig
+	if err := json.Unmarshal(rawConfig, &endpointConfig); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading config for endpoint instance",
+		)
+	}
+	return &endpointConfig, nil
 }
 
 /*
@@ -104,11 +170,12 @@ func NewDefaultModuleSystem(h *PackageHelper) (*module.System, error) {
 type HTTPClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	genSpecs      map[string]*ClientSpec
 }
 
 // Generate returns the HTTP client generated files as a map of relative file
-// path (relative to the target buid directory) to file bytes.
-func (generator *HTTPClientGenerator) Generate(
+// path (relative to the target build directory) to file bytes.
+func (g *HTTPClientGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
@@ -116,7 +183,7 @@ func (generator *HTTPClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading HTTP client %s JSON config",
+			"Error reading HTTP client \"%s\" JSON config",
 			instance.InstanceName,
 		)
 	}
@@ -128,15 +195,17 @@ func (generator *HTTPClientGenerator) Generate(
 			instance.JSONFileName,
 		),
 		clientConfig,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error initializing HTTPClientSpec for %s",
+			"Error initializing HTTPClientSpec for \"%s\"",
 			instance.InstanceName,
 		)
 	}
+
+	g.genSpecs[clientSpec.JSONFile] = clientSpec
 
 	clientMeta := &ClientMeta{
 		PackageName:      clientSpec.ModuleSpec.PackageName,
@@ -145,34 +214,34 @@ func (generator *HTTPClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 	}
 
-	client, err := generator.templates.execTemplate(
+	client, err := g.templates.execTemplate(
 		"http_client.tmpl",
 		clientMeta,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing HTTP client template for %s",
+			"Error executing HTTP client template for \"%s\"",
 			instance.InstanceName,
 		)
 	}
 
-	structs, err := generator.templates.execTemplate(
+	structs, err := g.templates.execTemplate(
 		"structs.tmpl",
 		clientMeta,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing HTTP client structs template for %s",
+			"Error executing HTTP client structs template for \"%s\"",
 			instance.InstanceName,
 		)
 	}
 
 	clientDirectory := filepath.Join(
-		generator.packageHelper.CodeGenTargetPath(),
+		g.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
 	)
 
@@ -204,11 +273,12 @@ func (generator *HTTPClientGenerator) Generate(
 type TChannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+	genSpecs      map[string]*ClientSpec
 }
 
 // Generate returns the TChannel client generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
-func (generator *TChannelClientGenerator) Generate(
+func (g *TChannelClientGenerator) Generate(
 	instance *module.Instance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
@@ -216,7 +286,7 @@ func (generator *TChannelClientGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading TChannel client %s JSON config",
+			"Error reading TChannel client \"%s\" JSON config",
 			instance.InstanceName,
 		)
 	}
@@ -228,15 +298,17 @@ func (generator *TChannelClientGenerator) Generate(
 			instance.JSONFileName,
 		),
 		clientConfig,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error initializing TChannelClientSpec for %s",
+			"Error initializing TChannelClientSpec for \"%s\"",
 			instance.InstanceName,
 		)
 	}
+
+	g.genSpecs[clientSpec.JSONFile] = clientSpec
 
 	clientMeta := &ClientMeta{
 		PackageName:      clientSpec.ModuleSpec.PackageName,
@@ -245,34 +317,34 @@ func (generator *TChannelClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 	}
 
-	client, err := generator.templates.execTemplate(
+	client, err := g.templates.execTemplate(
 		"tchannel_client.tmpl",
 		clientMeta,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing TChannel client template for %s",
+			"Error executing TChannel client template for \"%s\"",
 			instance.InstanceName,
 		)
 	}
 
-	server, err := generator.templates.execTemplate(
+	server, err := g.templates.execTemplate(
 		"tchannel_client_test_server.tmpl",
 		clientMeta,
-		generator.packageHelper,
+		g.packageHelper,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error executing TChannel server template for %s",
+			"Error executing TChannel server template for \"%s\"",
 			instance.InstanceName,
 		)
 	}
 
 	clientDirectory := filepath.Join(
-		generator.packageHelper.CodeGenTargetPath(),
+		g.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
 	)
 
@@ -290,17 +362,147 @@ func (generator *TChannelClientGenerator) Generate(
 	}, nil
 }
 
-func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
-	var clientConfig clientClassConfig
-	if err := json.Unmarshal(rawConfig, &clientConfig); err != nil {
+/*
+ * HTTP endpoint Generator
+ */
+
+// HTTPEndpointGenerator generates a group of zanzibar http endpoints that proxy corresponding clients
+type HTTPEndpointGenerator struct {
+	templates       *Template
+	packageHelper   *PackageHelper
+	clientSpecs     map[string]*ClientSpec
+	middlewareSpecs map[string]*MiddlewareSpec
+}
+
+// Generate returns the HTTP endpoint generated files as a map of relative file
+// path (relative to the target build directory) to file bytes.
+func (g *HTTPEndpointGenerator) Generate(
+	instance *module.Instance,
+) (map[string][]byte, error) {
+	ret := map[string][]byte{}
+	endpointJsons := []string{}
+
+	endpointConfig, err := readEndpointConfig(instance.JSONFileRaw)
+	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading config for HTTP client instance",
+			"Error reading HTTP endpoint \"%s\" JSON config",
+			instance.InstanceName,
 		)
 	}
-	clientConfig.Config["clientId"] = clientConfig.Name
-	clientConfig.Config["clientType"] = clientConfig.Type
-	return &clientConfig, nil
+
+	endpointConfigDir := filepath.Join(
+		instance.BaseDirectory,
+		instance.Directory,
+	)
+	for _, fileName := range endpointConfig.Endpoints {
+		endpointJsons = append(
+			endpointJsons, filepath.Join(endpointConfigDir, fileName),
+		)
+	}
+	for _, jsonFile := range endpointJsons {
+		espec, err := NewEndpointSpec(jsonFile, g.packageHelper, g.middlewareSpecs)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Error parsing endpoint json file: %s", jsonFile,
+			)
+		}
+
+		err = espec.SetDownstream(g.clientSpecs, g.packageHelper)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Error parsing downstream info for endpoint: %s", jsonFile,
+			)
+		}
+		err = g.generateEndpointFile(espec, instance, ret)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Error executing HTTP endpoint template \"%s\"",
+				instance.InstanceName,
+			)
+		}
+	}
+	return ret, nil
+}
+
+func (g *HTTPEndpointGenerator) generateEndpointFile(
+	e *EndpointSpec, instance *module.Instance, out map[string][]byte,
+) error {
+	m := e.ModuleSpec
+	methodName := e.ThriftMethodName
+	thriftServiceName := e.ThriftServiceName
+
+	if len(m.Services) == 0 {
+		return nil
+	}
+
+	structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
+	if err != nil {
+		return err
+	}
+	endpointDirectory := filepath.Join(
+		g.packageHelper.CodeGenTargetPath(),
+		instance.Directory,
+	)
+
+	// TODO: this is regenerated multiple times?
+	structFilePath, err := filepath.Rel(endpointDirectory, e.GoStructsFileName)
+	if err != nil {
+		structFilePath = e.GoStructsFileName
+	}
+
+	method := findMethod(m, thriftServiceName, methodName)
+	if method == nil {
+		return errors.Errorf(
+			"Could not find thriftServiceName \"%s\" + methodName \"%s\" in module",
+			thriftServiceName, methodName,
+		)
+	}
+
+	includedPackages := m.IncludedPackages
+	if e.WorkflowImportPath != "" {
+		includedPackages = append(includedPackages, GoPackageImport{
+			PackageName: e.WorkflowImportPath,
+			AliasName:   "custom" + strings.Title(m.PackageName),
+		})
+	}
+
+	var workflowName string
+	if method.Downstream != nil {
+		workflowName = strings.Title(method.Name) + "Endpoint"
+	} else {
+		workflowName = "custom" + strings.Title(m.PackageName) + "." +
+			strings.Title(method.Name) + "Endpoint"
+	}
+
+	meta := &EndpointMeta{
+		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
+		PackageName:        m.PackageName,
+		IncludedPackages:   includedPackages,
+		Method:             method,
+		ReqHeaderMap:       e.ReqHeaderMap,
+		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
+		ResHeaderMap:       e.ResHeaderMap,
+		ResHeaderMapKeys:   e.ResHeaderMapKeys,
+		ClientName:         e.ClientName,
+		WorkflowName:       workflowName,
+	}
+
+	endpoint, err := g.templates.execTemplate("endpoint.tmpl", meta, g.packageHelper)
+	if err != nil {
+		return errors.Wrap(err, "Error executing HTTP endpoint template")
+	}
+
+	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
+	endpointFilePath, err := filepath.Rel(endpointDirectory, targetPath)
+	if err != nil {
+		endpointFilePath = targetPath
+	}
+
+	out[structFilePath] = structs
+	out[endpointFilePath] = endpoint
+	return nil
 }
 
 /*
