@@ -320,7 +320,7 @@ func writeLogs(l *zap.Logger, reqFlds []zapcore.Field, resFlds []zapcore.Field) 
 		fields = append(reqFlds, resFlds...)
 	}
 	l.Info(
-		"Request/Response",
+		"Finished an incoming server HTTP request",
 		fields...,
 	)
 }
