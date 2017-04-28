@@ -120,7 +120,10 @@ func BenchmarkCall(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			res, err := gateway.MakeRequest(
-				"POST", "/baz/call", nil,
+				"POST", "/baz/call", map[string]string{
+					"x-token": "token",
+					"x-uuid":  "uuid",
+				},
 				bytes.NewReader([]byte(`{"arg":{"b1":true,"s2":"hello","i3":42}}`)),
 			)
 			if err != nil {

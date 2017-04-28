@@ -78,10 +78,19 @@ lint: check-licence eclint-check
 .PHONY: generate
 generate:
 	@go get -u github.com/jteeuwen/go-bindata/...
+	@chmod 644 ./codegen/templates/*.tmpl
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	@bash ./scripts/generate.sh
+
+.PHONY: check-generate
+check-generate:
+	@rm -f git-status.log
+	rm -rf ./examples/example-gateway/build
+	make generate
+	git status --porcelain > git-status.log
+	@[ ! -s git-status.log ] || ( cat git-status.log ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
 test-all: test cover fast-bench bins install-wrk
@@ -122,7 +131,10 @@ travis-coveralls:
 
 .PHONY: fast-bench
 fast-bench:
-	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 1s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
+	@rm -f bench.log bench-fail.log
+	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 1s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'  | tee -a bench.log"
+	@cat bench.log | grep "FAIL" | tee -a bench-fail.log
+	@[ ! -s bench-fail.log ]
 
 .PHONY: bench
 bench:
