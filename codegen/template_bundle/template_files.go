@@ -375,8 +375,8 @@ import (
 
 // Endpoints is a struct that holds all the endpoints
 type Endpoints struct {
-	{{range $idx, $e := .Endpoints -}}
-	{{$e.HandlerName}} {{$e.HandlerType}}
+	{{range $idx, $endpoint := .Endpoints -}}
+	{{$endpoint.HandlerName}} *{{$endpoint.HandlerType}}
 	{{end}}
 }
 
@@ -387,28 +387,25 @@ func CreateEndpoints(
 	return &Endpoints{
 		{{range $idx, $e := .Endpoints -}}
 		{{$e.HandlerName}}:
-			{{$e.PackageName}}.{{$e.Constructor}}(gateway),
+			{{$e.PackageName}}.New{{$e.MethodName}}Endpoint(gateway),
 		{{end}}
 	}
 }
 
 // Register will register all endpoints
-func Register(g *zanzibar.Gateway) {
-	router := g.Router
-	tchanRouter := g.TChanRouter
+func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
-	{{range $idx, $e := .Endpoints -}}
-	{{if eq .EndpointType "HTTP" -}}
+	{{range $idx, $endpoint := .Endpoints -}}
 	router.Register(
-		"{{.Method.HTTPMethod}}", "{{.Method.HTTPPath}}",
+		"{{$endpoint.Method}}", "{{$endpoint.HTTPPath}}",
 		zanzibar.NewRouterEndpoint(
 			g,
-			"{{.EndpointID}}",
-			"{{.HandlerID}}",
-			{{ if len .Middlewares | ne 0 -}}
+			"{{$endpoint.EndpointID}}",
+			"{{$endpoint.HandlerID}}",
+			{{ if len $endpoint.Middlewares | ne 0 -}}
 			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				{{range $idx, $middleware := $e.Middlewares -}}
+				{{range $idx, $middleware := $endpoint.Middlewares -}}
 				{{$middleware.Name}}.NewMiddleWare(
 					g,
 						{{$middleware.Name}}.Options{
@@ -418,17 +415,14 @@ func Register(g *zanzibar.Gateway) {
 						},
 				),
 				{{end -}}
-			}, endpoints.{{$e.HandlerName}}.HandleRequest).Handle,
+			}, endpoints.{{$endpoint.HandlerName}}.HandleRequest).Handle,
 			{{- else -}}
-			endpoints.{{$e.HandlerName}}.HandleRequest,
+			endpoints.{{$endpoint.HandlerName}}.HandleRequest,
 			{{- end}}
 			
 		),
 	)
-	{{else -}}
-	tchanRouter.Register("{{.Method.ThriftService}}", "{{.Method.Name}}", endpoints.{{.HandlerName}})
-	{{end -}}
-	{{end -}}
+	{{end}}
 }
 `)
 
@@ -442,7 +436,7 @@ func endpoint_registerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1691, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1595, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

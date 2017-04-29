@@ -69,7 +69,7 @@ func TestHandlers(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -155,7 +155,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -209,7 +209,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -271,7 +271,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,

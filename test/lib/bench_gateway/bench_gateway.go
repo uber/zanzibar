@@ -158,7 +158,7 @@ func CreateGateway(
 
 // GetPort ...
 func (gateway *BenchGateway) GetPort() int {
-	return int(gateway.ActualGateway.RealPort)
+	return int(gateway.ActualGateway.RealHTTPPort)
 }
 
 // GetErrorLogs ...
@@ -212,7 +212,7 @@ func (gateway *BenchGateway) MakeRequest(
 ) (*http.Response, error) {
 	client := gateway.httpClient
 
-	fullURL := "http://" + gateway.ActualGateway.RealAddr + url
+	fullURL := "http://" + gateway.ActualGateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
 	for headerName, headerValue := range headers {

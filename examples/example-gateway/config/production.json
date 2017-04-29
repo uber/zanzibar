@@ -11,7 +11,7 @@
 
 	"tchannel.serviceName": "example-gateway",
 	"tchannel.processName": "example-gateway",
-	"tchannel.port": "7784",
+	"tchannel.port": 7784,
 
 	"clients.contacts.port": 4000,
 	"clients.contacts.ip": "127.0.0.1",

@@ -46,7 +46,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -61,7 +61,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			},
 		),
 	)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/bar/",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,

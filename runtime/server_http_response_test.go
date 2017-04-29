@@ -47,7 +47,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -107,7 +107,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -166,7 +166,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -240,7 +240,7 @@ func TestResponsePeekBody(t *testing.T) {
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -304,7 +304,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -350,7 +350,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	}
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",

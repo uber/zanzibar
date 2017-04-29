@@ -74,11 +74,11 @@ func CreateEndpoints(
 
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway) {
-	router := g.Router
+	httpRouter := g.HTTPRouter
 	tchanRouter := g.TChanRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -87,7 +87,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BarArgNotStructHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/bar/missing-arg-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -96,7 +96,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BarMissingArgHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/bar/no-request-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -105,7 +105,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BarNoRequestHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/bar-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -125,7 +125,7 @@ func Register(g *zanzibar.Gateway) {
 			}, endpoints.BarNormalHTTPHandler.HandleRequest).Handle,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/too-many-args-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -134,7 +134,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BarTooManyArgsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/baz/call",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -143,7 +143,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BazCallHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/baz/compare",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -152,7 +152,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BazCompareHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/baz/ping",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -161,7 +161,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BazPingHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/baz/silly-noop",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -170,7 +170,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.BazSillyNoopHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/contacts/:userUUID/contacts",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -179,7 +179,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.ContactsSaveContactsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/googlenow/add-credentials",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -188,7 +188,7 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.GooglenowAddCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/googlenow/check-credentials",
 		zanzibar.NewRouterEndpoint(
 			g,
