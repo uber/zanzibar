@@ -167,7 +167,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	w http.ResponseWriter, r *http.Request, params httprouter.Params,
 ) {
 	reqFields := logRequestFields(r)
-	resFields := make([]zapcore.Field, 0)
+	var resFields []zapcore.Field
 
 	defer func() {
 		writeLogs(endpoint.gateway.Logger, reqFields, resFields)
@@ -280,7 +280,7 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 	// TODO: Allocating a fixed size array causes the zap logger to fail
 	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
 	// further to see if we can avoid reallocating underlying arrays for slices.
-	fields := make([]zapcore.Field, 0)
+	var fields []zapcore.Field
 	for k, v := range r.Header {
 		if len(v) > 0 {
 			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
@@ -307,7 +307,7 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 }
 
 func logResponseFields(res *ServerHTTPResponse) []zapcore.Field {
-	fields := make([]zapcore.Field, 0)
+	var fields []zapcore.Field
 
 	fields = append(fields, zap.Int(statusCodeZapName, res.StatusCode))
 	fields = append(fields, zap.Time("timestamp-finished", res.finishTime))
