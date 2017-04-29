@@ -236,11 +236,6 @@ func (gateway *Gateway) handleHealthRequest(
 
 // Close the http server
 func (gateway *Gateway) Close() {
-	if gateway.loggerFile != nil {
-		_ = gateway.loggerFile.Sync()
-		_ = gateway.loggerFile.Close()
-	}
-
 	gateway.metricsBackend.Flush()
 	_ = gateway.metricScopeCloser.Close()
 	if gateway.localHTTPServer != gateway.httpServer {
@@ -248,6 +243,12 @@ func (gateway *Gateway) Close() {
 	}
 	gateway.httpServer.Close()
 	gateway.tchanServer.Close()
+
+	// close log files as the last step
+	if gateway.loggerFile != nil {
+		_ = gateway.loggerFile.Sync()
+		_ = gateway.loggerFile.Close()
+	}
 }
 
 // InspectOrDie inspects the config for this gateway

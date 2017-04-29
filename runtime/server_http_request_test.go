@@ -53,6 +53,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	endpoint := zanzibar.NewRouterEndpoint(

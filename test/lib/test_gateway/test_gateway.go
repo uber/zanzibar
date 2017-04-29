@@ -141,6 +141,10 @@ func CreateGateway(
 		config["port"] = 0
 	}
 
+	if _, contains := config["tchannel.port"]; !contains {
+		config["tchannel.port"] = 0
+	}
+
 	config["tchannel.serviceName"] = "test-gateway"
 	config["tchannel.processName"] = "test-gateway"
 	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
