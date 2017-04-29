@@ -45,6 +45,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
@@ -105,6 +106,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
@@ -164,6 +166,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
@@ -238,6 +241,7 @@ func TestResponsePeekBody(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
@@ -299,6 +303,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	headers := zanzibar.ServerHTTPHeader{}
 	headers.Set("foo", "bar")
@@ -348,6 +353,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(

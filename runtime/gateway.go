@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -58,6 +59,7 @@ type Options struct {
 // Gateway type
 type Gateway struct {
 	HTTPPort     int32
+	TChanPort    int32
 	RealHTTPPort int32
 	RealHTTPAddr string
 	WaitGroup    *sync.WaitGroup
@@ -76,6 +78,7 @@ type Gateway struct {
 	logWriter         zapcore.WriteSyncer
 	httpServer        *HTTPServer
 	localHTTPServer   *HTTPServer
+	tchanServer       *tchannel.Channel
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -96,6 +99,7 @@ func CreateGateway(
 
 	gateway := &Gateway{
 		HTTPPort:    int32(config.MustGetInt("port")),
+		TChanPort:   int32(config.MustGetInt("tchannel.port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
 		Config:      config,
@@ -169,18 +173,25 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 	}
 
 	// start TChannel server
-	//addr := backend.IP + ":" + strconv.Itoa(int(backend.Port))
-	//ln, err := net.Listen("tcp", addr)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//realAddr := ln.Addr().(*net.TCPAddr)
-	//backend.RealPort = int32(realAddr.Port)
-	//backend.RealAddr = realAddr.IP.String() + ":" + strconv.Itoa(int(backend.RealPort))
-	//
-	//// tchannel serve does not block, connection handling is done in different goroutine
-	//err = backend.Channel.Serve(ln)
+	// TODO: proper IP
+	tchanAddr := "127.0.0.1:" + strconv.Itoa(int(gateway.TChanPort))
+	ln, err := net.Listen("tcp", tchanAddr)
+	if err != nil {
+		gateway.Logger.Error(
+			"Error listening tchannel port",
+			zap.String("error", err.Error()),
+		)
+		return err
+	}
+
+	// tchannel serve does not block, connection handling is done in different goroutine
+	err = gateway.tchanServer.Serve(ln)
+	if err != nil {
+		gateway.Logger.Error(
+			"Error starting tchannel server",
+			zap.String("error", err.Error()),
+		)
+	}
 
 	return nil
 }
@@ -236,6 +247,7 @@ func (gateway *Gateway) Close() {
 		gateway.localHTTPServer.Close()
 	}
 	gateway.httpServer.Close()
+	gateway.tchanServer.Close()
 }
 
 // InspectOrDie inspects the config for this gateway
@@ -442,6 +454,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
+	gateway.tchanServer = channel
 	gateway.TChanRouter = NewTChanRouter(channel, gateway.Logger)
 
 	return nil

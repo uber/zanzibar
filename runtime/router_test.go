@@ -43,6 +43,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
@@ -113,6 +114,7 @@ func TestRouterNotFound(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -141,6 +143,7 @@ func TestRouterInvalidMethod(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	resp, err := gateway.MakeRequest("POST", "/health", nil, nil)
 	if !assert.NoError(t, err) {

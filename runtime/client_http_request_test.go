@@ -45,6 +45,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
@@ -69,6 +70,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, "/")
@@ -91,6 +93,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
@@ -135,6 +138,7 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
@@ -165,6 +169,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
@@ -195,6 +200,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
@@ -224,6 +230,7 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/arg-not-struct-path",
