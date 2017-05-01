@@ -91,7 +91,7 @@ func CreateGateway(
 		return nil, err
 	}
 
-	seedConfig["port"] = int64(0)
+	seedConfig["http.port"] = int64(0)
 
 	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
 		seedConfig["tchannel.serviceName"] = "bench-gateway"

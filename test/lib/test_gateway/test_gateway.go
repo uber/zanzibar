@@ -137,8 +137,8 @@ func CreateGateway(
 
 	testGateway.setupMetrics(t, opts)
 
-	if _, contains := config["port"]; !contains {
-		config["port"] = 0
+	if _, contains := config["http.port"]; !contains {
+		config["http.port"] = 0
 	}
 
 	if _, contains := config["tchannel.port"]; !contains {

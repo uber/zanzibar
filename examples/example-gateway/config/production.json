@@ -1,6 +1,6 @@
 {
 	"serviceName": "example-gateway",
-	"port": 7783,
+	"http.port": 7783,
 	"useDatacenter": false,
 
 	"logger.fileName": "/var/log/example-gateway/example-gateway.log",

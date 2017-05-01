@@ -98,7 +98,7 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		HTTPPort:    int32(config.MustGetInt("port")),
+		HTTPPort:    int32(config.MustGetInt("http.port")),
 		TChanPort:   int32(config.MustGetInt("tchannel.port")),
 		ServiceName: config.MustGetString("serviceName"),
 		WaitGroup:   &sync.WaitGroup{},
