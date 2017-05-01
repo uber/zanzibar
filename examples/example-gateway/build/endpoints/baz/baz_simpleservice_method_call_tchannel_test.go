@@ -84,7 +84,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	var result endpointsBazBaz.SimpleService_Call_Result
 
-	success, resHeaders, err := gateway.MakeTChanRequest(
+	success, resHeaders, err := gateway.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 

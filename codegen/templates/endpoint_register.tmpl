@@ -34,7 +34,7 @@ func CreateEndpoints(
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway) {
 	httpRouter := g.HTTPRouter
-	tchanRouter := g.TChanRouter
+	tchannelRouter := g.TChannelRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
 	{{range $idx, $e := .Endpoints -}}
@@ -61,11 +61,10 @@ func Register(g *zanzibar.Gateway) {
 			{{- else -}}
 			endpoints.{{$e.HandlerName}}.HandleRequest,
 			{{- end}}
-			
 		),
 	)
 	{{else -}}
-	tchanRouter.Register("{{.Method.ThriftService}}", "{{.Method.Name}}", endpoints.{{.HandlerName}})
+	tchannelRouter.Register("{{.Method.ThriftService}}", "{{.Method.Name}}", endpoints.{{.HandlerName}})
 	{{end -}}
 	{{end -}}
 }

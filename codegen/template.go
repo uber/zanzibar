@@ -638,7 +638,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 			constructor = "New" + strings.Title(method.Name) + "Endpoint"
 		case "tchannel":
 			endpointType = "TChannel"
-			handlerType = "zanzibar.TChanHandler"
+			handlerType = "zanzibar.TChannelHandler"
 			constructor = "New" + strings.Title(method.ThriftService) +
 				strings.Title(method.Name) + "Handler"
 		default:

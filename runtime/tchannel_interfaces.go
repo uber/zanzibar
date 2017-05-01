@@ -32,15 +32,15 @@ type RWTStruct interface {
 	FromWire(wire.Value) error
 }
 
-// TChanClient abstracts calling a Thrift endpoint, and is used by the generated client code.
-type TChanClient interface {
+// TChannelClient abstracts calling a Thrift endpoint, and is used by the generated client code.
+type TChannelClient interface {
 	// Call should be passed the method to call, headers and the request/response thriftrw structs.
 	// The arguments returned are (whether there was an application error, unexpected error)
 	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (success bool, respHeaders map[string]string, err error)
 }
 
-// TChanHandler abstracts handling of an RPC that is implemented by the generated server code.
-type TChanHandler interface {
+// TChannelHandler abstracts handling of an RPC that is implemented by the generated server code.
+type TChannelHandler interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are (whether there was an application error, response headers, result struct, unexpected error)
 	Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp RWTStruct, respHeaders map[string]string, err error)

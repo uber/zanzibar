@@ -34,7 +34,7 @@ import (
 // TestTChannelBackend will pretend to be a http backend
 type TestTChannelBackend struct {
 	Channel  *tchannel.Channel
-	Router   *zanzibar.TChanRouter
+	Router   *zanzibar.TChannelRouter
 	IP       string
 	Port     int32
 	RealPort int32
@@ -93,7 +93,7 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 }
 
 // Register registers tchannel server handler
-func (backend *TestTChannelBackend) Register(service string, method string, handler zanzibar.TChanHandler) {
+func (backend *TestTChannelBackend) Register(service string, method string, handler zanzibar.TChannelHandler) {
 	backend.Router.Register(service, method, handler)
 }
 
@@ -122,7 +122,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 	}
 
 	backend.Channel = channel
-	backend.Router = zanzibar.NewTChanRouter(channel, testLogger)
+	backend.Router = zanzibar.NewTChannelRouter(channel, testLogger)
 
 	return backend, nil
 }

@@ -58,21 +58,21 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort      int32
-	TChanPort     int32
-	RealHTTPPort  int32
-	RealHTTPAddr  string
-	RealTChanPort int32
-	RealTChanAddr string
-	WaitGroup     *sync.WaitGroup
-	Clients       Clients
-	Channel       *tchannel.Channel
-	Logger        *zap.Logger
-	MetricScope   tally.Scope
-	ServiceName   string
-	Config        *StaticConfig
-	HTTPRouter    *HTTPRouter
-	TChanRouter   *TChanRouter
+	HTTPPort         int32
+	TChannelPort     int32
+	RealHTTPPort     int32
+	RealHTTPAddr     string
+	RealTChannelPort int32
+	RealTChannelAddr string
+	WaitGroup        *sync.WaitGroup
+	Clients          Clients
+	Channel          *tchannel.Channel
+	Logger           *zap.Logger
+	MetricScope      tally.Scope
+	ServiceName      string
+	Config           *StaticConfig
+	HTTPRouter       *HTTPRouter
+	TChannelRouter   *TChannelRouter
 
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
@@ -80,7 +80,7 @@ type Gateway struct {
 	logWriter         zapcore.WriteSyncer
 	httpServer        *HTTPServer
 	localHTTPServer   *HTTPServer
-	tchanServer       *tchannel.Channel
+	tchannelServer    *tchannel.Channel
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -100,11 +100,11 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		HTTPPort:    int32(config.MustGetInt("http.port")),
-		TChanPort:   int32(config.MustGetInt("tchannel.port")),
-		ServiceName: config.MustGetString("serviceName"),
-		WaitGroup:   &sync.WaitGroup{},
-		Config:      config,
+		HTTPPort:     int32(config.MustGetInt("http.port")),
+		TChannelPort: int32(config.MustGetInt("tchannel.port")),
+		ServiceName:  config.MustGetString("serviceName"),
+		WaitGroup:    &sync.WaitGroup{},
+		Config:       config,
 
 		logWriter:      logWriter,
 		metricsBackend: metricsBackend,
@@ -176,8 +176,8 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 
 	// start TChannel server
 	// TODO: proper IP
-	tchanAddr := "127.0.0.1:" + strconv.Itoa(int(gateway.TChanPort))
-	ln, err := net.Listen("tcp", tchanAddr)
+	tchannelAddr := "127.0.0.1:" + strconv.Itoa(int(gateway.TChannelPort))
+	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
 		gateway.Logger.Error(
 			"Error listening tchannel port",
@@ -185,11 +185,11 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		)
 		return err
 	}
-	gateway.RealTChanAddr = ln.Addr().String()
-	gateway.RealTChanPort = int32(ln.Addr().(*net.TCPAddr).Port)
+	gateway.RealTChannelAddr = ln.Addr().String()
+	gateway.RealTChannelPort = int32(ln.Addr().(*net.TCPAddr).Port)
 
 	// tchannel serve does not block, connection handling is done in different goroutine
-	err = gateway.tchanServer.Serve(ln)
+	err = gateway.tchannelServer.Serve(ln)
 	if err != nil {
 		gateway.Logger.Error(
 			"Error starting tchannel server",
@@ -246,7 +246,7 @@ func (gateway *Gateway) Close() {
 		gateway.localHTTPServer.Close()
 	}
 	gateway.httpServer.Close()
-	gateway.tchanServer.Close()
+	gateway.tchannelServer.Close()
 
 	// close log files as the last step
 	if gateway.loggerFile != nil {
@@ -459,8 +459,8 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
-	gateway.tchanServer = channel
-	gateway.TChanRouter = NewTChanRouter(channel, gateway.Logger)
+	gateway.tchannelServer = channel
+	gateway.TChannelRouter = NewTChannelRouter(channel, gateway.Logger)
 
 	return nil
 }

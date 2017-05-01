@@ -32,7 +32,7 @@ type {{$func}} func (
 ) ({{- if ne .ResponseType "" -}}*{{.ResponseType}}, {{- end -}}map[string]string, error)
 
 // New{{$handler}} wraps a handler function so it can be registered with a thrift server.
-func New{{$handler}}(f {{$func}}) zanzibar.TChanHandler {
+func New{{$handler}}(f {{$func}}) zanzibar.TChannelHandler {
 	return &{{$handler}}{f}
 }
 

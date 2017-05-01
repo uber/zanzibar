@@ -36,8 +36,8 @@ import (
 var realHTTPAddrRegex = regexp.MustCompile(
 	`"realHTTPAddr":"([0-9\.\:]+)"`,
 )
-var realTChanAddrRegex = regexp.MustCompile(
-	`"realTChanAddr":"([0-9\.\:]+)"`,
+var realTChannelAddrRegex = regexp.MustCompile(
+	`"realTChannelAddr":"([0-9\.\:]+)"`,
 )
 
 // MalformedStdoutError is used when the child process has unexpected stdout
@@ -174,30 +174,30 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 		}
 	}
 
-	m = realTChanAddrRegex.FindStringSubmatch(line1)
+	m = realTChannelAddrRegex.FindStringSubmatch(line1)
 	if m == nil {
 		return &MalformedStdoutError{
 			Type:       "malformed.stdout",
 			StdoutLine: line1,
 			Message: fmt.Sprintf(
-				"Could not find RealTChanAddr in server stdout: %s",
+				"Could not find RealTChannelAddr in server stdout: %s",
 				line1,
 			),
 		}
 	}
 
-	testGateway.RealTChanAddr = m[1]
-	indexOfSep = strings.LastIndex(testGateway.RealTChanAddr, ":")
+	testGateway.RealTChannelAddr = m[1]
+	indexOfSep = strings.LastIndex(testGateway.RealTChannelAddr, ":")
 	if indexOfSep != -1 {
-		host := testGateway.RealTChanAddr[0:indexOfSep]
-		port := testGateway.RealTChanAddr[indexOfSep+1:]
+		host := testGateway.RealTChannelAddr[0:indexOfSep]
+		port := testGateway.RealTChannelAddr[indexOfSep+1:]
 		portNum, err := strconv.Atoi(port)
 
-		testGateway.RealTChanHost = host
+		testGateway.RealTChannelHost = host
 		if err != nil {
-			testGateway.RealTChanPort = -1
+			testGateway.RealTChannelPort = -1
 		} else {
-			testGateway.RealTChanPort = portNum
+			testGateway.RealTChannelPort = portNum
 		}
 	}
 

@@ -48,7 +48,7 @@ type BenchGateway struct {
 	readLogs         bool
 	errorLogs        map[string][]string
 	httpClient       *http.Client
-	tchanClient      zanzibar.TChanClient
+	tchannelClient   zanzibar.TChannelClient
 }
 
 func getDirName() string {
@@ -150,7 +150,7 @@ func CreateGateway(
 
 	benchGateway.ActualGateway = gateway
 
-	benchGateway.tchanClient = zanzibar.NewTChannelClient(
+	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
 		gateway.Channel,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
@@ -236,8 +236,8 @@ func (gateway *BenchGateway) MakeRequest(
 	return client.Do(req)
 }
 
-// MakeTChanRequest helper
-func (gateway *BenchGateway) MakeTChanRequest(
+// MakeTChannelRequest helper
+func (gateway *BenchGateway) MakeTChannelRequest(
 	ctx context.Context,
 	thriftService string,
 	method string,
@@ -245,9 +245,9 @@ func (gateway *BenchGateway) MakeTChanRequest(
 	req, res zanzibar.RWTStruct,
 ) (bool, map[string]string, error) {
 	sc := gateway.ActualGateway.Channel.GetSubChannel(gateway.ActualGateway.ServiceName)
-	sc.Peers().Add(gateway.ActualGateway.RealTChanAddr)
+	sc.Peers().Add(gateway.ActualGateway.RealTChannelAddr)
 
-	return gateway.tchanClient.Call(ctx, thriftService, method, headers, req, res)
+	return gateway.tchannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // Close test gateway

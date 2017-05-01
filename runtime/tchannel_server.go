@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	tchan "github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
 	netContext "golang.org/x/net/context"
 
 	"github.com/pkg/errors"
@@ -42,53 +42,53 @@ import (
 type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 type handler struct {
-	tchanHandler   TChanHandler
-	postResponseCB PostResponseCB
+	tchannelHandler TChannelHandler
+	postResponseCB  PostResponseCB
 }
 
-// TChanRouter handles incoming TChannel calls and routes them to the matching TChanHandler.
-type TChanRouter struct {
+// TChannelRouter handles incoming TChannel calls and routes them to the matching TChannelHandler.
+type TChannelRouter struct {
 	sync.RWMutex
-	registrar tchan.Registrar
+	registrar tchannel.Registrar
 	logger    *zap.Logger
 	handlers  map[string]handler
 }
 
 // netContextRouter implements the Handler interface that consumes netContext instead of stdlib context
 type netContextRouter struct {
-	router *TChanRouter
+	router *TChannelRouter
 }
 
-func (ncr netContextRouter) Handle(ctx netContext.Context, call *tchan.InboundCall) {
+func (ncr netContextRouter) Handle(ctx netContext.Context, call *tchannel.InboundCall) {
 	ncr.router.Handle(ctx, call)
 }
 
-// NewTChanRouter returns a TChannel router that can serve thrift services over TChannel.
-func NewTChanRouter(registrar tchan.Registrar, logger *zap.Logger) *TChanRouter {
-	return &TChanRouter{
+// NewTChannelRouter returns a TChannel router that can serve thrift services over TChannel.
+func NewTChannelRouter(registrar tchannel.Registrar, logger *zap.Logger) *TChannelRouter {
+	return &TChannelRouter{
 		registrar: registrar,
 		logger:    logger,
 		handlers:  map[string]handler{},
 	}
 }
 
-// Register registers the given TChanHandler to be called on an incoming call for its method.
+// Register registers the given TChannelHandler to be called on an incoming call for its method.
 // "service" is the thrift service name as in the thrift definition.
-func (s *TChanRouter) Register(service string, method string, h TChanHandler) {
-	handler := &handler{tchanHandler: h}
+func (s *TChannelRouter) Register(service string, method string, h TChannelHandler) {
+	handler := &handler{tchannelHandler: h}
 	s.register(service, method, handler)
 }
 
-// RegisterWithPostResponseCB registers the given TChanHandler with a PostResponseCB function
-func (s *TChanRouter) RegisterWithPostResponseCB(service string, method string, h TChanHandler, cb PostResponseCB) {
+// RegisterWithPostResponseCB registers the given TChannelHandler with a PostResponseCB function
+func (s *TChannelRouter) RegisterWithPostResponseCB(service string, method string, h TChannelHandler, cb PostResponseCB) {
 	handler := &handler{
-		tchanHandler:   h,
-		postResponseCB: cb,
+		tchannelHandler: h,
+		postResponseCB:  cb,
 	}
 	s.register(service, method, handler)
 }
 
-func (s *TChanRouter) register(service string, method string, h *handler) {
+func (s *TChannelRouter) register(service string, method string, h *handler) {
 	key := service + "::" + method
 
 	s.Lock()
@@ -100,7 +100,7 @@ func (s *TChanRouter) register(service string, method string, h *handler) {
 }
 
 // Handle handles an incoming TChannel call and forwards it to the correct handler.
-func (s *TChanRouter) Handle(ctx context.Context, call *tchan.InboundCall) {
+func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall) {
 	op := call.MethodString()
 	service, method, ok := getServiceMethod(op)
 	if !ok {
@@ -119,8 +119,8 @@ func (s *TChanRouter) Handle(ctx context.Context, call *tchan.InboundCall) {
 	}
 }
 
-func (s *TChanRouter) onError(err error) {
-	if tchan.GetSystemErrorCode(err) == tchan.ErrCodeTimeout {
+func (s *TChannelRouter) onError(err error) {
+	if tchannel.GetSystemErrorCode(err) == tchannel.ErrCodeTimeout {
 		s.logger.Warn("Thrift server timeout",
 			zap.String("error", err.Error()),
 		)
@@ -131,7 +131,7 @@ func (s *TChanRouter) onError(err error) {
 	}
 }
 
-func (s *TChanRouter) handle(ctx context.Context, handler handler, service string, method string, call *tchan.InboundCall) error {
+func (s *TChannelRouter) handle(ctx context.Context, handler handler, service string, method string, call *tchannel.InboundCall) error {
 	reader, err := call.Arg2Reader()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", service, method)
@@ -159,15 +159,15 @@ func (s *TChanRouter) handle(ctx context.Context, handler handler, service strin
 		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", service, method)
 	}
 
-	tracer := tchan.TracerFromRegistrar(s.registrar)
-	ctx = tchan.ExtractInboundSpan(ctx, call, headers, tracer)
+	tracer := tchannel.TracerFromRegistrar(s.registrar)
+	ctx = tchannel.ExtractInboundSpan(ctx, call, headers, tracer)
 
 	wireValue, err := protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
 		return errors.Wrapf(err, "could not decode arg3 for inbound call: %s::%s", service, method)
 	}
 
-	success, resp, respHeaders, err := handler.tchanHandler.Handle(ctx, headers, &wireValue)
+	success, resp, respHeaders, err := handler.tchannelHandler.Handle(ctx, headers, &wireValue)
 
 	if handler.postResponseCB != nil {
 		defer handler.postResponseCB(ctx, method, resp)

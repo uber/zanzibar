@@ -47,7 +47,7 @@ type TestGateway interface {
 		headers map[string]string,
 		body io.Reader,
 	) (*http.Response, error)
-	MakeTChanRequest(
+	MakeTChannelRequest(
 		ctx context.Context,
 		thriftService string,
 		method string,
@@ -77,15 +77,15 @@ type ChildProcessGateway struct {
 	serviceName      string
 
 	HTTPClient       *http.Client
-	TChanClient      zanzibar.TChanClient
+	TChannelClient   zanzibar.TChannelClient
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup sync.WaitGroup
 	RealHTTPAddr     string
 	RealHTTPHost     string
 	RealHTTPPort     int
-	RealTChanAddr    string
-	RealTChanHost    string
-	RealTChanPort    int
+	RealTChannelAddr string
+	RealTChannelHost string
+	RealTChannelPort int
 }
 
 // Options used to create TestGateway
@@ -147,7 +147,7 @@ func CreateGateway(
 		return nil, err
 	}
 
-	tchanClient := zanzibar.NewTChannelClient(channel, &zanzibar.TChannelClientOption{
+	tchannelClient := zanzibar.NewTChannelClient(channel, &zanzibar.TChannelClientOption{
 		ServiceName:       serviceName,
 		Timeout:           time.Duration(1000) * time.Millisecond,
 		TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
@@ -164,7 +164,7 @@ func CreateGateway(
 				MaxIdleConnsPerHost: 500,
 			},
 		},
-		TChanClient:      tchanClient,
+		TChannelClient:   tchannelClient,
 		jsonLines:        []string{},
 		errorLogs:        map[string][]string{},
 		backendsHTTP:     backendsHTTP,
@@ -217,8 +217,8 @@ func (gateway *ChildProcessGateway) MakeRequest(
 	return client.Do(req)
 }
 
-// MakeTChanRequest helper
-func (gateway *ChildProcessGateway) MakeTChanRequest(
+// MakeTChannelRequest helper
+func (gateway *ChildProcessGateway) MakeTChannelRequest(
 	ctx context.Context,
 	thriftService string,
 	method string,
@@ -226,9 +226,9 @@ func (gateway *ChildProcessGateway) MakeTChanRequest(
 	req, res zanzibar.RWTStruct,
 ) (bool, map[string]string, error) {
 	sc := gateway.channel.GetSubChannel(gateway.serviceName)
-	sc.Peers().Add(gateway.RealTChanAddr)
+	sc.Peers().Add(gateway.RealTChannelAddr)
 
-	return gateway.TChanClient.Call(ctx, thriftService, method, headers, req, res)
+	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // HTTPBackends returns the HTTP backends

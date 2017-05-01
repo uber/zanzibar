@@ -43,7 +43,7 @@ import (
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceCallHandler(
 	gateway *zanzibar.Gateway,
-) zanzibar.TChanHandler {
+) zanzibar.TChannelHandler {
 	return &SimpleServiceCallHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 		Logger:  gateway.Logger,

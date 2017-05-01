@@ -48,7 +48,7 @@ type Endpoints struct {
 	ContactsSaveContactsHTTPHandler      *contacts.SaveContactsHandler
 	GooglenowAddCredentialsHTTPHandler   *googlenow.AddCredentialsHandler
 	GooglenowCheckCredentialsHTTPHandler *googlenow.CheckCredentialsHandler
-	BazCallTChannelHandler               zanzibar.TChanHandler
+	BazCallTChannelHandler               zanzibar.TChannelHandler
 }
 
 // CreateEndpoints bootstraps the endpoints.
@@ -75,7 +75,7 @@ func CreateEndpoints(
 // Register will register all endpoints
 func Register(g *zanzibar.Gateway) {
 	httpRouter := g.HTTPRouter
-	tchanRouter := g.TChanRouter
+	tchannelRouter := g.TChannelRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
 	httpRouter.Register(
@@ -197,5 +197,5 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.GooglenowCheckCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-	tchanRouter.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
+	tchannelRouter.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
 }

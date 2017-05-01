@@ -27,7 +27,7 @@ import (
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
-) zanzibar.TChanHandler {
+) zanzibar.TChannelHandler {
 	return &{{$handlerName}}{
 		Clients: gateway.Clients.(*clients.Clients),
 		Logger: gateway.Logger,
