@@ -45,8 +45,8 @@ type TestGateway interface {
 	) (*http.Response, error)
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
-	GetPort() int
-	GetErrorLogs() map[string][]string
+	HTTPPort() int
+	ErrorLogs() map[string][]string
 
 	Close()
 }
@@ -66,9 +66,9 @@ type ChildProcessGateway struct {
 	HTTPClient       *http.Client
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup sync.WaitGroup
-	RealAddr         string
-	RealHost         string
-	RealPort         int
+	RealHTTPAddr     string
+	RealHTTPHost     string
+	RealHTTPPort     int
 }
 
 // Options used to create TestGateway
@@ -167,7 +167,7 @@ func (gateway *ChildProcessGateway) MakeRequest(
 ) (*http.Response, error) {
 	client := gateway.HTTPClient
 
-	fullURL := "http://" + gateway.RealAddr + url
+	fullURL := "http://" + gateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
 	for headerName, headerValue := range headers {
@@ -191,13 +191,13 @@ func (gateway *ChildProcessGateway) TChannelBackends() map[string]*testBackend.T
 	return gateway.backendsTChannel
 }
 
-// GetPort ...
-func (gateway *ChildProcessGateway) GetPort() int {
-	return gateway.RealPort
+// HTTPPort ...
+func (gateway *ChildProcessGateway) HTTPPort() int {
+	return gateway.RealHTTPPort
 }
 
-// GetErrorLogs ...
-func (gateway *ChildProcessGateway) GetErrorLogs() map[string][]string {
+// ErrorLogs ...
+func (gateway *ChildProcessGateway) ErrorLogs() map[string][]string {
 	return gateway.errorLogs
 }
 

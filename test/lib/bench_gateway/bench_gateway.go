@@ -156,13 +156,13 @@ func CreateGateway(
 	return benchGateway, nil
 }
 
-// GetPort ...
-func (gateway *BenchGateway) GetPort() int {
+// HTTPPort ...
+func (gateway *BenchGateway) HTTPPort() int {
 	return int(gateway.ActualGateway.RealHTTPPort)
 }
 
-// GetErrorLogs ...
-func (gateway *BenchGateway) GetErrorLogs() map[string][]string {
+// ErrorLogs ...
+func (gateway *BenchGateway) ErrorLogs() map[string][]string {
 	if gateway.readLogs {
 		return gateway.errorLogs
 	}
