@@ -21,6 +21,9 @@
 package benchGateway
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"io"
 	"net"
 	"net/http"
@@ -28,10 +31,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"bytes"
-
-	"encoding/json"
 
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
@@ -49,6 +48,7 @@ type BenchGateway struct {
 	readLogs         bool
 	errorLogs        map[string][]string
 	httpClient       *http.Client
+	tchanClient      zanzibar.TChanClient
 }
 
 func getDirName() string {
@@ -92,6 +92,7 @@ func CreateGateway(
 	}
 
 	seedConfig["http.port"] = int64(0)
+	seedConfig["tchannel.port"] = int64(0)
 
 	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
 		seedConfig["tchannel.serviceName"] = "bench-gateway"
@@ -148,6 +149,15 @@ func CreateGateway(
 	gateway.Clients = createClients(gateway)
 
 	benchGateway.ActualGateway = gateway
+
+	benchGateway.tchanClient = zanzibar.NewTChannelClient(
+		gateway.Channel,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       gateway.ServiceName,
+			Timeout:           time.Duration(1000) * time.Millisecond,
+			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
+		})
+
 	err = gateway.Bootstrap(zanzibar.RegisterFn(regEndpoints))
 	if err != nil {
 		return nil, err
@@ -224,6 +234,20 @@ func (gateway *BenchGateway) MakeRequest(
 	}
 
 	return client.Do(req)
+}
+
+// MakeTChanRequest helper
+func (gateway *BenchGateway) MakeTChanRequest(
+	ctx context.Context,
+	thriftService string,
+	method string,
+	headers map[string]string,
+	req, res zanzibar.RWTStruct,
+) (bool, map[string]string, error) {
+	sc := gateway.ActualGateway.Channel.GetSubChannel(gateway.ActualGateway.ServiceName)
+	sc.Peers().Add(gateway.ActualGateway.RealTChanAddr)
+
+	return gateway.tchanClient.Call(ctx, thriftService, method, headers, req, res)
 }
 
 // Close test gateway

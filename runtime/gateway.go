@@ -58,19 +58,21 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort     int32
-	TChanPort    int32
-	RealHTTPPort int32
-	RealHTTPAddr string
-	WaitGroup    *sync.WaitGroup
-	Clients      Clients
-	Channel      *tchannel.Channel
-	Logger       *zap.Logger
-	MetricScope  tally.Scope
-	ServiceName  string
-	Config       *StaticConfig
-	HTTPRouter   *HTTPRouter
-	TChanRouter  *TChanRouter
+	HTTPPort      int32
+	TChanPort     int32
+	RealHTTPPort  int32
+	RealHTTPAddr  string
+	RealTChanPort int32
+	RealTChanAddr string
+	WaitGroup     *sync.WaitGroup
+	Clients       Clients
+	Channel       *tchannel.Channel
+	Logger        *zap.Logger
+	MetricScope   tally.Scope
+	ServiceName   string
+	Config        *StaticConfig
+	HTTPRouter    *HTTPRouter
+	TChanRouter   *TChanRouter
 
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
@@ -183,6 +185,8 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		)
 		return err
 	}
+	gateway.RealTChanAddr = ln.Addr().String()
+	gateway.RealTChanPort = int32(ln.Addr().(*net.TCPAddr).Port)
 
 	// tchannel serve does not block, connection handling is done in different goroutine
 	err = gateway.tchanServer.Serve(ln)

@@ -36,6 +36,9 @@ import (
 var realHTTPAddrRegex = regexp.MustCompile(
 	`"realHTTPAddr":"([0-9\.\:]+)"`,
 )
+var realTChanAddrRegex = regexp.MustCompile(
+	`"realTChanAddr":"([0-9\.\:]+)"`,
+)
 
 // MalformedStdoutError is used when the child process has unexpected stdout
 type MalformedStdoutError struct {
@@ -168,6 +171,33 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 			testGateway.RealHTTPPort = -1
 		} else {
 			testGateway.RealHTTPPort = portNum
+		}
+	}
+
+	m = realTChanAddrRegex.FindStringSubmatch(line1)
+	if m == nil {
+		return &MalformedStdoutError{
+			Type:       "malformed.stdout",
+			StdoutLine: line1,
+			Message: fmt.Sprintf(
+				"Could not find RealTChanAddr in server stdout: %s",
+				line1,
+			),
+		}
+	}
+
+	testGateway.RealTChanAddr = m[1]
+	indexOfSep = strings.LastIndex(testGateway.RealTChanAddr, ":")
+	if indexOfSep != -1 {
+		host := testGateway.RealTChanAddr[0:indexOfSep]
+		port := testGateway.RealTChanAddr[indexOfSep+1:]
+		portNum, err := strconv.Atoi(port)
+
+		testGateway.RealTChanHost = host
+		if err != nil {
+			testGateway.RealTChanPort = -1
+		} else {
+			testGateway.RealTChanPort = portNum
 		}
 	}
 
