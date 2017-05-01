@@ -95,6 +95,8 @@ type TestStub struct {
 	EndpointResHeaderKeys  []string          // To keep in canonical order
 
 	ClientStubs []ClientStub
+
+	TestServiceName string // The service module that mounts the endpoint
 }
 
 // ClientStub saves stubbed client request/response for an endpoint test.

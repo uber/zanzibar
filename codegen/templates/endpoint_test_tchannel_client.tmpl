@@ -45,7 +45,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main.go",
+			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
