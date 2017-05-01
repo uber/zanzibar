@@ -44,7 +44,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

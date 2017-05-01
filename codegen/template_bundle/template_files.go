@@ -375,8 +375,8 @@ import (
 
 // Endpoints is a struct that holds all the endpoints
 type Endpoints struct {
-	{{range $idx, $endpoint := .Endpoints -}}
-	{{$endpoint.HandlerName}} *{{$endpoint.HandlerType}}
+	{{range $idx, $e := .Endpoints -}}
+	{{$e.HandlerName}} {{$e.HandlerType}}
 	{{end}}
 }
 
@@ -387,25 +387,28 @@ func CreateEndpoints(
 	return &Endpoints{
 		{{range $idx, $e := .Endpoints -}}
 		{{$e.HandlerName}}:
-			{{$e.PackageName}}.New{{$e.MethodName}}Endpoint(gateway),
+			{{$e.PackageName}}.{{$e.Constructor}}(gateway),
 		{{end}}
 	}
 }
 
 // Register will register all endpoints
-func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
+func Register(g *zanzibar.Gateway) {
+	httpRouter := g.HTTPRouter
+	tchanRouter := g.TChanRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
-	{{range $idx, $endpoint := .Endpoints -}}
-	router.Register(
-		"{{$endpoint.Method}}", "{{$endpoint.HTTPPath}}",
+	{{range $idx, $e := .Endpoints -}}
+	{{if eq .EndpointType "HTTP" -}}
+	httpRouter.Register(
+		"{{.Method.HTTPMethod}}", "{{.Method.HTTPPath}}",
 		zanzibar.NewRouterEndpoint(
 			g,
-			"{{$endpoint.EndpointID}}",
-			"{{$endpoint.HandlerID}}",
-			{{ if len $endpoint.Middlewares | ne 0 -}}
+			"{{.EndpointID}}",
+			"{{.HandlerID}}",
+			{{ if len .Middlewares | ne 0 -}}
 			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				{{range $idx, $middleware := $endpoint.Middlewares -}}
+				{{range $idx, $middleware := $e.Middlewares -}}
 				{{$middleware.Name}}.NewMiddleWare(
 					g,
 						{{$middleware.Name}}.Options{
@@ -415,14 +418,17 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 						},
 				),
 				{{end -}}
-			}, endpoints.{{$endpoint.HandlerName}}.HandleRequest).Handle,
+			}, endpoints.{{$e.HandlerName}}.HandleRequest).Handle,
 			{{- else -}}
-			endpoints.{{$endpoint.HandlerName}}.HandleRequest,
+			endpoints.{{$e.HandlerName}}.HandleRequest,
 			{{- end}}
 			
 		),
 	)
-	{{end}}
+	{{else -}}
+	tchanRouter.Register("{{.Method.ThriftService}}", "{{.Method.Name}}", endpoints.{{.HandlerName}})
+	{{end -}}
+	{{end -}}
 }
 `)
 
@@ -436,7 +442,7 @@ func endpoint_registerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1595, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1703, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1017,7 +1023,8 @@ func createGateway() (*zanzibar.Gateway, error) {
 
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started {{.GatewayName | pascal}}",
-		zap.String("realAddr", server.RealAddr),
+		zap.String("realHTTPAddr", server.RealHTTPAddr),
+		zap.String("realTChanAddr", server.RealTChanAddr),
 		zap.Any("config", server.InspectOrDie()),
 	)
 
@@ -1051,7 +1058,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1612, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1673, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
