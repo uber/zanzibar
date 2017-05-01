@@ -42,13 +42,14 @@ func getDirName() string {
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"..",
+		"../../..",
 		"config",
 	)
 }
 
 func getConfig() *zanzibar.StaticConfig {
 	return zanzibar.NewStaticConfigOrDie([]string{
+		// TODO: zanzibar-defaults should be bundled in the binary
 		filepath.Join(getDirName(), "zanzibar-defaults.json"),
 		filepath.Join(getConfigDirName(), "production.json"),
 		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),

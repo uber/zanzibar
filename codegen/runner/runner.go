@@ -113,9 +113,4 @@ func main() {
 	fmt.Printf("Generating endpoint code for gateway \n")
 	err = gatewaySpec.GenerateEndpoints()
 	checkError(err, "Failed to generate endpoint files.")
-
-	fmt.Printf("Generating main.go for gateway \n")
-	err = gatewaySpec.GenerateMain()
-	checkError(err, "Failed to generate main.go.")
-
 }

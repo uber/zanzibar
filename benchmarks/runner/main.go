@@ -115,7 +115,7 @@ func spawnGateway(dirName string) *exec.Cmd {
 
 	mainGatewayPath := path.Join(
 		dirName, "..", "..", "examples",
-		"example-gateway", "build", "example-gateway",
+		"example-gateway", "bin", "example-gateway",
 	)
 
 	var gatewayCmd *exec.Cmd

@@ -1,5 +1,6 @@
 [{
 	"testName": "successfulRequest",
+	"testServiceName": "example-gateway",
 	"endpointId": "bar",
 	"handlerId": "tooManyArgs",
 	"endpointRequest": {},

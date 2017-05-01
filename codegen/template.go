@@ -27,7 +27,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -96,6 +95,8 @@ type TestStub struct {
 	EndpointResHeaderKeys  []string          // To keep in canonical order
 
 	ClientStubs []ClientStub
+
+	TestServiceName string // The service module that mounts the endpoint
 }
 
 // ClientStub saves stubbed client request/response for an endpoint test.
@@ -683,77 +684,6 @@ type MainMeta struct {
 	IncludedPackages        []GoPackageImport
 	GatewayName             string
 	RelativePathToAppConfig string
-}
-
-// GenerateMainFile will use main.tmpl to write out the main.go file
-// for a gateway.
-func (t *Template) GenerateMainFile(
-	g *GatewaySpec, h *PackageHelper,
-) (*MainFiles, error) {
-	rootConfigDirName := g.configDirName
-	configDestFileName := h.TargetProductionConfigFilePath()
-	gatewayDirName := filepath.Dir(configDestFileName)
-	deltaPath, err := filepath.Rel(gatewayDirName, rootConfigDirName)
-	if err != nil {
-		return nil, errors.Wrap(
-			err, "Could not build relative path when generating main file",
-		)
-	}
-
-	configSrcFileName := path.Join(
-		getDirName(), "..", "config", "production.json",
-	)
-	bytes, err := ioutil.ReadFile(configSrcFileName)
-	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"Could not read config/production.json while generating main file",
-		)
-	}
-
-	err = ioutil.WriteFile(configDestFileName, bytes, 0644)
-	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"Could not write config file while generating main file",
-		)
-	}
-
-	meta := &MainMeta{
-		IncludedPackages: []GoPackageImport{
-			{
-				PackageName: h.GoGatewayPackageName() + "/clients",
-				AliasName:   "",
-			},
-			{
-				PackageName: h.GoGatewayPackageName() + "/endpoints",
-				AliasName:   "",
-			},
-		},
-		GatewayName:             g.gatewayName,
-		RelativePathToAppConfig: deltaPath,
-	}
-
-	mainFile := h.TargetMainPath()
-	err = t.execTemplateAndFmt("main.tmpl", mainFile, meta, h)
-	if err != nil {
-		return nil, err
-	}
-
-	mainTestFile := h.TargetMainTestPath()
-	err = t.execTemplateAndFmt(
-		"main_test.tmpl",
-		mainTestFile,
-		meta,
-		h)
-	if err != nil {
-		return nil, err
-	}
-
-	return &MainFiles{
-		MainFile:     mainFile,
-		MainTestFile: mainTestFile,
-	}, nil
 }
 
 func (t *Template) execTemplateAndFmt(
