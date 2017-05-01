@@ -96,8 +96,16 @@ check-generate:
 	@[ ! -s git-status.log ] || ( cat git-status.log ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
-test-all: test cover fast-bench bins install-wrk
-	make test-benchmark-runner
+test-all: 
+	$(MAKE) generate 
+	$(MAKE) check-generate 
+	$(MAKE) lint 
+	$(MAKE) test-only 
+	$(MAKE) cover 
+	$(MAKE) fast-bench 
+	$(MAKE) bins 
+	$(MAKE) install-wrk
+	$(MAKE) test-benchmark-runner
 
 .PHONY: test-benchmark-runner
 test-benchmark-runner:
