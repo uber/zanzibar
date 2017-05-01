@@ -94,15 +94,15 @@ check-generate:
 
 .PHONY: test-all
 test-all: 
-	make generate 
-	make check-generate 
-	make lint 
-	make test-only 
-	make cover 
-	make fast-bench 
-	make bins 
-	make install-wrk
-	make test-benchmark-runner
+	$(MAKE) generate 
+	$(MAKE) check-generate 
+	$(MAKE) lint 
+	$(MAKE) test-only 
+	$(MAKE) cover 
+	$(MAKE) fast-bench 
+	$(MAKE) bins 
+	$(MAKE) install-wrk
+	$(MAKE) test-benchmark-runner
 
 .PHONY: test-benchmark-runner
 test-benchmark-runner:
