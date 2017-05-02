@@ -1,5 +1,5 @@
 {
-	"name": "baz-tchan",
+	"name": "bazTChannel",
 	"type": "tchannel",
 	"config": {
 		"rateLimit": 100

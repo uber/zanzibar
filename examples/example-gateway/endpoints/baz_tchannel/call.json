@@ -1,0 +1,10 @@
+{
+	"endpointType": "tchannel",
+	"endpointId": "bazTChannel",
+	"handleId": "call",
+	"thriftFile": "endpoints/baz_tchannel/baz_tchannel.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::Call",
+	"workflowType": "custom",
+	"workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/baz_tchannel"
+}
