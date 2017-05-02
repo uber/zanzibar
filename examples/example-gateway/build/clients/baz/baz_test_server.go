@@ -42,7 +42,7 @@ type SimpleServiceCallFunc func(
 ) (map[string]string, error)
 
 // NewSimpleServiceCallHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceCallHandler(f SimpleServiceCallFunc) zanzibar.TChanHandler {
+func NewSimpleServiceCallHandler(f SimpleServiceCallFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceCallHandler{f}
 }
 
@@ -90,7 +90,7 @@ type SimpleServiceCompareFunc func(
 ) (*clientsBazBaz.BazResponse, map[string]string, error)
 
 // NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChanHandler {
+func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceCompareHandler{f}
 }
 
@@ -139,7 +139,7 @@ type SimpleServicePingFunc func(
 ) (*clientsBazBaz.BazResponse, map[string]string, error)
 
 // NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChanHandler {
+func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChannelHandler {
 	return &SimpleServicePingHandler{f}
 }
 
@@ -177,7 +177,7 @@ type SimpleServiceSillyNoopFunc func(
 ) (map[string]string, error)
 
 // NewSimpleServiceSillyNoopHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceSillyNoopHandler(f SimpleServiceSillyNoopFunc) zanzibar.TChanHandler {
+func NewSimpleServiceSillyNoopHandler(f SimpleServiceSillyNoopFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceSillyNoopHandler{f}
 }
 

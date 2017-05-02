@@ -21,6 +21,7 @@
 package testGateway
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -28,9 +29,12 @@ import (
 	"sync"
 	"syscall"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally/m3"
+	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
 )
@@ -43,10 +47,17 @@ type TestGateway interface {
 		headers map[string]string,
 		body io.Reader,
 	) (*http.Response, error)
+	MakeTChannelRequest(
+		ctx context.Context,
+		thriftService string,
+		method string,
+		headers map[string]string,
+		req, resp zanzibar.RWTStruct,
+	) (bool, map[string]string, error)
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
-	GetPort() int
-	GetErrorLogs() map[string][]string
+	HTTPPort() int
+	ErrorLogs() map[string][]string
 
 	Close()
 }
@@ -62,13 +73,19 @@ type ChildProcessGateway struct {
 	backendsHTTP     map[string]*testBackend.TestHTTPBackend
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
 	errorLogs        map[string][]string
+	channel          *tchannel.Channel
+	serviceName      string
 
 	HTTPClient       *http.Client
+	TChannelClient   zanzibar.TChannelClient
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup sync.WaitGroup
-	RealAddr         string
-	RealHost         string
-	RealPort         int
+	RealHTTPAddr     string
+	RealHTTPHost     string
+	RealHTTPPort     int
+	RealTChannelAddr string
+	RealTChannelHost string
+	RealTChannelPort int
 }
 
 // Options used to create TestGateway
@@ -120,8 +137,27 @@ func CreateGateway(
 		return nil, err
 	}
 
+	tchannelOpts := &tchannel.ChannelOptions{
+		Logger: tchannel.NullLogger,
+	}
+
+	serviceName := "test-gateway"
+	channel, err := tchannel.NewChannel(serviceName, tchannelOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	tchannelClient := zanzibar.NewTChannelClient(channel, &zanzibar.TChannelClientOption{
+		ServiceName:       serviceName,
+		Timeout:           time.Duration(1000) * time.Millisecond,
+		TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
+	})
+
 	testGateway := &ChildProcessGateway{
-		test: t, opts: opts,
+		channel:     channel,
+		serviceName: serviceName,
+		test:        t,
+		opts:        opts,
 		HTTPClient: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
@@ -129,6 +165,7 @@ func CreateGateway(
 				MaxIdleConnsPerHost: 500,
 			},
 		},
+		TChannelClient:   tchannelClient,
 		jsonLines:        []string{},
 		errorLogs:        map[string][]string{},
 		backendsHTTP:     backendsHTTP,
@@ -137,14 +174,18 @@ func CreateGateway(
 
 	testGateway.setupMetrics(t, opts)
 
-	if _, contains := config["port"]; !contains {
-		config["port"] = 0
+	if _, contains := config["http.port"]; !contains {
+		config["http.port"] = 0
 	}
 
-	config["tchannel.serviceName"] = "test-gateway"
-	config["tchannel.processName"] = "test-gateway"
+	if _, contains := config["tchannel.port"]; !contains {
+		config["tchannel.port"] = 0
+	}
+
+	config["tchannel.serviceName"] = serviceName
+	config["tchannel.processName"] = serviceName
 	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
-	config["metrics.tally.service"] = "test-gateway"
+	config["metrics.tally.service"] = serviceName
 	config["metrics.tally.flushInterval"] = 10
 	config["metrics.m3.flushInterval"] = 10
 	config["logger.output"] = "stdout"
@@ -163,7 +204,7 @@ func (gateway *ChildProcessGateway) MakeRequest(
 ) (*http.Response, error) {
 	client := gateway.HTTPClient
 
-	fullURL := "http://" + gateway.RealAddr + url
+	fullURL := "http://" + gateway.RealHTTPAddr + url
 
 	req, err := http.NewRequest(method, fullURL, body)
 	for headerName, headerValue := range headers {
@@ -177,6 +218,20 @@ func (gateway *ChildProcessGateway) MakeRequest(
 	return client.Do(req)
 }
 
+// MakeTChannelRequest helper
+func (gateway *ChildProcessGateway) MakeTChannelRequest(
+	ctx context.Context,
+	thriftService string,
+	method string,
+	headers map[string]string,
+	req, res zanzibar.RWTStruct,
+) (bool, map[string]string, error) {
+	sc := gateway.channel.GetSubChannel(gateway.serviceName)
+	sc.Peers().Add(gateway.RealTChannelAddr)
+
+	return gateway.TChannelClient.Call(ctx, thriftService, method, headers, req, res)
+}
+
 // HTTPBackends returns the HTTP backends
 func (gateway *ChildProcessGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
 	return gateway.backendsHTTP
@@ -187,13 +242,13 @@ func (gateway *ChildProcessGateway) TChannelBackends() map[string]*testBackend.T
 	return gateway.backendsTChannel
 }
 
-// GetPort ...
-func (gateway *ChildProcessGateway) GetPort() int {
-	return gateway.RealPort
+// HTTPPort ...
+func (gateway *ChildProcessGateway) HTTPPort() int {
+	return gateway.RealHTTPPort
 }
 
-// GetErrorLogs ...
-func (gateway *ChildProcessGateway) GetErrorLogs() map[string][]string {
+// ErrorLogs ...
+func (gateway *ChildProcessGateway) ErrorLogs() map[string][]string {
 	return gateway.errorLogs
 }
 

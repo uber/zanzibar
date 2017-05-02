@@ -33,8 +33,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-var realAddrRegex = regexp.MustCompile(
-	`"realAddr":"([0-9\.\:]+)"`,
+var realHTTPAddrRegex = regexp.MustCompile(
+	`"realHTTPAddr":"([0-9\.\:]+)"`,
+)
+var realTChannelAddrRegex = regexp.MustCompile(
+	`"realTChannelAddr":"([0-9\.\:]+)"`,
 )
 
 // MalformedStdoutError is used when the child process has unexpected stdout
@@ -144,30 +147,57 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 		return err
 	}
 
-	m := realAddrRegex.FindStringSubmatch(line1)
+	m := realHTTPAddrRegex.FindStringSubmatch(line1)
 	if m == nil {
 		return &MalformedStdoutError{
 			Type:       "malformed.stdout",
 			StdoutLine: line1,
 			Message: fmt.Sprintf(
-				"Could not find RealAddr in server stdout: %s",
+				"Could not find RealHTTPAddr in server stdout: %s",
 				line1,
 			),
 		}
 	}
 
-	testGateway.RealAddr = m[1]
-	indexOfSep := strings.LastIndex(testGateway.RealAddr, ":")
+	testGateway.RealHTTPAddr = m[1]
+	indexOfSep := strings.LastIndex(testGateway.RealHTTPAddr, ":")
 	if indexOfSep != -1 {
-		host := testGateway.RealAddr[0:indexOfSep]
-		port := testGateway.RealAddr[indexOfSep+1:]
+		host := testGateway.RealHTTPAddr[0:indexOfSep]
+		port := testGateway.RealHTTPAddr[indexOfSep+1:]
 		portNum, err := strconv.Atoi(port)
 
-		testGateway.RealHost = host
+		testGateway.RealHTTPHost = host
 		if err != nil {
-			testGateway.RealPort = -1
+			testGateway.RealHTTPPort = -1
 		} else {
-			testGateway.RealPort = portNum
+			testGateway.RealHTTPPort = portNum
+		}
+	}
+
+	m = realTChannelAddrRegex.FindStringSubmatch(line1)
+	if m == nil {
+		return &MalformedStdoutError{
+			Type:       "malformed.stdout",
+			StdoutLine: line1,
+			Message: fmt.Sprintf(
+				"Could not find RealTChannelAddr in server stdout: %s",
+				line1,
+			),
+		}
+	}
+
+	testGateway.RealTChannelAddr = m[1]
+	indexOfSep = strings.LastIndex(testGateway.RealTChannelAddr, ":")
+	if indexOfSep != -1 {
+		host := testGateway.RealTChannelAddr[0:indexOfSep]
+		port := testGateway.RealTChannelAddr[indexOfSep+1:]
+		portNum, err := strconv.Atoi(port)
+
+		testGateway.RealTChannelHost = host
+		if err != nil {
+			testGateway.RealTChannelPort = -1
+		} else {
+			testGateway.RealTChannelPort = portNum
 		}
 	}
 

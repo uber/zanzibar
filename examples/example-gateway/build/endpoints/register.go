@@ -36,18 +36,19 @@ import (
 
 // Endpoints is a struct that holds all the endpoints
 type Endpoints struct {
-	ArgNotStructHandler     *bar.ArgNotStructHandler
-	MissingArgHandler       *bar.MissingArgHandler
-	NoRequestHandler        *bar.NoRequestHandler
-	NormalHandler           *bar.NormalHandler
-	TooManyArgsHandler      *bar.TooManyArgsHandler
-	CallHandler             *baz.CallHandler
-	CompareHandler          *baz.CompareHandler
-	PingHandler             *baz.PingHandler
-	SillyNoopHandler        *baz.SillyNoopHandler
-	SaveContactsHandler     *contacts.SaveContactsHandler
-	AddCredentialsHandler   *googlenow.AddCredentialsHandler
-	CheckCredentialsHandler *googlenow.CheckCredentialsHandler
+	BarArgNotStructHTTPHandler           *bar.ArgNotStructHandler
+	BarMissingArgHTTPHandler             *bar.MissingArgHandler
+	BarNoRequestHTTPHandler              *bar.NoRequestHandler
+	BarNormalHTTPHandler                 *bar.NormalHandler
+	BarTooManyArgsHTTPHandler            *bar.TooManyArgsHandler
+	BazCallHTTPHandler                   *baz.CallHandler
+	BazCompareHTTPHandler                *baz.CompareHandler
+	BazPingHTTPHandler                   *baz.PingHandler
+	BazSillyNoopHTTPHandler              *baz.SillyNoopHandler
+	ContactsSaveContactsHTTPHandler      *contacts.SaveContactsHandler
+	GooglenowAddCredentialsHTTPHandler   *googlenow.AddCredentialsHandler
+	GooglenowCheckCredentialsHTTPHandler *googlenow.CheckCredentialsHandler
+	BazCallTChannelHandler               zanzibar.TChannelHandler
 }
 
 // CreateEndpoints bootstraps the endpoints.
@@ -55,53 +56,56 @@ func CreateEndpoints(
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Endpoints{
-		ArgNotStructHandler:     bar.NewArgNotStructEndpoint(gateway),
-		MissingArgHandler:       bar.NewMissingArgEndpoint(gateway),
-		NoRequestHandler:        bar.NewNoRequestEndpoint(gateway),
-		NormalHandler:           bar.NewNormalEndpoint(gateway),
-		TooManyArgsHandler:      bar.NewTooManyArgsEndpoint(gateway),
-		CallHandler:             baz.NewCallEndpoint(gateway),
-		CompareHandler:          baz.NewCompareEndpoint(gateway),
-		PingHandler:             baz.NewPingEndpoint(gateway),
-		SillyNoopHandler:        baz.NewSillyNoopEndpoint(gateway),
-		SaveContactsHandler:     contacts.NewSaveContactsEndpoint(gateway),
-		AddCredentialsHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
-		CheckCredentialsHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
+		BarArgNotStructHTTPHandler:           bar.NewArgNotStructEndpoint(gateway),
+		BarMissingArgHTTPHandler:             bar.NewMissingArgEndpoint(gateway),
+		BarNoRequestHTTPHandler:              bar.NewNoRequestEndpoint(gateway),
+		BarNormalHTTPHandler:                 bar.NewNormalEndpoint(gateway),
+		BarTooManyArgsHTTPHandler:            bar.NewTooManyArgsEndpoint(gateway),
+		BazCallHTTPHandler:                   baz.NewCallEndpoint(gateway),
+		BazCompareHTTPHandler:                baz.NewCompareEndpoint(gateway),
+		BazPingHTTPHandler:                   baz.NewPingEndpoint(gateway),
+		BazSillyNoopHTTPHandler:              baz.NewSillyNoopEndpoint(gateway),
+		ContactsSaveContactsHTTPHandler:      contacts.NewSaveContactsEndpoint(gateway),
+		GooglenowAddCredentialsHTTPHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
+		GooglenowCheckCredentialsHTTPHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
+		BazCallTChannelHandler:               baz.NewSimpleServiceCallHandler(gateway),
 	}
 }
 
 // Register will register all endpoints
-func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
+func Register(g *zanzibar.Gateway) {
+	httpRouter := g.HTTPRouter
+	tchannelRouter := g.TChannelRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"argNotStruct",
-			endpoints.ArgNotStructHandler.HandleRequest,
+			endpoints.BarArgNotStructHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/bar/missing-arg-path",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"missingArg",
-			endpoints.MissingArgHandler.HandleRequest,
+			endpoints.BarMissingArgHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/bar/no-request-path",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"noRequest",
-			endpoints.NoRequestHandler.HandleRequest,
+			endpoints.BarNoRequestHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/bar-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -118,80 +122,80 @@ func Register(g *zanzibar.Gateway, router *zanzibar.Router) {
 					g,
 					logger.Options{},
 				),
-			}, endpoints.NormalHandler.HandleRequest).Handle,
+			}, endpoints.BarNormalHTTPHandler.HandleRequest).Handle,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/bar/too-many-args-path",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
 			"tooManyArgs",
-			endpoints.TooManyArgsHandler.HandleRequest,
+			endpoints.BarTooManyArgsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/baz/call",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"call",
-			endpoints.CallHandler.HandleRequest,
+			endpoints.BazCallHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/baz/compare",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"compare",
-			endpoints.CompareHandler.HandleRequest,
+			endpoints.BazCompareHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/baz/ping",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"ping",
-			endpoints.PingHandler.HandleRequest,
+			endpoints.BazPingHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"GET", "/baz/silly-noop",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"baz",
 			"sillyNoop",
-			endpoints.SillyNoopHandler.HandleRequest,
+			endpoints.BazSillyNoopHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/contacts/:userUUID/contacts",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"contacts",
 			"saveContacts",
-			endpoints.SaveContactsHandler.HandleRequest,
+			endpoints.ContactsSaveContactsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/googlenow/add-credentials",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"googlenow",
 			"addCredentials",
-			endpoints.AddCredentialsHandler.HandleRequest,
+			endpoints.GooglenowAddCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-	router.Register(
+	httpRouter.Register(
 		"POST", "/googlenow/check-credentials",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"googlenow",
 			"checkCredentials",
-			endpoints.CheckCredentialsHandler.HandleRequest,
+			endpoints.GooglenowCheckCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-
+	tchannelRouter.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
 }

@@ -30,16 +30,16 @@ import (
 
 // NewTChannelLogger creates a TChannel logger given a zap logger
 func NewTChannelLogger(logger *zap.Logger) tchannel.Logger {
-	return TChanLogger{logger: logger}
+	return TChannelLogger{logger: logger}
 }
 
-// TChanLogger warps a zap logger to be used for TChannel internal logging
-type TChanLogger struct {
+// TChannelLogger warps a zap logger to be used for TChannel internal logging
+type TChannelLogger struct {
 	logger *zap.Logger
 }
 
 // Enabled returns whether the given level is enabled.
-func (l TChanLogger) Enabled(tlevel tchannel.LogLevel) bool {
+func (l TChannelLogger) Enabled(tlevel tchannel.LogLevel) bool {
 	var zlevel zapcore.Level
 
 	/*
@@ -68,42 +68,42 @@ func (l TChanLogger) Enabled(tlevel tchannel.LogLevel) bool {
 }
 
 // Fatal logs a message, then exits with os.Exit(1).
-func (l TChanLogger) Fatal(msg string) {
+func (l TChannelLogger) Fatal(msg string) {
 	l.logger.Fatal(msg)
 }
 
 // Error logs a message at error priority.
-func (l TChanLogger) Error(msg string) {
+func (l TChannelLogger) Error(msg string) {
 	l.logger.Error(msg)
 }
 
 // Warn logs a message at warning priority.
-func (l TChanLogger) Warn(msg string) {
+func (l TChannelLogger) Warn(msg string) {
 	l.logger.Warn(msg)
 }
 
 // Infof logs a message at info priority.
-func (l TChanLogger) Infof(msg string, args ...interface{}) {
+func (l TChannelLogger) Infof(msg string, args ...interface{}) {
 	l.logger.Info(fmt.Sprintf(msg, args...))
 }
 
 // Info logs a message at info priority.
-func (l TChanLogger) Info(msg string) {
+func (l TChannelLogger) Info(msg string) {
 	l.logger.Info(msg)
 }
 
 // Debugf logs a message at debug priority.
-func (l TChanLogger) Debugf(msg string, args ...interface{}) {
+func (l TChannelLogger) Debugf(msg string, args ...interface{}) {
 	l.logger.Debug(fmt.Sprintf(msg, args...))
 }
 
 // Debug logs a message at debug priority.
-func (l TChanLogger) Debug(msg string) {
+func (l TChannelLogger) Debug(msg string) {
 	l.logger.Debug(msg)
 }
 
 // Fields returns the fields that this logger contains.
-func (l TChanLogger) Fields() tchannel.LogFields {
+func (l TChannelLogger) Fields() tchannel.LogFields {
 	// zap logger does not expose the fields
 	// zap.With writes the field to underlying buffer
 	// fortunately TChannel-go does not call this method except in tests
@@ -111,11 +111,11 @@ func (l TChanLogger) Fields() tchannel.LogFields {
 }
 
 // WithFields returns a logger with the current logger's fields and fields.
-func (l TChanLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger {
+func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger {
 	zfields := []zapcore.Field{}
 	for _, tf := range fields {
 		zf := zap.Any(tf.Key, tf.Value)
 		zfields = append(zfields, zf)
 	}
-	return TChanLogger{logger: l.logger.With(zfields...)}
+	return TChannelLogger{logger: l.logger.With(zfields...)}
 }

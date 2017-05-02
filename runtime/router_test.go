@@ -43,10 +43,11 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -61,7 +62,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			},
 		),
 	)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/bar/",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
@@ -99,7 +100,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		}
 
 		assert.Equal(t, []byte(testReq.expected), bytes)
-		assert.Equal(t, 1, len(bgateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
+		assert.Equal(t, 1, len(bgateway.ErrorLogs()["Finished an incoming server HTTP request"]))
 	}
 }
 
@@ -113,6 +114,7 @@ func TestRouterNotFound(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -128,7 +130,7 @@ func TestRouterNotFound(t *testing.T) {
 	}
 
 	assert.Equal(t, bytes, []byte("404 page not found\n"))
-	assert.Equal(t, 1, len(gateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(gateway.ErrorLogs()["Finished an incoming server HTTP request"]))
 }
 
 func TestRouterInvalidMethod(t *testing.T) {
@@ -141,6 +143,7 @@ func TestRouterInvalidMethod(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	resp, err := gateway.MakeRequest("POST", "/health", nil, nil)
 	if !assert.NoError(t, err) {
@@ -156,5 +159,5 @@ func TestRouterInvalidMethod(t *testing.T) {
 	}
 
 	assert.Equal(t, bytes, []byte("Method Not Allowed\n"))
-	assert.Equal(t, 1, len(gateway.GetErrorLogs()["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(gateway.ErrorLogs()["Finished an incoming server HTTP request"]))
 }

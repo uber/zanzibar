@@ -45,9 +45,10 @@ func TestInvalidStatusCode(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -77,7 +78,7 @@ func TestInvalidStatusCode(t *testing.T) {
 
 	assert.Equal(t, "true", string(bytes))
 
-	errorLogs := bgateway.GetErrorLogs()
+	errorLogs := bgateway.ErrorLogs()
 	logLines := errorLogs["Could not emit statusCode metric"]
 
 	assert.NotNil(t, logLines)
@@ -105,9 +106,10 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -140,7 +142,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.GetErrorLogs()
+	errorLogs := bgateway.ErrorLogs()
 	logLines := errorLogs["Could not serialize nil pointer body"]
 
 	assert.NotNil(t, logLines)
@@ -164,9 +166,10 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -199,7 +202,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.GetErrorLogs()
+	errorLogs := bgateway.ErrorLogs()
 	logLines := errorLogs["Could not serialize json response"]
 
 	assert.NotNil(t, logLines)
@@ -238,9 +241,10 @@ func TestResponsePeekBody(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -299,12 +303,13 @@ func TestResponseSetHeaders(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	headers := zanzibar.ServerHTTPHeader{}
 	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",
@@ -348,9 +353,10 @@ func TestResponsePeekBodyError(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.Router.Register(
+	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway,
 			"foo",

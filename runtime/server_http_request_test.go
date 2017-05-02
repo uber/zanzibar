@@ -53,6 +53,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
+	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	endpoint := zanzibar.NewRouterEndpoint(
@@ -83,7 +84,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	dJ := &dummyJson{}
 	assert.False(t, req.ReadAndUnmarshalBody(dJ))
 
-	errLogs := gateway.GetErrorLogs()
+	errLogs := gateway.ErrorLogs()
 	logLines := errLogs["Could not ReadAll() body"]
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))

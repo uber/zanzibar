@@ -56,7 +56,7 @@ func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
 	thriftService string
-	client        zanzibar.TChanClient
+	client        zanzibar.TChannelClient
 }
 
 {{range .Methods}}

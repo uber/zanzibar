@@ -68,7 +68,7 @@ func NewClient(gateway *zanzibar.Gateway) *BazClient {
 // BazClient is the TChannel client for downstream service.
 type BazClient struct {
 	thriftService string
-	client        zanzibar.TChanClient
+	client        zanzibar.TChannelClient
 }
 
 // Call ...

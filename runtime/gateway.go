@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -57,25 +58,29 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	Port        int32
-	RealPort    int32
-	RealAddr    string
-	WaitGroup   *sync.WaitGroup
-	Clients     Clients
-	Channel     *tchannel.Channel
-	Logger      *zap.Logger
-	MetricScope tally.Scope
-	ServiceName string
-	Config      *StaticConfig
-	Router      *Router
+	HTTPPort         int32
+	TChannelPort     int32
+	RealHTTPPort     int32
+	RealHTTPAddr     string
+	RealTChannelPort int32
+	RealTChannelAddr string
+	WaitGroup        *sync.WaitGroup
+	Clients          Clients
+	Channel          *tchannel.Channel
+	Logger           *zap.Logger
+	MetricScope      tally.Scope
+	ServiceName      string
+	Config           *StaticConfig
+	HTTPRouter       *HTTPRouter
+	TChannelRouter   *TChannelRouter
 
 	loggerFile        *os.File
 	metricScopeCloser io.Closer
 	metricsBackend    tally.CachedStatsReporter
 	logWriter         zapcore.WriteSyncer
-	server            *HTTPServer
-	localServer       *HTTPServer
-	tchannelServer    *TChannelServer
+	httpServer        *HTTPServer
+	localHTTPServer   *HTTPServer
+	tchannelServer    *tchannel.Channel
 	// clients?
 	//	- panic ???
 	//	- process reporter ?
@@ -95,10 +100,11 @@ func CreateGateway(
 	}
 
 	gateway := &Gateway{
-		Port:        int32(config.MustGetInt("port")),
-		ServiceName: config.MustGetString("serviceName"),
-		WaitGroup:   &sync.WaitGroup{},
-		Config:      config,
+		HTTPPort:     int32(config.MustGetInt("http.port")),
+		TChannelPort: int32(config.MustGetInt("tchannel.port")),
+		ServiceName:  config.MustGetString("serviceName"),
+		WaitGroup:    &sync.WaitGroup{},
+		Config:       config,
 
 		logWriter:      logWriter,
 		metricsBackend: metricsBackend,
@@ -107,7 +113,7 @@ func CreateGateway(
 	gateway.setupConfig(config)
 	config.Freeze()
 
-	gateway.Router = NewRouter(gateway)
+	gateway.HTTPRouter = NewHTTPRouter(gateway)
 
 	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
@@ -128,22 +134,25 @@ func CreateGateway(
 	return gateway, nil
 }
 
-// RegisterFn type used to avoid cyclic dependencies
-type RegisterFn func(gateway *Gateway, router *Router)
+// RegisterFn type to register generated endpoints.
+// Not importing the "endpoints" package avoids cyclic dependencies.
+type RegisterFn func(gateway *Gateway)
 
 // Bootstrap func
 func (gateway *Gateway) Bootstrap(register RegisterFn) error {
-	gateway.register(register)
+	gateway.registerPredefined()
+	register(gateway)
 
-	_, err := gateway.localServer.JustListen()
+	// start HTTP server
+	_, err := gateway.localHTTPServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port",
 			zap.String("error", err.Error()),
 		)
 		return errors.Wrap(err, "error listening on port")
 	}
-	if gateway.localServer.RealIP != gateway.server.RealIP {
-		_, err := gateway.server.JustListen()
+	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP {
+		_, err := gateway.httpServer.JustListen()
 		if err != nil {
 			gateway.Logger.Error("Error listening on port",
 				zap.String("error", err.Error()),
@@ -152,47 +161,72 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 		}
 	} else {
 		// Do not start at the same IP
-		gateway.server = gateway.localServer
+		gateway.httpServer = gateway.localHTTPServer
 	}
-	gateway.RealPort = gateway.server.RealPort
-	gateway.RealAddr = gateway.server.RealAddr
+	gateway.RealHTTPPort = gateway.httpServer.RealPort
+	gateway.RealHTTPAddr = gateway.httpServer.RealAddr
 
 	gateway.WaitGroup.Add(1)
-	go gateway.server.JustServe(gateway.WaitGroup)
+	go gateway.httpServer.JustServe(gateway.WaitGroup)
 
-	if gateway.server != gateway.localServer {
+	if gateway.httpServer != gateway.localHTTPServer {
 		gateway.WaitGroup.Add(1)
-		go gateway.localServer.JustServe(gateway.WaitGroup)
+		go gateway.localHTTPServer.JustServe(gateway.WaitGroup)
+	}
+
+	// start TChannel server
+	tchannelIP, err := tchannel.ListenIP()
+	if err != nil {
+		return errors.Wrap(err, "error finding the best IP for tchannel")
+	}
+	tchannelAddr := tchannelIP.String() + ":" + strconv.Itoa(int(gateway.TChannelPort))
+	ln, err := net.Listen("tcp", tchannelAddr)
+	if err != nil {
+		gateway.Logger.Error(
+			"Error listening tchannel port",
+			zap.String("error", err.Error()),
+		)
+		return err
+	}
+	gateway.RealTChannelAddr = ln.Addr().String()
+	gateway.RealTChannelPort = int32(ln.Addr().(*net.TCPAddr).Port)
+
+	// tchannel serve does not block, connection handling is done in different goroutine
+	err = gateway.tchannelServer.Serve(ln)
+	if err != nil {
+		gateway.Logger.Error(
+			"Error starting tchannel server",
+			zap.String("error", err.Error()),
+		)
+		return err
 	}
 
 	return nil
 }
 
-func (gateway *Gateway) register(register RegisterFn) {
-	gateway.Router.RegisterRaw("GET", "/debug/pprof", pprof.Index)
-	gateway.Router.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
-	gateway.Router.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
-	gateway.Router.RegisterRaw("GET", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.Router.RegisterRaw("POST", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.Router.RegisterRaw(
+func (gateway *Gateway) registerPredefined() {
+	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof", pprof.Index)
+	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
+	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
+	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/symbol", pprof.Symbol)
+	gateway.HTTPRouter.RegisterRaw("POST", "/debug/pprof/symbol", pprof.Symbol)
+	gateway.HTTPRouter.RegisterRaw(
 		"GET", "/debug/pprof/goroutine", pprof.Handler("goroutine").ServeHTTP,
 	)
-	gateway.Router.RegisterRaw(
+	gateway.HTTPRouter.RegisterRaw(
 		"GET", "/debug/pprof/heap", pprof.Handler("heap").ServeHTTP,
 	)
-	gateway.Router.RegisterRaw(
+	gateway.HTTPRouter.RegisterRaw(
 		"GET", "/debug/pprof/threadcreate",
 		pprof.Handler("threadcreate").ServeHTTP,
 	)
-	gateway.Router.RegisterRaw(
+	gateway.HTTPRouter.RegisterRaw(
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
 
-	gateway.Router.Register("GET", "/health", NewRouterEndpoint(
+	gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
 		gateway, "health", "health", gateway.handleHealthRequest,
 	))
-
-	register(gateway, gateway.Router)
 }
 
 func (gateway *Gateway) handleHealthRequest(
@@ -210,17 +244,19 @@ func (gateway *Gateway) handleHealthRequest(
 
 // Close the http server
 func (gateway *Gateway) Close() {
+	gateway.metricsBackend.Flush()
+	_ = gateway.metricScopeCloser.Close()
+	if gateway.localHTTPServer != gateway.httpServer {
+		gateway.localHTTPServer.Close()
+	}
+	gateway.httpServer.Close()
+	gateway.tchannelServer.Close()
+
+	// close log files as the last step
 	if gateway.loggerFile != nil {
 		_ = gateway.loggerFile.Sync()
 		_ = gateway.loggerFile.Close()
 	}
-
-	gateway.metricsBackend.Flush()
-	_ = gateway.metricScopeCloser.Close()
-	if gateway.localServer != gateway.server {
-		gateway.localServer.Close()
-	}
-	gateway.server.Close()
 }
 
 // InspectOrDie inspects the config for this gateway
@@ -382,18 +418,18 @@ func (gateway *Gateway) setupHTTPServer() error {
 	if err != nil {
 		return errors.Wrap(err, "error finding the best IP")
 	}
-	gateway.server = &HTTPServer{
+	gateway.httpServer = &HTTPServer{
 		Server: &http.Server{
-			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.Port), 10),
-			Handler: gateway.Router,
+			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.HTTPPort), 10),
+			Handler: gateway.HTTPRouter,
 		},
 		Logger: gateway.Logger,
 	}
 
-	gateway.localServer = &HTTPServer{
+	gateway.localHTTPServer = &HTTPServer{
 		Server: &http.Server{
-			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.Port), 10),
-			Handler: gateway.Router,
+			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.HTTPPort), 10),
+			Handler: gateway.HTTPRouter,
 		},
 		Logger: gateway.Logger,
 	}
@@ -427,7 +463,8 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	}
 
 	gateway.Channel = channel
-	gateway.tchannelServer = NewTChannelServer(channel, gateway.Logger)
+	gateway.tchannelServer = channel
+	gateway.TChannelRouter = NewTChannelRouter(channel, gateway.Logger)
 
 	return nil
 }

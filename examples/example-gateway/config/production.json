@@ -1,6 +1,6 @@
 {
 	"serviceName": "example-gateway",
-	"port": 7783,
+	"http.port": 7783,
 	"useDatacenter": false,
 
 	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
@@ -8,8 +8,10 @@
 
 	"metrics.tally.service": "example-gateway",
 	"metrics.m3.service": "example-gateway",
+
 	"tchannel.serviceName": "example-gateway",
 	"tchannel.processName": "example-gateway",
+	"tchannel.port": 7784,
 
 	"clients.contacts.port": 4000,
 	"clients.contacts.ip": "127.0.0.1",

@@ -30,15 +30,15 @@ import (
 	netContext "golang.org/x/net/context"
 )
 
-// TChannelClientOption is used when creating a new TChannelClient
+// TChannelClientOption is used when creating a new tchannelClient
 type TChannelClientOption struct {
 	ServiceName       string
 	Timeout           time.Duration
 	TimeoutPerAttempt time.Duration
 }
 
-// TChannelClient implements TChanClient and makes outgoing Thrift calls.
-type TChannelClient struct {
+// tchannelClient implements TChannelClient and makes outgoing Thrift calls.
+type tchannelClient struct {
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	serviceName       string
@@ -46,9 +46,9 @@ type TChannelClient struct {
 	timeoutPerAttempt time.Duration
 }
 
-// NewTChannelClient returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
-func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChanClient {
-	client := &TChannelClient{
+// NewTChannelClient returns a tchannelClient that makes calls over the given tchannel to the given thrift service.
+func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannelClient {
+	client := &tchannelClient{
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
 		serviceName:       opt.ServiceName,
@@ -58,7 +58,7 @@ func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChanCli
 	return client
 }
 
-func (c *TChannelClient) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
+func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
 	writer, err := call.Arg2Writer()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for outbound call %s: ", c.serviceName)
@@ -85,7 +85,7 @@ func (c *TChannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 
 // readResponse reads the response struct into resp, and returns:
 // (response headers, whether there was an application error, unexpected error).
-func (c *TChannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (bool, map[string]string, error) {
+func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (bool, map[string]string, error) {
 	reader, err := response.Arg2Reader()
 	if err != nil {
 		return false, nil, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
@@ -122,7 +122,7 @@ func (c *TChannelClient) readResponse(response *tchannel.OutboundCallResponse, r
 }
 
 // Call makes a RPC call to the given service.
-func (c *TChannelClient) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (bool, map[string]string, error) {
+func (c *tchannelClient) Call(ctx context.Context, thriftService, methodName string, reqHeaders map[string]string, req, resp RWTStruct) (bool, map[string]string, error) {
 	var respHeaders map[string]string
 	var isOK bool
 

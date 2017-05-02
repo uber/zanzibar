@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 )
 
-func TestTChanLoggerEnabled(t *testing.T) {
+func TestTChannelLoggerEnabled(t *testing.T) {
 	t2z := map[tchannel.LogLevel]zapcore.Level{
 		tchannel.LogLevelDebug: zap.DebugLevel,
 		tchannel.LogLevelInfo:  zap.InfoLevel,
@@ -48,7 +48,7 @@ func TestTChanLoggerEnabled(t *testing.T) {
 		})
 	}
 }
-func TestTChanLoggerLeveledMethods(t *testing.T) {
+func TestTChannelLoggerLeveledMethods(t *testing.T) {
 	withLogger(zap.DebugLevel, func(logger tchannel.Logger, logs *observer.ObservedLogs) {
 		tests := []struct {
 			method        func(string)
@@ -80,7 +80,7 @@ func TestTChanLoggerLeveledMethods(t *testing.T) {
 	})
 }
 
-func TestTChanLoggerWithFields(t *testing.T) {
+func TestTChannelLoggerWithFields(t *testing.T) {
 	withLogger(zap.DebugLevel, func(logger tchannel.Logger, logs *observer.ObservedLogs) {
 		assert.Nil(t, logger.Fields(), "Fields() always return nil")
 
