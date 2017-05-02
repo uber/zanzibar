@@ -309,7 +309,7 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 func logResponseFields(res *ServerHTTPResponse) []zapcore.Field {
 	fields := make([]zapcore.Field, 0)
 
-	fields = append(fields, zap.Int(statusCodeZapName, res.StatusCode))
+	fields = append(fields, zap.Int(statusCodeZapName, res.pendingStatusCode))
 	fields = append(fields, zap.Time("timestamp-finished", res.finishTime))
 	return fields
 }

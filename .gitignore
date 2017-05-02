@@ -25,3 +25,4 @@ scripts/easy_json/easy_json
 *.prof
 node_modules/
 test/.cached_binary_test_info.json
+examples/example-gateway/build/example-gateway
