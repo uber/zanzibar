@@ -175,8 +175,11 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 	}
 
 	// start TChannel server
-	// TODO: proper IP
-	tchannelAddr := "127.0.0.1:" + strconv.Itoa(int(gateway.TChannelPort))
+	tchannelIP, err := tchannel.ListenIP()
+	if err != nil {
+		return errors.Wrap(err, "error finding the best IP for tchannel")
+	}
+	tchannelAddr := tchannelIP.String() + ":" + strconv.Itoa(int(gateway.TChannelPort))
 	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
 		gateway.Logger.Error(

@@ -398,6 +398,7 @@ func Register(g *zanzibar.Gateway) {
 	tchannelRouter := g.TChannelRouter
 	endpoints := CreateEndpoints(g).(*Endpoints)
 
+	{{/* TODO: simplify HTTPRouter API for clear mounting as TChannelRouter */ -}}
 	{{range $idx, $e := .Endpoints -}}
 	{{if eq .EndpointType "HTTP" -}}
 	httpRouter.Register(
@@ -441,7 +442,7 @@ func endpoint_registerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1708, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1788, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
