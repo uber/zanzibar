@@ -1175,22 +1175,6 @@ func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
-
-{{range .Services}}
-
-{{/*  ========================= Method =========================  */ -}}
-
-{{range .Methods}}
-{{if len .RequestStruct | ne 0}} {{- /* generate struct to wrap request args*/ -}}
-// {{.RequestType}} is the http body type for endpoint {{.Name}}.
-type {{.RequestType}} struct {
-	{{range .RequestStruct -}}
-	{{title .Name}} {{.Type}} ` + "`" + `json:"{{.Name}}"` + "`" + `
-	{{end -}}
-}{{end -}}
-
-{{end}} {{- /* <range .Methods> */ -}}
-{{end}} {{- /* <range .Services> */ -}}
 `)
 
 func structsTmplBytes() ([]byte, error) {
@@ -1203,7 +1187,7 @@ func structsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "structs.tmpl", size: 851, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "structs.tmpl", size: 380, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
