@@ -156,7 +156,8 @@ func CreateGateway(
 	testGateway := &ChildProcessGateway{
 		channel:     channel,
 		serviceName: serviceName,
-		test:        t, opts: opts,
+		test:        t,
+		opts:        opts,
 		HTTPClient: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,

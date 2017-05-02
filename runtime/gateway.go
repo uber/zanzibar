@@ -195,6 +195,7 @@ func (gateway *Gateway) Bootstrap(register RegisterFn) error {
 			"Error starting tchannel server",
 			zap.String("error", err.Error()),
 		)
+		return err
 	}
 
 	return nil
