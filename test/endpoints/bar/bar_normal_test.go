@@ -163,7 +163,7 @@ func TestBarExceptionCode(t *testing.T) {
 		"POST", "/bar-path",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(403)
-			if _, err := w.Write([]byte("{}")); err != nil {
+			if _, err := w.Write([]byte(`{"stringField":"foo"}`)); err != nil {
 				t.Fatal("can't write fake response")
 			}
 			counter++

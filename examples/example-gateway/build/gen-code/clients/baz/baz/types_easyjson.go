@@ -6,6 +6,7 @@ package baz
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -28,6 +29,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var MessageSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -40,6 +42,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "message":
 			out.Message = string(in.String())
+			MessageSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -48,6 +51,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz(out *jwriter.Writer, in ServerErr) {
@@ -95,6 +101,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var MessageSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -107,6 +114,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "message":
 			out.Message = string(in.String())
+			MessageSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -115,6 +123,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz1(out *jwriter.Writer, in BazResponse) {
@@ -162,6 +173,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var B1Set bool
+	var S2Set bool
+	var I3Set bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -174,10 +188,13 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "b1":
 			out.B1 = bool(in.Bool())
+			B1Set = true
 		case "s2":
 			out.S2 = string(in.String())
+			S2Set = true
 		case "i3":
 			out.I3 = int32(in.Int32())
+			I3Set = true
 		default:
 			in.SkipRecursive()
 		}
@@ -186,6 +203,15 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !B1Set {
+		in.AddError(fmt.Errorf("key 'b1' is required"))
+	}
+	if !S2Set {
+		in.AddError(fmt.Errorf("key 's2' is required"))
+	}
+	if !I3Set {
+		in.AddError(fmt.Errorf("key 'i3' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(out *jwriter.Writer, in BazRequest) {
@@ -245,6 +271,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var MessageSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -257,6 +284,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "message":
 			out.Message = string(in.String())
+			MessageSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -265,6 +293,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz3(out *jwriter.Writer, in AuthErr) {

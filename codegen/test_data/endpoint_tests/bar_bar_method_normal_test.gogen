@@ -52,7 +52,7 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 		w.WriteHeader(200)
 
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte(`{}`)); err != nil {
+		if _, err := w.Write([]byte(`{"intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++

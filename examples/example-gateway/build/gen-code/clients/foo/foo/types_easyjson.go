@@ -6,6 +6,7 @@ package foo
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -28,6 +29,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var FooStringSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -40,6 +42,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "fooString":
 			out.FooString = string(in.String())
+			FooStringSet = true
 		case "fooI32":
 			if in.IsNull() {
 				in.Skip()
@@ -108,6 +111,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !FooStringSet {
+		in.AddError(fmt.Errorf("key 'fooString' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(out *jwriter.Writer, in FooStruct) {

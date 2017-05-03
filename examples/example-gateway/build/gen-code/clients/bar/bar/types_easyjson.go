@@ -6,6 +6,7 @@ package bar
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -28,6 +29,11 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var StringFieldSet bool
+	var IntWithRangeSet bool
+	var IntWithoutRangeSet bool
+	var MapIntWithRangeSet bool
+	var MapIntWithoutRangeSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -40,10 +46,13 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "stringField":
 			out.StringField = string(in.String())
+			StringFieldSet = true
 		case "intWithRange":
 			out.IntWithRange = int32(in.Int32())
+			IntWithRangeSet = true
 		case "intWithoutRange":
 			out.IntWithoutRange = int32(in.Int32())
+			IntWithoutRangeSet = true
 		case "mapIntWithRange":
 			if in.IsNull() {
 				in.Skip()
@@ -64,6 +73,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				}
 				in.Delim('}')
 			}
+			MapIntWithRangeSet = true
 		case "mapIntWithoutRange":
 			if in.IsNull() {
 				in.Skip()
@@ -84,6 +94,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				}
 				in.Delim('}')
 			}
+			MapIntWithoutRangeSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -92,6 +103,21 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !StringFieldSet {
+		in.AddError(fmt.Errorf("key 'stringField' is required"))
+	}
+	if !IntWithRangeSet {
+		in.AddError(fmt.Errorf("key 'intWithRange' is required"))
+	}
+	if !IntWithoutRangeSet {
+		in.AddError(fmt.Errorf("key 'intWithoutRange' is required"))
+	}
+	if !MapIntWithRangeSet {
+		in.AddError(fmt.Errorf("key 'mapIntWithRange' is required"))
+	}
+	if !MapIntWithoutRangeSet {
+		in.AddError(fmt.Errorf("key 'mapIntWithoutRange' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out *jwriter.Writer, in BarResponse) {
@@ -193,6 +219,8 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var StringFieldSet bool
+	var BoolFieldSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -205,8 +233,10 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "stringField":
 			out.StringField = string(in.String())
+			StringFieldSet = true
 		case "boolField":
 			out.BoolField = bool(in.Bool())
+			BoolFieldSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -215,6 +245,12 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !StringFieldSet {
+		in.AddError(fmt.Errorf("key 'stringField' is required"))
+	}
+	if !BoolFieldSet {
+		in.AddError(fmt.Errorf("key 'boolField' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out *jwriter.Writer, in BarRequest) {
@@ -268,6 +304,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
+	var StringFieldSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -280,6 +317,7 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		switch key {
 		case "stringField":
 			out.StringField = string(in.String())
+			StringFieldSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -288,6 +326,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	in.Delim('}')
 	if isTopLevel {
 		in.Consumed()
+	}
+	if !StringFieldSet {
+		in.AddError(fmt.Errorf("key 'stringField' is required"))
 	}
 }
 func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(out *jwriter.Writer, in BarException) {
