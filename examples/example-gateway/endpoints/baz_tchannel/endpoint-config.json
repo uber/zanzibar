@@ -2,11 +2,11 @@
 	"name": "bazTChannel",
 	"type": "tchannel",
 	"config": {
-		"rateLimit": 100
+		"rateLimit": 100,
+		"endpoints": [
+			"call.json"
+		]
 	},
-	"endpoints": [
-		"call.json"
-	],
 	"dependencies": {
 		"client": [
 			"baz"

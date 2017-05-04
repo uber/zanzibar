@@ -671,9 +671,11 @@ func (e *EndpointSpec) SetDownstream(
 type endpointClassConfig struct {
 	Name         string              `json:"name"`
 	Type         string              `json:"type"`
-	Config       interface{}         `json:"config"`
-	Endpoints    []string            `json:"endpoints"`
 	Dependencies map[string][]string `json:"dependencies"`
+	Config       struct {
+		Ratelimit int32    `json:"rateLimit"`
+		Endpoints []string `json:"endpoints"`
+	} `json:"config"`
 }
 
 func parseEndpointJsons(
@@ -700,7 +702,7 @@ func parseEndpointJsons(
 		}
 
 		endpointConfigDir := filepath.Dir(endpointGroupJSON)
-		for _, fileName := range endpointConfig.Endpoints {
+		for _, fileName := range endpointConfig.Config.Endpoints {
 			endpointJsons = append(
 				endpointJsons, filepath.Join(endpointConfigDir, fileName),
 			)

@@ -463,7 +463,7 @@ func (g *EndpointGenerator) Generate(
 		instance.BaseDirectory,
 		instance.Directory,
 	)
-	for _, fileName := range endpointConfig.Endpoints {
+	for _, fileName := range endpointConfig.Config.Endpoints {
 		endpointJsons = append(
 			endpointJsons, filepath.Join(endpointConfigDir, fileName),
 		)
