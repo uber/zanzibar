@@ -70,6 +70,8 @@ func main() {
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
+		configDirName,
+		config.MustGetString("middlewareConfig"),
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
 		config.MustGetString("genCodePackage"),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),

@@ -59,6 +59,8 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
+		filepath.Join(absGatewayPath),
+		"middlewares/middleware-config.json",
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,

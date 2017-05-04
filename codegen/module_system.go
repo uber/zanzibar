@@ -157,21 +157,6 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	middlewareSpecs := map[string]*MiddlewareSpec{}
-	middleConfig := filepath.Join(
-		configDirName,
-		middlewareConfig,
-	)
-	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot load middlewares:")
-	}
-
-	for _, mspec := range middlewares {
-		middlewareSpecs[mspec.Name] = mspec
-	}
-
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass("endpoint", module.Class{
 		Directory:         "endpoints",
@@ -182,10 +167,9 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClassType("endpoint", "http", &EndpointGenerator{
-		templates:       tmpl,
-		clientSpecs:     clientSpecs,
-		middlewareSpecs: middlewareSpecs,
-		packageHelper:   h,
+		templates:     tmpl,
+		clientSpecs:   clientSpecs,
+		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -436,10 +420,9 @@ func (g *TChannelClientGenerator) Generate(
 
 // EndpointGenerator generates a group of zanzibar http endpoints that proxy corresponding clients
 type EndpointGenerator struct {
-	templates       *Template
-	packageHelper   *PackageHelper
-	clientSpecs     map[string]*ClientSpec
-	middlewareSpecs map[string]*MiddlewareSpec
+	templates     *Template
+	packageHelper *PackageHelper
+	clientSpecs   map[string]*ClientSpec
 }
 
 // Generate returns the endpoint generated files as a map of relative file
@@ -469,7 +452,7 @@ func (g *EndpointGenerator) Generate(
 		)
 	}
 	for _, jsonFile := range endpointJsons {
-		espec, err := NewEndpointSpec(jsonFile, g.packageHelper, g.middlewareSpecs)
+		espec, err := NewEndpointSpec(jsonFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Error parsing endpoint json file: %s", jsonFile,
