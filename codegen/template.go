@@ -605,12 +605,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 	}
 	sort.Sort(sortByEndpointName(endpoints))
 
-	includedPkgs := []GoPackageImport{
-		{
-			PackageName: h.GoGatewayPackageName() + "/clients",
-			AliasName:   "",
-		},
-	}
+	includedPkgs := []GoPackageImport{}
 	endpointsInfo := make([]EndpointRegisterInfo, 0, len(endpoints))
 
 	for i := 0; i < len(endpoints); i++ {
@@ -644,24 +639,11 @@ func (t *Template) GenerateEndpointRegisterFile(
 		default:
 			panic("Unsupported endpoint type: " + espec.EndpointType)
 		}
-
-		var goPkg string
-		switch espec.WorkflowType {
-		case "httpClient", "tchannelClient", "custom":
-			goPkg = espec.ModuleSpec.GoPackage
-		default:
-			panic("Unsupported WorkflowType: " + espec.WorkflowType)
-		}
-
-		if !contains(includedPkgs, goPkg) {
-			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: goPkg,
-				AliasName:   "",
-			})
-		}
-
 		handlerName := strings.Title(espec.EndpointID) + strings.Title(method.Name) +
 			endpointType + "Handler"
+
+		includedPkgs = addEndpointPackage(espec, includedPkgs)
+		includedPkgs = addMiddlewarePackages(espec.Middlewares, includedPkgs)
 
 		info := EndpointRegisterInfo{
 			EndpointType: endpointType,
@@ -693,6 +675,36 @@ func (t *Template) GenerateEndpointRegisterFile(
 	}
 
 	return targetFile, nil
+}
+
+func addEndpointPackage(espec *EndpointSpec, includedPkgs []GoPackageImport) []GoPackageImport {
+	var goPkg string
+	switch espec.WorkflowType {
+	case "httpClient", "tchannelClient", "custom":
+		goPkg = espec.GoPackageName
+	default:
+		panic("Unsupported WorkflowType: " + espec.WorkflowType)
+	}
+
+	if !contains(includedPkgs, goPkg) {
+		includedPkgs = append(includedPkgs, GoPackageImport{
+			PackageName: goPkg,
+			AliasName:   "",
+		})
+	}
+	return includedPkgs
+}
+
+func addMiddlewarePackages(middlewares []MiddlewareSpec, includedPkgs []GoPackageImport) []GoPackageImport {
+	for _, m := range middlewares {
+		if !contains(includedPkgs, m.Path) {
+			includedPkgs = append(includedPkgs, GoPackageImport{
+				PackageName: m.Path,
+				AliasName:   "",
+			})
+		}
+	}
+	return includedPkgs
 }
 
 // MainMeta ...
