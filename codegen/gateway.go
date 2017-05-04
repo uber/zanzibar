@@ -299,6 +299,8 @@ type EndpointSpec struct {
 	// GoFolderName is the folder where all the endpoints
 	// are generated.
 	GoFolderName string
+	// GoPackageName is the package import path.
+	GoPackageName string
 
 	// EndpointType, currently only "http"
 	EndpointType string
@@ -459,6 +461,12 @@ func NewEndpointSpec(
 		dirName+"_structs.go",
 	)
 
+	goPackageName := filepath.Join(
+		h.GoGatewayPackageName(),
+		"endpoints",
+		dirName,
+	)
+
 	thriftInfo := endpointConfigObj["thriftMethodName"].(string)
 	parts := strings.Split(thriftInfo, "::")
 	if len(parts) != 2 {
@@ -473,6 +481,7 @@ func NewEndpointSpec(
 		JSONFile:           jsonFile,
 		GoStructsFileName:  goStructsFileName,
 		GoFolderName:       goFolderName,
+		GoPackageName:      goPackageName,
 		EndpointType:       endpointConfigObj["endpointType"].(string),
 		EndpointID:         endpointConfigObj["endpointId"].(string),
 		HandleID:           endpointConfigObj["handleId"].(string),
