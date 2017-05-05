@@ -3,7 +3,12 @@
 	"testServiceName": "example-gateway",
 	"endpointId": "bar",
 	"handlerId": "normal",
-	"endpointRequest": {},
+	"endpointRequest": {
+		"request": {
+			"stringField": "foo",
+			"boolField": true
+		}
+	},
 	"endpointReqHeaders": {},
 	"endpointResponse": {},
 	"endpointResHeaders": {},
@@ -11,7 +16,12 @@
 	"clientStubs": [{
 		"clientId": "bar",
 		"clientMethod": "normal",
-		"clientRequest": {},
+		"clientRequest": {
+			"request": {
+				"stringField": "foo",
+				"boolField": true
+			}
+		},
 		"clientReqHeaders": {},
 		"clientResponse": {
 			"stringField": "foo",

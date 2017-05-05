@@ -3,7 +3,9 @@
 	"testServiceName": "example-gateway",
 	"endpointId": "bar",
 	"handlerId": "argNotStruct",
-	"endpointRequest": {},
+	"endpointRequest": {
+		"request": "foo"
+	},
 	"endpointReqHeaders": {},
 	"endpointResponse": {},
 	"endpointResHeaders": {},
@@ -11,7 +13,9 @@
 	"clientStubs": [{
 		"clientId": "bar",
 		"clientMethod": "argNotStruct",
-		"clientRequest": {},
+		"clientRequest": {
+			"request": "foo"
+		},
 		"clientReqHeaders": {},
 		"clientResponse": {},
 		"clientResHeaders": {}
