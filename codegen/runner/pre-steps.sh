@@ -41,7 +41,6 @@ runtime=$((end-start))
 echo "Compiled thriftrw : +$runtime"
 
 echo "Generating Go code from Thrift files"
-rm -rf "$BUILD_DIR/gen-code"
 mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
     "$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
@@ -59,9 +58,12 @@ runtime=$((end-start))
 echo "Compiled easyjson : +$runtime"
 
 echo "Generating JSON Marshal/Unmarshal"
-for file in $(find "$BUILD_DIR/gen-code" -name "types.go" | grep -v "versioncheck.go");do
-    "$EASY_JSON_BINARY" -all -- "$file"
-done
+thriftrw_gofiles=(
+	$(find "$BUILD_DIR/gen-code" -name "*.go" | \
+		grep -v "versioncheck.go" | \
+		grep -v "easyjson.go" | sort)
+)
+"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
 end=`date +%s`
 runtime=$((end-start))
