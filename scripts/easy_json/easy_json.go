@@ -121,7 +121,7 @@ func main() {
 	flag.Parse()
 
 	files := flag.Args()
-	if len(files) != 1 {
+	if len(files) == 0 {
 		flag.Usage()
 		os.Exit(1)
 		return
@@ -162,6 +162,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
+			return
 		}
 	}
 }

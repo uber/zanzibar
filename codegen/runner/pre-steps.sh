@@ -58,9 +58,12 @@ runtime=$((end-start))
 echo "Compiled easyjson : +$runtime"
 
 echo "Generating JSON Marshal/Unmarshal"
-for file in $(find "$BUILD_DIR/gen-code" -name "types.go" | grep -v "versioncheck.go");do
-    "$EASY_JSON_BINARY" -all -- "$file"
-done
+thriftrw_gofiles=(
+	$(find "$BUILD_DIR/gen-code" -name "*.go" | \
+		grep -v "versioncheck.go" | \
+		grep -v "easyjson.go")
+)
+"$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
 end=`date +%s`
 runtime=$((end-start))
