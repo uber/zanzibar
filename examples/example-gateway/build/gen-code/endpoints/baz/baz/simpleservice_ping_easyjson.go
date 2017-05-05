@@ -7,6 +7,7 @@ package baz
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -47,7 +48,7 @@ func easyjson730cf796DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Success == nil {
 					out.Success = new(BazResponse)
 				}
-				(*out.Success).UnmarshalEasyJSON(in)
+				easyjson730cf796DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, &*out.Success)
 			}
 		default:
 			in.SkipRecursive()
@@ -72,7 +73,7 @@ func easyjson730cf796EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Success == nil {
 			out.RawString("null")
 		} else {
-			(*in.Success).MarshalEasyJSON(out)
+			easyjson730cf796EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
 		}
 	}
 	out.RawByte('}')
@@ -100,6 +101,54 @@ func (v *SimpleService_Ping_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_Ping_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson730cf796DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServicePing(l, v)
+}
+func easyjson730cf796DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *BazResponse) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjson730cf796EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out *jwriter.Writer, in BazResponse) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
 }
 func easyjson730cf796DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServicePing1(in *jlexer.Lexer, out *SimpleService_Ping_Args) {
 	isTopLevel := in.IsStart()
