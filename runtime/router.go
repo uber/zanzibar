@@ -189,8 +189,8 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 	fn(ctx, req, req.res)
 
-	resFields = logResponseFields(req.res)
 	req.res.flush()
+	resFields = logResponseFields(req.res)
 }
 
 // HTTPRouter data structure to handle and register endpoints
