@@ -248,7 +248,7 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(body *{{title .RequestType}}) *{{$clientReqType}} {
+func convertTo{{title .Name}}ClientRequest(body *{{.RequestType}}) *{{$clientReqType}} {
 	clientRequest := &{{$clientReqType}}{}
 
 	{{ range $key, $value := .RequestFieldMap -}}
