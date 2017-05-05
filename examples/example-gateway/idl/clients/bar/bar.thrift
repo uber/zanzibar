@@ -30,7 +30,6 @@ service Bar {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/bar-path"
     zanzibar.http.status = "200"
-    zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -41,7 +40,6 @@ service Bar {
     zanzibar.http.method = "GET"
     zanzibar.http.path = "/no-request-path"
     zanzibar.http.status = "200"
-    zanzibar.http.req.def.boxed = "false"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -52,7 +50,6 @@ service Bar {
     zanzibar.http.method = "GET"
     zanzibar.http.path = "/missing-arg-path"
     zanzibar.http.status = "200"
-    zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -65,7 +62,6 @@ service Bar {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/too-many-args-path"
     zanzibar.http.status = "200"
-    zanzibar.http.req.def.boxed = "true"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
@@ -77,7 +73,6 @@ service Bar {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/arg-not-struct-path"
     zanzibar.http.status = "200"
-    zanzibar.http.req.def.boxed = "false"
     zanzibar.meta = "SomeMeta"
     zanzibar.handler = "bar.baz"
   )
