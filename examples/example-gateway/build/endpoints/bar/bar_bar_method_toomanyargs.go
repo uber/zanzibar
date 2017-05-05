@@ -30,7 +30,6 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
@@ -59,7 +58,7 @@ func (handler *TooManyArgsHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
-	var requestBody TooManyArgsHTTPRequest
+	var requestBody endpointsBarBar.Bar_TooManyArgs_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -104,7 +103,7 @@ type TooManyArgsEndpoint struct {
 func (w TooManyArgsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *TooManyArgsHTTPRequest,
+	r *endpointsBarBar.Bar_TooManyArgs_Args,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToTooManyArgsClientRequest(r)
 
@@ -159,8 +158,8 @@ func (w TooManyArgsEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToTooManyArgsClientRequest(body *TooManyArgsHTTPRequest) *barClient.TooManyArgsHTTPRequest {
-	clientRequest := &barClient.TooManyArgsHTTPRequest{}
+func convertToTooManyArgsClientRequest(body *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
+	clientRequest := &clientsBarBar.Bar_TooManyArgs_Args{}
 
 	clientRequest.Foo = (*clientsFooFoo.FooStruct)(body.Foo)
 	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)

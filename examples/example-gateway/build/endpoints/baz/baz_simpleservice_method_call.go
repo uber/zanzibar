@@ -57,7 +57,7 @@ func (handler *CallHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
-	var requestBody CallHTTPRequest
+	var requestBody endpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -102,7 +102,7 @@ type CallEndpoint struct {
 func (w CallEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *CallHTTPRequest,
+	r *endpointsBazBaz.SimpleService_Call_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToCallClientRequest(r)
 
@@ -142,7 +142,7 @@ func (w CallEndpoint) Handle(
 	return resHeaders, nil
 }
 
-func convertToCallClientRequest(body *CallHTTPRequest) *clientsBazBaz.SimpleService_Call_Args {
+func convertToCallClientRequest(body *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
 	clientRequest := &clientsBazBaz.SimpleService_Call_Args{}
 
 	clientRequest.Arg = (*clientsBazBaz.BazRequest)(body.Arg)

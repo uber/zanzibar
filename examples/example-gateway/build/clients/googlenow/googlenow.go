@@ -28,6 +28,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -55,7 +56,7 @@ func NewClient(
 func (c *GoogleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
-	r *AddCredentialsHTTPRequest,
+	r *clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
 ) (map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(

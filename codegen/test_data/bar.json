@@ -39,7 +39,7 @@
 					],
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "ArgNotStructHTTPRequest",
+					"RequestType": "endpointsBarBar.Bar_ArgNotStruct_Args",
 					"ResponseType": "",
 					"OKStatusCode": {
 						"Code": 200,
@@ -76,13 +76,6 @@
 						403
 					],
 					"RequestBoxed": false,
-					"RequestStruct": [
-						{
-							"Type": "string",
-							"Name": "request",
-							"Annotations": null
-						}
-					],
 					"ThriftService": "Bar",
 					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
@@ -149,7 +142,6 @@
 						403
 					],
 					"RequestBoxed": false,
-					"RequestStruct": null,
 					"ThriftService": "Bar",
 					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
@@ -216,7 +208,6 @@
 						403
 					],
 					"RequestBoxed": false,
-					"RequestStruct": null,
 					"ThriftService": "Bar",
 					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
@@ -246,7 +237,7 @@
 					],
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "NormalHTTPRequest",
+					"RequestType": "endpointsBarBar.Bar_Normal_Args",
 					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
@@ -283,13 +274,6 @@
 						403
 					],
 					"RequestBoxed": false,
-					"RequestStruct": [
-						{
-							"Type": "*endpointsBarBar.BarRequest",
-							"Name": "request",
-							"Annotations": null
-						}
-					],
 					"ThriftService": "Bar",
 					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,
@@ -325,7 +309,7 @@
 						"x-uuid",
 						"x-token"
 					],
-					"RequestType": "TooManyArgsHTTPRequest",
+					"RequestType": "endpointsBarBar.Bar_TooManyArgs_Args",
 					"ResponseType": "endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
@@ -362,18 +346,6 @@
 						403
 					],
 					"RequestBoxed": false,
-					"RequestStruct": [
-						{
-							"Type": "*endpointsBarBar.BarRequest",
-							"Name": "request",
-							"Annotations": null
-						},
-						{
-							"Type": "*endpointsFooFoo.FooStruct",
-							"Name": "foo",
-							"Annotations": null
-						}
-					],
 					"ThriftService": "Bar",
 					"GenCodePkgName": "endpointsBarBar",
 					"WantAnnot": true,

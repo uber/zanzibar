@@ -77,7 +77,7 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/googlenow/add-credentials",
 		headers,
-		bytes.NewReader([]byte(`{"authcode":"test"}`)),
+		bytes.NewReader([]byte(`{"authCode":"test"}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

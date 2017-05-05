@@ -26,22 +26,10 @@ package baz
 import (
 	"runtime"
 
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 	"github.com/uber/zanzibar/runtime"
 )
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
-
-// CallHTTPRequest is the http body type for endpoint Call.
-type CallHTTPRequest struct {
-	Arg *endpointsBazBaz.BazRequest `json:"arg"`
-}
-
-// CompareHTTPRequest is the http body type for endpoint Compare.
-type CompareHTTPRequest struct {
-	Arg1 *endpointsBazBaz.BazRequest `json:"arg1"`
-	Arg2 *endpointsBazBaz.BazRequest `json:"arg2"`
 }

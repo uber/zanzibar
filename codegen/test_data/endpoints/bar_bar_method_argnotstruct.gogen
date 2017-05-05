@@ -30,7 +30,6 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients/bar"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
@@ -55,7 +54,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	var requestBody ArgNotStructHTTPRequest
+	var requestBody endpointsBarBar.Bar_ArgNotStruct_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -99,7 +98,7 @@ type ArgNotStructEndpoint struct {
 func (w ArgNotStructEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *ArgNotStructHTTPRequest,
+	r *endpointsBarBar.Bar_ArgNotStruct_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToArgNotStructClientRequest(r)
 
@@ -139,8 +138,8 @@ func (w ArgNotStructEndpoint) Handle(
 	return resHeaders, nil
 }
 
-func convertToArgNotStructClientRequest(body *ArgNotStructHTTPRequest) *barClient.ArgNotStructHTTPRequest {
-	clientRequest := &barClient.ArgNotStructHTTPRequest{}
+func convertToArgNotStructClientRequest(body *endpointsBarBar.Bar_ArgNotStruct_Args) *clientsBarBar.Bar_ArgNotStruct_Args {
+	clientRequest := &clientsBarBar.Bar_ArgNotStruct_Args{}
 
 	clientRequest.Request = string(body.Request)
 

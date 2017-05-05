@@ -54,7 +54,7 @@ func (handler *CompareHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	var requestBody CompareHTTPRequest
+	var requestBody endpointsBazBaz.SimpleService_Compare_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -98,7 +98,7 @@ type CompareEndpoint struct {
 func (w CompareEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *CompareHTTPRequest,
+	r *endpointsBazBaz.SimpleService_Compare_Args,
 ) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
 	clientRequest := convertToCompareClientRequest(r)
 
@@ -139,7 +139,7 @@ func (w CompareEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToCompareClientRequest(body *CompareHTTPRequest) *clientsBazBaz.SimpleService_Compare_Args {
+func convertToCompareClientRequest(body *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
 	clientRequest := &clientsBazBaz.SimpleService_Compare_Args{}
 
 	clientRequest.Arg1 = (*clientsBazBaz.BazRequest)(body.Arg1)

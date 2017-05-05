@@ -56,7 +56,7 @@ func NewClient(
 func (c *BarClient) ArgNotStruct(
 	ctx context.Context,
 	headers map[string]string,
-	r *ArgNotStructHTTPRequest,
+	r *clientsBarBar.Bar_ArgNotStruct_Args,
 ) (map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
@@ -237,7 +237,7 @@ func (c *BarClient) NoRequest(
 func (c *BarClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
-	r *NormalHTTPRequest,
+	r *clientsBarBar.Bar_Normal_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(
@@ -298,7 +298,7 @@ func (c *BarClient) Normal(
 func (c *BarClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
-	r *TooManyArgsHTTPRequest,
+	r *clientsBarBar.Bar_TooManyArgs_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
 	req := zanzibar.NewClientHTTPRequest(

@@ -26,28 +26,10 @@ package bar
 import (
 	"runtime"
 
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 	"github.com/uber/zanzibar/runtime"
 )
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
-
-// ArgNotStructHTTPRequest is the http body type for endpoint argNotStruct.
-type ArgNotStructHTTPRequest struct {
-	Request string `json:"request"`
-}
-
-// NormalHTTPRequest is the http body type for endpoint normal.
-type NormalHTTPRequest struct {
-	Request *endpointsBarBar.BarRequest `json:"request"`
-}
-
-// TooManyArgsHTTPRequest is the http body type for endpoint tooManyArgs.
-type TooManyArgsHTTPRequest struct {
-	Request *endpointsBarBar.BarRequest `json:"request"`
-	Foo     *endpointsFooFoo.FooStruct  `json:"foo"`
 }

@@ -68,7 +68,7 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/bar/arg-not-struct-path",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader([]byte(`{"request":"foo"}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

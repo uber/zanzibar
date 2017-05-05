@@ -30,7 +30,6 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
@@ -55,7 +54,7 @@ func (handler *NormalHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	var requestBody NormalHTTPRequest
+	var requestBody endpointsBarBar.Bar_Normal_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -99,7 +98,7 @@ type NormalEndpoint struct {
 func (w NormalEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *NormalHTTPRequest,
+	r *endpointsBarBar.Bar_Normal_Args,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
 	clientRequest := convertToNormalClientRequest(r)
 
@@ -140,8 +139,8 @@ func (w NormalEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToNormalClientRequest(body *NormalHTTPRequest) *barClient.NormalHTTPRequest {
-	clientRequest := &barClient.NormalHTTPRequest{}
+func convertToNormalClientRequest(body *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
+	clientRequest := &clientsBarBar.Bar_Normal_Args{}
 
 	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
 
