@@ -1,15 +1,15 @@
 {
-	"name": "contacts",
-	"type": "http",
+	"name": "bazTChannel",
+	"type": "tchannel",
 	"config": {
 		"rateLimit": 100,
 		"endpoints": [
-			"./save_contacts.json"
+			"call.json"
 		]
 	},
 	"dependencies": {
 		"client": [
-			"contacts"
+			"baz"
 		]
 	}
 }

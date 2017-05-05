@@ -59,6 +59,8 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
+		filepath.Join(absGatewayPath),
+		"middlewares/middleware-config.json",
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
@@ -69,7 +71,11 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
+	moduleSystem, err := codegen.NewDefaultModuleSystem(
+		absGatewayPath,
+		"./middlewares/middleware-config.json",
+		packageHelper,
+	)
 	if !assert.NoError(t, err, "failed to create module system", err) {
 		return
 	}
@@ -110,8 +116,8 @@ func TestGenerateBar(t *testing.T) {
 		"./test_data/clients",
 	)
 
-	err = gateway.GenerateEndpoints()
-	if !assert.NoError(t, err, "failed to create endpoints %s", err) {
+	err = gateway.GenerateEndpointRegisterFile()
+	if !assert.NoError(t, err, "failed to create endpoint index %s", err) {
 		return
 	}
 

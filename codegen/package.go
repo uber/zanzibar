@@ -43,10 +43,14 @@ type PackageHelper struct {
 	testConfigsRootDir string
 	// String containing copyright header to add to generated code.
 	copyrightHeader string
+	// The middlewares available for the endpoints
+	middlewareSpecs map[string]*MiddlewareSpec
 }
 
 // NewPackageHelper creates a package helper.
 func NewPackageHelper(
+	configDirName string,
+	middlewareConfig string,
 	thriftRootDir string,
 	genCodePackage string,
 	targetGenDir string,
@@ -67,14 +71,35 @@ func NewPackageHelper(
 		)
 	}
 
+	middlewareSpecs := map[string]*MiddlewareSpec{}
+	middleConfig := filepath.Join(
+		configDirName,
+		middlewareConfig,
+	)
+	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load middlewares:")
+	}
+
+	for _, mspec := range middlewares {
+		middlewareSpecs[mspec.Name] = mspec
+	}
+
 	p := &PackageHelper{
 		thriftRootDir:    path.Clean(thriftRootDir),
 		genCodePackage:   genCodePackage,
 		gatewayNamespace: gatewayNamespace,
 		targetGenDir:     genDir,
 		copyrightHeader:  copyrightHeader,
+		middlewareSpecs:  middlewareSpecs,
 	}
 	return p, nil
+}
+
+// MiddlewareSpecs returns a map of middlewares available
+func (p PackageHelper) MiddlewareSpecs() map[string]*MiddlewareSpec {
+	return p.middlewareSpecs
 }
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.

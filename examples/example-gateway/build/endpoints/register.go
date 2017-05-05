@@ -26,6 +26,7 @@ package endpoints
 import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz_tchannel"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
@@ -48,7 +49,7 @@ type Endpoints struct {
 	ContactsSaveContactsHTTPHandler      *contacts.SaveContactsHandler
 	GooglenowAddCredentialsHTTPHandler   *googlenow.AddCredentialsHandler
 	GooglenowCheckCredentialsHTTPHandler *googlenow.CheckCredentialsHandler
-	BazCallTChannelHandler               zanzibar.TChannelHandler
+	BazTChannelCallTChannelHandler       zanzibar.TChannelHandler
 }
 
 // CreateEndpoints bootstraps the endpoints.
@@ -68,7 +69,7 @@ func CreateEndpoints(
 		ContactsSaveContactsHTTPHandler:      contacts.NewSaveContactsEndpoint(gateway),
 		GooglenowAddCredentialsHTTPHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
 		GooglenowCheckCredentialsHTTPHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
-		BazCallTChannelHandler:               baz.NewSimpleServiceCallHandler(gateway),
+		BazTChannelCallTChannelHandler:       bazTchannel.NewSimpleServiceCallHandler(gateway),
 	}
 }
 
@@ -197,5 +198,5 @@ func Register(g *zanzibar.Gateway) {
 			endpoints.GooglenowCheckCredentialsHTTPHandler.HandleRequest,
 		),
 	)
-	tchannelRouter.Register("SimpleService", "Call", endpoints.BazCallTChannelHandler)
+	tchannelRouter.Register("SimpleService", "Call", endpoints.BazTChannelCallTChannelHandler)
 }

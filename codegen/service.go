@@ -79,7 +79,7 @@ func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) 
 		WantAnnot:   wantAnnot,
 		ThriftFile:  module.ThriftPath,
 		GoPackage:   targetPackage,
-		PackageName: module.GetName(),
+		PackageName: camelCase(module.GetName()),
 	}
 	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
 		return nil, err

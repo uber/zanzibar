@@ -18,20 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazTchannel
 
 import (
 	"context"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz_tchannel/baz_tchannel"
 )
+
+func getDirName() string {
+	_, file, _, _ := runtime.Caller(0)
+	return zanzibar.GetDirnameFromRuntimeCaller(file)
+}
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	testCallCounter := 0
@@ -53,7 +60,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	fakeCall := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SimpleService_Call_Args,
+		args *clientsBaz.SimpleService_Call_Args,
 	) (map[string]string, error) {
 		testCallCounter++
 
@@ -73,14 +80,14 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"x-token": "token",
 		"x-uuid":  "uuid",
 	}
-	args := &endpointsBazBaz.SimpleService_Call_Args{
-		Arg: &endpointsBazBaz.BazRequest{
+	args := &endpointsBaz.SimpleService_Call_Args{
+		Arg: &endpointsBaz.BazRequest{
 			B1: true,
 			S2: "hello",
 			I3: 42,
 		},
 	}
-	var result endpointsBazBaz.SimpleService_Call_Result
+	var result endpointsBaz.SimpleService_Call_Result
 
 	success, resHeaders, err := gateway.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,

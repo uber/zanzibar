@@ -1,6 +1,16 @@
 {
-	"endpoints": [
-		"./add_credentials.json",
-		"./check_credentials.json"
-	]
+	"name": "googlenow",
+	"type": "http",
+	"config": {
+		"rateLimit": 100,
+		"endpoints": [
+			"./add_credentials.json",
+			"./check_credentials.json"
+		]
+	},
+	"dependencies": {
+		"client": [
+			"googlenow"
+		]
+	}
 }

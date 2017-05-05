@@ -646,7 +646,7 @@ func (e *EndpointSpec) EndpointTestConfigPath() string {
 
 // SetDownstream configures the downstream client for this endpoint spec
 func (e *EndpointSpec) SetDownstream(
-	gatewaySpec *GatewaySpec,
+	clientModules map[string]*ClientSpec,
 	h *PackageHelper,
 ) error {
 	if e.WorkflowType == "custom" {
@@ -654,7 +654,7 @@ func (e *EndpointSpec) SetDownstream(
 	}
 
 	var clientSpec *ClientSpec
-	for _, v := range gatewaySpec.ClientModules {
+	for _, v := range clientModules {
 		if v.ClientName == e.ClientName {
 			clientSpec = v
 			break
@@ -675,9 +675,16 @@ func (e *EndpointSpec) SetDownstream(
 	)
 }
 
-// EndpointGroupInfo ...
-type EndpointGroupInfo struct {
-	Endpoints []string
+// EndpointClassConfig represents the specific config for
+// an endpoint group. This is a downcast of the moduleClassConfig.
+type endpointClassConfig struct {
+	Name         string              `json:"name"`
+	Type         string              `json:"type"`
+	Dependencies map[string][]string `json:"dependencies"`
+	Config       struct {
+		Ratelimit int32    `json:"rateLimit"`
+		Endpoints []string `json:"endpoints"`
+	} `json:"config"`
 }
 
 func parseEndpointJsons(
@@ -694,8 +701,8 @@ func parseEndpointJsons(
 			)
 		}
 
-		var endpointGroupInfo EndpointGroupInfo
-		err = json.Unmarshal(bytes, &endpointGroupInfo)
+		var endpointConfig endpointClassConfig
+		err = json.Unmarshal(bytes, &endpointConfig)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse json for endpoint group config: %s",
@@ -704,7 +711,7 @@ func parseEndpointJsons(
 		}
 
 		endpointConfigDir := filepath.Dir(endpointGroupJSON)
-		for _, fileName := range endpointGroupInfo.Endpoints {
+		for _, fileName := range endpointConfig.Config.Endpoints {
 			endpointJsons = append(
 				endpointJsons, filepath.Join(endpointConfigDir, fileName),
 			)
@@ -884,7 +891,7 @@ func NewGatewaySpec(
 			)
 		}
 
-		err = espec.SetDownstream(spec, packageHelper)
+		err = espec.SetDownstream(spec.ClientModules, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse downstream info for endpoint: %s", json,
@@ -904,26 +911,8 @@ func (gateway *GatewaySpec) GenerateClientsInit() error {
 	return err
 }
 
-// GenerateEndpoints will generate all the endpoints for the gateway
-func (gateway *GatewaySpec) GenerateEndpoints() error {
-	for _, module := range gateway.EndpointModules {
-		_, err := gateway.Template.GenerateEndpointFile(
-			module, gateway.PackageHelper,
-			module.ThriftServiceName, module.ThriftMethodName,
-		)
-		if err != nil {
-			return err
-		}
-
-		_, err = gateway.Template.GenerateEndpointTestFile(
-			module, gateway.PackageHelper,
-			module.ThriftServiceName, module.ThriftMethodName,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
+// GenerateEndpointRegisterFile will generate endpoints registration for the gateway
+func (gateway *GatewaySpec) GenerateEndpointRegisterFile() error {
 	_, err := gateway.Template.GenerateEndpointRegisterFile(
 		gateway.EndpointModules, gateway.PackageHelper,
 	)

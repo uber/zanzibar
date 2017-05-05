@@ -68,7 +68,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 
 	if moduleSystem.classes[name] != nil {
 		return errors.Errorf(
-			"The module class %s is already defined",
+			"The module class \"%s\" is already defined",
 			name,
 		)
 	}
@@ -78,7 +78,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	for _, moduleType := range class.ClassDependencies {
 		if moduleSystem.classes[moduleType] == nil {
 			return errors.Errorf(
-				"The module class %s depends on class type %s, "+
+				"The module class \"%s\" depends on class type \"%s\", "+
 					"which is not yet defined",
 				name,
 				moduleType,
@@ -90,7 +90,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 
 	if strings.HasPrefix(class.Directory, "..") {
 		return errors.Errorf(
-			"The module class %s must map to an internal directory but was %s",
+			"The module class \"%s\" must map to an internal directory but was \"%s\"",
 			name,
 			class.Directory,
 		)
@@ -100,7 +100,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	for moduleClassName, moduleClass := range moduleSystem.classes {
 		if class.Directory == moduleClass.Directory {
 			return errors.Errorf(
-				"The module class %s conflicts with directory %s from class %s",
+				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
 				name,
 				class.Directory,
 				moduleClassName,
@@ -126,7 +126,7 @@ func (moduleSystem *System) RegisterClassType(
 
 	if moduleClass == nil {
 		return errors.Errorf(
-			"Cannot set class type %s for undefined class %s",
+			"Cannot set class type \"%s\" for undefined class \"%s\"",
 			classType,
 			className,
 		)
@@ -134,7 +134,7 @@ func (moduleSystem *System) RegisterClassType(
 
 	if moduleClass.types[classType] != nil {
 		return errors.Errorf(
-			"The class type %s is already defined for class %s",
+			"The class type \"%s\" is already defined for class \"%s\"",
 			classType,
 			className,
 		)
@@ -170,7 +170,7 @@ func (moduleSystem *System) ResolveModules(
 			if instanceErr != nil {
 				return nil, errors.Wrapf(
 					instanceErr,
-					"Error reading single instance %s in %s",
+					"Error reading single instance \"%s\" in \"%s\"",
 					className,
 					class.Directory,
 				)
@@ -185,7 +185,7 @@ func (moduleSystem *System) ResolveModules(
 				// Expected $path to be a class directory
 				return nil, errors.Wrapf(
 					err,
-					"Error reading module instance directory %s",
+					"Error reading module instance directory \"%s\"",
 					fullInstanceDirectory,
 				)
 			}
@@ -200,7 +200,7 @@ func (moduleSystem *System) ResolveModules(
 					if instanceErr != nil {
 						return nil, errors.Wrapf(
 							instanceErr,
-							"Error reading multi instance %s in %s",
+							"Error reading multi instance \"%s\" in \"%s\"",
 							className,
 							filepath.Join(class.Directory, file.Name()),
 						)
@@ -237,7 +237,7 @@ func readInstance(
 		// Expected $class-config.json to exist in ...
 		return nil, errors.Wrapf(
 			err,
-			"Error reading JSON Config %s",
+			"Error reading JSON Config \"%s\"",
 			classConfigPath,
 		)
 	}
@@ -311,7 +311,7 @@ func (moduleSystem *System) GenerateBuild(
 				classInstance.Directory,
 			)
 			fmt.Printf(
-				"Generating %8s %s %-10s in %-30s %d/%d\n",
+				"Generating %8s %8s %-20s in %-30s %d/%d\n",
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
@@ -325,7 +325,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if generator == nil {
 				fmt.Printf(
-					"Skipping generation of %s %s class of type %s "+
+					"Skipping generation of \"%s\" \"%s\" class of type \"%s\" "+
 						"as generator is not defined\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
@@ -338,8 +338,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating %s %s class of type %s "+
-						"as generator is not defined\n%s\n",
+					"Error generating \"%s\" \"%s\" class of type \"%s\"\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
 					classInstance.ClassType,
@@ -353,7 +352,7 @@ func (moduleSystem *System) GenerateBuild(
 
 				if strings.HasPrefix(filePath, "..") {
 					return errors.Errorf(
-						"Module %s generated a file outside the build dir %s",
+						"Module \"%s\" generated a file outside the build dir \"%s\"",
 						classInstance.Directory,
 						filePath,
 					)
@@ -367,7 +366,7 @@ func (moduleSystem *System) GenerateBuild(
 				if err := writeFile(resolvedPath, content); err != nil {
 					return errors.Wrapf(
 						err,
-						"Error writing to file %s",
+						"Error writing to file \"%s\"",
 						resolvedPath,
 					)
 				}
@@ -386,7 +385,6 @@ func (moduleSystem *System) GenerateBuild(
 		}
 	}
 
-	print("\nDone.\n")
 	return nil
 }
 
@@ -396,7 +394,7 @@ func formatGoFile(filePath string) error {
 	gofmtCmd.Stderr = os.Stderr
 
 	if err := gofmtCmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed to gofmt file: %s", filePath)
+		return errors.Wrapf(err, "failed to gofmt file: \"%s\"", filePath)
 	}
 
 	goimportsCmd := exec.Command("goimports", "-w", "-e", filePath)
@@ -404,7 +402,7 @@ func formatGoFile(filePath string) error {
 	goimportsCmd.Stderr = os.Stderr
 
 	if err := goimportsCmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed to goimports file: %s", filePath)
+		return errors.Wrapf(err, "failed to goimports file: %q", filePath)
 	}
 
 	return nil
@@ -455,10 +453,10 @@ type Instance struct {
 	// Dependency is a list of dependent modules as defined in the instances
 	// json file
 	Dependencies []Dependency
-	// Resolved dependencies is a list of dependent modules after procesing
+	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
 	ResolvedDependencies []Dependency
-	// The JSONFileName is the absolute path to the instance json file
+	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
 	JSONFileRaw []byte
@@ -474,7 +472,7 @@ type Dependency struct {
 type JSONClassConfig struct {
 	Name         string              `json:"name"`
 	Config       interface{}         `json:"config"`
-	Dependencies map[string][]string `json:"deps"`
+	Dependencies map[string][]string `json:"dependencies"`
 	Type         string              `json:"type"`
 }
 
@@ -487,7 +485,7 @@ func (jsonConfig *JSONClassConfig) Read(
 	if readErr != nil {
 		return nil, errors.Wrapf(
 			readErr,
-			"Error reading class config %s",
+			"Error reading class config %q",
 			classConfigPath,
 		)
 	}
@@ -497,21 +495,21 @@ func (jsonConfig *JSONClassConfig) Read(
 	if parseErr != nil {
 		return nil, errors.Wrapf(
 			parseErr,
-			"Error JSON parsing clss config %s",
+			"Error JSON parsing clss config %q",
 			configFile,
 		)
 	}
 
 	if jsonConfig.Name == "" {
 		return nil, errors.Errorf(
-			"Error reading instance name from %s",
+			"Error reading instance name from %q",
 			classConfigPath,
 		)
 	}
 
 	if jsonConfig.Type == "" {
 		return nil, errors.Errorf(
-			"Error reading instance type from %s",
+			"Error reading instance type from %q",
 			classConfigPath,
 		)
 	}
@@ -528,7 +526,7 @@ func writeFile(filePath string, bytes []byte) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
 			return errors.Wrapf(
-				err, "could not make directory: %s", filePath,
+				err, "could not make directory: %q", filePath,
 			)
 		}
 	}
@@ -537,20 +535,20 @@ func writeFile(filePath string, bytes []byte) error {
 	defer closeFile(file)
 	if err != nil {
 		return errors.Wrapf(
-			err, "Could not open file for writing: %s", filePath,
+			err, "Could not open file for writing: %q", filePath,
 		)
 	}
 
 	n, err := file.Write(bytes)
 
 	if err != nil {
-		return errors.Wrapf(err, "Error writing to file %s", filePath)
+		return errors.Wrapf(err, "Error writing to file %q", filePath)
 	}
 
 	if n != len(bytes) {
 		return errors.Wrapf(
 			err,
-			"Error writing full contents to file: %s",
+			"Error writing full contents to file: %q",
 			filePath,
 		)
 	}

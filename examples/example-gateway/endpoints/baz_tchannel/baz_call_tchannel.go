@@ -28,7 +28,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz_tchannel/baz_tchannel"
 )
 
 // CallEndpoint ...
