@@ -69,7 +69,9 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+		bytes.NewReader([]byte(`{
+			"request":{"stringField":"foo","boolField":true}
+		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -107,8 +109,10 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 	defer gateway.Close()
 
 	endpoints := map[string]string{
-		"/bar/bar-path":            `{"stringField":"foo"}`,
-		"/bar/arg-not-struct-path": `{}`,
+		"/bar/bar-path": `{
+			"request":{"stringField":"foo","boolField":true}
+		}`,
+		"/bar/arg-not-struct-path": `{"request":"foo"}`,
 	}
 
 	for k, v := range endpoints {
@@ -172,7 +176,9 @@ func TestBarExceptionCode(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+		bytes.NewReader([]byte(`{
+			"request":{"stringField":"foo","boolField":true}
+		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -211,7 +217,9 @@ func TestMalformedBarExceptionCode(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+		bytes.NewReader([]byte(`{
+			"request":{"stringField":"foo","boolField":true}
+		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -250,7 +258,9 @@ func TestBarExceptionInvalidStatusCode(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{"stringField":"foo"}`)),
+		bytes.NewReader([]byte(`{
+			"request":{"stringField":"foo","boolField":true}
+		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
