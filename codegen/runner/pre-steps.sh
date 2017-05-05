@@ -61,7 +61,7 @@ echo "Generating JSON Marshal/Unmarshal"
 thriftrw_gofiles=(
 	$(find "$BUILD_DIR/gen-code" -name "*.go" | \
 		grep -v "versioncheck.go" | \
-		grep -v "easyjson.go")
+		grep -v "easyjson.go" | sort)
 )
 "$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
