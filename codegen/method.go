@@ -467,38 +467,58 @@ func createTypeConverter(
 			)
 		}
 
-		line := "out." + strings.Title(toField.Name) + " = "
+		prefix := "out." + strings.Title(toField.Name) + " = "
+		postfix := "(in." + strings.Title(fromField.Name) + ")"
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toField.Type.(type) {
 		case *compile.BoolSpec:
-			line += "bool"
+			line := prefix + "bool" + postfix
+			lines = append(lines, line)
 		case *compile.I8Spec:
-			line += "int8"
+			line := prefix + "int8" + postfix
+			lines = append(lines, line)
 		case *compile.I16Spec:
-			line += "int16"
+			line := prefix + "int16" + postfix
+			lines = append(lines, line)
 		case *compile.I32Spec:
-			line += "int32"
+			line := prefix + "int32" + postfix
+			lines = append(lines, line)
 		case *compile.I64Spec:
-			line += "int64"
+			line := prefix + "int64" + postfix
+			lines = append(lines, line)
 		case *compile.DoubleSpec:
-			line += "float64"
+			line := prefix + "float64" + postfix
+			lines = append(lines, line)
 		case *compile.StringSpec:
-			line += "string"
+			line := prefix + "string" + postfix
+			lines = append(lines, line)
 		case *compile.BinarySpec:
-			line += "[]byte"
+			line := prefix + "[]byte" + postfix
+			lines = append(lines, line)
+		case *compile.StructSpec:
+			pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"could not lookup struct when building converter for %s :",
+					toField.Name,
+				)
+			}
+
+			typeName := pkgName + "." + toField.Type.ThriftName()
+			line := prefix + "(*" + typeName + ")" + postfix
+			lines = append(lines, line)
 		default:
 			pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
 			if err != nil {
 				return nil, err
 			}
-			line += "(*" + pkgName + "." + toField.Type.ThriftName() + ")"
+			typeName := pkgName + "." + toField.Type.ThriftName()
+			line := prefix + "(*" + typeName + ")" + postfix
+			lines = append(lines, line)
 		}
-
-		line += "(in." + strings.Title(fromField.Name) + ")"
-
-		lines = append(lines, line)
 	}
 
 	return lines, nil
