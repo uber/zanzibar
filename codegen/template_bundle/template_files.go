@@ -172,6 +172,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 {{end -}}
 
 {{- if .Method.Downstream }}
+{{- $method := .Method -}}
 {{- with .Method -}}
 {{- $methodName := title .Name }}
 {{- $clientPackage := .Downstream.PackageName -}}
@@ -309,12 +310,10 @@ func (w {{$workflow}}) Handle(
 func convertTo{{title .Name}}ClientRequest(body *{{.RequestType}}) *{{$clientReqType}} {
 	clientRequest := &{{$clientReqType}}{}
 
-	{{ range $key, $value := .RequestFieldMap -}}
-	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
-	clientRequest.{{title $key }} = {{ $type }}(body.{{title $value }})
-	{{ end -}}
-	{{ end -}}
+	{{ range $key, $line := $method.ConvertRequestLines -}}
+	{{$line}}
 	{{ end }}
+
 	return clientRequest
 }
 {{end -}}
@@ -354,7 +353,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8022, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

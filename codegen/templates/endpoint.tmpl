@@ -114,6 +114,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 {{end -}}
 
 {{- if .Method.Downstream }}
+{{- $method := .Method -}}
 {{- with .Method -}}
 {{- $methodName := title .Name }}
 {{- $clientPackage := .Downstream.PackageName -}}
@@ -251,12 +252,10 @@ func (w {{$workflow}}) Handle(
 func convertTo{{title .Name}}ClientRequest(body *{{.RequestType}}) *{{$clientReqType}} {
 	clientRequest := &{{$clientReqType}}{}
 
-	{{ range $key, $value := .RequestFieldMap -}}
-	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
-	clientRequest.{{title $key }} = {{ $type }}(body.{{title $value }})
-	{{ end -}}
-	{{ end -}}
+	{{ range $key, $line := $method.ConvertRequestLines -}}
+	{{$line}}
 	{{ end }}
+
 	return clientRequest
 }
 {{end -}}

@@ -77,10 +77,9 @@ type MethodSpec struct {
 	DownstreamService string
 	// The downstream method spec for the endpoint
 	DownstreamMethod *MethodSpec
-	// A map from upstream to downstream field names in the requests.
-	RequestFieldMap map[string]string
-	// A map from upstream to field names to downstream types in the requests.
-	RequestTypeMap map[string]string
+
+	// Statements for converting request types
+	ConvertRequestLines []string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -450,9 +449,7 @@ func (ms *MethodSpec) setRequestFieldMap(
 	h *PackageHelper,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-	ms.RequestFieldMap = map[string]string{}
-	ms.RequestTypeMap = map[string]string{}
-
+	lines := []string{}
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
 	for i := 0; i < len(structType); i++ {
@@ -473,36 +470,42 @@ func (ms *MethodSpec) setRequestFieldMap(
 				field.Name, downstreamSpec.Name,
 			)
 		}
-		ms.RequestFieldMap[field.Name] = field.Name
+
+		line := "clientRequest." + strings.Title(field.Name) + " = "
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch field.Type.(type) {
 		case *compile.BoolSpec:
-			ms.RequestTypeMap[field.Name] = "bool"
+			line += "bool"
 		case *compile.I8Spec:
-			ms.RequestTypeMap[field.Name] = "int8"
+			line += "int8"
 		case *compile.I16Spec:
-			ms.RequestTypeMap[field.Name] = "int16"
+			line += "int16"
 		case *compile.I32Spec:
-			ms.RequestTypeMap[field.Name] = "int32"
+			line += "int32"
 		case *compile.I64Spec:
-			ms.RequestTypeMap[field.Name] = "int64"
+			line += "int64"
 		case *compile.DoubleSpec:
-			ms.RequestTypeMap[field.Name] = "float64"
+			line += "float64"
 		case *compile.StringSpec:
-			ms.RequestTypeMap[field.Name] = "string"
+			line += "string"
 		case *compile.BinarySpec:
-			ms.RequestTypeMap[field.Name] = "[]byte"
+			line += "[]byte"
 		default:
 			pkgName, err := h.TypePackageName(downstreamField.Type.ThriftFile())
 			if err != nil {
 				return err
 			}
-			ms.RequestTypeMap[field.Name] =
-				"(*" + pkgName + "." + field.Type.ThriftName() + ")"
+			line += "(*" + pkgName + "." + field.Type.ThriftName() + ")"
 		}
+
+		line += "(body." + strings.Title(field.Name) + ")"
+
+		lines = append(lines, line)
 	}
+
+	ms.ConvertRequestLines = lines
 	return nil
 }
 
