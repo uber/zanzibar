@@ -443,39 +443,35 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
-func (ms *MethodSpec) setRequestFieldMap(
-	funcSpec *compile.FunctionSpec,
-	downstreamSpec *compile.FunctionSpec,
+func createTypeConverter(
+	fromFields []*compile.FieldSpec,
+	toFields []*compile.FieldSpec,
+	lines []string,
 	h *PackageHelper,
-) error {
-	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-	lines := []string{}
-	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+) ([]string, error) {
+	for i := 0; i < len(toFields); i++ {
+		toField := toFields[i]
 
-	for i := 0; i < len(structType); i++ {
-		field := structType[i]
-		// Add type checking and conversion, custom mapping
-		downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
-		var downstreamField *compile.FieldSpec
-		for j := 0; j < len(downstreamStructType); j++ {
-			if downstreamStructType[j].Name == field.Name {
-				downstreamField = downstreamStructType[j]
+		var fromField *compile.FieldSpec
+		for j := 0; j < len(fromFields); j++ {
+			if fromFields[j].Name == toField.Name {
+				fromField = fromFields[j]
 				break
 			}
 		}
 
-		if downstreamField == nil {
-			return errors.Errorf(
-				"cannot map by name for the field %s to type: %s",
-				field.Name, downstreamSpec.Name,
+		if fromField == nil {
+			return nil, errors.Errorf(
+				"cannot map by name for the field %s",
+				toField.Name,
 			)
 		}
 
-		line := "out." + strings.Title(field.Name) + " = "
+		line := "out." + strings.Title(toField.Name) + " = "
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
-		switch field.Type.(type) {
+		switch toField.Type.(type) {
 		case *compile.BoolSpec:
 			line += "bool"
 		case *compile.I8Spec:
@@ -493,16 +489,38 @@ func (ms *MethodSpec) setRequestFieldMap(
 		case *compile.BinarySpec:
 			line += "[]byte"
 		default:
-			pkgName, err := h.TypePackageName(downstreamField.Type.ThriftFile())
+			pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
 			if err != nil {
-				return err
+				return nil, err
 			}
-			line += "(*" + pkgName + "." + field.Type.ThriftName() + ")"
+			line += "(*" + pkgName + "." + toField.Type.ThriftName() + ")"
 		}
 
-		line += "(in." + strings.Title(field.Name) + ")"
+		line += "(in." + strings.Title(fromField.Name) + ")"
 
 		lines = append(lines, line)
+	}
+
+	return lines, nil
+}
+
+func (ms *MethodSpec) setRequestFieldMap(
+	funcSpec *compile.FunctionSpec,
+	downstreamSpec *compile.FunctionSpec,
+	h *PackageHelper,
+) error {
+	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
+	lines := []string{}
+
+	// Add type checking and conversion, custom mapping
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
+
+	lines, err := createTypeConverter(
+		structType, downstreamStructType, lines, h,
+	)
+	if err != nil {
+		return err
 	}
 
 	ms.ConvertRequestLines = lines
