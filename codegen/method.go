@@ -478,9 +478,22 @@ func (ms *MethodSpec) setRequestFieldMap(
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch field.Type.(type) {
-		case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
-			*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
-			ms.RequestTypeMap[field.Name] = field.Type.ThriftName()
+		case *compile.BoolSpec:
+			ms.RequestTypeMap[field.Name] = "bool"
+		case *compile.I8Spec:
+			ms.RequestTypeMap[field.Name] = "int8"
+		case *compile.I16Spec:
+			ms.RequestTypeMap[field.Name] = "int16"
+		case *compile.I32Spec:
+			ms.RequestTypeMap[field.Name] = "int32"
+		case *compile.I64Spec:
+			ms.RequestTypeMap[field.Name] = "int64"
+		case *compile.DoubleSpec:
+			ms.RequestTypeMap[field.Name] = "float64"
+		case *compile.StringSpec:
+			ms.RequestTypeMap[field.Name] = "string"
+		case *compile.BinarySpec:
+			ms.RequestTypeMap[field.Name] = "[]byte"
 		default:
 			pkgName, err := h.TypePackageName(downstreamField.Type.ThriftFile())
 			if err != nil {

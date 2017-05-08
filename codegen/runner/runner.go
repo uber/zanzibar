@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -35,9 +36,18 @@ var configFile = flag.String("config", "", "the config file path")
 
 const templateDir = "./codegen/templates/*.tmpl"
 
+type stackTracer interface {
+	StackTrace() errors.StackTrace
+}
+
 func checkError(err error, message string) {
 	if err != nil {
 		fmt.Printf("%s:\n %s \n", message, err)
+
+		if err, ok := err.(stackTracer); ok {
+			fmt.Printf("%+v \n", err.StackTrace())
+		}
+
 		os.Exit(1)
 	}
 }
