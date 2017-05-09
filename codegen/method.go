@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"strings"
 
+	"fmt"
+
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -444,6 +446,7 @@ func (ms *MethodSpec) setDownstream(
 }
 
 func createTypeConverter(
+	toPrefix string,
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 	lines []string,
@@ -467,12 +470,16 @@ func createTypeConverter(
 			)
 		}
 
-		prefix := "out." + strings.Title(toField.Name) + " = "
+		if toPrefix == "" {
+			toPrefix = "out."
+		}
+
+		prefix := toPrefix + strings.Title(toField.Name) + " = "
 		postfix := "(in." + strings.Title(fromField.Name) + ")"
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
-		switch toField.Type.(type) {
+		switch toFieldType := toField.Type.(type) {
 		case *compile.BoolSpec:
 			line := prefix + "bool" + postfix
 			lines = append(lines, line)
@@ -506,18 +513,47 @@ func createTypeConverter(
 					toField.Name,
 				)
 			}
-
 			typeName := pkgName + "." + toField.Type.ThriftName()
-			line := prefix + "(*" + typeName + ")" + postfix
+
+			line := prefix + "&" + typeName + "{}"
 			lines = append(lines, line)
-		default:
-			pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
+
+			subToFields := toFieldType.Fields
+
+			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
+			if !ok {
+				return nil, errors.Wrapf(
+					err,
+					"could not convert struct fields, "+
+						"incompatible type for %s :",
+					toField.Name,
+				)
+			}
+
+			subFromFields := fromFieldType.Fields
+			lines, err = createTypeConverter(
+				"out."+strings.Title(toField.Name)+".",
+				subFromFields,
+				subToFields,
+				lines,
+				h,
+			)
 			if err != nil {
 				return nil, err
 			}
-			typeName := pkgName + "." + toField.Type.ThriftName()
-			line := prefix + "(*" + typeName + ")" + postfix
-			lines = append(lines, line)
+
+		default:
+			fmt.Printf("Unknown type %s for field %s \n",
+				toField.Type.TypeCode().String(), toField.Name,
+			)
+
+			// pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
+			// if err != nil {
+			// 	return nil, err
+			// }
+			// typeName := pkgName + "." + toField.Type.ThriftName()
+			// line := prefix + "(*" + typeName + ")" + postfix
+			// lines = append(lines, line)
 		}
 	}
 
@@ -537,7 +573,7 @@ func (ms *MethodSpec) setRequestFieldMap(
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
 	lines, err := createTypeConverter(
-		structType, downstreamStructType, lines, h,
+		"", structType, downstreamStructType, lines, h,
 	)
 	if err != nil {
 		return err
