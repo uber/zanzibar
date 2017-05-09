@@ -44,8 +44,9 @@ func checkError(err error, message string) {
 	if err != nil {
 		fmt.Printf("%s:\n %s \n", message, err)
 
-		if err, ok := err.(stackTracer); ok {
-			fmt.Printf("%+v \n", err.StackTrace())
+		causeErr := errors.Cause(err)
+		if causeErr, ok := causeErr.(stackTracer); ok {
+			fmt.Printf("%+v \n", causeErr.StackTrace())
 		}
 
 		os.Exit(1)
