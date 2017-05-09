@@ -446,7 +446,7 @@ func (ms *MethodSpec) setDownstream(
 }
 
 func createTypeConverter(
-	toPrefix string,
+	keyPrefix string,
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 	lines []string,
@@ -470,36 +470,67 @@ func createTypeConverter(
 			)
 		}
 
-		if toPrefix == "" {
-			toPrefix = "out."
-		}
-
-		prefix := toPrefix + strings.Title(toField.Name) + " = "
-		postfix := "(in." + strings.Title(fromField.Name) + ")"
+		prefix := "out." + keyPrefix + strings.Title(toField.Name) + " = "
+		postfix := "(in." + keyPrefix + strings.Title(fromField.Name) + ")"
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toFieldType := toField.Type.(type) {
 		case *compile.BoolSpec:
-			line := prefix + "bool" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "bool" + postfix
+			} else {
+				line = prefix + "ptr.Bool(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.I8Spec:
-			line := prefix + "int8" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "int8" + postfix
+			} else {
+				line = prefix + "ptr.Int8(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.I16Spec:
-			line := prefix + "int16" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "int16" + postfix
+			} else {
+				line = prefix + "ptr.Int16(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.I32Spec:
-			line := prefix + "int32" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "int32" + postfix
+			} else {
+				line = prefix + "ptr.Int32(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.I64Spec:
-			line := prefix + "int64" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "int64" + postfix
+			} else {
+				line = prefix + "ptr.Int64(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.DoubleSpec:
-			line := prefix + "float64" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "float64" + postfix
+			} else {
+				line = prefix + "ptr.Float64(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.StringSpec:
-			line := prefix + "string" + postfix
+			var line string
+			if toField.Required {
+				line = prefix + "string" + postfix
+			} else {
+				line = prefix + "ptr.String(*" + postfix + ")"
+			}
 			lines = append(lines, line)
 		case *compile.BinarySpec:
 			line := prefix + "[]byte" + postfix
@@ -532,7 +563,7 @@ func createTypeConverter(
 
 			subFromFields := fromFieldType.Fields
 			lines, err = createTypeConverter(
-				"out."+strings.Title(toField.Name)+".",
+				strings.Title(toField.Name)+".",
 				subFromFields,
 				subToFields,
 				lines,
