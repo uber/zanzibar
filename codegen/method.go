@@ -24,8 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	"fmt"
-
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -445,172 +443,28 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
-func createTypeConverter(
-	keyPrefix string,
-	fromFields []*compile.FieldSpec,
-	toFields []*compile.FieldSpec,
-	lines []string,
-	h *PackageHelper,
-) ([]string, error) {
-	for i := 0; i < len(toFields); i++ {
-		toField := toFields[i]
-
-		var fromField *compile.FieldSpec
-		for j := 0; j < len(fromFields); j++ {
-			if fromFields[j].Name == toField.Name {
-				fromField = fromFields[j]
-				break
-			}
-		}
-
-		if fromField == nil {
-			return nil, errors.Errorf(
-				"cannot map by name for the field %s",
-				toField.Name,
-			)
-		}
-
-		prefix := "out." + keyPrefix + strings.Title(toField.Name) + " = "
-		postfix := "(in." + keyPrefix + strings.Title(fromField.Name) + ")"
-
-		// Override thrift type names to avoid naming collisions between endpoint
-		// and client types.
-		switch toFieldType := toField.Type.(type) {
-		case *compile.BoolSpec:
-			var line string
-			if toField.Required {
-				line = prefix + "bool" + postfix
-			} else {
-				line = prefix + "ptr.Bool(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.I8Spec:
-			var line string
-			if toField.Required {
-				line = prefix + "int8" + postfix
-			} else {
-				line = prefix + "ptr.Int8(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.I16Spec:
-			var line string
-			if toField.Required {
-				line = prefix + "int16" + postfix
-			} else {
-				line = prefix + "ptr.Int16(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.I32Spec:
-			var line string
-			if toField.Required {
-				line = prefix + "int32" + postfix
-			} else {
-				line = prefix + "ptr.Int32(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.I64Spec:
-			var line string
-			if toField.Required {
-				line = prefix + "int64" + postfix
-			} else {
-				line = prefix + "ptr.Int64(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.DoubleSpec:
-			var line string
-			if toField.Required {
-				line = prefix + "float64" + postfix
-			} else {
-				line = prefix + "ptr.Float64(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.StringSpec:
-			var line string
-			if toField.Required {
-				line = prefix + "string" + postfix
-			} else {
-				line = prefix + "ptr.String(*" + postfix + ")"
-			}
-			lines = append(lines, line)
-		case *compile.BinarySpec:
-			line := prefix + "[]byte" + postfix
-			lines = append(lines, line)
-		case *compile.StructSpec:
-			pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
-			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"could not lookup struct when building converter for %s :",
-					toField.Name,
-				)
-			}
-			typeName := pkgName + "." + toField.Type.ThriftName()
-
-			line := prefix + "&" + typeName + "{}"
-			lines = append(lines, line)
-
-			subToFields := toFieldType.Fields
-
-			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
-			if !ok {
-				return nil, errors.Wrapf(
-					err,
-					"could not convert struct fields, "+
-						"incompatible type for %s :",
-					toField.Name,
-				)
-			}
-
-			subFromFields := fromFieldType.Fields
-			lines, err = createTypeConverter(
-				strings.Title(toField.Name)+".",
-				subFromFields,
-				subToFields,
-				lines,
-				h,
-			)
-			if err != nil {
-				return nil, err
-			}
-
-		default:
-			fmt.Printf("Unknown type %s for field %s \n",
-				toField.Type.TypeCode().String(), toField.Name,
-			)
-
-			// pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
-			// if err != nil {
-			// 	return nil, err
-			// }
-			// typeName := pkgName + "." + toField.Type.ThriftName()
-			// line := prefix + "(*" + typeName + ")" + postfix
-			// lines = append(lines, line)
-		}
-	}
-
-	return lines, nil
-}
-
 func (ms *MethodSpec) setRequestFieldMap(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
 	h *PackageHelper,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-	lines := []string{}
 
 	// Add type checking and conversion, custom mapping
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	lines, err := createTypeConverter(
-		"", structType, downstreamStructType, lines, h,
-	)
+	typeConverter := &TypeConverter{
+		Lines:  []string{},
+		Helper: h,
+	}
+
+	err := typeConverter.ConvertFields("", structType, downstreamStructType)
 	if err != nil {
 		return err
 	}
 
-	ms.ConvertRequestLines = lines
+	ms.ConvertRequestLines = typeConverter.Lines
 	return nil
 }
 
