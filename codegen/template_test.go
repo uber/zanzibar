@@ -71,11 +71,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	moduleSystem, err := codegen.NewDefaultModuleSystem(
-		absGatewayPath,
-		"./middlewares/middleware-config.json",
-		packageHelper,
-	)
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
 	if !assert.NoError(t, err, "failed to create module system", err) {
 		return
 	}

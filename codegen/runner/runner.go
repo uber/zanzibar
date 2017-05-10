@@ -82,11 +82,7 @@ func main() {
 		err, fmt.Sprintf("Can't build package helper %s", configDirName),
 	)
 
-	moduleSystem, err := codegen.NewDefaultModuleSystem(
-		configDirName,
-		config.MustGetString("middlewareConfig"),
-		packageHelper,
-	)
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
 	checkError(
 		err, fmt.Sprintf("Error creating module system %s", configDirName),
 	)

@@ -92,8 +92,6 @@ type ClientStub struct {
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
 // module system (clients, endpoints)
 func NewDefaultModuleSystem(
-	configDirName string,
-	middlewareConfig string,
 	h *PackageHelper,
 ) (*module.System, error) {
 	system := module.NewSystem()
