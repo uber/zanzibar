@@ -92,18 +92,18 @@ type ClientSpec struct {
 	ThriftServiceName string
 }
 
-// moduleClassConfig represents the generic JSON config for
+// ModuleClassConfig represents the generic JSON config for
 // all modules. This will be provided by the module package.
-type moduleClassConfig struct {
+type ModuleClassConfig struct {
 	Name   string      `json:"name"`
 	Type   string      `json:"type"`
 	Config interface{} `json:"config"`
 }
 
-// clientClassConfig represents the specific config for
+// ClientClassConfig represents the specific config for
 // a client. This is a downcast of the moduleClassConfig.
 // Config here is a map[string]string but could be any type.
-type clientClassConfig struct {
+type ClientClassConfig struct {
 	Name   string            `json:"name"`
 	Type   string            `json:"type"`
 	Config map[string]string `json:"config"`
@@ -123,7 +123,7 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 		)
 	}
 
-	clientConfig := &clientClassConfig{}
+	clientConfig := &ClientClassConfig{}
 
 	if err := json.Unmarshal(bytes, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
@@ -150,12 +150,12 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return newClientSpec(jsonFile, clientConfig, false, h)
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewCustomClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	customImportPath, ok := clientConfig.Config["customImportPath"]
 	if !ok {
 		return nil, errors.Errorf(
@@ -173,12 +173,12 @@ func NewCustomClientSpec(jsonFile string, clientConfig *clientClassConfig, h *Pa
 }
 
 // NewHTTPClientSpec creates a client spec from a json file whose type is http
-func NewHTTPClientSpec(jsonFile string, clientConfig *clientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewHTTPClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
 	return newClientSpec(jsonFile, clientConfig, true, h)
 
 }
 
-func newClientSpec(jsonFile string, clientConfig *clientClassConfig, wantAnnot bool, h *PackageHelper) (*ClientSpec, error) {
+func newClientSpec(jsonFile string, clientConfig *ClientClassConfig, wantAnnot bool, h *PackageHelper) (*ClientSpec, error) {
 	config := clientConfig.Config
 
 	for i := 0; i < len(mandatoryClientFields); i++ {
@@ -677,7 +677,7 @@ func (e *EndpointSpec) SetDownstream(
 
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
-type endpointClassConfig struct {
+type EndpointClassConfig struct {
 	Name         string              `json:"name"`
 	Type         string              `json:"type"`
 	Dependencies map[string][]string `json:"dependencies"`
@@ -701,7 +701,7 @@ func parseEndpointJsons(
 			)
 		}
 
-		var endpointConfig endpointClassConfig
+		var endpointConfig EndpointClassConfig
 		err = json.Unmarshal(bytes, &endpointConfig)
 		if err != nil {
 			return nil, errors.Wrapf(

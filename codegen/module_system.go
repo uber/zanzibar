@@ -190,8 +190,8 @@ func NewDefaultModuleSystem(
 	return system, nil
 }
 
-func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
-	var clientConfig clientClassConfig
+func readClientConfig(rawConfig []byte) (*ClientClassConfig, error) {
+	var clientConfig ClientClassConfig
 	if err := json.Unmarshal(rawConfig, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -203,8 +203,8 @@ func readClientConfig(rawConfig []byte) (*clientClassConfig, error) {
 	return &clientConfig, nil
 }
 
-func readEndpointConfig(rawConfig []byte) (*endpointClassConfig, error) {
-	var endpointConfig endpointClassConfig
+func readEndpointConfig(rawConfig []byte) (*EndpointClassConfig, error) {
+	var endpointConfig EndpointClassConfig
 	if err := json.Unmarshal(rawConfig, &endpointConfig); err != nil {
 		return nil, errors.Wrapf(
 			err,
