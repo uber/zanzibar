@@ -279,19 +279,6 @@ func (g *HTTPClientGenerator) Generate(
 		)
 	}
 
-	structs, err := g.templates.execTemplate(
-		"structs.tmpl",
-		clientMeta,
-		g.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error executing HTTP client structs template for %q",
-			instance.InstanceName,
-		)
-	}
-
 	clientDirectory := filepath.Join(
 		g.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
@@ -302,18 +289,9 @@ func (g *HTTPClientGenerator) Generate(
 		clientFilePath = clientSpec.GoFileName
 	}
 
-	structFilePath, err := filepath.Rel(
-		clientDirectory,
-		clientSpec.GoStructsFileName,
-	)
-	if err != nil {
-		structFilePath = clientSpec.GoStructsFileName
-	}
-
 	// Return the client files
 	return map[string][]byte{
 		clientFilePath: client,
-		structFilePath: structs,
 	}, nil
 }
 
