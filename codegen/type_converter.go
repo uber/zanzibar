@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -61,8 +60,8 @@ func (c *TypeConverter) ConvertFields(
 			)
 		}
 
-		prefix := "out." + keyPrefix + strings.Title(toField.Name) + " = "
-		postfix := "(in." + keyPrefix + strings.Title(fromField.Name) + ")"
+		prefix := "out." + keyPrefix + strings.Title(toField.Name)
+		postfix := "in." + keyPrefix + strings.Title(fromField.Name)
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
@@ -70,61 +69,61 @@ func (c *TypeConverter) ConvertFields(
 		case *compile.BoolSpec:
 			var line string
 			if toField.Required {
-				line = prefix + "bool" + postfix
+				line = prefix + " = bool(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Bool(*" + postfix + ")"
+				line = prefix + " = (*bool)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I8Spec:
 			var line string
 			if toField.Required {
-				line = prefix + "int8" + postfix
+				line = prefix + " = int8(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Int8(*" + postfix + ")"
+				line = prefix + " = (*int8)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I16Spec:
 			var line string
 			if toField.Required {
-				line = prefix + "int16" + postfix
+				line = prefix + " = int16(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Int16(*" + postfix + ")"
+				line = prefix + " = (*int16)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I32Spec:
 			var line string
 			if toField.Required {
-				line = prefix + "int32" + postfix
+				line = prefix + " = int32(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Int32(*" + postfix + ")"
+				line = prefix + " = (*int32)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I64Spec:
 			var line string
 			if toField.Required {
-				line = prefix + "int64" + postfix
+				line = prefix + " = int64(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Int64(*" + postfix + ")"
+				line = prefix + " = (*int64)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.DoubleSpec:
 			var line string
 			if toField.Required {
-				line = prefix + "float64" + postfix
+				line = prefix + " = float64(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.Float64(*" + postfix + ")"
+				line = prefix + " = (*float64)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.StringSpec:
 			var line string
 			if toField.Required {
-				line = prefix + "string" + postfix
+				line = prefix + " = string(" + postfix + ")"
 			} else {
-				line = prefix + "ptr.String(*" + postfix + ")"
+				line = prefix + " = (*string)(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.BinarySpec:
-			line := prefix + "[]byte" + postfix
+			line := prefix + " = []byte(" + postfix + ")"
 			c.Lines = append(c.Lines, line)
 		case *compile.StructSpec:
 			pkgName, err := c.Helper.TypePackageName(toField.Type.ThriftFile())
@@ -136,10 +135,6 @@ func (c *TypeConverter) ConvertFields(
 				)
 			}
 			typeName := pkgName + "." + toField.Type.ThriftName()
-
-			line := prefix + "&" + typeName + "{}"
-			c.Lines = append(c.Lines, line)
-
 			subToFields := toFieldType.Fields
 
 			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
@@ -154,9 +149,15 @@ func (c *TypeConverter) ConvertFields(
 
 			// TODO: ADD NIL CHECK !!!
 
+			line := "if " + postfix + " != nil {"
+			c.Lines = append(c.Lines, line)
+
+			line = "	" + prefix + " = &" + typeName + "{}"
+			c.Lines = append(c.Lines, line)
+
 			subFromFields := fromFieldType.Fields
 			err = c.ConvertFields(
-				strings.Title(toField.Name)+".",
+				"	"+strings.Title(toField.Name)+".",
 				subFromFields,
 				subToFields,
 			)
@@ -164,10 +165,19 @@ func (c *TypeConverter) ConvertFields(
 				return err
 			}
 
+			line = "} else {"
+			c.Lines = append(c.Lines, line)
+
+			line = "	" + prefix + " = nil"
+			c.Lines = append(c.Lines, line)
+
+			line = "}"
+			c.Lines = append(c.Lines, line)
+
 		default:
-			fmt.Printf("Unknown type %s for field %s \n",
-				toField.Type.TypeCode().String(), toField.Name,
-			)
+			// fmt.Printf("Unknown type %s for field %s \n",
+			// 	toField.Type.TypeCode().String(), toField.Name,
+			// )
 
 			// pkgName, err := h.TypePackageName(toField.Type.ThriftFile())
 			// if err != nil {
