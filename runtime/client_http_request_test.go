@@ -27,7 +27,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -160,7 +159,7 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 	bClient := clients.Bar
 
 	body, headers, err := bClient.Normal(
-		context.Background(), nil, &barClient.NormalHTTPRequest{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.NoError(t, err)
 
@@ -190,7 +189,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	bClient := clients.Bar
 
 	body, _, err := bClient.Normal(
-		context.Background(), nil, &barClient.NormalHTTPRequest{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -221,7 +220,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	bClient := clients.Bar
 
 	body, _, err := bClient.Normal(
-		context.Background(), nil, &barClient.NormalHTTPRequest{},
+		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
@@ -251,7 +250,7 @@ func TestMakingCallWithThriftException(t *testing.T) {
 
 	_, err = clients.Bar.ArgNotStruct(
 		context.Background(), nil,
-		&barClient.ArgNotStructHTTPRequest{
+		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",
 		},
 	)

@@ -5,7 +5,9 @@ import:
 - package: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - package: github.com/mailru/easyjson
-  version: 9d6630dc8c577b56cb9687a9cf9e8578aca7298a
+  version: c7e8f2b687054e448f35ff2693bd298c1a2f3a10
+  repo: https://github.com/Raynos/easyjson.git
+  vcs: git
   subpackages:
   - buffer
   - jlexer

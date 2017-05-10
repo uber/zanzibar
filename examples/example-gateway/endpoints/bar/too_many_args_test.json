@@ -3,7 +3,12 @@
 	"testServiceName": "example-gateway",
 	"endpointId": "bar",
 	"handlerId": "tooManyArgs",
-	"endpointRequest": {},
+	"endpointRequest": {
+		"request": {
+			"stringField": "foo",
+			"boolField": true
+		}
+	},
 	"endpointReqHeaders":  {
 		"X-Uuid": "test-uuid", 
 		"X-Token": "test-token"
@@ -17,7 +22,12 @@
 	"clientStubs": [{
 		"clientId": "bar",
 		"clientMethod": "tooManyArgs",
-		"clientRequest": {},
+		"clientRequest": {
+			"request": {
+				"stringField": "foo",
+				"boolField": true
+			}
+		},
 		"clientReqHeaders":  {
 			"X-Uuid": "test-uuid", 
 			"X-Token": "test-token"

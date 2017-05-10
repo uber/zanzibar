@@ -16,19 +16,3 @@ func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
-
-{{range .Services}}
-
-{{/*  ========================= Method =========================  */ -}}
-
-{{range .Methods}}
-{{if len .RequestStruct | ne 0}} {{- /* generate struct to wrap request args*/ -}}
-// {{.RequestType}} is the http body type for endpoint {{.Name}}.
-type {{.RequestType}} struct {
-	{{range .RequestStruct -}}
-	{{title .Name}} {{.Type}} `json:"{{.Name}}"`
-	{{end -}}
-}{{end -}}
-
-{{end}} {{- /* <range .Methods> */ -}}
-{{end}} {{- /* <range .Services> */ -}}

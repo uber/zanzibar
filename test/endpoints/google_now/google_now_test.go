@@ -280,8 +280,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 
 	assert.Equal(t,
 		"{\"error\":\"Could not parse json: parse error: "+
-			"invalid character 'b' after top-level value "+
-			"near offset 0 of 'bad bytes'\"}",
+			"syntax error near offset 0 of 'bad bytes'\"}",
 		string(respBytes),
 	)
 }
@@ -338,8 +337,8 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "500 Internal Server Error", res.Status)
-	assert.Equal(t, 1, counter)
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
 
 	res2, err2 := gateway.MakeRequest(
 		"POST", "/googlenow/add-credentials", headers,
@@ -350,7 +349,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 	}
 
 	assert.Equal(t, "202 Accepted", res2.Status)
-	assert.Equal(t, 2, counter)
+	assert.Equal(t, 1, counter)
 }
 
 func TestAddCredentialsBackendDown(t *testing.T) {
@@ -376,7 +375,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/googlenow/add-credentials", headers,
-		bytes.NewReader(noAuthCodeBytes),
+		bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -439,7 +438,7 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 	)
 	res, err := gateway.MakeRequest(
 		"POST", "/googlenow/add-credentials", headers,
-		bytes.NewReader(noAuthCodeBytes),
+		bytes.NewReader(benchBytes),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

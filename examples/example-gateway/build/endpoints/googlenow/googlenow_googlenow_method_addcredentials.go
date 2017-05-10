@@ -30,7 +30,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
+	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
+	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
 )
 
 // AddCredentialsHandler is the handler for "/googlenow/add-credentials"
@@ -56,7 +57,7 @@ func (handler *AddCredentialsHandler) HandleRequest(
 	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
 		return
 	}
-	var requestBody AddCredentialsHTTPRequest
+	var requestBody endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -95,7 +96,7 @@ type AddCredentialsEndpoint struct {
 func (w AddCredentialsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *AddCredentialsHTTPRequest,
+	r *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
 ) (zanzibar.Header, error) {
 	clientRequest := convertToAddCredentialsClientRequest(r)
 
@@ -136,8 +137,8 @@ func (w AddCredentialsEndpoint) Handle(
 	return resHeaders, nil
 }
 
-func convertToAddCredentialsClientRequest(body *AddCredentialsHTTPRequest) *googlenowClient.AddCredentialsHTTPRequest {
-	clientRequest := &googlenowClient.AddCredentialsHTTPRequest{}
+func convertToAddCredentialsClientRequest(body *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args {
+	clientRequest := &clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args{}
 
 	clientRequest.AuthCode = string(body.AuthCode)
 

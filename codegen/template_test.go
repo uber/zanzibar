@@ -110,11 +110,6 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(tmpDir, "clients", "bar", "bar.go"),
 		"./test_data/clients",
 	)
-	cmpGoldenFile(
-		t,
-		filepath.Join(tmpDir, "clients", "bar", "bar_structs.go"),
-		"./test_data/clients",
-	)
 
 	err = gateway.GenerateEndpointRegisterFile()
 	if !assert.NoError(t, err, "failed to create endpoint index %s", err) {

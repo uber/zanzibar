@@ -43,10 +43,11 @@ echo "Compiled thriftrw : +$runtime"
 echo "Generating Go code from Thrift files"
 mkdir -p "$BUILD_DIR/gen-code"
 for tfile in $(find "$CONFIG_DIR/idl" -name '*.thrift'); do
-    "$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
+	"$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
 		--no-embed-idl \
-        --thrift-root="$CONFIG_DIR/idl" "$tfile"
+		--thrift-root="$CONFIG_DIR/idl" "$tfile"
 done
+gofmt -w "$BUILD_DIR/gen-code/"
 
 end=`date +%s`
 runtime=$((end-start))

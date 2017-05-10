@@ -68,7 +68,7 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/bar/bar-path",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader([]byte(`{"request":{"boolField":true,"stringField":"foo"}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

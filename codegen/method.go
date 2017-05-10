@@ -24,8 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	"fmt"
-
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
 )
@@ -64,8 +62,7 @@ type MethodSpec struct {
 	ExceptionsIndex  map[string]ExceptionSpec
 	ValidStatusCodes []int
 	// Additional struct generated from the bundle of request args.
-	RequestBoxed  bool
-	RequestStruct []StructSpec
+	RequestBoxed bool
 	// Thrift service name the method belongs to.
 	ThriftService string
 	// The thriftrw-generated go package name
@@ -196,10 +193,17 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	var err error
 	if isRequestBoxed(funcSpec) {
 		ms.RequestBoxed = true
-		ms.RequestType, err = packageHelper.TypeFullName(curThriftFile, funcSpec.ArgsSpec[0].Type)
+		ms.RequestType, err = packageHelper.TypeFullName(
+			curThriftFile, funcSpec.ArgsSpec[0].Type,
+		)
 	} else {
 		ms.RequestBoxed = false
-		ms.RequestType, err = ms.newRequestType(curThriftFile, funcSpec, packageHelper)
+
+		goPackageName, err := packageHelper.TypePackageName(curThriftFile)
+		if err == nil {
+			ms.RequestType = goPackageName + "." +
+				ms.ThriftService + "_" + strings.Title(ms.Name) + "_Args"
+		}
 	}
 	if err != nil {
 		return errors.Wrap(err, "failed to set request type")
@@ -211,38 +215,6 @@ func isStructType(spec compile.TypeSpec) bool {
 	spec = compile.RootTypeSpec(spec)
 	_, isStruct := spec.(*compile.StructSpec)
 	return isStruct
-}
-
-func (ms *MethodSpec) newRequestType(curThriftFile string, f *compile.FunctionSpec, h *PackageHelper) (string, error) {
-	var requestType string
-	// TODO: (lu) the assumption here is 'no annotation == tchannel', good enough until new protocol is introduced
-	if ms.WantAnnot {
-		requestType = strings.Title(f.Name) + "HTTPRequest"
-	} else {
-		// This is specifically generating the "Args" type that thriftrw generates.
-		requestType = fmt.Sprintf(
-			"%s.%s_%s_Args",
-			ms.GenCodePkgName, strings.Title(ms.ThriftService), strings.Title(f.Name),
-		)
-
-	}
-
-	ms.RequestStruct = make([]StructSpec, len(f.ArgsSpec))
-	for i, arg := range f.ArgsSpec {
-		typeName, err := h.TypeFullName(curThriftFile, arg.Type)
-		if err != nil {
-			return "", errors.Wrap(err, "failed to generate new request type")
-		}
-		if isStructType(arg.Type) {
-			typeName = "*" + typeName
-		}
-		ms.RequestStruct[i] = StructSpec{
-			Type:        typeName,
-			Name:        arg.Name,
-			Annotations: arg.Annotations,
-		}
-	}
-	return requestType, nil
 }
 
 func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.ResultSpec, packageHelper *PackageHelper) error {

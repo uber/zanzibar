@@ -82,7 +82,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 		"POST",
 		"/bar/too-many-args-path",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader([]byte(`{"request":{"boolField":true,"stringField":"foo"}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
