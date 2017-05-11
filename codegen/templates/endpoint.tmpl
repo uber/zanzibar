@@ -249,14 +249,14 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(body *{{.RequestType}}) *{{$clientReqType}} {
-	clientRequest := &{{$clientReqType}}{}
+func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
+	out := &{{$clientReqType}}{}
 
 	{{ range $key, $line := $method.ConvertRequestLines -}}
 	{{$line}}
 	{{ end }}
 
-	return clientRequest
+	return out
 }
 {{end -}}
 
