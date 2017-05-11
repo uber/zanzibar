@@ -28,13 +28,16 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
-// TypeConverter ...
+// TypeConverter can generate a function body that converts two thriftrw
+// FieldGroups from one to another. It's assumed that the converted code
+// operates on two variables, "in" and "out" and that both are a go struct.
 type TypeConverter struct {
 	Lines  []string
 	Helper *PackageHelper
 }
 
-// ConvertFields ...
+// ConvertFields will add lines to the TypeConverter for mapping
+// from one go struct to another based on two thriftrw.FieldGroups
 func (c *TypeConverter) ConvertFields(
 	keyPrefix string,
 	fromFields []*compile.FieldSpec,
@@ -148,6 +151,8 @@ func (c *TypeConverter) ConvertFields(
 					toField.Name,
 				)
 			}
+
+			// TODO: ADD NIL CHECK !!!
 
 			subFromFields := fromFieldType.Fields
 			err = c.ConvertFields(

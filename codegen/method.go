@@ -80,6 +80,9 @@ type MethodSpec struct {
 
 	// Statements for converting request types
 	ConvertRequestLines []string
+
+	// Statements for converting response types
+	ConvertResponseLines []string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -443,7 +446,7 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
-func (ms *MethodSpec) setRequestFieldMap(
+func (ms *MethodSpec) setTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
 	h *PackageHelper,
@@ -465,6 +468,30 @@ func (ms *MethodSpec) setRequestFieldMap(
 	}
 
 	ms.ConvertRequestLines = typeConverter.Lines
+
+	// TODO: support non-struct return types
+	respType := funcSpec.ResultSpec.ReturnType
+	downstreamRespType := funcSpec.ResultSpec.ReturnType
+
+	if respType == nil || downstreamRespType == nil {
+		return nil
+	}
+
+	respFields := respType.(*compile.StructSpec).Fields
+	downstreamRespFields := downstreamRespType.(*compile.StructSpec).Fields
+
+	respConverter := &TypeConverter{
+		Lines:  []string{},
+		Helper: h,
+	}
+
+	err = respConverter.ConvertFields("", downstreamRespFields, respFields)
+	if err != nil {
+		return err
+	}
+
+	ms.ConvertResponseLines = respConverter.Lines
+
 	return nil
 }
 

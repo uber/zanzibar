@@ -203,7 +203,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err := method.setRequestFieldMap(funcSpec, downstreamSpec, h)
+		err := method.setTypeConverters(funcSpec, downstreamSpec, h)
 		if err != nil {
 			return err
 		}

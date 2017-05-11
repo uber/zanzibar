@@ -275,10 +275,14 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
-func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*{{.ResponseType}})(body)
-	return downstreamResponse
+func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
+	out := &{{.ResponseType}}{}
+
+	{{ range $key, $line := $method.ConvertResponseLines -}}
+	{{$line}}
+	{{ end }}
+
+	return out
 }
 {{end -}}
 
