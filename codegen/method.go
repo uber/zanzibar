@@ -471,7 +471,7 @@ func (ms *MethodSpec) setRequestFieldMap(
 			)
 		}
 
-		line := "clientRequest." + strings.Title(field.Name) + " = "
+		line := "out." + strings.Title(field.Name) + " = "
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
@@ -500,7 +500,7 @@ func (ms *MethodSpec) setRequestFieldMap(
 			line += "(*" + pkgName + "." + field.Type.ThriftName() + ")"
 		}
 
-		line += "(body." + strings.Title(field.Name) + ")"
+		line += "(in." + strings.Title(field.Name) + ")"
 
 		lines = append(lines, line)
 	}
