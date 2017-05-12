@@ -138,12 +138,12 @@ func (w ArgNotStructEndpoint) Handle(
 	return resHeaders, nil
 }
 
-func convertToArgNotStructClientRequest(body *endpointsBarBar.Bar_ArgNotStruct_Args) *clientsBarBar.Bar_ArgNotStruct_Args {
-	clientRequest := &clientsBarBar.Bar_ArgNotStruct_Args{}
+func convertToArgNotStructClientRequest(in *endpointsBarBar.Bar_ArgNotStruct_Args) *clientsBarBar.Bar_ArgNotStruct_Args {
+	out := &clientsBarBar.Bar_ArgNotStruct_Args{}
 
-	clientRequest.Request = string(body.Request)
+	out.Request = string(in.Request)
 
-	return clientRequest
+	return out
 }
 
 func convertArgNotStructBarException(

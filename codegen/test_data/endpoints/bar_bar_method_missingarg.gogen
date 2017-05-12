@@ -141,8 +141,12 @@ func convertMissingArgBarException(
 	return serverError
 }
 
-func convertMissingArgClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBarBar.BarResponse)(body)
-	return downstreamResponse
+func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+	out := &endpointsBarBar.BarResponse{}
+
+	out.StringField = string(in.StringField)
+	out.IntWithRange = int32(in.IntWithRange)
+	out.IntWithoutRange = int32(in.IntWithoutRange)
+
+	return out
 }

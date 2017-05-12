@@ -119,8 +119,10 @@ func (w PingEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertPingClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
-	return downstreamResponse
+func convertPingClientResponse(in *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+	out := &endpointsBazBaz.BazResponse{}
+
+	out.Message = string(in.Message)
+
+	return out
 }

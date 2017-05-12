@@ -158,13 +158,28 @@ func (w TooManyArgsEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToTooManyArgsClientRequest(body *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
-	clientRequest := &clientsBarBar.Bar_TooManyArgs_Args{}
+func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
+	out := &clientsBarBar.Bar_TooManyArgs_Args{}
 
-	clientRequest.Foo = (*clientsFooFoo.FooStruct)(body.Foo)
-	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
+	if in.Request != nil {
+		out.Request = &clientsBarBar.BarRequest{}
+		out.Request.StringField = string(in.Request.StringField)
+		out.Request.BoolField = bool(in.Request.BoolField)
+	} else {
+		out.Request = nil
+	}
+	if in.Foo != nil {
+		out.Foo = &clientsFooFoo.FooStruct{}
+		out.Foo.FooString = string(in.Foo.FooString)
+		out.Foo.FooI32 = (*int32)(in.Foo.FooI32)
+		out.Foo.FooI16 = (*int16)(in.Foo.FooI16)
+		out.Foo.FooDouble = (*float64)(in.Foo.FooDouble)
+		out.Foo.FooBool = (*bool)(in.Foo.FooBool)
+	} else {
+		out.Foo = nil
+	}
 
-	return clientRequest
+	return out
 }
 
 func convertTooManyArgsBarException(
@@ -175,8 +190,12 @@ func convertTooManyArgsBarException(
 	return serverError
 }
 
-func convertTooManyArgsClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBarBar.BarResponse)(body)
-	return downstreamResponse
+func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+	out := &endpointsBarBar.BarResponse{}
+
+	out.StringField = string(in.StringField)
+	out.IntWithRange = int32(in.IntWithRange)
+	out.IntWithoutRange = int32(in.IntWithoutRange)
+
+	return out
 }

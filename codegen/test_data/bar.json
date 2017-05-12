@@ -83,8 +83,8 @@
 					"Downstream": null,
 					"DownstreamService": "",
 					"DownstreamMethod": null,
-					"RequestFieldMap": null,
-					"RequestTypeMap": null
+					"ConvertRequestLines": null,
+					"ConvertResponseLines": null
 				},
 				{
 					"Name": "missingArg",
@@ -149,8 +149,8 @@
 					"Downstream": null,
 					"DownstreamService": "",
 					"DownstreamMethod": null,
-					"RequestFieldMap": null,
-					"RequestTypeMap": null
+					"ConvertRequestLines": null,
+					"ConvertResponseLines": null
 				},
 				{
 					"Name": "noRequest",
@@ -215,8 +215,8 @@
 					"Downstream": null,
 					"DownstreamService": "",
 					"DownstreamMethod": null,
-					"RequestFieldMap": null,
-					"RequestTypeMap": null
+					"ConvertRequestLines": null,
+					"ConvertResponseLines": null
 				},
 				{
 					"Name": "normal",
@@ -281,8 +281,8 @@
 					"Downstream": null,
 					"DownstreamService": "",
 					"DownstreamMethod": null,
-					"RequestFieldMap": null,
-					"RequestTypeMap": null
+					"ConvertRequestLines": null,
+					"ConvertResponseLines": null
 				},
 				{
 					"Name": "tooManyArgs",
@@ -353,8 +353,8 @@
 					"Downstream": null,
 					"DownstreamService": "",
 					"DownstreamMethod": null,
-					"RequestFieldMap": null,
-					"RequestTypeMap": null
+					"ConvertRequestLines": null,
+					"ConvertResponseLines": null
 				}
 			],
 			"CompileSpec": null

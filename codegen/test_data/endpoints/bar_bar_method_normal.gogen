@@ -139,12 +139,18 @@ func (w NormalEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToNormalClientRequest(body *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
-	clientRequest := &clientsBarBar.Bar_Normal_Args{}
+func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
+	out := &clientsBarBar.Bar_Normal_Args{}
 
-	clientRequest.Request = (*clientsBarBar.BarRequest)(body.Request)
+	if in.Request != nil {
+		out.Request = &clientsBarBar.BarRequest{}
+		out.Request.StringField = string(in.Request.StringField)
+		out.Request.BoolField = bool(in.Request.BoolField)
+	} else {
+		out.Request = nil
+	}
 
-	return clientRequest
+	return out
 }
 
 func convertNormalBarException(
@@ -155,8 +161,12 @@ func convertNormalBarException(
 	return serverError
 }
 
-func convertNormalClientResponse(body *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBarBar.BarResponse)(body)
-	return downstreamResponse
+func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+	out := &endpointsBarBar.BarResponse{}
+
+	out.StringField = string(in.StringField)
+	out.IntWithRange = int32(in.IntWithRange)
+	out.IntWithoutRange = int32(in.IntWithoutRange)
+
+	return out
 }
