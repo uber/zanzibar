@@ -68,10 +68,10 @@ type {{$clientName}} struct {
 		args *{{.RequestType}},
 		{{end -}}
 	) ({{- if ne .ResponseType "" -}} *{{.ResponseType}}, {{- end -}}map[string]string, error) {
-		var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 		{{if eq .RequestType "" -}}
-			args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 		success, respHeaders, err := c.client.Call(
 			ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
@@ -98,7 +98,7 @@ type {{$clientName}} struct {
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
-			resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+			resp, err := {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			return resp, respHeaders, err
 		{{end -}}
 	}

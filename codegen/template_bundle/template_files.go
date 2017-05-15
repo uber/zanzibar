@@ -1260,10 +1260,10 @@ type {{$clientName}} struct {
 		args *{{.RequestType}},
 		{{end -}}
 	) ({{- if ne .ResponseType "" -}} *{{.ResponseType}}, {{- end -}}map[string]string, error) {
-		var result {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Result
+		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 		{{if eq .RequestType "" -}}
-			args := &{{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Args{}
+			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 		success, respHeaders, err := c.client.Call(
 			ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
@@ -1290,7 +1290,7 @@ type {{$clientName}} struct {
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
-			resp, err := {{.GenCodePkgName}}.{{$svc.Name}}_{{.Name}}_Helper.UnwrapResponse(&result)
+			resp, err := {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			return resp, respHeaders, err
 		{{end -}}
 	}
@@ -1308,7 +1308,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3107, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1362,8 +1362,8 @@ func (h *{{$handler}}) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req {{$genCodePkg}}.{{$svc.Name}}_{{.Name}}_Args
-	var res {{$genCodePkg}}.{{$svc.Name}}_{{.Name}}_Result
+	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
+	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
@@ -1422,7 +1422,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2780, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2804, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1482,7 +1482,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{- end}}
 
-	var res {{$genCodePkg}}.{{.ThriftService}}_{{.Name}}_Result
+	var res {{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result
 
 	{{if ne .RequestType "" -}}
 	var req {{.RequestType}}
@@ -1559,7 +1559,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3168, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3180, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

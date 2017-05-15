@@ -53,7 +53,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{- end}}
 
-	var res {{$genCodePkg}}.{{.ThriftService}}_{{.Name}}_Result
+	var res {{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result
 
 	{{if ne .RequestType "" -}}
 	var req {{.RequestType}}

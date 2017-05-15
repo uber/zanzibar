@@ -47,8 +47,8 @@ func (h *{{$handler}}) Handle(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req {{$genCodePkg}}.{{$svc.Name}}_{{.Name}}_Args
-	var res {{$genCodePkg}}.{{$svc.Name}}_{{.Name}}_Result
+	var req {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Args
+	var res {{$genCodePkg}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
