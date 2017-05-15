@@ -5,9 +5,7 @@ import:
 - package: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - package: github.com/mailru/easyjson
-  version: c7e8f2b687054e448f35ff2693bd298c1a2f3a10
-  repo: https://github.com/Raynos/easyjson.git
-  vcs: git
+  version: dffba8d13bbd998df17d8557570cdea0624b9d1d
   subpackages:
   - buffer
   - jlexer
@@ -44,6 +42,6 @@ import:
 - package: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 -testImport:
- - package: github.com/stretchr/testify		
- -  subpackages:		
+ - package: github.com/stretchr/testify
+ -  subpackages:
  -  - assert
