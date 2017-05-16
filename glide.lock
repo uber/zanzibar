@@ -1,5 +1,5 @@
-hash: a28318f0b34bba3d32c1641ffefe60232e934cc11545f54b7804dde4a523c4d6
-updated: 2017-05-05T14:32:58.945623178-07:00
+hash: 9c89b932f9af1747c2e0fa0757019541e3260c81e87ca7ca2a8747cbe77e436e
+updated: 2017-05-15T16:04:13.094984243-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,15 +22,13 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 0648c820cd4e564706597268ae2d2c7d9e6900c6
+  version: 460c7bb0abd6e927f2767cadc91aa6ef776a98b4
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/mailru/easyjson
-  version: c7e8f2b687054e448f35ff2693bd298c1a2f3a10
-  repo: https://github.com/Raynos/easyjson.git
-  vcs: git
+  version: dffba8d13bbd998df17d8557570cdea0624b9d1d
   subpackages:
   - bootstrap
   - buffer
@@ -52,7 +50,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
   - assert
   - require
@@ -113,7 +111,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: feeb485667d1fdabe727840fe00adc22431bc86e
+  version: 34057069f4ab13dc4433c68d368737ebeafcccdc
   subpackages:
   - context
 testImports: []
