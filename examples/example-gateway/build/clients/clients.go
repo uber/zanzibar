@@ -28,6 +28,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
+	quux "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	"github.com/uber/zanzibar/runtime"
 )
@@ -35,6 +36,7 @@ import (
 // Clients datastructure that holds all the generated clients
 // This should only hold clients generate from specs
 type Clients struct {
+	Quux      *quux.Quux
 	Bar       *barClient.BarClient
 	Baz       *bazClient.BazClient
 	Contacts  *contactsClient.ContactsClient
@@ -46,6 +48,7 @@ func CreateClients(
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Clients{
+		Quux:      quux.NewClient(gateway),
 		Bar:       barClient.NewClient(gateway),
 		Baz:       bazClient.NewClient(gateway),
 		Contacts:  contactsClient.NewClient(gateway),
