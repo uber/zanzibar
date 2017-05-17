@@ -134,14 +134,14 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("init", module.Class{
+	if err := system.RegisterClass("clients", module.Class{
 		Directory:         "clients",
 		ClassType:         module.SingleModule,
 		ClassDependencies: []string{},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering clientInit class")
 	}
-	if err := system.RegisterClassType("init", "clients", &ClientsInitGenerator{
+	if err := system.RegisterClassType("clients", "init", &ClientsInitGenerator{
 		templates:     tmpl,
 		clientSpecs:   clientSpecs,
 		packageHelper: h,
