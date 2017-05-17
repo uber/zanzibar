@@ -134,6 +134,16 @@ func NewDefaultModuleSystem(
 		)
 	}
 
+	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
+		genSpecs:      clientSpecs,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering custom client class type",
+		)
+	}
+
 	if err := system.RegisterClass("clients", module.Class{
 		Directory:         "clients",
 		ClassType:         module.SingleModule,
@@ -406,6 +416,51 @@ func (g *TChannelClientGenerator) Generate(
 		clientFilePath: client,
 		serverFilePath: server,
 	}, nil
+}
+
+/*
+ * Custom Client Generator
+ */
+
+// CustomClientGenerator gathers the custom client spec for future use in ClientsInitGenerator
+type CustomClientGenerator struct {
+	packageHelper *PackageHelper
+	genSpecs      map[string]*ClientSpec
+}
+
+// Generate does NOT generate any file, it collects the client spec
+func (g *CustomClientGenerator) Generate(
+	instance *module.Instance,
+) (map[string][]byte, error) {
+	// Parse the client config from the endpoint JSON file
+	clientConfig, err := readClientConfig(instance.JSONFileRaw)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading custom client %q JSON config",
+			instance.InstanceName,
+		)
+	}
+
+	clientSpec, err := NewCustomClientSpec(
+		filepath.Join(
+			instance.BaseDirectory,
+			instance.Directory,
+			instance.JSONFileName,
+		),
+		clientConfig,
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error initializing CustomClientSpec for %q",
+			instance.InstanceName,
+		)
+	}
+
+	g.genSpecs[clientSpec.JSONFile] = clientSpec
+	return nil, nil
 }
 
 /*
