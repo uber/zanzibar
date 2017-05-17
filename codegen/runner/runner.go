@@ -107,11 +107,7 @@ func main() {
 	)
 	checkError(err, "Failed to generate module system components.")
 
-	// TODO: Module system should generate an index for clients
-	fmt.Printf("Generating client index code for gateway \n")
-	err = gatewaySpec.GenerateClientsInit()
-	checkError(err, "Failed to generate client index.")
-
+	// TODO: Module system should generate an index for endpoints
 	fmt.Printf("Generating endpoint index code for gateway \n")
 	err = gatewaySpec.GenerateEndpointRegisterFile()
 	checkError(err, "Failed to generate endpoint index file.")

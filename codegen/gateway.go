@@ -68,10 +68,14 @@ type ClientSpec struct {
 	ModuleSpec *ModuleSpec
 	// JSONFile for this spec
 	JSONFile string
-	// ClientType, currently only "http" and "custom" are supported
+	// ClientType, currently "http", "tchannel" and "custom" are supported
 	ClientType string
 	// If "custom" then where to import custom code from
 	CustomImportPath string
+	// If "custom" then what the client type (in Go) in the custom package
+	CustomClientType string
+	// If "custom" then what the package name (in Go) the client package has
+	CustomPackageName string
 	// GoFileName, the absolute path where the generate client is
 	GoFileName string
 	// GoPackageName is the golang package name for the client
@@ -156,18 +160,30 @@ func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
 func NewCustomClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	customImportPath, ok := clientConfig.Config["customImportPath"]
-	if !ok {
-		return nil, errors.Errorf(
-			"client config (%s) must have customImportPath field for type custom", jsonFile,
-		)
+	fields := []string{
+		"customImportPath",
+		"customClientType",
+		"customPackageName",
+		"clientName",
 	}
 
-	clientSpec, err := newClientSpec(jsonFile, clientConfig, false, h)
-	if err != nil {
-		return nil, err
+	for _, f := range fields {
+		if _, ok := clientConfig.Config[f]; !ok {
+			return nil, errors.Errorf(
+				"client config %q must have %q field for type custom", jsonFile, f,
+			)
+		}
 	}
-	clientSpec.CustomImportPath = customImportPath
+
+	clientSpec := &ClientSpec{
+		JSONFile:          jsonFile,
+		ClientType:        clientConfig.Type,
+		ClientID:          clientConfig.Config["clientId"],
+		ClientName:        clientConfig.Config["clientName"],
+		CustomImportPath:  clientConfig.Config["customImportPath"],
+		CustomClientType:  clientConfig.Config["customClientType"],
+		CustomPackageName: clientConfig.Config["customPackageName"],
+	}
 
 	return clientSpec, nil
 }
@@ -901,14 +917,6 @@ func NewGatewaySpec(
 	}
 
 	return spec, nil
-}
-
-// GenerateClientsInit will generate the clients init code for the gateway
-func (gateway *GatewaySpec) GenerateClientsInit() error {
-	_, err := gateway.Template.GenerateClientsInitFile(
-		gateway.ClientModules, gateway.PackageHelper,
-	)
-	return err
 }
 
 // GenerateEndpointRegisterFile will generate endpoints registration for the gateway

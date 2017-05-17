@@ -96,11 +96,6 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	err = gateway.GenerateClientsInit()
-	if !assert.NoError(t, err, "failed to create clients init %s", err) {
-		return
-	}
-
 	cmpGoldenFile(
 		t,
 		filepath.Join(tmpDir, "clients", "bar", "bar.go"),

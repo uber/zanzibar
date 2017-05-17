@@ -98,7 +98,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 
 	// Validate the module class directory name is unique
 	for moduleClassName, moduleClass := range moduleSystem.classes {
-		if class.Directory == moduleClass.Directory {
+		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
 			return errors.Errorf(
 				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
 				name,

@@ -134,6 +134,24 @@ func NewDefaultModuleSystem(
 		)
 	}
 
+	if err := system.RegisterClass("init", module.Class{
+		Directory:         "clients",
+		ClassType:         module.SingleModule,
+		ClassDependencies: []string{},
+	}); err != nil {
+		return nil, errors.Wrapf(err, "Error registering clientInit class")
+	}
+	if err := system.RegisterClassType("init", "clients", &ClientsInitGenerator{
+		templates:     tmpl,
+		clientSpecs:   clientSpecs,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering clientInit class type",
+		)
+	}
+
 	if err := system.RegisterClass("service", module.Class{
 		Directory:         "services",
 		ClassType:         module.MultiModule,
@@ -387,6 +405,96 @@ func (g *TChannelClientGenerator) Generate(
 	return map[string][]byte{
 		clientFilePath: client,
 		serverFilePath: server,
+	}, nil
+}
+
+/*
+ * Clients Init Generator
+ */
+
+// ClientsInitGenerator generates a clients initialization file
+type ClientsInitGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+	clientSpecs   map[string]*ClientSpec
+}
+
+// Generate returns the client init file as a map of relative file
+// path (relative to the target build directory) to file bytes.
+func (g *ClientsInitGenerator) Generate(
+	instance *module.Instance,
+) (map[string][]byte, error) {
+	clients := []*ClientSpec{}
+	for _, v := range g.clientSpecs {
+		clients = append(clients, v)
+	}
+	sort.Sort(sortByClientName(clients))
+
+	includedPkgs := []GoPackageImport{}
+	for i := 0; i < len(clients); i++ {
+		if clients[i].ClientType == "custom" {
+			includedPkgs = append(includedPkgs, GoPackageImport{
+				PackageName: clients[i].CustomImportPath,
+				AliasName:   clients[i].CustomPackageName,
+			})
+			continue
+		}
+
+		if len(clients[i].ModuleSpec.Services) != 0 {
+			includedPkgs = append(includedPkgs, GoPackageImport{
+				PackageName: clients[i].GoPackageName,
+				AliasName:   "",
+			},
+			)
+		}
+	}
+
+	clientInfo := []ClientInfoMeta{}
+	for i := 0; i < len(clients); i++ {
+		if clients[i].ClientType == "custom" {
+			clientInfo = append(clientInfo, ClientInfoMeta{
+				FieldName:   strings.Title(clients[i].ClientName),
+				PackageName: clients[i].CustomPackageName,
+				TypeName:    clients[i].CustomClientType,
+			})
+			continue
+		}
+
+		module := clients[i].ModuleSpec
+		if len(module.Services) == 0 {
+			continue
+		}
+
+		if len(module.Services) != 1 {
+			return nil, errors.Errorf(
+				"Cannot import client with multiple services: %s",
+				module.PackageName,
+			)
+		}
+
+		clientInfo = append(clientInfo, ClientInfoMeta{
+			FieldName:   strings.Title(clients[i].ClientName),
+			PackageName: module.PackageName,
+			TypeName:    strings.Title(clients[i].ClientName) + "Client",
+		})
+	}
+
+	meta := &ClientsInitFilesMeta{
+		IncludedPackages: includedPkgs,
+		ClientInfo:       clientInfo,
+	}
+
+	clientsInit, err := g.templates.execTemplate(
+		"init_clients.tmpl",
+		meta,
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error executing client init template")
+	}
+
+	return map[string][]byte{
+		"clients.go": clientsInit,
 	}, nil
 }
 
