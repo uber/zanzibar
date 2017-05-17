@@ -47,6 +47,12 @@ var mandatoryClientFields = []string{
 	"clientName",
 	"serviceName",
 }
+var mandatoryCustomClientFields = []string{
+	"customImportPath",
+	"customClientType",
+	"customPackageName",
+	"clientName",
+}
 var mandatoryEndpointFields = []string{
 	"endpointType",
 	"endpointId",
@@ -160,14 +166,7 @@ func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
 func NewCustomClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	fields := []string{
-		"customImportPath",
-		"customClientType",
-		"customPackageName",
-		"clientName",
-	}
-
-	for _, f := range fields {
+	for _, f := range mandatoryCustomClientFields {
 		if _, ok := clientConfig.Config[f]; !ok {
 			return nil, errors.Errorf(
 				"client config %q must have %q field for type custom", jsonFile, f,
