@@ -98,7 +98,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 
 	// Validate the module class directory name is unique
 	for moduleClassName, moduleClass := range moduleSystem.classes {
-		if class.Directory == moduleClass.Directory {
+		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
 			return errors.Errorf(
 				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
 				name,
@@ -325,7 +325,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if generator == nil {
 				fmt.Printf(
-					"Skipping generation of \"%s\" \"%s\" class of type \"%s\" "+
+					"Skipping generation of %q %q class of type %q "+
 						"as generator is not defined\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
@@ -338,7 +338,7 @@ func (moduleSystem *System) GenerateBuild(
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating \"%s\" \"%s\" class of type \"%s\"\n%s\n",
+					"Error generating %q %q class of type %q\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
 					classInstance.ClassType,
@@ -352,7 +352,7 @@ func (moduleSystem *System) GenerateBuild(
 
 				if strings.HasPrefix(filePath, "..") {
 					return errors.Errorf(
-						"Module \"%s\" generated a file outside the build dir \"%s\"",
+						"Module %q generated a file outside the build dir %q",
 						classInstance.Directory,
 						filePath,
 					)
@@ -366,7 +366,7 @@ func (moduleSystem *System) GenerateBuild(
 				if err := writeFile(resolvedPath, content); err != nil {
 					return errors.Wrapf(
 						err,
-						"Error writing to file \"%s\"",
+						"Error writing to file %q",
 						resolvedPath,
 					)
 				}
@@ -394,7 +394,7 @@ func formatGoFile(filePath string) error {
 	gofmtCmd.Stderr = os.Stderr
 
 	if err := gofmtCmd.Run(); err != nil {
-		return errors.Wrapf(err, "failed to gofmt file: \"%s\"", filePath)
+		return errors.Wrapf(err, "failed to gofmt file: %q", filePath)
 	}
 
 	goimportsCmd := exec.Command("goimports", "-w", "-e", filePath)
