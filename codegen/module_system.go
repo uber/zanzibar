@@ -507,10 +507,18 @@ func (g *ClientsInitGenerator) Generate(
 	clientInfo := []ClientInfoMeta{}
 	for i := 0; i < len(clients); i++ {
 		if clients[i].ClientType == "custom" {
+			isPointerType := false
+			typeName := clients[i].CustomClientType
+			if strings.HasPrefix(typeName, "*") {
+				isPointerType = true
+				typeName = strings.TrimLeft(typeName, "*")
+			}
+
 			clientInfo = append(clientInfo, ClientInfoMeta{
-				FieldName:   strings.Title(clients[i].ClientName),
-				PackageName: clients[i].CustomPackageName,
-				TypeName:    clients[i].CustomClientType,
+				IsPointerType: isPointerType,
+				FieldName:     strings.Title(clients[i].ClientName),
+				PackageName:   clients[i].CustomPackageName,
+				TypeName:      typeName,
 			})
 			continue
 		}
@@ -528,9 +536,10 @@ func (g *ClientsInitGenerator) Generate(
 		}
 
 		clientInfo = append(clientInfo, ClientInfoMeta{
-			FieldName:   strings.Title(clients[i].ClientName),
-			PackageName: module.PackageName,
-			TypeName:    strings.Title(clients[i].ClientName) + "Client",
+			IsPointerType: true,
+			FieldName:     strings.Title(clients[i].ClientName),
+			PackageName:   module.PackageName,
+			TypeName:      strings.Title(clients[i].ClientName) + "Client",
 		})
 	}
 

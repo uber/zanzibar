@@ -13,7 +13,7 @@ import (
 // This should only hold clients generate from specs
 type Clients struct {
 	{{range $idx, $clientInfo := .ClientInfo -}}
-	{{$clientInfo.FieldName}} *{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
+	{{$clientInfo.FieldName}} {{if $clientInfo.IsPointerType}}*{{end}}{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
 	{{end}}
 }
 
