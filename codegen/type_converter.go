@@ -152,8 +152,6 @@ func (c *TypeConverter) convertFields(
 				)
 			}
 
-			// TODO: ADD NIL CHECK !!!
-
 			line := "if " + postfix + " != nil {"
 			c.Lines = append(c.Lines, line)
 
