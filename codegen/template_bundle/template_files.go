@@ -66,6 +66,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"{{.GatewayPackageName}}/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -172,6 +173,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 {{end -}}
 
 {{- if .Method.Downstream }}
+{{- $method := .Method -}}
 {{- with .Method -}}
 {{- $methodName := title .Name }}
 {{- $clientPackage := .Downstream.PackageName -}}
@@ -306,16 +308,14 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(body *{{.RequestType}}) *{{$clientReqType}} {
-	clientRequest := &{{$clientReqType}}{}
+func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
+	out := &{{$clientReqType}}{}
 
-	{{ range $key, $value := .RequestFieldMap -}}
-	{{ range $name, $type := $.Method.RequestTypeMap -}} {{if eq $name $key -}}
-	clientRequest.{{title $key }} = {{ $type }}(body.{{title $value }})
-	{{ end -}}
-	{{ end -}}
+	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
+	{{$line}}
 	{{ end }}
-	return clientRequest
+
+	return out
 }
 {{end -}}
 
@@ -333,10 +333,14 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
-func convert{{title .Name}}ClientResponse(body *{{$clientResType}}) *{{.ResponseType}} {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*{{.ResponseType}})(body)
-	return downstreamResponse
+func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
+	out := &{{.ResponseType}}{}
+
+	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
+	{{$line}}
+	{{ end }}
+
+	return out
 }
 {{end -}}
 
@@ -354,7 +358,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -77,10 +77,12 @@ type MethodSpec struct {
 	DownstreamService string
 	// The downstream method spec for the endpoint
 	DownstreamMethod *MethodSpec
-	// A map from upstream to downstream field names in the requests.
-	RequestFieldMap map[string]string
-	// A map from upstream to field names to downstream types in the requests.
-	RequestTypeMap map[string]string
+
+	// Statements for converting request types
+	ConvertRequestGoStatements []string
+
+	// Statements for converting response types
+	ConvertResponseGoStatements []string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -444,52 +446,52 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
-func (ms *MethodSpec) setRequestFieldMap(
+func (ms *MethodSpec) setTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
 	h *PackageHelper,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-	ms.RequestFieldMap = map[string]string{}
-	ms.RequestTypeMap = map[string]string{}
 
+	// Add type checking and conversion, custom mapping
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	for i := 0; i < len(structType); i++ {
-		field := structType[i]
-		// Add type checking and conversion, custom mapping
-		downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
-		var downstreamField *compile.FieldSpec
-		for j := 0; j < len(downstreamStructType); j++ {
-			if downstreamStructType[j].Name == field.Name {
-				downstreamField = downstreamStructType[j]
-				break
-			}
-		}
-
-		if downstreamField == nil {
-			return errors.Errorf(
-				"cannot map by name for the field %s to type: %s",
-				field.Name, downstreamSpec.Name,
-			)
-		}
-		ms.RequestFieldMap[field.Name] = field.Name
-
-		// Override thrift type names to avoid naming collisions between endpoint
-		// and client types.
-		switch field.Type.(type) {
-		case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
-			*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
-			ms.RequestTypeMap[field.Name] = field.Type.ThriftName()
-		default:
-			pkgName, err := h.TypePackageName(downstreamField.Type.ThriftFile())
-			if err != nil {
-				return err
-			}
-			ms.RequestTypeMap[field.Name] =
-				"(*" + pkgName + "." + field.Type.ThriftName() + ")"
-		}
+	typeConverter := &TypeConverter{
+		Lines:  []string{},
+		Helper: h,
 	}
+
+	err := typeConverter.GenStructConverter(structType, downstreamStructType)
+	if err != nil {
+		return err
+	}
+
+	ms.ConvertRequestGoStatements = typeConverter.Lines
+
+	// TODO: support non-struct return types
+	respType := funcSpec.ResultSpec.ReturnType
+	downstreamRespType := funcSpec.ResultSpec.ReturnType
+
+	if respType == nil || downstreamRespType == nil {
+		return nil
+	}
+
+	respFields := respType.(*compile.StructSpec).Fields
+	downstreamRespFields := downstreamRespType.(*compile.StructSpec).Fields
+
+	respConverter := &TypeConverter{
+		Lines:  []string{},
+		Helper: h,
+	}
+
+	err = respConverter.GenStructConverter(downstreamRespFields, respFields)
+	if err != nil {
+		return err
+	}
+
+	ms.ConvertResponseGoStatements = respConverter.Lines
+
 	return nil
 }
 

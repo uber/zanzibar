@@ -139,13 +139,27 @@ func (w CompareEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertToCompareClientRequest(body *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
-	clientRequest := &clientsBazBaz.SimpleService_Compare_Args{}
+func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
+	out := &clientsBazBaz.SimpleService_Compare_Args{}
 
-	clientRequest.Arg1 = (*clientsBazBaz.BazRequest)(body.Arg1)
-	clientRequest.Arg2 = (*clientsBazBaz.BazRequest)(body.Arg2)
+	if in.Arg1 != nil {
+		out.Arg1 = &clientsBazBaz.BazRequest{}
+		out.Arg1.B1 = bool(in.Arg1.B1)
+		out.Arg1.S2 = string(in.Arg1.S2)
+		out.Arg1.I3 = int32(in.Arg1.I3)
+	} else {
+		out.Arg1 = nil
+	}
+	if in.Arg2 != nil {
+		out.Arg2 = &clientsBazBaz.BazRequest{}
+		out.Arg2.B1 = bool(in.Arg2.B1)
+		out.Arg2.S2 = string(in.Arg2.S2)
+		out.Arg2.I3 = int32(in.Arg2.I3)
+	} else {
+		out.Arg2 = nil
+	}
 
-	return clientRequest
+	return out
 }
 
 func convertCompareAuthErr(
@@ -156,8 +170,10 @@ func convertCompareAuthErr(
 	return serverError
 }
 
-func convertCompareClientResponse(body *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
-	// TODO: Add response fields mapping here.
-	downstreamResponse := (*endpointsBazBaz.BazResponse)(body)
-	return downstreamResponse
+func convertCompareClientResponse(in *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+	out := &endpointsBazBaz.BazResponse{}
+
+	out.Message = string(in.Message)
+
+	return out
 }

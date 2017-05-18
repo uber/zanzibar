@@ -186,7 +186,8 @@ func (ms *ModuleSpec) SetDownstream(
 		return err
 	}
 
-	// If this is an endpoint then a downstream will be defined. If if it a client it will not be.
+	// If this is an endpoint then a downstream will be defined.
+	// If if it a client it will not be.
 	if method.Downstream != nil {
 		var downstreamMethod *MethodSpec
 
@@ -202,7 +203,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err := method.setRequestFieldMap(funcSpec, downstreamSpec, h)
+		err := method.setTypeConverters(funcSpec, downstreamSpec, h)
 		if err != nil {
 			return err
 		}
