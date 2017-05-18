@@ -79,10 +79,10 @@ type MethodSpec struct {
 	DownstreamMethod *MethodSpec
 
 	// Statements for converting request types
-	ConvertRequestLines []string
+	ConvertRequestGoStatements []string
 
 	// Statements for converting response types
-	ConvertResponseLines []string
+	ConvertResponseGoStatements []string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -467,7 +467,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertRequestLines = typeConverter.Lines
+	ms.ConvertRequestGoStatements = typeConverter.Lines
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
@@ -490,7 +490,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertResponseLines = respConverter.Lines
+	ms.ConvertResponseGoStatements = respConverter.Lines
 
 	return nil
 }

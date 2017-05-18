@@ -253,7 +253,7 @@ func (w {{$workflow}}) Handle(
 func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
 	out := &{{$clientReqType}}{}
 
-	{{ range $key, $line := $method.ConvertRequestLines -}}
+	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
 	{{$line}}
 	{{ end }}
 
@@ -278,7 +278,7 @@ func convert{{$methodName}}{{title $cException.Name}}(
 func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
 	out := &{{.ResponseType}}{}
 
-	{{ range $key, $line := $method.ConvertResponseLines -}}
+	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
 	{{$line}}
 	{{ end }}
 
