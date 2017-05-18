@@ -219,6 +219,54 @@ func (moduleSystem *System) ResolveModules(
 		}
 
 		resolvedModules[className] = classInstances
+
+		// Resolve the class dependencies
+		for _, classInstance := range classInstances {
+			for _, classDependency := range classInstance.Dependencies {
+				moduleClassInstances, ok :=
+					resolvedModules[classDependency.ClassName]
+
+				if !ok {
+					return nil, errors.Errorf(
+						"Invalid class name \"%q\" in dependencies for %s %s",
+						classDependency.ClassName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				// TODO: We don't want to linear scan here
+				var dependencyInstance *Instance
+
+				for _, instance := range moduleClassInstances {
+					if instance.InstanceName == classDependency.InstanceName {
+						dependencyInstance = instance
+						break
+					}
+				}
+
+				if dependencyInstance == nil {
+					return nil, errors.Errorf(
+						"Unknown %q class depdendency \"%q\""+
+							"in dependencies for %s %s",
+						classDependency.ClassName,
+						classDependency.InstanceName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				resolvedDependencies, ok :=
+					classInstance.ResolvedDependencies[classDependency.ClassName]
+
+				if !ok {
+					resolvedDependencies = []*Instance{}
+				}
+
+				classInstance.ResolvedDependencies[classDependency.ClassName] =
+					append(resolvedDependencies, dependencyInstance)
+			}
+		}
 	}
 
 	return resolvedModules, nil
@@ -584,7 +632,7 @@ type Instance struct {
 	Dependencies []Dependency
 	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
-	ResolvedDependencies []Dependency
+	ResolvedDependencies map[string][]*Instance
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
