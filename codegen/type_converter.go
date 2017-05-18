@@ -42,7 +42,7 @@ type PackageNameResolver interface {
 	TypePackageName(thriftFile string) (string, error)
 }
 
-func (c *TypeConverter) convertFields(
+func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
 	fromFields []*compile.FieldSpec,
@@ -159,7 +159,7 @@ func (c *TypeConverter) convertFields(
 			c.Lines = append(c.Lines, line)
 
 			subFromFields := fromFieldType.Fields
-			err = c.convertFields(
+			err = c.genStructConverter(
 				strings.Title(toField.Name)+".",
 				"	",
 				subFromFields,
@@ -196,13 +196,13 @@ func (c *TypeConverter) convertFields(
 	return nil
 }
 
-// ConvertFields will add lines to the TypeConverter for mapping
+// GenStructConverter will add lines to the TypeConverter for mapping
 // from one go struct to another based on two thriftrw.FieldGroups
-func (c *TypeConverter) ConvertFields(
+func (c *TypeConverter) GenStructConverter(
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 ) error {
-	err := c.convertFields("", "", fromFields, toFields)
+	err := c.genStructConverter("", "", fromFields, toFields)
 	if err != nil {
 		return err
 	}
