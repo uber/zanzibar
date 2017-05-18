@@ -32,13 +32,19 @@ import (
 // operates on two variables, "in" and "out" and that both are a go struct.
 type TypeConverter struct {
 	Lines  []string
-	Helper *PackageHelper
+	Helper PackageNameResolver
 }
 
-// ConvertFields will add lines to the TypeConverter for mapping
-// from one go struct to another based on two thriftrw.FieldGroups
-func (c *TypeConverter) ConvertFields(
+// PackageNameResolver interface allows for resolving what the
+// package name for a thrift file is. This depends on where the
+// thrift-based structs are generated.
+type PackageNameResolver interface {
+	TypePackageName(thriftFile string) (string, error)
+}
+
+func (c *TypeConverter) convertFields(
 	keyPrefix string,
+	indent string,
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 ) error {
@@ -60,7 +66,7 @@ func (c *TypeConverter) ConvertFields(
 			)
 		}
 
-		prefix := "out." + keyPrefix + strings.Title(toField.Name)
+		prefix := indent + "out." + keyPrefix + strings.Title(toField.Name)
 		postfix := "in." + keyPrefix + strings.Title(fromField.Name)
 
 		// Override thrift type names to avoid naming collisions between endpoint
@@ -156,8 +162,9 @@ func (c *TypeConverter) ConvertFields(
 			c.Lines = append(c.Lines, line)
 
 			subFromFields := fromFieldType.Fields
-			err = c.ConvertFields(
-				"	"+strings.Title(toField.Name)+".",
+			err = c.convertFields(
+				strings.Title(toField.Name)+".",
+				"	",
 				subFromFields,
 				subToFields,
 			)
@@ -187,6 +194,20 @@ func (c *TypeConverter) ConvertFields(
 			// line := prefix + "(*" + typeName + ")" + postfix
 			// c.Lines = append(c.Lines, line)
 		}
+	}
+
+	return nil
+}
+
+// ConvertFields will add lines to the TypeConverter for mapping
+// from one go struct to another based on two thriftrw.FieldGroups
+func (c *TypeConverter) ConvertFields(
+	fromFields []*compile.FieldSpec,
+	toFields []*compile.FieldSpec,
+) error {
+	err := c.convertFields("", "", fromFields, toFields)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -462,7 +462,7 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper: h,
 	}
 
-	err := typeConverter.ConvertFields("", structType, downstreamStructType)
+	err := typeConverter.ConvertFields(structType, downstreamStructType)
 	if err != nil {
 		return err
 	}
@@ -485,7 +485,7 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper: h,
 	}
 
-	err = respConverter.ConvertFields("", downstreamRespFields, respFields)
+	err = respConverter.ConvertFields(downstreamRespFields, respFields)
 	if err != nil {
 		return err
 	}
