@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -102,6 +103,24 @@ func (c *TypeConverter) genStructConverter(
 				line = prefix + " = int32(" + postfix + ")"
 			} else {
 				line = prefix + " = (*int32)(" + postfix + ")"
+			}
+			c.Lines = append(c.Lines, line)
+		case *compile.EnumSpec:
+			pkgName, err := c.Helper.TypePackageName(toField.Type.ThriftFile())
+			if err != nil {
+				return errors.Wrapf(
+					err,
+					"could not lookup struct when building converter for %s :",
+					toField.Name,
+				)
+			}
+			typeName := pkgName + "." + toField.Type.ThriftName()
+
+			var line string
+			if toField.Required {
+				line = prefix + " = " + typeName + "(" + postfix + ")"
+			} else {
+				line = prefix + " = (*" + typeName + ")(" + postfix + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I64Spec:
