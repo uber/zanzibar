@@ -21,12 +21,14 @@
 package module
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -150,7 +152,9 @@ func (moduleSystem *System) RegisterClassType(
 // walked, and a module instance is initialized for each identified module in
 // the target directory.
 func (moduleSystem *System) ResolveModules(
+	packageRoot string,
 	baseDirectory string,
+	targetGenDir string,
 ) (map[string][]*Instance, error) {
 
 	resolvedModules := map[string][]*Instance{}
@@ -162,9 +166,11 @@ func (moduleSystem *System) ResolveModules(
 		classInstances := []*Instance{}
 
 		if class.ClassType == SingleModule {
-			instance, instanceErr := readInstance(
-				className,
+			instance, instanceErr := moduleSystem.readInstance(
+				packageRoot,
 				baseDirectory,
+				targetGenDir,
+				className,
 				class.Directory,
 			)
 			if instanceErr != nil {
@@ -192,9 +198,11 @@ func (moduleSystem *System) ResolveModules(
 
 			for _, file := range files {
 				if file.IsDir() {
-					instance, instanceErr := readInstance(
-						className,
+					instance, instanceErr := moduleSystem.readInstance(
+						packageRoot,
 						baseDirectory,
+						targetGenDir,
+						className,
 						filepath.Join(class.Directory, file.Name()),
 					)
 					if instanceErr != nil {
@@ -216,9 +224,11 @@ func (moduleSystem *System) ResolveModules(
 	return resolvedModules, nil
 }
 
-func readInstance(
-	className string,
+func (moduleSystem *System) readInstance(
+	packageRoot string,
 	baseDirectory string,
+	targetGenDir string,
+	className string,
 	instanceDirectory string,
 ) (*Instance, error) {
 
@@ -242,15 +252,39 @@ func readInstance(
 		)
 	}
 
+	dependencies := readDeps(jsonConfig.Dependencies)
+	packageInfo, err := readPackageInfo(
+		packageRoot,
+		baseDirectory,
+		targetGenDir,
+		className,
+		instanceDirectory,
+		&jsonConfig,
+		dependencies,
+	)
+
+	if err != nil {
+		// TODO: We should accumulate errors and list them all here
+		// Expected $class-config.json to exist in ...
+		return nil, errors.Wrapf(
+			err,
+			"Error reading class package info for %s %s",
+			className,
+			jsonConfig.Name,
+		)
+	}
+
 	return &Instance{
-		ClassName:     className,
-		ClassType:     jsonConfig.Type,
-		BaseDirectory: baseDirectory,
-		Directory:     instanceDirectory,
-		InstanceName:  jsonConfig.Name,
-		Dependencies:  readDeps(jsonConfig.Dependencies),
-		JSONFileName:  jsonFileName,
-		JSONFileRaw:   raw,
+		PackageInfo:          packageInfo,
+		ClassName:            className,
+		ClassType:            jsonConfig.Type,
+		BaseDirectory:        baseDirectory,
+		Directory:            instanceDirectory,
+		InstanceName:         jsonConfig.Name,
+		Dependencies:         dependencies,
+		ResolvedDependencies: map[string][]*Instance{},
+		JSONFileName:         jsonFileName,
+		JSONFileRaw:          raw,
 	}, nil
 }
 
@@ -277,14 +311,62 @@ func readDeps(jsonDeps map[string][]string) []Dependency {
 	return deps
 }
 
+func readPackageInfo(
+	packageRoot string,
+	baseDirectory string,
+	targetGenDir string,
+	className string,
+	instanceDirectory string,
+	jsonConfig *JSONClassConfig,
+	dependencies []Dependency,
+) (*PackageInfo, error) {
+	qualifiedClassName := strings.Title(camelCase(className))
+	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
+	defaultAlias := camelCase(strings.ToLower(qualifiedInstanceName)) +
+		qualifiedClassName
+
+	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error computing generated import string for %s",
+			targetGenDir,
+		)
+	}
+
+	return &PackageInfo{
+		PackageName:           defaultAlias,
+		PackageAlias:          defaultAlias + "Static",
+		GeneratedPackageAlias: defaultAlias + "Generated",
+		PackagePath: filepath.Join(
+			packageRoot,
+			instanceDirectory,
+		),
+		ExportName: qualifiedInstanceName,
+		ExportType: qualifiedInstanceName + qualifiedClassName,
+		GeneratedPackagePath: filepath.Join(
+			packageRoot,
+			relativeGeneratedPath,
+			instanceDirectory,
+		),
+		IsExportGenerated: jsonConfig.IsExportGenerated == nil ||
+			*jsonConfig.IsExportGenerated,
+	}, nil
+}
+
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory
 func (moduleSystem *System) GenerateBuild(
+	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
 ) error {
-	resolvedModules, err := moduleSystem.ResolveModules(baseDirectory)
+	resolvedModules, err := moduleSystem.ResolveModules(
+		packageRoot,
+		baseDirectory,
+		targetGenDir,
+	)
 
 	if err != nil {
 		return err
@@ -427,6 +509,51 @@ type BuildGenerator interface {
 	) (map[string][]byte, error)
 }
 
+// PackageInfo provides information about the package associated with a module
+// instance.
+type PackageInfo struct {
+	// PackageName is the name of the generated package, and should be the same
+	// as the package name used by any custom code in the config directory
+	PackageName string
+	// PackageAlias is the unique import alias for non-generated packages
+	PackageAlias string
+	// GeneratedPackageAlias is the unique import alias for generated packages
+	GeneratedPackageAlias string
+	// PackagePath is the full package path for the non-generated code
+	PackagePath string
+	// GeneratedPackagePath is the full package path for the generated code
+	GeneratedPackagePath string
+	// ExportName is the name that should be used when initializing the module
+	// on a dependency struct.
+	ExportName string
+	// ExportType refers to the type returned by the module initializer
+	ExportType string
+	// IsExportGenerated is true if the export type is provided by the
+	// generated pacakge, otherwise it is assumed that the export type resides
+	// in the non-generated package
+	IsExportGenerated bool
+}
+
+// ImportPackagePath returns the correct package path for the module's exported
+// type, depending on which package (generated or not) the type lives in
+func (info *PackageInfo) ImportPackagePath() string {
+	if info.IsExportGenerated {
+		return info.GeneratedPackagePath
+	}
+
+	return info.PackagePath
+}
+
+// ImportPackageAlias returns the correct package alias for referencing the
+// module's exported type, depending on whether or not the export is generated
+func (info *PackageInfo) ImportPackageAlias() string {
+	if info.IsExportGenerated {
+		return info.GeneratedPackageAlias
+	}
+
+	return info.PackageAlias
+}
+
 // Instance is a configured module on disk inside a module class directory.
 // For example, this could be
 //     ClassName:    "Endpoint,
@@ -435,6 +562,8 @@ type BuildGenerator interface {
 //     Directory:    "clients/health/"
 //     InstanceName: "health",
 type Instance struct {
+	// PackageInfo is the name for the generated module instance
+	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
 	ClassName string
 	// ClassType is the type of the class as defined in the module system
@@ -464,16 +593,19 @@ type Instance struct {
 
 // Dependency defines a module instance required by another module instance
 type Dependency struct {
-	ClassName    string
+	// ClassName is the name of the class as defined in the module system
+	ClassName string
+	// InstanceName is the name of the dependency instance as configu
 	InstanceName string
 }
 
 // JSONClassConfig maps onto a json configuration for a class type
 type JSONClassConfig struct {
-	Name         string              `json:"name"`
-	Config       interface{}         `json:"config"`
-	Dependencies map[string][]string `json:"dependencies"`
-	Type         string              `json:"type"`
+	Name              string              `json:"name"`
+	Config            interface{}         `json:"config"`
+	Dependencies      map[string][]string `json:"dependencies"`
+	Type              string              `json:"type"`
+	IsExportGenerated *bool               `json:"IsExportGenerated"`
 }
 
 // Read will read a class configuration json file into a jsonClassConfig struct
@@ -558,4 +690,19 @@ func writeFile(filePath string, bytes []byte) error {
 
 func closeFile(file *os.File) {
 	_ = file.Close()
+}
+
+var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
+
+func camelCase(src string) string {
+	byteSrc := []byte(src)
+	chunks := camelingRegex.FindAll(byteSrc, -1)
+	for idx, val := range chunks {
+		if idx > 0 {
+			chunks[idx] = bytes.Title(val)
+		} else {
+			chunks[idx][0] = bytes.ToLower(val[0:1])[0]
+		}
+	}
+	return string(bytes.Join(chunks, nil))
 }

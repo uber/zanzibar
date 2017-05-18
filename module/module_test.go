@@ -146,6 +146,7 @@ func TestExampleService(t *testing.T) {
 	// TODO: this doesn't yet generate the build to a dir
 	// TODO: this should return a collection of errors if they occur
 	err = moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 	)
