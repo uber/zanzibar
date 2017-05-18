@@ -936,7 +936,7 @@ import (
 // This should only hold clients generate from specs
 type Clients struct {
 	{{range $idx, $clientInfo := .ClientInfo -}}
-	{{$clientInfo.FieldName}} *{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
+	{{$clientInfo.FieldName}} {{if $clientInfo.IsPointerType}}*{{end}}{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
 	{{end}}
 }
 
@@ -962,7 +962,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 747, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 786, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
