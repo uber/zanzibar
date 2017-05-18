@@ -145,8 +145,7 @@ func (c *TypeConverter) convertFields(
 
 			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
 			if !ok {
-				return errors.Wrapf(
-					err,
+				return errors.Errorf(
 					"could not convert struct fields, "+
 						"incompatible type for %s :",
 					toField.Name,
