@@ -311,7 +311,7 @@ func (w {{$workflow}}) Handle(
 func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
 	out := &{{$clientReqType}}{}
 
-	{{ range $key, $line := $method.ConvertRequestLines -}}
+	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
 	{{$line}}
 	{{ end }}
 
@@ -336,7 +336,7 @@ func convert{{$methodName}}{{title $cException.Name}}(
 func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
 	out := &{{.ResponseType}}{}
 
-	{{ range $key, $line := $method.ConvertResponseLines -}}
+	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
 	{{$line}}
 	{{ end }}
 
@@ -358,7 +358,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8028, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
