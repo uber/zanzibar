@@ -179,8 +179,8 @@ func (c *TypeConverter) genStructConverter(
 
 			subFromFields := fromFieldType.Fields
 			err = c.genStructConverter(
-				strings.Title(toField.Name)+".",
-				"	",
+				keyPrefix+strings.Title(toField.Name)+".",
+				indent+"	",
 				subFromFields,
 				subToFields,
 			)
