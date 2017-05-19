@@ -298,8 +298,46 @@ func (c *TypeConverter) genStructConverter(
 					"(*" + typeName + ")(value)"
 				c.Lines = append(c.Lines, line)
 			} else {
-				line = toIdentifier + "[index] = " +
-					typeName + "(value)"
+				line = toIdentifier + "[index] = " + typeName + "(value)"
+				c.Lines = append(c.Lines, line)
+			}
+
+			line = "}"
+			c.Lines = append(c.Lines, line)
+
+		case *compile.MapSpec:
+			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+			if err != nil {
+				return err
+			}
+
+			_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
+			if !isStringKey {
+				return errors.Errorf(
+					"could not convert key (%s), map is not string-keyed.",
+					toField.Name,
+				)
+			}
+
+			_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+			if isStruct {
+				line := toIdentifier + " = make(map[string]*" +
+					typeName + ", len(" + fromIdentifier + "))"
+				c.Lines = append(c.Lines, line)
+			} else {
+				line := toIdentifier + " = make(map[string]" +
+					typeName + ", len(" + fromIdentifier + "))"
+				c.Lines = append(c.Lines, line)
+			}
+
+			line := "for key, value := range " + fromIdentifier + " {"
+			c.Lines = append(c.Lines, line)
+
+			if isStruct {
+				line = toIdentifier + "[key] = (*" + typeName + ")(value)"
+				c.Lines = append(c.Lines, line)
+			} else {
+				line = toIdentifier + "[key] = " + typeName + "(value)"
 				c.Lines = append(c.Lines, line)
 			}
 
