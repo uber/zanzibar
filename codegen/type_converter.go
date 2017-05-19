@@ -115,8 +115,8 @@ func (c *TypeConverter) genStructConverter(
 			)
 		}
 
-		prefix := indent + "out." + keyPrefix + strings.Title(toField.Name)
-		postfix := "in." + keyPrefix + strings.Title(fromField.Name)
+		toIdentifier := indent + "out." + keyPrefix + strings.Title(toField.Name)
+		fromIdentifier := "in." + keyPrefix + strings.Title(fromField.Name)
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
@@ -124,33 +124,33 @@ func (c *TypeConverter) genStructConverter(
 		case *compile.BoolSpec:
 			var line string
 			if toField.Required {
-				line = prefix + " = bool(" + postfix + ")"
+				line = toIdentifier + " = bool(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*bool)(" + postfix + ")"
+				line = toIdentifier + " = (*bool)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I8Spec:
 			var line string
 			if toField.Required {
-				line = prefix + " = int8(" + postfix + ")"
+				line = toIdentifier + " = int8(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*int8)(" + postfix + ")"
+				line = toIdentifier + " = (*int8)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I16Spec:
 			var line string
 			if toField.Required {
-				line = prefix + " = int16(" + postfix + ")"
+				line = toIdentifier + " = int16(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*int16)(" + postfix + ")"
+				line = toIdentifier + " = (*int16)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I32Spec:
 			var line string
 			if toField.Required {
-				line = prefix + " = int32(" + postfix + ")"
+				line = toIdentifier + " = int32(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*int32)(" + postfix + ")"
+				line = toIdentifier + " = (*int32)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.EnumSpec:
@@ -161,37 +161,37 @@ func (c *TypeConverter) genStructConverter(
 
 			var line string
 			if toField.Required {
-				line = prefix + " = " + typeName + "(" + postfix + ")"
+				line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*" + typeName + ")(" + postfix + ")"
+				line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.I64Spec:
 			var line string
 			if toField.Required {
-				line = prefix + " = int64(" + postfix + ")"
+				line = toIdentifier + " = int64(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*int64)(" + postfix + ")"
+				line = toIdentifier + " = (*int64)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.DoubleSpec:
 			var line string
 			if toField.Required {
-				line = prefix + " = float64(" + postfix + ")"
+				line = toIdentifier + " = float64(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*float64)(" + postfix + ")"
+				line = toIdentifier + " = (*float64)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.StringSpec:
 			var line string
 			if toField.Required {
-				line = prefix + " = string(" + postfix + ")"
+				line = toIdentifier + " = string(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*string)(" + postfix + ")"
+				line = toIdentifier + " = (*string)(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.BinarySpec:
-			line := prefix + " = []byte(" + postfix + ")"
+			line := toIdentifier + " = []byte(" + fromIdentifier + ")"
 			c.Lines = append(c.Lines, line)
 		case *compile.TypedefSpec:
 			typeName, err := c.getIdentifierName(toField.Type)
@@ -201,9 +201,9 @@ func (c *TypeConverter) genStructConverter(
 
 			var line string
 			if toField.Required {
-				line = prefix + " = " + typeName + "(" + postfix + ")"
+				line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
 			} else {
-				line = prefix + " = (*" + typeName + ")(" + postfix + ")"
+				line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
 			}
 			c.Lines = append(c.Lines, line)
 
@@ -223,10 +223,10 @@ func (c *TypeConverter) genStructConverter(
 				)
 			}
 
-			line := "if " + postfix + " != nil {"
+			line := "if " + fromIdentifier + " != nil {"
 			c.Lines = append(c.Lines, line)
 
-			line = "	" + prefix + " = &" + typeName + "{}"
+			line = "	" + toIdentifier + " = &" + typeName + "{}"
 			c.Lines = append(c.Lines, line)
 
 			subFromFields := fromFieldType.Fields
@@ -243,7 +243,7 @@ func (c *TypeConverter) genStructConverter(
 			line = "} else {"
 			c.Lines = append(c.Lines, line)
 
-			line = "	" + prefix + " = nil"
+			line = "	" + toIdentifier + " = nil"
 			c.Lines = append(c.Lines, line)
 
 			line = "}"
@@ -257,23 +257,25 @@ func (c *TypeConverter) genStructConverter(
 
 			_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 			if isStruct {
-				line := prefix + " = make([]*" +
-					typeName + ", len(" + postfix + "))"
+				line := toIdentifier + " = make([]*" +
+					typeName + ", len(" + fromIdentifier + "))"
 				c.Lines = append(c.Lines, line)
 			} else {
-				line := prefix + " = make([]" +
-					typeName + ", len(" + postfix + "))"
+				line := toIdentifier + " = make([]" +
+					typeName + ", len(" + fromIdentifier + "))"
 				c.Lines = append(c.Lines, line)
 			}
 
-			line := "for index, value := range " + postfix + " {"
+			line := "for index, value := range " + fromIdentifier + " {"
 			c.Lines = append(c.Lines, line)
 
 			if isStruct {
-				line = prefix + "[index] = " + "(*" + typeName + ")(value)"
+				line = toIdentifier + "[index] = " +
+					"(*" + typeName + ")(value)"
 				c.Lines = append(c.Lines, line)
 			} else {
-				line = prefix + "[index] = " + typeName + "(value)"
+				line = toIdentifier + "[index] = " +
+					typeName + "(value)"
 				c.Lines = append(c.Lines, line)
 			}
 
