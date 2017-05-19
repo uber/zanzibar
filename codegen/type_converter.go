@@ -43,6 +43,39 @@ type PackageNameResolver interface {
 	TypePackageName(thriftFile string) (string, error)
 }
 
+func (c *TypeConverter) getGoTypeName(
+	valueType compile.TypeSpec,
+) (string, error) {
+	switch s := valueType.(type) {
+	case *compile.BoolSpec:
+		return "bool", nil
+	case *compile.I8Spec:
+		return "int8", nil
+	case *compile.I16Spec:
+		return "int16", nil
+	case *compile.I32Spec:
+		return "int32", nil
+	case *compile.I64Spec:
+		return "int64", nil
+	case *compile.DoubleSpec:
+		return "float64", nil
+	case *compile.StringSpec:
+		return "string", nil
+	case *compile.BinarySpec:
+		return "[]byte", nil
+	case *compile.MapSpec:
+		panic("Not Implemented")
+	case *compile.SetSpec:
+		panic("Not Implemented")
+	case *compile.ListSpec:
+		panic("Not Implemented")
+	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
+		return c.getIdentifierName(s)
+	default:
+		panic(fmt.Sprintf("Unknown type (%T) %v", valueType, valueType))
+	}
+}
+
 func (c *TypeConverter) getIdentifierName(
 	fieldType compile.TypeSpec,
 ) (string, error) {
