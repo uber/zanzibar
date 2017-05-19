@@ -145,6 +145,26 @@ func (c *TypeConverter) genConverterForStruct(
 	return nil
 }
 
+func (c *TypeConverter) genConverterForPrimitive(
+	toField *compile.FieldSpec,
+	toIdentifier string,
+	fromIdentifier string,
+) error {
+	var line string
+	typeName, err := c.getGoTypeName(toField.Type)
+	if err != nil {
+		return err
+	}
+
+	if toField.Required {
+		line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
+	} else {
+		line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
+	}
+	c.Lines = append(c.Lines, line)
+	return nil
+}
+
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
@@ -175,75 +195,22 @@ func (c *TypeConverter) genStructConverter(
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toFieldType := toField.Type.(type) {
-		case *compile.BoolSpec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = bool(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*bool)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.I8Spec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = int8(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*int8)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.I16Spec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = int16(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*int16)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.I32Spec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = int32(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*int32)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.EnumSpec:
-			typeName, err := c.getIdentifierName(toField.Type)
+		case
+			*compile.BoolSpec,
+			*compile.I8Spec,
+			*compile.I16Spec,
+			*compile.I32Spec,
+			*compile.EnumSpec,
+			*compile.I64Spec,
+			*compile.DoubleSpec,
+			*compile.StringSpec:
+
+			err := c.genConverterForPrimitive(
+				toField, toIdentifier, fromIdentifier,
+			)
 			if err != nil {
 				return err
 			}
-
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.I64Spec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = int64(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*int64)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.DoubleSpec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = float64(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*float64)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
-		case *compile.StringSpec:
-			var line string
-			if toField.Required {
-				line = toIdentifier + " = string(" + fromIdentifier + ")"
-			} else {
-				line = toIdentifier + " = (*string)(" + fromIdentifier + ")"
-			}
-			c.Lines = append(c.Lines, line)
 		case *compile.BinarySpec:
 			line := toIdentifier + " = []byte(" + fromIdentifier + ")"
 			c.Lines = append(c.Lines, line)
