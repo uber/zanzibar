@@ -279,7 +279,7 @@ func (c *TypeConverter) genStructConverter(
 				return err
 			}
 
-			_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+			valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 			if isStruct {
 				line := toIdentifier + " = make([]*" +
 					typeName + ", len(" + fromIdentifier + "))"
@@ -294,9 +294,25 @@ func (c *TypeConverter) genStructConverter(
 			c.Lines = append(c.Lines, line)
 
 			if isStruct {
-				line = toIdentifier + "[index] = " +
-					"(*" + typeName + ")(value)"
-				c.Lines = append(c.Lines, line)
+				fromFieldType, ok := fromField.Type.(*compile.ListSpec)
+				if !ok {
+					return errors.Errorf(
+						"Could not convert field (%s): type is not list",
+						fromField.Name,
+					)
+				}
+
+				err = c.genConverterForStruct(
+					toField.Name,
+					valueStruct,
+					fromFieldType.ValueSpec,
+					"value",
+					keyPrefix+strings.Title(toField.Name)+"[index]",
+					indent,
+				)
+				if err != nil {
+					return err
+				}
 			} else {
 				line = toIdentifier + "[index] = " + typeName + "(value)"
 				c.Lines = append(c.Lines, line)
