@@ -43,6 +43,21 @@ type PackageNameResolver interface {
 	TypePackageName(thriftFile string) (string, error)
 }
 
+func (c *TypeConverter) getIdentifierName(
+	fieldType compile.TypeSpec,
+) (string, error) {
+	pkgName, err := c.Helper.TypePackageName(fieldType.ThriftFile())
+	if err != nil {
+		return "", errors.Wrapf(
+			err,
+			"could not lookup fieldType when building converter for %s :",
+			fieldType.ThriftName(),
+		)
+	}
+	typeName := pkgName + "." + fieldType.ThriftName()
+	return typeName, nil
+}
+
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
@@ -106,15 +121,10 @@ func (c *TypeConverter) genStructConverter(
 			}
 			c.Lines = append(c.Lines, line)
 		case *compile.EnumSpec:
-			pkgName, err := c.Helper.TypePackageName(toField.Type.ThriftFile())
+			typeName, err := c.getIdentifierName(toField.Type)
 			if err != nil {
-				return errors.Wrapf(
-					err,
-					"could not lookup struct when building converter for %s :",
-					toField.Name,
-				)
+				return err
 			}
-			typeName := pkgName + "." + toField.Type.ThriftName()
 
 			var line string
 			if toField.Required {
@@ -151,15 +161,10 @@ func (c *TypeConverter) genStructConverter(
 			line := prefix + " = []byte(" + postfix + ")"
 			c.Lines = append(c.Lines, line)
 		case *compile.StructSpec:
-			pkgName, err := c.Helper.TypePackageName(toField.Type.ThriftFile())
+			typeName, err := c.getIdentifierName(toField.Type)
 			if err != nil {
-				return errors.Wrapf(
-					err,
-					"could not lookup struct when building converter for %s :",
-					toField.Name,
-				)
+				return err
 			}
-			typeName := pkgName + "." + toField.Type.ThriftName()
 			subToFields := toFieldType.Fields
 
 			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
