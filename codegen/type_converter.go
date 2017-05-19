@@ -160,6 +160,20 @@ func (c *TypeConverter) genStructConverter(
 		case *compile.BinarySpec:
 			line := prefix + " = []byte(" + postfix + ")"
 			c.Lines = append(c.Lines, line)
+		case *compile.TypedefSpec:
+			typeName, err := c.getIdentifierName(toField.Type)
+			if err != nil {
+				return err
+			}
+
+			var line string
+			if toField.Required {
+				line = prefix + " = " + typeName + "(" + postfix + ")"
+			} else {
+				line = prefix + " = (*" + typeName + ")(" + postfix + ")"
+			}
+			c.Lines = append(c.Lines, line)
+
 		case *compile.StructSpec:
 			typeName, err := c.getIdentifierName(toField.Type)
 			if err != nil {
