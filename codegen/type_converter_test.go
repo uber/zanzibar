@@ -405,3 +405,52 @@ func TestStructTypeMisMatch(t *testing.T) {
 	assert.Equal(t, "could not convert struct fields, "+
 		"incompatible type for four :", err.Error())
 }
+
+func TestConvertTypeDef(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`typedef string UUID
+
+		struct Foo {
+			1: optional UUID one
+			2: required UUID two
+		}
+
+		struct Bar {
+			1: optional UUID one
+			2: required UUID two
+		}`,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = (*structs.UUID)(in.One)
+		out.Two = structs.UUID(in.Two)
+	`), lines)
+}
+
+func TestConvertEnum(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`enum ItemState {
+			REQUIRED,
+			OPTIONAL
+		}
+
+		struct Foo {
+			1: optional ItemState one
+			2: required ItemState two
+		}
+
+		struct Bar {
+			1: optional ItemState one
+			2: required ItemState two
+		}`,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = (*structs.ItemState)(in.One)
+		out.Two = structs.ItemState(in.Two)
+	`), lines)
+}
