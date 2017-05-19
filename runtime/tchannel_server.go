@@ -177,10 +177,12 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		if er := reader.Close(); er != nil {
 			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", service, method)
 		}
-		s.logger.Warn("Unexpected tchannel system error",
+		s.logger.Error("Unexpected tchannel system error",
+			zap.String("service", service),
+			zap.String("method", method),
 			zap.String("error", err.Error()),
 		)
-		return call.Response().SendSystemError(err)
+		return call.Response().SendSystemError(errors.New("Server Error"))
 	}
 
 	if err := EnsureEmpty(reader, "reading request body"); err != nil {
