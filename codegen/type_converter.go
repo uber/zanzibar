@@ -91,6 +91,60 @@ func (c *TypeConverter) getIdentifierName(
 	return typeName, nil
 }
 
+func (c *TypeConverter) genConverterForStruct(
+	toFieldName string,
+	toFieldType *compile.StructSpec,
+	fromFieldType compile.TypeSpec,
+	fromIdentifier string,
+	keyPrefix string,
+	indent string,
+) error {
+	toIdentifier := indent + "out." + keyPrefix
+
+	typeName, err := c.getIdentifierName(toFieldType)
+	if err != nil {
+		return err
+	}
+	subToFields := toFieldType.Fields
+
+	fromFieldStruct, ok := fromFieldType.(*compile.StructSpec)
+	if !ok {
+		return errors.Errorf(
+			"could not convert struct fields, "+
+				"incompatible type for %s :",
+			toFieldName,
+		)
+	}
+
+	line := "if " + fromIdentifier + " != nil {"
+	c.Lines = append(c.Lines, line)
+
+	line = "	" + toIdentifier + " = &" + typeName + "{}"
+	c.Lines = append(c.Lines, line)
+
+	subFromFields := fromFieldStruct.Fields
+	err = c.genStructConverter(
+		keyPrefix+".",
+		indent+"	",
+		subFromFields,
+		subToFields,
+	)
+	if err != nil {
+		return err
+	}
+
+	line = "} else {"
+	c.Lines = append(c.Lines, line)
+
+	line = "	" + toIdentifier + " = nil"
+	c.Lines = append(c.Lines, line)
+
+	line = "}"
+	c.Lines = append(c.Lines, line)
+
+	return nil
+}
+
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
@@ -208,47 +262,17 @@ func (c *TypeConverter) genStructConverter(
 			c.Lines = append(c.Lines, line)
 
 		case *compile.StructSpec:
-			typeName, err := c.getIdentifierName(toField.Type)
-			if err != nil {
-				return err
-			}
-			subToFields := toFieldType.Fields
-
-			fromFieldType, ok := fromField.Type.(*compile.StructSpec)
-			if !ok {
-				return errors.Errorf(
-					"could not convert struct fields, "+
-						"incompatible type for %s :",
-					toField.Name,
-				)
-			}
-
-			line := "if " + fromIdentifier + " != nil {"
-			c.Lines = append(c.Lines, line)
-
-			line = "	" + toIdentifier + " = &" + typeName + "{}"
-			c.Lines = append(c.Lines, line)
-
-			subFromFields := fromFieldType.Fields
-			err = c.genStructConverter(
-				keyPrefix+strings.Title(toField.Name)+".",
-				indent+"	",
-				subFromFields,
-				subToFields,
+			err := c.genConverterForStruct(
+				toField.Name,
+				toFieldType,
+				fromField.Type,
+				fromIdentifier,
+				keyPrefix+strings.Title(toField.Name),
+				indent,
 			)
 			if err != nil {
 				return err
 			}
-
-			line = "} else {"
-			c.Lines = append(c.Lines, line)
-
-			line = "	" + toIdentifier + " = nil"
-			c.Lines = append(c.Lines, line)
-
-			line = "}"
-			c.Lines = append(c.Lines, line)
-
 		case *compile.ListSpec:
 			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
 			if err != nil {
