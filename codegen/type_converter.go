@@ -221,6 +221,7 @@ func (c *TypeConverter) genStructConverter(
 			}
 
 			var line string
+			// TODO: typedef for struct is invalid here ...
 			if toField.Required {
 				line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
 			} else {
@@ -317,6 +318,7 @@ func (c *TypeConverter) genStructConverter(
 			c.Lines = append(c.Lines, line)
 
 			if isStruct {
+				// TODO: need to deep copy struct here.
 				line = toIdentifier + "[key] = (*" + typeName + ")(value)"
 				c.Lines = append(c.Lines, line)
 			} else {
