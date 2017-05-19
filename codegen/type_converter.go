@@ -249,6 +249,37 @@ func (c *TypeConverter) genStructConverter(
 			line = "}"
 			c.Lines = append(c.Lines, line)
 
+		case *compile.ListSpec:
+			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+			if err != nil {
+				return err
+			}
+
+			_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+			if isStruct {
+				line := prefix + " = make([]*" +
+					typeName + ", len(" + postfix + "))"
+				c.Lines = append(c.Lines, line)
+			} else {
+				line := prefix + " = make([]" +
+					typeName + ", len(" + postfix + "))"
+				c.Lines = append(c.Lines, line)
+			}
+
+			line := "for index, value := range " + postfix + " {"
+			c.Lines = append(c.Lines, line)
+
+			if isStruct {
+				line = prefix + "[index] = " + "(*" + typeName + ")(value)"
+				c.Lines = append(c.Lines, line)
+			} else {
+				line = prefix + "[index] = " + typeName + "(value)"
+				c.Lines = append(c.Lines, line)
+			}
+
+			line = "}"
+			c.Lines = append(c.Lines, line)
+
 		default:
 			// fmt.Printf("Unknown type %s for field %s \n",
 			// 	toField.Type.TypeCode().String(), toField.Name,
