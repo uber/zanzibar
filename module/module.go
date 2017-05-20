@@ -27,6 +27,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -386,7 +387,7 @@ func readPackageInfo(
 		PackageName:           defaultAlias,
 		PackageAlias:          defaultAlias + "Static",
 		GeneratedPackageAlias: defaultAlias + "Generated",
-		PackagePath: filepath.Join(
+		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,
 		),
