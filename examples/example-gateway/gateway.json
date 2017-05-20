@@ -1,6 +1,6 @@
 {
 	"gatewayName": "example-gateway",
-	"packageRoot": "github.com/uber/zanzibar/example-gateway",
+	"packageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 	"thriftRootDir": "./idl",
 	"gatewayNamespace": "github.com/uber/zanzibar",
 	"genCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
