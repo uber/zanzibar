@@ -87,7 +87,7 @@ func (handler *CompareHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// CompareEndpoint calls thrift client Baz.Compare
+// CompareEndpoint calls thrift client Baz.SimpleServiceCompare
 type CompareEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
@@ -104,7 +104,7 @@ func (w CompareEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	clientRespBody, _, err := w.Clients.Baz.Compare(
+	clientRespBody, _, err := w.Clients.Baz.SimpleServiceCompare(
 		ctx, clientHeaders, clientRequest,
 	)
 

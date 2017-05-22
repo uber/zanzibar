@@ -49,7 +49,7 @@ func (w CallEndpoint) Handle(
 		Arg: (*clientBaz.BazRequest)(req.Arg),
 	}
 
-	clientRespHeaders, err := w.Clients.Baz.Call(ctx, clientReqHeaders, clientReq)
+	clientRespHeaders, err := w.Clients.Baz.SimpleServiceCall(ctx, clientReqHeaders, clientReq)
 	respHeaders := zanzibar.ServerTChannelHeader(clientRespHeaders)
 	if err != nil {
 		switch v := err.(type) {

@@ -77,7 +77,7 @@ func (handler *PingHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// PingEndpoint calls thrift client Baz.Ping
+// PingEndpoint calls thrift client Baz.SimpleServicePing
 type PingEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
@@ -92,7 +92,7 @@ func (w PingEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	clientRespBody, _, err := w.Clients.Baz.Ping(
+	clientRespBody, _, err := w.Clients.Baz.SimpleServicePing(
 		ctx, clientHeaders,
 	)
 
