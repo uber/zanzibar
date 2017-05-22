@@ -59,9 +59,9 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne $clientMethod.RequestType "" -}}
-		args *{{$clientMethodRequestType}},
+		args {{$clientMethodRequestType}},
 		{{end -}}
-	) ({{- if ne $clientMethod.ResponseType "" -}}*{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+	) ({{- if ne $clientMethod.ResponseType "" -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 		{{$counter}}++
 
 		{{range $k, $v := .ClientReqHeaders -}}
@@ -80,7 +80,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		{{end}}
 
 		{{if ne $clientMethod.ResponseType "" -}}
-		var res {{$clientMethod.ResponseType}}
+		var res {{unref $clientMethod.ResponseType}}
 		err := json.Unmarshal([]byte(`{{.ClientResponseString}}`), &res)
 		if err!= nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")

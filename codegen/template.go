@@ -54,6 +54,7 @@ var funcMap = tmpl.FuncMap{
 	"basePath":     filepath.Base,
 	"pascal":       pascalCase,
 	"jsonMarshal":  jsonMarshal,
+	"unref":        unref,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -92,6 +93,13 @@ func pascalCase(src string) string {
 		chunks[idx] = bytes.Title(val)
 	}
 	return string(bytes.Join(chunks, nil))
+}
+
+func unref(t string) string {
+	if strings.HasPrefix(t, "*") {
+		return strings.TrimLeft(t, "*")
+	}
+	return t
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.

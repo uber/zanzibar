@@ -198,12 +198,15 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 		ms.RequestType, err = packageHelper.TypeFullName(
 			curThriftFile, funcSpec.ArgsSpec[0].Type,
 		)
+		if err == nil && isStructType(funcSpec.ArgsSpec[0].Type) {
+			ms.RequestType = "*" + ms.RequestType
+		}
 	} else {
 		ms.RequestBoxed = false
 
 		goPackageName, err := packageHelper.TypePackageName(curThriftFile)
 		if err == nil {
-			ms.RequestType = goPackageName + "." +
+			ms.RequestType = "*" + goPackageName + "." +
 				ms.ThriftService + "_" + strings.Title(ms.Name) + "_Args"
 		}
 	}
@@ -225,6 +228,9 @@ func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.Re
 		return nil
 	}
 	typeName, err := packageHelper.TypeFullName(curThriftFile, respSpec.ReturnType)
+	if isStructType(respSpec.ReturnType) {
+		typeName = "*" + typeName
+	}
 	if err != nil {
 		return errors.Wrap(err, "failed to get response type")
 	}

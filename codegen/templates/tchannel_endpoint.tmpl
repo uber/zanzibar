@@ -56,7 +56,7 @@ func (h *{{$handlerName}}) Handle(
 	var res {{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result
 
 	{{if ne .RequestType "" -}}
-	var req {{.RequestType}}
+	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
