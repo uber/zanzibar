@@ -223,6 +223,53 @@ func (c *TypeConverter) genConverterForList(
 	return nil
 }
 
+func (c *TypeConverter) genConverterForMap(
+	toFieldType *compile.MapSpec,
+	toField *compile.FieldSpec,
+	toIdentifier string,
+	fromIdentifier string,
+) error {
+	typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+	if err != nil {
+		return err
+	}
+
+	_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
+	if !isStringKey {
+		return errors.Errorf(
+			"could not convert key (%s), map is not string-keyed.",
+			toField.Name,
+		)
+	}
+
+	_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+	if isStruct {
+		line := toIdentifier + " = make(map[string]*" +
+			typeName + ", len(" + fromIdentifier + "))"
+		c.Lines = append(c.Lines, line)
+	} else {
+		line := toIdentifier + " = make(map[string]" +
+			typeName + ", len(" + fromIdentifier + "))"
+		c.Lines = append(c.Lines, line)
+	}
+
+	line := "for key, value := range " + fromIdentifier + " {"
+	c.Lines = append(c.Lines, line)
+
+	if isStruct {
+		// TODO: need to deep copy struct here.
+		line = toIdentifier + "[key] = (*" + typeName + ")(value)"
+		c.Lines = append(c.Lines, line)
+	} else {
+		line = toIdentifier + "[key] = " + typeName + "(value)"
+		c.Lines = append(c.Lines, line)
+	}
+
+	line = "}"
+	c.Lines = append(c.Lines, line)
+	return nil
+}
+
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
@@ -313,45 +360,15 @@ func (c *TypeConverter) genStructConverter(
 				return err
 			}
 		case *compile.MapSpec:
-			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+			err := c.genConverterForMap(
+				toFieldType,
+				toField,
+				toIdentifier,
+				fromIdentifier,
+			)
 			if err != nil {
 				return err
 			}
-
-			_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
-			if !isStringKey {
-				return errors.Errorf(
-					"could not convert key (%s), map is not string-keyed.",
-					toField.Name,
-				)
-			}
-
-			_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
-			if isStruct {
-				line := toIdentifier + " = make(map[string]*" +
-					typeName + ", len(" + fromIdentifier + "))"
-				c.Lines = append(c.Lines, line)
-			} else {
-				line := toIdentifier + " = make(map[string]" +
-					typeName + ", len(" + fromIdentifier + "))"
-				c.Lines = append(c.Lines, line)
-			}
-
-			line := "for key, value := range " + fromIdentifier + " {"
-			c.Lines = append(c.Lines, line)
-
-			if isStruct {
-				// TODO: need to deep copy struct here.
-				line = toIdentifier + "[key] = (*" + typeName + ")(value)"
-				c.Lines = append(c.Lines, line)
-			} else {
-				line = toIdentifier + "[key] = " + typeName + "(value)"
-				c.Lines = append(c.Lines, line)
-			}
-
-			line = "}"
-			c.Lines = append(c.Lines, line)
-
 		default:
 			// fmt.Printf("Unknown type %s for field %s \n",
 			// 	toField.Type.TypeCode().String(), toField.Name,
