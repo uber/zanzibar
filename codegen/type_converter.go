@@ -401,7 +401,7 @@ func (c *TypeConverter) genStructConverter(
 			// 	return nil, err
 			// }
 			// typeName := pkgName + "." + toField.Type.ThriftName()
-			// line := prefix + "(*" + typeName + ")" + postfix
+			// line := toIdentifier + "(*" + typeName + ")" + postfix
 			// c.Lines = append(c.Lines, line)
 		}
 	}
