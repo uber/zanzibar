@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package codegen
 
 import (
 	"encoding/json"
@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -34,39 +35,42 @@ import (
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
 // multiple directories with multiple configurations
-type classType int
+type moduleClassType int
 
 const (
 	// SingleModule defines a module class type that has 1 directory
-	SingleModule classType = iota
+	SingleModule moduleClassType = iota
 	// MultiModule defines a module class type with multiple nested directories
-	MultiModule classType = iota
+	MultiModule moduleClassType = iota
 )
 
 const configSuffix = "-config.json"
 
-// NewSystem returns a new module system
-func NewSystem() *System {
-	return &System{
-		classes:    map[string]*Class{},
+// NewModuleSystem returns a new module system
+func NewModuleSystem() *ModuleSystem {
+	return &ModuleSystem{
+		classes:    map[string]*ModuleClass{},
 		classOrder: []string{},
 	}
 }
 
-// System defines the module classes and their type generators
-type System struct {
-	classes    map[string]*Class
+// ModuleSystem defines the module classes and their type generators
+type ModuleSystem struct {
+	classes    map[string]*ModuleClass
 	classOrder []string
 }
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
-func (moduleSystem *System) RegisterClass(name string, class Class) error {
+func (system *ModuleSystem) RegisterClass(
+	name string,
+	class ModuleClass,
+) error {
 	if name == "" {
 		return errors.Errorf("A module class name must not be empty")
 	}
 
-	if moduleSystem.classes[name] != nil {
+	if system.classes[name] != nil {
 		return errors.Errorf(
 			"The module class \"%s\" is already defined",
 			name,
@@ -76,7 +80,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	// Validate the module class dependencies
 	// (this validation ensures that circular deps cannot exist)
 	for _, moduleType := range class.ClassDependencies {
-		if moduleSystem.classes[moduleType] == nil {
+		if system.classes[moduleType] == nil {
 			return errors.Errorf(
 				"The module class \"%s\" depends on class type \"%s\", "+
 					"which is not yet defined",
@@ -97,7 +101,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	}
 
 	// Validate the module class directory name is unique
-	for moduleClassName, moduleClass := range moduleSystem.classes {
+	for moduleClassName, moduleClass := range system.classes {
 		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
 			return errors.Errorf(
 				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
@@ -109,20 +113,20 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	}
 
 	class.types = map[string]BuildGenerator{}
-	moduleSystem.classes[name] = &class
-	moduleSystem.classOrder = append(moduleSystem.classOrder, name)
+	system.classes[name] = &class
+	system.classOrder = append(system.classOrder, name)
 
 	return nil
 }
 
 // RegisterClassType registers a type generator for a specific module class
 // For example, the "http"" type generator for the "Endpoint"" class
-func (moduleSystem *System) RegisterClassType(
+func (system *ModuleSystem) RegisterClassType(
 	className string,
 	classType string,
 	generator BuildGenerator,
 ) error {
-	moduleClass := moduleSystem.classes[className]
+	moduleClass := system.classes[className]
 
 	if moduleClass == nil {
 		return errors.Errorf(
@@ -149,22 +153,26 @@ func (moduleSystem *System) RegisterClassType(
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
 // the target directory.
-func (moduleSystem *System) ResolveModules(
+func (system *ModuleSystem) ResolveModules(
+	packageRoot string,
 	baseDirectory string,
-) (map[string][]*Instance, error) {
+	targetGenDir string,
+) (map[string][]*ModuleInstance, error) {
 
-	resolvedModules := map[string][]*Instance{}
+	resolvedModules := map[string][]*ModuleInstance{}
 
-	for _, className := range moduleSystem.classOrder {
-		class := moduleSystem.classes[className]
+	for _, className := range system.classOrder {
+		class := system.classes[className]
 		fullInstanceDirectory := filepath.Join(baseDirectory, class.Directory)
 
-		classInstances := []*Instance{}
+		classInstances := []*ModuleInstance{}
 
 		if class.ClassType == SingleModule {
-			instance, instanceErr := readInstance(
-				className,
+			instance, instanceErr := system.readInstance(
+				packageRoot,
 				baseDirectory,
+				targetGenDir,
+				className,
 				class.Directory,
 			)
 			if instanceErr != nil {
@@ -192,9 +200,11 @@ func (moduleSystem *System) ResolveModules(
 
 			for _, file := range files {
 				if file.IsDir() {
-					instance, instanceErr := readInstance(
-						className,
+					instance, instanceErr := system.readInstance(
+						packageRoot,
 						baseDirectory,
+						targetGenDir,
+						className,
 						filepath.Join(class.Directory, file.Name()),
 					)
 					if instanceErr != nil {
@@ -211,16 +221,66 @@ func (moduleSystem *System) ResolveModules(
 		}
 
 		resolvedModules[className] = classInstances
+
+		// Resolve the class dependencies
+		for _, classInstance := range classInstances {
+			for _, classDependency := range classInstance.Dependencies {
+				moduleClassInstances, ok :=
+					resolvedModules[classDependency.ClassName]
+
+				if !ok {
+					return nil, errors.Errorf(
+						"Invalid class name \"%q\" in dependencies for %s %s",
+						classDependency.ClassName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				// TODO: We don't want to linear scan here
+				var dependencyInstance *ModuleInstance
+
+				for _, instance := range moduleClassInstances {
+					if instance.InstanceName == classDependency.InstanceName {
+						dependencyInstance = instance
+						break
+					}
+				}
+
+				if dependencyInstance == nil {
+					return nil, errors.Errorf(
+						"Unknown %q class depdendency \"%q\""+
+							"in dependencies for %s %s",
+						classDependency.ClassName,
+						classDependency.InstanceName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				resolvedDependencies, ok :=
+					classInstance.ResolvedDependencies[classDependency.ClassName]
+
+				if !ok {
+					resolvedDependencies = []*ModuleInstance{}
+				}
+
+				classInstance.ResolvedDependencies[classDependency.ClassName] =
+					append(resolvedDependencies, dependencyInstance)
+			}
+		}
 	}
 
 	return resolvedModules, nil
 }
 
-func readInstance(
-	className string,
+func (system *ModuleSystem) readInstance(
+	packageRoot string,
 	baseDirectory string,
+	targetGenDir string,
+	className string,
 	instanceDirectory string,
-) (*Instance, error) {
+) (*ModuleInstance, error) {
 
 	jsonFileName := className + configSuffix
 	classConfigPath := filepath.Join(
@@ -242,31 +302,55 @@ func readInstance(
 		)
 	}
 
-	return &Instance{
-		ClassName:     className,
-		ClassType:     jsonConfig.Type,
-		BaseDirectory: baseDirectory,
-		Directory:     instanceDirectory,
-		InstanceName:  jsonConfig.Name,
-		Dependencies:  readDeps(jsonConfig.Dependencies),
-		JSONFileName:  jsonFileName,
-		JSONFileRaw:   raw,
+	dependencies := readDeps(jsonConfig.Dependencies)
+	packageInfo, err := readPackageInfo(
+		packageRoot,
+		baseDirectory,
+		targetGenDir,
+		className,
+		instanceDirectory,
+		&jsonConfig,
+		dependencies,
+	)
+
+	if err != nil {
+		// TODO: We should accumulate errors and list them all here
+		// Expected $class-config.json to exist in ...
+		return nil, errors.Wrapf(
+			err,
+			"Error reading class package info for %s %s",
+			className,
+			jsonConfig.Name,
+		)
+	}
+
+	return &ModuleInstance{
+		PackageInfo:          packageInfo,
+		ClassName:            className,
+		ClassType:            jsonConfig.Type,
+		BaseDirectory:        baseDirectory,
+		Directory:            instanceDirectory,
+		InstanceName:         jsonConfig.Name,
+		Dependencies:         dependencies,
+		ResolvedDependencies: map[string][]*ModuleInstance{},
+		JSONFileName:         jsonFileName,
+		JSONFileRaw:          raw,
 	}, nil
 }
 
-func readDeps(jsonDeps map[string][]string) []Dependency {
+func readDeps(jsonDeps map[string][]string) []ModuleDependency {
 	depCount := 0
 
 	for _, depsList := range jsonDeps {
 		depCount += len(depsList)
 	}
 
-	deps := make([]Dependency, depCount)
+	deps := make([]ModuleDependency, depCount)
 	depIndex := 0
 
 	for className, depsList := range jsonDeps {
 		for _, instanceName := range depsList {
-			deps[depIndex] = Dependency{
+			deps[depIndex] = ModuleDependency{
 				ClassName:    className,
 				InstanceName: instanceName,
 			}
@@ -277,14 +361,67 @@ func readDeps(jsonDeps map[string][]string) []Dependency {
 	return deps
 }
 
+func readPackageInfo(
+	packageRoot string,
+	baseDirectory string,
+	targetGenDir string,
+	className string,
+	instanceDirectory string,
+	jsonConfig *JSONClassConfig,
+	dependencies []ModuleDependency,
+) (*PackageInfo, error) {
+	qualifiedClassName := strings.Title(camelCase(className))
+	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
+	defaultAlias := camelCase(strings.ToLower(qualifiedInstanceName)) +
+		qualifiedClassName
+
+	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error computing generated import string for %s",
+			targetGenDir,
+		)
+	}
+
+	return &PackageInfo{
+		// The package name is assumed to be the lower case of the instance
+		// Name plus the titular class name, such as fooClient
+		PackageName: defaultAlias,
+		// The prefixes "Static" and "Generated" are used to ensure global
+		// uniqueness of the provided package aliases. Note that the default
+		// package is "PackageName".
+		PackageAlias:          defaultAlias + "Static",
+		GeneratedPackageAlias: defaultAlias + "Generated",
+		PackagePath: path.Join(
+			packageRoot,
+			instanceDirectory,
+		),
+		ExportName: qualifiedInstanceName,
+		ExportType: qualifiedInstanceName + qualifiedClassName,
+		GeneratedPackagePath: filepath.Join(
+			packageRoot,
+			relativeGeneratedPath,
+			instanceDirectory,
+		),
+		IsExportGenerated: jsonConfig.IsExportGenerated == nil ||
+			*jsonConfig.IsExportGenerated,
+	}, nil
+}
+
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory
-func (moduleSystem *System) GenerateBuild(
+func (system *ModuleSystem) GenerateBuild(
+	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
 ) error {
-	resolvedModules, err := moduleSystem.ResolveModules(baseDirectory)
+	resolvedModules, err := system.ResolveModules(
+		packageRoot,
+		baseDirectory,
+		targetGenDir,
+	)
 
 	if err != nil {
 		return err
@@ -296,7 +433,7 @@ func (moduleSystem *System) GenerateBuild(
 	}
 
 	moduleIndex := 0
-	for _, className := range moduleSystem.classOrder {
+	for _, className := range system.classOrder {
 		classInstances := resolvedModules[className]
 
 		for _, classInstance := range classInstances {
@@ -320,7 +457,7 @@ func (moduleSystem *System) GenerateBuild(
 				moduleCount,
 			)
 
-			classGenerators := moduleSystem.classes[classInstance.ClassName]
+			classGenerators := system.classes[classInstance.ClassName]
 			generator := classGenerators.types[classInstance.ClassType]
 
 			if generator == nil {
@@ -408,11 +545,11 @@ func formatGoFile(filePath string) error {
 	return nil
 }
 
-// Class defines a module class in the build configuration directory. This
-// coud be something like an Endpoint class which contains multiple endpoint
-// configurations, or a Lib class, that is itself a module instance
-type Class struct {
-	ClassType         classType
+// ModuleClass defines a module class in the build configuration directory.
+// THis coud be something like an Endpoint class which contains multiple
+// endpoint configurations, or a Lib class, that is itself a module instance
+type ModuleClass struct {
+	ClassType         moduleClassType
 	Directory         string
 	ClassDependencies []string
 	types             map[string]BuildGenerator
@@ -423,18 +560,65 @@ type Class struct {
 // Endpoint module instance may generate endpoint handler code
 type BuildGenerator interface {
 	Generate(
-		instance *Instance,
+		instance *ModuleInstance,
 	) (map[string][]byte, error)
 }
 
-// Instance is a configured module on disk inside a module class directory.
+// PackageInfo provides information about the package associated with a module
+// instance.
+type PackageInfo struct {
+	// PackageName is the name of the generated package, and should be the same
+	// as the package name used by any custom code in the config directory
+	PackageName string
+	// PackageAlias is the unique import alias for non-generated packages
+	PackageAlias string
+	// GeneratedPackageAlias is the unique import alias for generated packages
+	GeneratedPackageAlias string
+	// PackagePath is the full package path for the non-generated code
+	PackagePath string
+	// GeneratedPackagePath is the full package path for the generated code
+	GeneratedPackagePath string
+	// ExportName is the name that should be used when initializing the module
+	// on a dependency struct.
+	ExportName string
+	// ExportType refers to the type returned by the module initializer
+	ExportType string
+	// IsExportGenerated is true if the export type is provided by the
+	// generated pacakge, otherwise it is assumed that the export type resides
+	// in the non-generated package
+	IsExportGenerated bool
+}
+
+// ImportPackagePath returns the correct package path for the module's exported
+// type, depending on which package (generated or not) the type lives in
+func (info *PackageInfo) ImportPackagePath() string {
+	if info.IsExportGenerated {
+		return info.GeneratedPackagePath
+	}
+
+	return info.PackagePath
+}
+
+// ImportPackageAlias returns the correct package alias for referencing the
+// module's exported type, depending on whether or not the export is generated
+func (info *PackageInfo) ImportPackageAlias() string {
+	if info.IsExportGenerated {
+		return info.GeneratedPackageAlias
+	}
+
+	return info.PackageAlias
+}
+
+// ModuleInstance is a configured module inside a module class directory.
 // For example, this could be
 //     ClassName:    "Endpoint,
 //     ClassType:    "http",
 //     BaseDirectory "/path/to/service/base/"
 //     Directory:    "clients/health/"
 //     InstanceName: "health",
-type Instance struct {
+type ModuleInstance struct {
+	// PackageInfo is the name for the generated module instance
+	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
 	ClassName string
 	// ClassType is the type of the class as defined in the module system
@@ -450,30 +634,43 @@ type Instance struct {
 	// Config is a reference to the instance "config" key in the instances json
 	//file
 	Config interface{}
-	// Dependency is a list of dependent modules as defined in the instances
+	// Dependencies is a list of dependent modules as defined in the instances
 	// json file
-	Dependencies []Dependency
+	Dependencies []ModuleDependency
 	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
-	ResolvedDependencies []Dependency
+	ResolvedDependencies map[string][]*ModuleInstance
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
 	JSONFileRaw []byte
 }
 
-// Dependency defines a module instance required by another module instance
-type Dependency struct {
-	ClassName    string
+// ModuleDependency defines a module instance required by another instance
+type ModuleDependency struct {
+	// ClassName is the name of the class as defined in the module system
+	ClassName string
+	// InstanceName is the name of the dependency instance as configu
 	InstanceName string
 }
 
 // JSONClassConfig maps onto a json configuration for a class type
 type JSONClassConfig struct {
-	Name         string              `json:"name"`
-	Config       interface{}         `json:"config"`
+	// Name is the class instance name used to identify the module as a
+	// dependency. The combination of the class Name and this instance name
+	// is unique.
+	Name string `json:"name"`
+	// The configuration object for this class instance. This depends on the
+	// class name and class type, and is interpreted by each module generator.
+	Config interface{} `json:"config"`
+	// Dependencies is a map of class name to a list of instance names. This
+	// infers the dependencies struct generated for the initializer
 	Dependencies map[string][]string `json:"dependencies"`
-	Type         string              `json:"type"`
+	// Type refers to the class type used to generate the dependency
+	Type string `json:"type"`
+	// IsExportGenerated determines whether or not the export lives in
+	// IsExportGenerated defaults to true if not set.
+	IsExportGenerated *bool `json:"IsExportGenerated"`
 }
 
 // Read will read a class configuration json file into a jsonClassConfig struct

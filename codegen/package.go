@@ -31,6 +31,8 @@ import (
 
 // PackageHelper manages the mapping from thrift file to generated type code and service code.
 type PackageHelper struct {
+	// The project package name
+	packageRoot string
 	// The root directory containing thrift files.
 	thriftRootDir string
 	// Namespace under thrift folder
@@ -49,6 +51,7 @@ type PackageHelper struct {
 
 // NewPackageHelper creates a package helper.
 func NewPackageHelper(
+	packageRoot string,
 	configDirName string,
 	middlewareConfig string,
 	thriftRootDir string,
@@ -87,6 +90,7 @@ func NewPackageHelper(
 	}
 
 	p := &PackageHelper{
+		packageRoot:      packageRoot,
 		thriftRootDir:    path.Clean(thriftRootDir),
 		genCodePackage:   genCodePackage,
 		gatewayNamespace: gatewayNamespace,
@@ -95,6 +99,11 @@ func NewPackageHelper(
 		middlewareSpecs:  middlewareSpecs,
 	}
 	return p, nil
+}
+
+// PackageRoot returns the service's root package name
+func (p PackageHelper) PackageRoot() string {
+	return p.packageRoot
 }
 
 // MiddlewareSpecs returns a map of middlewares available

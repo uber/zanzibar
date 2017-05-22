@@ -1,0 +1,10 @@
+{
+	"name": "example",
+	"type": "http",
+	"config": {
+		"headers": {
+				"x-service-name": "example"
+		}
+	},
+	"dependencies": {}
+}

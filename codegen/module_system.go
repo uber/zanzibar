@@ -30,7 +30,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/module"
 )
 
 // EndpointMeta saves meta data used to render an endpoint.
@@ -93,8 +92,8 @@ type ClientStub struct {
 // module system (clients, endpoints)
 func NewDefaultModuleSystem(
 	h *PackageHelper,
-) (*module.System, error) {
-	system := module.NewSystem()
+) (*ModuleSystem, error) {
+	system := NewModuleSystem()
 	tmpl, err := NewTemplate()
 
 	if err != nil {
@@ -102,9 +101,9 @@ func NewDefaultModuleSystem(
 	}
 
 	// Register client module class and type generators
-	if err := system.RegisterClass("client", module.Class{
+	if err := system.RegisterClass("client", ModuleClass{
 		Directory:         "clients",
-		ClassType:         module.MultiModule,
+		ClassType:         MultiModule,
 		ClassDependencies: []string{},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
@@ -144,9 +143,9 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("clients", module.Class{
+	if err := system.RegisterClass("clients", ModuleClass{
 		Directory:         "clients",
-		ClassType:         module.SingleModule,
+		ClassType:         SingleModule,
 		ClassDependencies: []string{},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering clientInit class")
@@ -162,9 +161,9 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("service", module.Class{
+	if err := system.RegisterClass("service", ModuleClass{
 		Directory:         "services",
-		ClassType:         module.MultiModule,
+		ClassType:         MultiModule,
 		ClassDependencies: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -184,9 +183,9 @@ func NewDefaultModuleSystem(
 	}
 
 	// Register endpoint module class and type generators
-	if err := system.RegisterClass("endpoint", module.Class{
+	if err := system.RegisterClass("endpoint", ModuleClass{
 		Directory:         "endpoints",
-		ClassType:         module.MultiModule,
+		ClassType:         MultiModule,
 		ClassDependencies: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
@@ -254,7 +253,7 @@ type HTTPClientGenerator struct {
 // Generate returns the HTTP client generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
 func (g *HTTPClientGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
@@ -335,7 +334,7 @@ type TChannelClientGenerator struct {
 // Generate returns the TChannel client generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
 func (g *TChannelClientGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
@@ -430,7 +429,7 @@ type CustomClientGenerator struct {
 
 // Generate does NOT generate any file, it collects the client spec
 func (g *CustomClientGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
@@ -477,7 +476,7 @@ type ClientsInitGenerator struct {
 // Generate returns the client init file as a map of relative file
 // path (relative to the target build directory) to file bytes.
 func (g *ClientsInitGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	clients := []*ClientSpec{}
 	for _, v := range g.clientSpecs {
@@ -576,7 +575,7 @@ type EndpointGenerator struct {
 // Generate returns the endpoint generated files as a map of relative file
 // path (relative to the target build directory) to file bytes.
 func (g *EndpointGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	ret := map[string][]byte{}
 	endpointJsons := []string{}
@@ -636,7 +635,7 @@ func (g *EndpointGenerator) Generate(
 }
 
 func (g *EndpointGenerator) generateEndpointFile(
-	e *EndpointSpec, instance *module.Instance, out map[string][]byte,
+	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
 ) error {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
@@ -744,7 +743,7 @@ type GatewayServiceGenerator struct {
 // Generate returns the gateway service generated files as a map of relative
 // file path (relative to the target buid directory) to file bytes.
 func (generator *GatewayServiceGenerator) Generate(
-	instance *module.Instance,
+	instance *ModuleInstance,
 ) (map[string][]byte, error) {
 	// zanzibar-defaults.json is copied from ../config/production.json
 	configSrcFileName := path.Join(
@@ -812,7 +811,7 @@ func (generator *GatewayServiceGenerator) Generate(
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(
-	e *EndpointSpec, instance *module.Instance, out map[string][]byte,
+	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
 ) error {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName

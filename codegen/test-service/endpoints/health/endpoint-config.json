@@ -1,0 +1,12 @@
+{
+	"name": "health",
+	"type": "http",
+	"config": {
+		"rateLimit": 100
+	},
+	"dependencies": {
+		"client": [
+			"example"
+		]
+	}
+}
