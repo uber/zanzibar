@@ -165,6 +165,64 @@ func (c *TypeConverter) genConverterForPrimitive(
 	return nil
 }
 
+func (c *TypeConverter) genConverterForList(
+	toFieldType *compile.ListSpec,
+	toField *compile.FieldSpec,
+	fromField *compile.FieldSpec,
+	toIdentifier string,
+	fromIdentifier string,
+	keyPrefix string,
+	indent string,
+) error {
+	typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+	if err != nil {
+		return err
+	}
+
+	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+	if isStruct {
+		line := toIdentifier + " = make([]*" +
+			typeName + ", len(" + fromIdentifier + "))"
+		c.Lines = append(c.Lines, line)
+	} else {
+		line := toIdentifier + " = make([]" +
+			typeName + ", len(" + fromIdentifier + "))"
+		c.Lines = append(c.Lines, line)
+	}
+
+	line := "for index, value := range " + fromIdentifier + " {"
+	c.Lines = append(c.Lines, line)
+
+	if isStruct {
+		fromFieldType, ok := fromField.Type.(*compile.ListSpec)
+		if !ok {
+			return errors.Errorf(
+				"Could not convert field (%s): type is not list",
+				fromField.Name,
+			)
+		}
+
+		err = c.genConverterForStruct(
+			toField.Name,
+			valueStruct,
+			fromFieldType.ValueSpec,
+			"value",
+			keyPrefix+strings.Title(toField.Name)+"[index]",
+			indent,
+		)
+		if err != nil {
+			return err
+		}
+	} else {
+		line = toIdentifier + "[index] = " + typeName + "(value)"
+		c.Lines = append(c.Lines, line)
+	}
+
+	line = "}"
+	c.Lines = append(c.Lines, line)
+	return nil
+}
+
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	indent string,
@@ -242,53 +300,18 @@ func (c *TypeConverter) genStructConverter(
 				return err
 			}
 		case *compile.ListSpec:
-			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
+			err := c.genConverterForList(
+				toFieldType,
+				toField,
+				fromField,
+				toIdentifier,
+				fromIdentifier,
+				keyPrefix,
+				indent,
+			)
 			if err != nil {
 				return err
 			}
-
-			valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
-			if isStruct {
-				line := toIdentifier + " = make([]*" +
-					typeName + ", len(" + fromIdentifier + "))"
-				c.Lines = append(c.Lines, line)
-			} else {
-				line := toIdentifier + " = make([]" +
-					typeName + ", len(" + fromIdentifier + "))"
-				c.Lines = append(c.Lines, line)
-			}
-
-			line := "for index, value := range " + fromIdentifier + " {"
-			c.Lines = append(c.Lines, line)
-
-			if isStruct {
-				fromFieldType, ok := fromField.Type.(*compile.ListSpec)
-				if !ok {
-					return errors.Errorf(
-						"Could not convert field (%s): type is not list",
-						fromField.Name,
-					)
-				}
-
-				err = c.genConverterForStruct(
-					toField.Name,
-					valueStruct,
-					fromFieldType.ValueSpec,
-					"value",
-					keyPrefix+strings.Title(toField.Name)+"[index]",
-					indent,
-				)
-				if err != nil {
-					return err
-				}
-			} else {
-				line = toIdentifier + "[index] = " + typeName + "(value)"
-				c.Lines = append(c.Lines, line)
-			}
-
-			line = "}"
-			c.Lines = append(c.Lines, line)
-
 		case *compile.MapSpec:
 			typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
 			if err != nil {
