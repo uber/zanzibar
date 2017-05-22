@@ -91,6 +91,7 @@ import (
 {{ $clientName := title .ClientName -}}
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{ $responseType := .Method.ResponseType}}
+{{ $clientMethodName := title .ClientMethodName -}}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -180,7 +181,6 @@ func (handler *{{$handlerName}}) HandleRequest(
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientMethodName := title ($clientMethod).Name -}}
 {{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
@@ -358,7 +358,13 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "endpoint.tmpl", size: 8052, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+||||||| merged common ancestors
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8038, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> Allow multiple services for tchannel client
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1214,7 +1220,6 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$clientName := title .ClientID | printf "%sClient" -}}
-{{range $svc := .Services}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 	{{- /* this is the service discovery service name */}}
@@ -1243,21 +1248,19 @@ func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 	)
 
 	return &{{$clientName}}{
-		{{- /* this is the thrift service name, different from service discovery service name */}}
-		thriftService: "{{$svc.Name}}",
-		client:        client,
+		client: client,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
-	thriftService string
 	client        zanzibar.TChannelClient
 }
 
+{{range $svc := .Services}}
 {{range .Methods}}
-	// {{.Name}} ...
-	func (c *{{$clientName}}) {{.Name}}(
+	// {{title $svc.Name}}{{title .Name}} is a client RPC call for method "{{.Name}}" of thrift service "{{$svc.Name}}"
+	func (c *{{$clientName}}) {{title $svc.Name}}{{title .Name}}(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne .RequestType "" -}}
@@ -1270,7 +1273,7 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 		success, respHeaders, err := c.client.Call(
-			ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
 
 		if err == nil && !success {
@@ -1312,7 +1315,13 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3141, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+||||||| merged common ancestors
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3111, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> Allow multiple services for tchannel client
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

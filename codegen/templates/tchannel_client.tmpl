@@ -18,7 +18,6 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$clientName := title .ClientID | printf "%sClient" -}}
-{{range $svc := .Services}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 	{{- /* this is the service discovery service name */}}
@@ -47,21 +46,19 @@ func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
 	)
 
 	return &{{$clientName}}{
-		{{- /* this is the thrift service name, different from service discovery service name */}}
-		thriftService: "{{$svc.Name}}",
-		client:        client,
+		client: client,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
-	thriftService string
 	client        zanzibar.TChannelClient
 }
 
+{{range $svc := .Services}}
 {{range .Methods}}
-	// {{.Name}} ...
-	func (c *{{$clientName}}) {{.Name}}(
+	// {{title $svc.Name}}{{title .Name}} is a client RPC call for method "{{.Name}}" of thrift service "{{$svc.Name}}"
+	func (c *{{$clientName}}) {{title $svc.Name}}{{title .Name}}(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne .RequestType "" -}}
@@ -74,7 +71,7 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 		success, respHeaders, err := c.client.Call(
-			ctx, c.thriftService, "{{.Name}}", reqHeaders, args, &result,
+			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
 
 		if err == nil && !success {

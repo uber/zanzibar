@@ -39,6 +39,7 @@ type EndpointMeta struct {
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
+	ClientMethodName   string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
 	ReqHeaderMapKeys   []string
@@ -689,6 +690,16 @@ func (g *EndpointGenerator) generateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
+	// TODO: http client needs to support multiple thrift services
+	var clientMethodName string
+	if method.DownstreamMethod != nil {
+		clientMethodName = method.DownstreamMethod.Name
+		if e.WorkflowType == "tchannelClient" {
+			clientMethodName = method.DownstreamService + strings.Title(clientMethodName)
+
+		}
+	}
+
 	meta := &EndpointMeta{
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
@@ -699,6 +710,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
 		ClientName:         e.ClientName,
+		ClientMethodName:   clientMethodName,
 		WorkflowName:       workflowName,
 	}
 
