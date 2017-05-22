@@ -385,7 +385,12 @@ func readPackageInfo(
 	}
 
 	return &PackageInfo{
-		PackageName:           defaultAlias,
+		// The package name is assumed to be the lower case of the instance
+		// Name plus the titular class name, such as fooClient
+		PackageName: defaultAlias,
+		// The prefixes "Static" and "Generated" are used to ensure global
+		// uniqueness of the provided package aliases. Note that the default
+		// package is "PackageName".
 		PackageAlias:          defaultAlias + "Static",
 		GeneratedPackageAlias: defaultAlias + "Generated",
 		PackagePath: path.Join(
