@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package codegen
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -29,7 +28,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -37,39 +35,42 @@ import (
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
 // multiple directories with multiple configurations
-type classType int
+type moduleClassType int
 
 const (
 	// SingleModule defines a module class type that has 1 directory
-	SingleModule classType = iota
+	SingleModule moduleClassType = iota
 	// MultiModule defines a module class type with multiple nested directories
-	MultiModule classType = iota
+	MultiModule moduleClassType = iota
 )
 
 const configSuffix = "-config.json"
 
-// NewSystem returns a new module system
-func NewSystem() *System {
-	return &System{
-		classes:    map[string]*Class{},
+// NewModuleSystem returns a new module system
+func NewModuleSystem() *ModuleSystem {
+	return &ModuleSystem{
+		classes:    map[string]*ModuleClass{},
 		classOrder: []string{},
 	}
 }
 
-// System defines the module classes and their type generators
-type System struct {
-	classes    map[string]*Class
+// ModuleSystem defines the module classes and their type generators
+type ModuleSystem struct {
+	classes    map[string]*ModuleClass
 	classOrder []string
 }
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
-func (moduleSystem *System) RegisterClass(name string, class Class) error {
+func (system *ModuleSystem) RegisterClass(
+	name string,
+	class ModuleClass,
+) error {
 	if name == "" {
 		return errors.Errorf("A module class name must not be empty")
 	}
 
-	if moduleSystem.classes[name] != nil {
+	if system.classes[name] != nil {
 		return errors.Errorf(
 			"The module class \"%s\" is already defined",
 			name,
@@ -79,7 +80,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	// Validate the module class dependencies
 	// (this validation ensures that circular deps cannot exist)
 	for _, moduleType := range class.ClassDependencies {
-		if moduleSystem.classes[moduleType] == nil {
+		if system.classes[moduleType] == nil {
 			return errors.Errorf(
 				"The module class \"%s\" depends on class type \"%s\", "+
 					"which is not yet defined",
@@ -100,7 +101,7 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	}
 
 	// Validate the module class directory name is unique
-	for moduleClassName, moduleClass := range moduleSystem.classes {
+	for moduleClassName, moduleClass := range system.classes {
 		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
 			return errors.Errorf(
 				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
@@ -112,20 +113,20 @@ func (moduleSystem *System) RegisterClass(name string, class Class) error {
 	}
 
 	class.types = map[string]BuildGenerator{}
-	moduleSystem.classes[name] = &class
-	moduleSystem.classOrder = append(moduleSystem.classOrder, name)
+	system.classes[name] = &class
+	system.classOrder = append(system.classOrder, name)
 
 	return nil
 }
 
 // RegisterClassType registers a type generator for a specific module class
 // For example, the "http"" type generator for the "Endpoint"" class
-func (moduleSystem *System) RegisterClassType(
+func (system *ModuleSystem) RegisterClassType(
 	className string,
 	classType string,
 	generator BuildGenerator,
 ) error {
-	moduleClass := moduleSystem.classes[className]
+	moduleClass := system.classes[className]
 
 	if moduleClass == nil {
 		return errors.Errorf(
@@ -152,22 +153,22 @@ func (moduleSystem *System) RegisterClassType(
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
 // the target directory.
-func (moduleSystem *System) ResolveModules(
+func (system *ModuleSystem) ResolveModules(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
-) (map[string][]*Instance, error) {
+) (map[string][]*ModuleInstance, error) {
 
-	resolvedModules := map[string][]*Instance{}
+	resolvedModules := map[string][]*ModuleInstance{}
 
-	for _, className := range moduleSystem.classOrder {
-		class := moduleSystem.classes[className]
+	for _, className := range system.classOrder {
+		class := system.classes[className]
 		fullInstanceDirectory := filepath.Join(baseDirectory, class.Directory)
 
-		classInstances := []*Instance{}
+		classInstances := []*ModuleInstance{}
 
 		if class.ClassType == SingleModule {
-			instance, instanceErr := moduleSystem.readInstance(
+			instance, instanceErr := system.readInstance(
 				packageRoot,
 				baseDirectory,
 				targetGenDir,
@@ -199,7 +200,7 @@ func (moduleSystem *System) ResolveModules(
 
 			for _, file := range files {
 				if file.IsDir() {
-					instance, instanceErr := moduleSystem.readInstance(
+					instance, instanceErr := system.readInstance(
 						packageRoot,
 						baseDirectory,
 						targetGenDir,
@@ -237,7 +238,7 @@ func (moduleSystem *System) ResolveModules(
 				}
 
 				// TODO: We don't want to linear scan here
-				var dependencyInstance *Instance
+				var dependencyInstance *ModuleInstance
 
 				for _, instance := range moduleClassInstances {
 					if instance.InstanceName == classDependency.InstanceName {
@@ -261,7 +262,7 @@ func (moduleSystem *System) ResolveModules(
 					classInstance.ResolvedDependencies[classDependency.ClassName]
 
 				if !ok {
-					resolvedDependencies = []*Instance{}
+					resolvedDependencies = []*ModuleInstance{}
 				}
 
 				classInstance.ResolvedDependencies[classDependency.ClassName] =
@@ -273,13 +274,13 @@ func (moduleSystem *System) ResolveModules(
 	return resolvedModules, nil
 }
 
-func (moduleSystem *System) readInstance(
+func (system *ModuleSystem) readInstance(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
 	className string,
 	instanceDirectory string,
-) (*Instance, error) {
+) (*ModuleInstance, error) {
 
 	jsonFileName := className + configSuffix
 	classConfigPath := filepath.Join(
@@ -323,7 +324,7 @@ func (moduleSystem *System) readInstance(
 		)
 	}
 
-	return &Instance{
+	return &ModuleInstance{
 		PackageInfo:          packageInfo,
 		ClassName:            className,
 		ClassType:            jsonConfig.Type,
@@ -331,25 +332,25 @@ func (moduleSystem *System) readInstance(
 		Directory:            instanceDirectory,
 		InstanceName:         jsonConfig.Name,
 		Dependencies:         dependencies,
-		ResolvedDependencies: map[string][]*Instance{},
+		ResolvedDependencies: map[string][]*ModuleInstance{},
 		JSONFileName:         jsonFileName,
 		JSONFileRaw:          raw,
 	}, nil
 }
 
-func readDeps(jsonDeps map[string][]string) []Dependency {
+func readDeps(jsonDeps map[string][]string) []ModuleDependency {
 	depCount := 0
 
 	for _, depsList := range jsonDeps {
 		depCount += len(depsList)
 	}
 
-	deps := make([]Dependency, depCount)
+	deps := make([]ModuleDependency, depCount)
 	depIndex := 0
 
 	for className, depsList := range jsonDeps {
 		for _, instanceName := range depsList {
-			deps[depIndex] = Dependency{
+			deps[depIndex] = ModuleDependency{
 				ClassName:    className,
 				InstanceName: instanceName,
 			}
@@ -367,7 +368,7 @@ func readPackageInfo(
 	className string,
 	instanceDirectory string,
 	jsonConfig *JSONClassConfig,
-	dependencies []Dependency,
+	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(camelCase(className))
 	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
@@ -406,12 +407,12 @@ func readPackageInfo(
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory
-func (moduleSystem *System) GenerateBuild(
+func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
 ) error {
-	resolvedModules, err := moduleSystem.ResolveModules(
+	resolvedModules, err := system.ResolveModules(
 		packageRoot,
 		baseDirectory,
 		targetGenDir,
@@ -427,7 +428,7 @@ func (moduleSystem *System) GenerateBuild(
 	}
 
 	moduleIndex := 0
-	for _, className := range moduleSystem.classOrder {
+	for _, className := range system.classOrder {
 		classInstances := resolvedModules[className]
 
 		for _, classInstance := range classInstances {
@@ -451,7 +452,7 @@ func (moduleSystem *System) GenerateBuild(
 				moduleCount,
 			)
 
-			classGenerators := moduleSystem.classes[classInstance.ClassName]
+			classGenerators := system.classes[classInstance.ClassName]
 			generator := classGenerators.types[classInstance.ClassType]
 
 			if generator == nil {
@@ -539,11 +540,11 @@ func formatGoFile(filePath string) error {
 	return nil
 }
 
-// Class defines a module class in the build configuration directory. This
-// coud be something like an Endpoint class which contains multiple endpoint
-// configurations, or a Lib class, that is itself a module instance
-type Class struct {
-	ClassType         classType
+// ModuleClass defines a module class in the build configuration directory.
+// THis coud be something like an Endpoint class which contains multiple
+// endpoint configurations, or a Lib class, that is itself a module instance
+type ModuleClass struct {
+	ClassType         moduleClassType
 	Directory         string
 	ClassDependencies []string
 	types             map[string]BuildGenerator
@@ -554,7 +555,7 @@ type Class struct {
 // Endpoint module instance may generate endpoint handler code
 type BuildGenerator interface {
 	Generate(
-		instance *Instance,
+		instance *ModuleInstance,
 	) (map[string][]byte, error)
 }
 
@@ -603,14 +604,14 @@ func (info *PackageInfo) ImportPackageAlias() string {
 	return info.PackageAlias
 }
 
-// Instance is a configured module on disk inside a module class directory.
+// ModuleInstance is a configured module inside a module class directory.
 // For example, this could be
 //     ClassName:    "Endpoint,
 //     ClassType:    "http",
 //     BaseDirectory "/path/to/service/base/"
 //     Directory:    "clients/health/"
 //     InstanceName: "health",
-type Instance struct {
+type ModuleInstance struct {
 	// PackageInfo is the name for the generated module instance
 	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
@@ -628,20 +629,20 @@ type Instance struct {
 	// Config is a reference to the instance "config" key in the instances json
 	//file
 	Config interface{}
-	// Dependency is a list of dependent modules as defined in the instances
+	// Dependencies is a list of dependent modules as defined in the instances
 	// json file
-	Dependencies []Dependency
+	Dependencies []ModuleDependency
 	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
-	ResolvedDependencies map[string][]*Instance
+	ResolvedDependencies map[string][]*ModuleInstance
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
 	JSONFileRaw []byte
 }
 
-// Dependency defines a module instance required by another module instance
-type Dependency struct {
+// ModuleDependency defines a module instance required by another instance
+type ModuleDependency struct {
 	// ClassName is the name of the class as defined in the module system
 	ClassName string
 	// InstanceName is the name of the dependency instance as configu
@@ -739,19 +740,4 @@ func writeFile(filePath string, bytes []byte) error {
 
 func closeFile(file *os.File) {
 	_ = file.Close()
-}
-
-var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
-
-func camelCase(src string) string {
-	byteSrc := []byte(src)
-	chunks := camelingRegex.FindAll(byteSrc, -1)
-	for idx, val := range chunks {
-		if idx > 0 {
-			chunks[idx] = bytes.Title(val)
-		} else {
-			chunks[idx][0] = bytes.ToLower(val[0:1])[0]
-		}
-	}
-	return string(bytes.Join(chunks, nil))
 }
