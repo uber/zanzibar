@@ -226,8 +226,11 @@ func (c *TypeConverter) genConverterForList(
 func (c *TypeConverter) genConverterForMap(
 	toFieldType *compile.MapSpec,
 	toField *compile.FieldSpec,
+	fromField *compile.FieldSpec,
 	toIdentifier string,
 	fromIdentifier string,
+	keyPrefix string,
+	indent string,
 ) error {
 	typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
 	if err != nil {
@@ -242,7 +245,7 @@ func (c *TypeConverter) genConverterForMap(
 		)
 	}
 
-	_, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
+	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	if isStruct {
 		line := toIdentifier + " = make(map[string]*" +
 			typeName + ", len(" + fromIdentifier + "))"
@@ -257,9 +260,25 @@ func (c *TypeConverter) genConverterForMap(
 	c.Lines = append(c.Lines, line)
 
 	if isStruct {
-		// TODO: need to deep copy struct here.
-		line = toIdentifier + "[key] = (*" + typeName + ")(value)"
-		c.Lines = append(c.Lines, line)
+		fromFieldType, ok := fromField.Type.(*compile.MapSpec)
+		if !ok {
+			return errors.Errorf(
+				"Could not convert field (%s): type is not map",
+				fromField.Name,
+			)
+		}
+
+		err = c.genConverterForStruct(
+			toField.Name,
+			valueStruct,
+			fromFieldType.ValueSpec,
+			"value",
+			keyPrefix+strings.Title(toField.Name)+"[key]",
+			indent,
+		)
+		if err != nil {
+			return err
+		}
 	} else {
 		line = toIdentifier + "[key] = " + typeName + "(value)"
 		c.Lines = append(c.Lines, line)
@@ -363,8 +382,11 @@ func (c *TypeConverter) genStructConverter(
 			err := c.genConverterForMap(
 				toFieldType,
 				toField,
+				fromField,
 				toIdentifier,
 				fromIdentifier,
+				keyPrefix,
+				indent,
 			)
 			if err != nil {
 				return err
