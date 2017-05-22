@@ -651,11 +651,21 @@ type ModuleDependency struct {
 
 // JSONClassConfig maps onto a json configuration for a class type
 type JSONClassConfig struct {
-	Name              string              `json:"name"`
-	Config            interface{}         `json:"config"`
-	Dependencies      map[string][]string `json:"dependencies"`
-	Type              string              `json:"type"`
-	IsExportGenerated *bool               `json:"IsExportGenerated"`
+	// Name is the class instance name used to identify the module as a
+	// dependency. The combination of the class Name and this instance name
+	// is unique.
+	Name string `json:"name"`
+	// The configuration object for this class instance. This depends on the
+	// class name and class type, and is interpreted by each module generator.
+	Config interface{} `json:"config"`
+	// Dependencies is a map of class name to a list of instance names. This
+	// infers the dependencies struct generated for the initializer
+	Dependencies map[string][]string `json:"dependencies"`
+	// Type refers to the class type used to generate the dependency
+	Type string `json:"type"`
+	// IsExportGenerated determines whether or not the export lives in
+	// IsExportGenerated defaults to true if not set.
+	IsExportGenerated *bool `json:"IsExportGenerated"`
 }
 
 // Read will read a class configuration json file into a jsonClassConfig struct
