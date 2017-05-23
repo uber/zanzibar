@@ -72,7 +72,7 @@ func (system *ModuleSystem) RegisterClass(
 
 	if system.classes[name] != nil {
 		return errors.Errorf(
-			"The module class \"%s\" is already defined",
+			"The module class %q is already defined",
 			name,
 		)
 	}
@@ -82,7 +82,7 @@ func (system *ModuleSystem) RegisterClass(
 	for _, moduleType := range class.ClassDependencies {
 		if system.classes[moduleType] == nil {
 			return errors.Errorf(
-				"The module class \"%s\" depends on class type \"%s\", "+
+				"The module class %q depends on class type %q, "+
 					"which is not yet defined",
 				name,
 				moduleType,
@@ -94,7 +94,7 @@ func (system *ModuleSystem) RegisterClass(
 
 	if strings.HasPrefix(class.Directory, "..") {
 		return errors.Errorf(
-			"The module class \"%s\" must map to an internal directory but was \"%s\"",
+			"The module class %q must map to an internal directory but was %q",
 			name,
 			class.Directory,
 		)
@@ -104,7 +104,7 @@ func (system *ModuleSystem) RegisterClass(
 	for moduleClassName, moduleClass := range system.classes {
 		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
 			return errors.Errorf(
-				"The module class \"%s\" conflicts with directory \"%s\" from class \"%s\"",
+				"The module class %q conflicts with directory %q from class %q",
 				name,
 				class.Directory,
 				moduleClassName,
@@ -130,7 +130,7 @@ func (system *ModuleSystem) RegisterClassType(
 
 	if moduleClass == nil {
 		return errors.Errorf(
-			"Cannot set class type \"%s\" for undefined class \"%s\"",
+			"Cannot set class type %q for undefined class %q",
 			classType,
 			className,
 		)
@@ -138,7 +138,7 @@ func (system *ModuleSystem) RegisterClassType(
 
 	if moduleClass.types[classType] != nil {
 		return errors.Errorf(
-			"The class type \"%s\" is already defined for class \"%s\"",
+			"The class type %q is already defined for class %q",
 			classType,
 			className,
 		)
@@ -178,7 +178,7 @@ func (system *ModuleSystem) ResolveModules(
 			if instanceErr != nil {
 				return nil, errors.Wrapf(
 					instanceErr,
-					"Error reading single instance \"%s\" in \"%s\"",
+					"Error reading single instance %q in %q",
 					className,
 					class.Directory,
 				)
@@ -193,7 +193,7 @@ func (system *ModuleSystem) ResolveModules(
 				// Expected $path to be a class directory
 				return nil, errors.Wrapf(
 					err,
-					"Error reading module instance directory \"%s\"",
+					"Error reading module instance directory %q",
 					fullInstanceDirectory,
 				)
 			}
@@ -210,7 +210,7 @@ func (system *ModuleSystem) ResolveModules(
 					if instanceErr != nil {
 						return nil, errors.Wrapf(
 							instanceErr,
-							"Error reading multi instance \"%s\" in \"%s\"",
+							"Error reading multi instance %q in %q",
 							className,
 							filepath.Join(class.Directory, file.Name()),
 						)
@@ -230,7 +230,7 @@ func (system *ModuleSystem) ResolveModules(
 
 				if !ok {
 					return nil, errors.Errorf(
-						"Invalid class name \"%q\" in dependencies for %s %s",
+						"Invalid class name %q in dependencies for %q %q",
 						classDependency.ClassName,
 						classInstance.ClassName,
 						classInstance.InstanceName,
@@ -249,8 +249,56 @@ func (system *ModuleSystem) ResolveModules(
 
 				if dependencyInstance == nil {
 					return nil, errors.Errorf(
-						"Unknown %q class depdendency \"%q\""+
-							"in dependencies for %s %s",
+						"Unknown %q class depdendency %q"+
+							"in dependencies for %q %q",
+						classDependency.ClassName,
+						classDependency.InstanceName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				resolvedDependencies, ok :=
+					classInstance.ResolvedDependencies[classDependency.ClassName]
+
+				if !ok {
+					resolvedDependencies = []*ModuleInstance{}
+				}
+
+				classInstance.ResolvedDependencies[classDependency.ClassName] =
+					append(resolvedDependencies, dependencyInstance)
+			}
+		}
+
+		// Resolve the class dependencies
+		for _, classInstance := range classInstances {
+			for _, classDependency := range classInstance.Dependencies {
+				moduleClassInstances, ok :=
+					resolvedModules[classDependency.ClassName]
+
+				if !ok {
+					return nil, errors.Errorf(
+						"Invalid class name %q in dependencies for %q %q",
+						classDependency.ClassName,
+						classInstance.ClassName,
+						classInstance.InstanceName,
+					)
+				}
+
+				// TODO: We don't want to linear scan here
+				var dependencyInstance *ModuleInstance
+
+				for _, instance := range moduleClassInstances {
+					if instance.InstanceName == classDependency.InstanceName {
+						dependencyInstance = instance
+						break
+					}
+				}
+
+				if dependencyInstance == nil {
+					return nil, errors.Errorf(
+						"Unknown %q class depdendency %q"+
+							"in dependencies for %q %q",
 						classDependency.ClassName,
 						classDependency.InstanceName,
 						classInstance.ClassName,
@@ -297,7 +345,7 @@ func (system *ModuleSystem) readInstance(
 		// Expected $class-config.json to exist in ...
 		return nil, errors.Wrapf(
 			err,
-			"Error reading JSON Config \"%s\"",
+			"Error reading JSON Config %q",
 			classConfigPath,
 		)
 	}
@@ -318,7 +366,7 @@ func (system *ModuleSystem) readInstance(
 		// Expected $class-config.json to exist in ...
 		return nil, errors.Wrapf(
 			err,
-			"Error reading class package info for %s %s",
+			"Error reading class package info for %q %q",
 			className,
 			jsonConfig.Name,
 		)
@@ -379,7 +427,7 @@ func readPackageInfo(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error computing generated import string for %s",
+			"Error computing generated import string for %q",
 			targetGenDir,
 		)
 	}
@@ -475,7 +523,7 @@ func (system *ModuleSystem) GenerateBuild(
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating %q %q class of type %q\n%s\n",
+					"Error generating %q %q class of type %q\n%q\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
 					classInstance.ClassType,
