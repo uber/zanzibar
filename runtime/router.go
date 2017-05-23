@@ -23,13 +23,11 @@ package zanzibar
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"go.uber.org/zap"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/uber-go/tally"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -108,14 +106,6 @@ type HandlerFn func(
 	*ServerHTTPResponse,
 )
 
-// EndpointMetrics contains pre allocated metrics structures
-// These are pre-allocated to cache tags maps and for performance
-type EndpointMetrics struct {
-	requestRecvd   tally.Counter
-	requestLatency tally.Timer
-	statusCodes    map[int]tally.Counter
-}
-
 // RouterEndpoint struct represents an endpoint that can be registered
 // into the router itself.
 type RouterEndpoint struct {
@@ -123,7 +113,7 @@ type RouterEndpoint struct {
 	HandlerName  string
 	HandlerFn    HandlerFn
 
-	metrics EndpointMetrics
+	metrics Metrics
 	gateway *Gateway
 }
 
@@ -138,15 +128,6 @@ func NewRouterEndpoint(
 		"endpoint": endpointName,
 		"handler":  handlerName,
 	}
-	endpointScope := gateway.MetricScope.Tagged(endpointTags)
-	requestRecvd := endpointScope.Counter("inbound.calls.recvd")
-	requestLatency := endpointScope.Timer("inbound.calls.latency")
-	statusCodes := make(map[int]tally.Counter, len(knownStatusCodes))
-
-	for _, statusCode := range knownStatusCodes {
-		metricName := "inbound.calls.status." + strconv.Itoa(statusCode)
-		statusCodes[statusCode] = endpointScope.Counter(metricName)
-	}
 
 	return &RouterEndpoint{
 		EndpointName: endpointName,
@@ -154,11 +135,11 @@ func NewRouterEndpoint(
 		HandlerFn:    handler,
 		gateway:      gateway,
 
-		metrics: EndpointMetrics{
-			requestRecvd:   requestRecvd,
-			statusCodes:    statusCodes,
-			requestLatency: requestLatency,
-		},
+		metrics: NewMetrics(
+			gateway.MetricScope.Tagged(endpointTags),
+			"inbound.calls.recvd",
+			"inbound.calls.latency",
+		),
 	}
 }
 
