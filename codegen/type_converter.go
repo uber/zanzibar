@@ -43,6 +43,12 @@ type PackageNameResolver interface {
 	TypePackageName(thriftFile string) (string, error)
 }
 
+// append helper will add a line to TypeConverter
+func (c *TypeConverter) append(parts ...string) {
+	line := strings.Join(parts, "")
+	c.Lines = append(c.Lines, line)
+}
+
 func (c *TypeConverter) getGoTypeName(
 	valueType compile.TypeSpec,
 ) (string, error) {
@@ -120,11 +126,9 @@ func (c *TypeConverter) genConverterForStruct(
 		)
 	}
 
-	line := indent + "if " + fromIdentifier + " != nil {"
-	c.Lines = append(c.Lines, line)
+	c.append(indent, "if ", fromIdentifier, " != nil {")
 
-	line = indent + "	" + toIdentifier + " = &" + typeName + "{}"
-	c.Lines = append(c.Lines, line)
+	c.append(indent, "	", toIdentifier, " = &", typeName, "{}")
 
 	subFromFields := fromFieldStruct.Fields
 	err = c.genStructConverter(
@@ -137,14 +141,11 @@ func (c *TypeConverter) genConverterForStruct(
 		return err
 	}
 
-	line = indent + "} else {"
-	c.Lines = append(c.Lines, line)
+	c.append(indent, "} else {")
 
-	line = indent + "	" + toIdentifier + " = nil"
-	c.Lines = append(c.Lines, line)
+	c.append(indent, "	", toIdentifier, " = nil")
 
-	line = indent + "}"
-	c.Lines = append(c.Lines, line)
+	c.append(indent, "}")
 
 	return nil
 }
@@ -154,18 +155,16 @@ func (c *TypeConverter) genConverterForPrimitive(
 	toIdentifier string,
 	fromIdentifier string,
 ) error {
-	var line string
 	typeName, err := c.getGoTypeName(toField.Type)
 	if err != nil {
 		return err
 	}
 
 	if toField.Required {
-		line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
+		c.append(toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
 	} else {
-		line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
+		c.append(toIdentifier, " = (*", typeName, ")(", fromIdentifier, ")")
 	}
-	c.Lines = append(c.Lines, line)
 	return nil
 }
 
@@ -185,17 +184,18 @@ func (c *TypeConverter) genConverterForList(
 
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	if isStruct {
-		line := toIdentifier + " = make([]*" +
-			typeName + ", len(" + fromIdentifier + "))"
-		c.Lines = append(c.Lines, line)
+		c.append(
+			toIdentifier, " = make([]*", typeName,
+			", len(", fromIdentifier, "))",
+		)
 	} else {
-		line := toIdentifier + " = make([]" +
-			typeName + ", len(" + fromIdentifier + "))"
-		c.Lines = append(c.Lines, line)
+		c.append(
+			toIdentifier, " = make([]", typeName,
+			", len(", fromIdentifier, "))",
+		)
 	}
 
-	line := "for index, value := range " + fromIdentifier + " {"
-	c.Lines = append(c.Lines, line)
+	c.append("for index, value := range ", fromIdentifier, " {")
 
 	if isStruct {
 		fromFieldType, ok := fromField.Type.(*compile.ListSpec)
@@ -218,12 +218,10 @@ func (c *TypeConverter) genConverterForList(
 			return err
 		}
 	} else {
-		line = "	" + toIdentifier + "[index] = " + typeName + "(value)"
-		c.Lines = append(c.Lines, line)
+		c.append("	", toIdentifier, "[index] = ", typeName, "(value)")
 	}
 
-	line = "}"
-	c.Lines = append(c.Lines, line)
+	c.append("}")
 	return nil
 }
 
@@ -251,17 +249,18 @@ func (c *TypeConverter) genConverterForMap(
 
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	if isStruct {
-		line := toIdentifier + " = make(map[string]*" +
-			typeName + ", len(" + fromIdentifier + "))"
-		c.Lines = append(c.Lines, line)
+		c.append(
+			toIdentifier, " = make(map[string]*", typeName,
+			", len(", fromIdentifier, "))",
+		)
 	} else {
-		line := toIdentifier + " = make(map[string]" +
-			typeName + ", len(" + fromIdentifier + "))"
-		c.Lines = append(c.Lines, line)
+		c.append(
+			toIdentifier, " = make(map[string]", typeName,
+			", len(", fromIdentifier, "))",
+		)
 	}
 
-	line := "for key, value := range " + fromIdentifier + " {"
-	c.Lines = append(c.Lines, line)
+	c.append("for key, value := range ", fromIdentifier, " {")
 
 	if isStruct {
 		fromFieldType, ok := fromField.Type.(*compile.MapSpec)
@@ -284,12 +283,10 @@ func (c *TypeConverter) genConverterForMap(
 			return err
 		}
 	} else {
-		line = "	" + toIdentifier + "[key] = " + typeName + "(value)"
-		c.Lines = append(c.Lines, line)
+		c.append("	", toIdentifier, "[key] = ", typeName, "(value)")
 	}
 
-	line = "}"
-	c.Lines = append(c.Lines, line)
+	c.append("}")
 	return nil
 }
 
@@ -340,22 +337,23 @@ func (c *TypeConverter) genStructConverter(
 				return err
 			}
 		case *compile.BinarySpec:
-			line := toIdentifier + " = []byte(" + fromIdentifier + ")"
-			c.Lines = append(c.Lines, line)
+			c.append(toIdentifier, " = []byte(", fromIdentifier, ")")
 		case *compile.TypedefSpec:
 			typeName, err := c.getIdentifierName(toField.Type)
 			if err != nil {
 				return err
 			}
 
-			var line string
 			// TODO: typedef for struct is invalid here ...
 			if toField.Required {
-				line = toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
+				c.append(
+					toIdentifier, " = ", typeName, "(", fromIdentifier, ")",
+				)
 			} else {
-				line = toIdentifier + " = (*" + typeName + ")(" + fromIdentifier + ")"
+				c.append(
+					toIdentifier, " = (*", typeName, ")(", fromIdentifier, ")",
+				)
 			}
-			c.Lines = append(c.Lines, line)
 
 		case *compile.StructSpec:
 			err := c.genConverterForStruct(
