@@ -358,13 +358,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8052, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-||||||| merged common ancestors
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8038, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> Allow multiple services for tchannel client
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8048, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1320,19 +1314,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3141, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-||||||| merged common ancestors
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3111, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> Allow multiple services for tchannel client
-||||||| merged common ancestors
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3111, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3240, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> Generate tchannel client method based on exposed methods config
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3238, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
