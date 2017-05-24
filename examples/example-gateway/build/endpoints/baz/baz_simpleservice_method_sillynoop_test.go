@@ -51,7 +51,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeSillyNoop := func(
+	fakeDeliberateDiffNoop := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (map[string]string, error) {
@@ -65,7 +65,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
 		"SillyNoop",
-		bazClient.NewSimpleServiceSillyNoopHandler(fakeSillyNoop),
+		bazClient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 	)
 
 	headers := map[string]string{}

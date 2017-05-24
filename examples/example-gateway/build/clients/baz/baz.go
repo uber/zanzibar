@@ -60,18 +60,16 @@ func NewClient(gateway *zanzibar.Gateway) *BazClient {
 	)
 
 	return &BazClient{
-		thriftService: "SimpleService",
-		client:        client,
+		client: client,
 	}
 }
 
 // BazClient is the TChannel client for downstream service.
 type BazClient struct {
-	thriftService string
-	client        zanzibar.TChannelClient
+	client zanzibar.TChannelClient
 }
 
-// Call ...
+// Call is a client RPC call for method "SimpleService::Call"
 func (c *BazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
@@ -80,7 +78,7 @@ func (c *BazClient) Call(
 	var result clientsBazBaz.SimpleService_Call_Result
 
 	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {
@@ -98,7 +96,7 @@ func (c *BazClient) Call(
 	return respHeaders, err
 }
 
-// Compare ...
+// Compare is a client RPC call for method "SimpleService::Compare"
 func (c *BazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
@@ -107,7 +105,7 @@ func (c *BazClient) Compare(
 	var result clientsBazBaz.SimpleService_Compare_Result
 
 	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "Compare", reqHeaders, args, &result,
+		ctx, "SimpleService", "Compare", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {
@@ -126,7 +124,7 @@ func (c *BazClient) Compare(
 	return resp, respHeaders, err
 }
 
-// Ping ...
+// Ping is a client RPC call for method "SimpleService::Ping"
 func (c *BazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
@@ -135,7 +133,7 @@ func (c *BazClient) Ping(
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "Ping", reqHeaders, args, &result,
+		ctx, "SimpleService", "Ping", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {
@@ -152,8 +150,8 @@ func (c *BazClient) Ping(
 	return resp, respHeaders, err
 }
 
-// SillyNoop ...
-func (c *BazClient) SillyNoop(
+// DeliberateDiffNoop is a client RPC call for method "SimpleService::SillyNoop"
+func (c *BazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {
@@ -161,7 +159,7 @@ func (c *BazClient) SillyNoop(
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
 	success, respHeaders, err := c.client.Call(
-		ctx, c.thriftService, "SillyNoop", reqHeaders, args, &result,
+		ctx, "SimpleService", "SillyNoop", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {

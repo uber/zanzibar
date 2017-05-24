@@ -39,6 +39,7 @@ type EndpointMeta struct {
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
+	ClientMethodName   string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
 	ReqHeaderMapKeys   []string
@@ -365,11 +366,18 @@ func (g *TChannelClientGenerator) Generate(
 
 	g.genSpecs[clientSpec.JSONFile] = clientSpec
 
+	// reverse index the exposed methods map
+	exposedMethods := map[string]string{}
+	for k, v := range clientSpec.ExposedMethods {
+		exposedMethods[v] = k
+	}
+
 	clientMeta := &ClientMeta{
 		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
+		ExposedMethods:   exposedMethods,
 	}
 
 	client, err := g.templates.execTemplate(
@@ -689,6 +697,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
+	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
@@ -699,6 +708,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
 		ClientName:         e.ClientName,
+		ClientMethodName:   e.ClientMethod,
 		WorkflowName:       workflowName,
 	}
 

@@ -33,6 +33,7 @@ import (
 {{ $clientName := title .ClientName -}}
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{ $responseType := .Method.ResponseType}}
+{{ $clientMethodName := title .ClientMethodName -}}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -122,7 +123,6 @@ func (handler *{{$handlerName}}) HandleRequest(
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientMethodName := title ($clientMethod).Name -}}
 {{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}

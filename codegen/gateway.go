@@ -99,7 +99,11 @@ type ClientSpec struct {
 	ClientName string
 	// ThriftServiceName, if the thrift file has multiple
 	// services then this is the service that describes the client
+	// TODO: this field needs to be deprecated for multi-service support
 	ThriftServiceName string
+	// ExposedMethods is a map of exposed method name to thrift "$service::$method"
+	// only the method values in this map are generated for the client
+	ExposedMethods map[string]string
 }
 
 // ModuleClassConfig represents the generic JSON config for
@@ -112,11 +116,10 @@ type ModuleClassConfig struct {
 
 // ClientClassConfig represents the specific config for
 // a client. This is a downcast of the moduleClassConfig.
-// Config here is a map[string]string but could be any type.
 type ClientClassConfig struct {
-	Name   string            `json:"name"`
-	Type   string            `json:"type"`
-	Config map[string]string `json:"config"`
+	Name   string                 `json:"name"`
+	Type   string                 `json:"type"`
+	Config map[string]interface{} `json:"config"`
 }
 
 // NewClientSpec creates a client spec from a json file.
@@ -161,7 +164,28 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
 func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	return newClientSpec(jsonFile, clientConfig, false, h)
+	exposedMethods := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	if len(exposedMethods) == 0 {
+		return nil, errors.Errorf("No methods are exposed in client config: %s", jsonFile)
+	}
+
+	cspec, err := newClientSpec(jsonFile, clientConfig, false, h)
+	if err != nil {
+		return nil, err
+	}
+
+	cspec.ExposedMethods = map[string]string{}
+	reversed := map[string]string{}
+	for key, val := range exposedMethods {
+		cspec.ExposedMethods[key] = val.(string)
+		reversed[val.(string)] = key
+	}
+
+	if len(cspec.ExposedMethods) != len(reversed) {
+		return nil, errors.Errorf("Keys or values of the exposedMethods of are not unique: %s", jsonFile)
+	}
+
+	return cspec, nil
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
@@ -177,11 +201,11 @@ func NewCustomClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *Pa
 	clientSpec := &ClientSpec{
 		JSONFile:          jsonFile,
 		ClientType:        clientConfig.Type,
-		ClientID:          clientConfig.Config["clientId"],
-		ClientName:        clientConfig.Config["clientName"],
-		CustomImportPath:  clientConfig.Config["customImportPath"],
-		CustomClientType:  clientConfig.Config["customClientType"],
-		CustomPackageName: clientConfig.Config["customPackageName"],
+		ClientID:          clientConfig.Config["clientId"].(string),
+		ClientName:        clientConfig.Config["clientName"].(string),
+		CustomImportPath:  clientConfig.Config["customImportPath"].(string),
+		CustomClientType:  clientConfig.Config["customClientType"].(string),
+		CustomPackageName: clientConfig.Config["customPackageName"].(string),
 	}
 
 	return clientSpec, nil
@@ -206,7 +230,7 @@ func newClientSpec(jsonFile string, clientConfig *ClientClassConfig, wantAnnot b
 	}
 
 	thriftFile := filepath.Join(
-		h.ThriftIDLPath(), config["thriftFile"],
+		h.ThriftIDLPath(), config["thriftFile"].(string),
 	)
 
 	mspec, err := NewModuleSpec(thriftFile, wantAnnot, h)
@@ -247,9 +271,9 @@ func newClientSpec(jsonFile string, clientConfig *ClientClassConfig, wantAnnot b
 		GoPackageName:     goPackageName,
 		GoStructsFileName: goStructsFileName,
 		ThriftFile:        thriftFile,
-		ClientID:          config["clientId"],
-		ClientName:        config["clientName"],
-		ThriftServiceName: config["serviceName"],
+		ClientID:          config["clientId"].(string),
+		ClientName:        config["clientName"].(string),
+		ThriftServiceName: config["serviceName"].(string),
 	}, nil
 }
 
@@ -686,7 +710,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	return e.ModuleSpec.SetDownstream(
 		e.ThriftServiceName, e.ThriftMethodName,
-		clientSpec, e.ClientName, e.ClientMethod, h,
+		clientSpec, e.ClientMethod, h,
 	)
 }
 

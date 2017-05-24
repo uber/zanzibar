@@ -89,7 +89,7 @@ func (handler *SillyNoopHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// SillyNoopEndpoint calls thrift client Baz.SillyNoop
+// SillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
 type SillyNoopEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
@@ -104,7 +104,7 @@ func (w SillyNoopEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.SillyNoop(ctx, clientHeaders)
+	_, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)
 
 	if err != nil {
 		switch errValue := err.(type) {
