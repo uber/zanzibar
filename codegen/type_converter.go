@@ -64,14 +64,18 @@ func (c *TypeConverter) getGoTypeName(
 	case *compile.BinarySpec:
 		return "[]byte", nil
 	case *compile.MapSpec:
+		/* coverage ignore next line */
 		panic("Not Implemented")
 	case *compile.SetSpec:
+		/* coverage ignore next line */
 		panic("Not Implemented")
 	case *compile.ListSpec:
+		/* coverage ignore next line */
 		panic("Not Implemented")
 	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
 		return c.getIdentifierName(s)
 	default:
+		/* coverage ignore next line */
 		panic(fmt.Sprintf("Unknown type (%T) %v", valueType, valueType))
 	}
 }
