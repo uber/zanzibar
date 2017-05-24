@@ -26,6 +26,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
@@ -55,6 +56,10 @@ type naivePackageNameResolver struct {
 func (r *naivePackageNameResolver) TypePackageName(
 	thriftFile string,
 ) (string, error) {
+	if thriftFile[0] == '.' {
+		return "", errors.Errorf("Naive does not support relative imports")
+	}
+
 	_, fileName := filepath.Split(thriftFile)
 
 	return fileName[0 : len(fileName)-thriftExtensionLength], nil
@@ -67,12 +72,18 @@ func newTypeConverter() *codegen.TypeConverter {
 	}
 }
 
-func compileProgram(content string) (*compile.Module, error) {
+func compileProgram(
+	content string,
+	otherFiles map[string][]byte,
+) (*compile.Module, error) {
+	if otherFiles == nil {
+		otherFiles = map[string][]byte{}
+	}
+	otherFiles["structs.thrift"] = []byte(content)
+
 	program, err := compile.Compile(
 		"structs.thrift",
-		compile.Filesystem(dummyFS{
-			"structs.thrift": []byte(content),
-		}),
+		compile.Filesystem(dummyFS(otherFiles)),
 	)
 	if err != nil {
 		return nil, err
@@ -84,9 +95,10 @@ func convertTypes(
 	fromStruct string,
 	toStruct string,
 	content string,
+	otherFiles map[string][]byte,
 ) (string, error) {
 	converter := newTypeConverter()
-	program, err := compileProgram(content)
+	program, err := compileProgram(content, otherFiles)
 	if err != nil {
 		return "", err
 	}
@@ -151,6 +163,7 @@ func TestConverStrings(t *testing.T) {
 			1: optional string one
 			2: required string two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -172,6 +185,7 @@ func TestConvertBools(t *testing.T) {
 			1: optional bool one
 			2: required bool two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -193,6 +207,7 @@ func TestConvertInt8(t *testing.T) {
 			1: optional i8 one
 			2: required i8 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -214,6 +229,7 @@ func TestConvertInt16(t *testing.T) {
 			1: optional i16 one
 			2: required i16 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -235,6 +251,7 @@ func TestConvertInt32(t *testing.T) {
 			1: optional i32 one
 			2: required i32 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -256,6 +273,7 @@ func TestConvertInt64(t *testing.T) {
 			1: optional i64 one
 			2: required i64 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -277,6 +295,7 @@ func TestConvertDouble(t *testing.T) {
 			1: optional double one
 			2: required double two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -298,6 +317,7 @@ func TestConvertBinary(t *testing.T) {
 			1: optional binary one
 			2: required binary two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -329,6 +349,7 @@ func TestConvertStruct(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -371,6 +392,7 @@ func TestHandlesMissingFields(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.Equal(t, "cannot map by name for the field two", err.Error())
@@ -399,6 +421,7 @@ func TestStructTypeMisMatch(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.Equal(t, "", lines)
@@ -420,6 +443,7 @@ func TestConvertTypeDef(t *testing.T) {
 			1: optional UUID one
 			2: required UUID two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -446,6 +470,7 @@ func TestConvertEnum(t *testing.T) {
 			1: optional ItemState one
 			2: required ItemState two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
