@@ -52,19 +52,19 @@ func (c *{{$clientName}}) {{title .Name}}(
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-) (*{{.ResponseType}}, map[string]string, error) {
+) ({{.ResponseType}}, map[string]string, error) {
 {{else if eq .ResponseType "" }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-	r *{{.RequestType}},
+	r {{.RequestType}},
 ) (map[string]string, error) {
 {{else}}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-	r *{{.RequestType}},
-) (*{{.ResponseType}}, map[string]string, error) {
+	r {{.RequestType}},
+) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
@@ -115,7 +115,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{.ResponseType}}
+			var responseBody {{unref .ResponseType}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			if err != nil {
 				return nil, respHeaders, err
@@ -152,7 +152,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{.ResponseType}}
+			var responseBody {{unref .ResponseType}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			if err != nil {
 				return nil, respHeaders, err

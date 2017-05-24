@@ -62,7 +62,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{- end -}}
 
 	{{if ne .RequestType ""}}
-	var requestBody {{.RequestType}}
+	var requestBody {{unref .RequestType}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -141,17 +141,17 @@ func (w {{$workflow}}) Handle(
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*{{.ResponseType}}, zanzibar.Header, error) {
+) ({{.ResponseType}}, zanzibar.Header, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *{{.RequestType}},
+	r {{.RequestType}},
 ) (zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,	
-	r *{{.RequestType}},
-) (*{{.ResponseType}}, zanzibar.Header, error) {
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
@@ -250,8 +250,8 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
-	out := &{{$clientReqType}}{}
+func convertTo{{title .Name}}ClientRequest(in {{.RequestType}}) {{$clientReqType}} {
+	out := &{{unref $clientReqType}}{}
 
 	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
 	{{$line}}
@@ -275,8 +275,8 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
-func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
-	out := &{{.ResponseType}}{}
+func convert{{title .Name}}ClientResponse(in {{$clientResType}}) {{.ResponseType}} {
+	out := &{{unref .ResponseType}}{}
 
 	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
 	{{$line}}

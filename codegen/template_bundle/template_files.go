@@ -120,7 +120,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{- end -}}
 
 	{{if ne .RequestType ""}}
-	var requestBody {{.RequestType}}
+	var requestBody {{unref .RequestType}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -199,17 +199,17 @@ func (w {{$workflow}}) Handle(
 {{else if eq .RequestType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (*{{.ResponseType}}, zanzibar.Header, error) {
+) ({{.ResponseType}}, zanzibar.Header, error) {
 {{else if eq .ResponseType "" }}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *{{.RequestType}},
+	r {{.RequestType}},
 ) (zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
 	reqHeaders zanzibar.Header,	
-	r *{{.RequestType}},
-) (*{{.ResponseType}}, zanzibar.Header, error) {
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
@@ -308,8 +308,8 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(in *{{.RequestType}}) *{{$clientReqType}} {
-	out := &{{$clientReqType}}{}
+func convertTo{{title .Name}}ClientRequest(in {{.RequestType}}) {{$clientReqType}} {
+	out := &{{unref $clientReqType}}{}
 
 	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
 	{{$line}}
@@ -333,8 +333,8 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
-func convert{{title .Name}}ClientResponse(in *{{$clientResType}}) *{{.ResponseType}} {
-	out := &{{.ResponseType}}{}
+func convert{{title .Name}}ClientResponse(in {{$clientResType}}) {{.ResponseType}} {
+	out := &{{unref .ResponseType}}{}
 
 	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
 	{{$line}}
@@ -358,7 +358,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8052, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -626,9 +626,9 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne $clientMethod.RequestType "" -}}
-		args *{{$clientMethodRequestType}},
+		args {{$clientMethodRequestType}},
 		{{end -}}
-	) ({{- if ne $clientMethod.ResponseType "" -}}*{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+	) ({{- if ne $clientMethod.ResponseType "" -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 		{{$counter}}++
 
 		{{range $k, $v := .ClientReqHeaders -}}
@@ -647,7 +647,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		{{end}}
 
 		{{if ne $clientMethod.ResponseType "" -}}
-		var res {{$clientMethod.ResponseType}}
+		var res {{unref $clientMethod.ResponseType}}
 		err := json.Unmarshal([]byte(` + "`" + `{{.ClientResponseString}}` + "`" + `), &res)
 		if err!= nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
@@ -718,7 +718,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3888, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3892, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -777,19 +777,19 @@ func (c *{{$clientName}}) {{title .Name}}(
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-) (*{{.ResponseType}}, map[string]string, error) {
+) ({{.ResponseType}}, map[string]string, error) {
 {{else if eq .ResponseType "" }}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-	r *{{.RequestType}},
+	r {{.RequestType}},
 ) (map[string]string, error) {
 {{else}}
 func (c *{{$clientName}}) {{title .Name}}(
 	ctx context.Context,
 	headers map[string]string,
-	r *{{.RequestType}},
-) (*{{.ResponseType}}, map[string]string, error) {
+	r {{.RequestType}},
+) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
@@ -840,7 +840,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{.ResponseType}}
+			var responseBody {{unref .ResponseType}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			if err != nil {
 				return nil, respHeaders, err
@@ -877,7 +877,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 	{{else}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			var responseBody {{.ResponseType}}
+			var responseBody {{unref .ResponseType}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			if err != nil {
 				return nil, respHeaders, err
@@ -920,7 +920,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 4932, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 4940, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1261,9 +1261,9 @@ type {{$clientName}} struct {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne .RequestType "" -}}
-		args *{{.RequestType}},
+		args {{.RequestType}},
 		{{end -}}
-	) ({{- if ne .ResponseType "" -}} *{{.ResponseType}}, {{- end -}}map[string]string, error) {
+	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
 
 		{{if eq .RequestType "" -}}
@@ -1312,7 +1312,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3141, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1346,9 +1346,9 @@ type {{$func}} func (
 	ctx context.Context,
 	reqHeaders map[string]string,
 	{{if ne .RequestType "" -}}
-		args *{{.RequestType}},
+		args {{.RequestType}},
 	{{end -}}
-) ({{- if ne .ResponseType "" -}}*{{.ResponseType}}, {{- end -}}map[string]string, error)
+) ({{- if ne .ResponseType "" -}}{{.ResponseType}}, {{- end -}}map[string]string, error)
 
 // New{{$handler}} wraps a handler function so it can be registered with a thrift server.
 func New{{$handler}}(f {{$func}}) zanzibar.TChannelHandler {
@@ -1426,7 +1426,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2804, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2802, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1489,7 +1489,7 @@ func (h *{{$handlerName}}) Handle(
 	var res {{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result
 
 	{{if ne .RequestType "" -}}
-	var req {{.RequestType}}
+	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
@@ -1563,7 +1563,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3180, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3186, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

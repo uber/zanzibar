@@ -39,7 +39,7 @@
 					],
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "endpointsBarBar.Bar_ArgNotStruct_Args",
+					"RequestType": "*endpointsBarBar.Bar_ArgNotStruct_Args",
 					"ResponseType": "",
 					"OKStatusCode": {
 						"Code": 200,
@@ -106,7 +106,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "*endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -172,7 +172,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"ResponseType": "*endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -237,8 +237,8 @@
 					],
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "endpointsBarBar.Bar_Normal_Args",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"RequestType": "*endpointsBarBar.Bar_Normal_Args",
+					"ResponseType": "*endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -309,8 +309,8 @@
 						"x-uuid",
 						"x-token"
 					],
-					"RequestType": "endpointsBarBar.Bar_TooManyArgs_Args",
-					"ResponseType": "endpointsBarBar.BarResponse",
+					"RequestType": "*endpointsBarBar.Bar_TooManyArgs_Args",
+					"ResponseType": "*endpointsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
