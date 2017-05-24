@@ -26,6 +26,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
@@ -55,6 +56,10 @@ type naivePackageNameResolver struct {
 func (r *naivePackageNameResolver) TypePackageName(
 	thriftFile string,
 ) (string, error) {
+	if thriftFile[0] == '.' {
+		return "", errors.Errorf("Naive does not support relative imports")
+	}
+
 	_, fileName := filepath.Split(thriftFile)
 
 	return fileName[0 : len(fileName)-thriftExtensionLength], nil
@@ -67,12 +72,18 @@ func newTypeConverter() *codegen.TypeConverter {
 	}
 }
 
-func compileProgram(content string) (*compile.Module, error) {
+func compileProgram(
+	content string,
+	otherFiles map[string][]byte,
+) (*compile.Module, error) {
+	if otherFiles == nil {
+		otherFiles = map[string][]byte{}
+	}
+	otherFiles["structs.thrift"] = []byte(content)
+
 	program, err := compile.Compile(
 		"structs.thrift",
-		compile.Filesystem(dummyFS{
-			"structs.thrift": []byte(content),
-		}),
+		compile.Filesystem(dummyFS(otherFiles)),
 	)
 	if err != nil {
 		return nil, err
@@ -84,9 +95,10 @@ func convertTypes(
 	fromStruct string,
 	toStruct string,
 	content string,
+	otherFiles map[string][]byte,
 ) (string, error) {
 	converter := newTypeConverter()
-	program, err := compileProgram(content)
+	program, err := compileProgram(content, otherFiles)
 	if err != nil {
 		return "", err
 	}
@@ -151,6 +163,7 @@ func TestConverStrings(t *testing.T) {
 			1: optional string one
 			2: required string two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -172,6 +185,7 @@ func TestConvertBools(t *testing.T) {
 			1: optional bool one
 			2: required bool two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -193,6 +207,7 @@ func TestConvertInt8(t *testing.T) {
 			1: optional i8 one
 			2: required i8 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -214,6 +229,7 @@ func TestConvertInt16(t *testing.T) {
 			1: optional i16 one
 			2: required i16 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -235,6 +251,7 @@ func TestConvertInt32(t *testing.T) {
 			1: optional i32 one
 			2: required i32 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -256,6 +273,7 @@ func TestConvertInt64(t *testing.T) {
 			1: optional i64 one
 			2: required i64 two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -277,6 +295,7 @@ func TestConvertDouble(t *testing.T) {
 			1: optional double one
 			2: required double two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -298,6 +317,7 @@ func TestConvertBinary(t *testing.T) {
 			1: optional binary one
 			2: required binary two
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -329,6 +349,7 @@ func TestConvertStruct(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -371,6 +392,7 @@ func TestHandlesMissingFields(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.Equal(t, "cannot map by name for the field two", err.Error())
@@ -399,9 +421,548 @@ func TestStructTypeMisMatch(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 	)
 
 	assert.Equal(t, "", lines)
 	assert.Equal(t, "could not convert struct fields, "+
 		"incompatible type for four :", err.Error())
+}
+
+func TestConvertTypeDef(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`typedef string UUID
+
+		struct Foo {
+			1: optional UUID one
+			2: required UUID two
+		}
+
+		struct Bar {
+			1: optional UUID one
+			2: required UUID two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = (*structs.UUID)(in.One)
+		out.Two = structs.UUID(in.Two)
+	`), lines)
+}
+
+func TestConvertEnum(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`enum ItemState {
+			REQUIRED,
+			OPTIONAL
+		}
+
+		struct Foo {
+			1: optional ItemState one
+			2: required ItemState two
+		}
+
+		struct Bar {
+			1: optional ItemState one
+			2: required ItemState two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = (*structs.ItemState)(in.One)
+		out.Two = structs.ItemState(in.Two)
+	`), lines)
+}
+
+func TestConvertWithBadImportTypedef(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		
+		struct Foo {
+			1: optional bar.MyString one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional bar.MyString one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			typedef string MyString
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyString :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertWithBadImportEnum(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		
+		struct Foo {
+			1: optional bar.MyEnum one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional bar.MyEnum one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			enum MyEnum {
+				REQUIRED,
+				OPTIONAL
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyEnum :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertWithBadImportStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		
+		struct Foo {
+			1: optional bar.MyStruct one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional bar.MyStruct one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyStruct :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertListOfString(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional list<string> one
+			2: required list<string> two
+		}
+
+		struct Bar {
+			1: optional list<string> one
+			2: required list<string> two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make([]string, len(in.One))
+		for index, value := range in.One {
+			out.One[index] = string(value)
+		}
+		out.Two = make([]string, len(in.Two))
+		for index, value := range in.Two {
+			out.Two[index] = string(value)
+		}
+	`), lines)
+}
+
+func TestConvertListOfBinary(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional list<binary> one
+			2: required list<binary> two
+		}
+
+		struct Bar {
+			1: optional list<binary> one
+			2: required list<binary> two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make([][]byte, len(in.One))
+		for index, value := range in.One {
+			out.One[index] = []byte(value)
+		}
+		out.Two = make([][]byte, len(in.Two))
+		for index, value := range in.Two {
+			out.Two[index] = []byte(value)
+		}
+	`), lines)
+}
+
+func TestConvertListOfStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional list<Inner> one
+			2: required list<Inner> two
+		}
+
+		struct Bar {
+			1: optional list<Inner> one
+			2: required list<Inner> two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make([]*structs.Inner, len(in.One))
+		for index, value := range in.One {
+			if value != nil {
+				out.One[index] = &structs.Inner{}
+				out.One[index].Field = (*string)(in.One[index].Field)
+			} else {
+				out.One[index] = nil
+			}
+		}
+		out.Two = make([]*structs.Inner, len(in.Two))
+		for index, value := range in.Two {
+			if value != nil {
+				out.Two[index] = &structs.Inner{}
+				out.Two[index].Field = (*string)(in.Two[index].Field)
+			} else {
+				out.Two[index] = nil
+			}
+		}
+	`), lines)
+}
+
+func TestConvertWithBadImportListOfStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		
+		struct Foo {
+			1: optional list<bar.MyStruct> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional list<bar.MyStruct> one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyStruct :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertWithMisMatchListTypes(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional list<Inner> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional list<Inner> one
+			2: required list<Inner> two
+		}`,
+		nil,
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"Could not convert field (two): type is not list",
+		err.Error(),
+	)
+}
+
+func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+
+		struct Inner {
+			1: optional bar.MyStruct field
+		}
+		
+		struct Foo {
+			1: optional list<Inner> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional list<Inner> one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyStruct :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertMapOfString(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional map<string, string> one
+			2: required map<string, string> two
+		}
+
+		struct Bar {
+			1: optional map<string, string> one
+			2: required map<string, string> two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make(map[string]string, len(in.One))
+		for key, value := range in.One {
+			out.One[key] = string(value)
+		}
+		out.Two = make(map[string]string, len(in.Two))
+		for key, value := range in.Two {
+			out.Two[key] = string(value)
+		}
+	`), lines)
+}
+
+func TestConvertMapOfStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional map<string, Inner> one
+			2: required map<string, Inner> two
+		}
+
+		struct Bar {
+			1: optional map<string, Inner> one
+			2: required map<string, Inner> two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make(map[string]*structs.Inner, len(in.One))
+		for key, value := range in.One {
+			if value != nil {
+				out.One[key] = &structs.Inner{}
+				out.One[key].Field = (*string)(in.One[key].Field)
+			} else {
+				out.One[key] = nil
+			}
+		}
+		out.Two = make(map[string]*structs.Inner, len(in.Two))
+		for key, value := range in.Two {
+			if value != nil {
+				out.Two[key] = &structs.Inner{}
+				out.Two[key].Field = (*string)(in.Two[key].Field)
+			} else {
+				out.Two[key] = nil
+			}
+		}
+	`), lines)
+}
+
+func TestConvertWithBadImportMapOfStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		
+		struct Foo {
+			1: optional map<string, bar.MyStruct> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional map<string, bar.MyStruct> one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyStruct :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertWithMisMatchMapTypes(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional map<string, Inner> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional map<string, Inner> one
+			2: required map<string, Inner> two
+		}`,
+		nil,
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"Could not convert field (two): type is not map",
+		err.Error(),
+	)
+}
+
+func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+
+		struct Inner {
+			1: optional bar.MyStruct field
+		}
+		
+		struct Foo {
+			1: optional map<string, Inner> one
+			2: required string two
+		}
+
+		struct Bar {
+			1: optional map<string, Inner> one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not lookup fieldType when building converter for MyStruct :: "+
+			"Naive does not support relative imports",
+		err.Error(),
+	)
+}
+
+func TestConvertWithBadKeyMapOfString(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional map<i32, string> one
+			2: required map<i32, string> two
+		}
+
+		struct Bar {
+			1: optional map<i32, string> one
+			2: required map<i32, string> two
+		}`,
+		nil,
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not convert key (one), map is not string-keyed.",
+		err.Error(),
+	)
 }

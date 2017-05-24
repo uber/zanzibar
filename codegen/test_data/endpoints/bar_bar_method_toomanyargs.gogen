@@ -175,6 +175,10 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 		out.Foo.FooI16 = (*int16)(in.Foo.FooI16)
 		out.Foo.FooDouble = (*float64)(in.Foo.FooDouble)
 		out.Foo.FooBool = (*bool)(in.Foo.FooBool)
+		out.Foo.FooMap = make(map[string]string, len(in.Foo.FooMap))
+		for key, value := range in.Foo.FooMap {
+			out.Foo.FooMap[key] = string(value)
+		}
 	} else {
 		out.Foo = nil
 	}
@@ -196,6 +200,14 @@ func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsB
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
+	out.MapIntWithRange = make(map[string]int32, len(in.MapIntWithRange))
+	for key, value := range in.MapIntWithRange {
+		out.MapIntWithRange[key] = int32(value)
+	}
+	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
+	for key, value := range in.MapIntWithoutRange {
+		out.MapIntWithoutRange[key] = int32(value)
+	}
 
 	return out
 }

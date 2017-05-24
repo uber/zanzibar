@@ -147,6 +147,14 @@ func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBa
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
+	out.MapIntWithRange = make(map[string]int32, len(in.MapIntWithRange))
+	for key, value := range in.MapIntWithRange {
+		out.MapIntWithRange[key] = int32(value)
+	}
+	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
+	for key, value := range in.MapIntWithoutRange {
+		out.MapIntWithoutRange[key] = int32(value)
+	}
 
 	return out
 }
