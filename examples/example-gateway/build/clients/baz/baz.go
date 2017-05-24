@@ -69,8 +69,8 @@ type BazClient struct {
 	client zanzibar.TChannelClient
 }
 
-// SimpleServiceCall is a client RPC call for method "Call" of thrift service "SimpleService"
-func (c *BazClient) SimpleServiceCall(
+// Call is a client RPC call for method "SimpleService::Call"
+func (c *BazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Call_Args,
@@ -96,8 +96,8 @@ func (c *BazClient) SimpleServiceCall(
 	return respHeaders, err
 }
 
-// SimpleServiceCompare is a client RPC call for method "Compare" of thrift service "SimpleService"
-func (c *BazClient) SimpleServiceCompare(
+// Compare is a client RPC call for method "SimpleService::Compare"
+func (c *BazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
@@ -124,8 +124,8 @@ func (c *BazClient) SimpleServiceCompare(
 	return resp, respHeaders, err
 }
 
-// SimpleServicePing is a client RPC call for method "Ping" of thrift service "SimpleService"
-func (c *BazClient) SimpleServicePing(
+// Ping is a client RPC call for method "SimpleService::Ping"
+func (c *BazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (*clientsBazBaz.BazResponse, map[string]string, error) {
@@ -150,8 +150,8 @@ func (c *BazClient) SimpleServicePing(
 	return resp, respHeaders, err
 }
 
-// SimpleServiceSillyNoop is a client RPC call for method "SillyNoop" of thrift service "SimpleService"
-func (c *BazClient) SimpleServiceSillyNoop(
+// DeliberateDiffNoop is a client RPC call for method "SimpleService::SillyNoop"
+func (c *BazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {

@@ -378,9 +378,7 @@ func findParamsAnnotation(
 	return "", false
 }
 
-func (ms *MethodSpec) setHTTPPath(
-	httpPath string, funcSpec *compile.FunctionSpec,
-) {
+func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpec) {
 	ms.HTTPPath = httpPath
 
 	segments := strings.Split(httpPath[1:], "/")
@@ -417,11 +415,11 @@ func (ms *MethodSpec) setHTTPPath(
 }
 
 func (ms *MethodSpec) setDownstream(
-	clientModule *ModuleSpec, clientService string, clientMethod string,
+	clientModule *ModuleSpec, clientThriftService, clientThriftMethod string,
 ) error {
 	var downstreamService *ServiceSpec
 	for _, service := range clientModule.Services {
-		if service.Name == clientService {
+		if service.Name == clientThriftService {
 			downstreamService = service
 			break
 		}
@@ -429,12 +427,12 @@ func (ms *MethodSpec) setDownstream(
 	if downstreamService == nil {
 		return errors.Errorf(
 			"Downstream service '%s' is not found in '%s'",
-			clientService, clientModule.ThriftFile,
+			clientThriftService, clientModule.ThriftFile,
 		)
 	}
 	var downstreamMethod *MethodSpec
 	for _, method := range downstreamService.Methods {
-		if method.Name == clientMethod {
+		if method.Name == clientThriftMethod {
 			downstreamMethod = method
 			break
 		}
@@ -442,12 +440,12 @@ func (ms *MethodSpec) setDownstream(
 	if downstreamMethod == nil {
 		return errors.Errorf(
 			"\n Downstream method '%s' is not found in '%s'",
-			clientMethod, clientModule.ThriftFile,
+			clientThriftMethod, clientModule.ThriftFile,
 		)
 	}
 	// Remove irrelevant services and methods.
 	ms.Downstream = clientModule
-	ms.DownstreamService = clientService
+	ms.DownstreamService = clientThriftService
 	ms.DownstreamMethod = downstreamMethod
 	return nil
 }

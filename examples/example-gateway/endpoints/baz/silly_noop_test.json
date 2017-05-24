@@ -10,7 +10,7 @@
 
 	"clientStubs": [{
 		"clientId": "baz",
-		"clientMethod": "sillyNoop",
+		"clientMethod": "DeliberateDiffNoop",
 		"clientRequest": {},
 		"clientReqHeaders": {},
 		"clientResponse": {},

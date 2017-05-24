@@ -130,6 +130,7 @@ type ClientMeta struct {
 	ClientID         string
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
+	ExposedMethods   map[string]string
 }
 
 func findMethod(

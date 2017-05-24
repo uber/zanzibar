@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
@@ -147,8 +148,10 @@ func NewServiceSpec(spec *compile.ServiceSpec, wantAnnot bool, packageHelper *Pa
 
 // SetDownstream ...
 func (ms *ModuleSpec) SetDownstream(
-	serviceName string, methodName string,
-	clientSpec *ClientSpec, clientService string, clientMethod string,
+	serviceName string,
+	methodName string,
+	clientSpec *ClientSpec,
+	clientMethod string,
 	h *PackageHelper,
 ) error {
 	var service *ServiceSpec
@@ -179,9 +182,20 @@ func (ms *ModuleSpec) SetDownstream(
 		)
 	}
 
-	err := method.setDownstream(
-		clientSpec.ModuleSpec, serviceName, clientMethod,
-	)
+	var err error
+	// TODO: we should do the same thing for http client as well
+	if clientSpec.ClientType == "tchannel" {
+		serviceMethod, ok := clientSpec.ExposedMethods[clientMethod]
+		if !ok {
+			return errors.Errorf("Client %q does not expose method %q", clientSpec.ClientName, clientMethod)
+		}
+		sm := strings.Split(serviceMethod, "::")
+
+		err = method.setDownstream(clientSpec.ModuleSpec, sm[0], sm[1])
+	} else {
+		err = method.setDownstream(clientSpec.ModuleSpec, clientSpec.ClientName, clientMethod)
+	}
+
 	if err != nil {
 		return err
 	}

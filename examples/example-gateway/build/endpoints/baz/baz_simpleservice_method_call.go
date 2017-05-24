@@ -91,7 +91,7 @@ func (handler *CallHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// CallEndpoint calls thrift client Baz.SimpleServiceCall
+// CallEndpoint calls thrift client Baz.Call
 type CallEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
@@ -108,7 +108,7 @@ func (w CallEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.SimpleServiceCall(
+	_, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,
 	)
 

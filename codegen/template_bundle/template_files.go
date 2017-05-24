@@ -1219,6 +1219,7 @@ import (
 )
 
 {{$clientID := .ClientID -}}
+{{$exposedMethods := .ExposedMethods -}}
 {{$clientName := title .ClientID | printf "%sClient" -}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
@@ -1259,8 +1260,11 @@ type {{$clientName}} struct {
 
 {{range $svc := .Services}}
 {{range .Methods}}
-	// {{title $svc.Name}}{{title .Name}} is a client RPC call for method "{{.Name}}" of thrift service "{{$svc.Name}}"
-	func (c *{{$clientName}}) {{title $svc.Name}}{{title .Name}}(
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := index $exposedMethods $serviceMethod -}}
+{{if $methodName -}}
+	// {{$methodName}} is a client RPC call for method "{{$svc.Name}}::{{.Name}}"
+	func (c *{{$clientName}}) {{$methodName}}(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne .RequestType "" -}}
@@ -1302,6 +1306,7 @@ type {{$clientName}} struct {
 		{{end -}}
 	}
 {{end -}}
+{{end -}}
 {{end}}
 `)
 
@@ -1316,12 +1321,18 @@ func tchannel_clientTmpl() (*asset, error) {
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3141, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 ||||||| merged common ancestors
 	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3143, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 =======
 	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3111, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 >>>>>>> Allow multiple services for tchannel client
+||||||| merged common ancestors
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3111, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+=======
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3240, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+>>>>>>> Generate tchannel client method based on exposed methods config
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
