@@ -99,7 +99,7 @@ func (c *TypeConverter) genConverterForStruct(
 	keyPrefix string,
 	indent string,
 ) error {
-	toIdentifier := indent + "out." + keyPrefix
+	toIdentifier := "out." + keyPrefix
 
 	typeName, err := c.getIdentifierName(toFieldType)
 	if err != nil {
@@ -116,10 +116,10 @@ func (c *TypeConverter) genConverterForStruct(
 		)
 	}
 
-	line := "if " + fromIdentifier + " != nil {"
+	line := indent + "if " + fromIdentifier + " != nil {"
 	c.Lines = append(c.Lines, line)
 
-	line = "	" + toIdentifier + " = &" + typeName + "{}"
+	line = indent + "	" + toIdentifier + " = &" + typeName + "{}"
 	c.Lines = append(c.Lines, line)
 
 	subFromFields := fromFieldStruct.Fields
@@ -133,13 +133,13 @@ func (c *TypeConverter) genConverterForStruct(
 		return err
 	}
 
-	line = "} else {"
+	line = indent + "} else {"
 	c.Lines = append(c.Lines, line)
 
-	line = "	" + toIdentifier + " = nil"
+	line = indent + "	" + toIdentifier + " = nil"
 	c.Lines = append(c.Lines, line)
 
-	line = "}"
+	line = indent + "}"
 	c.Lines = append(c.Lines, line)
 
 	return nil
@@ -208,13 +208,13 @@ func (c *TypeConverter) genConverterForList(
 			fromFieldType.ValueSpec,
 			"value",
 			keyPrefix+strings.Title(toField.Name)+"[index]",
-			indent,
+			"	"+indent,
 		)
 		if err != nil {
 			return err
 		}
 	} else {
-		line = toIdentifier + "[index] = " + typeName + "(value)"
+		line = "	" + toIdentifier + "[index] = " + typeName + "(value)"
 		c.Lines = append(c.Lines, line)
 	}
 
@@ -274,13 +274,13 @@ func (c *TypeConverter) genConverterForMap(
 			fromFieldType.ValueSpec,
 			"value",
 			keyPrefix+strings.Title(toField.Name)+"[key]",
-			indent,
+			"	"+indent,
 		)
 		if err != nil {
 			return err
 		}
 	} else {
-		line = toIdentifier + "[key] = " + typeName + "(value)"
+		line = "	" + toIdentifier + "[key] = " + typeName + "(value)"
 		c.Lines = append(c.Lines, line)
 	}
 
