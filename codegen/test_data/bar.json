@@ -87,9 +87,52 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
+					"Name": "argWithHeaders",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/bar/argWithHeaders",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "argWithHeaders",
+							"BodyIdentifier": ""
+						}
+					],
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*endpointsBarBar.Bar_ArgWithHeaders_Args",
+					"ResponseType": "*endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/missing-arg-path",
 					"PathSegments": [
 						{
@@ -155,7 +198,7 @@
 				{
 					"Name": "noRequest",
 					"HTTPMethod": "GET",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/no-request-path",
 					"PathSegments": [
 						{
@@ -221,7 +264,7 @@
 				{
 					"Name": "normal",
 					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/bar-path",
 					"PathSegments": [
 						{
@@ -287,7 +330,7 @@
 				{
 					"Name": "tooManyArgs",
 					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/too-many-args-path",
 					"PathSegments": [
 						{

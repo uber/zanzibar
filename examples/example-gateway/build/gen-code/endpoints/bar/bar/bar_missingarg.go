@@ -129,12 +129,6 @@ func (v *Bar_MissingArg_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BarResponse_Read(w wire.Value) (*BarResponse, error) {
-	var v BarResponse
-	err := v.FromWire(w)
-	return &v, err
-}
-
 func (v *Bar_MissingArg_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
