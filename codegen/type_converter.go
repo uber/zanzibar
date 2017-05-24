@@ -49,6 +49,12 @@ func (c *TypeConverter) append(parts ...string) {
 	c.Lines = append(c.Lines, line)
 }
 
+// appendf helper will add a formatted line to TypeConverter
+func (c *TypeConverter) appendf(format string, parts ...interface{}) {
+	line := fmt.Sprintf(format, parts...)
+	c.Lines = append(c.Lines, line)
+}
+
 func (c *TypeConverter) getGoTypeName(
 	valueType compile.TypeSpec,
 ) (string, error) {
@@ -184,14 +190,14 @@ func (c *TypeConverter) genConverterForList(
 
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	if isStruct {
-		c.append(
-			toIdentifier, " = make([]*", typeName,
-			", len(", fromIdentifier, "))",
+		c.appendf(
+			"%s = make([]*%s, len(%s))",
+			toIdentifier, typeName, fromIdentifier,
 		)
 	} else {
-		c.append(
-			toIdentifier, " = make([]", typeName,
-			", len(", fromIdentifier, "))",
+		c.appendf(
+			"%s = make([]%s, len(%s))",
+			toIdentifier, typeName, fromIdentifier,
 		)
 	}
 
@@ -249,14 +255,14 @@ func (c *TypeConverter) genConverterForMap(
 
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	if isStruct {
-		c.append(
-			toIdentifier, " = make(map[string]*", typeName,
-			", len(", fromIdentifier, "))",
+		c.appendf(
+			"%s = make(map[string]*%s, len(%s))",
+			toIdentifier, typeName, fromIdentifier,
 		)
 	} else {
-		c.append(
-			toIdentifier, " = make(map[string]", typeName,
-			", len(", fromIdentifier, "))",
+		c.appendf(
+			"%s = make(map[string]%s, len(%s))",
+			toIdentifier, typeName, fromIdentifier,
 		)
 	}
 
