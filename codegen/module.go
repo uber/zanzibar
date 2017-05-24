@@ -149,6 +149,61 @@ func (system *ModuleSystem) RegisterClassType(
 	return nil
 }
 
+func (system *ModuleSystem) populateResolvedDependencies(
+	classInstances []*ModuleInstance,
+	resolvedModules map[string][]*ModuleInstance,
+) error {
+	// Resolve the class dependencies
+	for _, classInstance := range classInstances {
+		for _, classDependency := range classInstance.Dependencies {
+			moduleClassInstances, ok :=
+				resolvedModules[classDependency.ClassName]
+
+			if !ok {
+				return errors.Errorf(
+					"Invalid class name %q in dependencies for %q %q",
+					classDependency.ClassName,
+					classInstance.ClassName,
+					classInstance.InstanceName,
+				)
+			}
+
+			// TODO: We don't want to linear scan here
+			var dependencyInstance *ModuleInstance
+
+			for _, instance := range moduleClassInstances {
+				if instance.InstanceName == classDependency.InstanceName {
+					dependencyInstance = instance
+					break
+				}
+			}
+
+			if dependencyInstance == nil {
+				return errors.Errorf(
+					"Unknown %q class depdendency %q"+
+						"in dependencies for %q %q",
+					classDependency.ClassName,
+					classDependency.InstanceName,
+					classInstance.ClassName,
+					classInstance.InstanceName,
+				)
+			}
+
+			resolvedDependencies, ok :=
+				classInstance.ResolvedDependencies[classDependency.ClassName]
+
+			if !ok {
+				resolvedDependencies = []*ModuleInstance{}
+			}
+
+			classInstance.ResolvedDependencies[classDependency.ClassName] =
+				append(resolvedDependencies, dependencyInstance)
+		}
+	}
+
+	return nil
+}
+
 // ResolveModules resolves the module instances from the config on disk
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
@@ -222,100 +277,24 @@ func (system *ModuleSystem) ResolveModules(
 
 		resolvedModules[className] = classInstances
 
-		// Resolve the class dependencies
-		for _, classInstance := range classInstances {
-			for _, classDependency := range classInstance.Dependencies {
-				moduleClassInstances, ok :=
-					resolvedModules[classDependency.ClassName]
-
-				if !ok {
-					return nil, errors.Errorf(
-						"Invalid class name %q in dependencies for %q %q",
-						classDependency.ClassName,
-						classInstance.ClassName,
-						classInstance.InstanceName,
-					)
-				}
-
-				// TODO: We don't want to linear scan here
-				var dependencyInstance *ModuleInstance
-
-				for _, instance := range moduleClassInstances {
-					if instance.InstanceName == classDependency.InstanceName {
-						dependencyInstance = instance
-						break
-					}
-				}
-
-				if dependencyInstance == nil {
-					return nil, errors.Errorf(
-						"Unknown %q class depdendency %q"+
-							"in dependencies for %q %q",
-						classDependency.ClassName,
-						classDependency.InstanceName,
-						classInstance.ClassName,
-						classInstance.InstanceName,
-					)
-				}
-
-				resolvedDependencies, ok :=
-					classInstance.ResolvedDependencies[classDependency.ClassName]
-
-				if !ok {
-					resolvedDependencies = []*ModuleInstance{}
-				}
-
-				classInstance.ResolvedDependencies[classDependency.ClassName] =
-					append(resolvedDependencies, dependencyInstance)
-			}
+		// Resolve dependencies for all classes
+		err := system.populateResolvedDependencies(
+			classInstances, resolvedModules,
+		)
+		if err != nil {
+			return nil, err
 		}
 
-		// Resolve the class dependencies
-		for _, classInstance := range classInstances {
-			for _, classDependency := range classInstance.Dependencies {
-				moduleClassInstances, ok :=
-					resolvedModules[classDependency.ClassName]
-
-				if !ok {
-					return nil, errors.Errorf(
-						"Invalid class name %q in dependencies for %q %q",
-						classDependency.ClassName,
-						classInstance.ClassName,
-						classInstance.InstanceName,
-					)
-				}
-
-				// TODO: We don't want to linear scan here
-				var dependencyInstance *ModuleInstance
-
-				for _, instance := range moduleClassInstances {
-					if instance.InstanceName == classDependency.InstanceName {
-						dependencyInstance = instance
-						break
-					}
-				}
-
-				if dependencyInstance == nil {
-					return nil, errors.Errorf(
-						"Unknown %q class depdendency %q"+
-							"in dependencies for %q %q",
-						classDependency.ClassName,
-						classDependency.InstanceName,
-						classInstance.ClassName,
-						classInstance.InstanceName,
-					)
-				}
-
-				resolvedDependencies, ok :=
-					classInstance.ResolvedDependencies[classDependency.ClassName]
-
-				if !ok {
-					resolvedDependencies = []*ModuleInstance{}
-				}
-
-				classInstance.ResolvedDependencies[classDependency.ClassName] =
-					append(resolvedDependencies, dependencyInstance)
-			}
+		// Resolve dependencies again in case two instances
+		// of the same class peer depend on each other.
+		// We dont sort the instances of the classes yet to
+		// ensure we resolve them in the "correct" order,
+		// so just resolve twice for now.
+		err = system.populateResolvedDependencies(
+			classInstances, resolvedModules,
+		)
+		if err != nil {
+			return nil, err
 		}
 	}
 
