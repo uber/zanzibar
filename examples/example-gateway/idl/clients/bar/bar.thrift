@@ -72,4 +72,17 @@ service Bar {
         zanzibar.http.path = "/arg-not-struct-path"
         zanzibar.http.status = "200"
     )
+
+    BarResponse argWithHeaders (
+        1: required string name
+        2: optional string userUUID (
+            zanzibar.http.ref = "headers.x-uuid"
+            go.tag = "json:\"-\""
+        )
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/bar/argWithHeaders"
+        zanzibar.http.status = "200"
+    )
 }
