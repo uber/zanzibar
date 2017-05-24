@@ -120,3 +120,14 @@ cat ./coverage/istanbul.json | jq '[
 echo "Checking code coverage for runtime folder"
 ./node_modules/.bin/istanbul check-coverage --statements 100 \
 	./coverage/istanbul-runtime.json
+
+cat ./coverage/istanbul.json | jq '[
+	. |
+	to_entries |
+	.[] |
+	select(.key | contains("codegen/type_converter"))
+] | from_entries' > ./coverage/istanbul-codegen.json
+
+echo "Checking code coverage for codegen folder"
+./node_modules/.bin/istanbul check-coverage --statements 100 \
+	./coverage/istanbul-codegen.json
