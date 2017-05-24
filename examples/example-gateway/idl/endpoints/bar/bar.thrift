@@ -32,8 +32,6 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/bar-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse noRequest (
     ) throws (
@@ -42,8 +40,6 @@ service Bar {
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/no-request-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse missingArg (
     ) throws (
@@ -52,8 +48,6 @@ service Bar {
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/missing-arg-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse tooManyArgs (
         1: required BarRequest request
@@ -61,12 +55,9 @@ service Bar {
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
     ) (
-        zanzibar.http.headers = "x-uuid,x-token"
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/too-many-args-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
         zanzibar.http.reqHeaders = "x-uuid,x-token"
         zanzibar.http.resHeaders = "x-uuid,x-token"
     )

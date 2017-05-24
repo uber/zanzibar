@@ -36,8 +36,6 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse noRequest (
     ) throws (
@@ -46,8 +44,6 @@ service Bar {
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/no-request-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse missingArg (
     ) throws (
@@ -56,8 +52,6 @@ service Bar {
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/missing-arg-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     BarResponse tooManyArgs (
         1: required BarRequest request
@@ -68,8 +62,6 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/too-many-args-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
     void argNotStruct (
         1: required string request
@@ -79,7 +71,5 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/arg-not-struct-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
-        zanzibar.handler = "bar.baz"
     )
 }
