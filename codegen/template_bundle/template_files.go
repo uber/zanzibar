@@ -1395,7 +1395,7 @@ func (h *{{$handler}}) Handle(
 			switch v := err.(type) {
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
-				case *{{$genCodePkg}}.{{title .Name}}:
+				case *{{.Type}}:
 					if v == nil {
 						return false, nil, nil, errors.New(
 							"Handler for {{$method}} returned non-nil error type *{{title .Name}} but nil value",
@@ -1428,7 +1428,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2802, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2780, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

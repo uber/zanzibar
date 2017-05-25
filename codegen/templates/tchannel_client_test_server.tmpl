@@ -74,7 +74,7 @@ func (h *{{$handler}}) Handle(
 			switch v := err.(type) {
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
-				case *{{$genCodePkg}}.{{title .Name}}:
+				case *{{.Type}}:
 					if v == nil {
 						return false, nil, nil, errors.New(
 							"Handler for {{$method}} returned non-nil error type *{{title .Name}} but nil value",
