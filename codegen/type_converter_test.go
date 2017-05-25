@@ -479,7 +479,6 @@ func TestConvertEnum(t *testing.T) {
 	`), lines)
 }
 
-<<<<<<< HEAD
 func TestConvertWithBadImportTypedef(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
