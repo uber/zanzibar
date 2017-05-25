@@ -195,9 +195,7 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	var err error
 	if isRequestBoxed(funcSpec) {
 		ms.RequestBoxed = true
-		ms.RequestType, err = packageHelper.TypeFullName(
-			curThriftFile, funcSpec.ArgsSpec[0].Type,
-		)
+		ms.RequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
 		if err == nil && isStructType(funcSpec.ArgsSpec[0].Type) {
 			ms.RequestType = "*" + ms.RequestType
 		}
@@ -227,7 +225,7 @@ func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.Re
 		ms.ResponseType = ""
 		return nil
 	}
-	typeName, err := packageHelper.TypeFullName(curThriftFile, respSpec.ReturnType)
+	typeName, err := packageHelper.TypeFullName(respSpec.ReturnType)
 	if isStructType(respSpec.ReturnType) {
 		typeName = "*" + typeName
 	}
@@ -279,7 +277,7 @@ func (ms *MethodSpec) setExceptions(
 	)
 
 	for i, e := range resultSpec.Exceptions {
-		typeName, err := h.TypeFullName(curThriftFile, e.Type)
+		typeName, err := h.TypeFullName(e.Type)
 		if err != nil {
 			return errors.Wrapf(
 				err,

@@ -225,8 +225,8 @@ func (p PackageHelper) EndpointTestConfigPath(
 	return path.Join(p.testConfigsRootDir, strings.ToLower(serviceName), fileName)
 }
 
-// TypeFullName returns the referred Go type name in generated code from curThriftFile.
-func (p PackageHelper) TypeFullName(curThriftFile string, typeSpec compile.TypeSpec) (string, error) {
+// TypeFullName returns the referred Go type name in generated code.
+func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 	if typeSpec == nil {
 		return "", nil
 	}
