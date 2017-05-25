@@ -105,6 +105,7 @@ func convertTypes(
 	err = converter.GenStructConverter(
 		program.Types[fromStruct].(*compile.StructSpec).Fields,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
+		nil,
 	)
 	if err != nil {
 		return "", err
