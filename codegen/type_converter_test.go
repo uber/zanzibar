@@ -95,6 +95,7 @@ func convertTypes(
 	toStruct string,
 	content string,
 	otherFiles map[string][]byte,
+	overrideMap map[*compile.FieldSpec]codegen.FieldMapperEntry,
 ) (string, error) {
 	converter := newTypeConverter()
 	program, err := compileProgram(content, otherFiles)
@@ -164,6 +165,7 @@ func TestConverStrings(t *testing.T) {
 			2: required string two
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -185,6 +187,7 @@ func TestConvertBools(t *testing.T) {
 			1: optional bool one
 			2: required bool two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -208,6 +211,7 @@ func TestConvertInt8(t *testing.T) {
 			2: required i8 two
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -229,6 +233,7 @@ func TestConvertInt16(t *testing.T) {
 			1: optional i16 one
 			2: required i16 two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -252,6 +257,7 @@ func TestConvertInt32(t *testing.T) {
 			2: required i32 two
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -273,6 +279,7 @@ func TestConvertInt64(t *testing.T) {
 			1: optional i64 one
 			2: required i64 two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -296,6 +303,7 @@ func TestConvertDouble(t *testing.T) {
 			2: required double two
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.NoError(t, err)
@@ -317,6 +325,7 @@ func TestConvertBinary(t *testing.T) {
 			1: optional binary one
 			2: required binary two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -349,6 +358,7 @@ func TestConvertStruct(t *testing.T) {
 			3: optional NestedBar three
 			4: required NestedBar four
 		}`,
+		nil,
 		nil,
 	)
 
@@ -393,6 +403,7 @@ func TestHandlesMissingFields(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.Equal(t, "cannot map by name for the field two", err.Error())
@@ -422,6 +433,7 @@ func TestStructTypeMisMatch(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
+		nil,
 	)
 
 	assert.Equal(t, "", lines)
@@ -443,6 +455,7 @@ func TestConvertTypeDef(t *testing.T) {
 			1: optional UUID one
 			2: required UUID two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -470,6 +483,7 @@ func TestConvertEnum(t *testing.T) {
 			1: optional ItemState one
 			2: required ItemState two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -500,6 +514,7 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 			typedef string MyString
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -533,6 +548,7 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -565,6 +581,7 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -587,6 +604,7 @@ func TestConvertListOfString(t *testing.T) {
 			1: optional list<string> one
 			2: required list<string> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -615,6 +633,7 @@ func TestConvertListOfBinary(t *testing.T) {
 			1: optional list<binary> one
 			2: required list<binary> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -648,6 +667,7 @@ func TestConvertListOfStruct(t *testing.T) {
 			1: optional list<Inner> one
 			2: required list<Inner> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -696,6 +716,7 @@ func TestConvertWithBadImportListOfStruct(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -723,6 +744,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 			1: optional list<Inner> one
 			2: required list<Inner> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -760,6 +782,7 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -782,6 +805,7 @@ func TestConvertMapOfString(t *testing.T) {
 			1: optional map<string, string> one
 			2: required map<string, string> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -815,6 +839,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 			1: optional map<string, Inner> one
 			2: required map<string, Inner> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -863,6 +888,7 @@ func TestConvertWithBadImportMapOfStruct(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -890,6 +916,7 @@ func TestConvertWithMisMatchMapTypes(t *testing.T) {
 			1: optional map<string, Inner> one
 			2: required map<string, Inner> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -927,6 +954,7 @@ func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
 			}
 			`),
 		},
+		nil,
 	)
 
 	assert.Error(t, err)
@@ -949,6 +977,7 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 			1: optional map<i32, string> one
 			2: required map<i32, string> two
 		}`,
+		nil,
 		nil,
 	)
 
@@ -1022,6 +1051,7 @@ func TestConverterMap(t *testing.T) {
 			1: optional bool one
 			2: required bool two
 		}`,
+		nil,
 		nil,
 	)
 
