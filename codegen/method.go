@@ -335,15 +335,45 @@ func (ms *MethodSpec) setExceptions(
 }
 
 func findParamsAnnotation(
-	fields compile.FieldGroup, paramName string, prefix string,
+	fields compile.FieldGroup, paramName string,
 ) (string, bool) {
+	var identifier string
+	visitor := func(prefix string, field *compile.FieldSpec) bool {
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param == "params."+paramName[1:] {
+				identifier = prefix + "." + field.Name
+				return true
+			}
+		}
+
+		return false
+	}
+	walkFieldGroups(fields, visitor)
+
+	if identifier == "" {
+		return "", false
+	}
+
+	return identifier, true
+}
+
+func walkFieldGroups(
+	fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
+	return walkFieldGroupsInternal("", fields, visitField)
+}
+
+func walkFieldGroupsInternal(
+	prefix string, fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
 	for i := 0; i < len(fields); i++ {
 		field := fields[i]
 
-		if param, ok := field.Annotations[antHTTPRef]; ok {
-			if param == "params."+paramName[1:] {
-				return prefix + field.Name, true
-			}
+		bail := visitField(prefix, field)
+		if bail {
+			return true
 		}
 
 		switch t := field.Type.(type) {
@@ -356,11 +386,13 @@ func findParamsAnnotation(
 		case *compile.I32Spec:
 		case *compile.I64Spec:
 		case *compile.StructSpec:
-			path, ok := findParamsAnnotation(
-				t.Fields, paramName, field.Name+".",
+			bail := walkFieldGroupsInternal(
+				prefix+"."+field.Name,
+				t.Fields,
+				visitField,
 			)
-			if ok {
-				return path, true
+			if bail {
+				return true
 			}
 		case *compile.SetSpec:
 			// TODO: implement
@@ -373,7 +405,7 @@ func findParamsAnnotation(
 		}
 	}
 
-	return "", false
+	return false
 }
 
 func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpec) {
@@ -396,11 +428,11 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 				// Boxed requests mean first arg is struct
 				structType := funcSpec.ArgsSpec[0].Type.(*compile.StructSpec)
 				fieldSelect, ok = findParamsAnnotation(
-					structType.Fields, segment, "",
+					structType.Fields, segment,
 				)
 			} else {
 				fieldSelect, ok = findParamsAnnotation(
-					compile.FieldGroup(funcSpec.ArgsSpec), segment, "",
+					compile.FieldGroup(funcSpec.ArgsSpec), segment,
 				)
 			}
 
