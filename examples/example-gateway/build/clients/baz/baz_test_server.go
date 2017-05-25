@@ -31,8 +31,48 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
+
+// SecondServiceEchoFunc is the handler function for "Echo" method of thrift service "SecondService".
+type SecondServiceEchoFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_Echo_Args,
+) (string, map[string]string, error)
+
+// NewSecondServiceEchoHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoHandler(f SecondServiceEchoFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoHandler{f}
+}
+
+// SecondServiceEchoHandler handles the "Echo" method call of thrift service "SecondService".
+type SecondServiceEchoHandler struct {
+	echo SecondServiceEchoFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_Echo_Args
+	var res clientsBazBaz.SecondService_Echo_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echo(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = r
+
+	return err == nil, &res, respHeaders, nil
+}
 
 // SimpleServiceCallFunc is the handler function for "Call" method of thrift service "SimpleService".
 type SimpleServiceCallFunc func(
@@ -87,7 +127,7 @@ type SimpleServiceCompareFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error)
+) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChannelHandler {
@@ -136,7 +176,7 @@ func (h *SimpleServiceCompareHandler) Handle(
 type SimpleServicePingFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (*clientsBazBaz.BazResponse, map[string]string, error)
+) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChannelHandler {
@@ -209,7 +249,7 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.ServerErr:
+		case *clientsBazBase.ServerErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for SillyNoop returned non-nil error type *ServerErr but nil value",

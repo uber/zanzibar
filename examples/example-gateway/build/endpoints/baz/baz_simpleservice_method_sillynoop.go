@@ -30,6 +30,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
@@ -117,7 +118,7 @@ func (w SillyNoopEndpoint) Handle(
 
 			return nil, serverErr
 
-		case *clientsBazBaz.ServerErr:
+		case *clientsBazBase.ServerErr:
 			serverErr := convertSillyNoopServerErr(
 				errValue,
 			)
@@ -152,7 +153,7 @@ func convertSillyNoopAuthErr(
 	return serverError
 }
 func convertSillyNoopServerErr(
-	clientError *clientsBazBaz.ServerErr,
+	clientError *clientsBazBase.ServerErr,
 ) *endpointsBazBaz.ServerErr {
 	// TODO: Add error fields mapping here.
 	serverError := &endpointsBazBaz.ServerErr{}

@@ -30,7 +30,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 )
 
@@ -119,7 +119,7 @@ func (w PingEndpoint) Handle(
 	return response, resHeaders, nil
 }
 
-func convertPingClientResponse(in *clientsBazBaz.BazResponse) *endpointsBazBaz.BazResponse {
+func convertPingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
 	out := &endpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)

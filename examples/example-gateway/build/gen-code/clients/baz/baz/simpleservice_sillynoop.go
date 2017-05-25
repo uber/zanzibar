@@ -6,6 +6,7 @@ package baz
 import (
 	"errors"
 	"fmt"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"go.uber.org/thriftrw/wire"
 	"strings"
 )
@@ -64,7 +65,7 @@ func init() {
 		switch err.(type) {
 		case *AuthErr:
 			return true
-		case *ServerErr:
+		case *base.ServerErr:
 			return true
 		default:
 			return false
@@ -80,7 +81,7 @@ func init() {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_SillyNoop_Result.AuthErr")
 			}
 			return &SimpleService_SillyNoop_Result{AuthErr: e}, nil
-		case *ServerErr:
+		case *base.ServerErr:
 			if e == nil {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_SillyNoop_Result.ServerErr")
 			}
@@ -102,8 +103,8 @@ func init() {
 }
 
 type SimpleService_SillyNoop_Result struct {
-	AuthErr   *AuthErr   `json:"authErr,omitempty"`
-	ServerErr *ServerErr `json:"serverErr,omitempty"`
+	AuthErr   *AuthErr        `json:"authErr,omitempty"`
+	ServerErr *base.ServerErr `json:"serverErr,omitempty"`
 }
 
 func (v *SimpleService_SillyNoop_Result) ToWire() (wire.Value, error) {
@@ -135,8 +136,8 @@ func (v *SimpleService_SillyNoop_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _ServerErr_Read(w wire.Value) (*ServerErr, error) {
-	var v ServerErr
+func _ServerErr_Read(w wire.Value) (*base.ServerErr, error) {
+	var v base.ServerErr
 	err := v.FromWire(w)
 	return &v, err
 }

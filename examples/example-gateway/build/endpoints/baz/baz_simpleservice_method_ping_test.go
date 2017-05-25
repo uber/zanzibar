@@ -35,7 +35,6 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 func TestPingSuccessfulRequestOKResponse(t *testing.T) {
@@ -57,12 +56,12 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	fakePing := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
 		testPingCounter++
 
 		var resHeaders map[string]string
 
-		var res clientsBazBaz.BazResponse
+		var res clientsBazBase.BazResponse
 		err := json.Unmarshal([]byte(`{"message":"pong"}`), &res)
 		if err != nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")

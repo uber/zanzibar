@@ -6,6 +6,7 @@ package baz
 import (
 	"errors"
 	"fmt"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"go.uber.org/thriftrw/wire"
 	"strings"
 )
@@ -110,8 +111,8 @@ func (v *SimpleService_Compare_Args) EnvelopeType() wire.EnvelopeType {
 var SimpleService_Compare_Helper = struct {
 	Args           func(arg1 *BazRequest, arg2 *BazRequest) *SimpleService_Compare_Args
 	IsException    func(error) bool
-	WrapResponse   func(*BazResponse, error) (*SimpleService_Compare_Result, error)
-	UnwrapResponse func(*SimpleService_Compare_Result) (*BazResponse, error)
+	WrapResponse   func(*base.BazResponse, error) (*SimpleService_Compare_Result, error)
+	UnwrapResponse func(*SimpleService_Compare_Result) (*base.BazResponse, error)
 }{}
 
 func init() {
@@ -126,7 +127,7 @@ func init() {
 			return false
 		}
 	}
-	SimpleService_Compare_Helper.WrapResponse = func(success *BazResponse, err error) (*SimpleService_Compare_Result, error) {
+	SimpleService_Compare_Helper.WrapResponse = func(success *base.BazResponse, err error) (*SimpleService_Compare_Result, error) {
 		if err == nil {
 			return &SimpleService_Compare_Result{Success: success}, nil
 		}
@@ -139,7 +140,7 @@ func init() {
 		}
 		return nil, err
 	}
-	SimpleService_Compare_Helper.UnwrapResponse = func(result *SimpleService_Compare_Result) (success *BazResponse, err error) {
+	SimpleService_Compare_Helper.UnwrapResponse = func(result *SimpleService_Compare_Result) (success *base.BazResponse, err error) {
 		if result.AuthErr != nil {
 			err = result.AuthErr
 			return
@@ -154,8 +155,8 @@ func init() {
 }
 
 type SimpleService_Compare_Result struct {
-	Success *BazResponse `json:"success,omitempty"`
-	AuthErr *AuthErr     `json:"authErr,omitempty"`
+	Success *base.BazResponse `json:"success,omitempty"`
+	AuthErr *AuthErr          `json:"authErr,omitempty"`
 }
 
 func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
@@ -187,8 +188,8 @@ func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazResponse_Read(w wire.Value) (*BazResponse, error) {
-	var v BazResponse
+func _BazResponse_Read(w wire.Value) (*base.BazResponse, error) {
+	var v base.BazResponse
 	err := v.FromWire(w)
 	return &v, err
 }

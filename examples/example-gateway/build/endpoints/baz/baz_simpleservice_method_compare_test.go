@@ -58,12 +58,12 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
-	) (*clientsBazBaz.BazResponse, map[string]string, error) {
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
 		testCompareCounter++
 
 		var resHeaders map[string]string
 
-		var res clientsBazBaz.BazResponse
+		var res clientsBazBase.BazResponse
 		err := json.Unmarshal([]byte(`{"message":"different"}`), &res)
 		if err != nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
