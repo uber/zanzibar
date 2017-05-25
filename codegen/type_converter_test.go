@@ -479,6 +479,7 @@ func TestConvertEnum(t *testing.T) {
 	`), lines)
 }
 
+<<<<<<< HEAD
 func TestConvertWithBadImportTypedef(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
@@ -958,6 +959,7 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 		err.Error(),
 	)
 }
+<<<<<<< HEAD
 
 // Enduse that common acronyms are handled consistently with the
 // Thrift compiled acronym strings.
@@ -1003,4 +1005,10 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 			out.Four = nil
 		}
 	`), lines)
+=======
+func TestConverterMap(t *testing.T) {
+}
+
+func TestConverterMapOverride(t *testing.T) {
+>>>>>>> 3c1579fb... Add transforms with overrride
 }

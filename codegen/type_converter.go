@@ -134,12 +134,15 @@ func (c *TypeConverter) genConverterForPrimitive(
 	toField *compile.FieldSpec,
 	toIdentifier string,
 	fromIdentifier string,
+	overiddenIdentifier string,
 ) error {
 	typeName, err := c.getGoTypeName(toField.Type)
 	if err != nil {
 		return err
 	}
+	if overiddenIdentifier != "" {
 
+	}
 	if toField.Required {
 		c.append(toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
 	} else {
@@ -275,15 +278,40 @@ func (c *TypeConverter) genStructConverter(
 	indent string,
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
+	fieldMap map[*compile.FieldSpec]FieldMapperEntry,
 ) error {
 	for i := 0; i < len(toFields); i++ {
 		toField := toFields[i]
 
+		// Check for same named field
 		var fromField *compile.FieldSpec
 		for j := 0; j < len(fromFields); j++ {
 			if fromFields[j].Name == toField.Name {
 				fromField = fromFields[j]
 				break
+			}
+		}
+
+		// Check for mapped field
+		var overiddenField *compile.FieldSpec
+		for k, v := range fieldMap {
+			if v.dest.Name == toField.Name {
+				if fromField == nil {
+					fromField = v.dest
+				} else {
+					if v.override {
+						// check for required/optional setting
+						if !v.dest.Required {
+							overiddenField = fromField
+						}
+						fromField = v.dest
+					} else {
+						// check for required/optional setting
+						if !fromField.Required {
+							overiddenField = v.dest
+						}
+					}
+				}
 			}
 		}
 
@@ -296,6 +324,10 @@ func (c *TypeConverter) genStructConverter(
 
 		toIdentifier := indent + "out." + keyPrefix + pascalCase(toField.Name)
 		fromIdentifier := "in." + keyPrefix + pascalCase(fromField.Name)
+		overiddenIdentifier := ""
+		if overiddenField != nil {
+			overiddenIdentifier = "in." + keyPrefix + pascalCase(overiddenField.Name)
+		}
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
@@ -311,7 +343,7 @@ func (c *TypeConverter) genStructConverter(
 			*compile.StringSpec:
 
 			err := c.genConverterForPrimitive(
-				toField, toIdentifier, fromIdentifier,
+				toField, toIdentifier, fromIdentifier, overiddenIdentifier,
 			)
 			if err != nil {
 				return err
@@ -396,11 +428,36 @@ func (c *TypeConverter) genStructConverter(
 func (c *TypeConverter) GenStructConverter(
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
+	fieldMap map[*compile.FieldSpec]FieldMapperEntry,
 ) error {
-	err := c.genStructConverter("", "", fromFields, toFields)
+	err := c.genStructConverter("", "", fromFields, toFields, fieldMap)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// FieldMapperEntry defines a destination field and optional arguments
+// converting and overriding fields.
+type FieldMapperEntry struct {
+	dest          *compile.FieldSpec
+	override      bool
+	typeConverter string // TODO: implement
+	transform     string // TODO: implement
+}
+
+func assignWithOverride(
+	toIdentifier string,
+	typeName string,
+	fromIdentifier string,
+	overridenIdentifier string,
+) []string {
+
+	line1 := toIdentifier + " = " + typeName + "(" + overridenIdentifier + ")"
+	line2 := "if " + fromIdentifier + " != nil {"
+	line3 := toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
+	line4 := "}"
+
+	return []string{line1, line2, line3, line4}
 }
