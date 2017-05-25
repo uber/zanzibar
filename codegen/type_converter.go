@@ -69,6 +69,60 @@ func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error
 	return GoType(c.Helper, valueType)
 }
 
+func (c *TypeConverter) assignWithOverride(
+	toIdentifier string,
+	typeName string,
+	fromIdentifier string,
+	overiddenIdentifier string,
+) {
+	if overiddenIdentifier == "" {
+		c.append(toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
+		return
+	}
+
+	c.append(toIdentifier, " = ", typeName, "(", overiddenIdentifier, ")")
+	c.append("if ", fromIdentifier, " != nil {")
+	c.append(toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
+	c.append("}")
+}
+
+func (c *TypeConverter) getGoTypeName(
+	valueType compile.TypeSpec,
+) (string, error) {
+	switch s := valueType.(type) {
+	case *compile.BoolSpec:
+		return "bool", nil
+	case *compile.I8Spec:
+		return "int8", nil
+	case *compile.I16Spec:
+		return "int16", nil
+	case *compile.I32Spec:
+		return "int32", nil
+	case *compile.I64Spec:
+		return "int64", nil
+	case *compile.DoubleSpec:
+		return "float64", nil
+	case *compile.StringSpec:
+		return "string", nil
+	case *compile.BinarySpec:
+		return "[]byte", nil
+	case *compile.MapSpec:
+		/* coverage ignore next line */
+		panic("Not Implemented")
+	case *compile.SetSpec:
+		/* coverage ignore next line */
+		panic("Not Implemented")
+	case *compile.ListSpec:
+		/* coverage ignore next line */
+		panic("Not Implemented")
+	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
+		return c.getIdentifierName(s)
+	default:
+		/* coverage ignore next line */
+		panic(fmt.Sprintf("Unknown type (%T) %v", valueType, valueType))
+	}
+}
+
 func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
 	t, err := goCustomType(c.Helper, fieldType)
 	if err != nil {
@@ -111,11 +165,14 @@ func (c *TypeConverter) genConverterForStruct(
 	c.append(indent, "	", toIdentifier, " = &", typeName, "{}")
 
 	subFromFields := fromFieldStruct.Fields
+	// Build subfield mapping
+
 	err = c.genStructConverter(
 		keyPrefix+".",
 		indent+"	",
 		subFromFields,
 		subToFields,
+		nil,
 	)
 	if err != nil {
 		return err
@@ -140,13 +197,20 @@ func (c *TypeConverter) genConverterForPrimitive(
 	if err != nil {
 		return err
 	}
-	if overiddenIdentifier != "" {
-
-	}
 	if toField.Required {
-		c.append(toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
+		c.assignWithOverride(
+			toIdentifier,
+			typeName,
+			fromIdentifier,
+			overiddenIdentifier,
+		)
 	} else {
-		c.append(toIdentifier, " = (*", typeName, ")(", fromIdentifier, ")")
+		c.append(
+			toIdentifier,
+			fmt.Sprintf("(*%s)", typeName),
+			fromIdentifier,
+			overiddenIdentifier,
+		)
 	}
 	return nil
 }
@@ -294,7 +358,7 @@ func (c *TypeConverter) genStructConverter(
 
 		// Check for mapped field
 		var overiddenField *compile.FieldSpec
-		for k, v := range fieldMap {
+		for _, v := range fieldMap {
 			if v.dest.Name == toField.Name {
 				if fromField == nil {
 					fromField = v.dest
@@ -443,21 +507,6 @@ func (c *TypeConverter) GenStructConverter(
 type FieldMapperEntry struct {
 	dest          *compile.FieldSpec
 	override      bool
-	typeConverter string // TODO: implement
-	transform     string // TODO: implement
-}
-
-func assignWithOverride(
-	toIdentifier string,
-	typeName string,
-	fromIdentifier string,
-	overridenIdentifier string,
-) []string {
-
-	line1 := toIdentifier + " = " + typeName + "(" + overridenIdentifier + ")"
-	line2 := "if " + fromIdentifier + " != nil {"
-	line3 := toIdentifier + " = " + typeName + "(" + fromIdentifier + ")"
-	line4 := "}"
-
-	return []string{line1, line2, line3, line4}
+	typeConverter string // TODO: implement. i.e string(int) etc
+	transform     string // TODO: implement. i.e. camelCasing, Title, etc
 }

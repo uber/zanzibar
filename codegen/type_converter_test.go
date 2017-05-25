@@ -959,6 +959,7 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 	)
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 // Enduse that common acronyms are handled consistently with the
 // Thrift compiled acronym strings.
@@ -1005,9 +1006,34 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 		}
 	`), lines)
 =======
+=======
+
+>>>>>>> 323165ba... add helper method for tertiary assignment
 func TestConverterMap(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional bool one
+			2: required bool two
+		}
+
+		struct Bar {
+			1: optional bool one
+			2: required bool two
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = (*bool)(in.One)
+		out.Two = bool(in.Two)
+	`), lines)
 }
 
 func TestConverterMapOverride(t *testing.T) {
 >>>>>>> 3c1579fb... Add transforms with overrride
+}
+
+func TestConverterMapWithSubFields(t *testing.T) {
 }

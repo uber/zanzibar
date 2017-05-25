@@ -630,7 +630,8 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper:      h,
 	}
 
-	err := typeConverter.GenStructConverter(structType, downstreamStructType)
+	// TODO(sindelar): Build transform map from config files
+	err := typeConverter.GenStructConverter(structType, downstreamStructType, nil)
 	if err != nil {
 		return err
 	}
@@ -653,7 +654,8 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper:      h,
 	}
 
-	err = respConverter.GenStructConverter(downstreamRespFields, respFields)
+	// TODO(sindelar): Build transform map from config files
+	err = respConverter.GenStructConverter(downstreamRespFields, respFields, nil)
 	if err != nil {
 		return err
 	}
