@@ -535,13 +535,6 @@ func (g *ClientsInitGenerator) Generate(
 			continue
 		}
 
-		if len(module.Services) != 1 {
-			return nil, errors.Errorf(
-				"Cannot import client with multiple services: %s",
-				module.PackageName,
-			)
-		}
-
 		clientInfo = append(clientInfo, ClientInfoMeta{
 			IsPointerType: true,
 			FieldName:     strings.Title(clients[i].ClientName),
