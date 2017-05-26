@@ -33,8 +33,8 @@ service SimpleService {
   )
 }
 
-//service SecondService {
-//  string Echo(
-//    1: required string arg
-//  )
-//}
+service SecondService {
+  void Echo(
+    1: required string arg
+  )
+}

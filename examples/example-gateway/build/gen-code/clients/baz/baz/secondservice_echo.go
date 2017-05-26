@@ -80,8 +80,8 @@ func (v *SecondService_Echo_Args) EnvelopeType() wire.EnvelopeType {
 var SecondService_Echo_Helper = struct {
 	Args           func(arg string) *SecondService_Echo_Args
 	IsException    func(error) bool
-	WrapResponse   func(string, error) (*SecondService_Echo_Result, error)
-	UnwrapResponse func(*SecondService_Echo_Result) (string, error)
+	WrapResponse   func(error) (*SecondService_Echo_Result, error)
+	UnwrapResponse func(*SecondService_Echo_Result) error
 }{}
 
 func init() {
@@ -94,68 +94,31 @@ func init() {
 			return false
 		}
 	}
-	SecondService_Echo_Helper.WrapResponse = func(success string, err error) (*SecondService_Echo_Result, error) {
+	SecondService_Echo_Helper.WrapResponse = func(err error) (*SecondService_Echo_Result, error) {
 		if err == nil {
-			return &SecondService_Echo_Result{Success: &success}, nil
+			return &SecondService_Echo_Result{}, nil
 		}
 		return nil, err
 	}
-	SecondService_Echo_Helper.UnwrapResponse = func(result *SecondService_Echo_Result) (success string, err error) {
-		if result.Success != nil {
-			success = *result.Success
-			return
-		}
-		err = errors.New("expected a non-void result")
+	SecondService_Echo_Helper.UnwrapResponse = func(result *SecondService_Echo_Result) (err error) {
 		return
 	}
 }
 
-type SecondService_Echo_Result struct {
-	Success *string `json:"success,omitempty"`
-}
+type SecondService_Echo_Result struct{}
 
 func (v *SecondService_Echo_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [0]wire.Field
 		i      int = 0
-		w      wire.Value
-		err    error
 	)
-	if v.Success != nil {
-		w, err = wire.NewValueString(*(v.Success)), error(nil)
-		if err != nil {
-			return w, err
-		}
-		fields[i] = wire.Field{ID: 0, Value: w}
-		i++
-	}
-	if i != 1 {
-		return wire.Value{}, fmt.Errorf("SecondService_Echo_Result should have exactly one field: got %v fields", i)
-	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
 func (v *SecondService_Echo_Result) FromWire(w wire.Value) error {
-	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
-		case 0:
-			if field.Value.Type() == wire.TBinary {
-				var x string
-				x, err = field.Value.GetString(), error(nil)
-				v.Success = &x
-				if err != nil {
-					return err
-				}
-			}
 		}
-	}
-	count := 0
-	if v.Success != nil {
-		count++
-	}
-	if count != 1 {
-		return fmt.Errorf("SecondService_Echo_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
@@ -164,28 +127,12 @@ func (v *SecondService_Echo_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
-	var fields [1]string
+	var fields [0]string
 	i := 0
-	if v.Success != nil {
-		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
-		i++
-	}
 	return fmt.Sprintf("SecondService_Echo_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 func (v *SecondService_Echo_Result) Equals(rhs *SecondService_Echo_Result) bool {
-	if !_String_EqualsPtr(v.Success, rhs.Success) {
-		return false
-	}
 	return true
 }
 
