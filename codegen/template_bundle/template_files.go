@@ -127,6 +127,16 @@ func (handler *{{$handlerName}}) HandleRequest(
 	}
 	{{end}}
 
+	{{range $headerName, $headerInfo := .ReqHeaderFields}}
+	{{camel $headerName}}Value, _ := req.Header.Get("{{$headerName}}")
+	{{if $headerInfo.IsPointer}}
+	{{$fieldId := $headerInfo.FieldIdentifier}}
+	requestBody{{$fieldId}} = ptr.String({{camel $headerName}}Value)
+	{{else}}
+	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
+	{{end}}
+	{{end}}
+
 	workflow := {{$workflow}}{
 		Clients: handler.Clients,
 		Logger: req.Logger,
@@ -358,7 +368,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8048, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8415, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
