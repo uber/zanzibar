@@ -68,7 +68,7 @@ func NewServerHTTPRequest(
 		URL:     r.URL,
 		Method:  r.Method,
 		Params:  params,
-		Header:  ServerHTTPHeader(r.Header),
+		Header:  NewServerHTTPHeader(r.Header),
 		metrics: &endpoint.metrics,
 	}
 	req.res = NewServerHTTPResponse(w, req)
