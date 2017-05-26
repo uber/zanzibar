@@ -1040,6 +1040,7 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 
 >>>>>>> 323165ba... add helper method for tertiary assignment
 func TestConverterMap(t *testing.T) {
+
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`struct Foo {
