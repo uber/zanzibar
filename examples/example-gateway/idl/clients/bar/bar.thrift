@@ -75,10 +75,7 @@ service Bar {
 
     BarResponse argWithHeaders (
         1: required string name
-        2: optional string userUUID (
-            zanzibar.http.ref = "headers.x-uuid"
-            go.tag = "json:\"-\""
-        )
+        2: optional string userUUID
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
