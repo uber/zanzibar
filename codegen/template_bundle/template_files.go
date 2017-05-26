@@ -572,7 +572,7 @@ package {{.PackageName}}
 import (
 	"bytes"
 	"context"
-	{{if ne .Method.DownstreamMethod.ResponseType "" -}}
+	{{if .Method.DownstreamMethod.ResponseType -}}
 	"encoding/json"
 	{{end -}}
 	"path/filepath"
@@ -625,10 +625,10 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	{{$clientFunc}} := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		{{if ne $clientMethod.RequestType "" -}}
+		{{if $clientMethod.RequestType -}}
 		args {{$clientMethodRequestType}},
 		{{end -}}
-	) ({{- if ne $clientMethod.ResponseType "" -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
+	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 		{{$counter}}++
 
 		{{range $k, $v := .ClientReqHeaders -}}
@@ -639,14 +639,14 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		{{end -}}
 
 		var resHeaders map[string]string
-		{{if ne (len .ClientResHeaders) 0 -}}
+		{{if (len .ClientResHeaders) -}}
 		resHeaders = map[string]string{}
 		{{end -}}
 		{{range $k, $v := .ClientResHeaders -}}
 		resHeaders["{{$k}}"] = "{{$v}}"
 		{{end}}
 
-		{{if ne $clientMethod.ResponseType "" -}}
+		{{if $clientMethod.ResponseType -}}
 		var res {{unref $clientMethod.ResponseType}}
 		err := json.Unmarshal([]byte(` + "`" + `{{.ClientResponseString}}` + "`" + `), &res)
 		if err!= nil {
@@ -683,7 +683,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		return
 	}
 
-	{{if ne $responseType "" -}}
+	{{if $responseType -}}
 	defer func() { _ = res.Body.Close() }()
 	data, err := ioutil.ReadAll(res.Body)
 	if !assert.NoError(t, err, "failed to read response body") {
@@ -699,7 +699,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		"{{$v}}",
 		res.Header.Get("{{$k}}"))
 	{{end -}}
-	{{if ne $responseType "" -}}
+	{{if $responseType -}}
 		assert.Equal(t, ` + "`" + `{{.EndpointResponseString}}` + "`" + `, string(data))
 	{{end -}}
 }
@@ -718,7 +718,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3892, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3851, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

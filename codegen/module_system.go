@@ -732,87 +732,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 	return nil
 }
 
-/*
- * Gateway Service Generator
- */
-
-// GatewayServiceGenerator generates an entry point for a single service as
-// a main.go that bootstraps the service and its dependencies
-type GatewayServiceGenerator struct {
-	templates     *Template
-	packageHelper *PackageHelper
-}
-
-// Generate returns the gateway service generated files as a map of relative
-// file path (relative to the target buid directory) to file bytes.
-func (generator *GatewayServiceGenerator) Generate(
-	instance *ModuleInstance,
-) (map[string][]byte, error) {
-	// zanzibar-defaults.json is copied from ../config/production.json
-	configSrcFileName := path.Join(
-		getDirName(), "..", "config", "production.json",
-	)
-	productionConfig, err := ioutil.ReadFile(configSrcFileName)
-	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"Could not read config/production.json while generating main file",
-		)
-	}
-
-	// main.go and main_test.go shared meta
-	meta := &MainMeta{
-		IncludedPackages: []GoPackageImport{
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/clients",
-				AliasName: "",
-			},
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/endpoints",
-				AliasName: "",
-			},
-		},
-		GatewayName:             instance.InstanceName,
-		RelativePathToAppConfig: filepath.Join("..", "..", ".."),
-	}
-
-	// generate main.go
-	main, err := generator.templates.execTemplate(
-		"main.tmpl",
-		meta,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main.go for %s",
-			instance.InstanceName,
-		)
-	}
-
-	// generate main_test.go
-	mainTest, err := generator.templates.execTemplate(
-		"main_test.tmpl",
-		meta,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service main_test.go for %s",
-			instance.InstanceName,
-		)
-	}
-
-	return map[string][]byte{
-		"zanzibar-defaults.json": productionConfig,
-		"main.go":                main,
-		"main_test.go":           mainTest,
-	}, nil
-}
-
 func (g *EndpointGenerator) generateEndpointTestFile(
 	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
 ) error {
@@ -934,25 +853,10 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	tempName := "endpoint_test.tmpl"
 	if e.WorkflowType == "tchannelClient" {
 		meta.ClientName = e.ClientName
-
-		genCodeClientPkgName, err := g.packageHelper.TypeImportPath(method.Downstream.ThriftFile)
-		if err != nil {
-			return errors.Wrap(err, "could not run endpoint_test template")
-		}
-		genCodeClientAliasName, err := g.packageHelper.TypePackageName(method.Downstream.ThriftFile)
-		if err != nil {
-			return errors.Wrap(err, "could not run endpoint_test template")
-		}
-		meta.IncludedPackages = []GoPackageImport{
-			{
-				AliasName:   method.Downstream.PackageName,
-				PackageName: method.Downstream.GoPackage,
-			},
-			{
-				AliasName:   genCodeClientAliasName,
-				PackageName: genCodeClientPkgName,
-			},
-		}
+		meta.IncludedPackages = append(method.Downstream.IncludedPackages, GoPackageImport{
+			AliasName:   method.Downstream.PackageName,
+			PackageName: method.Downstream.GoPackage,
+		})
 		tempName = "endpoint_test_tchannel_client.tmpl"
 	}
 
@@ -973,4 +877,85 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	out[endpointTestFilePath] = endpointTest
 
 	return nil
+}
+
+/*
+ * Gateway Service Generator
+ */
+
+// GatewayServiceGenerator generates an entry point for a single service as
+// a main.go that bootstraps the service and its dependencies
+type GatewayServiceGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+}
+
+// Generate returns the gateway service generated files as a map of relative
+// file path (relative to the target buid directory) to file bytes.
+func (generator *GatewayServiceGenerator) Generate(
+	instance *ModuleInstance,
+) (map[string][]byte, error) {
+	// zanzibar-defaults.json is copied from ../config/production.json
+	configSrcFileName := path.Join(
+		getDirName(), "..", "config", "production.json",
+	)
+	productionConfig, err := ioutil.ReadFile(configSrcFileName)
+	if err != nil {
+		return nil, errors.Wrap(
+			err,
+			"Could not read config/production.json while generating main file",
+		)
+	}
+
+	// main.go and main_test.go shared meta
+	meta := &MainMeta{
+		IncludedPackages: []GoPackageImport{
+			{
+				PackageName: generator.packageHelper.GoGatewayPackageName() +
+					"/clients",
+				AliasName: "",
+			},
+			{
+				PackageName: generator.packageHelper.GoGatewayPackageName() +
+					"/endpoints",
+				AliasName: "",
+			},
+		},
+		GatewayName:             instance.InstanceName,
+		RelativePathToAppConfig: filepath.Join("..", "..", ".."),
+	}
+
+	// generate main.go
+	main, err := generator.templates.execTemplate(
+		"main.tmpl",
+		meta,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service main.go for %s",
+			instance.InstanceName,
+		)
+	}
+
+	// generate main_test.go
+	mainTest, err := generator.templates.execTemplate(
+		"main_test.tmpl",
+		meta,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service main_test.go for %s",
+			instance.InstanceName,
+		)
+	}
+
+	return map[string][]byte{
+		"zanzibar-defaults.json": productionConfig,
+		"main.go":                main,
+		"main_test.go":           mainTest,
+	}, nil
 }

@@ -35,6 +35,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 

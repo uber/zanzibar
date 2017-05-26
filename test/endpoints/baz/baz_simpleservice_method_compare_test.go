@@ -33,6 +33,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
@@ -40,12 +41,12 @@ var testCompareCounter int
 
 func compare(
 	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Compare_Args,
-) (*baz.BazResponse, map[string]string, error) {
+) (*base.BazResponse, map[string]string, error) {
 	testCompareCounter++
 	r1 := args.Arg1
 	r2 := args.Arg2
 	if r1.B1 && r1.S2 == "hello" && r1.I3 == 42 && r2.B1 && r2.S2 == "hola" && r2.I3 == 42 {
-		return &baz.BazResponse{
+		return &base.BazResponse{
 			Message: "different",
 		}, nil, nil
 	}
