@@ -62,6 +62,7 @@ func (c *GoogleNowClient) AddCredentials(
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "addCredentials", c.HTTPClient,
 	)
+	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/add-credentials"
@@ -79,6 +80,7 @@ func (c *GoogleNowClient) AddCredentials(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+	// TODO(jakev): verify mandatory response headers
 
 	res.CheckOKResponse([]int{202})
 
@@ -106,6 +108,7 @@ func (c *GoogleNowClient) CheckCredentials(
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "checkCredentials", c.HTTPClient,
 	)
+	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/check-credentials"
@@ -123,6 +126,7 @@ func (c *GoogleNowClient) CheckCredentials(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+	// TODO(jakev): verify mandatory response headers
 
 	res.CheckOKResponse([]int{202})
 

@@ -85,7 +85,7 @@ func (handler *ArgWithHeadersHandler) HandleRequest(
 			return
 		}
 	}
-	// TODO(sindelar): implement check headers on response
+	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

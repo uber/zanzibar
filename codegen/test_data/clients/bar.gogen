@@ -123,6 +123,7 @@ func (c *BarClient) ArgWithHeaders(
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithHeaders", c.HTTPClient,
 	)
+	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithHeaders"
@@ -150,6 +151,7 @@ func (c *BarClient) ArgWithHeaders(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 	}
@@ -195,6 +197,7 @@ func (c *BarClient) MissingArg(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -255,6 +258,7 @@ func (c *BarClient) NoRequest(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -316,6 +320,7 @@ func (c *BarClient) Normal(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -377,6 +382,7 @@ func (c *BarClient) TooManyArgs(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
