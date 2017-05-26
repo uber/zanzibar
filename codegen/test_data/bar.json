@@ -106,10 +106,16 @@
 						}
 					],
 					"ReqHeaderFields": {
-						"x-uuid": ".UserUUID"
+						"x-uuid": {
+							"FieldIdentifier": ".UserUUID",
+							"IsPointer": true
+						}
 					},
 					"ResHeaderFields": {
-						"some-header-field": ".StringField"
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
 					},
 					"ReqHeaders": [
 						"x-uuid"
@@ -156,7 +162,10 @@
 					],
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
-						"some-header-field": ".StringField"
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
 					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
@@ -226,7 +235,10 @@
 					],
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
-						"some-header-field": ".StringField"
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
 					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
@@ -296,7 +308,10 @@
 					],
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
-						"some-header-field": ".StringField"
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
 					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
@@ -366,7 +381,10 @@
 					],
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
-						"some-header-field": ".StringField"
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
 					},
 					"ReqHeaders": [
 						"x-uuid",
