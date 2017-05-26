@@ -28,6 +28,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
@@ -61,6 +62,10 @@ func (handler *ArgWithHeadersHandler) HandleRequest(
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+
+	xUUIDValue, _ := req.Header.Get("x-uuid")
+
+	requestBody.UserUUID = ptr.String(xUUIDValue)
 
 	workflow := ArgWithHeadersEndpoint{
 		Clients: handler.Clients,
