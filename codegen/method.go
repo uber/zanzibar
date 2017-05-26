@@ -50,6 +50,17 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
+
+	// ReqHeaderFields is a map of "header name" to
+	// a golang field accessor expression like ".Foo.Bar"
+	// Use to place request headers in the body
+	ReqHeaderFields map[string]string
+
+	// ResHeaderFields is a map of header name to a golang
+	// field accessor expression used to read fields out
+	// of the response body and place them into response headers
+	ResHeaderFields map[string]string
+
 	// ReqHeaders needed, generated from "zanzibar.http.reqHeaders"
 	ReqHeaders []string
 	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
@@ -179,6 +190,9 @@ func NewMethod(
 		)
 	}
 	method.setHTTPPath(httpPath, funcSpec)
+
+	method.setRequestHeaderFields(funcSpec)
+	method.setResponseHeaderFields(funcSpec)
 
 	return method, nil
 }
@@ -341,7 +355,7 @@ func findParamsAnnotation(
 	visitor := func(prefix string, field *compile.FieldSpec) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param == "params."+paramName[1:] {
-				identifier = prefix + "." + field.Name
+				identifier = prefix + "." + strings.Title(field.Name)
 				return true
 			}
 		}
@@ -357,55 +371,51 @@ func findParamsAnnotation(
 	return identifier, true
 }
 
-func walkFieldGroups(
-	fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
-) bool {
-	return walkFieldGroupsInternal("", fields, visitField)
+func (ms *MethodSpec) setRequestHeaderFields(
+	funcSpec *compile.FunctionSpec,
+) {
+	fields := compile.FieldGroup(funcSpec.ArgsSpec)
+	ms.ReqHeaderFields = map[string]string{}
+
+	// Scan for all annotations
+	visitor := func(prefix string, field *compile.FieldSpec) bool {
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param[0:8] == "headers." {
+				headerName := param[8:]
+				ms.ReqHeaderFields[headerName] =
+					prefix + "." + strings.Title(field.Name)
+			}
+		}
+		return false
+	}
+	walkFieldGroups(fields, visitor)
 }
 
-func walkFieldGroupsInternal(
-	prefix string, fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
-) bool {
-	for i := 0; i < len(fields); i++ {
-		field := fields[i]
-
-		bail := visitField(prefix, field)
-		if bail {
-			return true
-		}
-
-		switch t := field.Type.(type) {
-		case *compile.BinarySpec:
-		case *compile.StringSpec:
-		case *compile.BoolSpec:
-		case *compile.DoubleSpec:
-		case *compile.I8Spec:
-		case *compile.I16Spec:
-		case *compile.I32Spec:
-		case *compile.I64Spec:
-		case *compile.StructSpec:
-			bail := walkFieldGroupsInternal(
-				prefix+"."+field.Name,
-				t.Fields,
-				visitField,
-			)
-			if bail {
-				return true
-			}
-		case *compile.SetSpec:
-			// TODO: implement
-		case *compile.MapSpec:
-			// TODO: implement
-		case *compile.ListSpec:
-			// TODO: implement
-		default:
-			panic("unknown Spec")
-		}
+func (ms *MethodSpec) setResponseHeaderFields(
+	funcSpec *compile.FunctionSpec,
+) {
+	structType, ok := funcSpec.ResultSpec.ReturnType.(*compile.StructSpec)
+	// If the result is not a struct then there are zero response header
+	// annotations.
+	if !ok {
+		return
 	}
 
-	return false
+	fields := structType.Fields
+	ms.ResHeaderFields = map[string]string{}
+
+	// Scan for all annotations
+	visitor := func(prefix string, field *compile.FieldSpec) bool {
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param[0:8] == "headers." {
+				headerName := param[8:]
+				ms.ResHeaderFields[headerName] =
+					prefix + "." + strings.Title(field.Name)
+			}
+		}
+		return false
+	}
+	walkFieldGroups(fields, visitor)
 }
 
 func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpec) {
@@ -542,4 +552,57 @@ func headers(annotation string) []string {
 		return nil
 	}
 	return strings.Split(annotation, ",")
+}
+
+func walkFieldGroups(
+	fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
+	return walkFieldGroupsInternal("", fields, visitField)
+}
+
+func walkFieldGroupsInternal(
+	prefix string, fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
+	for i := 0; i < len(fields); i++ {
+		field := fields[i]
+
+		bail := visitField(prefix, field)
+		if bail {
+			return true
+		}
+
+		realType := compile.RootTypeSpec(field.Type)
+		switch t := realType.(type) {
+		case *compile.BinarySpec:
+		case *compile.StringSpec:
+		case *compile.BoolSpec:
+		case *compile.DoubleSpec:
+		case *compile.I8Spec:
+		case *compile.I16Spec:
+		case *compile.I32Spec:
+		case *compile.I64Spec:
+		case *compile.EnumSpec:
+		case *compile.StructSpec:
+			bail := walkFieldGroupsInternal(
+				prefix+"."+strings.Title(field.Name),
+				t.Fields,
+				visitField,
+			)
+			if bail {
+				return true
+			}
+		case *compile.SetSpec:
+			// TODO: implement
+		case *compile.MapSpec:
+			// TODO: implement
+		case *compile.ListSpec:
+			// TODO: implement
+		default:
+			panic("unknown Spec")
+		}
+	}
+
+	return false
 }
