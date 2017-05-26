@@ -112,8 +112,12 @@ func (handler *{{$handlerName}}) HandleRequest(
 		}
 	}
 
-	{{- if .ReqHeaders }}
+	{{- if .ResHeaders }}
 	// TODO(sindelar): implement check headers on response
+	{{- end }}
+
+	{{- if .ResHeaderFields }}
+	// TODO(jakev): implement writing fields into response headers
 	{{- end }}
 
 	{{if eq .ResponseType "" -}}
