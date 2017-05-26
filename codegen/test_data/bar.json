@@ -37,6 +37,8 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*endpointsBarBar.Bar_ArgNotStruct_Args",
@@ -103,6 +105,12 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {
+						"x-uuid": ".UserUUID"
+					},
+					"ResHeaderFields": {
+						"some-header-field": ".StringField"
+					},
 					"ReqHeaders": [
 						"x-uuid"
 					],
@@ -146,6 +154,10 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": ".StringField"
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
@@ -212,6 +224,10 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": ".StringField"
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
@@ -278,6 +294,10 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": ".StringField"
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*endpointsBarBar.Bar_Normal_Args",
@@ -344,6 +364,10 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": ".StringField"
+					},
 					"ReqHeaders": [
 						"x-uuid",
 						"x-token"
