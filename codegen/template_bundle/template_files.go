@@ -1337,8 +1337,12 @@ import (
 	{{end}}
 )
 
+{{$exposedMethods := .ExposedMethods -}}
 {{range $svc := .Services}}
 {{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := index $exposedMethods $serviceMethod -}}
+{{if $methodName -}}
 {{$privateName := lower .Name -}}
 {{$genCodePkg := .GenCodePkgName -}}
 {{$func := printf "%s%sFunc" $svc.Name .Name -}}
@@ -1389,7 +1393,9 @@ func (h *{{$handler}}) Handle(
 		if err != nil {
 			return false, nil, nil, err
 		}
+		{{if .ResponseType -}}
 		res.Success = r
+		{{end -}}
 	{{else -}}
 		if err != nil {
 			switch v := err.(type) {
@@ -1406,7 +1412,7 @@ func (h *{{$handler}}) Handle(
 				default:
 					return false, nil, nil, err
 			}
-		} {{if ne .ResponseType "" -}} else {
+		} {{if .ResponseType -}} else {
 			res.Success = r
 		} {{end -}}
 	{{end}}
@@ -1414,7 +1420,7 @@ func (h *{{$handler}}) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 {{end -}}
-
+{{end -}}
 {{end}}
 `)
 
@@ -1428,7 +1434,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2780, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2996, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
