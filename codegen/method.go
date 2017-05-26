@@ -42,6 +42,13 @@ type ExceptionSpec struct {
 	StatusCode StatusCode
 }
 
+// HeaderFieldInfo contains information about where to store
+// the string from headers into the request/response body.
+type HeaderFieldInfo struct {
+	FieldIdentifier string
+	IsPointer       bool
+}
+
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
 	Name       string
@@ -54,12 +61,12 @@ type MethodSpec struct {
 	// ReqHeaderFields is a map of "header name" to
 	// a golang field accessor expression like ".Foo.Bar"
 	// Use to place request headers in the body
-	ReqHeaderFields map[string]string
+	ReqHeaderFields map[string]HeaderFieldInfo
 
 	// ResHeaderFields is a map of header name to a golang
 	// field accessor expression used to read fields out
 	// of the response body and place them into response headers
-	ResHeaderFields map[string]string
+	ResHeaderFields map[string]HeaderFieldInfo
 
 	// ReqHeaders needed, generated from "zanzibar.http.reqHeaders"
 	ReqHeaders []string
@@ -375,15 +382,17 @@ func (ms *MethodSpec) setRequestHeaderFields(
 	funcSpec *compile.FunctionSpec,
 ) {
 	fields := compile.FieldGroup(funcSpec.ArgsSpec)
-	ms.ReqHeaderFields = map[string]string{}
+	ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
 
 	// Scan for all annotations
 	visitor := func(prefix string, field *compile.FieldSpec) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				ms.ReqHeaderFields[headerName] =
-					prefix + "." + strings.Title(field.Name)
+				ms.ReqHeaderFields[headerName] = HeaderFieldInfo{
+					FieldIdentifier: prefix + "." + strings.Title(field.Name),
+					IsPointer:       !field.Required,
+				}
 			}
 		}
 		return false
@@ -402,15 +411,17 @@ func (ms *MethodSpec) setResponseHeaderFields(
 	}
 
 	fields := structType.Fields
-	ms.ResHeaderFields = map[string]string{}
+	ms.ResHeaderFields = map[string]HeaderFieldInfo{}
 
 	// Scan for all annotations
 	visitor := func(prefix string, field *compile.FieldSpec) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				ms.ResHeaderFields[headerName] =
-					prefix + "." + strings.Title(field.Name)
+				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
+					FieldIdentifier: prefix + "." + strings.Title(field.Name),
+					IsPointer:       !field.Required,
+				}
 			}
 		}
 		return false
