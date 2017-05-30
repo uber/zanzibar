@@ -32,14 +32,14 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 )
 
 var testPingCounter int
 
-func ping(ctx context.Context, reqHeaders map[string]string) (*baz.BazResponse, map[string]string, error) {
+func ping(ctx context.Context, reqHeaders map[string]string) (*base.BazResponse, map[string]string, error) {
 	testPingCounter++
-	res := baz.BazResponse{
+	res := base.BazResponse{
 		Message: "pong",
 	}
 	return &res, nil, nil

@@ -205,10 +205,16 @@ func (ms *ModuleSpec) SetDownstream(
 	if method.Downstream != nil {
 		var downstreamMethod *MethodSpec
 
-		for _, dsMethod := range method.Downstream.Services[0].Methods {
-			if method.Name == dsMethod.Name {
-				downstreamMethod = dsMethod
-				break
+		// TODO: once all client configs have "exposedMethods" field, we can find the exact
+		// service, instead of loop over for service looking for the first matching method,
+		// which could totally be wrong method
+	loop:
+		for _, s := range method.Downstream.Services {
+			for _, dsMethod := range s.Methods {
+				if method.Name == dsMethod.Name {
+					downstreamMethod = dsMethod
+					break loop
+				}
 			}
 		}
 		if downstreamMethod == nil {

@@ -32,6 +32,7 @@ import (
 
 	"github.com/uber/zanzibar/runtime"
 
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
@@ -101,7 +102,7 @@ func (c *BazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error) {
+) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Compare_Result
 
 	success, respHeaders, err := c.client.Call(
@@ -128,7 +129,7 @@ func (c *BazClient) Compare(
 func (c *BazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (*clientsBazBaz.BazResponse, map[string]string, error) {
+) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Ping_Result
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}

@@ -31,6 +31,7 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
@@ -87,7 +88,7 @@ type SimpleServiceCompareFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
-) (*clientsBazBaz.BazResponse, map[string]string, error)
+) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChannelHandler {
@@ -136,7 +137,7 @@ func (h *SimpleServiceCompareHandler) Handle(
 type SimpleServicePingFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-) (*clientsBazBaz.BazResponse, map[string]string, error)
+) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
 func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChannelHandler {
@@ -209,7 +210,7 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 				)
 			}
 			res.AuthErr = v
-		case *clientsBazBaz.ServerErr:
+		case *clientsBazBase.ServerErr:
 			if v == nil {
 				return false, nil, nil, errors.New(
 					"Handler for SillyNoop returned non-nil error type *ServerErr but nil value",

@@ -21,12 +21,13 @@ EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 
 .PHONY: check-licence
 check-licence:
-	ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+	@echo "Checking uber-licence..."
+	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
+	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
-	ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
+	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: install
@@ -39,12 +40,13 @@ install:
 
 .PHONY: eclint-check
 eclint-check:
-	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
-	./node_modules/.bin/eclint check "./{codegen,examples}/**/*.{json,tmpl}"
+	@echo "Checking eclint..."
+	@ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
+	@./node_modules/.bin/eclint check "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: eclint-fix
 eclint-fix:
-	ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
+	@ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
 	./node_modules/.bin/eclint fix "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: lint

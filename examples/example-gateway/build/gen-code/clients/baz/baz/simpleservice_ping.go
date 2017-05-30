@@ -6,6 +6,7 @@ package baz
 import (
 	"errors"
 	"fmt"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"go.uber.org/thriftrw/wire"
 	"strings"
 )
@@ -52,8 +53,8 @@ func (v *SimpleService_Ping_Args) EnvelopeType() wire.EnvelopeType {
 var SimpleService_Ping_Helper = struct {
 	Args           func() *SimpleService_Ping_Args
 	IsException    func(error) bool
-	WrapResponse   func(*BazResponse, error) (*SimpleService_Ping_Result, error)
-	UnwrapResponse func(*SimpleService_Ping_Result) (*BazResponse, error)
+	WrapResponse   func(*base.BazResponse, error) (*SimpleService_Ping_Result, error)
+	UnwrapResponse func(*SimpleService_Ping_Result) (*base.BazResponse, error)
 }{}
 
 func init() {
@@ -66,13 +67,13 @@ func init() {
 			return false
 		}
 	}
-	SimpleService_Ping_Helper.WrapResponse = func(success *BazResponse, err error) (*SimpleService_Ping_Result, error) {
+	SimpleService_Ping_Helper.WrapResponse = func(success *base.BazResponse, err error) (*SimpleService_Ping_Result, error) {
 		if err == nil {
 			return &SimpleService_Ping_Result{Success: success}, nil
 		}
 		return nil, err
 	}
-	SimpleService_Ping_Helper.UnwrapResponse = func(result *SimpleService_Ping_Result) (success *BazResponse, err error) {
+	SimpleService_Ping_Helper.UnwrapResponse = func(result *SimpleService_Ping_Result) (success *base.BazResponse, err error) {
 		if result.Success != nil {
 			success = result.Success
 			return
@@ -83,7 +84,7 @@ func init() {
 }
 
 type SimpleService_Ping_Result struct {
-	Success *BazResponse `json:"success,omitempty"`
+	Success *base.BazResponse `json:"success,omitempty"`
 }
 
 func (v *SimpleService_Ping_Result) ToWire() (wire.Value, error) {
