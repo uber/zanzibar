@@ -40,7 +40,7 @@ type ServerHTTPRequest struct {
 	gateway     *Gateway
 	started     bool
 	startTime   time.Time
-	metrics     *EndpointMetrics
+	metrics     Metrics
 
 	Logger *zap.Logger
 	Scope  tally.Scope
@@ -69,7 +69,7 @@ func NewServerHTTPRequest(
 		Method:  r.Method,
 		Params:  params,
 		Header:  ServerHTTPHeader(r.Header),
-		metrics: &endpoint.metrics,
+		metrics: endpoint.metrics,
 	}
 	req.res = NewServerHTTPResponse(w, req)
 
@@ -95,7 +95,7 @@ func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 	req.started = true
 	req.startTime = time.Now()
 
-	req.metrics.requestRecvd.Inc(1)
+	req.metrics.IncrementCounter()
 }
 
 // CheckHeaders verifies that request contains required headers.

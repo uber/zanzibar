@@ -28,6 +28,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"go.uber.org/zap"
+	"fmt"
 )
 
 // ServerHTTPResponse struct manages request
@@ -37,7 +38,7 @@ type ServerHTTPResponse struct {
 	gateway           *Gateway
 	finishTime        time.Time
 	finished          bool
-	metrics           *EndpointMetrics
+	metrics           Metrics
 	flushed           bool
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
@@ -85,19 +86,8 @@ func (res *ServerHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
-	counter := res.metrics.statusCodes[res.StatusCode]
-	if counter == nil {
-		res.Request.Logger.Error(
-			"Could not emit statusCode metric",
-			zap.Int("UnexpectedStatusCode", res.StatusCode),
-		)
-	} else {
-		counter.Inc(1)
-	}
-
-	res.metrics.requestLatency.Record(
-		res.finishTime.Sub(res.Request.startTime),
-	)
+	res.metrics.IncrementMetric(fmt.Sprintf("inbound.calls.status.%d", res.StatusCode))
+	res.metrics.RecordLatency(res.finishTime.Sub(res.Request.startTime))
 }
 
 // SendErrorString helper to send an error string
@@ -141,14 +131,20 @@ func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, headers Header, body json.Marshaler,
 ) {
 	if body == nil {
-		res.SendErrorString(500, "Could not serialize json response")
+		res.SendErrorString(
+			http.StatusInternalServerError,
+			"Could not serialize json response",
+		)
 		res.Request.Logger.Error("Could not serialize nil pointer body")
 		return
 	}
 
 	bytes, err := body.MarshalJSON()
 	if err != nil {
-		res.SendErrorString(500, "Could not serialize json response")
+		res.SendErrorString(
+			http.StatusInternalServerError,
+			"Could not serialize json response",
+		)
 		res.Request.Logger.Error("Could not serialize json response",
 			zap.String("error", err.Error()),
 		)

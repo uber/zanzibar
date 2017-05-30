@@ -77,22 +77,6 @@ func TestInvalidStatusCode(t *testing.T) {
 	}
 
 	assert.Equal(t, "true", string(bytes))
-
-	errorLogs := bgateway.ErrorLogs()
-	logLines := errorLogs["Could not emit statusCode metric"]
-
-	assert.NotNil(t, logLines)
-	assert.Equal(t, 1, len(logLines))
-
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
-	code := lineStruct["UnexpectedStatusCode"].(float64)
-	assert.Equal(t, 999.0, code)
 }
 
 func TestCallingWriteJSONWithNil(t *testing.T) {
