@@ -113,6 +113,54 @@ func (c *BarClient) ArgNotStruct(
 	)
 }
 
+// ArgWithHeaders calls "/bar/argWithHeaders" endpoint.
+func (c *BarClient) ArgWithHeaders(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ArgWithHeaders_Args,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "argWithHeaders", c.HTTPClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithHeaders"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return nil, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return nil, respHeaders, err
+		}
+		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+	}
+
+	return nil, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
 // MissingArg calls "/missing-arg-path" endpoint.
 func (c *BarClient) MissingArg(
 	ctx context.Context,
@@ -149,6 +197,7 @@ func (c *BarClient) MissingArg(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -209,6 +258,7 @@ func (c *BarClient) NoRequest(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -270,6 +320,7 @@ func (c *BarClient) Normal(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 
@@ -331,6 +382,7 @@ func (c *BarClient) TooManyArgs(
 		if err != nil {
 			return nil, respHeaders, err
 		}
+		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 

@@ -27,7 +27,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	tmpl "text/template"
@@ -42,7 +41,6 @@ type MainFiles struct {
 	MainTestFile string
 }
 
-var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 var funcMap = tmpl.FuncMap{
 	"lower":        strings.ToLower,
 	"title":        strings.Title,
@@ -64,19 +62,6 @@ func fullTypeName(typeName, packageName string) string {
 	return packageName + "." + typeName
 }
 
-func camelCase(src string) string {
-	byteSrc := []byte(src)
-	chunks := camelingRegex.FindAll(byteSrc, -1)
-	for idx, val := range chunks {
-		if idx > 0 {
-			chunks[idx] = bytes.Title(val)
-		} else {
-			chunks[idx][0] = bytes.ToLower(val[0:1])[0]
-		}
-	}
-	return string(bytes.Join(chunks, nil))
-}
-
 func decrement(num int) int {
 	return num - 1
 }
@@ -84,15 +69,6 @@ func decrement(num int) int {
 func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
 	str, err := json.Marshal(jsonObj)
 	return string(str), err
-}
-
-func pascalCase(src string) string {
-	byteSrc := []byte(src)
-	chunks := camelingRegex.FindAll(byteSrc, -1)
-	for idx, val := range chunks {
-		chunks[idx] = bytes.Title(val)
-	}
-	return string(bytes.Join(chunks, nil))
 }
 
 func unref(t string) string {

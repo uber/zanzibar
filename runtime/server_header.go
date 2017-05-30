@@ -21,8 +21,10 @@
 package zanzibar
 
 import (
-	"errors"
 	"net/http"
+	"net/textproto"
+
+	"github.com/pkg/errors"
 )
 
 // Header defines methods on ServerHeaders
@@ -38,13 +40,17 @@ type Header interface {
 // on http.Header
 type ServerHTTPHeader http.Header
 
+// NewServerHTTPHeader creates a server http header
+func NewServerHTTPHeader(h http.Header) ServerHTTPHeader {
+	return ServerHTTPHeader(h)
+}
+
 // Get retrieves the first string stored on a given header. Bool
 // return value is used to distinguish between the presence of a
 // header with golang's zerovalue string and the absence of the string.
 func (zh ServerHTTPHeader) Get(key string) (string, bool) {
-	// TODO: Canonicalize strings before lookup.
-	// Use textproto.CanonicalMIMEHeaderKey
-	h := zh[key]
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	h := zh[httpKey]
 	if len(h) > 0 {
 		return h[0], true
 	}
@@ -61,20 +67,22 @@ func (zh ServerHTTPHeader) GetOrEmptyStr(key string) string {
 	return ""
 }
 
+// GetAll retries all strings stored for this header.
+func (zh ServerHTTPHeader) GetAll(key string) []string {
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	return zh[httpKey]
+}
+
 // Add appends a value for a given header.
 func (zh ServerHTTPHeader) Add(key string, value string) {
-	// TODO: Canonicalize strings before inserting
-	// Use textproto.CanonicalMIMEHeaderKey
-	zh[key] = append(zh[key], value)
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	zh[httpKey] = append(zh[httpKey], value)
 }
 
 // Set sets a value for a given header, overwriting all previous values.
 func (zh ServerHTTPHeader) Set(key string, value string) {
-	// TODO: Canonicalize strings before inserting
-	// Use textproto.CanonicalMIMEHeaderKey
-	h := make([]string, 1)
-	h[0] = value
-	zh[key] = h
+	httpKey := textproto.CanonicalMIMEHeaderKey(key)
+	zh[httpKey] = []string{value}
 }
 
 // Keys returns a slice of header keys.
@@ -91,7 +99,8 @@ func (zh ServerHTTPHeader) Keys() []string {
 // Ensure returns error if the headers do not have the given keys
 func (zh ServerHTTPHeader) Ensure(keys []string) error {
 	for _, headerName := range keys {
-		_, ok := zh[headerName]
+		httpHeaderName := textproto.CanonicalMIMEHeaderKey(headerName)
+		_, ok := zh[httpHeaderName]
 		if !ok {
 			return errors.New("Missing manditory header: " + headerName)
 		}

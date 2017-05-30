@@ -38,6 +38,7 @@ import (
 // Endpoints is a struct that holds all the endpoints
 type Endpoints struct {
 	BarArgNotStructHTTPHandler           *bar.ArgNotStructHandler
+	BarArgWithHeadersHTTPHandler         *bar.ArgWithHeadersHandler
 	BarMissingArgHTTPHandler             *bar.MissingArgHandler
 	BarNoRequestHTTPHandler              *bar.NoRequestHandler
 	BarNormalHTTPHandler                 *bar.NormalHandler
@@ -58,6 +59,7 @@ func CreateEndpoints(
 ) interface{} {
 	return &Endpoints{
 		BarArgNotStructHTTPHandler:           bar.NewArgNotStructEndpoint(gateway),
+		BarArgWithHeadersHTTPHandler:         bar.NewArgWithHeadersEndpoint(gateway),
 		BarMissingArgHTTPHandler:             bar.NewMissingArgEndpoint(gateway),
 		BarNoRequestHTTPHandler:              bar.NewNoRequestEndpoint(gateway),
 		BarNormalHTTPHandler:                 bar.NewNormalEndpoint(gateway),
@@ -84,6 +86,15 @@ func Register(g *zanzibar.Gateway) {
 			"bar",
 			"argNotStruct",
 			endpoints.BarArgNotStructHTTPHandler.HandleRequest,
+		),
+	)
+	g.HTTPRouter.Register(
+		"POST", "/bar/argWithHeaders",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithHeaders",
+			endpoints.BarArgWithHeadersHTTPHandler.HandleRequest,
 		),
 	)
 	g.HTTPRouter.Register(

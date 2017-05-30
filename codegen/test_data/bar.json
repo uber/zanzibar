@@ -37,6 +37,8 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*endpointsBarBar.Bar_ArgNotStruct_Args",
@@ -87,9 +89,64 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
+					"Name": "argWithHeaders",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/bar/argWithHeaders",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "argWithHeaders",
+							"BodyIdentifier": ""
+						}
+					],
+					"ReqHeaderFields": {
+						"x-uuid": {
+							"FieldIdentifier": ".UserUUID",
+							"IsPointer": true
+						}
+					},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*endpointsBarBar.Bar_ArgWithHeaders_Args",
+					"ResponseType": "*endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/missing-arg-path",
 					"PathSegments": [
 						{
@@ -103,6 +160,13 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
@@ -155,7 +219,7 @@
 				{
 					"Name": "noRequest",
 					"HTTPMethod": "GET",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/no-request-path",
 					"PathSegments": [
 						{
@@ -169,6 +233,13 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
@@ -221,7 +292,7 @@
 				{
 					"Name": "normal",
 					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/bar-path",
 					"PathSegments": [
 						{
@@ -235,6 +306,13 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*endpointsBarBar.Bar_Normal_Args",
@@ -287,7 +365,7 @@
 				{
 					"Name": "tooManyArgs",
 					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
+					"EndpointName": "",
 					"HTTPPath": "/bar/too-many-args-path",
 					"PathSegments": [
 						{
@@ -301,6 +379,13 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
 					"ReqHeaders": [
 						"x-uuid",
 						"x-token"

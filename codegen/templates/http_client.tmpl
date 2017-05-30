@@ -70,11 +70,19 @@ func (c *{{$clientName}}) {{title .Name}}(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
 
+	{{- if .ReqHeaders }}
+	// TODO(jakev): Ensure we validate mandatory headers
+	{{- end}}
+
+	{{- if .ReqHeaderFields }}
+	// TODO(jakev): populate request headers from thrift body
+	{{- end}}
+
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
-	{{- else -}}+"/"+string(r.{{$segment.BodyIdentifier | title}})
+	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})
 	{{- end -}}
 	{{- end}}
 
@@ -95,6 +103,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	{{- if .ResHeaders }}
+	// TODO(jakev): verify mandatory response headers
+	{{- end}}
 
 	res.CheckOKResponse([]int{
 		{{- range $index, $code := .ValidStatusCodes -}}
@@ -120,6 +132,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 			if err != nil {
 				return nil, respHeaders, err
 			}
+
+			{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+			{{- end}}
 
 			return &responseBody, respHeaders, nil
 	}
@@ -157,6 +173,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 			if err != nil {
 				return nil, respHeaders, err
 			}
+
+			{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+			{{- end}}
 
 			return &responseBody, respHeaders, nil
 		{{range $idx, $exception := .Exceptions}}

@@ -127,6 +127,16 @@ func (handler *{{$handlerName}}) HandleRequest(
 	}
 	{{end}}
 
+	{{range $headerName, $headerInfo := .ReqHeaderFields}}
+	{{camel $headerName}}Value, _ := req.Header.Get("{{$headerName}}")
+	{{if $headerInfo.IsPointer}}
+	{{$fieldId := $headerInfo.FieldIdentifier}}
+	requestBody{{$fieldId}} = ptr.String({{camel $headerName}}Value)
+	{{else}}
+	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
+	{{end}}
+	{{end}}
+
 	workflow := {{$workflow}}{
 		Clients: handler.Clients,
 		Logger: req.Logger,
@@ -160,8 +170,12 @@ func (handler *{{$handlerName}}) HandleRequest(
 		}
 	}
 
-	{{- if .ReqHeaders }}
+	{{- if .ResHeaders }}
 	// TODO(sindelar): implement check headers on response
+	{{- end }}
+
+	{{- if .ResHeaderFields }}
+	// TODO(jakev): implement writing fields into response headers
 	{{- end }}
 
 	{{if eq .ResponseType "" -}}
@@ -358,7 +372,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8048, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8520, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -795,11 +809,19 @@ func (c *{{$clientName}}) {{title .Name}}(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
 
+	{{- if .ReqHeaders }}
+	// TODO(jakev): Ensure we validate mandatory headers
+	{{- end}}
+
+	{{- if .ReqHeaderFields }}
+	// TODO(jakev): populate request headers from thrift body
+	{{- end}}
+
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
-	{{- else -}}+"/"+string(r.{{$segment.BodyIdentifier | title}})
+	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})
 	{{- end -}}
 	{{- end}}
 
@@ -820,6 +842,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 	for k := range res.Header {
 		respHeaders[k] = res.Header.Get(k)
 	}
+
+	{{- if .ResHeaders }}
+	// TODO(jakev): verify mandatory response headers
+	{{- end}}
 
 	res.CheckOKResponse([]int{
 		{{- range $index, $code := .ValidStatusCodes -}}
@@ -845,6 +871,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 			if err != nil {
 				return nil, respHeaders, err
 			}
+
+			{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+			{{- end}}
 
 			return &responseBody, respHeaders, nil
 	}
@@ -883,6 +913,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 				return nil, respHeaders, err
 			}
 
+			{{- if .ResHeaderFields }}
+			// TODO(jakev): read response headers and put them in body
+			{{- end}}
+
 			return &responseBody, respHeaders, nil
 		{{range $idx, $exception := .Exceptions}}
 		case {{$exception.StatusCode.Code}}:
@@ -920,7 +954,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 4940, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5425, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

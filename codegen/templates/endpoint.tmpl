@@ -69,6 +69,16 @@ func (handler *{{$handlerName}}) HandleRequest(
 	}
 	{{end}}
 
+	{{range $headerName, $headerInfo := .ReqHeaderFields}}
+	{{camel $headerName}}Value, _ := req.Header.Get("{{$headerName}}")
+	{{if $headerInfo.IsPointer}}
+	{{$fieldId := $headerInfo.FieldIdentifier}}
+	requestBody{{$fieldId}} = ptr.String({{camel $headerName}}Value)
+	{{else}}
+	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
+	{{end}}
+	{{end}}
+
 	workflow := {{$workflow}}{
 		Clients: handler.Clients,
 		Logger: req.Logger,
@@ -102,8 +112,12 @@ func (handler *{{$handlerName}}) HandleRequest(
 		}
 	}
 
-	{{- if .ReqHeaders }}
+	{{- if .ResHeaders }}
 	// TODO(sindelar): implement check headers on response
+	{{- end }}
+
+	{{- if .ResHeaderFields }}
+	// TODO(jakev): implement writing fields into response headers
 	{{- end }}
 
 	{{if eq .ResponseType "" -}}

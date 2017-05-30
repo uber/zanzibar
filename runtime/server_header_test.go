@@ -21,6 +21,7 @@
 package zanzibar_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,9 +29,9 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	v, ok := zh.Get("foo")
 	assert.Equal(t, true, ok)
@@ -38,9 +39,9 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetOrEmpty(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{""}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "")
 
 	v := zh.GetOrEmptyStr("foo")
 	assert.Equal(t, "headOne", v)
@@ -53,7 +54,7 @@ func TestGetOrEmpty(t *testing.T) {
 }
 
 func TestGetMissingKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 
 	v, ok := zh.Get("foo")
 	assert.Equal(t, false, ok)
@@ -61,9 +62,10 @@ func TestGetMissingKey(t *testing.T) {
 }
 
 func TestGetMultivalueKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne", "headTwo"}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Add("foo", "headTwo")
+	zh.Set("bar", "otherHeader")
 
 	v, ok := zh.Get("foo")
 	assert.Equal(t, true, ok)
@@ -71,71 +73,74 @@ func TestGetMultivalueKey(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("bar", "otherHeader")
 
 	zh.Add("foo", "headOne")
-	assert.Equal(t, "headOne", zh["foo"][0])
+	assert.Equal(t, "headOne", zh.GetOrEmptyStr("foo"))
 }
 
 func TestAddMultivalueKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	zh.Add("foo", "headTwo")
-	assert.Equal(t, "headOne", zh["foo"][0])
-	assert.Equal(t, "headTwo", zh["foo"][1])
+	assert.Equal(t,
+		[]string{"headOne", "headTwo"},
+		zh.GetAll("foo"),
+	)
 }
 
 func TestSetOverwriteOldKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	zh.Set("foo", "newHeader")
-	assert.Equal(t, "newHeader", zh["foo"][0])
-	assert.Equal(t, 1, len(zh["foo"]))
+	assert.Equal(t, "newHeader", zh.GetOrEmptyStr("foo"))
+	assert.Equal(t, 1, len(zh.GetAll("foo")))
 }
 
 func TestSetNewKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("bar", "otherHeader")
 
 	zh.Set("foo", "headOne")
-	assert.Equal(t, "headOne", zh["foo"][0])
+	assert.Equal(t, "headOne", zh.GetOrEmptyStr("foo"))
 }
 
 func TestSetOverwriteMultiKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
-	zh["foo"] = []string{"headOne", "headTwo"}
-	zh["bar"] = []string{"otherHeader"}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
+	zh.Set("foo", "headOne")
+	zh.Add("foo", "headTwo")
+	zh.Set("bar", "otherHeader")
 
 	zh.Set("foo", "newHeader")
-	assert.Equal(t, "newHeader", zh["foo"][0])
-	assert.Equal(t, 1, len(zh["foo"]))
+	assert.Equal(t, "newHeader", zh.GetOrEmptyStr("foo"))
+	assert.Equal(t, 1, len(zh.GetAll("foo")))
 }
 
 func TestMissingKey(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 	emptyAr := make([]string, 0)
 	assert.Equal(t, emptyAr, zh.Keys())
 }
 
 func TestKeys(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{"otherHeader"}
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	assert.Equal(t, 2, len(zh.Keys()))
 }
 
 func TestEnsure(t *testing.T) {
-	zh := zanzibar.ServerHTTPHeader{}
+	zh := zanzibar.NewServerHTTPHeader(http.Header{})
 
-	zh["foo"] = []string{"headOne"}
-	zh["bar"] = []string{"otherHeader"}
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
 	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
@@ -143,7 +148,7 @@ func TestEnsure(t *testing.T) {
 
 func TestSTHGet(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
-	zh["foo"] = "headOne"
+	zh.Set("foo", "headOne")
 
 	v, ok := zh.Get("foo")
 	assert.Equal(t, true, ok)
@@ -167,7 +172,7 @@ func TestSTHAdd(t *testing.T) {
 
 func TestSTHSetOverwriteOldKey(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
-	zh["foo"] = "headOne"
+	zh.Set("foo", "headOne")
 
 	zh.Set("foo", "newHeader")
 	assert.Equal(t, "newHeader", zh["foo"])
@@ -175,7 +180,7 @@ func TestSTHSetOverwriteOldKey(t *testing.T) {
 
 func TestSTHSetNewKey(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
-	zh["bar"] = "otherHeader"
+	zh.Set("bar", "otherHeader")
 
 	zh.Set("foo", "headOne")
 	assert.Equal(t, "headOne", zh["foo"])
@@ -190,8 +195,8 @@ func TestSTHMissingKey(t *testing.T) {
 func TestSTHkeys(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 
-	zh["foo"] = "headOne"
-	zh["bar"] = "otherHeader"
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	assert.Equal(t, 2, len(zh.Keys()))
 }
@@ -199,8 +204,8 @@ func TestSTHkeys(t *testing.T) {
 func TestSTHEnsure(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 
-	zh["foo"] = "headOne"
-	zh["bar"] = "otherHeader"
+	zh.Set("foo", "headOne")
+	zh.Set("bar", "otherHeader")
 
 	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
 	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))

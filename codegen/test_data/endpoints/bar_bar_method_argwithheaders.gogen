@@ -26,50 +26,56 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
+	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// MissingArgHandler is the handler for "/bar/missing-arg-path"
-type MissingArgHandler struct {
+// ArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
+type ArgWithHeadersHandler struct {
 	Clients *clients.Clients
 }
 
-// NewMissingArgEndpoint creates a handler
-func NewMissingArgEndpoint(
+// NewArgWithHeadersEndpoint creates a handler
+func NewArgWithHeadersEndpoint(
 	gateway *zanzibar.Gateway,
-) *MissingArgHandler {
-	return &MissingArgHandler{
+) *ArgWithHeadersHandler {
+	return &ArgWithHeadersHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/bar/missing-arg-path".
-func (handler *MissingArgHandler) HandleRequest(
+// HandleRequest handles "/bar/argWithHeaders".
+func (handler *ArgWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	if !req.CheckHeaders([]string{"x-uuid"}) {
+		return
+	}
+	var requestBody endpointsBarBar.Bar_ArgWithHeaders_Args
+	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
+		return
+	}
 
-	workflow := MissingArgEndpoint{
+	xUUIDValue, _ := req.Header.Get("x-uuid")
+
+	requestBody.UserUUID = ptr.String(xUUIDValue)
+
+	workflow := ArgWithHeadersEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		switch errValue := err.(type) {
-
-		case *endpointsBarBar.BarException:
-			res.WriteJSON(
-				403, cliRespHeaders, errValue,
-			)
-			return
 
 		default:
 			req.Logger.Warn("Workflow for endpoint returned error",
@@ -84,35 +90,29 @@ func (handler *MissingArgHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// MissingArgEndpoint calls thrift client Bar.MissingArg
-type MissingArgEndpoint struct {
+// ArgWithHeadersEndpoint calls thrift client Bar.ArgWithHeaders
+type ArgWithHeadersEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w MissingArgEndpoint) Handle(
+func (w ArgWithHeadersEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
+	r *endpointsBarBar.Bar_ArgWithHeaders_Args,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
+	clientRequest := convertToArgWithHeadersClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
-	clientRespBody, _, err := w.Clients.Bar.MissingArg(
-		ctx, clientHeaders,
+	clientRespBody, _, err := w.Clients.Bar.ArgWithHeaders(
+		ctx, clientHeaders, clientRequest,
 	)
 
 	if err != nil {
 		switch errValue := err.(type) {
-
-		case *clientsBarBar.BarException:
-			serverErr := convertMissingArgBarException(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Could not make client request",
@@ -130,19 +130,20 @@ func (w MissingArgEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertMissingArgClientResponse(clientRespBody)
+	response := convertArgWithHeadersClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertMissingArgBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
-	return serverError
+func convertToArgWithHeadersClientRequest(in *endpointsBarBar.Bar_ArgWithHeaders_Args) *clientsBarBar.Bar_ArgWithHeaders_Args {
+	out := &clientsBarBar.Bar_ArgWithHeaders_Args{}
+
+	out.Name = string(in.Name)
+	out.UserUUID = (*string)(in.UserUUID)
+
+	return out
 }
 
-func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertArgWithHeadersClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
