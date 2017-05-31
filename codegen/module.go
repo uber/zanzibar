@@ -498,7 +498,7 @@ func (system *ModuleSystem) GenerateBuild(
 				continue
 			}
 
-			files, err := generator.Generate(classInstance)
+			buildResult, err := generator.Generate(classInstance)
 
 			if err != nil {
 				fmt.Printf(
@@ -511,7 +511,13 @@ func (system *ModuleSystem) GenerateBuild(
 				return err
 			}
 
-			for filePath, content := range files {
+			if buildResult == nil {
+				continue
+			}
+
+			classInstance.genSpec = buildResult.Spec
+
+			for filePath, content := range buildResult.Files {
 				filePath = filepath.Clean(filePath)
 
 				if strings.HasPrefix(filePath, "..") {
@@ -582,13 +588,23 @@ type ModuleClass struct {
 	types             map[string]BuildGenerator
 }
 
+// BuildResult is the result of running a module generator
+type BuildResult struct {
+	// Files contains a map of file names to file bytes to be written to the
+	// module build directory
+	Files map[string][]byte
+	// Spec is an arbitrary type that can be used to share computed data
+	// between dependencies
+	Spec interface{}
+}
+
 // BuildGenerator provides a function to generate a module instance build
 // artifact from its configuration as part of a build step. For example, an
 // Endpoint module instance may generate endpoint handler code
 type BuildGenerator interface {
 	Generate(
 		instance *ModuleInstance,
-	) (map[string][]byte, error)
+	) (*BuildResult, error)
 }
 
 // PackageInfo provides information about the package associated with a module
@@ -644,6 +660,10 @@ func (info *PackageInfo) ImportPackageAlias() string {
 //     Directory:    "clients/health/"
 //     InstanceName: "health",
 type ModuleInstance struct {
+	// genSpec is used to share generated specs across dependencies. Generators
+	// should not mutate this directly, and should return the spec as a result.
+	// Only the module system code should mutate a module instance.
+	genSpec interface{}
 	// PackageInfo is the name for the generated module instance
 	PackageInfo *PackageInfo
 	// ClassName is the name of the class as defined in the module system
@@ -671,6 +691,11 @@ type ModuleInstance struct {
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
 	JSONFileRaw []byte
+}
+
+// GeneratedSpec returns the last spec result returned for the module instance
+func (instance *ModuleInstance) GeneratedSpec() interface{} {
+	return instance.genSpec
 }
 
 // ModuleDependency defines a module instance required by another instance

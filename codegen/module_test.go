@@ -39,7 +39,7 @@ type TestHTTPClientGenerator struct{}
 
 func (*TestHTTPClientGenerator) Generate(
 	instance *ModuleInstance,
-) (map[string][]byte, error) {
+) (*BuildResult, error) {
 	return nil, nil
 }
 
@@ -47,7 +47,7 @@ type TestTChannelClientGenerator struct{}
 
 func (*TestTChannelClientGenerator) Generate(
 	instance *ModuleInstance,
-) (map[string][]byte, error) {
+) (*BuildResult, error) {
 	return nil, nil
 }
 
@@ -55,7 +55,7 @@ type TestHTTPEndpointGenerator struct{}
 
 func (*TestHTTPEndpointGenerator) Generate(
 	instance *ModuleInstance,
-) (map[string][]byte, error) {
+) (*BuildResult, error) {
 	return nil, nil
 }
 
