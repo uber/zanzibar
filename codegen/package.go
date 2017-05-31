@@ -41,6 +41,8 @@ type PackageHelper struct {
 	genCodePackage string
 	// The directory to put the generated service code.
 	targetGenDir string
+	// The go package name where all the generated code is
+	goGatewayNamespace string
 	// The root directory for the gateway test config files.
 	testConfigsRootDir string
 	// String containing copyright header to add to generated code.
@@ -64,6 +66,22 @@ func NewPackageHelper(
 	if err != nil {
 		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
 	}
+
+	absConfigDir, err := filepath.Abs(configDirName)
+	if err != nil {
+		return nil, errors.Errorf(
+			"%s is not valid path: %s", configDirName, err,
+		)
+	}
+
+	relativeGenDir, err := filepath.Rel(absConfigDir, genDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not compute relative dir for %q", genDir,
+		)
+	}
+
+	goGatewayNamespace := filepath.Join(packageRoot, relativeGenDir)
 
 	genDirIndex := strings.Index(genDir, gatewayNamespace)
 	if genDirIndex == -1 {
@@ -90,13 +108,14 @@ func NewPackageHelper(
 	}
 
 	p := &PackageHelper{
-		packageRoot:      packageRoot,
-		thriftRootDir:    path.Clean(thriftRootDir),
-		genCodePackage:   genCodePackage,
-		gatewayNamespace: gatewayNamespace,
-		targetGenDir:     genDir,
-		copyrightHeader:  copyrightHeader,
-		middlewareSpecs:  middlewareSpecs,
+		packageRoot:        packageRoot,
+		thriftRootDir:      path.Clean(thriftRootDir),
+		genCodePackage:     genCodePackage,
+		gatewayNamespace:   gatewayNamespace,
+		goGatewayNamespace: goGatewayNamespace,
+		targetGenDir:       genDir,
+		copyrightHeader:    copyrightHeader,
+		middlewareSpecs:    middlewareSpecs,
 	}
 	return p, nil
 }
@@ -132,11 +151,7 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 
 // GoGatewayPackageName returns the name of the gateway package
 func (p PackageHelper) GoGatewayPackageName() string {
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
-	return path.Join(
-		p.gatewayNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
-	)
+	return p.goGatewayNamespace
 }
 
 // ThriftIDLPath returns the file path to the thrift idl folder
