@@ -197,11 +197,25 @@ func (system *ModuleSystem) populateResolvedDependencies(
 			}
 
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
-				append(resolvedDependencies, dependencyInstance)
+				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
 	}
 
 	return nil
+}
+
+func appendUniqueModule(
+	classDeps []*ModuleInstance,
+	instance *ModuleInstance,
+) []*ModuleInstance {
+	for i, classInstance := range classDeps {
+		if classInstance.InstanceName == instance.InstanceName {
+			classDeps[i] = instance
+			return classDeps
+		}
+	}
+
+	return append(classDeps, instance)
 }
 
 // ResolveModules resolves the module instances from the config on disk
