@@ -51,6 +51,7 @@ eclint-fix:
 
 .PHONY: lint
 lint: check-licence eclint-check
+	@rm -f ./workspace
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@gofmt -d -s $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
