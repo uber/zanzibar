@@ -3,7 +3,7 @@ PKG_FILES = benchmarks codegen examples runtime test
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
-	awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
+	grep -v "workspace/..." | awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
 
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
