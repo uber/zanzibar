@@ -110,11 +110,8 @@ func NewDefaultModuleSystem(
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
 
-	clientSpecs := map[string]*ClientSpec{}
-
 	if err := system.RegisterClassType("client", "http", &HTTPClientGenerator{
 		templates:     tmpl,
-		genSpecs:      clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -125,7 +122,6 @@ func NewDefaultModuleSystem(
 
 	if err := system.RegisterClassType("client", "tchannel", &TChannelClientGenerator{
 		templates:     tmpl,
-		genSpecs:      clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -135,7 +131,6 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
-		genSpecs:      clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -153,7 +148,6 @@ func NewDefaultModuleSystem(
 	}
 	if err := system.RegisterClassType("clients", "init", &ClientsInitGenerator{
 		templates:     tmpl,
-		clientSpecs:   clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -194,7 +188,6 @@ func NewDefaultModuleSystem(
 
 	if err := system.RegisterClassType("endpoint", "http", &EndpointGenerator{
 		templates:     tmpl,
-		clientSpecs:   clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -205,7 +198,6 @@ func NewDefaultModuleSystem(
 
 	if err := system.RegisterClassType("endpoint", "tchannel", &EndpointGenerator{
 		templates:     tmpl,
-		clientSpecs:   clientSpecs,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -248,7 +240,6 @@ func readEndpointConfig(rawConfig []byte) (*EndpointClassConfig, error) {
 type HTTPClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
-	genSpecs      map[string]*ClientSpec
 }
 
 // Generate returns the HTTP client build result, which contains the files and
@@ -282,8 +273,6 @@ func (g *HTTPClientGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
-
-	g.genSpecs[clientSpec.JSONFile] = clientSpec
 
 	clientMeta := &ClientMeta{
 		PackageName:      clientSpec.ModuleSpec.PackageName,
@@ -331,7 +320,6 @@ func (g *HTTPClientGenerator) Generate(
 type TChannelClientGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
-	genSpecs      map[string]*ClientSpec
 }
 
 // Generate returns the TChannel client build result, which contains the files
@@ -365,8 +353,6 @@ func (g *TChannelClientGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
-
-	g.genSpecs[clientSpec.JSONFile] = clientSpec
 
 	// reverse index the exposed methods map
 	exposedMethods := map[string]string{}
@@ -436,7 +422,6 @@ func (g *TChannelClientGenerator) Generate(
 // CustomClientGenerator gathers the custom client spec for future use in ClientsInitGenerator
 type CustomClientGenerator struct {
 	packageHelper *PackageHelper
-	genSpecs      map[string]*ClientSpec
 }
 
 // Generate returns the custom client build result, which contains the
@@ -471,7 +456,6 @@ func (g *CustomClientGenerator) Generate(
 		)
 	}
 
-	g.genSpecs[clientSpec.JSONFile] = clientSpec
 	return &BuildResult{
 		Spec: clientSpec,
 	}, nil
@@ -485,7 +469,6 @@ func (g *CustomClientGenerator) Generate(
 type ClientsInitGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
-	clientSpecs   map[string]*ClientSpec
 }
 
 // Generate returns the client initializer build result, which contains the
@@ -493,11 +476,7 @@ type ClientsInitGenerator struct {
 func (g *ClientsInitGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	clients := []*ClientSpec{}
-	for _, v := range g.clientSpecs {
-		clients = append(clients, v)
-	}
-	sort.Sort(sortByClientName(clients))
+	clients := readClientDependencySpecs(instance)
 
 	includedPkgs := []GoPackageImport{}
 	for i := 0; i < len(clients); i++ {
@@ -579,7 +558,6 @@ func (g *ClientsInitGenerator) Generate(
 type EndpointGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
-	clientSpecs   map[string]*ClientSpec
 }
 
 // Generate returns the endpoint build result, which contains a file per
@@ -590,6 +568,7 @@ func (g *EndpointGenerator) Generate(
 	ret := map[string][]byte{}
 	endpointJsons := []string{}
 	endpointSpecs := []*EndpointSpec{}
+	clientSpecs := readClientDependencySpecs(instance)
 
 	endpointConfig, err := readEndpointConfig(instance.JSONFileRaw)
 	if err != nil {
@@ -619,7 +598,7 @@ func (g *EndpointGenerator) Generate(
 
 		endpointSpecs = append(endpointSpecs, espec)
 
-		err = espec.SetDownstream(g.clientSpecs, g.packageHelper)
+		err = espec.SetDownstream(clientSpecs, g.packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Error parsing downstream info for endpoint: %s", jsonFile,
@@ -975,4 +954,16 @@ func (generator *GatewayServiceGenerator) Generate(
 			"main_test.go":           mainTest,
 		},
 	}, nil
+}
+
+func readClientDependencySpecs(instance *ModuleInstance) []*ClientSpec {
+	clients := []*ClientSpec{}
+
+	for _, clientDep := range instance.ResolvedDependencies["client"] {
+		clients = append(clients, clientDep.GeneratedSpec().(*ClientSpec))
+	}
+
+	sort.Sort(sortByClientName(clients))
+
+	return clients
 }

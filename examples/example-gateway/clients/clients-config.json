@@ -1,5 +1,14 @@
 {
 	"name": "clients",
 	"type": "init",
-	"config": {}
+	"config": {},
+	"dependencies": {
+		"client": [
+			"bar",
+			"baz",
+			"contacts",
+			"googlenow",
+			"quux"
+		]
+	}
 }

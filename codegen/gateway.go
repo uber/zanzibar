@@ -685,7 +685,7 @@ func (e *EndpointSpec) EndpointTestConfigPath() string {
 
 // SetDownstream configures the downstream client for this endpoint spec
 func (e *EndpointSpec) SetDownstream(
-	clientModules map[string]*ClientSpec,
+	clientModules []*ClientSpec,
 	h *PackageHelper,
 ) error {
 	if e.WorkflowType == "custom" {
@@ -912,7 +912,8 @@ func NewGatewaySpec(
 		spec.MiddlewareModules[mspec.Name] = mspec
 	}
 
-	for _, json := range clientJsons {
+	clientSpecs := make([]*ClientSpec, len(clientJsons))
+	for i, json := range clientJsons {
 		cspec, err := NewClientSpec(json, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
@@ -920,6 +921,7 @@ func NewGatewaySpec(
 			)
 		}
 
+		clientSpecs[i] = cspec
 		spec.ClientModules[cspec.JSONFile] = cspec
 	}
 	for _, json := range endpointJsons {
@@ -930,7 +932,7 @@ func NewGatewaySpec(
 			)
 		}
 
-		err = espec.SetDownstream(spec.ClientModules, packageHelper)
+		err = espec.SetDownstream(clientSpecs, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot parse downstream info for endpoint: %s", json,
