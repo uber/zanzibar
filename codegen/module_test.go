@@ -35,12 +35,20 @@ var staticHandler = handler{}
 var variableHandler = handler{}
 var splatHandler = handler{}
 
+type TestClientSpec struct {
+	Info string
+}
+
 type TestHTTPClientGenerator struct{}
 
 func (*TestHTTPClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	return nil, nil
+	return &BuildResult{
+		Spec: &TestClientSpec{
+			Info: "http",
+		},
+	}, nil
 }
 
 type TestTChannelClientGenerator struct{}
@@ -48,7 +56,11 @@ type TestTChannelClientGenerator struct{}
 func (*TestTChannelClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	return nil, nil
+	return &BuildResult{
+		Spec: &TestClientSpec{
+			Info: "tchannel",
+		},
+	}, nil
 }
 
 type TestHTTPEndpointGenerator struct{}
@@ -227,6 +239,15 @@ func TestExampleService(t *testing.T) {
 			i := classInstances[0]
 
 			compareInstances(t, i, &expectedEndpointInstance)
+
+			clientDependency := i.ResolvedDependencies["client"][0]
+			clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)
+
+			if clientSpec.Info != i.ClassType {
+				t.Errorf(
+					"Expected client spec info on generated client spec",
+				)
+			}
 		} else {
 			t.Errorf("Unexpected resolved class type %s", className)
 		}
