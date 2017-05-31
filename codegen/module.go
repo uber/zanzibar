@@ -284,18 +284,6 @@ func (system *ModuleSystem) ResolveModules(
 		if err != nil {
 			return nil, err
 		}
-
-		// Resolve dependencies again in case two instances
-		// of the same class peer depend on each other.
-		// We dont sort the instances of the classes yet to
-		// ensure we resolve them in the "correct" order,
-		// so just resolve twice for now.
-		err = system.populateResolvedDependencies(
-			classInstances, resolvedModules,
-		)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return resolvedModules, nil
