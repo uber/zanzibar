@@ -145,22 +145,13 @@ func TestExampleService(t *testing.T) {
 
 	// TODO: this doesn't yet generate the build to a dir
 	// TODO: this should return a collection of errors if they occur
-	err = moduleSystem.GenerateBuild(
+	instances, err := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
-	}
-
-	instances, err := moduleSystem.ResolveModules(
-		"github.com/uber/zanzibar/codegen/test-service",
-		testServiceDir,
-		path.Join(testServiceDir, "build"),
-	)
-	if err != nil {
-		t.Errorf("Unexpected error resolving build %s", err)
 	}
 
 	expectedClientInstance := ModuleInstance{

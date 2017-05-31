@@ -445,7 +445,7 @@ func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
-) error {
+) (map[string][]*ModuleInstance, error) {
 	resolvedModules, err := system.ResolveModules(
 		packageRoot,
 		baseDirectory,
@@ -453,7 +453,7 @@ func (system *ModuleSystem) GenerateBuild(
 	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	moduleCount := 0
@@ -510,7 +510,7 @@ func (system *ModuleSystem) GenerateBuild(
 					classInstance.ClassType,
 					err.Error(),
 				)
-				return err
+				return nil, err
 			}
 
 			if buildResult == nil {
@@ -523,7 +523,7 @@ func (system *ModuleSystem) GenerateBuild(
 				filePath = filepath.Clean(filePath)
 
 				if strings.HasPrefix(filePath, "..") {
-					return errors.Errorf(
+					return nil, errors.Errorf(
 						"Module %q generated a file outside the build dir %q",
 						classInstance.Directory,
 						filePath,
@@ -536,7 +536,7 @@ func (system *ModuleSystem) GenerateBuild(
 				)
 
 				if err := writeFile(resolvedPath, content); err != nil {
-					return errors.Wrapf(
+					return nil, errors.Wrapf(
 						err,
 						"Error writing to file %q",
 						resolvedPath,
@@ -550,14 +550,14 @@ func (system *ModuleSystem) GenerateBuild(
 				// for the generators yet.
 				if filepath.Ext(filePath) == ".go" {
 					if err := formatGoFile(resolvedPath); err != nil {
-						return err
+						return nil, err
 					}
 				}
 			}
 		}
 	}
 
-	return nil
+	return resolvedModules, nil
 }
 
 func formatGoFile(filePath string) error {
