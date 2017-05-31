@@ -34,8 +34,6 @@ type ModuleSpec struct {
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
 	WantAnnot bool
-	// Go package path of this module.
-	GoPackage string
 	// Go package name, generated base on module name.
 	PackageName string
 	// Go client types file path, generated from thrift file.
@@ -71,15 +69,10 @@ func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
 	}
-	targetPackage, err := packageHelper.PackageGenPath(module.ThriftPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate target package path")
-	}
 
 	moduleSpec := &ModuleSpec{
 		WantAnnot:   wantAnnot,
 		ThriftFile:  module.ThriftPath,
-		GoPackage:   targetPackage,
 		PackageName: camelCase(module.GetName()),
 	}
 	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
@@ -244,15 +237,15 @@ func (ms *ModuleSpec) SetDownstream(
 	for _, service := range ms.Services {
 		for _, method := range service.Methods {
 			d := method.Downstream
-			if d != nil && !ms.isPackageIncluded(d.GoPackage) {
+			if d != nil && !ms.isPackageIncluded(d.GoThriftTypesFilePath) {
 				// thrift types file is optional...
-				if method.Downstream.GoThriftTypesFilePath == "" {
+				if d.GoThriftTypesFilePath == "" {
 					continue
 				}
 
 				ms.IncludedPackages = append(
 					ms.IncludedPackages, GoPackageImport{
-						PackageName: method.Downstream.GoThriftTypesFilePath,
+						PackageName: d.GoThriftTypesFilePath,
 						AliasName:   "",
 					},
 				)
