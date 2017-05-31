@@ -165,28 +165,6 @@ func (p PackageHelper) CodeGenTargetPath() string {
 	return p.targetGenDir
 }
 
-// PackageGenPath returns the Go package path for generated code from a thrift file.
-func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
-	}
-
-	idx := strings.Index(thrift, p.thriftRootDir)
-	if idx == -1 {
-		return "", errors.Errorf(
-			"file %s is not in thrift dir (%s)",
-			thrift, p.thriftRootDir,
-		)
-	}
-
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
-	return path.Join(
-		p.gatewayNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
-		filepath.Dir(thrift[idx+len(p.thriftRootDir):]),
-	), nil
-}
-
 // TypePackageName returns the package name that defines the type.
 func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {
