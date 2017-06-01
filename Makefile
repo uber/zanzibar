@@ -1,4 +1,4 @@
-PKGS = $(shell glide novendor)
+PKGS = $(shell glide novendor | grep -v "workspace/...")
 PKG_FILES = benchmarks codegen examples runtime test
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
@@ -6,8 +6,7 @@ COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "workspace/..." | awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
 
 GO_FILES := $(shell \
-	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
-	-o -name '*.go' -print | cut -b3-)
+	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
