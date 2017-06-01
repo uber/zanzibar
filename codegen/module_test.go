@@ -35,12 +35,20 @@ var staticHandler = handler{}
 var variableHandler = handler{}
 var splatHandler = handler{}
 
+type TestClientSpec struct {
+	Info string
+}
+
 type TestHTTPClientGenerator struct{}
 
 func (*TestHTTPClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	return nil, nil
+	return &BuildResult{
+		Spec: &TestClientSpec{
+			Info: "http",
+		},
+	}, nil
 }
 
 type TestTChannelClientGenerator struct{}
@@ -48,7 +56,11 @@ type TestTChannelClientGenerator struct{}
 func (*TestTChannelClientGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	return nil, nil
+	return &BuildResult{
+		Spec: &TestClientSpec{
+			Info: "tchannel",
+		},
+	}, nil
 }
 
 type TestHTTPEndpointGenerator struct{}
@@ -145,22 +157,13 @@ func TestExampleService(t *testing.T) {
 
 	// TODO: this doesn't yet generate the build to a dir
 	// TODO: this should return a collection of errors if they occur
-	err = moduleSystem.GenerateBuild(
+	instances, err := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
-	}
-
-	instances, err := moduleSystem.ResolveModules(
-		"github.com/uber/zanzibar/codegen/test-service",
-		testServiceDir,
-		path.Join(testServiceDir, "build"),
-	)
-	if err != nil {
-		t.Errorf("Unexpected error resolving build %s", err)
 	}
 
 	expectedClientInstance := ModuleInstance{
@@ -236,6 +239,15 @@ func TestExampleService(t *testing.T) {
 			i := classInstances[0]
 
 			compareInstances(t, i, &expectedEndpointInstance)
+
+			clientDependency := i.ResolvedDependencies["client"][0]
+			clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)
+
+			if clientSpec.Info != i.ClassType {
+				t.Errorf(
+					"Expected client spec info on generated client spec",
+				)
+			}
 		} else {
 			t.Errorf("Unexpected resolved class type %s", className)
 		}

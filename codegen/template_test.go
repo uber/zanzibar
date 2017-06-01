@@ -89,7 +89,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	err = moduleSystem.GenerateBuild(
+	_, err = moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),

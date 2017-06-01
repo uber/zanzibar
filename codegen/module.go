@@ -197,11 +197,25 @@ func (system *ModuleSystem) populateResolvedDependencies(
 			}
 
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
-				append(resolvedDependencies, dependencyInstance)
+				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
 	}
 
 	return nil
+}
+
+func appendUniqueModule(
+	classDeps []*ModuleInstance,
+	instance *ModuleInstance,
+) []*ModuleInstance {
+	for i, classInstance := range classDeps {
+		if classInstance.InstanceName == instance.InstanceName {
+			classDeps[i] = instance
+			return classDeps
+		}
+	}
+
+	return append(classDeps, instance)
 }
 
 // ResolveModules resolves the module instances from the config on disk
@@ -279,18 +293,6 @@ func (system *ModuleSystem) ResolveModules(
 
 		// Resolve dependencies for all classes
 		err := system.populateResolvedDependencies(
-			classInstances, resolvedModules,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		// Resolve dependencies again in case two instances
-		// of the same class peer depend on each other.
-		// We dont sort the instances of the classes yet to
-		// ensure we resolve them in the "correct" order,
-		// so just resolve twice for now.
-		err = system.populateResolvedDependencies(
 			classInstances, resolvedModules,
 		)
 		if err != nil {
@@ -443,7 +445,7 @@ func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
-) error {
+) (map[string][]*ModuleInstance, error) {
 	resolvedModules, err := system.ResolveModules(
 		packageRoot,
 		baseDirectory,
@@ -451,7 +453,7 @@ func (system *ModuleSystem) GenerateBuild(
 	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	moduleCount := 0
@@ -508,7 +510,7 @@ func (system *ModuleSystem) GenerateBuild(
 					classInstance.ClassType,
 					err.Error(),
 				)
-				return err
+				return nil, err
 			}
 
 			if buildResult == nil {
@@ -521,7 +523,7 @@ func (system *ModuleSystem) GenerateBuild(
 				filePath = filepath.Clean(filePath)
 
 				if strings.HasPrefix(filePath, "..") {
-					return errors.Errorf(
+					return nil, errors.Errorf(
 						"Module %q generated a file outside the build dir %q",
 						classInstance.Directory,
 						filePath,
@@ -534,7 +536,7 @@ func (system *ModuleSystem) GenerateBuild(
 				)
 
 				if err := writeFile(resolvedPath, content); err != nil {
-					return errors.Wrapf(
+					return nil, errors.Wrapf(
 						err,
 						"Error writing to file %q",
 						resolvedPath,
@@ -548,14 +550,14 @@ func (system *ModuleSystem) GenerateBuild(
 				// for the generators yet.
 				if filepath.Ext(filePath) == ".go" {
 					if err := formatGoFile(resolvedPath); err != nil {
-						return err
+						return nil, err
 					}
 				}
 			}
 		}
 	}
 
-	return nil
+	return resolvedModules, nil
 }
 
 func formatGoFile(filePath string) error {
