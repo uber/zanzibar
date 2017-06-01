@@ -45,7 +45,7 @@ func TestModuleSpec(t *testing.T) {
 }
 
 func convertThriftPathToRelative(m *codegen.ModuleSpec) {
-	index := strings.Index(m.ThriftFile, "zanzibar")
+	index := strings.LastIndex(m.ThriftFile, "zanzibar")
 	m.ThriftFile = m.ThriftFile[index:]
 
 	for _, service := range m.Services {
