@@ -1512,6 +1512,41 @@ func TestConvertWithMisMatchListTypesForOverride(t *testing.T) {
 	)
 }
 
+func TestConverterMapListTypeIncompatabile(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional list<Inner> one
+			2: optional list<string> two
+		}
+
+		struct Bar {
+			1: optional list<Inner> one
+			2: optional list<Inner> two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"could not convert struct fields, incompatible type for two :",
+		err.Error(),
+	)
+}
+
 func TestConvertWithMisMatchMapTypesForOverride(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["Two"] = codegen.FieldMapperEntry{
