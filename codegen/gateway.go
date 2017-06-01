@@ -864,11 +864,6 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "cannot create template")
 	}
 
-	middleConfig := filepath.Join(
-		configDirName,
-		middlewareConfig,
-	)
-
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
 		clientConfig,
@@ -907,13 +902,10 @@ func NewGatewaySpec(
 		gatewayName:       gatewayName,
 	}
 
-	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	spec.MiddlewareModules, err = parseMiddlewareConfig(middlewareConfig, configDirName)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")
-	}
-	for _, mspec := range middlewares {
-		spec.MiddlewareModules[mspec.Name] = mspec
 	}
 
 	clientSpecs := make([]*ClientSpec, len(clientJsons))
