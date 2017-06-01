@@ -1,7 +1,6 @@
 {
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
 	"WantAnnot": true,
-	"GoPackage": "github.com/uber/zanzibar/.tmp_gen/endpoints/bar",
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
