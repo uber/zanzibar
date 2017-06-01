@@ -761,9 +761,14 @@ func parseEndpointJsons(
 }
 
 func parseMiddlewareConfig(
-	config string,
+	middlewareConfig string,
 	configDirName string,
-) ([]*MiddlewareSpec, error) {
+) (map[string]*MiddlewareSpec, error) {
+	specMap := map[string]*MiddlewareSpec{}
+	if middlewareConfig == "" {
+		return specMap, nil
+	}
+	config := filepath.Join(configDirName, middlewareConfig)
 	bytes, err := ioutil.ReadFile(config)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -792,8 +797,7 @@ func parseMiddlewareConfig(
 		)
 	}
 
-	specs := make([]*MiddlewareSpec, len(midList))
-	for idx, mid := range midList {
+	for _, mid := range midList {
 		mid, ok := mid.(map[string]interface{})
 		if !ok {
 			return nil, errors.Wrapf(
@@ -811,7 +815,7 @@ func parseMiddlewareConfig(
 			)
 		}
 
-		specs[idx], err = NewMiddlewareSpec(
+		specMap[name], err = NewMiddlewareSpec(
 			name,
 			importPath,
 			schema,
@@ -824,7 +828,7 @@ func parseMiddlewareConfig(
 			)
 		}
 	}
-	return specs, nil
+	return specMap, nil
 }
 
 // GatewaySpec collects information for the entire gateway

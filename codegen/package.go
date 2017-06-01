@@ -74,19 +74,10 @@ func NewPackageHelper(
 		)
 	}
 
-	middlewareSpecs := map[string]*MiddlewareSpec{}
-	middleConfig := filepath.Join(
-		configDirName,
-		middlewareConfig,
-	)
-	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, configDirName)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")
-	}
-
-	for _, mspec := range middlewares {
-		middlewareSpecs[mspec.Name] = mspec
 	}
 
 	p := &PackageHelper{
