@@ -95,10 +95,16 @@ func convertTypes(
 	toStruct string,
 	content string,
 	otherFiles map[string][]byte,
-	overrideMap map[*compile.FieldSpec]codegen.FieldMapperEntry,
+	overrideMap map[string]codegen.FieldMapperEntry,
 ) (string, error) {
 	converter := newTypeConverter()
 	program, err := compileProgram(content, otherFiles)
+	if err != nil {
+		return "", err
+	}
+	overrideMap, err = addSpecToMap(overrideMap,
+		program.Types[toStruct].(*compile.StructSpec).Fields,
+		"")
 	if err != nil {
 		return "", err
 	}
@@ -106,13 +112,36 @@ func convertTypes(
 	err = converter.GenStructConverter(
 		program.Types[fromStruct].(*compile.StructSpec).Fields,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
-		nil,
+		overrideMap,
 	)
 	if err != nil {
 		return "", err
 	}
 
 	return trim(strings.Join(converter.GetLines(), "\n")), nil
+}
+
+func addSpecToMap(
+	overrideMap map[string]codegen.FieldMapperEntry,
+	fields compile.FieldGroup,
+	prefix string,
+) (map[string]codegen.FieldMapperEntry, error) {
+	for k, v := range overrideMap {
+		for _, spec := range fields {
+			fieldQualName := prefix + strings.Title(spec.Name)
+			if v.QualifiedName == fieldQualName {
+				v.Field = spec
+				overrideMap[k] = v
+			} else if strings.HasPrefix(v.QualifiedName, fieldQualName) {
+				overrideMap, _ = addSpecToMap(
+					overrideMap,
+					spec.Type.(*compile.StructSpec).Fields,
+					fieldQualName+".",
+				)
+			}
+		}
+	}
+	return overrideMap, nil
 }
 
 func countTabs(line string) int {
@@ -1040,32 +1069,346 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 
 >>>>>>> 323165ba... add helper method for tertiary assignment
 func TestConverterMap(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	}
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: required bool one
+			2: required bool two
+		}
+
+		struct Bar {
+			1: required bool one
+			2: required bool two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = bool(in.Two)
+		out.Two = bool(in.One)
+	`), lines)
+}
+
+func TestConverterMapOverrideOptional(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	} // Map from required filed, unconditional assignment
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+	fieldMap["Three"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four",
+		Override:      true,
+	}
+	fieldMap["Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three",
+		Override:      false,
+	} // Map to required filed, unconditional assignment
 
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`struct Foo {
 			1: optional bool one
-			2: required bool two
+			2: optional bool two
+			3: optional bool three
+			4: required bool four
 		}
 
 		struct Bar {
 			1: optional bool one
 			2: required bool two
+			3: optional bool three
+			4: optional bool four
 		}`,
 		nil,
-		nil,
+		fieldMap,
 	)
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = (*bool)(in.One)
+		out.One = (*bool)(in.Two)
 		out.Two = bool(in.Two)
+		if in.One != nil {
+			out.Two = bool(in.One)
+		}
+		out.Three = (*bool)(in.Three)
+		if in.Four != nil {
+			out.Three = (*bool)(in.Four)
+		}
+		out.Four = (*bool)(in.Four)
+		`), lines)
+}
+
+func TestConverterMapStructWithSubFields(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Three.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three.Two",
+		Override:      true,
+	}
+	fieldMap["Four.Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four.One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+			1: required string one
+			2: optional string two
+		}
+
+		struct NestedBar {
+			1: required string one
+			2: optional string two
+		}
+
+		struct Foo {
+			3: optional NestedFoo three
+			4: required NestedFoo four
+		}
+
+		struct Bar {
+			3: optional NestedBar three
+			4: required NestedBar four
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			if in.Three.Two != nil {
+				out.Three.One = string(in.Three.Two)
+			}
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			out.Four.Two = (*string)(in.Four.One)
+		} else {
+			out.Four = nil
+		}
 	`), lines)
 }
 
+<<<<<<< HEAD
 func TestConverterMapOverride(t *testing.T) {
 >>>>>>> 3c1579fb... Add transforms with overrride
+=======
+func TestConverterMapListType(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	}
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional list<string> one
+			2: required list<string> two
+		}
+
+		struct Bar {
+			1: optional list<string> one
+			2: required list<string> two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make([]string, len(in.Two))
+		for index, value := range in.Two {
+			out.One[index] = string(value)
+		}
+		sourceList := in.Two
+		if in.One != nil {
+			sourceList = in.One
+		}
+		out.Two = make([]string, len(sourceList))
+		for index, value := range sourceList {
+			out.Two[index] = string(value)
+		}
+	`), lines)
 }
 
-func TestConverterMapWithSubFields(t *testing.T) {
+func TestConverterMapListOfStructType(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	}
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Inner {
+			1: optional string field
+		}
+
+		struct Foo {
+			1: optional list<Inner> one
+			2: required list<Inner> two
+		}
+
+		struct Bar {
+			1: optional list<Inner> one
+			2: required list<Inner> two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make([]*structs.Inner, len(in.Two))
+		for index, value := range in.Two {
+			if value != nil {
+				out.One[index] = &structs.Inner{}
+				out.One[index].Field = (*string)(in.Two[index].Field)
+			} else {
+				out.One[index] = nil
+			}
+		}
+		sourceList := in.Two
+		isOverridden := false
+		if in.One != nil {
+			sourceList = in.One
+			isOverridden = true
+		}
+		out.Two = make([]*structs.Inner, len(sourceList))
+		for index, value := range sourceList {
+			if isOverridden {
+				if value != nil {
+					out.Two[index] = &structs.Inner{}
+					out.Two[index].Field = (*string)(in.One[index].Field)
+				} else {
+					out.Two[index] = nil
+				}
+			} else {
+				if value != nil {
+					out.Two[index] = &structs.Inner{}
+					out.Two[index].Field = (*string)(in.Two[index].Field)
+				} else {
+					out.Two[index] = nil
+				}
+			}
+		}
+	`), lines)
+>>>>>>> 567902ee... Add tests, fix converter to conform to tests
+}
+
+func TestConverterMapMapType(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	}
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional map<string, Inner> one
+			2: optional map<string, Inner> two
+		}
+
+		struct Bar {
+			1: optional map<string, Inner> one
+			2: optional map<string, Inner> two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		sourceList := in.One
+		isOverridden := false
+		if in.Two != nil {
+			sourceList = in.Two
+			isOverridden = true
+		}
+		out.One = make(map[string]*structs.Inner, len(sourceList))
+		for key, value := range sourceList {
+			if isOverridden {
+				if value != nil {
+					out.One[key] = &structs.Inner{}
+					out.One[key].Field = (*string)(in.Two[key].Field)
+				} else {
+					out.One[key] = nil
+				}
+			} else {
+				if value != nil {
+					out.One[key] = &structs.Inner{}
+					out.One[key].Field = (*string)(in.One[key].Field)
+				} else {
+					out.One[key] = nil
+				}
+			}
+		}
+		sourceList := in.Two
+		isOverridden := false
+		if in.One != nil {
+			sourceList = in.One
+			isOverridden = true
+		}
+		out.Two = make(map[string]*structs.Inner, len(sourceList))
+		for key, value := range sourceList {
+			if isOverridden {
+				if value != nil {
+					out.Two[key] = &structs.Inner{}
+					out.Two[key].Field = (*string)(in.One[key].Field)
+				} else {
+					out.Two[key] = nil
+				}
+			} else {
+				if value != nil {
+					out.Two[key] = &structs.Inner{}
+					out.Two[key].Field = (*string)(in.Two[key].Field)
+				} else {
+					out.Two[key] = nil
+				}
+			}
+		}
+	`), lines)
+
 }
