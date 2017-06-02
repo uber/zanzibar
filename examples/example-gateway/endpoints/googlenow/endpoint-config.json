@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"client": [
-			"googlenow"
+			"google-now"
 		]
 	}
 }

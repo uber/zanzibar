@@ -1,5 +1,5 @@
 {
-	"name": "googlenow",
+	"name": "google-now",
 	"type": "http",
 	"config": {
 		"thriftFile": "clients/googlenow/googlenow.thrift",
