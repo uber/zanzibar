@@ -4,7 +4,6 @@
 	"config": {
 		"thriftFile": "clients/baz/baz.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"clientName": "Baz",
 		"serviceName": "Qux",
 		"exposedMethods": {
 			"Call": "SimpleService::Call",
