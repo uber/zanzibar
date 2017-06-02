@@ -223,12 +223,12 @@ func (ms *ModuleSpec) SetDownstream(
 	}
 
 	// Adds imports for downstream services.
-	if !ms.isPackageIncluded(clientSpec.GoPackageName) {
+	if !ms.isPackageIncluded(clientSpec.ImportPackagePath) {
 
 		ms.IncludedPackages = append(
 			ms.IncludedPackages, GoPackageImport{
-				PackageName: clientSpec.GoPackageName,
-				AliasName:   "",
+				PackageName: clientSpec.ImportPackagePath,
+				AliasName:   clientSpec.ImportPackageAlias,
 			},
 		)
 	}

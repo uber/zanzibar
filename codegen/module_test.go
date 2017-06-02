@@ -174,7 +174,7 @@ func TestExampleService(t *testing.T) {
 		InstanceName:  "example",
 		JSONFileName:  "client-config.json",
 		PackageInfo: &PackageInfo{
-			ExportName:            "Example",
+			ExportName:            "NewClient",
 			ExportType:            "ExampleClient",
 			GeneratedPackageAlias: "exampleClientGenerated",
 			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
@@ -200,7 +200,7 @@ func TestExampleService(t *testing.T) {
 		InstanceName: "health",
 		JSONFileName: "endpoint-config.json",
 		PackageInfo: &PackageInfo{
-			ExportName:            "Health",
+			ExportName:            "NewEndpoint",
 			ExportType:            "HealthEndpoint",
 			GeneratedPackageAlias: "healthEndpointGenerated",
 			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",

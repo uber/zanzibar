@@ -258,11 +258,7 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	clientSpec, err := NewHTTPClientSpec(
-		filepath.Join(
-			instance.BaseDirectory,
-			instance.Directory,
-			instance.JSONFileName,
-		),
+		instance,
 		clientConfig,
 		g.packageHelper,
 	)
@@ -275,6 +271,8 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		ExportName:       clientSpec.ExportName,
+		ExportType:       clientSpec.ExportType,
 		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
@@ -294,15 +292,8 @@ func (g *HTTPClientGenerator) Generate(
 		)
 	}
 
-	clientDirectory := filepath.Join(
-		g.packageHelper.CodeGenTargetPath(),
-		instance.Directory,
-	)
-
-	clientFilePath, err := filepath.Rel(clientDirectory, clientSpec.GoFileName)
-	if err != nil {
-		clientFilePath = clientSpec.GoFileName
-	}
+	baseName := filepath.Base(instance.Directory)
+	clientFilePath := baseName + ".go"
 
 	return &BuildResult{
 		Files: map[string][]byte{
@@ -338,11 +329,7 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	clientSpec, err := NewTChannelClientSpec(
-		filepath.Join(
-			instance.BaseDirectory,
-			instance.Directory,
-			instance.JSONFileName,
-		),
+		instance,
 		clientConfig,
 		g.packageHelper,
 	)
@@ -361,6 +348,8 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		ExportName:       clientSpec.ExportName,
+		ExportType:       clientSpec.ExportType,
 		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
@@ -394,17 +383,9 @@ func (g *TChannelClientGenerator) Generate(
 		)
 	}
 
-	clientDirectory := filepath.Join(
-		g.packageHelper.CodeGenTargetPath(),
-		instance.Directory,
-	)
-
-	clientFilePath, err := filepath.Rel(clientDirectory, clientSpec.GoFileName)
-	if err != nil {
-		clientFilePath = clientSpec.GoFileName
-	}
-
-	serverFilePath := strings.TrimRight(clientFilePath, ".go") + "_test_server.go"
+	baseName := filepath.Base(instance.Directory)
+	clientFilePath := baseName + ".go"
+	serverFilePath := baseName + "_test_server.go"
 
 	return &BuildResult{
 		Files: map[string][]byte{
@@ -440,11 +421,7 @@ func (g *CustomClientGenerator) Generate(
 	}
 
 	clientSpec, err := NewCustomClientSpec(
-		filepath.Join(
-			instance.BaseDirectory,
-			instance.Directory,
-			instance.JSONFileName,
-		),
+		instance,
 		clientConfig,
 		g.packageHelper,
 	)
@@ -479,53 +456,58 @@ func (g *ClientsInitGenerator) Generate(
 	clients := readClientDependencySpecs(instance)
 
 	includedPkgs := []GoPackageImport{}
-	for i := 0; i < len(clients); i++ {
-		if clients[i].ClientType == "custom" {
+	for _, client := range clients {
+		// TODO: there shouldn't be a special thing for custom
+		if client.ClientType == "custom" {
 			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: clients[i].CustomImportPath,
-				AliasName:   clients[i].CustomPackageName,
+				PackageName: client.CustomImportPath,
+				AliasName:   client.ImportPackageAlias,
 			})
 			continue
 		}
 
-		if len(clients[i].ModuleSpec.Services) != 0 {
+		if len(client.ModuleSpec.Services) != 0 {
 			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: clients[i].GoPackageName,
-				AliasName:   "",
-			},
-			)
+				PackageName: client.ImportPackagePath,
+				AliasName:   client.ImportPackageAlias,
+			})
 		}
 	}
 
 	clientInfo := []ClientInfoMeta{}
-	for i := 0; i < len(clients); i++ {
-		if clients[i].ClientType == "custom" {
+	for _, client := range clients {
+		// TODO: there shouldn't be a special thing for custom
+		if client.ClientType == "custom" {
 			isPointerType := false
-			typeName := clients[i].CustomClientType
-			if strings.HasPrefix(typeName, "*") {
+			exportType := client.CustomClientType
+			if strings.HasPrefix(exportType, "*") {
 				isPointerType = true
-				typeName = strings.TrimLeft(typeName, "*")
+				exportType = strings.TrimLeft(exportType, "*")
 			}
 
 			clientInfo = append(clientInfo, ClientInfoMeta{
 				IsPointerType: isPointerType,
-				FieldName:     strings.Title(clients[i].ClientName),
-				PackageName:   clients[i].CustomPackageName,
-				TypeName:      typeName,
+				FieldName:     strings.Title(client.ClientName),
+				PackagePath:   client.ImportPackagePath,
+				PackageAlias:  client.ImportPackageAlias,
+				ExportName:    client.ExportName,
+				ExportType:    exportType,
 			})
 			continue
 		}
 
-		module := clients[i].ModuleSpec
+		module := client.ModuleSpec
 		if len(module.Services) == 0 {
 			continue
 		}
 
 		clientInfo = append(clientInfo, ClientInfoMeta{
 			IsPointerType: true,
-			FieldName:     strings.Title(clients[i].ClientName),
-			PackageName:   module.PackageName,
-			TypeName:      strings.Title(clients[i].ClientName) + "Client",
+			FieldName:     strings.Title(client.ClientName),
+			PackagePath:   client.ImportPackagePath,
+			PackageAlias:  client.ImportPackageAlias,
+			ExportName:    client.ExportName,
+			ExportType:    client.ExportType,
 		})
 	}
 

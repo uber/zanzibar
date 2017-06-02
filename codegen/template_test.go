@@ -76,24 +76,25 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	gateway, err := codegen.NewGatewaySpec(
-		packageHelper,
-		absGatewayPath,
-		"./clients",
-		"./endpoints",
-		"./middlewares/middleware-config.json",
-		"example-gateway",
-	)
-	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
-		return
-	}
-
-	_, err = moduleSystem.GenerateBuild(
+	moduleInstances, err := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 	)
 	if !assert.NoError(t, err, "failed to create clients init %s", err) {
+		return
+	}
+
+	gateway, err := codegen.NewGatewaySpec(
+		moduleInstances,
+		packageHelper,
+		absGatewayPath,
+		"./endpoints",
+		"./middlewares/middleware-config.json",
+		"example-gateway",
+	)
+
+	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
 	}
 
