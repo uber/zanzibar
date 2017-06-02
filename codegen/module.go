@@ -442,8 +442,9 @@ func readPackageInfo(
 			packageRoot,
 			instanceDirectory,
 		),
-		ExportName: "New" + qualifiedClassName,
-		ExportType: qualifiedInstanceName + qualifiedClassName,
+		ExportName:            "New" + qualifiedClassName,
+		QualifiedInstanceName: qualifiedInstanceName,
+		ExportType:            qualifiedInstanceName + qualifiedClassName,
 		GeneratedPackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,
@@ -638,6 +639,8 @@ type PackageInfo struct {
 	PackagePath string
 	// GeneratedPackagePath is the full package path for the generated code
 	GeneratedPackagePath string
+	// QualifiedInstanceName for this package. Pascal case name for this module.
+	QualifiedInstanceName string
 	// ExportName is the name that should be used when initializing the module
 	// on a dependency struct.
 	ExportName string
