@@ -32,8 +32,8 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// GooglenowClient is the http client for service GoogleNow.
-type GooglenowClient struct {
+// GoogleNowClient is the http client for service GoogleNow.
+type GoogleNowClient struct {
 	ClientID   string
 	HTTPClient *zanzibar.HTTPClient
 }
@@ -41,19 +41,19 @@ type GooglenowClient struct {
 // NewClient returns a new http client for service GoogleNow.
 func NewClient(
 	gateway *zanzibar.Gateway,
-) *GooglenowClient {
+) *GoogleNowClient {
 	ip := gateway.Config.MustGetString("clients.googleNow.ip")
 	port := gateway.Config.MustGetInt("clients.googleNow.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
-	return &GooglenowClient{
-		ClientID:   "googlenow",
+	return &GoogleNowClient{
+		ClientID:   "google-now",
 		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
 // AddCredentials calls "/add-credentials" endpoint.
-func (c *GooglenowClient) AddCredentials(
+func (c *GoogleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
@@ -100,7 +100,7 @@ func (c *GooglenowClient) AddCredentials(
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
-func (c *GooglenowClient) CheckCredentials(
+func (c *GoogleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
