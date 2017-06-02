@@ -29,8 +29,8 @@ type {{$clientName}} struct {
 func {{$exportName}}(
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
-	ip := gateway.Config.MustGetString("clients.{{.Name | camel}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{.Name | camel}}.port")
+	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{

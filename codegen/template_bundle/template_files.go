@@ -479,9 +479,9 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
+{{- $clientID := .ClientID }}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientName := title .DownstreamService -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
@@ -495,7 +495,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"{{$clientName | camel}}"},
+		KnownHTTPBackends: []string{"{{$clientID}}"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
 		),
@@ -527,7 +527,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.HTTPBackends()["{{$clientName | camel}}"].HandleFunc(
+	gateway.HTTPBackends()["{{$clientID}}"].HandleFunc(
 		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
 	)
 
@@ -574,7 +574,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2539, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2501, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -768,8 +768,8 @@ type {{$clientName}} struct {
 func {{$exportName}}(
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
-	ip := gateway.Config.MustGetString("clients.{{.Name | camel}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{.Name | camel}}.port")
+	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
@@ -955,7 +955,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5444, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
