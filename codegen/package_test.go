@@ -64,9 +64,9 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 
 	h, err := codegen.NewPackageHelper(
 		"github.com/uber/zanzibar/examples/example-gateway",
-		filepath.Join(absGatewayPath),
+		absGatewayPath,
 		"middlewares/middleware-config.json",
-		filepath.Join(absGatewayPath, "idl"),
+		"./idl",
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		testCopyrightHeader,

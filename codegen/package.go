@@ -33,15 +33,17 @@ import (
 type PackageHelper struct {
 	// The project package name
 	packageRoot string
-	// The root directory containing thrift files.
+	// The absolute root dir path for all configs, i.e., clients, endpoints, idl, etc
+	configRoot string
+	// The absolute root directory containing thrift files
 	thriftRootDir string
 	// The go package name of where all the generated structs are
 	genCodePackage string
-	// The directory to put the generated service code.
+	// The absolute directory to put the generated service code
 	targetGenDir string
 	// The go package name where all the generated code is
 	goGatewayNamespace string
-	// The root directory for the gateway test config files.
+	// The root directory for the gateway test config files
 	testConfigsRootDir string
 	// String containing copyright header to add to generated code.
 	copyrightHeader string
@@ -52,35 +54,23 @@ type PackageHelper struct {
 // NewPackageHelper creates a package helper.
 func NewPackageHelper(
 	packageRoot string,
-	configDirName string,
+	configRoot string,
 	middlewareConfig string,
-	thriftRootDir string,
+	relThriftRootDir string,
 	genCodePackage string,
-	targetGenDir string,
+	relTargetGenDir string,
 	copyrightHeader string,
 ) (*PackageHelper, error) {
-	genDir, err := filepath.Abs(targetGenDir)
-	if err != nil {
-		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
-	}
-
-	absConfigDir, err := filepath.Abs(configDirName)
+	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
 		return nil, errors.Errorf(
-			"%s is not valid path: %s", configDirName, err,
+			"%s is not valid path: %s", configRoot, err,
 		)
 	}
 
-	relativeGenDir, err := filepath.Rel(absConfigDir, genDir)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not compute relative dir for %q", genDir,
-		)
-	}
+	goGatewayNamespace := filepath.Join(packageRoot, relTargetGenDir)
 
-	goGatewayNamespace := filepath.Join(packageRoot, relativeGenDir)
-
-	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, configDirName)
+	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, absConfigRoot)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")
@@ -88,10 +78,11 @@ func NewPackageHelper(
 
 	p := &PackageHelper{
 		packageRoot:        packageRoot,
-		thriftRootDir:      path.Clean(thriftRootDir),
+		configRoot:         absConfigRoot,
+		thriftRootDir:      path.Join(absConfigRoot, relThriftRootDir),
 		genCodePackage:     genCodePackage,
 		goGatewayNamespace: goGatewayNamespace,
-		targetGenDir:       genDir,
+		targetGenDir:       path.Join(absConfigRoot, relTargetGenDir),
 		copyrightHeader:    copyrightHeader,
 		middlewareSpecs:    middlewareSpecs,
 	}
@@ -101,6 +92,11 @@ func NewPackageHelper(
 // PackageRoot returns the service's root package name
 func (p PackageHelper) PackageRoot() string {
 	return p.packageRoot
+}
+
+// ConfigRoot returns the service's absolute config root path
+func (p PackageHelper) ConfigRoot() string {
+	return p.configRoot
 }
 
 // MiddlewareSpecs returns a map of middlewares available
