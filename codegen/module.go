@@ -119,12 +119,16 @@ func (system *ModuleSystem) RegisterClass(
 	return nil
 }
 
+// ModuleClassOption allows customization with the module class.
+type ModuleClassOption func(*ModuleClass)
+
 // RegisterClassType registers a type generator for a specific module class
 // For example, the "http"" type generator for the "Endpoint"" class
 func (system *ModuleSystem) RegisterClassType(
 	className string,
 	classType string,
 	generator BuildGenerator,
+	opts ...ModuleClassOption,
 ) error {
 	moduleClass := system.classes[className]
 
@@ -145,6 +149,10 @@ func (system *ModuleSystem) RegisterClassType(
 	}
 
 	moduleClass.types[classType] = generator
+
+	for _, opt := range opts {
+		opt(moduleClass)
+	}
 
 	return nil
 }
@@ -255,38 +263,23 @@ func (system *ModuleSystem) ResolveModules(
 			classInstances = append(classInstances, instance)
 		} else {
 
-			files, err := ioutil.ReadDir(fullInstanceDirectory)
+			instances, err := system.resolveMultiModules(
+				packageRoot,
+				baseDirectory,
+				targetGenDir,
+				fullInstanceDirectory,
+				className,
+				class,
+			)
 
 			if err != nil {
-				// TODO: We should accumulate errors and list them all here
-				// Expected $path to be a class directory
-				return nil, errors.Wrapf(
-					err,
-					"Error reading module instance directory %q",
-					fullInstanceDirectory,
+				return nil, errors.Wrapf(err,
+					"Error reading resolving multi modules of %q",
+					className,
 				)
 			}
 
-			for _, file := range files {
-				if file.IsDir() {
-					instance, instanceErr := system.readInstance(
-						packageRoot,
-						baseDirectory,
-						targetGenDir,
-						className,
-						filepath.Join(class.Directory, file.Name()),
-					)
-					if instanceErr != nil {
-						return nil, errors.Wrapf(
-							instanceErr,
-							"Error reading multi instance %q in %q",
-							className,
-							filepath.Join(class.Directory, file.Name()),
-						)
-					}
-					classInstances = append(classInstances, instance)
-				}
-			}
+			classInstances = append(classInstances, instances...)
 		}
 
 		resolvedModules[className] = classInstances
@@ -301,6 +294,86 @@ func (system *ModuleSystem) ResolveModules(
 	}
 
 	return resolvedModules, nil
+}
+
+func (system *ModuleSystem) resolveMultiModules(
+	packageRoot string,
+	baseDirectory string,
+	targetGenDir string,
+	classDir string, // full path
+	className string,
+	class *ModuleClass,
+) ([]*ModuleInstance, error) {
+	classInstances := []*ModuleInstance{}
+
+	if classDir == "" {
+		return classInstances, nil
+	}
+
+	files, err := ioutil.ReadDir(classDir)
+
+	if err != nil {
+		// TODO: We should accumulate errors and list them all here
+		// Expected $path to be a class directory
+		return nil, errors.Wrapf(
+			err,
+			"Error reading module instance directory %q",
+			classDir,
+		)
+	}
+
+	relClassDir, err := filepath.Rel(baseDirectory, classDir)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Error relative class directory for %q",
+			className,
+		)
+	}
+
+outer:
+	for _, file := range files {
+		for _, dir := range class.SubDirs {
+			if file.IsDir() && file.Name() == dir {
+				instances, err := system.resolveMultiModules(
+					packageRoot,
+					baseDirectory,
+					filepath.Join(targetGenDir, dir),
+					filepath.Join(classDir, dir),
+					className,
+					class,
+				)
+				if err != nil {
+					return nil, errors.Wrapf(err,
+						"Error reading subdir of multi instance %q in %q",
+						className,
+						filepath.Join(class.Directory, file.Name()),
+					)
+				}
+				classInstances = append(classInstances, instances...)
+				continue outer
+			}
+		}
+		if file.IsDir() {
+			instance, instanceErr := system.readInstance(
+				packageRoot,
+				baseDirectory,
+				targetGenDir,
+				className,
+				filepath.Join(relClassDir, file.Name()),
+			)
+			if instanceErr != nil {
+				return nil, errors.Wrapf(
+					instanceErr,
+					"Error reading multi instance %q in %q",
+					className,
+					filepath.Join(class.Directory, file.Name()),
+				)
+			}
+			classInstances = append(classInstances, instance)
+		}
+	}
+
+	return classInstances, nil
 }
 
 func (system *ModuleSystem) readInstance(
@@ -538,14 +611,6 @@ func (system *ModuleSystem) GenerateBuild(
 			for filePath, content := range buildResult.Files {
 				filePath = filepath.Clean(filePath)
 
-				if strings.HasPrefix(filePath, "..") {
-					return nil, errors.Errorf(
-						"Module %q generated a file outside the build dir %q",
-						classInstance.Directory,
-						filePath,
-					)
-				}
-
 				resolvedPath := filepath.Join(
 					buildPath,
 					filePath,
@@ -597,13 +662,26 @@ func formatGoFile(filePath string) error {
 }
 
 // ModuleClass defines a module class in the build configuration directory.
-// THis coud be something like an Endpoint class which contains multiple
+// THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
 	ClassType         moduleClassType
 	Directory         string
 	ClassDependencies []string
 	types             map[string]BuildGenerator
+	// SubDirs allow module instances to be group in sub directories
+	SubDirs []string
+}
+
+// AddSubDir allows the modules of type `mtype` to reside in subDir
+func (mc *ModuleClass) AddSubDir(subDir string) {
+	for _, dir := range mc.SubDirs {
+		if dir == subDir {
+			return
+		}
+	}
+
+	mc.SubDirs = append(mc.SubDirs, subDir)
 }
 
 // BuildResult is the result of running a module generator
