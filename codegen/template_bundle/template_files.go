@@ -1249,9 +1249,10 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{$clientName := title .ClientID | printf "%sClient" -}}
+{{- $clientName := .ExportType }}
+{{- $exportName := .ExportName}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
+func {{$exportName}}(gateway *zanzibar.Gateway) *{{$clientName}} {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
@@ -1349,7 +1350,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3238, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3254, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
