@@ -127,6 +127,7 @@ func main() {
 		return
 	}
 
+	// Do not paralleliz, not worth it.
 	for _, file := range files {
 		easyJSONFile := file[0:len(file)-3] + "_easyjson.go"
 		oldChecksum := getOldChecksum(easyJSONFile)

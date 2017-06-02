@@ -65,7 +65,6 @@ func TestGenerateBar(t *testing.T) {
 		filepath.Join(absGatewayPath, "idl"),
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
-		"github.com/uber/zanzibar",
 		testCopyrightHeader,
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {

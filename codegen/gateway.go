@@ -380,6 +380,8 @@ type EndpointSpec struct {
 	ClientName string
 	// if "httpClient", which client method to call.
 	ClientMethod string
+	// The client for this endpoint if httpClient or tchannelClient
+	ClientSpec *ClientSpec
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
@@ -707,6 +709,8 @@ func (e *EndpointSpec) SetDownstream(
 			e.JSONFile, e.ClientName,
 		)
 	}
+
+	e.ClientSpec = clientSpec
 
 	return e.ModuleSpec.SetDownstream(
 		e.ThriftServiceName, e.ThriftMethodName,

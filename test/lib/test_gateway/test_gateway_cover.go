@@ -195,7 +195,8 @@ func createTestBinaryFile(
 		if folder == "./test/..." ||
 			folder == "./benchmarks/..." ||
 			folder == "./scripts/..." ||
-			folder == "" {
+			folder == "" ||
+			folder == "./workspace/..." {
 			continue
 		}
 

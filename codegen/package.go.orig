@@ -71,6 +71,9 @@ func NewPackageHelper(
 		)
 	}
 
+<<<<<<< HEAD
+	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, configDirName)
+=======
 	relativeGenDir, err := filepath.Rel(absConfigDir, genDir)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -80,7 +83,13 @@ func NewPackageHelper(
 
 	goGatewayNamespace := filepath.Join(packageRoot, relativeGenDir)
 
-	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, configDirName)
+	middlewareSpecs := map[string]*MiddlewareSpec{}
+	middleConfig := filepath.Join(
+		configDirName,
+		middlewareConfig,
+	)
+	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+>>>>>>> master
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")

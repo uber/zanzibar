@@ -75,6 +75,8 @@ type ChildProcessGateway struct {
 	errorLogs        map[string][]string
 	channel          *tchannel.Channel
 	serviceName      string
+	startTime        time.Time
+	endTime          time.Time
 
 	HTTPClient       *http.Client
 	TChannelClient   zanzibar.TChannelClient
@@ -117,6 +119,8 @@ func (gateway *ChildProcessGateway) setupMetrics(
 func CreateGateway(
 	t *testing.T, config map[string]interface{}, opts *Options,
 ) (TestGateway, error) {
+	startTime := time.Now()
+
 	if config == nil {
 		config = map[string]interface{}{}
 	}
@@ -158,6 +162,7 @@ func CreateGateway(
 		serviceName: serviceName,
 		test:        t,
 		opts:        opts,
+		startTime:   startTime,
 		HTTPClient: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
@@ -294,4 +299,6 @@ func (gateway *ChildProcessGateway) Close() {
 			)
 		}
 	}
+
+	gateway.endTime = time.Now()
 }

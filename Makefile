@@ -1,13 +1,12 @@
-PKGS = $(shell glide novendor)
+PKGS = $(shell glide novendor | grep -v "workspace/...")
 PKG_FILES = benchmarks codegen examples runtime test
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
-	awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
+	grep -v "workspace/..." | awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
 
 GO_FILES := $(shell \
-	find . '(' -path '*/.*' -o -path './vendor' ')' -prune \
-	-o -name '*.go' -print | cut -b3-)
+	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
@@ -23,12 +22,12 @@ EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 check-licence:
 	@echo "Checking uber-licence..."
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!workspace' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: install
 install:
@@ -95,15 +94,11 @@ check-generate:
 	rm -rf ./examples/example-gateway/build
 	make generate
 	git status --porcelain > git-status.log
-	@[ ! -s git-status.log ] || ( cat git-status.log ; git diff ; [ ! -s git-status.log ] );
+	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
 test-all: 
-	$(MAKE) generate 
-	$(MAKE) check-generate 
-	$(MAKE) lint 
-	$(MAKE) test-only 
-	$(MAKE) cover 
+	$(MAKE) jenkins
 	$(MAKE) fast-bench 
 	$(MAKE) bins 
 	$(MAKE) install-wrk
@@ -225,7 +220,6 @@ view-gocov:
 		open coverage/index.html; \
 	fi
 
-
 .PHONY: view-cover
 view-cover:
 	go tool cover -html=./coverage/cover.out
@@ -245,3 +239,36 @@ tag-build:
 	git add VERSION
 	cat VERSION | xargs -I{} git commit -m "build: {}"
 	cat VERSION | xargs -I{} git tag -m "build: {}" "build-{}"
+
+.PHONY: jenkins-install
+jenkins-install:
+	PWD=$(pwd)
+	@rm -rf ./vendor/
+	@rm -rf ./workspace/
+	@mkdir -p ./workspace/src/github.com/uber/
+	@ln -s $(PWD) workspace/src/github.com/uber/zanzibar
+	cd workspace/src/github.com/uber/zanzibar && \
+		GOPATH=$(PWD)/workspace \
+		PATH=$(PWD)/workspace/bin:$(PATH) \
+		make install
+
+.PHONY: jenkins-test
+jenkins-test:
+	PWD=$(pwd)
+	cd workspace/src/github.com/uber/zanzibar && \
+		GOPATH=$(PWD)/workspace \
+		PATH=$(PWD)/workspace/bin:$(PATH) \
+		make check-generate
+	cd workspace/src/github.com/uber/zanzibar && \
+		GOPATH=$(PWD)/workspace \
+		PATH=$(PWD)/workspace/bin:$(PATH) \
+		make lint
+	cd workspace/src/github.com/uber/zanzibar && \
+		GOPATH=$(PWD)/workspace \
+		PATH=$(PWD)/workspace/bin:$(PATH) \
+		make test-only
+
+.PHONY: jenkins
+jenkins:
+	$(MAKE) jenkins-install
+	$(MAKE) jenkins-test
