@@ -35,12 +35,12 @@ type PackageHelper struct {
 	packageRoot string
 	// The root directory containing thrift files.
 	thriftRootDir string
-	// Namespace under thrift folder
-	gatewayNamespace string
 	// The go package name of where all the generated structs are
 	genCodePackage string
 	// The directory to put the generated service code.
 	targetGenDir string
+	// The go package name where all the generated code is
+	goGatewayNamespace string
 	// The root directory for the gateway test config files.
 	testConfigsRootDir string
 	// String containing copyright header to add to generated code.
@@ -57,7 +57,6 @@ func NewPackageHelper(
 	thriftRootDir string,
 	genCodePackage string,
 	targetGenDir string,
-	gatewayNamespace string,
 	copyrightHeader string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
@@ -65,14 +64,21 @@ func NewPackageHelper(
 		return nil, errors.Errorf("%s is not valid path: %s", targetGenDir, err)
 	}
 
-	genDirIndex := strings.Index(genDir, gatewayNamespace)
-	if genDirIndex == -1 {
+	absConfigDir, err := filepath.Abs(configDirName)
+	if err != nil {
 		return nil, errors.Errorf(
-			"gatewayNamespace (%s) must be inside targetGenDir (%s)",
-			gatewayNamespace,
-			genDir,
+			"%s is not valid path: %s", configDirName, err,
 		)
 	}
+
+	relativeGenDir, err := filepath.Rel(absConfigDir, genDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not compute relative dir for %q", genDir,
+		)
+	}
+
+	goGatewayNamespace := filepath.Join(packageRoot, relativeGenDir)
 
 	middlewareSpecs := map[string]*MiddlewareSpec{}
 	middleConfig := filepath.Join(
@@ -90,13 +96,13 @@ func NewPackageHelper(
 	}
 
 	p := &PackageHelper{
-		packageRoot:      packageRoot,
-		thriftRootDir:    path.Clean(thriftRootDir),
-		genCodePackage:   genCodePackage,
-		gatewayNamespace: gatewayNamespace,
-		targetGenDir:     genDir,
-		copyrightHeader:  copyrightHeader,
-		middlewareSpecs:  middlewareSpecs,
+		packageRoot:        packageRoot,
+		thriftRootDir:      path.Clean(thriftRootDir),
+		genCodePackage:     genCodePackage,
+		goGatewayNamespace: goGatewayNamespace,
+		targetGenDir:       genDir,
+		copyrightHeader:    copyrightHeader,
+		middlewareSpecs:    middlewareSpecs,
 	}
 	return p, nil
 }
@@ -132,11 +138,7 @@ func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 
 // GoGatewayPackageName returns the name of the gateway package
 func (p PackageHelper) GoGatewayPackageName() string {
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
-	return path.Join(
-		p.gatewayNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
-	)
+	return p.goGatewayNamespace
 }
 
 // ThriftIDLPath returns the file path to the thrift idl folder
@@ -148,28 +150,6 @@ func (p PackageHelper) ThriftIDLPath() string {
 // be generated.
 func (p PackageHelper) CodeGenTargetPath() string {
 	return p.targetGenDir
-}
-
-// PackageGenPath returns the Go package path for generated code from a thrift file.
-func (p PackageHelper) PackageGenPath(thrift string) (string, error) {
-	if !strings.HasSuffix(thrift, ".thrift") {
-		return "", errors.Errorf("file %s is not .thrift", thrift)
-	}
-
-	idx := strings.Index(thrift, p.thriftRootDir)
-	if idx == -1 {
-		return "", errors.Errorf(
-			"file %s is not in thrift dir (%s)",
-			thrift, p.thriftRootDir,
-		)
-	}
-
-	nsIndex := strings.Index(p.targetGenDir, p.gatewayNamespace)
-	return path.Join(
-		p.gatewayNamespace,
-		p.targetGenDir[nsIndex+len(p.gatewayNamespace):],
-		filepath.Dir(thrift[idx+len(p.thriftRootDir):]),
-	), nil
 }
 
 // TypePackageName returns the package name that defines the type.

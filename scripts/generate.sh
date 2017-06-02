@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 PREFIX=examples/example-gateway
 
 bash ./codegen/runner/pre-steps.sh "$PREFIX/build" "$PREFIX"

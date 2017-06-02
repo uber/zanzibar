@@ -847,10 +847,14 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	tempName := "endpoint_test.tmpl"
 	if e.WorkflowType == "tchannelClient" {
 		meta.ClientName = e.ClientName
-		meta.IncludedPackages = append(method.Downstream.IncludedPackages, GoPackageImport{
-			AliasName:   method.Downstream.PackageName,
-			PackageName: method.Downstream.GoPackage,
-		})
+
+		meta.IncludedPackages = append(
+			method.Downstream.IncludedPackages,
+			GoPackageImport{
+				AliasName:   method.Downstream.PackageName,
+				PackageName: e.ClientSpec.GoPackageName,
+			},
+		)
 		tempName = "endpoint_test_tchannel_client.tmpl"
 	}
 

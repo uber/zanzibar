@@ -12,12 +12,13 @@ start=`date +%s`
 
 if [ $# -eq 0 ]
 then
-	FILES=$(go list ./... | grep -v "vendor" | \
+	FILES=$(go list -e ./... | grep -v "vendor" | \
+		grep -v "workspace" | \
 		grep "test\|examples\|runtime\|codegen")
 elif [ $# -eq 1 ]
 then
-	FILES=$(go list ./... | grep -v "vendor" | \
-		grep "$1")
+	FILES=$(go list -e ./... | grep -v "vendor" | \
+		grep -v "workspace" | grep "$1")
 else
 	FILES=$@
 fi
