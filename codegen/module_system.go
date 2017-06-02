@@ -834,7 +834,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 			method.Downstream.IncludedPackages,
 			GoPackageImport{
 				AliasName:   method.Downstream.PackageName,
-				PackageName: e.ClientSpec.GoPackageName,
+				PackageName: e.ClientSpec.ImportPackagePath,
 			},
 		)
 		tempName = "endpoint_test_tchannel_client.tmpl"
