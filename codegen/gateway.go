@@ -218,7 +218,7 @@ func NewCustomClientSpec(
 		ExportType:         instance.PackageInfo.ExportType,
 		ClientType:         clientConfig.Type,
 		ClientID:           clientConfig.Config["clientId"].(string),
-		ClientName:         clientConfig.Config["clientName"].(string),
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
 		CustomClientType:   clientConfig.Config["customClientType"].(string),
 		CustomPackageName:  clientConfig.Config["customPackageName"].(string),
@@ -277,7 +277,7 @@ func newClientSpec(
 		ExportType:         instance.PackageInfo.ExportType,
 		ThriftFile:         thriftFile,
 		ClientID:           config["clientId"].(string),
-		ClientName:         config["clientName"].(string),
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		ThriftServiceName:  config["serviceName"].(string),
 	}, nil
 }
