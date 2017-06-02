@@ -4,6 +4,6 @@
 	"config": {
 		"thriftFile": "clients/googlenow/googlenow.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"serviceName": "GoogleNow"
+		"serviceName": "GoogleNowService"
 	}
 }
