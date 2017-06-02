@@ -247,8 +247,6 @@ jenkins-install:
 	@rm -rf ./workspace/
 	@mkdir -p ./workspace/src/github.com/uber/
 	@ln -s $(PWD) workspace/src/github.com/uber/zanzibar
-	export GOPATH=$(PWD)/workspace
-	export PATH=$(PWD)/workspace/bin:$(PATH)
 	cd workspace/src/github.com/uber/zanzibar && \
 		GOPATH=$(PWD)/workspace \
 		PATH=$(PWD)/workspace/bin:$(PATH) \
@@ -256,8 +254,7 @@ jenkins-install:
 
 .PHONY: jenkins-test
 jenkins-test:
-	export GOPATH=$(PWD)/workspace
-	export PATH=$(PWD)/workspace/bin:$(PATH)
+	PWD=$(pwd)
 	cd workspace/src/github.com/uber/zanzibar && \
 		GOPATH=$(PWD)/workspace \
 		PATH=$(PWD)/workspace/bin:$(PATH) \
@@ -270,10 +267,6 @@ jenkins-test:
 		GOPATH=$(PWD)/workspace \
 		PATH=$(PWD)/workspace/bin:$(PATH) \
 		make test-only
-	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
-		PATH=$(PWD)/workspace/bin:$(PATH) \
-		make cover
 
 .PHONY: jenkins
 jenkins:
