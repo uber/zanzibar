@@ -755,8 +755,9 @@ import (
 )
 
 {{- $clientID := .ClientID -}}
+{{- $clientName := .ExportType }}
+{{- $exportName := .ExportName}}
 {{range .Services}}
-{{- $clientName := title .Name | printf "%sClient" }}
 // {{$clientName}} is the http client for service {{.Name}}.
 type {{$clientName}} struct {
 	ClientID string
@@ -764,7 +765,7 @@ type {{$clientName}} struct {
 }
 
 // NewClient returns a new http client for service {{.Name}}.
-func NewClient(
+func {{$exportName}}(
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
 	ip := gateway.Config.MustGetString("clients.{{.Name | camel}}.ip")
@@ -954,7 +955,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5425, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5444, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -974,7 +975,7 @@ import (
 // This should only hold clients generate from specs
 type Clients struct {
 	{{range $idx, $clientInfo := .ClientInfo -}}
-	{{$clientInfo.FieldName}} {{if $clientInfo.IsPointerType}}*{{end}}{{$clientInfo.PackageName}}.{{$clientInfo.TypeName}}
+	{{$clientInfo.FieldName}} {{if $clientInfo.IsPointerType}}*{{end}}{{$clientInfo.PackageAlias}}.{{$clientInfo.ExportType}}
 	{{end}}
 }
 
@@ -984,7 +985,7 @@ func CreateClients(
 ) interface{} {
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: {{$cinfo.PackageName}}.NewClient(gateway),
+		{{$cinfo.FieldName}}: {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway),
 		{{end}}
 	}
 }
@@ -1000,7 +1001,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 786, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 802, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1248,9 +1249,10 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{$clientName := title .ClientID | printf "%sClient" -}}
+{{- $clientName := .ExportType }}
+{{- $exportName := .ExportName}}
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func NewClient(gateway *zanzibar.Gateway) *{{$clientName}} {
+func {{$exportName}}(gateway *zanzibar.Gateway) *{{$clientName}} {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName)
@@ -1348,7 +1350,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3238, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3254, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

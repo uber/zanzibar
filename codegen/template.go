@@ -103,6 +103,8 @@ func NewTemplate() (*Template, error) {
 // ClientMeta ...
 type ClientMeta struct {
 	PackageName      string
+	ExportName       string
+	ExportType       string
 	ClientID         string
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
@@ -130,8 +132,10 @@ func findMethod(
 type ClientInfoMeta struct {
 	IsPointerType bool
 	FieldName     string
-	PackageName   string
-	TypeName      string
+	PackagePath   string
+	PackageAlias  string
+	ExportName    string
+	ExportType    string
 }
 
 // ClientsInitFilesMeta ...
@@ -149,7 +153,7 @@ func (c sortByClientName) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 func (c sortByClientName) Less(i, j int) bool {
-	return c[i].GoFileName < c[j].GoFileName
+	return c[i].ClientName < c[j].ClientName
 }
 
 // EndpointRegisterInfo ...

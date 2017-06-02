@@ -82,13 +82,15 @@ type ClientSpec struct {
 	CustomClientType string
 	// If "custom" then what the package name (in Go) the client package has
 	CustomPackageName string
-	// GoFileName, the absolute path where the generate client is
-	GoFileName string
-	// GoPackageName is the golang package name for the client
-	GoPackageName string
-	// GoStructsFileName, absolute path where any helper structs
-	// are generated for this generated client
-	GoStructsFileName string
+	// The path to the client package import
+	ImportPackagePath string
+	// The globally unique pacakge alias for the import
+	ImportPackageAlias string
+	// ExportName is the name that should be used when initializing the module
+	// on a dependency struct.
+	ExportName string
+	// ExportType refers to the type returned by the module initializer
+	ExportType string
 	// ThriftFile, absolute path to thrift file
 	ThriftFile string
 	// ClientID, used for logging and metrics, must be lowercase
@@ -123,24 +125,17 @@ type ClientClassConfig struct {
 }
 
 // NewClientSpec creates a client spec from a json file.
-func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
-	_, err := os.Stat(jsonFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Could not find file %s: ", jsonFile)
-	}
-
-	bytes, err := ioutil.ReadFile(jsonFile)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not read json file %s: ", jsonFile,
-		)
-	}
-
+func NewClientSpec(
+	instance *ModuleInstance,
+	h *PackageHelper,
+) (*ClientSpec, error) {
 	clientConfig := &ClientClassConfig{}
 
-	if err := json.Unmarshal(bytes, &clientConfig); err != nil {
+	if err := json.Unmarshal(instance.JSONFileRaw, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not parse class config json file %s: ", jsonFile,
+			err,
+			"Could not parse class config json file %s: ",
+			instance.JSONFileName,
 		)
 	}
 
@@ -150,26 +145,34 @@ func NewClientSpec(jsonFile string, h *PackageHelper) (*ClientSpec, error) {
 
 	switch clientConfig.Type {
 	case "http":
-		return NewHTTPClientSpec(jsonFile, clientConfig, h)
+		return NewHTTPClientSpec(instance, clientConfig, h)
 	case "tchannel":
-		return NewTChannelClientSpec(jsonFile, clientConfig, h)
+		return NewTChannelClientSpec(instance, clientConfig, h)
 	case "custom":
-		return NewCustomClientSpec(jsonFile, clientConfig, h)
+		return NewCustomClientSpec(instance, clientConfig, h)
 	default:
 		return nil, errors.Errorf(
-			"Cannot support unknown clientType for client %s", jsonFile,
+			"Cannot support unknown clientType for client %s",
+			instance.JSONFileName,
 		)
 	}
 }
 
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
-func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewTChannelClientSpec(
+	instance *ModuleInstance,
+	clientConfig *ClientClassConfig,
+	h *PackageHelper,
+) (*ClientSpec, error) {
 	exposedMethods := clientConfig.Config["exposedMethods"].(map[string]interface{})
 	if len(exposedMethods) == 0 {
-		return nil, errors.Errorf("No methods are exposed in client config: %s", jsonFile)
+		return nil, errors.Errorf(
+			"No methods are exposed in client config: %s",
+			instance.JSONFileName,
+		)
 	}
 
-	cspec, err := newClientSpec(jsonFile, clientConfig, false, h)
+	cspec, err := newClientSpec(instance, clientConfig, false, h)
 	if err != nil {
 		return nil, err
 	}
@@ -182,49 +185,72 @@ func NewTChannelClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *
 	}
 
 	if len(cspec.ExposedMethods) != len(reversed) {
-		return nil, errors.Errorf("Keys or values of the exposedMethods of are not unique: %s", jsonFile)
+		return nil, errors.Errorf(
+			"Keys or values of the exposedMethods of are not unique: %s",
+			instance.JSONFileName,
+		)
 	}
 
 	return cspec, nil
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
-func NewCustomClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
+func NewCustomClientSpec(
+	instance *ModuleInstance,
+	clientConfig *ClientClassConfig,
+	h *PackageHelper,
+) (*ClientSpec, error) {
 	for _, f := range mandatoryCustomClientFields {
 		if _, ok := clientConfig.Config[f]; !ok {
 			return nil, errors.Errorf(
-				"client config %q must have %q field for type custom", jsonFile, f,
+				"client config %q must have %q field for type custom",
+				instance.JSONFileName,
+				f,
 			)
 		}
 	}
 
 	clientSpec := &ClientSpec{
-		JSONFile:          jsonFile,
-		ClientType:        clientConfig.Type,
-		ClientID:          clientConfig.Config["clientId"].(string),
-		ClientName:        clientConfig.Config["clientName"].(string),
-		CustomImportPath:  clientConfig.Config["customImportPath"].(string),
-		CustomClientType:  clientConfig.Config["customClientType"].(string),
-		CustomPackageName: clientConfig.Config["customPackageName"].(string),
+		JSONFile:           instance.JSONFileName,
+		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
+		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
+		ExportName:         instance.PackageInfo.ExportName,
+		ExportType:         instance.PackageInfo.ExportType,
+		ClientType:         clientConfig.Type,
+		ClientID:           clientConfig.Config["clientId"].(string),
+		ClientName:         clientConfig.Config["clientName"].(string),
+		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
+		CustomClientType:   clientConfig.Config["customClientType"].(string),
+		CustomPackageName:  clientConfig.Config["customPackageName"].(string),
 	}
 
 	return clientSpec, nil
 }
 
-// NewHTTPClientSpec creates a client spec from a json file whose type is http
-func NewHTTPClientSpec(jsonFile string, clientConfig *ClientClassConfig, h *PackageHelper) (*ClientSpec, error) {
-	return newClientSpec(jsonFile, clientConfig, true, h)
+// NewHTTPClientSpec creates a client spec from a http client module instance
+func NewHTTPClientSpec(
+	instance *ModuleInstance,
+	clientConfig *ClientClassConfig,
+	h *PackageHelper,
+) (*ClientSpec, error) {
+	return newClientSpec(instance, clientConfig, true, h)
 
 }
 
-func newClientSpec(jsonFile string, clientConfig *ClientClassConfig, wantAnnot bool, h *PackageHelper) (*ClientSpec, error) {
+func newClientSpec(
+	instance *ModuleInstance,
+	clientConfig *ClientClassConfig,
+	wantAnnot bool, h *PackageHelper,
+) (*ClientSpec, error) {
 	config := clientConfig.Config
 
 	for i := 0; i < len(mandatoryClientFields); i++ {
 		fieldName := mandatoryClientFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
-				"client config (%s) must have %s field", jsonFile, fieldName,
+				"client config (%s) must have %s field",
+				instance.JSONFileName,
+				fieldName,
 			)
 		}
 	}
@@ -241,39 +267,18 @@ func newClientSpec(jsonFile string, clientConfig *ClientClassConfig, wantAnnot b
 	}
 	mspec.PackageName = mspec.PackageName + "Client"
 
-	baseName := filepath.Base(filepath.Dir(jsonFile))
-
-	goFileName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"clients",
-		baseName,
-		baseName+".go",
-	)
-
-	goPackageName := filepath.Join(
-		h.GoGatewayPackageName(),
-		"clients",
-		baseName,
-	)
-
-	goStructsFileName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"clients",
-		baseName,
-		baseName+"_structs.go",
-	)
-
 	return &ClientSpec{
-		ModuleSpec:        mspec,
-		JSONFile:          jsonFile,
-		ClientType:        clientConfig.Type,
-		GoFileName:        goFileName,
-		GoPackageName:     goPackageName,
-		GoStructsFileName: goStructsFileName,
-		ThriftFile:        thriftFile,
-		ClientID:          config["clientId"].(string),
-		ClientName:        config["clientName"].(string),
-		ThriftServiceName: config["serviceName"].(string),
+		ModuleSpec:         mspec,
+		JSONFile:           instance.JSONFileName,
+		ClientType:         clientConfig.Type,
+		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
+		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
+		ExportName:         instance.PackageInfo.ExportName,
+		ExportType:         instance.PackageInfo.ExportType,
+		ThriftFile:         thriftFile,
+		ClientID:           config["clientId"].(string),
+		ClientName:         config["clientName"].(string),
+		ThriftServiceName:  config["serviceName"].(string),
 	}, nil
 }
 
@@ -848,7 +853,6 @@ type GatewaySpec struct {
 
 	gatewayName         string
 	configDirName       string
-	clientConfigDir     string
 	endpointConfigDir   string
 	middlewareConfig    string
 	copyrightHeaderFile string
@@ -856,9 +860,9 @@ type GatewaySpec struct {
 
 // NewGatewaySpec sets up gateway spec
 func NewGatewaySpec(
+	moduleInstances map[string][]*ModuleInstance,
 	packageHelper *PackageHelper,
 	configDirName string,
-	clientConfig string,
 	endpointConfig string,
 	middlewareConfig string,
 	gatewayName string,
@@ -866,16 +870,6 @@ func NewGatewaySpec(
 	tmpl, err := NewTemplate()
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
-	}
-
-	clientJsons, err := filepath.Glob(filepath.Join(
-		configDirName,
-		clientConfig,
-		"*",
-		"client-config.json",
-	))
-	if err != nil {
-		return nil, errors.Wrap(err, "Cannot load client json files")
 	}
 
 	endpointGroupJsons, err := filepath.Glob(filepath.Join(
@@ -901,7 +895,6 @@ func NewGatewaySpec(
 		MiddlewareModules: map[string]*MiddlewareSpec{},
 
 		configDirName:     configDirName,
-		clientConfigDir:   clientConfig,
 		endpointConfigDir: endpointConfig,
 		gatewayName:       gatewayName,
 	}
@@ -912,12 +905,15 @@ func NewGatewaySpec(
 			err, "Cannot load middlewares:")
 	}
 
-	clientSpecs := make([]*ClientSpec, len(clientJsons))
-	for i, json := range clientJsons {
-		cspec, err := NewClientSpec(json, packageHelper)
+	clientModules := moduleInstances["client"]
+	clientSpecs := make([]*ClientSpec, len(clientModules))
+	for i, clientInstance := range clientModules {
+		cspec, err := NewClientSpec(clientInstance, packageHelper)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot parse client json file %s :", json,
+				err,
+				"Cannot create spec for client module %s :",
+				clientInstance.InstanceName,
 			)
 		}
 

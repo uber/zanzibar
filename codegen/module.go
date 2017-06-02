@@ -413,6 +413,22 @@ func readPackageInfo(
 		)
 	}
 
+	// The module system presently has special reservations for the "custom"
+	// type. We should really extrapolate from the class type info what the
+	// default export type is for this instance
+	var isExportGenerated bool
+	if jsonConfig.Type == "custom" {
+		if jsonConfig.IsExportGenerated == nil {
+			isExportGenerated = false
+		} else {
+			isExportGenerated = *jsonConfig.IsExportGenerated
+		}
+	} else if jsonConfig.IsExportGenerated == nil {
+		isExportGenerated = true
+	} else {
+		isExportGenerated = *jsonConfig.IsExportGenerated
+	}
+
 	return &PackageInfo{
 		// The package name is assumed to be the lower case of the instance
 		// Name plus the titular class name, such as fooClient
@@ -426,15 +442,14 @@ func readPackageInfo(
 			packageRoot,
 			instanceDirectory,
 		),
-		ExportName: qualifiedInstanceName,
+		ExportName: "New" + qualifiedClassName,
 		ExportType: qualifiedInstanceName + qualifiedClassName,
 		GeneratedPackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,
 			instanceDirectory,
 		),
-		IsExportGenerated: jsonConfig.IsExportGenerated == nil ||
-			*jsonConfig.IsExportGenerated,
+		IsExportGenerated: isExportGenerated,
 	}, nil
 }
 

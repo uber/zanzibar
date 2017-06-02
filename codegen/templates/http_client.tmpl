@@ -16,8 +16,9 @@ import (
 )
 
 {{- $clientID := .ClientID -}}
+{{- $clientName := .ExportType }}
+{{- $exportName := .ExportName}}
 {{range .Services}}
-{{- $clientName := title .Name | printf "%sClient" }}
 // {{$clientName}} is the http client for service {{.Name}}.
 type {{$clientName}} struct {
 	ClientID string
@@ -25,7 +26,7 @@ type {{$clientName}} struct {
 }
 
 // NewClient returns a new http client for service {{.Name}}.
-func NewClient(
+func {{$exportName}}(
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
 	ip := gateway.Config.MustGetString("clients.{{.Name | camel}}.ip")
