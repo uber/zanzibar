@@ -44,7 +44,6 @@ var mandatoryClientFields = []string{
 	"clientId",
 	"thriftFile",
 	"thriftFileSha",
-	"serviceName",
 }
 var mandatoryCustomClientFields = []string{
 	"customImportPath",
@@ -231,8 +230,19 @@ func NewHTTPClientSpec(
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	return newClientSpec(instance, clientConfig, true, h)
+	cspec, err := newClientSpec(instance, clientConfig, true, h)
+	if err != nil {
+		return nil, err
+	}
 
+	if cspec.ThriftServiceName == "" {
+		return nil, errors.Errorf(
+			"client config (%s) must have serviceName field",
+			instance.JSONFileName,
+		)
+	}
+
+	return cspec, nil
 }
 
 func newClientSpec(
@@ -265,6 +275,11 @@ func newClientSpec(
 	}
 	mspec.PackageName = mspec.PackageName + "Client"
 
+	thriftServiceName := ""
+	if serviceName, ok := config["serviceName"]; ok {
+		thriftServiceName = serviceName.(string)
+	}
+
 	return &ClientSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           instance.JSONFileName,
@@ -276,7 +291,7 @@ func newClientSpec(
 		ThriftFile:         thriftFile,
 		ClientID:           config["clientId"].(string),
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
-		ThriftServiceName:  config["serviceName"].(string),
+		ThriftServiceName:  thriftServiceName,
 	}, nil
 }
 
