@@ -87,7 +87,6 @@ func main() {
 		filepath.Join(configDirName, config.MustGetString("thriftRootDir")),
 		config.MustGetString("genCodePackage"),
 		filepath.Join(configDirName, config.MustGetString("targetGenDir")),
-		config.MustGetString("gatewayNamespace"),
 		string(copyright),
 	)
 	checkError(

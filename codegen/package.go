@@ -35,8 +35,6 @@ type PackageHelper struct {
 	packageRoot string
 	// The root directory containing thrift files.
 	thriftRootDir string
-	// Namespace under thrift folder
-	gatewayNamespace string
 	// The go package name of where all the generated structs are
 	genCodePackage string
 	// The directory to put the generated service code.
@@ -59,7 +57,6 @@ func NewPackageHelper(
 	thriftRootDir string,
 	genCodePackage string,
 	targetGenDir string,
-	gatewayNamespace string,
 	copyrightHeader string,
 ) (*PackageHelper, error) {
 	genDir, err := filepath.Abs(targetGenDir)
@@ -83,15 +80,6 @@ func NewPackageHelper(
 
 	goGatewayNamespace := filepath.Join(packageRoot, relativeGenDir)
 
-	genDirIndex := strings.Index(genDir, gatewayNamespace)
-	if genDirIndex == -1 {
-		return nil, errors.Errorf(
-			"gatewayNamespace (%s) must be inside targetGenDir (%s)",
-			gatewayNamespace,
-			genDir,
-		)
-	}
-
 	middlewareSpecs := map[string]*MiddlewareSpec{}
 	middleConfig := filepath.Join(
 		configDirName,
@@ -111,7 +99,6 @@ func NewPackageHelper(
 		packageRoot:        packageRoot,
 		thriftRootDir:      path.Clean(thriftRootDir),
 		genCodePackage:     genCodePackage,
-		gatewayNamespace:   gatewayNamespace,
 		goGatewayNamespace: goGatewayNamespace,
 		targetGenDir:       genDir,
 		copyrightHeader:    copyrightHeader,
