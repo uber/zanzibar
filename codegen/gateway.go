@@ -44,14 +44,12 @@ var mandatoryClientFields = []string{
 	"clientId",
 	"thriftFile",
 	"thriftFileSha",
-	"clientName",
 	"serviceName",
 }
 var mandatoryCustomClientFields = []string{
 	"customImportPath",
 	"customClientType",
 	"customPackageName",
-	"clientName",
 }
 var mandatoryEndpointFields = []string{
 	"endpointType",
