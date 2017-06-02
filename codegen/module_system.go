@@ -39,6 +39,7 @@ type EndpointMeta struct {
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
+	ClientID           string
 	ClientMethodName   string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
@@ -53,6 +54,7 @@ type EndpointTestMeta struct {
 	Method           *MethodSpec
 	TestStubs        []TestStub
 	ClientName       string
+	ClientID         string
 	IncludedPackages []GoPackageImport
 }
 
@@ -666,6 +668,11 @@ func (g *EndpointGenerator) generateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
+	clientID := ""
+	if e.ClientSpec != nil {
+		clientID = e.ClientSpec.ClientID
+	}
+
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
@@ -676,6 +683,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
+		ClientID:           clientID,
 		ClientName:         e.ClientName,
 		ClientMethodName:   e.ClientMethod,
 		WorkflowName:       workflowName,
@@ -824,6 +832,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		PackageName: m.PackageName,
 		Method:      method,
 		TestStubs:   testStubs,
+		ClientID:    e.ClientSpec.ClientID,
 	}
 
 	tempName := "endpoint_test.tmpl"
