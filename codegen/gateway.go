@@ -765,9 +765,14 @@ func parseEndpointJsons(
 }
 
 func parseMiddlewareConfig(
-	config string,
+	middlewareConfig string,
 	configDirName string,
-) ([]*MiddlewareSpec, error) {
+) (map[string]*MiddlewareSpec, error) {
+	specMap := map[string]*MiddlewareSpec{}
+	if middlewareConfig == "" {
+		return specMap, nil
+	}
+	config := filepath.Join(configDirName, middlewareConfig)
 	bytes, err := ioutil.ReadFile(config)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -796,8 +801,7 @@ func parseMiddlewareConfig(
 		)
 	}
 
-	specs := make([]*MiddlewareSpec, len(midList))
-	for idx, mid := range midList {
+	for _, mid := range midList {
 		mid, ok := mid.(map[string]interface{})
 		if !ok {
 			return nil, errors.Wrapf(
@@ -815,7 +819,7 @@ func parseMiddlewareConfig(
 			)
 		}
 
-		specs[idx], err = NewMiddlewareSpec(
+		specMap[name], err = NewMiddlewareSpec(
 			name,
 			importPath,
 			schema,
@@ -828,7 +832,7 @@ func parseMiddlewareConfig(
 			)
 		}
 	}
-	return specs, nil
+	return specMap, nil
 }
 
 // GatewaySpec collects information for the entire gateway
@@ -863,11 +867,6 @@ func NewGatewaySpec(
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create template")
 	}
-
-	middleConfig := filepath.Join(
-		configDirName,
-		middlewareConfig,
-	)
 
 	clientJsons, err := filepath.Glob(filepath.Join(
 		configDirName,
@@ -907,13 +906,10 @@ func NewGatewaySpec(
 		gatewayName:       gatewayName,
 	}
 
-	middlewares, err := parseMiddlewareConfig(middleConfig, configDirName)
+	spec.MiddlewareModules, err = parseMiddlewareConfig(middlewareConfig, configDirName)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")
-	}
-	for _, mspec := range middlewares {
-		spec.MiddlewareModules[mspec.Name] = mspec
 	}
 
 	clientSpecs := make([]*ClientSpec, len(clientJsons))
