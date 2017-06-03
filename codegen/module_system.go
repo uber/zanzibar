@@ -158,27 +158,6 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("service", ModuleClass{
-		Directory:         "services",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
-	}); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error registering service class",
-		)
-	}
-
-	if err := system.RegisterClassType("service", "gateway", &GatewayServiceGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error registering Gateway service class type",
-		)
-	}
-
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass("endpoint", ModuleClass{
 		Directory:         "endpoints",
@@ -201,12 +180,36 @@ func NewDefaultModuleSystem(
 	if err := system.RegisterClassType("endpoint", "tchannel", &EndpointGenerator{
 		templates:     tmpl,
 		packageHelper: h,
+	}, func(mc *ModuleClass) {
+		mc.AddSubDir("tchannel")
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering HTTP endpoint class type",
 		)
 	}
+
+	if err := system.RegisterClass("service", ModuleClass{
+		Directory:         "services",
+		ClassType:         MultiModule,
+		ClassDependencies: []string{"client"},
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering service class",
+		)
+	}
+
+	if err := system.RegisterClassType("service", "gateway", &GatewayServiceGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway service class type",
+		)
+	}
+
 	return system, nil
 }
 
