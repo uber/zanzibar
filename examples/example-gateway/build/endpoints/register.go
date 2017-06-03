@@ -26,9 +26,9 @@ package endpoints
 import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz_tchannel"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
+	tchannelBaz "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/runtime/middlewares/logger"
 
@@ -71,7 +71,7 @@ func CreateEndpoints(
 		ContactsSaveContactsHTTPHandler:      contacts.NewSaveContactsEndpoint(gateway),
 		GooglenowAddCredentialsHTTPHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
 		GooglenowCheckCredentialsHTTPHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
-		BazTChannelCallTChannelHandler:       bazTchannel.NewSimpleServiceCallHandler(gateway),
+		BazTChannelCallTChannelHandler:       tchannelBaz.NewSimpleServiceCallHandler(gateway),
 	}
 }
 

@@ -32,7 +32,7 @@ import (
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz_tchannel/baz_tchannel"
+	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 )
 
 func getDirName() string {
@@ -48,7 +48,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..", "examples", "example-gateway",
+			getDirName(), "..", "..", "..", "..", "examples", "example-gateway",
 			"build", "services", "example-gateway", "main.go",
 		),
 	})
