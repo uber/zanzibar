@@ -250,9 +250,7 @@ func newClientSpec(
 		fieldName := mandatoryClientFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
-				"client config (%s) must have %s field",
-				instance.JSONFileName,
-				fieldName,
+				"client config %q must have %s field", instance.JSONFileName, fieldName,
 			)
 		}
 	}
@@ -401,7 +399,7 @@ func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonF
 		fieldName := mandatoryFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return errors.Errorf(
-				"config (%s) must have %s field", jsonFile, fieldName,
+				"config %q must have %s field", jsonFile, fieldName,
 			)
 		}
 	}
@@ -471,7 +469,7 @@ func NewEndpointSpec(
 		iclientID, ok := endpointConfigObj["clientID"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config (%s) must have clientID field", jsonFile,
+				"endpoint config %q must have clientName field", jsonFile,
 			)
 		}
 		clientID = iclientID.(string)
@@ -479,7 +477,7 @@ func NewEndpointSpec(
 		iclientMethod, ok := endpointConfigObj["clientMethod"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config (%s) must have clientMethod field", jsonFile,
+				"endpoint config %q must have clientMethod field", jsonFile,
 			)
 		}
 		clientMethod = iclientMethod.(string)
@@ -487,44 +485,38 @@ func NewEndpointSpec(
 		iworkflowImportPath, ok := endpointConfigObj["workflowImportPath"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config (%s) must have workflowImportPath field",
+				"endpoint config %q must have workflowImportPath field",
 				jsonFile,
 			)
 		}
 		workflowImportPath = iworkflowImportPath.(string)
 	} else {
 		return nil, errors.Errorf(
-			"Invalid workflowType (%s) for endpoint (%s)",
+			"Invalid workflowType %q for endpoint %q",
 			workflowType, jsonFile,
 		)
 	}
 
-	dirName := filepath.Base(filepath.Dir(jsonFile))
+	dirName, err := filepath.Rel(h.ConfigRoot(), filepath.Dir(jsonFile))
+	if err != nil {
+		return nil, errors.Errorf("Config file is out of config root: %s", jsonFile)
+	}
 
-	goFolderName := filepath.Join(
-		h.CodeGenTargetPath(),
-		"endpoints",
-		dirName,
-	)
+	goFolderName := filepath.Join(h.CodeGenTargetPath(), dirName)
 
 	goStructsFileName := filepath.Join(
 		h.CodeGenTargetPath(),
-		"endpoints",
 		dirName,
-		dirName+"_structs.go",
+		filepath.Base(dirName)+"_structs.go",
 	)
 
-	goPackageName := filepath.Join(
-		h.GoGatewayPackageName(),
-		"endpoints",
-		dirName,
-	)
+	goPackageName := filepath.Join(h.GoGatewayPackageName(), dirName)
 
 	thriftInfo := endpointConfigObj["thriftMethodName"].(string)
 	parts := strings.Split(thriftInfo, "::")
 	if len(parts) != 2 {
 		return nil, errors.Errorf(
-			"Cannot read thriftMethodName (%s) for endpoint json file %s : ",
+			"Cannot read thriftMethodName %q for endpoint json file %s : ",
 			thriftInfo, jsonFile,
 		)
 	}
@@ -585,7 +577,7 @@ func augmentHTTPEndpointSpec(
 		// Verify the middleware name is defined.
 		if midSpecs[name] == nil {
 			return nil, errors.Errorf(
-				"middlewares config (%s) not found.", name,
+				"middlewares config %q not found.", name,
 			)
 		}
 		// TODO(sindelar): Validate Options against middleware spec and support
@@ -716,8 +708,8 @@ func (e *EndpointSpec) SetDownstream(
 
 	if clientSpec == nil {
 		return errors.Errorf(
-			"When parsing endpoint json (%s), "+
-				"could not find client (%s) in gateway",
+			"When parsing endpoint json %q, "+
+				"could not find client %q in gateway",
 			e.JSONFile, e.ClientID,
 		)
 	}
@@ -879,12 +871,20 @@ func NewGatewaySpec(
 		return nil, errors.Wrap(err, "cannot create template")
 	}
 
-	endpointGroupJsons, err := filepath.Glob(filepath.Join(
-		configDirName,
-		endpointConfig,
-		"*",
-		"endpoint-config.json",
-	))
+	endpointGroupJsons := []string{}
+	err = filepath.Walk(
+		filepath.Join(configDirName, endpointConfig),
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.Name() == "endpoint-config.json" {
+				endpointGroupJsons = append(endpointGroupJsons, path)
+			}
+			return nil
+		},
+	)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot load endpoint json files")
 	}

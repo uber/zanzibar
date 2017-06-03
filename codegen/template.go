@@ -250,7 +250,8 @@ func (t *Template) GenerateEndpointRegisterFile(
 		handlerName := strings.Title(espec.EndpointID) + strings.Title(method.Name) +
 			endpointType + "Handler"
 
-		includedPkgs = addEndpointPackage(espec, includedPkgs)
+		aliasName := aliasImport(espec, h)
+		includedPkgs = addEndpointPackage(espec, aliasName, includedPkgs)
 		includedPkgs = addMiddlewarePackages(espec.Middlewares, includedPkgs)
 
 		info := EndpointRegisterInfo{
@@ -259,7 +260,7 @@ func (t *Template) GenerateEndpointRegisterFile(
 			EndpointID:   espec.EndpointID,
 			HandlerID:    espec.HandleID,
 			Method:       method,
-			PackageName:  espec.ModuleSpec.PackageName,
+			PackageName:  aliasName,
 			HandlerType:  handlerType,
 			HandlerName:  handlerName,
 			Middlewares:  espec.Middlewares,
@@ -285,7 +286,22 @@ func (t *Template) GenerateEndpointRegisterFile(
 	return targetFile, nil
 }
 
-func addEndpointPackage(espec *EndpointSpec, includedPkgs []GoPackageImport) []GoPackageImport {
+func aliasImport(spec *EndpointSpec, h *PackageHelper) string {
+	// error is ok to ignore as the goPkg is generated based on packageRoot
+	relEndpointDir, _ := filepath.Rel(h.PackageRoot(), spec.GoPackageName)
+	relGenDir, _ := filepath.Rel(h.configRoot, h.CodeGenTargetPath())
+	relEndpointDir = strings.TrimPrefix(relEndpointDir, filepath.Clean(relGenDir)+"/endpoints/")
+	parts := strings.Split(relEndpointDir, "/")
+	aliasName := parts[0]
+	for i, v := range parts {
+		if i != 0 {
+			aliasName = aliasName + strings.Title(v)
+		}
+	}
+	return aliasName
+}
+
+func addEndpointPackage(espec *EndpointSpec, aliasName string, includedPkgs []GoPackageImport) []GoPackageImport {
 	var goPkg string
 	switch espec.WorkflowType {
 	case "httpClient", "tchannelClient", "custom":
@@ -294,10 +310,13 @@ func addEndpointPackage(espec *EndpointSpec, includedPkgs []GoPackageImport) []G
 		panic("Unsupported WorkflowType: " + espec.WorkflowType)
 	}
 
+	if aliasName == espec.ModuleSpec.PackageName {
+		aliasName = ""
+	}
 	if !contains(includedPkgs, goPkg) {
 		includedPkgs = append(includedPkgs, GoPackageImport{
 			PackageName: goPkg,
-			AliasName:   "",
+			AliasName:   aliasName,
 		})
 	}
 	return includedPkgs
