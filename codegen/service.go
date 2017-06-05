@@ -186,7 +186,11 @@ func (ms *ModuleSpec) SetDownstream(
 
 		err = method.setDownstream(clientSpec.ModuleSpec, sm[0], sm[1])
 	} else {
-		err = method.setDownstream(clientSpec.ModuleSpec, clientSpec.ClientName, clientMethod)
+		err = method.setDownstream(
+			clientSpec.ModuleSpec,
+			clientSpec.ThriftServiceName,
+			clientMethod,
+		)
 	}
 
 	if err != nil {

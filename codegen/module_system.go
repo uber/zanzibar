@@ -39,6 +39,7 @@ type EndpointMeta struct {
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
+	ClientID           string
 	ClientMethodName   string
 	WorkflowName       string
 	ReqHeaderMap       map[string]string
@@ -53,6 +54,7 @@ type EndpointTestMeta struct {
 	Method           *MethodSpec
 	TestStubs        []TestStub
 	ClientName       string
+	ClientID         string
 	IncludedPackages []GoPackageImport
 }
 
@@ -345,6 +347,41 @@ func (g *TChannelClientGenerator) Generate(
 	exposedMethods := map[string]string{}
 	for k, v := range clientSpec.ExposedMethods {
 		exposedMethods[v] = k
+	}
+
+	// TODO: Verify all exposedMethods exist and are valid.
+	for exposedMethod := range exposedMethods {
+		segments := strings.Split(exposedMethod, "::")
+		thriftService := segments[0]
+		thriftMethod := segments[1]
+		found := false
+
+		for _, candidateService := range clientSpec.ModuleSpec.Services {
+			if found {
+				break
+			}
+			if candidateService.Name != thriftService {
+				continue
+			}
+
+			for _, candidateMethod := range candidateService.Methods {
+				if candidateMethod.Name != thriftMethod {
+					continue
+				}
+
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, errors.Errorf(
+				"Invalid exposedMethods for tchannel client (%q). "+
+					"The exposedMethod (%q) does not exist",
+				instance.InstanceName,
+				exposedMethod,
+			)
+		}
 	}
 
 	clientMeta := &ClientMeta{
@@ -666,6 +703,11 @@ func (g *EndpointGenerator) generateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
+	clientID := ""
+	if e.ClientSpec != nil {
+		clientID = e.ClientSpec.ClientID
+	}
+
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
@@ -676,6 +718,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
+		ClientID:           clientID,
 		ClientName:         e.ClientName,
 		ClientMethodName:   e.ClientMethod,
 		WorkflowName:       workflowName,
@@ -824,6 +867,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		PackageName: m.PackageName,
 		Method:      method,
 		TestStubs:   testStubs,
+		ClientID:    e.ClientSpec.ClientID,
 	}
 
 	tempName := "endpoint_test.tmpl"

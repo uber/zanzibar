@@ -39,7 +39,7 @@ type Clients struct {
 	Bar       *barClientGenerated.BarClient
 	Baz       *bazClientGenerated.BazClient
 	Contacts  *contactsClientGenerated.ContactsClient
-	GoogleNow *googlenowClientGenerated.GooglenowClient
+	GoogleNow *googlenowClientGenerated.GoogleNowClient
 	Quux      *quuxClientStatic.Quux
 }
 

@@ -14,9 +14,9 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
+{{- $clientID := .ClientID }}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientName := title .DownstreamService -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
@@ -30,7 +30,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"{{$clientName | camel}}"},
+		KnownHTTPBackends: []string{"{{$clientID}}"},
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
 		),
@@ -62,7 +62,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 		counter++
 	}
 
-	gateway.HTTPBackends()["{{$clientName | camel}}"].HandleFunc(
+	gateway.HTTPBackends()["{{$clientID}}"].HandleFunc(
 		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
 	)
 

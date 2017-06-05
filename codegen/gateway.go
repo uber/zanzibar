@@ -44,14 +44,11 @@ var mandatoryClientFields = []string{
 	"clientId",
 	"thriftFile",
 	"thriftFileSha",
-	"clientName",
-	"serviceName",
 }
 var mandatoryCustomClientFields = []string{
 	"customImportPath",
 	"customClientType",
 	"customPackageName",
-	"clientName",
 }
 var mandatoryEndpointFields = []string{
 	"endpointType",
@@ -218,7 +215,7 @@ func NewCustomClientSpec(
 		ExportType:         instance.PackageInfo.ExportType,
 		ClientType:         clientConfig.Type,
 		ClientID:           clientConfig.Config["clientId"].(string),
-		ClientName:         clientConfig.Config["clientName"].(string),
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
 		CustomClientType:   clientConfig.Config["customClientType"].(string),
 		CustomPackageName:  clientConfig.Config["customPackageName"].(string),
@@ -233,8 +230,19 @@ func NewHTTPClientSpec(
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	return newClientSpec(instance, clientConfig, true, h)
+	cspec, err := newClientSpec(instance, clientConfig, true, h)
+	if err != nil {
+		return nil, err
+	}
 
+	if cspec.ThriftServiceName == "" {
+		return nil, errors.Errorf(
+			"client config (%s) must have serviceName field",
+			instance.JSONFileName,
+		)
+	}
+
+	return cspec, nil
 }
 
 func newClientSpec(
@@ -267,6 +275,11 @@ func newClientSpec(
 	}
 	mspec.PackageName = mspec.PackageName + "Client"
 
+	thriftServiceName := ""
+	if serviceName, ok := config["serviceName"]; ok {
+		thriftServiceName = serviceName.(string)
+	}
+
 	return &ClientSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           instance.JSONFileName,
@@ -277,8 +290,8 @@ func newClientSpec(
 		ExportType:         instance.PackageInfo.ExportType,
 		ThriftFile:         thriftFile,
 		ClientID:           config["clientId"].(string),
-		ClientName:         config["clientName"].(string),
-		ThriftServiceName:  config["serviceName"].(string),
+		ClientName:         instance.PackageInfo.QualifiedInstanceName,
+		ThriftServiceName:  thriftServiceName,
 	}, nil
 }
 

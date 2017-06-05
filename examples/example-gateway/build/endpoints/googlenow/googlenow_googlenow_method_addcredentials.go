@@ -137,8 +137,8 @@ func (w AddCredentialsEndpoint) Handle(
 	return resHeaders, nil
 }
 
-func convertToAddCredentialsClientRequest(in *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args {
-	out := &clientsGooglenowGooglenow.GoogleNow_AddCredentials_Args{}
+func convertToAddCredentialsClientRequest(in *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {
+	out := &clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args{}
 
 	out.AuthCode = string(in.AuthCode)
 

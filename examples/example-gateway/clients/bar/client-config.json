@@ -4,7 +4,6 @@
 	"config": {
 		"thriftFile": "clients/bar/bar.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"clientName": "Bar",
 		"serviceName": "Bar"
 	}
 }
