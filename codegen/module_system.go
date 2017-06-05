@@ -350,7 +350,7 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	// TODO: Verify all exposedMethods exist and are valid.
-	for exposedMethod, _ := range exposedMethods {
+	for exposedMethod := range exposedMethods {
 		segments := strings.Split(exposedMethod, "::")
 		thriftService := segments[0]
 		thriftMethod := segments[1]
