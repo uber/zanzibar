@@ -349,6 +349,41 @@ func (g *TChannelClientGenerator) Generate(
 		exposedMethods[v] = k
 	}
 
+	// TODO: Verify all exposedMethods exist and are valid.
+	for exposedMethod, _ := range exposedMethods {
+		segments := strings.Split(exposedMethod, "::")
+		thriftService := segments[0]
+		thriftMethod := segments[1]
+		found := false
+
+		for _, candidateService := range clientSpec.ModuleSpec.Services {
+			if found {
+				break
+			}
+			if candidateService.Name != thriftService {
+				continue
+			}
+
+			for _, candidateMethod := range candidateService.Methods {
+				if candidateMethod.Name != thriftMethod {
+					continue
+				}
+
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, errors.Errorf(
+				"Invalid exposedMethods for tchannel client (%q). "+
+					"The exposedMethod (%q) does not exist",
+				instance.InstanceName,
+				exposedMethod,
+			)
+		}
+	}
+
 	clientMeta := &ClientMeta{
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
