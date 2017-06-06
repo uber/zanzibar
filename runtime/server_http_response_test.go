@@ -37,8 +37,8 @@ import (
 
 func TestInvalidStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -97,8 +97,8 @@ func TestInvalidStatusCode(t *testing.T) {
 
 func TestCallingWriteJSONWithNil(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -158,8 +158,8 @@ func (f failingJsonObj) MarshalJSON() ([]byte, error) {
 
 func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -232,8 +232,8 @@ type MyBody struct {
 
 func TestResponsePeekBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -294,8 +294,8 @@ func TestResponsePeekBody(t *testing.T) {
 
 func TestResponseSetHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -344,8 +344,8 @@ func TestResponseSetHeaders(t *testing.T) {
 
 func TestResponsePeekBodyError(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)

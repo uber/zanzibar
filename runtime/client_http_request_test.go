@@ -34,10 +34,18 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
+var defaultTestOptions *testGateway.Options = &testGateway.Options{
+	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+	KnownTChannelBackends: []string{"baz"},
+}
+var defaultTestConfig map[string]interface{} = map[string]interface{}{
+	"clients.baz.serviceName": "baz",
+}
+
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -61,8 +69,8 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 
 func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -86,9 +94,12 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 }
 
 func TestMakingClientCalLWithHeaders(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"bar"},
-	}, clients.CreateClients, endpoints.Register)
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -131,9 +142,12 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 }
 
 func TestMakingClientCalLWithRespHeaders(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"bar"},
-	}, clients.CreateClients, endpoints.Register)
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -168,9 +182,12 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 }
 
 func TestMakingClientCallWithThriftException(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"bar"},
-	}, clients.CreateClients, endpoints.Register)
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -199,9 +216,12 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 }
 
 func TestMakingClientCallWithBadStatusCode(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"bar"},
-	}, clients.CreateClients, endpoints.Register)
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -229,9 +249,12 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 }
 
 func TestMakingCallWithThriftException(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(nil, &testGateway.Options{
-		KnownHTTPBackends: []string{"bar"},
-	}, clients.CreateClients, endpoints.Register)
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		clients.CreateClients,
+		endpoints.Register,
+	)
 	if !assert.NoError(t, err) {
 		return
 	}

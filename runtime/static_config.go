@@ -71,14 +71,14 @@ type StaticConfig struct {
 func NewStaticConfigOrDie(
 	files []string, seedConfig map[string]interface{},
 ) *StaticConfig {
-	if seedConfig == nil {
-		seedConfig = map[string]interface{}{}
-	}
-
 	config := &StaticConfig{
 		files:        files,
-		seedConfig:   seedConfig,
+		seedConfig:   map[string]interface{}{},
 		configValues: map[string]StaticConfigValue{},
+	}
+
+	for key, value := range seedConfig {
+		config.seedConfig[key] = value
 	}
 
 	config.initializeConfigValues()

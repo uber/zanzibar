@@ -69,8 +69,13 @@ func TestHealthCall(t *testing.T) {
 
 func BenchmarkHealthCall(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		map[string]interface{}{
+			"clients.baz.serviceName": "baz",
+		},
+		&testGateway.Options{
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
+		},
 		clients.CreateClients,
 		endpoints.Register,
 	)

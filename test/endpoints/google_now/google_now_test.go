@@ -50,9 +50,12 @@ var headers map[string]string = map[string]string{
 
 func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
+		map[string]interface{}{
+			"clients.baz.serviceName": "baz",
+		},
 		&testGateway.Options{
-			KnownHTTPBackends: []string{"google-now"},
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
 		},
 		clients.CreateClients,
 		endpoints.Register,

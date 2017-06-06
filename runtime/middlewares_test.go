@@ -58,8 +58,8 @@ func TestHandlers(t *testing.T) {
 	// request/responses without setting up a backend and register.
 	// Currently they require endpoints to instantiate.
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -145,8 +145,8 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	assert.Equal(t, 3, len(middlewares))
 
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -200,8 +200,8 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	assert.Equal(t, 3, len(middlewares))
 
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -263,8 +263,8 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	// request/responses without setting up a backend and register.
 	// Currently they require endpoints to instantiate.
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)

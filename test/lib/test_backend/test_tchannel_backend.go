@@ -70,6 +70,8 @@ func BuildTChannelBackends(
 		result[clientName] = backend
 		cfg["clients."+clientName+".ip"] = "127.0.0.1"
 		cfg["clients."+clientName+".port"] = int64(backend.RealPort)
+		cfg["clients."+clientName+".timeout"] = int64(10000)
+		cfg["clients."+clientName+".timeoutPerAttempt"] = int64(10000)
 	}
 
 	return result, nil

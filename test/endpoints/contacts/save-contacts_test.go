@@ -40,9 +40,12 @@ var benchBytes = []byte("{\"userUUID\":\"foo\",\"contacts\":[{\"fragments\":[{\"
 
 func BenchmarkSaveContacts(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
+		map[string]interface{}{
+			"clients.baz.serviceName": "baz",
+		},
 		&testGateway.Options{
-			KnownHTTPBackends: []string{"contacts"},
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
 		},
 		clients.CreateClients,
 		endpoints.Register,

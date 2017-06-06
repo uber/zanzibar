@@ -128,16 +128,6 @@ func CreateGateway(
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
 		filepath.Join(getZanzibarDirName(), "config", "production.json"),
-		filepath.Join(
-			getDirName(),
-			"..",
-			"..",
-			"..",
-			"examples",
-			"example-gateway",
-			"config",
-			"production.json",
-		),
 	}, seedConfig)
 
 	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{

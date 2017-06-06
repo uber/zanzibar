@@ -35,8 +35,8 @@ import (
 
 func TestTrailingSlashRoutes(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -106,8 +106,8 @@ func TestTrailingSlashRoutes(t *testing.T) {
 
 func TestRouterNotFound(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
@@ -135,8 +135,8 @@ func TestRouterNotFound(t *testing.T) {
 
 func TestRouterInvalidMethod(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
-		nil,
+		defaultTestConfig,
+		defaultTestOptions,
 		clients.CreateClients,
 		endpoints.Register,
 	)
