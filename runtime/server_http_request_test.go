@@ -39,12 +39,13 @@ import (
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		nil,
+		defaultTestConfig,
 		&testGateway.Options{
 			LogWhitelist: map[string]bool{
 				"Could not ReadAll() body": true,
 			},
-			KnownHTTPBackends: []string{"bar"},
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
 		},
 		clients.CreateClients,
 		endpoints.Register,
