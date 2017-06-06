@@ -57,9 +57,10 @@ func compare(
 func BenchmarkCompare(b *testing.B) {
 	gateway, err := benchGateway.CreateGateway(
 		map[string]interface{}{
-			"clients.baz.serviceName": "Qux",
+			"clients.baz.serviceName": "baz",
 		},
 		&testGateway.Options{
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
 		clients.CreateClients,
