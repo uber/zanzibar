@@ -471,7 +471,7 @@ func NewEndpointSpec(
 		iclientID, ok := endpointConfigObj["clientID"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config (%s) must have clientName field", jsonFile,
+				"endpoint config (%s) must have clientID field", jsonFile,
 			)
 		}
 		clientID = iclientID.(string)
