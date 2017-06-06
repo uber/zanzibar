@@ -2,6 +2,7 @@
 	"serviceName": "my-gateway",
 	"port": 4000,
 	"env": "production",
+	"useDatacenter": false,
 
 	"logger.output": "stdout",
 
