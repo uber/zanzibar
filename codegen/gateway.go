@@ -389,7 +389,7 @@ type EndpointSpec struct {
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string
 	// if "httpClient", which client to call.
-	ClientName string
+	ClientID string
 	// if "httpClient", which client method to call.
 	ClientMethod string
 	// The client for this endpoint if httpClient or tchannelClient
@@ -463,18 +463,18 @@ func NewEndpointSpec(
 	}
 
 	var workflowImportPath string
-	var clientName string
+	var clientID string
 	var clientMethod string
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
-		iclientName, ok := endpointConfigObj["clientName"]
+		iclientID, ok := endpointConfigObj["clientID"]
 		if !ok {
 			return nil, errors.Errorf(
 				"endpoint config (%s) must have clientName field", jsonFile,
 			)
 		}
-		clientName = iclientName.(string)
+		clientID = iclientID.(string)
 
 		iclientMethod, ok := endpointConfigObj["clientMethod"]
 		if !ok {
@@ -543,7 +543,7 @@ func NewEndpointSpec(
 		ThriftMethodName:   parts[1],
 		WorkflowType:       workflowType,
 		WorkflowImportPath: workflowImportPath,
-		ClientName:         clientName,
+		ClientID:           clientID,
 		ClientMethod:       clientMethod,
 	}
 
@@ -708,7 +708,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	var clientSpec *ClientSpec
 	for _, v := range clientModules {
-		if v.ClientName == e.ClientName {
+		if v.ClientID == e.ClientID {
 			clientSpec = v
 			break
 		}
@@ -718,7 +718,7 @@ func (e *EndpointSpec) SetDownstream(
 		return errors.Errorf(
 			"When parsing endpoint json (%s), "+
 				"could not find client (%s) in gateway",
-			e.JSONFile, e.ClientName,
+			e.JSONFile, e.ClientID,
 		)
 	}
 
