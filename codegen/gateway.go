@@ -40,8 +40,6 @@ func getDirName() string {
 }
 
 var mandatoryClientFields = []string{
-	"clientType",
-	"clientId",
 	"thriftFile",
 	"thriftFileSha",
 }
@@ -136,10 +134,6 @@ func NewClientSpec(
 		)
 	}
 
-	// Restore the properties in the old config structure
-	clientConfig.Config["clientId"] = clientConfig.Name
-	clientConfig.Config["clientType"] = clientConfig.Type
-
 	switch clientConfig.Type {
 	case "http":
 		return NewHTTPClientSpec(instance, clientConfig, h)
@@ -214,7 +208,7 @@ func NewCustomClientSpec(
 		ExportName:         instance.PackageInfo.ExportName,
 		ExportType:         instance.PackageInfo.ExportType,
 		ClientType:         clientConfig.Type,
-		ClientID:           clientConfig.Config["clientId"].(string),
+		ClientID:           clientConfig.Name,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
 		CustomClientType:   clientConfig.Config["customClientType"].(string),
@@ -289,7 +283,7 @@ func newClientSpec(
 		ExportName:         instance.PackageInfo.ExportName,
 		ExportType:         instance.PackageInfo.ExportType,
 		ThriftFile:         thriftFile,
-		ClientID:           config["clientId"].(string),
+		ClientID:           instance.InstanceName,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		ThriftServiceName:  thriftServiceName,
 	}, nil
