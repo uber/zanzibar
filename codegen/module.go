@@ -80,7 +80,7 @@ func (system *ModuleSystem) RegisterClass(
 	// Validate the module class dependencies
 	// (this validation ensures that circular deps cannot exist)
 	for _, moduleType := range class.ClassDependencies {
-		if system.classes[moduleType] == nil {
+		if moduleType != name && system.classes[moduleType] == nil {
 			return errors.Errorf(
 				"The module class %q depends on class type %q, "+
 					"which is not yet defined",
