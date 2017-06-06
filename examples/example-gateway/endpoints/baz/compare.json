@@ -6,7 +6,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::Compare",
 	"workflowType": "tchannelClient",
-	"clientName": "Baz",
+	"clientID": "baz",
 	"clientMethod": "Compare",
 	"testFixtures": [],
 	"middlewares": [],
