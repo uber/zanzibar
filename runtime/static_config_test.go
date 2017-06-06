@@ -559,3 +559,27 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 
 	closer.Close()
 }
+
+func TestStaticConfigHasOwnState(t *testing.T) {
+	dict := map[string]interface{}{
+		"a.b.c": "v",
+		"bool":  true,
+		"int":   int64(1),
+		"float": float64(1.0),
+	}
+
+	config1 := zanzibar.NewStaticConfigOrDie(
+		[]string{},
+		dict,
+	)
+	config2 := zanzibar.NewStaticConfigOrDie(
+		[]string{},
+		dict,
+	)
+
+	config1.SetOrDie("a-key", "a-value")
+
+	assert.Panics(t, func() {
+		config2.MustGetString("a-key")
+	})
+}
