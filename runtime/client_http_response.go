@@ -79,7 +79,7 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 		return nil, errors.Wrapf(
 			err,
 			"Could not read client(%s) response body",
-			res.req.ClientName,
+			res.req.ClientID,
 		)
 	}
 
@@ -98,7 +98,7 @@ func (res *ClientHTTPResponse) UnmarshalBody(
 		return errors.Wrapf(
 			err,
 			"Could not parse client(%s) json",
-			res.req.ClientName,
+			res.req.ClientID,
 		)
 	}
 

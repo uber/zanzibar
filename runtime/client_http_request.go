@@ -40,14 +40,14 @@ type ClientHTTPRequest struct {
 	httpRequest *http.Request
 	res         *ClientHTTPResponse
 
-	ClientName string
+	ClientID   string
 	MethodName string
 	Logger     *zap.Logger
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest
 func NewClientHTTPRequest(
-	clientName string, methodName string,
+	clientID string, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
 	req := &ClientHTTPRequest{
@@ -57,26 +57,26 @@ func NewClientHTTPRequest(
 
 	req.res = NewClientHTTPResponse(req)
 
-	req.start(clientName, methodName)
+	req.start(clientID, methodName)
 	return req
 }
 
 // Start the request, do some metrics book keeping
 func (req *ClientHTTPRequest) start(
-	clientName string, methodName string,
+	clientID string, methodName string,
 ) {
 	if req.started {
 		/* coverage ignore next line */
 		req.Logger.Error(
 			"Cannot start ClientHTTPRequest twice",
 			zap.String("methodName", methodName),
-			zap.String("clientName", clientName),
+			zap.String("clientID", clientID),
 		)
 		/* coverage ignore next line */
 		return
 	}
 
-	req.ClientName = clientName
+	req.ClientID = clientID
 	req.MethodName = methodName
 
 	req.started = true
@@ -96,7 +96,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 				zap.String("error", err.Error()),
 			)
 			return errors.Wrapf(err,
-				"Could not serialize json for client: %s", req.ClientName,
+				"Could not serialize json for client: %s", req.ClientID,
 			)
 		}
 
@@ -113,7 +113,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 		)
 		return errors.Wrapf(httpErr,
 			"Could not make outbound request for client: %s",
-			req.ClientName,
+			req.ClientID,
 		)
 	}
 
