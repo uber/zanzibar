@@ -68,14 +68,16 @@ import (
 	{{end -}}
 )
 
-type {{$instance.PackageInfo.ExportType}}Deps struct {
+// Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type Dependencies struct {
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
-	{{$classType}} {{$instance.PackageInfo.ExportType}}Deps
+	{{$classType}} {{$classType | pascal}}Dependencies
 	{{end -}}
 }
 
 {{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
-type {{$instance.PackageInfo.ExportType}}Deps struct {
+// {{$classType | pascal}}Dependencies contains {{$classType}} dependencies
+type {{$classType | pascal}}Dependencies struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
 	{{end -}}
@@ -93,7 +95,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 882, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1024, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
