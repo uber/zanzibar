@@ -21,7 +21,6 @@
 package testBackend
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 
@@ -52,10 +51,12 @@ func BuildTChannelBackends(
 		clientName := knownTChannelBackends[i]
 
 		val, ok := cfg["clients."+clientName+".serviceName"]
+		var serviceName string
 		if !ok {
-			return nil, fmt.Errorf("Missing \"clients.%s.serviceName\" in config", clientName)
+			serviceName = clientName
+		} else {
+			serviceName = val.(string)
 		}
-		serviceName := val.(string)
 
 		backend, err := CreateTChannelBackend(0, serviceName)
 		if err != nil {
