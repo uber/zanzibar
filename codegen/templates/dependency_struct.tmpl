@@ -1,0 +1,24 @@
+{{$instance := . -}}
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
+	{{end -}}
+)
+
+type {{$instance.PackageInfo.ExportType}}Deps struct {
+	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+	{{$classType}} {{$instance.PackageInfo.ExportType}}Deps
+	{{end -}}
+}
+
+{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+type {{$instance.PackageInfo.ExportType}}Deps struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}
