@@ -54,6 +54,7 @@ func BuildTChannelBackends(
 		var serviceName string
 		if !ok {
 			serviceName = clientID
+			cfg["clients."+clientID+".serviceName"] = serviceName
 		} else {
 			serviceName = val.(string)
 		}
