@@ -107,7 +107,7 @@ func NewDefaultModuleSystem(
 	if err := system.RegisterClass("client", ModuleClass{
 		Directory:         "clients",
 		ClassType:         MultiModule,
-		ClassDependencies: []string{},
+		ClassDependencies: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
