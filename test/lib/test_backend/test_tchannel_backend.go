@@ -48,12 +48,13 @@ func BuildTChannelBackends(
 	result := make(map[string]*TestTChannelBackend, n)
 
 	for i := 0; i < n; i++ {
-		clientID := knownTChannelBackends[i]
+		clientName := knownTChannelBackends[i]
 
-		val, ok := cfg["clients."+clientID+".serviceName"]
+		val, ok := cfg["clients."+clientName+".serviceName"]
 		var serviceName string
 		if !ok {
-			serviceName = clientID
+			serviceName = clientName
+			cfg["clients."+clientName+".serviceName"] = serviceName
 		} else {
 			serviceName = val.(string)
 		}
@@ -68,11 +69,11 @@ func BuildTChannelBackends(
 			return nil, err
 		}
 
-		result[clientID] = backend
-		cfg["clients."+clientID+".ip"] = "127.0.0.1"
-		cfg["clients."+clientID+".port"] = int64(backend.RealPort)
-		cfg["clients."+clientID+".timeout"] = int64(10000)
-		cfg["clients."+clientID+".timeoutPerAttempt"] = int64(10000)
+		result[clientName] = backend
+		cfg["clients."+clientName+".ip"] = "127.0.0.1"
+		cfg["clients."+clientName+".port"] = int64(backend.RealPort)
+		cfg["clients."+clientName+".timeout"] = int64(10000)
+		cfg["clients."+clientName+".timeoutPerAttempt"] = int64(10000)
 	}
 
 	return result, nil
