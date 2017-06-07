@@ -641,8 +641,7 @@ type PackageInfo struct {
 	GeneratedPackagePath string
 	// QualifiedInstanceName for this package. Pascal case name for this module.
 	QualifiedInstanceName string
-	// ExportName is the name that should be used when initializing the module
-	// on a dependency struct.
+	// ExportName is the name on the module initializer function
 	ExportName string
 	// ExportType refers to the type returned by the module initializer
 	ExportType string
