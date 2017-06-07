@@ -6,7 +6,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::missingArg",
 	"workflowType": "httpClient",
-	"clientName": "Bar",
+	"clientID": "bar",
 	"clientMethod": "missingArg",
 	"testFixtures": [],
 	"middlewares": [],

@@ -6,7 +6,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::SillyNoop",
 	"workflowType": "tchannelClient",
-	"clientName": "Baz",
+	"clientID": "baz",
 	"clientMethod": "DeliberateDiffNoop",
 	"testFixtures": [],
 	"middlewares": [],

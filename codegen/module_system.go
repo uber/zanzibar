@@ -703,9 +703,10 @@ func (g *EndpointGenerator) generateEndpointFile(
 			strings.Title(method.Name) + "Endpoint"
 	}
 
-	clientID := ""
+	clientID := e.ClientID
+	clientName := ""
 	if e.ClientSpec != nil {
-		clientID = e.ClientSpec.ClientID
+		clientName = e.ClientSpec.ClientName
 	}
 
 	// TODO: http client needs to support multiple thrift services
@@ -719,7 +720,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
 		ClientID:           clientID,
-		ClientName:         e.ClientName,
+		ClientName:         clientName,
 		ClientMethodName:   e.ClientMethod,
 		WorkflowName:       workflowName,
 	}
@@ -872,7 +873,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 
 	tempName := "endpoint_test.tmpl"
 	if e.WorkflowType == "tchannelClient" {
-		meta.ClientName = e.ClientName
+		meta.ClientName = e.ClientSpec.ClientName
 
 		meta.IncludedPackages = append(
 			method.Downstream.IncludedPackages,

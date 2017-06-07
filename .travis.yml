@@ -23,6 +23,7 @@ install:
   - make jenkins-install
 script:
   - make jenkins-test
+  - make cover
   - make fast-bench
   - make bins
   - make test-benchmark-runner

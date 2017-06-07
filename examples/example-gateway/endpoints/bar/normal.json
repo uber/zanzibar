@@ -6,7 +6,7 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::normal",
 	"workflowType": "httpClient",
-	"clientName": "Bar",
+	"clientID": "bar",
 	"clientMethod": "normal",
 	"testFixtures": [],
 	"middlewares": [

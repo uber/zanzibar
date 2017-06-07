@@ -99,6 +99,7 @@ check-generate:
 .PHONY: test-all
 test-all: 
 	$(MAKE) jenkins
+	$(MAKE) cover
 	$(MAKE) fast-bench 
 	$(MAKE) bins 
 	$(MAKE) install-wrk
