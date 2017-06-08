@@ -119,16 +119,12 @@ func (system *ModuleSystem) RegisterClass(
 	return nil
 }
 
-// ModuleClassOption allows customization with the module class.
-type ModuleClassOption func(*ModuleClass)
-
 // RegisterClassType registers a type generator for a specific module class
 // For example, the "http"" type generator for the "Endpoint"" class
 func (system *ModuleSystem) RegisterClassType(
 	className string,
 	classType string,
 	generator BuildGenerator,
-	opts ...ModuleClassOption,
 ) error {
 	moduleClass := system.classes[className]
 
@@ -149,10 +145,6 @@ func (system *ModuleSystem) RegisterClassType(
 	}
 
 	moduleClass.types[classType] = generator
-
-	for _, opt := range opts {
-		opt(moduleClass)
-	}
 
 	return nil
 }

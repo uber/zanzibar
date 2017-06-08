@@ -180,8 +180,6 @@ func NewDefaultModuleSystem(
 	if err := system.RegisterClassType("endpoint", "tchannel", &EndpointGenerator{
 		templates:     tmpl,
 		packageHelper: h,
-	}, func(mc *ModuleClass) {
-		mc.AddSubDir("tchannel")
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
