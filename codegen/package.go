@@ -68,7 +68,7 @@ func NewPackageHelper(
 		)
 	}
 
-	goGatewayNamespace := filepath.Join(packageRoot, relTargetGenDir)
+	goGatewayNamespace := path.Join(packageRoot, relTargetGenDir)
 
 	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, absConfigRoot)
 	if err != nil {
@@ -79,10 +79,10 @@ func NewPackageHelper(
 	p := &PackageHelper{
 		packageRoot:        packageRoot,
 		configRoot:         absConfigRoot,
-		thriftRootDir:      path.Join(absConfigRoot, relThriftRootDir),
+		thriftRootDir:      filepath.Join(absConfigRoot, relThriftRootDir),
 		genCodePackage:     genCodePackage,
 		goGatewayNamespace: goGatewayNamespace,
-		targetGenDir:       path.Join(absConfigRoot, relTargetGenDir),
+		targetGenDir:       filepath.Join(absConfigRoot, relTargetGenDir),
 		copyrightHeader:    copyrightHeader,
 		middlewareSpecs:    middlewareSpecs,
 	}
