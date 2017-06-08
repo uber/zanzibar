@@ -254,7 +254,6 @@ func (system *ModuleSystem) ResolveModules(
 			}
 			classInstances = append(classInstances, instance)
 		} else {
-
 			instances, err := system.resolveMultiModules(
 				packageRoot,
 				baseDirectory,
@@ -296,12 +295,35 @@ func (system *ModuleSystem) resolveMultiModules(
 	className string,
 	class *ModuleClass,
 ) ([]*ModuleInstance, error) {
-	classInstances := []*ModuleInstance{}
-
-	if classDir == "" {
-		return classInstances, nil
+	relClassDir, err := filepath.Rel(baseDirectory, classDir)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Error relative class directory for %q",
+			className,
+		)
 	}
 
+	configFile := filepath.Join(classDir, className+configSuffix)
+	if _, err := os.Stat(configFile); err == nil {
+		instance, instanceErr := system.readInstance(
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			className,
+			relClassDir,
+		)
+		if instanceErr != nil {
+			return nil, errors.Wrapf(
+				instanceErr,
+				"Error reading multi instance %q in %q",
+				className,
+				class.Directory,
+			)
+		}
+		return []*ModuleInstance{instance}, nil
+	}
+
+	classInstances := []*ModuleInstance{}
 	files, err := ioutil.ReadDir(classDir)
 
 	if err != nil {
@@ -314,52 +336,27 @@ func (system *ModuleSystem) resolveMultiModules(
 		)
 	}
 
-	relClassDir, err := filepath.Rel(baseDirectory, classDir)
-	if err != nil {
-		return nil, errors.Wrapf(err,
-			"Error relative class directory for %q",
-			className,
-		)
-	}
-
 	for _, file := range files {
-		if file.IsDir() && class.hasSubDir(file.Name()) {
-			instances, err := system.resolveMultiModules(
-				packageRoot,
-				baseDirectory,
-				filepath.Join(targetGenDir, file.Name()),
-				filepath.Join(classDir, file.Name()),
-				className,
-				class,
-			)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Error reading subdir of multi instance %q in %q",
-					className,
-					filepath.Join(class.Directory, file.Name()),
-				)
-			}
-			classInstances = append(classInstances, instances...)
+		if !file.IsDir() {
 			continue
 		}
-		if file.IsDir() {
-			instance, instanceErr := system.readInstance(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
+
+		instances, err := system.resolveMultiModules(
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			filepath.Join(classDir, file.Name()),
+			className,
+			class,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"Error reading subdir of multi instance %q in %q",
 				className,
-				filepath.Join(relClassDir, file.Name()),
+				filepath.Join(class.Directory, file.Name()),
 			)
-			if instanceErr != nil {
-				return nil, errors.Wrapf(
-					instanceErr,
-					"Error reading multi instance %q in %q",
-					className,
-					filepath.Join(class.Directory, file.Name()),
-				)
-			}
-			classInstances = append(classInstances, instance)
 		}
+		classInstances = append(classInstances, instances...)
 	}
 
 	return classInstances, nil
@@ -658,17 +655,6 @@ type ModuleClass struct {
 	Directory         string
 	ClassDependencies []string
 	types             map[string]BuildGenerator
-	// SubDirs allow module instances to be group in sub directories
-	SubDirs []string
-}
-
-func (m *ModuleClass) hasSubDir(dir string) bool {
-	for _, sd := range m.SubDirs {
-		if sd == dir {
-			return true
-		}
-	}
-	return false
 }
 
 // BuildResult is the result of running a module generator
