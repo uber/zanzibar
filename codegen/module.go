@@ -322,28 +322,25 @@ func (system *ModuleSystem) resolveMultiModules(
 		)
 	}
 
-outer:
 	for _, file := range files {
-		for _, dir := range class.SubDirs {
-			if file.IsDir() && file.Name() == dir {
-				instances, err := system.resolveMultiModules(
-					packageRoot,
-					baseDirectory,
-					filepath.Join(targetGenDir, dir),
-					filepath.Join(classDir, dir),
+		if file.IsDir() && class.hasSubDir(file.Name()) {
+			instances, err := system.resolveMultiModules(
+				packageRoot,
+				baseDirectory,
+				filepath.Join(targetGenDir, file.Name()),
+				filepath.Join(classDir, file.Name()),
+				className,
+				class,
+			)
+			if err != nil {
+				return nil, errors.Wrapf(err,
+					"Error reading subdir of multi instance %q in %q",
 					className,
-					class,
+					filepath.Join(class.Directory, file.Name()),
 				)
-				if err != nil {
-					return nil, errors.Wrapf(err,
-						"Error reading subdir of multi instance %q in %q",
-						className,
-						filepath.Join(class.Directory, file.Name()),
-					)
-				}
-				classInstances = append(classInstances, instances...)
-				continue outer
 			}
+			classInstances = append(classInstances, instances...)
+			continue
 		}
 		if file.IsDir() {
 			instance, instanceErr := system.readInstance(
@@ -665,15 +662,13 @@ type ModuleClass struct {
 	SubDirs []string
 }
 
-// AddSubDir allows the modules of type `mtype` to reside in subDir
-func (mc *ModuleClass) AddSubDir(subDir string) {
-	for _, dir := range mc.SubDirs {
-		if dir == subDir {
-			return
+func (m *ModuleClass) hasSubDir(dir string) bool {
+	for _, sd := range m.SubDirs {
+		if sd == dir {
+			return true
 		}
 	}
-
-	mc.SubDirs = append(mc.SubDirs, subDir)
+	return false
 }
 
 // BuildResult is the result of running a module generator

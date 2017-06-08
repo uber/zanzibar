@@ -163,6 +163,7 @@ func NewDefaultModuleSystem(
 		Directory:         "endpoints",
 		ClassType:         MultiModule,
 		ClassDependencies: []string{"client"},
+		SubDirs:           []string{"tchannel"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
