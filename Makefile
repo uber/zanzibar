@@ -99,6 +99,7 @@ check-generate:
 .PHONY: test-all
 test-all: 
 	$(MAKE) jenkins
+	$(MAKE) install
 	$(MAKE) cover
 	$(MAKE) fast-bench 
 	$(MAKE) bins 
@@ -190,6 +191,7 @@ clean-cover:
 
 .PHONY: cover
 cover: clean-cover
+	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
 	bash ./scripts/cover.sh
 
 .PHONY: generate-istanbul-json

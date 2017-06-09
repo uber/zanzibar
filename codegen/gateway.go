@@ -925,7 +925,7 @@ func NewGatewaySpec(
 		}
 
 		clientSpecs[i] = cspec
-		spec.ClientModules[cspec.JSONFile] = cspec
+		spec.ClientModules[cspec.ClientID] = cspec
 	}
 	for _, json := range endpointJsons {
 		espec, err := NewEndpointSpec(json, packageHelper, spec.MiddlewareModules)
@@ -941,7 +941,7 @@ func NewGatewaySpec(
 				err, "Cannot parse downstream info for endpoint: %s", json,
 			)
 		}
-		spec.EndpointModules[espec.JSONFile] = espec
+		spec.EndpointModules[espec.EndpointID+"::"+espec.HandleID] = espec
 	}
 
 	return spec, nil
