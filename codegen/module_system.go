@@ -107,7 +107,7 @@ func NewDefaultModuleSystem(
 	if err := system.RegisterClass("client", ModuleClass{
 		Directory:         "clients",
 		ClassType:         MultiModule,
-		ClassDependencies: []string{},
+		ClassDependencies: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -133,6 +133,7 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClassType("client", "custom", &CustomClientGenerator{
+		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
 		return nil, errors.Wrapf(
@@ -294,14 +295,37 @@ func (g *HTTPClientGenerator) Generate(
 		)
 	}
 
+	// When it is possible to generate structs for all module types, the
+	// module system will do this transparently. For now we are opting in
+	// on a per-generator basis.
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating dependencies struct for %q %q",
+			instance.ClassName,
+			instance.InstanceName,
+		)
+	}
+
 	baseName := filepath.Base(instance.Directory)
 	clientFilePath := baseName + ".go"
 
+	files := map[string][]byte{
+		clientFilePath: client,
+	}
+
+	if dependencies != nil {
+		files["dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
-		Files: map[string][]byte{
-			clientFilePath: client,
-		},
-		Spec: clientSpec,
+		Files: files,
+		Spec:  clientSpec,
 	}, nil
 }
 
@@ -420,16 +444,39 @@ func (g *TChannelClientGenerator) Generate(
 		)
 	}
 
+	// When it is possible to generate structs for all module types, the
+	// module system will do this transparently. For now we are opting in
+	// on a per-generator basis.
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating dependencies struct for %q %q",
+			instance.ClassName,
+			instance.InstanceName,
+		)
+	}
+
 	baseName := filepath.Base(instance.Directory)
 	clientFilePath := baseName + ".go"
 	serverFilePath := baseName + "_test_server.go"
 
+	files := map[string][]byte{
+		clientFilePath: client,
+		serverFilePath: server,
+	}
+
+	if dependencies != nil {
+		files["dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
-		Files: map[string][]byte{
-			clientFilePath: client,
-			serverFilePath: server,
-		},
-		Spec: clientSpec,
+		Files: files,
+		Spec:  clientSpec,
 	}, nil
 }
 
@@ -439,6 +486,7 @@ func (g *TChannelClientGenerator) Generate(
 
 // CustomClientGenerator gathers the custom client spec for future use in ClientsInitGenerator
 type CustomClientGenerator struct {
+	templates     *Template
 	packageHelper *PackageHelper
 }
 
@@ -470,8 +518,32 @@ func (g *CustomClientGenerator) Generate(
 		)
 	}
 
+	// When it is possible to generate structs for all module types, the
+	// module system will do this transparently. For now we are opting in
+	// on a per-generator basis.
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating dependencies struct for %q %q",
+			instance.ClassName,
+			instance.InstanceName,
+		)
+	}
+
+	files := map[string][]byte{}
+
+	if dependencies != nil {
+		files["dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
-		Spec: clientSpec,
+		Files: files,
+		Spec:  clientSpec,
 	}, nil
 }
 
@@ -997,4 +1069,31 @@ func readClientDependencySpecs(instance *ModuleInstance) []*ClientSpec {
 	sort.Sort(sortByClientName(clients))
 
 	return clients
+}
+
+// GenerateDependencyStruct generates a module struct with placeholders for the
+// instance module based on the defined dependency configuration
+func GenerateDependencyStruct(
+	instance *ModuleInstance,
+	packageHelper *PackageHelper,
+	template *Template,
+) ([]byte, error) {
+	hasDependencies := false
+
+	for _, moduleInstances := range instance.ResolvedDependencies {
+		if len(moduleInstances) > 0 {
+			hasDependencies = true
+			break
+		}
+	}
+
+	if !hasDependencies {
+		return nil, nil
+	}
+
+	return template.execTemplate(
+		"dependency_struct.tmpl",
+		instance,
+		packageHelper,
+	)
 }

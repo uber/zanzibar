@@ -80,7 +80,7 @@ func (system *ModuleSystem) RegisterClass(
 	// Validate the module class dependencies
 	// (this validation ensures that circular deps cannot exist)
 	for _, moduleType := range class.ClassDependencies {
-		if system.classes[moduleType] == nil {
+		if moduleType != name && system.classes[moduleType] == nil {
 			return errors.Errorf(
 				"The module class %q depends on class type %q, "+
 					"which is not yet defined",
@@ -641,8 +641,7 @@ type PackageInfo struct {
 	GeneratedPackagePath string
 	// QualifiedInstanceName for this package. Pascal case name for this module.
 	QualifiedInstanceName string
-	// ExportName is the name that should be used when initializing the module
-	// on a dependency struct.
+	// ExportName is the name on the module initializer function
 	ExportName string
 	// ExportType refers to the type returned by the module initializer
 	ExportType string

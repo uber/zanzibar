@@ -1,0 +1,26 @@
+{{$instance := . -}}
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
+	{{end -}}
+)
+
+// Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type Dependencies struct {
+	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+	{{$classType | pascal}} {{$classType | pascal}}Dependencies
+	{{end -}}
+}
+
+{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+// {{$classType | pascal}}Dependencies contains {{$classType}} dependencies
+type {{$classType | pascal}}Dependencies struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}

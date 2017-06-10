@@ -6,5 +6,8 @@
 		"customImportPath": "github.com/uber/zanzibar/examples/example-gateway/clients/quux",
 		"customClientType": "*Quux",
 		"customPackageName": "quux"
+	},
+	"dependencies": {
+		"client": ["bar"]
 	}
 }
