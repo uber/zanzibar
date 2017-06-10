@@ -29,7 +29,7 @@ import (
 
 // Dependencies contains dependencies for the quux client module
 type Dependencies struct {
-	client ClientDependencies
+	Client ClientDependencies
 }
 
 // ClientDependencies contains client dependencies
