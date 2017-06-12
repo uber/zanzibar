@@ -28,6 +28,8 @@ import (
 
 	"time"
 
+	"strconv"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -139,10 +141,12 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 			zap.String("error", err.Error()),
 		)
 
-		req.res.SendErrorString(
-			400, "Could not parse query string",
-		)
-		req.parseFailed = true
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
 		return false
 	}
 
@@ -158,6 +162,175 @@ func (req *ServerHTTPRequest) GetQueryValue(key string) (string, bool) {
 	}
 
 	return req.queryValues.Get(key), true
+}
+
+// GetQueryBool will return a query param as a boolean
+func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return false, false
+	}
+
+	value := req.queryValues.Get(key)
+	if value == "true" {
+		return true, true
+	} else if value == "false" {
+		return false, true
+	}
+
+	err := &strconv.NumError{
+		Func: "ParseBool",
+		Num:  value,
+		Err:  strconv.ErrSyntax,
+	}
+
+	req.Logger.Warn("Got request with invalid query string types",
+		zap.String("expected", "bool"),
+		zap.String("actual", value),
+		zap.String("error", err.Error()),
+	)
+	if !req.parseFailed {
+		req.res.SendErrorString(
+			400, "Could not parse query string",
+		)
+		req.parseFailed = true
+	}
+	return false, false
+}
+
+// GetQueryInt8 will return a query params as int8
+func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 8)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int8"),
+			zap.String("actual", value),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int8(number), true
+}
+
+// GetQueryInt16 will return a query params as int16
+func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 16)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int16"),
+			zap.String("actual", value),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int16(number), true
+}
+
+// GetQueryInt32 will return a query params as int32
+func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 32)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int32"),
+			zap.String("actual", value),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int32(number), true
+}
+
+// GetQueryInt64 will return a query param as int64
+func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int64"),
+			zap.String("actual", value),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return number, true
+}
+
+// GetQueryFloat64 will return query param key as float64
+func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "float64"),
+			zap.String("actual", value),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return number, true
 }
 
 // GetQueryValues will return all query parameters for key.
