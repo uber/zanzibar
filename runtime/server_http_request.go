@@ -41,6 +41,8 @@ type ServerHTTPRequest struct {
 	started     bool
 	startTime   time.Time
 	metrics     *EndpointMetrics
+	queryValues url.Values
+	parseFailed bool
 
 	Logger *zap.Logger
 	Scope  tally.Scope
@@ -61,6 +63,7 @@ func NewServerHTTPRequest(
 	req := &ServerHTTPRequest{
 		gateway:     endpoint.gateway,
 		httpRequest: r,
+		queryValues: nil,
 
 		Logger: endpoint.gateway.Logger,
 		Scope:  endpoint.gateway.MetricScope,
@@ -103,17 +106,68 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		headerValue := req.httpRequest.Header.Get(headerName)
 		if headerValue == "" {
-			req.res.SendErrorString(
-				400, "Missing mandatory header: "+headerName,
-			)
 			req.Logger.Warn("Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
+
+			if !req.parseFailed {
+				req.res.SendErrorString(
+					400, "Missing mandatory header: "+headerName,
+				)
+				req.parseFailed = true
+			}
+
 			return false
 		}
 
 	}
 	return true
+}
+
+func (req *ServerHTTPRequest) parseQueryValues() bool {
+	if req.parseFailed {
+		return false
+	}
+
+	if req.queryValues != nil {
+		return true
+	}
+
+	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string",
+			zap.String("error", err.Error()),
+		)
+
+		req.res.SendErrorString(
+			400, "Could not parse query string",
+		)
+		req.parseFailed = true
+		return false
+	}
+
+	req.queryValues = values
+	return true
+}
+
+// GetQueryValue will return the first query parameter for key or empty string
+func (req *ServerHTTPRequest) GetQueryValue(key string) (string, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return "", false
+	}
+
+	return req.queryValues.Get(key), true
+}
+
+// GetQueryValues will return all query parameters for key.
+func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	return req.queryValues[key], true
 }
 
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
@@ -132,10 +186,14 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.res.SendErrorString(500, "Could not ReadAll() body")
 		req.Logger.Error("Could not ReadAll() body",
 			zap.String("error", err.Error()),
 		)
+		if !req.parseFailed {
+			req.res.SendErrorString(500, "Could not ReadAll() body")
+			req.parseFailed = true
+		}
+
 		return nil, false
 	}
 
@@ -148,10 +206,13 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.res.SendErrorString(400, "Could not parse json: "+err.Error())
 		req.Logger.Warn("Could not parse json",
 			zap.String("error", err.Error()),
 		)
+		if !req.parseFailed {
+			req.res.SendErrorString(400, "Could not parse json: "+err.Error())
+			req.parseFailed = true
+		}
 		return false
 	}
 
