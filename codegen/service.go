@@ -140,7 +140,7 @@ func NewServiceSpec(
 ) (*ServiceSpec, error) {
 	serviceSpec := &ServiceSpec{
 		WantAnnot:   wantAnnot,
-		IsEndpoint:  isEndoint,
+		IsEndpoint:  isEndpoint,
 		Name:        spec.Name,
 		ThriftFile:  spec.File,
 		CompileSpec: spec,
@@ -285,7 +285,7 @@ func (ms *ModuleSpec) SetDownstream(
 func (s *ServiceSpec) NewMethod(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) (*MethodSpec, error) {
-	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.isEndpoint, s.Name)
+	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.IsEndpoint, s.Name)
 }
 
 func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {
