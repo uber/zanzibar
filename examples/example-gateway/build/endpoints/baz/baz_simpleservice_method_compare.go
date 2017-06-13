@@ -76,6 +76,12 @@ func (handler *CompareHandler) HandleRequest(
 			)
 			return
 
+		case *endpointsBazBaz.OtherAuthErr:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
 		default:
 			req.Logger.Warn("Workflow for endpoint returned error",
 				zap.String("error", errValue.Error()),
@@ -114,6 +120,14 @@ func (w CompareEndpoint) Handle(
 
 		case *clientsBazBaz.AuthErr:
 			serverErr := convertCompareAuthErr(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, serverErr
+
+		case *clientsBazBaz.OtherAuthErr:
+			serverErr := convertCompareOtherAuthErr(
 				errValue,
 			)
 			// TODO(sindelar): Consider returning partial headers
@@ -168,6 +182,13 @@ func convertCompareAuthErr(
 ) *endpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
 	serverError := &endpointsBazBaz.AuthErr{}
+	return serverError
+}
+func convertCompareOtherAuthErr(
+	clientError *clientsBazBaz.OtherAuthErr,
+) *endpointsBazBaz.OtherAuthErr {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsBazBaz.OtherAuthErr{}
 	return serverError
 }
 

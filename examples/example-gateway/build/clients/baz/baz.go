@@ -113,6 +113,8 @@ func (c *BazClient) Compare(
 		switch {
 		case result.AuthErr != nil:
 			err = result.AuthErr
+		case result.OtherAuthErr != nil:
+			err = result.OtherAuthErr
 		default:
 			err = errors.New("BazClient received no result or unknown exception for Compare")
 		}

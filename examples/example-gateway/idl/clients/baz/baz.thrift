@@ -11,12 +11,17 @@ exception AuthErr {
     1: required string message
 }
 
+exception OtherAuthErr {
+  1: required string message
+}
+
 service SimpleService {
     base.BazResponse Compare(
         1: required BazRequest arg1
         2: required BazRequest arg2
     ) throws (
         1: AuthErr authErr
+        2: OtherAuthErr otherAuthErr       
     )
 
     void Call(
