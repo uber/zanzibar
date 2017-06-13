@@ -28,12 +28,26 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
-// TypeConverter can generate a function body that converts two thriftrw
-// FieldGroups from one to another. It's assumed that the converted code
-// operates on two variables, "in" and "out" and that both are a go struct.
-type TypeConverter struct {
-	Lines  []string
-	Helper PackageNameResolver
+// LineBuilder struct just appends/builds lines.
+type LineBuilder struct {
+	lines []string
+}
+
+// append helper will add a line to TypeConverter
+func (l *LineBuilder) append(parts ...string) {
+	line := strings.Join(parts, "")
+	l.lines = append(l.lines, line)
+}
+
+// appendf helper will add a formatted line to TypeConverter
+func (l *LineBuilder) appendf(format string, parts ...interface{}) {
+	line := fmt.Sprintf(format, parts...)
+	l.lines = append(l.lines, line)
+}
+
+// GetLines returns the lines in the line builder
+func (l *LineBuilder) GetLines() []string {
+	return l.lines
 }
 
 // PackageNameResolver interface allows for resolving what the
@@ -43,16 +57,12 @@ type PackageNameResolver interface {
 	TypePackageName(thriftFile string) (string, error)
 }
 
-// append helper will add a line to TypeConverter
-func (c *TypeConverter) append(parts ...string) {
-	line := strings.Join(parts, "")
-	c.Lines = append(c.Lines, line)
-}
-
-// appendf helper will add a formatted line to TypeConverter
-func (c *TypeConverter) appendf(format string, parts ...interface{}) {
-	line := fmt.Sprintf(format, parts...)
-	c.Lines = append(c.Lines, line)
+// TypeConverter can generate a function body that converts two thriftrw
+// FieldGroups from one to another. It's assumed that the converted code
+// operates on two variables, "in" and "out" and that both are a go struct.
+type TypeConverter struct {
+	LineBuilder
+	Helper PackageNameResolver
 }
 
 func (c *TypeConverter) getGoTypeName(

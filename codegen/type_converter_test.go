@@ -67,7 +67,6 @@ func (r *naivePackageNameResolver) TypePackageName(
 
 func newTypeConverter() *codegen.TypeConverter {
 	return &codegen.TypeConverter{
-		Lines:  []string{},
 		Helper: &naivePackageNameResolver{},
 	}
 }
@@ -111,7 +110,7 @@ func convertTypes(
 		return "", err
 	}
 
-	return trim(strings.Join(converter.Lines, "\n")), nil
+	return trim(strings.Join(converter.GetLines(), "\n")), nil
 }
 
 func countTabs(line string) int {
