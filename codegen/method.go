@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -57,6 +58,9 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
+
+	// Statements for reading query parameters.
+	QueryParamGoStatements []string
 
 	// ReqHeaderFields is a map of "header name" to
 	// a golang field accessor expression like ".Foo.Bar"
@@ -186,9 +190,10 @@ func NewMethod(
 	method.setValidStatusCodes()
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
-		return nil, errors.Errorf(
-			"invalid annotation: HTTP GET method with body type",
-		)
+		err := method.setQueryParamStatements(funcSpec)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var httpPath string
@@ -548,6 +553,57 @@ func (ms *MethodSpec) setTypeConverters(
 	}
 
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
+
+	return nil
+}
+
+func (ms *MethodSpec) setQueryParamStatements(
+	funcSpec *compile.FunctionSpec,
+) error {
+	statements := LineBuilder{}
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	for _, field := range structType {
+		realType := compile.RootTypeSpec(field.Type)
+		fieldName := field.Name
+		identifierName := camelCase(fieldName) + "Query"
+
+		var pointerMethod string
+
+		switch realType.(type) {
+		case *compile.BoolSpec:
+			statements.appendf("%s, ok := req.GetQueryBool(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Bool"
+		case *compile.StringSpec:
+			statements.appendf("%s, ok := req.GetQueryValue(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "String"
+		default:
+			panic(fmt.Sprintf("Unknown type (%T) %v", realType, realType))
+		}
+
+		statements.append("if !ok {")
+		statements.append("\treturn")
+		statements.append("}")
+
+		if field.Required {
+			statements.appendf("requestBody.%s = %s",
+				strings.Title(field.Name), identifierName,
+			)
+		} else {
+			statements.appendf("requestBody.%s = ptr.%s(%s)",
+				strings.Title(field.Name), pointerMethod, identifierName,
+			)
+		}
+
+		// new line after block.
+		statements.append("")
+	}
+
+	ms.QueryParamGoStatements = statements.GetLines()
 
 	return nil
 }
