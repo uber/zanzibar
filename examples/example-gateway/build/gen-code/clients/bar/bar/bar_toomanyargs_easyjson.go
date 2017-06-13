@@ -378,7 +378,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Foo == nil {
 					out.Foo = new(foo.FooStruct)
 				}
-				(*out.Foo).UnmarshalEasyJSON(in)
+				easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(in, &*out.Foo)
 			}
 		default:
 			in.SkipRecursive()
@@ -416,7 +416,7 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Foo == nil {
 			out.RawString("null")
 		} else {
-			(*in.Foo).MarshalEasyJSON(out)
+			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(out, *in.Foo)
 		}
 	}
 	out.RawByte('}')
@@ -444,6 +444,183 @@ func (v *Bar_TooManyArgs_Args) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Bar_TooManyArgs_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarTooManyArgs1(l, v)
+}
+func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(in *jlexer.Lexer, out *foo.FooStruct) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var FooStringSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "fooString":
+			out.FooString = string(in.String())
+			FooStringSet = true
+		case "fooI32":
+			if in.IsNull() {
+				in.Skip()
+				out.FooI32 = nil
+			} else {
+				if out.FooI32 == nil {
+					out.FooI32 = new(int32)
+				}
+				*out.FooI32 = int32(in.Int32())
+			}
+		case "fooI16":
+			if in.IsNull() {
+				in.Skip()
+				out.FooI16 = nil
+			} else {
+				if out.FooI16 == nil {
+					out.FooI16 = new(int16)
+				}
+				*out.FooI16 = int16(in.Int16())
+			}
+		case "fooDouble":
+			if in.IsNull() {
+				in.Skip()
+				out.FooDouble = nil
+			} else {
+				if out.FooDouble == nil {
+					out.FooDouble = new(float64)
+				}
+				*out.FooDouble = float64(in.Float64())
+			}
+		case "fooBool":
+			if in.IsNull() {
+				in.Skip()
+				out.FooBool = nil
+			} else {
+				if out.FooBool == nil {
+					out.FooBool = new(bool)
+				}
+				*out.FooBool = bool(in.Bool())
+			}
+		case "fooMap":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.FooMap = make(map[string]string)
+				} else {
+					out.FooMap = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v5 string
+					v5 = string(in.String())
+					(out.FooMap)[key] = v5
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !FooStringSet {
+		in.AddError(fmt.Errorf("key 'fooString' is required"))
+	}
+}
+func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooFoo(out *jwriter.Writer, in foo.FooStruct) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"fooString\":")
+	out.String(string(in.FooString))
+	if in.FooI32 != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"fooI32\":")
+		if in.FooI32 == nil {
+			out.RawString("null")
+		} else {
+			out.Int32(int32(*in.FooI32))
+		}
+	}
+	if in.FooI16 != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"fooI16\":")
+		if in.FooI16 == nil {
+			out.RawString("null")
+		} else {
+			out.Int16(int16(*in.FooI16))
+		}
+	}
+	if in.FooDouble != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"fooDouble\":")
+		if in.FooDouble == nil {
+			out.RawString("null")
+		} else {
+			out.Float64(float64(*in.FooDouble))
+		}
+	}
+	if in.FooBool != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"fooBool\":")
+		if in.FooBool == nil {
+			out.RawString("null")
+		} else {
+			out.Bool(bool(*in.FooBool))
+		}
+	}
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"fooMap\":")
+	if in.FooMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+		out.RawString(`null`)
+	} else {
+		out.RawByte('{')
+		v6First := true
+		for v6Name, v6Value := range in.FooMap {
+			if !v6First {
+				out.RawByte(',')
+			}
+			v6First = false
+			out.String(string(v6Name))
+			out.RawByte(':')
+			out.String(string(v6Value))
+		}
+		out.RawByte('}')
+	}
+	out.RawByte('}')
 }
 func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(in *jlexer.Lexer, out *BarRequest) {
 	isTopLevel := in.IsStart()
