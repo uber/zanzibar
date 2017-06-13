@@ -91,4 +91,13 @@ service Bar {
         zanzibar.http.path = "/bar/echo"
         zanzibar.http.status = "200"
     )
+
+    BarResponse argWithQueryParams(
+        1: required string name
+        2: optional string userUUID
+    ) (
+        zanzibar.http.method = "GET"
+        zanzibar.http.path = "/bar/argWithQueryParams"
+        zanzibar.http.status = "200"
+    )
 }
