@@ -1,6 +1,7 @@
 {
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
 	"WantAnnot": true,
+	"IsEndpoint": false,
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
@@ -18,6 +19,7 @@
 			"Name": "Bar",
 			"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
 			"WantAnnot": true,
+			"IsEndpoint": false,
 			"Methods": [
 				{
 					"Name": "argNotStruct",

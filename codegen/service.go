@@ -34,6 +34,8 @@ type ModuleSpec struct {
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
 	WantAnnot bool
+	// Whether the module is for an endpoint vs downstream client
+	IsEndpoint bool
 	// Go package name, generated base on module name.
 	PackageName string
 	// Go client types file path, generated from thrift file.
@@ -57,6 +59,8 @@ type ServiceSpec struct {
 	ThriftFile string
 	// Whether the service should have annotations or not
 	WantAnnot bool
+	// Whether the service is for an endpoint vs downstream client
+	IsEndpoint bool
 	// List of methods/endpoints of the service
 	Methods []*MethodSpec
 	// thriftrw compile spec.
@@ -64,7 +68,12 @@ type ServiceSpec struct {
 }
 
 // NewModuleSpec returns a specification for a thrift module
-func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) (*ModuleSpec, error) {
+func NewModuleSpec(
+	thrift string,
+	wantAnnot bool,
+	isEndpoint bool,
+	packageHelper *PackageHelper,
+) (*ModuleSpec, error) {
 	module, err := compile.Compile(thrift)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed parse thrift file")
@@ -72,6 +81,7 @@ func NewModuleSpec(thrift string, wantAnnot bool, packageHelper *PackageHelper) 
 
 	moduleSpec := &ModuleSpec{
 		WantAnnot:   wantAnnot,
+		IsEndpoint:  isEndpoint,
 		ThriftFile:  module.ThriftPath,
 		PackageName: camelCase(module.GetName()),
 	}
@@ -107,7 +117,12 @@ func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *Package
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		serviceSpec, err := NewServiceSpec(module.Services[name], ms.WantAnnot, packageHelper)
+		serviceSpec, err := NewServiceSpec(
+			module.Services[name],
+			ms.WantAnnot,
+			ms.IsEndpoint,
+			packageHelper,
+		)
 		if err != nil {
 			return err
 		}
@@ -117,9 +132,15 @@ func (ms *ModuleSpec) AddServices(module *compile.Module, packageHelper *Package
 }
 
 // NewServiceSpec creates a service specification from given thrift file path.
-func NewServiceSpec(spec *compile.ServiceSpec, wantAnnot bool, packageHelper *PackageHelper) (*ServiceSpec, error) {
+func NewServiceSpec(
+	spec *compile.ServiceSpec,
+	wantAnnot bool,
+	isEndpoint bool,
+	packageHelper *PackageHelper,
+) (*ServiceSpec, error) {
 	serviceSpec := &ServiceSpec{
 		WantAnnot:   wantAnnot,
+		IsEndpoint:  isEndpoint,
 		Name:        spec.Name,
 		ThriftFile:  spec.File,
 		CompileSpec: spec,
@@ -264,7 +285,7 @@ func (ms *ModuleSpec) SetDownstream(
 func (s *ServiceSpec) NewMethod(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) (*MethodSpec, error) {
-	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.Name)
+	return NewMethod(s.ThriftFile, funcSpec, packageHelper, s.WantAnnot, s.IsEndpoint, s.Name)
 }
 
 func (ms *ModuleSpec) addTypeImport(thriftPath string, packageHelper *PackageHelper) error {

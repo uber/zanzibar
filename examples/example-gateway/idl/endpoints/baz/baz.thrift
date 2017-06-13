@@ -14,6 +14,10 @@ exception AuthErr {
   1: required string message
 }
 
+exception OtherAuthErr {
+  1: required string message
+}
+
 exception ServerErr {
   1: required string message
 }
@@ -25,6 +29,7 @@ service SimpleService {
     2: required BazRequest arg2
   ) throws (
     1: AuthErr authErr (zanzibar.http.status = "403")
+    2: OtherAuthErr otherAuthErr (zanzibar.http.status = "403")
   ) (
     zanzibar.http.status = "200"
     zanzibar.http.method = "POST"

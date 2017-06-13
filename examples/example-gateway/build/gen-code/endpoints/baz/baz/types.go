@@ -239,6 +239,69 @@ func (v *BazResponse) Equals(rhs *BazResponse) bool {
 	return true
 }
 
+type OtherAuthErr struct {
+	Message string `json:"message,required"`
+}
+
+func (v *OtherAuthErr) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	w, err = wire.NewValueString(v.Message), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func (v *OtherAuthErr) FromWire(w wire.Value) error {
+	var err error
+	messageIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Message, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				messageIsSet = true
+			}
+		}
+	}
+	if !messageIsSet {
+		return errors.New("field Message of OtherAuthErr is required")
+	}
+	return nil
+}
+
+func (v *OtherAuthErr) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Message: %v", v.Message)
+	i++
+	return fmt.Sprintf("OtherAuthErr{%v}", strings.Join(fields[:i], ", "))
+}
+
+func (v *OtherAuthErr) Equals(rhs *OtherAuthErr) bool {
+	if !(v.Message == rhs.Message) {
+		return false
+	}
+	return true
+}
+
+func (v *OtherAuthErr) Error() string {
+	return v.String()
+}
+
 type ServerErr struct {
 	Message string `json:"message,required"`
 }

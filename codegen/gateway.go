@@ -261,7 +261,7 @@ func newClientSpec(
 		h.ThriftIDLPath(), config["thriftFile"].(string),
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, wantAnnot, h)
+	mspec, err := NewModuleSpec(thriftFile, wantAnnot, false, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,
@@ -455,7 +455,7 @@ func NewEndpointSpec(
 		h.ThriftIDLPath(), endpointConfigObj["thriftFile"].(string),
 	)
 
-	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", h)
+	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", true, h)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Could not build module spec for thrift %s: ", thriftFile,

@@ -122,6 +122,8 @@ func init() {
 		switch err.(type) {
 		case *AuthErr:
 			return true
+		case *OtherAuthErr:
+			return true
 		default:
 			return false
 		}
@@ -136,12 +138,21 @@ func init() {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_Compare_Result.AuthErr")
 			}
 			return &SimpleService_Compare_Result{AuthErr: e}, nil
+		case *OtherAuthErr:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_Compare_Result.OtherAuthErr")
+			}
+			return &SimpleService_Compare_Result{OtherAuthErr: e}, nil
 		}
 		return nil, err
 	}
 	SimpleService_Compare_Helper.UnwrapResponse = func(result *SimpleService_Compare_Result) (success *BazResponse, err error) {
 		if result.AuthErr != nil {
 			err = result.AuthErr
+			return
+		}
+		if result.OtherAuthErr != nil {
+			err = result.OtherAuthErr
 			return
 		}
 		if result.Success != nil {
@@ -154,13 +165,14 @@ func init() {
 }
 
 type SimpleService_Compare_Result struct {
-	Success *BazResponse `json:"success,omitempty"`
-	AuthErr *AuthErr     `json:"authErr,omitempty"`
+	Success      *BazResponse  `json:"success,omitempty"`
+	AuthErr      *AuthErr      `json:"authErr,omitempty"`
+	OtherAuthErr *OtherAuthErr `json:"otherAuthErr,omitempty"`
 }
 
 func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -181,6 +193,14 @@ func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 1, Value: w}
 		i++
 	}
+	if v.OtherAuthErr != nil {
+		w, err = v.OtherAuthErr.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 	if i != 1 {
 		return wire.Value{}, fmt.Errorf("SimpleService_Compare_Result should have exactly one field: got %v fields", i)
 	}
@@ -189,6 +209,12 @@ func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 
 func _BazResponse_Read(w wire.Value) (*BazResponse, error) {
 	var v BazResponse
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _OtherAuthErr_Read(w wire.Value) (*OtherAuthErr, error) {
+	var v OtherAuthErr
 	err := v.FromWire(w)
 	return &v, err
 }
@@ -211,6 +237,13 @@ func (v *SimpleService_Compare_Result) FromWire(w wire.Value) error {
 					return err
 				}
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.OtherAuthErr, err = _OtherAuthErr_Read(field.Value)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	count := 0
@@ -218,6 +251,9 @@ func (v *SimpleService_Compare_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if v.AuthErr != nil {
+		count++
+	}
+	if v.OtherAuthErr != nil {
 		count++
 	}
 	if count != 1 {
@@ -230,7 +266,7 @@ func (v *SimpleService_Compare_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	if v.Success != nil {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
@@ -238,6 +274,10 @@ func (v *SimpleService_Compare_Result) String() string {
 	}
 	if v.AuthErr != nil {
 		fields[i] = fmt.Sprintf("AuthErr: %v", v.AuthErr)
+		i++
+	}
+	if v.OtherAuthErr != nil {
+		fields[i] = fmt.Sprintf("OtherAuthErr: %v", v.OtherAuthErr)
 		i++
 	}
 	return fmt.Sprintf("SimpleService_Compare_Result{%v}", strings.Join(fields[:i], ", "))
@@ -248,6 +288,9 @@ func (v *SimpleService_Compare_Result) Equals(rhs *SimpleService_Compare_Result)
 		return false
 	}
 	if !((v.AuthErr == nil && rhs.AuthErr == nil) || (v.AuthErr != nil && rhs.AuthErr != nil && v.AuthErr.Equals(rhs.AuthErr))) {
+		return false
+	}
+	if !((v.OtherAuthErr == nil && rhs.OtherAuthErr == nil) || (v.OtherAuthErr != nil && rhs.OtherAuthErr != nil && v.OtherAuthErr.Equals(rhs.OtherAuthErr))) {
 		return false
 	}
 	return true

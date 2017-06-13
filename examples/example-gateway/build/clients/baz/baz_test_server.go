@@ -123,6 +123,13 @@ func (h *SimpleServiceCompareHandler) Handle(
 				)
 			}
 			res.AuthErr = v
+		case *clientsBazBaz.OtherAuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for Compare returned non-nil error type *OtherAuthErr but nil value",
+				)
+			}
+			res.OtherAuthErr = v
 		default:
 			return false, nil, nil, err
 		}

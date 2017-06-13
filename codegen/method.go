@@ -134,6 +134,7 @@ func NewMethod(
 	funcSpec *compile.FunctionSpec,
 	packageHelper *PackageHelper,
 	wantAnnot bool,
+	isEndpoint bool,
 	thriftService string,
 ) (*MethodSpec, error) {
 	method := &MethodSpec{}
@@ -159,7 +160,7 @@ func NewMethod(
 		return nil, err
 	}
 
-	err = method.setExceptions(thriftFile, funcSpec.ResultSpec, packageHelper)
+	err = method.setExceptions(thriftFile, isEndpoint, funcSpec.ResultSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
@@ -286,6 +287,7 @@ func (ms *MethodSpec) setValidStatusCodes() {
 
 func (ms *MethodSpec) setExceptions(
 	curThriftFile string,
+	isEndpoint bool,
 	resultSpec *compile.ResultSpec,
 	h *PackageHelper,
 ) error {
@@ -328,7 +330,7 @@ func (ms *MethodSpec) setExceptions(
 			)
 		}
 
-		if seenStatusCodes[code] {
+		if seenStatusCodes[code] && !isEndpoint {
 			return errors.Wrapf(
 				err,
 				"cannot have duplicate status code %s for exception %s",
