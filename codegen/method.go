@@ -515,8 +515,8 @@ func (ms *MethodSpec) setTypeConverters(
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
 	typeConverter := &TypeConverter{
-		Lines:  []string{},
-		Helper: h,
+		LineBuilder: LineBuilder{},
+		Helper:      h,
 	}
 
 	err := typeConverter.GenStructConverter(structType, downstreamStructType)
@@ -524,7 +524,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertRequestGoStatements = typeConverter.Lines
+	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
@@ -538,8 +538,8 @@ func (ms *MethodSpec) setTypeConverters(
 	downstreamRespFields := downstreamRespType.(*compile.StructSpec).Fields
 
 	respConverter := &TypeConverter{
-		Lines:  []string{},
-		Helper: h,
+		LineBuilder: LineBuilder{},
+		Helper:      h,
 	}
 
 	err = respConverter.GenStructConverter(downstreamRespFields, respFields)
@@ -547,7 +547,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertResponseGoStatements = respConverter.Lines
+	ms.ConvertResponseGoStatements = respConverter.GetLines()
 
 	return nil
 }
