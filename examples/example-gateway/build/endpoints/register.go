@@ -39,6 +39,7 @@ import (
 type Endpoints struct {
 	BarArgNotStructHTTPHandler           *bar.ArgNotStructHandler
 	BarArgWithHeadersHTTPHandler         *bar.ArgWithHeadersHandler
+	BarArgWithQueryParamsHTTPHandler     *bar.ArgWithQueryParamsHandler
 	BarMissingArgHTTPHandler             *bar.MissingArgHandler
 	BarNoRequestHTTPHandler              *bar.NoRequestHandler
 	BarNormalHTTPHandler                 *bar.NormalHandler
@@ -60,6 +61,7 @@ func CreateEndpoints(
 	return &Endpoints{
 		BarArgNotStructHTTPHandler:           bar.NewArgNotStructEndpoint(gateway),
 		BarArgWithHeadersHTTPHandler:         bar.NewArgWithHeadersEndpoint(gateway),
+		BarArgWithQueryParamsHTTPHandler:     bar.NewArgWithQueryParamsEndpoint(gateway),
 		BarMissingArgHTTPHandler:             bar.NewMissingArgEndpoint(gateway),
 		BarNoRequestHTTPHandler:              bar.NewNoRequestEndpoint(gateway),
 		BarNormalHTTPHandler:                 bar.NewNormalEndpoint(gateway),
@@ -95,6 +97,15 @@ func Register(g *zanzibar.Gateway) {
 			"bar",
 			"argWithHeaders",
 			endpoints.BarArgWithHeadersHTTPHandler.HandleRequest,
+		),
+	)
+	g.HTTPRouter.Register(
+		"GET", "/bar/argWithQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithQueryParams",
+			endpoints.BarArgWithQueryParamsHTTPHandler.HandleRequest,
 		),
 	)
 	g.HTTPRouter.Register(

@@ -38,6 +38,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": null,
 					"ReqHeaders": null,
@@ -106,6 +107,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {
 						"x-uuid": {
 							"FieldIdentifier": ".UserUUID",
@@ -145,6 +147,68 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
+					"Name": "argWithQueryParams",
+					"HTTPMethod": "GET",
+					"EndpointName": "",
+					"HTTPPath": "/bar/argWithQueryParams",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "argWithQueryParams",
+							"BodyIdentifier": ""
+						}
+					],
+					"QueryParamGoStatements": [
+						"nameQuery, ok := req.GetQueryValue(\"name\")",
+						"if !ok {",
+						"\treturn",
+						"}",
+						"requestBody.Name = nameQuery",
+						"",
+						"userUUIDQuery, ok := req.GetQueryValue(\"userUUID\")",
+						"if !ok {",
+						"\treturn",
+						"}",
+						"requestBody.UserUUID = ptr.String(userUUIDQuery)",
+						""
+					],
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*endpointsBarBar.Bar_ArgWithQueryParams_Args",
+					"ResponseType": "*endpointsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "endpointsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
@@ -161,6 +225,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -234,6 +299,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -307,6 +373,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -380,6 +447,7 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
