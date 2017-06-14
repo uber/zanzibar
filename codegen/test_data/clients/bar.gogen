@@ -224,7 +224,7 @@ func (c *BarClient) ArgWithQueryParams(
 	// Generate full URL.
 	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithQueryParams"
 
-	err := req.WriteJSON("GET", fullURL, headers, r)
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
 		return nil, nil, err
 	}

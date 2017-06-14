@@ -1,49 +1,45 @@
 {
-	"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
+	"ThriftFile": "zanzibar/examples/example-gateway/idl/clients/bar/bar.thrift",
 	"WantAnnot": true,
 	"IsEndpoint": false,
 	"PackageName": "bar",
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
 		{
-			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo",
-			"AliasName": "endpointsFooFoo"
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo",
+			"AliasName": "clientsFooFoo"
 		},
 		{
-			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar",
-			"AliasName": "endpointsBarBar"
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar",
+			"AliasName": "clientsBarBar"
 		}
 	],
 	"Services": [
 		{
 			"Name": "Bar",
-			"ThriftFile": "zanzibar/examples/example-gateway/idl/endpoints/bar/bar.thrift",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/clients/bar/bar.thrift",
 			"WantAnnot": true,
 			"IsEndpoint": false,
 			"Methods": [
 				{
 					"Name": "argNotStruct",
 					"HTTPMethod": "POST",
-					"EndpointName": "bar.baz",
-					"HTTPPath": "/bar/arg-not-struct-path",
+					"EndpointName": "",
+					"HTTPPath": "/arg-not-struct-path",
 					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
 						{
 							"Type": "static",
 							"Text": "arg-not-struct-path",
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": null,
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "*endpointsBarBar.Bar_ArgNotStruct_Args",
+					"RequestType": "*clientsBarBar.Bar_ArgNotStruct_Args",
 					"ResponseType": "",
 					"OKStatusCode": {
 						"Code": 200,
@@ -51,7 +47,7 @@
 					},
 					"Exceptions": [
 						{
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -64,7 +60,7 @@
 					],
 					"ExceptionsIndex": {
 						"barException": {
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -81,7 +77,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -107,13 +103,9 @@
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {
-						"x-uuid": {
-							"FieldIdentifier": ".UserUUID",
-							"IsPointer": true
-						}
-					},
+					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -124,8 +116,8 @@
 						"x-uuid"
 					],
 					"ResHeaders": null,
-					"RequestType": "*endpointsBarBar.Bar_ArgWithHeaders_Args",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"RequestType": "*clientsBarBar.Bar_ArgWithHeaders_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -137,7 +129,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -148,7 +140,7 @@
 				},
 				{
 					"Name": "argWithQueryParams",
-					"HTTPMethod": "GET",
+					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryParams",
 					"PathSegments": [
@@ -163,20 +155,8 @@
 							"BodyIdentifier": ""
 						}
 					],
-					"QueryParamGoStatements": [
-						"nameQuery, ok := req.GetQueryValue(\"name\")",
-						"if !ok {",
-						"\treturn",
-						"}",
-						"requestBody.Name = nameQuery",
-						"",
-						"userUUIDQuery, ok := req.GetQueryValue(\"userUUID\")",
-						"if !ok {",
-						"\treturn",
-						"}",
-						"requestBody.UserUUID = ptr.String(userUUIDQuery)",
-						""
-					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -186,8 +166,8 @@
 					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "*endpointsBarBar.Bar_ArgWithQueryParams_Args",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"RequestType": "*clientsBarBar.Bar_ArgWithQueryParams_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
@@ -199,7 +179,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -212,19 +192,15 @@
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
-					"HTTPPath": "/bar/missing-arg-path",
+					"HTTPPath": "/missing-arg-path",
 					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
 						{
 							"Type": "static",
 							"Text": "missing-arg-path",
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
@@ -236,14 +212,14 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
 					},
 					"Exceptions": [
 						{
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -256,7 +232,7 @@
 					],
 					"ExceptionsIndex": {
 						"barException": {
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -273,7 +249,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -286,19 +262,15 @@
 					"Name": "noRequest",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
-					"HTTPPath": "/bar/no-request-path",
+					"HTTPPath": "/no-request-path",
 					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
 						{
 							"Type": "static",
 							"Text": "no-request-path",
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
@@ -310,14 +282,14 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
 					},
 					"Exceptions": [
 						{
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -330,7 +302,7 @@
 					],
 					"ExceptionsIndex": {
 						"barException": {
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -347,7 +319,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -360,19 +332,15 @@
 					"Name": "normal",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
-					"HTTPPath": "/bar/bar-path",
+					"HTTPPath": "/bar-path",
 					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
 						{
 							"Type": "static",
 							"Text": "bar-path",
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
@@ -383,15 +351,15 @@
 					},
 					"ReqHeaders": null,
 					"ResHeaders": null,
-					"RequestType": "*endpointsBarBar.Bar_Normal_Args",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"RequestType": "*clientsBarBar.Bar_Normal_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
 					},
 					"Exceptions": [
 						{
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -404,7 +372,7 @@
 					],
 					"ExceptionsIndex": {
 						"barException": {
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -421,7 +389,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
@@ -434,19 +402,15 @@
 					"Name": "tooManyArgs",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
-					"HTTPPath": "/bar/too-many-args-path",
+					"HTTPPath": "/too-many-args-path",
 					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
 						{
 							"Type": "static",
 							"Text": "too-many-args-path",
 							"BodyIdentifier": ""
 						}
 					],
+					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
 					"ReqHeaderFields": {},
 					"ResHeaderFields": {
@@ -455,23 +419,17 @@
 							"IsPointer": false
 						}
 					},
-					"ReqHeaders": [
-						"x-uuid",
-						"x-token"
-					],
-					"ResHeaders": [
-						"x-uuid",
-						"x-token"
-					],
-					"RequestType": "*endpointsBarBar.Bar_TooManyArgs_Args",
-					"ResponseType": "*endpointsBarBar.BarResponse",
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_TooManyArgs_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
 					},
 					"Exceptions": [
 						{
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -484,7 +442,7 @@
 					],
 					"ExceptionsIndex": {
 						"barException": {
-							"Type": "endpointsBarBar.BarException",
+							"Type": "clientsBarBar.BarException",
 							"Name": "barException",
 							"Annotations": {
 								"zanzibar.http.status": "403"
@@ -501,7 +459,7 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
-					"GenCodePkgName": "endpointsBarBar",
+					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,
 					"Downstream": null,
