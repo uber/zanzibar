@@ -584,6 +584,31 @@ func (ms *MethodSpec) setQueryParamStatements(
 				identifierName, fieldName,
 			)
 			pointerMethod = "Bool"
+		case *compile.I8Spec:
+			statements.appendf("%s, ok := req.GetQueryInt8(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Int8"
+		case *compile.I16Spec:
+			statements.appendf("%s, ok := req.GetQueryInt16(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Int16"
+		case *compile.I32Spec:
+			statements.appendf("%s, ok := req.GetQueryInt32(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Int32"
+		case *compile.I64Spec:
+			statements.appendf("%s, ok := req.GetQueryInt64(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Int64"
+		case *compile.DoubleSpec:
+			statements.appendf("%s, ok := req.GetQueryFloat64(%q)",
+				identifierName, fieldName,
+			)
+			pointerMethod = "Float64"
 		case *compile.StringSpec:
 			statements.appendf("%s, ok := req.GetQueryValue(%q)",
 				identifierName, fieldName,
