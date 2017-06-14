@@ -58,6 +58,7 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
+	IsEndpoint   bool
 
 	// Statements for reading query parameters.
 	QueryParamGoStatements []string
@@ -146,6 +147,7 @@ func NewMethod(
 	var err error
 	var ok bool
 	method.Name = funcSpec.MethodName()
+	method.IsEndpoint = isEndpoint
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
 
@@ -190,6 +192,12 @@ func NewMethod(
 	method.setValidStatusCodes()
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
+		if !method.IsEndpoint {
+			return nil, errors.Errorf(
+				"invalid annotation: HTTP GET method cannot have a body",
+			)
+		}
+
 		err := method.setQueryParamStatements(funcSpec)
 		if err != nil {
 			return nil, err
