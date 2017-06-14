@@ -35,7 +35,7 @@ var updateGoldenFile = flag.Bool("update", false, "Updates the golden files with
 const parsedBarFile = "test_data/bar.json"
 
 func TestModuleSpec(t *testing.T) {
-	barThrift := "../examples/example-gateway/idl/endpoints/bar/bar.thrift"
+	barThrift := "../examples/example-gateway/idl/clients/bar/bar.thrift"
 	m, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the thrift file")
 	convertThriftPathToRelative(m)
