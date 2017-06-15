@@ -161,8 +161,8 @@ func (gateway *BenchGateway) HTTPPort() int {
 	return int(gateway.ActualGateway.RealHTTPPort)
 }
 
-// ErrorLogs ...
-func (gateway *BenchGateway) ErrorLogs() map[string][]string {
+// Logs ...
+func (gateway *BenchGateway) Logs(level string) map[string][]string {
 	if gateway.readLogs {
 		return gateway.errorLogs
 	}
