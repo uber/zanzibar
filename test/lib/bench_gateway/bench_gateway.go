@@ -161,14 +161,7 @@ func (gateway *BenchGateway) HTTPPort() int {
 	return int(gateway.ActualGateway.RealHTTPPort)
 }
 
-// Logs ...
-func (gateway *BenchGateway) Logs(
-	level string, msg string,
-) []testGateway.LogMessage {
-	if gateway.readLogs {
-		return gateway.logMessages[msg]
-	}
-
+func (gateway *BenchGateway) buildLogs() {
 	lines := strings.Split(gateway.logBytes.String(), "\n")
 	for i := 0; i < len(lines); i++ {
 		line := lines[i]
@@ -195,7 +188,24 @@ func (gateway *BenchGateway) Logs(
 	}
 
 	gateway.readLogs = true
-	return gateway.logMessages[msg]
+}
+
+// Logs ...
+func (gateway *BenchGateway) Logs(
+	level string, msg string,
+) []testGateway.LogMessage {
+	if !gateway.readLogs {
+		gateway.buildLogs()
+	}
+
+	lines := gateway.logMessages[msg]
+	for _, line := range lines {
+		if line["level"].(string) != level {
+			return nil
+		}
+	}
+
+	return lines
 }
 
 // HTTPBackends returns the HTTP backends of the gateway

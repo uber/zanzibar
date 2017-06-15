@@ -259,7 +259,14 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 func (gateway *ChildProcessGateway) Logs(
 	level string, msg string,
 ) []LogMessage {
-	return gateway.logMessages[msg]
+	lines := gateway.logMessages[msg]
+	for _, line := range lines {
+		if line["level"].(string) != level {
+			return nil
+		}
+	}
+
+	return lines
 }
 
 // Close test gateway
