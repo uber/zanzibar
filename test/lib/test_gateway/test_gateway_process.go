@@ -123,13 +123,13 @@ func addJSONLine(gateway *ChildProcessGateway, line string) {
 
 	msg := lineStruct["msg"].(string)
 
-	msgLogs := gateway.errorLogs[msg]
+	msgLogs := gateway.logMessages[msg]
 	if msgLogs == nil {
-		msgLogs = []string{line}
+		msgLogs = []LogMessage{lineStruct}
 	} else {
-		msgLogs = append(msgLogs, line)
+		msgLogs = append(msgLogs, lineStruct)
 	}
-	gateway.errorLogs[msg] = msgLogs
+	gateway.logMessages[msg] = msgLogs
 }
 
 func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) error {

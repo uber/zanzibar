@@ -46,7 +46,7 @@ type BenchGateway struct {
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
 	logBytes         *bytes.Buffer
 	readLogs         bool
-	errorLogs        map[string][]string
+	logMessages      map[string][]testGateway.LogMessage
 	httpClient       *http.Client
 	tchannelClient   zanzibar.TChannelClient
 }
@@ -122,8 +122,8 @@ func CreateGateway(
 		backendsTChannel: backendsTChannel,
 		logBytes:         bytes.NewBuffer(nil),
 
-		readLogs:  false,
-		errorLogs: map[string][]string{},
+		readLogs:    false,
+		logMessages: map[string][]testGateway.LogMessage{},
 	}
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
@@ -162,9 +162,11 @@ func (gateway *BenchGateway) HTTPPort() int {
 }
 
 // Logs ...
-func (gateway *BenchGateway) Logs(level string, msg string) []string {
+func (gateway *BenchGateway) Logs(
+	level string, msg string,
+) []testGateway.LogMessage {
 	if gateway.readLogs {
-		return gateway.errorLogs[msg]
+		return gateway.logMessages[msg]
 	}
 
 	lines := strings.Split(gateway.logBytes.String(), "\n")
@@ -183,17 +185,17 @@ func (gateway *BenchGateway) Logs(level string, msg string) []string {
 
 		msg := lineStruct["msg"].(string)
 
-		msgLogs := gateway.errorLogs[msg]
+		msgLogs := gateway.logMessages[msg]
 		if msgLogs == nil {
-			msgLogs = []string{line}
+			msgLogs = []testGateway.LogMessage{lineStruct}
 		} else {
-			msgLogs = append(msgLogs, line)
+			msgLogs = append(msgLogs, lineStruct)
 		}
-		gateway.errorLogs[msg] = msgLogs
+		gateway.logMessages[msg] = msgLogs
 	}
 
 	gateway.readLogs = true
-	return gateway.errorLogs[msg]
+	return gateway.logMessages[msg]
 }
 
 // HTTPBackends returns the HTTP backends of the gateway

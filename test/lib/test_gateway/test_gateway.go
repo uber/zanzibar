@@ -57,10 +57,13 @@ type TestGateway interface {
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
 	HTTPPort() int
-	Logs(level string, msg string) []string
+	Logs(level string, msg string) []LogMessage
 
 	Close()
 }
+
+// LogMessage is a json log record parsed into map.
+type LogMessage map[string]interface{}
 
 // ChildProcessGateway for testing
 type ChildProcessGateway struct {
@@ -72,7 +75,7 @@ type ChildProcessGateway struct {
 	m3Server         *testM3Server.FakeM3Server
 	backendsHTTP     map[string]*testBackend.TestHTTPBackend
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
-	errorLogs        map[string][]string
+	logMessages      map[string][]LogMessage
 	channel          *tchannel.Channel
 	serviceName      string
 	startTime        time.Time
@@ -172,7 +175,7 @@ func CreateGateway(
 		},
 		TChannelClient:   tchannelClient,
 		jsonLines:        []string{},
-		errorLogs:        map[string][]string{},
+		logMessages:      map[string][]LogMessage{},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
 	}
@@ -253,8 +256,10 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 }
 
 // Logs ...
-func (gateway *ChildProcessGateway) Logs(level string, msg string) []string {
-	return gateway.errorLogs[msg]
+func (gateway *ChildProcessGateway) Logs(
+	level string, msg string,
+) []LogMessage {
+	return gateway.logMessages[msg]
 }
 
 // Close test gateway
