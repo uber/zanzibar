@@ -22,7 +22,6 @@ package zanzibar_test
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -83,13 +82,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	code := lineStruct["UnexpectedStatusCode"].(float64)
 	assert.Equal(t, 999.0, code)
 }
@@ -205,13 +198,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorText := lineStruct["error"].(string)
 	assert.Equal(t, "cannot serialize", errorText)
 }

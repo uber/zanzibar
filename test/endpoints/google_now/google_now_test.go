@@ -33,8 +33,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 
-	"encoding/json"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -226,13 +224,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorField := lineStruct["error"].(string)
 	assert.Equal(t, "unexpected EOF", errorField)
 }
@@ -399,13 +391,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorMsg := lineStruct["error"].(string)
 	assert.Contains(t, errorMsg, "dial tcp")
 }
@@ -650,13 +636,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorMsg := lineStruct["error"].(string)
 	assert.Contains(t, errorMsg, "dial tcp")
 }
