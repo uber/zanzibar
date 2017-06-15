@@ -78,7 +78,7 @@ func TestInvalidStatusCode(t *testing.T) {
 
 	assert.Equal(t, "true", string(bytes))
 
-	errorLogs := bgateway.ErrorLogs()
+	errorLogs := bgateway.Logs("error")
 	logLines := errorLogs["Could not emit statusCode metric"]
 
 	assert.NotNil(t, logLines)
@@ -142,7 +142,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.ErrorLogs()
+	errorLogs := bgateway.Logs("error")
 	logLines := errorLogs["Could not serialize nil pointer body"]
 
 	assert.NotNil(t, logLines)
@@ -202,7 +202,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.ErrorLogs()
+	errorLogs := bgateway.Logs("error")
 	logLines := errorLogs["Could not serialize json response"]
 
 	assert.NotNil(t, logLines)
