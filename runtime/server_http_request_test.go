@@ -85,8 +85,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	dJ := &dummyJson{}
 	assert.False(t, req.ReadAndUnmarshalBody(dJ))
 
-	errLogs := gateway.Logs("error")
-	logLines := errLogs["Could not ReadAll() body"]
+	logLines := gateway.Logs("error", "Could not ReadAll() body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 }

@@ -222,9 +222,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errLogs := gateway.Logs("error")
-
-	logLines := errLogs["Could not ReadAll() body"]
+	logLines := gateway.Logs("error", "Could not ReadAll() body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
@@ -396,8 +394,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errorLogs := gateway.Logs("warn")
-	logLines := errorLogs["Could not make client request"]
+	logLines := gateway.Logs("warn", "Could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
@@ -648,8 +645,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errorLogs := gateway.Logs("warn")
-	logLines := errorLogs["Could not make client request"]
+	logLines := gateway.Logs("warn", "Could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
