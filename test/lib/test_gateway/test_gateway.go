@@ -57,7 +57,7 @@ type TestGateway interface {
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
 	HTTPPort() int
-	Logs(level string) map[string][]string
+	Logs(level string, msg string) []string
 
 	Close()
 }
@@ -253,8 +253,8 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 }
 
 // Logs ...
-func (gateway *ChildProcessGateway) Logs(level string) map[string][]string {
-	return gateway.errorLogs
+func (gateway *ChildProcessGateway) Logs(level string, msg string) []string {
+	return gateway.errorLogs[msg]
 }
 
 // Close test gateway

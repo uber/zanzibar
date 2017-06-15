@@ -162,9 +162,9 @@ func (gateway *BenchGateway) HTTPPort() int {
 }
 
 // Logs ...
-func (gateway *BenchGateway) Logs(level string) map[string][]string {
+func (gateway *BenchGateway) Logs(level string, msg string) []string {
 	if gateway.readLogs {
-		return gateway.errorLogs
+		return gateway.errorLogs[msg]
 	}
 
 	lines := strings.Split(gateway.logBytes.String(), "\n")
@@ -193,7 +193,7 @@ func (gateway *BenchGateway) Logs(level string) map[string][]string {
 	}
 
 	gateway.readLogs = true
-	return gateway.errorLogs
+	return gateway.errorLogs[msg]
 }
 
 // HTTPBackends returns the HTTP backends of the gateway
