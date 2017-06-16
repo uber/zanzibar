@@ -90,6 +90,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 	}
 
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+
 }
 
 func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {
@@ -146,6 +147,12 @@ func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(`{
 		"error":"Could not parse query string"
 	}`))
+
+	logLines := gateway.Logs("warn", "Got request with invalid query string")
+	assert.Equal(t, len(logLines), 1)
+
+	line := logLines[0]
+	assert.Equal(t, line["error"].(string), `invalid URL escape "%gh"`)
 }
 
 func TestBarWithManyQueryParamsCall(t *testing.T) {
@@ -272,6 +279,17 @@ func TestBarManyQueryParamsWithInvalidBool(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(`{
 		"error":"Could not parse query string"
 	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseBool: parsing \"t\": invalid syntax",
+		line["error"].(string),
+	)
 }
 
 func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
@@ -325,4 +343,15 @@ func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(`{
 		"error":"Could not parse query string"
 	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseInt: parsing \"wat\": invalid syntax",
+		line["error"].(string),
+	)
 }
