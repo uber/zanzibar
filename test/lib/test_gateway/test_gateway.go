@@ -259,6 +259,10 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 func (gateway *ChildProcessGateway) Logs(
 	level string, msg string,
 ) []LogMessage {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
+
 	lines := gateway.logMessages[msg]
 	for _, line := range lines {
 		if line["level"].(string) != level {
