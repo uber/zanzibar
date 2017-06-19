@@ -254,39 +254,23 @@ func (system *ModuleSystem) ResolveModules(
 			}
 			classInstances = append(classInstances, instance)
 		} else {
-
-			files, err := ioutil.ReadDir(fullInstanceDirectory)
+			instances, err := system.resolveMultiModules(
+				packageRoot,
+				baseDirectory,
+				targetGenDir,
+				fullInstanceDirectory,
+				className,
+				class,
+			)
 
 			if err != nil {
-				// TODO: We should accumulate errors and list them all here
-				// Expected $path to be a class directory
-				return nil, errors.Wrapf(
-					err,
-					"Error reading module instance directory %q",
-					fullInstanceDirectory,
+				return nil, errors.Wrapf(err,
+					"Error reading resolving multi modules of %q",
+					className,
 				)
 			}
 
-			for _, file := range files {
-				if file.IsDir() {
-					instance, instanceErr := system.readInstance(
-						packageRoot,
-						baseDirectory,
-						targetGenDir,
-						className,
-						filepath.Join(class.Directory, file.Name()),
-					)
-					if instanceErr != nil {
-						return nil, errors.Wrapf(
-							instanceErr,
-							"Error reading multi instance %q in %q",
-							className,
-							filepath.Join(class.Directory, file.Name()),
-						)
-					}
-					classInstances = append(classInstances, instance)
-				}
-			}
+			classInstances = append(classInstances, instances...)
 		}
 
 		resolvedModules[className] = classInstances
@@ -301,6 +285,81 @@ func (system *ModuleSystem) ResolveModules(
 	}
 
 	return resolvedModules, nil
+}
+
+func (system *ModuleSystem) resolveMultiModules(
+	packageRoot string,
+	baseDirectory string,
+	targetGenDir string,
+	classDir string, // full path
+	className string,
+	class *ModuleClass,
+) ([]*ModuleInstance, error) {
+	relClassDir, err := filepath.Rel(baseDirectory, classDir)
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Error relative class directory for %q",
+			className,
+		)
+	}
+
+	configFile := filepath.Join(classDir, className+configSuffix)
+	if _, err := os.Stat(configFile); err == nil {
+		instance, instanceErr := system.readInstance(
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			className,
+			relClassDir,
+		)
+		if instanceErr != nil {
+			return nil, errors.Wrapf(
+				instanceErr,
+				"Error reading multi instance %q in %q",
+				className,
+				class.Directory,
+			)
+		}
+		return []*ModuleInstance{instance}, nil
+	}
+
+	classInstances := []*ModuleInstance{}
+	files, err := ioutil.ReadDir(classDir)
+
+	if err != nil {
+		// TODO: We should accumulate errors and list them all here
+		// Expected $path to be a class directory
+		return nil, errors.Wrapf(
+			err,
+			"Error reading module instance directory %q",
+			classDir,
+		)
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+
+		instances, err := system.resolveMultiModules(
+			packageRoot,
+			baseDirectory,
+			targetGenDir,
+			filepath.Join(classDir, file.Name()),
+			className,
+			class,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(err,
+				"Error reading subdir of multi instance %q in %q",
+				className,
+				filepath.Join(class.Directory, file.Name()),
+			)
+		}
+		classInstances = append(classInstances, instances...)
+	}
+
+	return classInstances, nil
 }
 
 func (system *ModuleSystem) readInstance(
@@ -538,14 +597,6 @@ func (system *ModuleSystem) GenerateBuild(
 			for filePath, content := range buildResult.Files {
 				filePath = filepath.Clean(filePath)
 
-				if strings.HasPrefix(filePath, "..") {
-					return nil, errors.Errorf(
-						"Module %q generated a file outside the build dir %q",
-						classInstance.Directory,
-						filePath,
-					)
-				}
-
 				resolvedPath := filepath.Join(
 					buildPath,
 					filePath,
@@ -597,7 +648,7 @@ func formatGoFile(filePath string) error {
 }
 
 // ModuleClass defines a module class in the build configuration directory.
-// THis coud be something like an Endpoint class which contains multiple
+// THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
 	ClassType         moduleClassType

@@ -34,7 +34,7 @@ import (
 const (
 	clientThrift   = "../examples/example-gateway/idl/github.com/uber/zanzibar/clients/bar/bar.thrift"
 	endpointThrift = "../examples/example-gateway/idl/github.com/uber/zanzibar/endpoints/bar/bar.thrift"
-	tmpDir         = "../.tmp_gen"
+	tmpDir         = "../../.tmp_gen"
 )
 
 func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
@@ -60,9 +60,9 @@ func TestGenerateBar(t *testing.T) {
 
 	packageHelper, err := codegen.NewPackageHelper(
 		"github.com/uber/zanzibar/examples/example-gateway",
-		filepath.Join(absGatewayPath),
+		absGatewayPath,
 		"middlewares/middleware-config.json",
-		filepath.Join(absGatewayPath, "idl"),
+		"./idl",
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		testCopyrightHeader,
@@ -100,7 +100,7 @@ func TestGenerateBar(t *testing.T) {
 
 	cmpGoldenFile(
 		t,
-		filepath.Join(tmpDir, "clients", "bar", "bar.go"),
+		filepath.Join(absGatewayPath, tmpDir, "clients", "bar", "bar.go"),
 		"./test_data/clients",
 	)
 
@@ -110,7 +110,7 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	endpoints, err := ioutil.ReadDir(
-		filepath.Join(tmpDir, "endpoints", "bar"),
+		filepath.Join(absGatewayPath, tmpDir, "endpoints", "bar"),
 	)
 	if !assert.NoError(t, err, "cannot read dir %s", err) {
 		return
@@ -124,13 +124,13 @@ func TestGenerateBar(t *testing.T) {
 
 		cmpGoldenFile(
 			t,
-			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			filepath.Join(absGatewayPath, tmpDir, "endpoints", "bar", file.Name()),
 			"./test_data/endpoints",
 		)
 	}
 	cmpGoldenFile(
 		t,
-		filepath.Join(tmpDir, "endpoints", "bar", "bar_structs.go"),
+		filepath.Join(absGatewayPath, tmpDir, "endpoints", "bar", "bar_structs.go"),
 		"./test_data/endpoints",
 	)
 
@@ -142,7 +142,7 @@ func TestGenerateBar(t *testing.T) {
 
 		cmpGoldenFile(
 			t,
-			filepath.Join(tmpDir, "endpoints", "bar", file.Name()),
+			filepath.Join(absGatewayPath, tmpDir, "endpoints", "bar", file.Name()),
 			"./test_data/endpoint_tests",
 		)
 	}

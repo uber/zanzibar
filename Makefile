@@ -118,20 +118,21 @@ install-wrk:
 
 .PHONY: test
 test: generate lint
-	make test-only
+	@make test-only
 
 .PHONY: test-only
 test-only:
-	rm -f ./test/.cached_binary_test_info.json
-	ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache.
-	ZANZIBAR_CACHE=1 go test \
+	@rm -f ./test/.cached_binary_test_info.json
+	@echo "Running all tests..."
+	@ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache
+	@ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
 		./runtime/... \
 		./test/... | \
 		grep -v '\[no test files\]'
-	rm -f ./test/.cached_binary_test_info.json
-	echo "<coverage />" > ./coverage/cobertura-coverage.xml
+	@rm -f ./test/.cached_binary_test_info.json
+	@echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
 .PHONY: travis-coveralls
 travis-coveralls:
