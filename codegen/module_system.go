@@ -563,16 +563,27 @@ type ClientsInitGenerator struct {
 func (g *ClientsInitGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	clients := readClientDependencySpecs(instance)
+	clients := []*ClientSpec{}
+	instances := sortInstances(instance.ResolvedDependencies["client"])
+
+	for _, instance := range instances {
+		clients = append(clients, instance.GeneratedSpec().(*ClientSpec))
+	}
 
 	includedPkgs := []GoPackageImport{}
-	for _, client := range clients {
+	for i, client := range clients {
 		// TODO: there shouldn't be a special thing for custom
 		if client.ClientType == "custom" {
 			includedPkgs = append(includedPkgs, GoPackageImport{
 				PackageName: client.CustomImportPath,
 				AliasName:   client.ImportPackageAlias,
 			})
+			if len(instances[i].ResolvedDependencies["client"]) > 0 {
+				includedPkgs = append(includedPkgs, GoPackageImport{
+					PackageName: instances[i].PackageInfo.GeneratedPackagePath,
+					AliasName:   instances[i].PackageInfo.GeneratedPackageAlias,
+				})
+			}
 			continue
 		}
 
@@ -585,7 +596,26 @@ func (g *ClientsInitGenerator) Generate(
 	}
 
 	clientInfo := []ClientInfoMeta{}
-	for _, client := range clients {
+	for i, client := range clients {
+		meta := ClientInfoMeta{
+			IsPointerType: true,
+			FieldName:     strings.Title(client.ClientName),
+			PackagePath:   client.ImportPackagePath,
+			PackageAlias:  client.ImportPackageAlias,
+			ExportName:    client.ExportName,
+			ExportType:    client.ExportType,
+		}
+
+		deps := instances[i].ResolvedDependencies["client"]
+		if len(deps) > 0 {
+			depFieldNames := []string{}
+			for _, dep := range deps {
+				depFieldNames = append(depFieldNames, strings.Title(dep.PackageInfo.QualifiedInstanceName))
+			}
+			meta.DepPackageAlias = instances[i].PackageInfo.GeneratedPackageAlias
+			meta.DepFieldNames = depFieldNames
+		}
+
 		// TODO: there shouldn't be a special thing for custom
 		if client.ClientType == "custom" {
 			isPointerType := false
@@ -594,15 +624,10 @@ func (g *ClientsInitGenerator) Generate(
 				isPointerType = true
 				exportType = strings.TrimLeft(exportType, "*")
 			}
+			meta.IsPointerType = isPointerType
+			meta.ExportType = exportType
 
-			clientInfo = append(clientInfo, ClientInfoMeta{
-				IsPointerType: isPointerType,
-				FieldName:     strings.Title(client.ClientName),
-				PackagePath:   client.ImportPackagePath,
-				PackageAlias:  client.ImportPackageAlias,
-				ExportName:    client.ExportName,
-				ExportType:    exportType,
-			})
+			clientInfo = append(clientInfo, meta)
 			continue
 		}
 
@@ -611,14 +636,7 @@ func (g *ClientsInitGenerator) Generate(
 			continue
 		}
 
-		clientInfo = append(clientInfo, ClientInfoMeta{
-			IsPointerType: true,
-			FieldName:     strings.Title(client.ClientName),
-			PackagePath:   client.ImportPackagePath,
-			PackageAlias:  client.ImportPackageAlias,
-			ExportName:    client.ExportName,
-			ExportType:    client.ExportType,
-		})
+		clientInfo = append(clientInfo, meta)
 	}
 
 	meta := &ClientsInitFilesMeta{
@@ -1097,4 +1115,47 @@ func GenerateDependencyStruct(
 		instance,
 		packageHelper,
 	)
+}
+
+// sort the clients by client height in DAG, lowest node first
+func sortInstances(instances []*ModuleInstance) []*ModuleInstance {
+	heightMap := map[*ModuleInstance]int{}
+	sortedGroup := [][]*ModuleInstance{}
+	for _, instance := range instances {
+		h := height(instance, heightMap)
+		l := len(sortedGroup)
+		if l < h+1 {
+			for i := 0; i < h+1-l; i++ {
+				sortedGroup = append(sortedGroup, []*ModuleInstance{})
+			}
+		}
+		sortedGroup[h] = append(sortedGroup[h], instance)
+	}
+
+	sorted := []*ModuleInstance{}
+	for _, g := range sortedGroup {
+		sorted = append(sorted, g...)
+	}
+	return sorted
+}
+
+// TODO: needs to refactor for generic use for any module class type
+func height(i *ModuleInstance, known map[*ModuleInstance]int) int {
+	if h, ok := known[i]; ok {
+		return h
+	}
+	if len(i.ResolvedDependencies["client"]) == 0 {
+		known[i] = 0
+		return 0
+	}
+
+	mh := 0
+	for _, instance := range i.ResolvedDependencies["client"] {
+		ch := height(instance, known)
+		if ch > mh {
+			mh = ch
+		}
+	}
+	known[i] = mh + 1
+	return mh + 1
 }

@@ -21,9 +21,17 @@ type Clients struct {
 func CreateClients(
 	gateway *zanzibar.Gateway,
 ) interface{} {
+	{{range $idx, $cinfo := .ClientInfo -}}
+	_{{lower $cinfo.FieldName}} := {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway{{if $cinfo.DepFieldNames}}, {{$cinfo.DepPackageAlias}}.ClientDependencies{
+		{{range $fname := $cinfo.DepFieldNames -}}
+		{{$fname}}: _{{lower $fname}},
+		{{end}}
+	}{{end}})
+	{{end}}
+
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway),
+		{{$cinfo.FieldName}}: _{{lower $cinfo.FieldName}},
 		{{end}}
 	}
 }

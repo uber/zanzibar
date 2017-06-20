@@ -1027,9 +1027,17 @@ type Clients struct {
 func CreateClients(
 	gateway *zanzibar.Gateway,
 ) interface{} {
+	{{range $idx, $cinfo := .ClientInfo -}}
+	_{{lower $cinfo.FieldName}} := {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway{{if $cinfo.DepFieldNames}}, {{$cinfo.DepPackageAlias}}.ClientDependencies{
+		{{range $fname := $cinfo.DepFieldNames -}}
+		{{$fname}}: _{{lower $fname}},
+		{{end}}
+	}{{end}})
+	{{end}}
+
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway),
+		{{$cinfo.FieldName}}: _{{lower $cinfo.FieldName}},
 		{{end}}
 	}
 }
@@ -1045,7 +1053,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 802, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 1086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

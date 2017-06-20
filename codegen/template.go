@@ -130,12 +130,14 @@ func findMethod(
 
 // ClientInfoMeta ...
 type ClientInfoMeta struct {
-	IsPointerType bool
-	FieldName     string
-	PackagePath   string
-	PackageAlias  string
-	ExportName    string
-	ExportType    string
+	IsPointerType   bool
+	FieldName       string
+	PackagePath     string
+	PackageAlias    string
+	ExportName      string
+	ExportType      string
+	DepPackageAlias string
+	DepFieldNames   []string
 }
 
 // ClientsInitFilesMeta ...
