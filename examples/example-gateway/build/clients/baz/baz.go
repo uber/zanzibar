@@ -70,6 +70,33 @@ type BazClient struct {
 	client zanzibar.TChannelClient
 }
 
+// Echo is a client RPC call for method "SecondService::Echo"
+func (c *BazClient) Echo(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_Echo_Args,
+) (string, map[string]string, error) {
+	var result clientsBazBaz.SecondService_Echo_Result
+	var resp string
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "Echo", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("BazClient received no result or unknown exception for Echo")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_Echo_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
 // Call is a client RPC call for method "SimpleService::Call"
 func (c *BazClient) Call(
 	ctx context.Context,

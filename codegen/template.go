@@ -42,17 +42,18 @@ type MainFiles struct {
 }
 
 var funcMap = tmpl.FuncMap{
-	"lower":        strings.ToLower,
-	"title":        strings.Title,
-	"Title":        strings.Title,
-	"fullTypeName": fullTypeName,
-	"camel":        camelCase,
-	"split":        strings.Split,
-	"dec":          decrement,
-	"basePath":     filepath.Base,
-	"pascal":       pascalCase,
-	"jsonMarshal":  jsonMarshal,
-	"unref":        unref,
+	"lower":         strings.ToLower,
+	"title":         strings.Title,
+	"Title":         strings.Title,
+	"fullTypeName":  fullTypeName,
+	"camel":         camelCase,
+	"split":         strings.Split,
+	"dec":           decrement,
+	"basePath":      filepath.Base,
+	"pascal":        pascalCase,
+	"jsonMarshal":   jsonMarshal,
+	"isPointerType": isPointerType,
+	"unref":         unref,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -69,6 +70,10 @@ func decrement(num int) int {
 func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
 	str, err := json.Marshal(jsonObj)
 	return string(str), err
+}
+
+func isPointerType(t string) bool {
+	return strings.HasPrefix(t, "*")
 }
 
 func unref(t string) string {

@@ -1485,7 +1485,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = r
+		res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -1504,7 +1504,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = r
+			res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
 		} {{end -}}
 	{{end}}
 
@@ -1525,7 +1525,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2996, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3092, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
