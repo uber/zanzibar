@@ -1354,6 +1354,9 @@ type {{$clientName}} struct {
 		{{end -}}
 	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
+		{{if .ResponseType -}}
+		var resp {{.ResponseType}}
+		{{end}}
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -1376,14 +1379,14 @@ type {{$clientName}} struct {
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
-			return nil, nil, err
+			return resp, nil, err
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
-			resp, err := {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
+			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			return resp, respHeaders, err
 		{{end -}}
 	}
@@ -1402,7 +1405,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3264, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3328, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -104,6 +104,7 @@ func (c *BazClient) Compare(
 	args *clientsBazBaz.SimpleService_Compare_Args,
 ) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Compare_Result
+	var resp *clientsBazBase.BazResponse
 
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "Compare", reqHeaders, args, &result,
@@ -120,10 +121,10 @@ func (c *BazClient) Compare(
 		}
 	}
 	if err != nil {
-		return nil, nil, err
+		return resp, nil, err
 	}
 
-	resp, err := clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	return resp, respHeaders, err
 }
 
@@ -133,6 +134,7 @@ func (c *BazClient) Ping(
 	reqHeaders map[string]string,
 ) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Ping_Result
+	var resp *clientsBazBase.BazResponse
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	success, respHeaders, err := c.client.Call(
@@ -146,10 +148,10 @@ func (c *BazClient) Ping(
 		}
 	}
 	if err != nil {
-		return nil, nil, err
+		return resp, nil, err
 	}
 
-	resp, err := clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
+	resp, err = clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	return resp, respHeaders, err
 }
 
