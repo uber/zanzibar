@@ -120,6 +120,7 @@ func (c *BarClient) ArgWithHeaders(
 	r *clientsBarBar.Bar_ArgWithHeaders_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var _res *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithHeaders", c.HTTPClient,
 	)
@@ -130,11 +131,11 @@ func (c *BarClient) ArgWithHeaders(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -156,7 +157,7 @@ func (c *BarClient) ArgWithHeaders(
 		return &responseBody, respHeaders, nil
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return _res, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -167,6 +168,7 @@ func (c *BarClient) MissingArg(
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var _res *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "missingArg", c.HTTPClient,
 	)
@@ -176,11 +178,11 @@ func (c *BarClient) MissingArg(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -217,7 +219,7 @@ func (c *BarClient) MissingArg(
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return _res, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -228,6 +230,7 @@ func (c *BarClient) NoRequest(
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var _res *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "noRequest", c.HTTPClient,
 	)
@@ -237,11 +240,11 @@ func (c *BarClient) NoRequest(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -278,7 +281,7 @@ func (c *BarClient) NoRequest(
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return _res, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -290,6 +293,7 @@ func (c *BarClient) Normal(
 	r *clientsBarBar.Bar_Normal_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var _res *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "normal", c.HTTPClient,
 	)
@@ -299,11 +303,11 @@ func (c *BarClient) Normal(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -340,7 +344,7 @@ func (c *BarClient) Normal(
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return _res, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -352,6 +356,7 @@ func (c *BarClient) TooManyArgs(
 	r *clientsBarBar.Bar_TooManyArgs_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var _res *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "tooManyArgs", c.HTTPClient,
 	)
@@ -361,11 +366,11 @@ func (c *BarClient) TooManyArgs(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return _res, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -402,7 +407,7 @@ func (c *BarClient) TooManyArgs(
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return _res, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }

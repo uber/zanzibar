@@ -850,6 +850,9 @@ func (c *{{$clientName}}) {{title .Name}}(
 	r {{.RequestType}},
 ) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
+	{{if .ResponseType -}}
+	var _res  {{.ResponseType}}
+	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
@@ -876,11 +879,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}_res, nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}_res, nil, err{{end}}
 	}
 
 	respHeaders := map[string]string{}
@@ -981,7 +984,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}nil, {{end}}respHeaders, errors.Errorf(
+	return {{if ne .ResponseType ""}}_res, {{end}}respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -999,7 +1002,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
