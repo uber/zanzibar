@@ -88,7 +88,7 @@ func (c *ContactsClient) SaveContacts(
 		var responseBody clientsContactsContacts.SaveContactsResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 
 		return &responseBody, respHeaders, nil

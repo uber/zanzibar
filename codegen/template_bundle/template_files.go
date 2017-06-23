@@ -790,6 +790,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
@@ -915,16 +916,24 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			rawBody, err := res.ReadAll()
 			if err != nil {
-				return nil, respHeaders, err
+				return _res, respHeaders, err
+			}
+			err = json.Unmarshal(rawBody, &responseBody)
+			{{end -}}
+			if err != nil {
+				return _res, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
@@ -956,30 +965,38 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			rawBody, err := res.ReadAll()
 			if err != nil {
-				return nil, respHeaders, err
+				return _res, respHeaders, err
+			}
+			err = json.Unmarshal(rawBody, &responseBody)
+			{{end -}}
+			if err != nil {
+				return _res, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{range $idx, $exception := .Exceptions}}
 		case {{$exception.StatusCode.Code}}:
 			var exception {{$exception.Type}}
 			err = res.ReadAndUnmarshalBody(&exception)
 			if err != nil {
-				return nil, respHeaders, err
+				return _res, respHeaders, err
 			}
-			return nil, respHeaders, &exception
+			return _res, respHeaders, &exception
 		{{end}}
 		default:
 			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
-				return nil, respHeaders, err
+				return _res, respHeaders, err
 			}
 	}
 	{{end}}
@@ -1002,7 +1019,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6019, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

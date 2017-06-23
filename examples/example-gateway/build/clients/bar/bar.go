@@ -150,7 +150,7 @@ func (c *BarClient) ArgWithHeaders(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -197,7 +197,7 @@ func (c *BarClient) MissingArg(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -207,15 +207,15 @@ func (c *BarClient) MissingArg(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return _res, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 	}
 
@@ -259,7 +259,7 @@ func (c *BarClient) NoRequest(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -269,15 +269,15 @@ func (c *BarClient) NoRequest(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return _res, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 	}
 
@@ -322,7 +322,7 @@ func (c *BarClient) Normal(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -332,15 +332,15 @@ func (c *BarClient) Normal(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return _res, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 	}
 
@@ -385,7 +385,7 @@ func (c *BarClient) TooManyArgs(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -395,15 +395,15 @@ func (c *BarClient) TooManyArgs(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return _res, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return _res, respHeaders, err
 		}
 	}
 
