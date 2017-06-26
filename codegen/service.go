@@ -221,27 +221,17 @@ func (ms *ModuleSpec) SetDownstream(
 	// If this is an endpoint then a downstream will be defined.
 	// If if it a client it will not be.
 	if method.Downstream != nil {
-		var downstreamMethod *MethodSpec
-
 		// TODO: once all client configs have "exposedMethods" field, we can find the exact
 		// service, instead of loop over for service looking for the first matching method,
 		// which could totally be wrong method
-	loop:
-		for _, s := range method.Downstream.Services {
-			for _, dsMethod := range s.Methods {
-				if method.Name == dsMethod.Name {
-					downstreamMethod = dsMethod
-					break loop
-				}
-			}
-		}
-		if downstreamMethod == nil {
-			return errors.Errorf("Failed to map %s to one of the downstream methods: %v  ", method.Name, method.Downstream.Services[0].Methods)
+		downstreamMethod, err := findMethodByName(method.Name, method.Downstream.Services)
+		if err != nil {
+			return err
 		}
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err := method.setTypeConverters(funcSpec, downstreamSpec, h)
+		err = method.setTypeConverters(funcSpec, downstreamSpec, h)
 		if err != nil {
 			return err
 		}
@@ -279,6 +269,19 @@ func (ms *ModuleSpec) SetDownstream(
 	}
 
 	return nil
+}
+
+func findMethodByName(name string, serviceSpecs []*ServiceSpec) (*MethodSpec, error) {
+	var allMethods []string
+	for _, s := range serviceSpecs {
+		for _, dsMethod := range s.Methods {
+			allMethods = append(allMethods, s.Name+"::"+dsMethod.Name)
+			if name == dsMethod.Name {
+				return dsMethod, nil
+			}
+		}
+	}
+	return nil, errors.Errorf("failed to map downstream method %q to methods %q defined in thrift file", name, allMethods)
 }
 
 // NewMethod creates new method specification.
