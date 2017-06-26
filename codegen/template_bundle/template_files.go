@@ -1335,10 +1335,10 @@ type {{$clientName}} struct {
 {{range $svc := .Services}}
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
-{{$methodName := index $exposedMethods $serviceMethod -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 {{if $methodName -}}
-	// {{title $methodName}} is a client RPC call for method "{{$svc.Name}}::{{.Name}}"
-	func (c *{{$clientName}}) {{title $methodName}}(
+	// {{$methodName}} is a client RPC call for method "{{$svc.Name}}::{{.Name}}"
+	func (c *{{$clientName}}) {{$methodName}}(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		{{if ne .RequestType "" -}}
@@ -1394,7 +1394,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3266, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3264, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
