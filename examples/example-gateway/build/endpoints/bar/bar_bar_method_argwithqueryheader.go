@@ -61,12 +61,6 @@ func (handler *ArgWithQueryHeaderHandler) HandleRequest(
 
 	requestBody.UserUUID = ptr.String(xUUIDValue)
 
-	userUUIDQuery, ok := req.GetQueryValue("userUUID")
-	if !ok {
-		return
-	}
-	requestBody.UserUUID = ptr.String(userUUIDQuery)
-
 	workflow := ArgWithQueryHeaderEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
