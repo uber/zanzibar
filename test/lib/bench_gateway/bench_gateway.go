@@ -208,6 +208,15 @@ func (gateway *BenchGateway) Logs(
 	return lines
 }
 
+// AllLogs ...
+func (gateway *BenchGateway) AllLogs() map[string][]testGateway.LogMessage {
+	if !gateway.readLogs {
+		gateway.buildLogs()
+	}
+
+	return gateway.logMessages
+}
+
 // HTTPBackends returns the HTTP backends of the gateway
 func (gateway *BenchGateway) HTTPBackends() map[string]*testBackend.TestHTTPBackend {
 	return gateway.backendsHTTP

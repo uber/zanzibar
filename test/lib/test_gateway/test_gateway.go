@@ -58,6 +58,8 @@ type TestGateway interface {
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
 	HTTPPort() int
 	Logs(level string, msg string) []LogMessage
+	// AllLogs() returns a map of msg to a list of LogMessage
+	AllLogs() map[string][]LogMessage
 
 	Close()
 }
@@ -271,6 +273,11 @@ func (gateway *ChildProcessGateway) Logs(
 	}
 
 	return lines
+}
+
+// AllLogs ...
+func (gateway *ChildProcessGateway) AllLogs() map[string][]LogMessage {
+	return gateway.logMessages
 }
 
 // Close test gateway
