@@ -95,6 +95,16 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    BarResponse argWithQueryHeader(
+        1: optional string userUUID (
+            zanzibar.http.ref = "headers.x-uuid"
+        )
+    ) (
+        zanzibar.http.method = "GET"
+        zanzibar.http.path = "/bar/argWithQueryHeader"
+        zanzibar.http.status = "200"
+    )
+
     BarResponse argWithManyQueryParams(
         1: required string aStr
         2: optional string anOptStr
