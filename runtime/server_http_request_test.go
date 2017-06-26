@@ -23,6 +23,7 @@ package zanzibar_test
 import (
 	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,4 +103,516 @@ type corruptReader struct{}
 
 func (c *corruptReader) Read(b []byte) (n int, err error) {
 	return 0, errors.New("Failed to read body")
+}
+
+func TestDoubleParseQueryValues(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryValue("foo")
+				assert.Equal(t, "", foo1)
+
+				foo2, _ := req.GetQueryValue("foo")
+				assert.Equal(t, "", foo2)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryBool(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryBool("foo")
+				assert.Equal(t, false, foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryInt8(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryInt8("foo")
+				assert.Equal(t, int8(0), foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryInt16(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryInt16("foo")
+				assert.Equal(t, int16(0), foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryInt32(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryInt32("foo")
+				assert.Equal(t, int32(0), foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryInt64(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryInt64("foo")
+				assert.Equal(t, int64(0), foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryFloat64(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryFloat64("foo")
+				assert.Equal(t, float64(0), foo1)
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestFailingGetQueryValues(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				foo1, _ := req.GetQueryValues("foo")
+				assert.Equal(t, 0, len(foo1))
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?%gh&%ij", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", resp.Status)
+	assert.Equal(t, 400, resp.StatusCode)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(bytes),
+	)
+
+	logs := bgateway.AllLogs()
+	assert.Equal(t, 3, len(logs))
+
+	// Assert that there is only one log even though
+	// we double call GetQueryValue
+	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+}
+
+func TestGetQueryValues(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions,
+		clients.CreateClients, endpoints.Register,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	lastQueryParam := []string{}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway,
+			"foo",
+			"foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				params, ok := req.GetQueryValues("foo")
+				if !assert.Equal(t, true, ok) {
+					return
+				}
+
+				lastQueryParam = params
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo?foo=bar", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, []string{"bar"}, lastQueryParam)
+
+	resp, err = gateway.MakeRequest("GET", "/foo?foo=baz&foo=baz2", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, []string{"baz", "baz2"}, lastQueryParam)
+
+	resp, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "200 OK", resp.Status)
+	assert.Equal(t, []string(nil), lastQueryParam)
+	assert.Equal(t, 0, len(lastQueryParam))
 }

@@ -355,6 +355,262 @@ func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
 	)
 }
 
+func TestBarManyQueryParamsWithInvalidInt16(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/argWithManyQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithManyQueryParams?"+
+			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
+			"aInt8=24&anOptInt8=-50&aInt16=wat&anOptInt16=-100&"+
+			"aInt32=12&anOptInt32=-10&aInt64=4&anOptInt64=-1&"+
+			"aFloat64=5.1&anOptFloat64=-0.4",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(`{
+		"error":"Could not parse query string"
+	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseInt: parsing \"wat\": invalid syntax",
+		line["error"].(string),
+	)
+}
+
+func TestBarManyQueryParamsWithInvalidInt32(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/argWithManyQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithManyQueryParams?"+
+			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
+			"aInt8=24&anOptInt8=-50&aInt16=48&anOptInt16=-100&"+
+			"aInt32=wat&anOptInt32=-10&aInt64=4&anOptInt64=-1&"+
+			"aFloat64=5.1&anOptFloat64=-0.4",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(`{
+		"error":"Could not parse query string"
+	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseInt: parsing \"wat\": invalid syntax",
+		line["error"].(string),
+	)
+}
+
+func TestBarManyQueryParamsWithInvalidInt64(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/argWithManyQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithManyQueryParams?"+
+			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
+			"aInt8=24&anOptInt8=-50&aInt16=48&anOptInt16=-100&"+
+			"aInt32=12&anOptInt32=-10&aInt64=wat&anOptInt64=-1&"+
+			"aFloat64=5.1&anOptFloat64=-0.4",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(`{
+		"error":"Could not parse query string"
+	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseInt: parsing \"wat\": invalid syntax",
+		line["error"].(string),
+	)
+}
+
+func TestBarManyQueryParamsWithInvalidFloat64(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/argWithManyQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithManyQueryParams?"+
+			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
+			"aInt8=24&anOptInt8=-50&aInt16=48&anOptInt16=-100&"+
+			"aInt32=12&anOptInt32=-10&aInt64=4&anOptInt64=-1&"+
+			"aFloat64=wat&anOptFloat64=-0.4",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(`{
+		"error":"Could not parse query string"
+	}`))
+
+	logLines := gateway.Logs(
+		"warn", "Got request with invalid query string types",
+	)
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t,
+		"strconv.ParseFloat: parsing \"wat\": invalid syntax",
+		line["error"].(string),
+	)
+}
+
 func TestBarWithQueryHeaders(t *testing.T) {
 	var counter int = 0
 
