@@ -189,6 +189,56 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
+					"Name": "argWithQueryHeader",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/bar/argWithQueryHeader",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "argWithQueryHeader",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_ArgWithQueryHeader_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
 					"Name": "argWithQueryParams",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
