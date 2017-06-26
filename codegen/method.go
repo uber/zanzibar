@@ -576,6 +576,13 @@ func (ms *MethodSpec) setQueryParamStatements(
 		fieldName := field.Name
 		identifierName := camelCase(fieldName) + "Query"
 
+		httpRefAnnotation := field.Annotations[antHTTPRef]
+		// If a thrift field has a http.ref annotation then we
+		// should not read this field from query parameters.
+		if httpRefAnnotation != "" {
+			continue
+		}
+
 		var pointerMethod string
 
 		switch realType.(type) {
