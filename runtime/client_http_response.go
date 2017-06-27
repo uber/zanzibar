@@ -121,6 +121,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
 func (res *ClientHTTPResponse) ReadAndUnmarshalNonStructBody(v interface{}) error {
 	rawBody, err := res.ReadAll()
 	if err != nil {
+		/* coverage ignore next line */
 		return err
 	}
 

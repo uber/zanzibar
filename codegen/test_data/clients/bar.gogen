@@ -52,54 +52,6 @@ func NewClient(
 	}
 }
 
-// Echo calls "/bar/echo" endpoint.
-func (c *BarClient) Echo(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Bar_Echo_Args,
-) (string, map[string]string, error) {
-
-	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "Echo", c.HTTPClient,
-	)
-	// TODO(jakev): Ensure we validate mandatory headers
-
-	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/echo"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody string
-		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	}
-
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
-}
-
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
 func (c *BarClient) ArgNotStruct(
 	ctx context.Context,
@@ -203,6 +155,54 @@ func (c *BarClient) ArgWithHeaders(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// Echo calls "/bar/echo" endpoint.
+func (c *BarClient) Echo(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_Echo_Args,
+) (string, map[string]string, error) {
+
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "echo", c.HTTPClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.HTTPClient.BaseURL + "/bar" + "/echo"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
 	}
 
 	return defaultRes, respHeaders, errors.Errorf(
