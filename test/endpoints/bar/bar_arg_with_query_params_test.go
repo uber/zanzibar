@@ -666,3 +666,66 @@ func TestBarWithQueryHeaders(t *testing.T) {
 
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
 }
+
+func TestBarWithManyQueryParamsRequiredCall(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/argWithManyQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithManyQueryParams",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "400 Bad Request", res.Status)
+	assert.Equal(t, 0, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t,
+		`{"error":"Could not parse query string"}`,
+		string(respBytes),
+	)
+
+	logs := gateway.AllLogs()
+
+	assert.Equal(t, 4, len(logs))
+	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
+	assert.Equal(t, 1, len(logs["Started ExampleGateway"]))
+	assert.Equal(t, 1, len(logs["Got request with missing query string value"]))
+	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
+
+	assert.Equal(t,
+		"aStr",
+		logs["Got request with missing query string value"][0]["expectedKey"],
+	)
+}
