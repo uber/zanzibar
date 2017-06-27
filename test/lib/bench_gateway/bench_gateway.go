@@ -162,6 +162,10 @@ func (gateway *BenchGateway) HTTPPort() int {
 }
 
 func (gateway *BenchGateway) buildLogs() {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
+
 	lines := strings.Split(gateway.logBytes.String(), "\n")
 	for i := 0; i < len(lines); i++ {
 		line := lines[i]

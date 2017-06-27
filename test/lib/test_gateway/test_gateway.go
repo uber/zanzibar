@@ -277,6 +277,10 @@ func (gateway *ChildProcessGateway) Logs(
 
 // AllLogs ...
 func (gateway *ChildProcessGateway) AllLogs() map[string][]LogMessage {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
+
 	return gateway.logMessages
 }
 
