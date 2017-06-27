@@ -850,6 +850,9 @@ func (c *{{$clientName}}) {{title .Name}}(
 	r {{.RequestType}},
 ) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
+	{{if .ResponseType -}}
+	var defaultRes  {{.ResponseType}}
+	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
@@ -876,11 +879,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
 	respHeaders := map[string]string{}
@@ -912,16 +915,20 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+			{{end -}}
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
@@ -953,35 +960,39 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+			{{end -}}
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{range $idx, $exception := .Exceptions}}
 		case {{$exception.StatusCode.Code}}:
 			var exception {{$exception.Type}}
 			err = res.ReadAndUnmarshalBody(&exception)
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
-			return nil, respHeaders, &exception
+			return defaultRes, respHeaders, &exception
 		{{end}}
 		default:
 			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}nil, {{end}}respHeaders, errors.Errorf(
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -999,7 +1010,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5894, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1027,9 +1038,17 @@ type Clients struct {
 func CreateClients(
 	gateway *zanzibar.Gateway,
 ) interface{} {
+	{{range $idx, $cinfo := .ClientInfo -}}
+	_{{lower $cinfo.FieldName}} := {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway{{if $cinfo.DepFieldNames}}, {{$cinfo.DepPackageAlias}}.ClientDependencies{
+		{{range $fname := $cinfo.DepFieldNames -}}
+		{{$fname}}: _{{lower $fname}},
+		{{end}}
+	}{{end}})
+	{{end}}
+
 	return &Clients{
 		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway),
+		{{$cinfo.FieldName}}: _{{lower $cinfo.FieldName}},
 		{{end}}
 	}
 }
@@ -1045,7 +1064,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 802, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 1086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1346,6 +1365,9 @@ type {{$clientName}} struct {
 		{{end -}}
 	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 		var result {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Result
+		{{if .ResponseType -}}
+		var resp {{.ResponseType}}
+		{{end}}
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -1368,14 +1390,14 @@ type {{$clientName}} struct {
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
-			return nil, nil, err
+			return resp, nil, err
 		{{end -}}
 		}
 
 		{{if eq .ResponseType "" -}}
 			return respHeaders, err
 		{{else -}}
-			resp, err := {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
+			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			return resp, respHeaders, err
 		{{end -}}
 	}
@@ -1394,7 +1416,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3264, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3328, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1474,7 +1496,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = r
+		res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -1493,7 +1515,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = r
+			res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
 		} {{end -}}
 	{{end}}
 
@@ -1514,7 +1536,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2996, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3092, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

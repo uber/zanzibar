@@ -70,6 +70,33 @@ type BazClient struct {
 	client zanzibar.TChannelClient
 }
 
+// Echo is a client RPC call for method "SecondService::Echo"
+func (c *BazClient) Echo(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_Echo_Args,
+) (string, map[string]string, error) {
+	var result clientsBazBaz.SecondService_Echo_Result
+	var resp string
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "Echo", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("BazClient received no result or unknown exception for Echo")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_Echo_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
 // Call is a client RPC call for method "SimpleService::Call"
 func (c *BazClient) Call(
 	ctx context.Context,
@@ -104,6 +131,7 @@ func (c *BazClient) Compare(
 	args *clientsBazBaz.SimpleService_Compare_Args,
 ) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Compare_Result
+	var resp *clientsBazBase.BazResponse
 
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "Compare", reqHeaders, args, &result,
@@ -120,10 +148,10 @@ func (c *BazClient) Compare(
 		}
 	}
 	if err != nil {
-		return nil, nil, err
+		return resp, nil, err
 	}
 
-	resp, err := clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	return resp, respHeaders, err
 }
 
@@ -133,6 +161,7 @@ func (c *BazClient) Ping(
 	reqHeaders map[string]string,
 ) (*clientsBazBase.BazResponse, map[string]string, error) {
 	var result clientsBazBaz.SimpleService_Ping_Result
+	var resp *clientsBazBase.BazResponse
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	success, respHeaders, err := c.client.Call(
@@ -146,10 +175,10 @@ func (c *BazClient) Ping(
 		}
 	}
 	if err != nil {
-		return nil, nil, err
+		return resp, nil, err
 	}
 
-	resp, err := clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
+	resp, err = clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	return resp, respHeaders, err
 }
 

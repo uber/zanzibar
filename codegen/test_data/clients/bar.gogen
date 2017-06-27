@@ -52,6 +52,54 @@ func NewClient(
 	}
 }
 
+// Echo calls "/bar/echo" endpoint.
+func (c *BarClient) Echo(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_Echo_Args,
+) (string, map[string]string, error) {
+
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "Echo", c.HTTPClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.HTTPClient.BaseURL + "/bar" + "/echo"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
 func (c *BarClient) ArgNotStruct(
 	ctx context.Context,
@@ -120,6 +168,7 @@ func (c *BarClient) ArgWithHeaders(
 	r *clientsBarBar.Bar_ArgWithHeaders_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithHeaders", c.HTTPClient,
 	)
@@ -130,11 +179,11 @@ func (c *BarClient) ArgWithHeaders(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -149,14 +198,14 @@ func (c *BarClient) ArgWithHeaders(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -167,6 +216,7 @@ func (c *BarClient) MissingArg(
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "missingArg", c.HTTPClient,
 	)
@@ -176,11 +226,11 @@ func (c *BarClient) MissingArg(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -195,7 +245,7 @@ func (c *BarClient) MissingArg(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -205,19 +255,19 @@ func (c *BarClient) MissingArg(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return defaultRes, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -228,6 +278,7 @@ func (c *BarClient) NoRequest(
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "noRequest", c.HTTPClient,
 	)
@@ -237,11 +288,11 @@ func (c *BarClient) NoRequest(
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -256,7 +307,7 @@ func (c *BarClient) NoRequest(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -266,19 +317,19 @@ func (c *BarClient) NoRequest(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return defaultRes, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -290,6 +341,7 @@ func (c *BarClient) Normal(
 	r *clientsBarBar.Bar_Normal_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "normal", c.HTTPClient,
 	)
@@ -299,11 +351,11 @@ func (c *BarClient) Normal(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -318,7 +370,7 @@ func (c *BarClient) Normal(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -328,19 +380,19 @@ func (c *BarClient) Normal(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return defaultRes, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -352,6 +404,7 @@ func (c *BarClient) TooManyArgs(
 	r *clientsBarBar.Bar_TooManyArgs_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 
+	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "tooManyArgs", c.HTTPClient,
 	)
@@ -361,11 +414,11 @@ func (c *BarClient) TooManyArgs(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return nil, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -380,7 +433,7 @@ func (c *BarClient) TooManyArgs(
 		var responseBody clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
 
@@ -390,19 +443,19 @@ func (c *BarClient) TooManyArgs(
 		var exception clientsBarBar.BarException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
-		return nil, respHeaders, &exception
+		return defaultRes, respHeaders, &exception
 
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
-			return nil, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 	}
 
-	return nil, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }

@@ -82,4 +82,13 @@ service Bar {
         zanzibar.http.path = "/bar/argWithHeaders"
         zanzibar.http.status = "200"
     )
+
+    string Echo (
+        1: required string name
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/bar/echo"
+        zanzibar.http.status = "200"
+    )
 }

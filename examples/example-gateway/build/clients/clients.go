@@ -28,6 +28,7 @@ import (
 	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
+	quuxClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux"
 	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	"github.com/uber/zanzibar/runtime"
@@ -47,11 +48,19 @@ type Clients struct {
 func CreateClients(
 	gateway *zanzibar.Gateway,
 ) interface{} {
+	_bar := barClientGenerated.NewClient(gateway)
+	_baz := bazClientGenerated.NewClient(gateway)
+	_contacts := contactsClientGenerated.NewClient(gateway)
+	_googlenow := googlenowClientGenerated.NewClient(gateway)
+	_quux := quuxClientStatic.NewClient(gateway, quuxClientGenerated.ClientDependencies{
+		Bar: _bar,
+	})
+
 	return &Clients{
-		Bar:       barClientGenerated.NewClient(gateway),
-		Baz:       bazClientGenerated.NewClient(gateway),
-		Contacts:  contactsClientGenerated.NewClient(gateway),
-		GoogleNow: googlenowClientGenerated.NewClient(gateway),
-		Quux:      quuxClientStatic.NewClient(gateway),
+		Bar:       _bar,
+		Baz:       _baz,
+		Contacts:  _contacts,
+		GoogleNow: _googlenow,
+		Quux:      _quux,
 	}
 }

@@ -20,12 +20,15 @@
 
 package quux
 
-import "github.com/uber/zanzibar/runtime"
+import (
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux"
+	"github.com/uber/zanzibar/runtime"
+)
 
 // Quux is a custom client that does nothing yet
 type Quux struct{}
 
 // NewClient creates a new Quux client
-func NewClient(g *zanzibar.Gateway) *Quux {
+func NewClient(g *zanzibar.Gateway, dependencies quuxClient.ClientDependencies) *Quux {
 	return &Quux{}
 }

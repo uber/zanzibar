@@ -8,7 +8,8 @@
 			"Call": "SimpleService::Call",
 			"Compare": "SimpleService::Compare",
 			"Ping": "SimpleService::Ping",
-			"DeliberateDiffNoop": "SimpleService::SillyNoop"
+			"DeliberateDiffNoop": "SimpleService::SillyNoop",
+			"Echo": "SecondService::Echo"
 		}
 	}
 }

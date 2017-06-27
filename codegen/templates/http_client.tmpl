@@ -67,6 +67,9 @@ func (c *{{$clientName}}) {{title .Name}}(
 	r {{.RequestType}},
 ) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
+	{{if .ResponseType -}}
+	var defaultRes  {{.ResponseType}}
+	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
 	)
@@ -93,11 +96,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}nil, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
 	respHeaders := map[string]string{}
@@ -129,16 +132,20 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+			{{end -}}
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
@@ -170,35 +177,39 @@ func (c *{{$clientName}}) {{title .Name}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
+			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
+			{{else -}}
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+			{{end -}}
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
 			// TODO(jakev): read response headers and put them in body
 			{{- end}}
 
-			return &responseBody, respHeaders, nil
+			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		{{range $idx, $exception := .Exceptions}}
 		case {{$exception.StatusCode.Code}}:
 			var exception {{$exception.Type}}
 			err = res.ReadAndUnmarshalBody(&exception)
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
-			return nil, respHeaders, &exception
+			return defaultRes, respHeaders, &exception
 		{{end}}
 		default:
 			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
-				return nil, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}nil, {{end}}respHeaders, errors.Errorf(
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }

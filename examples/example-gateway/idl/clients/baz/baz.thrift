@@ -39,7 +39,7 @@ service SimpleService {
 }
 
 service SecondService {
-    void Echo(
+    string Echo(
         1: required string arg
     )
 }
