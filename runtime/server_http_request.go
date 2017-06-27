@@ -349,6 +349,30 @@ func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
 	return req.queryValues[key], true
 }
 
+// CheckQueryValue will return bool if the query param exists.
+func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
+	success := req.parseQueryValues()
+	if !success {
+		return false
+	}
+
+	values := req.queryValues[key]
+	if len(values) == 0 {
+		req.Logger.Warn("Got request with missing query string value",
+			zap.String("expectedKey", key),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return false
+	}
+
+	return true
+}
+
 // ReadAndUnmarshalBody will try to unmarshal into struct or fail
 func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	body json.Unmarshaler,
