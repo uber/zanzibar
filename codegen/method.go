@@ -583,14 +583,19 @@ func (ms *MethodSpec) setQueryParamStatements(
 			continue
 		}
 
+		okIdentifierName := camelCase(fieldName) + "Ok"
 		if field.Required {
-			okIdentifierName := camelCase(fieldName) + "Ok"
 			statements.appendf("%s := req.CheckQueryValue(%q)",
 				okIdentifierName, fieldName,
 			)
 			statements.appendf("if !%s {", okIdentifierName)
 			statements.append("\treturn")
 			statements.append("}")
+		} else {
+			statements.appendf("%s := req.HasQueryValue(%q)",
+				okIdentifierName, fieldName,
+			)
+			statements.appendf("if %s {", okIdentifierName)
 		}
 
 		var pointerMethod string
@@ -644,9 +649,10 @@ func (ms *MethodSpec) setQueryParamStatements(
 				strings.Title(field.Name), identifierName,
 			)
 		} else {
-			statements.appendf("requestBody.%s = ptr.%s(%s)",
+			statements.appendf("\trequestBody.%s = ptr.%s(%s)",
 				strings.Title(field.Name), pointerMethod, identifierName,
 			)
+			statements.append("}")
 		}
 
 		// new line after block.
