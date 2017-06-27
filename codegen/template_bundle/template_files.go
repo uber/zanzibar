@@ -918,7 +918,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			{{else -}}
-			err = res.ReadAndUnmarshalNonPointerValue(&responseBody)
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
 			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
@@ -963,7 +963,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			{{else -}}
-			err = res.ReadAndUnmarshalNonPointerValue(&responseBody)
+			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
 			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
@@ -1010,7 +1010,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5898, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5894, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

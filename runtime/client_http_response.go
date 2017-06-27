@@ -117,8 +117,8 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
 	return res.UnmarshalBody(body, rawBody)
 }
 
-// ReadAndUnmarshalNonPointerValue will try to unmarshal non pointer value or fail
-func (res *ClientHTTPResponse) ReadAndUnmarshalNonPointerValue(v interface{}) error {
+// ReadAndUnmarshalNonStructBody will try to unmarshal non pointer value or fail
+func (res *ClientHTTPResponse) ReadAndUnmarshalNonStructBody(v interface{}) error {
 	rawBody, err := res.ReadAll()
 	if err != nil {
 		return err
