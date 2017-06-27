@@ -187,6 +187,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 	req.Logger.Warn("Got request with invalid query string types",
 		zap.String("expected", "bool"),
 		zap.String("actual", value),
+		zap.String("key", key),
 		zap.String("error", err.Error()),
 	)
 	if !req.parseFailed {
@@ -211,6 +212,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int8"),
 			zap.String("actual", value),
+			zap.String("key", key),
 			zap.String("error", err.Error()),
 		)
 		if !req.parseFailed {
@@ -238,6 +240,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int16"),
 			zap.String("actual", value),
+			zap.String("key", key),
 			zap.String("error", err.Error()),
 		)
 		if !req.parseFailed {
@@ -265,6 +268,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int32"),
 			zap.String("actual", value),
+			zap.String("key", key),
 			zap.String("error", err.Error()),
 		)
 		if !req.parseFailed {
@@ -292,6 +296,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int64"),
 			zap.String("actual", value),
+			zap.String("key", key),
 			zap.String("error", err.Error()),
 		)
 		if !req.parseFailed {
@@ -319,6 +324,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "float64"),
 			zap.String("actual", value),
+			zap.String("key", key),
 			zap.String("error", err.Error()),
 		)
 		if !req.parseFailed {
