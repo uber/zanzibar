@@ -583,6 +583,16 @@ func (ms *MethodSpec) setQueryParamStatements(
 			continue
 		}
 
+		if field.Required {
+			okIdentifierName := camelCase(fieldName) + "Ok"
+			statements.appendf("%s := req.CheckQueryValue(%q)",
+				okIdentifierName, fieldName,
+			)
+			statements.appendf("if !%s {", okIdentifierName)
+			statements.append("\treturn")
+			statements.append("}")
+		}
+
 		var pointerMethod string
 
 		switch realType.(type) {
