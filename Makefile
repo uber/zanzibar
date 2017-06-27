@@ -8,7 +8,8 @@ COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" \
+	-e "codegen/templates/" -e "codegen/template_bundle/" -e "mock"
 
 # list all executables
 PROGS = benchmarks/benchserver/benchserver \
@@ -22,7 +23,9 @@ EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 check-licence:
 	@echo "Checking uber-licence..."
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' \
+		--dir '!vendor' --dir '!examples' --dir '!.tmp_gen' \
+		--dir '!template_bundle' --dir '!mock'
 
 .PHONY: fix-licence
 fix-licence:
