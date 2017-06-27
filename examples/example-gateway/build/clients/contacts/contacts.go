@@ -59,7 +59,7 @@ func (c *ContactsClient) SaveContacts(
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 
-	var _res *clientsContactsContacts.SaveContactsResponse
+	var defaultRes *clientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "saveContacts", c.HTTPClient,
 	)
@@ -69,11 +69,11 @@ func (c *ContactsClient) SaveContacts(
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
-		return _res, nil, err
+		return defaultRes, nil, err
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return _res, nil, err
+		return defaultRes, nil, err
 	}
 
 	respHeaders := map[string]string{}
@@ -88,13 +88,13 @@ func (c *ContactsClient) SaveContacts(
 		var responseBody clientsContactsContacts.SaveContactsResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
-			return _res, respHeaders, err
+			return defaultRes, respHeaders, err
 		}
 
 		return &responseBody, respHeaders, nil
 	}
 
-	return _res, respHeaders, errors.Errorf(
+	return defaultRes, respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }

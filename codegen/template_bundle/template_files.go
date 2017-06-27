@@ -790,7 +790,6 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"encoding/json"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
@@ -852,7 +851,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 ) ({{.ResponseType}}, map[string]string, error) {
 {{end}}
 	{{if .ResponseType -}}
-	var _res  {{.ResponseType}}
+	var defaultRes  {{.ResponseType}}
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "{{.Name}}", c.HTTPClient,
@@ -880,11 +879,11 @@ func (c *{{$clientName}}) {{title .Name}}(
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
 	{{end}} {{- /* <if .RequestType ne ""> */ -}}
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}_res, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 	res, err := req.Do(ctx)
 	if err != nil {
-		return {{if eq .ResponseType ""}}nil, err{{else}}_res, nil, err{{end}}
+		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
 
 	respHeaders := map[string]string{}
@@ -919,14 +918,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			{{else -}}
-			rawBody, err := res.ReadAll()
-			if err != nil {
-				return _res, respHeaders, err
-			}
-			err = json.Unmarshal(rawBody, &responseBody)
+			err = res.ReadAndUnmarshalNonPointerValue(&responseBody)
 			{{end -}}
 			if err != nil {
-				return _res, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
@@ -968,14 +963,10 @@ func (c *{{$clientName}}) {{title .Name}}(
 			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
 			{{else -}}
-			rawBody, err := res.ReadAll()
-			if err != nil {
-				return _res, respHeaders, err
-			}
-			err = json.Unmarshal(rawBody, &responseBody)
+			err = res.ReadAndUnmarshalNonPointerValue(&responseBody)
 			{{end -}}
 			if err != nil {
-				return _res, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 
 			{{- if .ResHeaderFields }}
@@ -988,20 +979,20 @@ func (c *{{$clientName}}) {{title .Name}}(
 			var exception {{$exception.Type}}
 			err = res.ReadAndUnmarshalBody(&exception)
 			if err != nil {
-				return _res, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
-			return _res, respHeaders, &exception
+			return defaultRes, respHeaders, &exception
 		{{end}}
 		default:
 			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
-				return _res, respHeaders, err
+				return defaultRes, respHeaders, err
 			}
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}_res, {{end}}respHeaders, errors.Errorf(
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, errors.Errorf(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
@@ -1019,7 +1010,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6019, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5898, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

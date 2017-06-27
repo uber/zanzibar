@@ -97,7 +97,7 @@ func (res *ClientHTTPResponse) UnmarshalBody(
 		)
 		return errors.Wrapf(
 			err,
-			"Could not parse client(%s) json",
+			"Could not parse client %q json",
 			res.req.ClientID,
 		)
 	}
@@ -115,6 +115,28 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
 	}
 
 	return res.UnmarshalBody(body, rawBody)
+}
+
+// ReadAndUnmarshalNonPointerValue will try to unmarshal non pointer value or fail
+func (res *ClientHTTPResponse) ReadAndUnmarshalNonPointerValue(v interface{}) error {
+	rawBody, err := res.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(rawBody, v)
+	if err != nil {
+		res.req.Logger.Warn("Could not parse client json",
+			zap.String("error", err.Error()),
+		)
+		return errors.Wrapf(
+			err,
+			"Could not parse client %q json",
+			res.req.ClientID,
+		)
+	}
+
+	return nil
 }
 
 // CheckOKResponse checks if the status code is OK.
