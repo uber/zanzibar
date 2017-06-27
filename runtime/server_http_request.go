@@ -349,7 +349,7 @@ func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
 	return req.queryValues[key], true
 }
 
-// CheckQueryValue will return bool if the query param exists.
+// CheckQueryValue will check for a required query param.
 func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 	success := req.parseQueryValues()
 	if !success {
@@ -367,6 +367,21 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 			)
 			req.parseFailed = true
 		}
+		return false
+	}
+
+	return true
+}
+
+// HasQueryValue will return bool if the query param exists.
+func (req *ServerHTTPRequest) HasQueryValue(key string) bool {
+	success := req.parseQueryValues()
+	if !success {
+		return false
+	}
+
+	values := req.queryValues[key]
+	if len(values) == 0 {
 		return false
 	}
 
