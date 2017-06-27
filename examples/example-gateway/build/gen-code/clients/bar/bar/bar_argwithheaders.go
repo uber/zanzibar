@@ -84,15 +84,6 @@ func (v *Bar_ArgWithHeaders_Args) String() string {
 	return fmt.Sprintf("Bar_ArgWithHeaders_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 func (v *Bar_ArgWithHeaders_Args) Equals(rhs *Bar_ArgWithHeaders_Args) bool {
 	if !(v.Name == rhs.Name) {
 		return false
