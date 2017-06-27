@@ -57,6 +57,10 @@ func (handler *ArgWithQueryParamsHandler) HandleRequest(
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithQueryParams_Args
 
+	nameOk := req.CheckQueryValue("name")
+	if !nameOk {
+		return
+	}
 	nameQuery, ok := req.GetQueryValue("name")
 	if !ok {
 		return

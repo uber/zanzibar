@@ -57,6 +57,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithManyQueryParams_Args
 
+	aStrOk := req.CheckQueryValue("aStr")
+	if !aStrOk {
+		return
+	}
 	aStrQuery, ok := req.GetQueryValue("aStr")
 	if !ok {
 		return
@@ -69,6 +73,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptStr = ptr.String(anOptStrQuery)
 
+	aBoolOk := req.CheckQueryValue("aBool")
+	if !aBoolOk {
+		return
+	}
 	aBoolQuery, ok := req.GetQueryBool("aBool")
 	if !ok {
 		return
@@ -81,6 +89,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptBool = ptr.Bool(anOptBoolQuery)
 
+	aInt8Ok := req.CheckQueryValue("aInt8")
+	if !aInt8Ok {
+		return
+	}
 	aInt8Query, ok := req.GetQueryInt8("aInt8")
 	if !ok {
 		return
@@ -93,6 +105,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptInt8 = ptr.Int8(anOptInt8Query)
 
+	aInt16Ok := req.CheckQueryValue("aInt16")
+	if !aInt16Ok {
+		return
+	}
 	aInt16Query, ok := req.GetQueryInt16("aInt16")
 	if !ok {
 		return
@@ -105,6 +121,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptInt16 = ptr.Int16(anOptInt16Query)
 
+	aInt32Ok := req.CheckQueryValue("aInt32")
+	if !aInt32Ok {
+		return
+	}
 	aInt32Query, ok := req.GetQueryInt32("aInt32")
 	if !ok {
 		return
@@ -117,6 +137,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptInt32 = ptr.Int32(anOptInt32Query)
 
+	aInt64Ok := req.CheckQueryValue("aInt64")
+	if !aInt64Ok {
+		return
+	}
 	aInt64Query, ok := req.GetQueryInt64("aInt64")
 	if !ok {
 		return
@@ -129,6 +153,10 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AnOptInt64 = ptr.Int64(anOptInt64Query)
 
+	aFloat64Ok := req.CheckQueryValue("aFloat64")
+	if !aFloat64Ok {
+		return
+	}
 	aFloat64Query, ok := req.GetQueryFloat64("aFloat64")
 	if !ok {
 		return
