@@ -67,11 +67,14 @@ func (handler *ArgWithQueryParamsHandler) HandleRequest(
 	}
 	requestBody.Name = nameQuery
 
-	userUUIDQuery, ok := req.GetQueryValue("userUUID")
-	if !ok {
-		return
+	userUUIDOk := req.HasQueryValue("userUUID")
+	if userUUIDOk {
+		userUUIDQuery, ok := req.GetQueryValue("userUUID")
+		if !ok {
+			return
+		}
+		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
-	requestBody.UserUUID = ptr.String(userUUIDQuery)
 
 	workflow := ArgWithQueryParamsEndpoint{
 		Clients: handler.Clients,
