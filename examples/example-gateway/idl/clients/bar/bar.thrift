@@ -83,7 +83,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
-    string Echo (
+    string echo (
         1: required string name
     ) (
         zanzibar.http.method = "POST"
