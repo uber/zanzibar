@@ -542,7 +542,7 @@ import (
 
 {{range $.TestStubs}}
 
-func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
+func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
@@ -557,7 +557,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	{{range .ClientStubs}}
-	fake{{.ClientMethod | Title}} := func(w http.ResponseWriter, r *http.Request) {
+	fake{{.ClientMethod | title}} := func(w http.ResponseWriter, r *http.Request) {
 
 		{{range $k, $v := .ClientReqHeaders -}}
 		assert.Equal(
@@ -579,7 +579,7 @@ func Test{{.HandlerID | Title}}{{.TestName | Title}}OKResponse(t *testing.T) {
 	}
 
 	gateway.HTTPBackends()["{{$clientID}}"].HandleFunc(
-		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | Title}},
+		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | title}},
 	)
 
 	{{end -}}
@@ -686,7 +686,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	{{range .ClientStubs}}
-	{{$clientFunc := printf "fake%s" (Title .ClientMethod) -}}
+	{{$clientFunc := printf "fake%s" (title .ClientMethod) -}}
 	{{$clientFunc}} := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
