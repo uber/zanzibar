@@ -108,7 +108,18 @@ func (w CallEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
-	_, err := w.Clients.Baz.Call(
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
+	}
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
+
+	cliRespHeaders, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -138,6 +149,8 @@ func (w CallEndpoint) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
 
 	return resHeaders, nil
 }
