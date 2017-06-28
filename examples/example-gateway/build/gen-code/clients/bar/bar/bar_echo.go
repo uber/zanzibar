@@ -70,7 +70,7 @@ func (v *Bar_Echo_Args) Equals(rhs *Bar_Echo_Args) bool {
 }
 
 func (v *Bar_Echo_Args) MethodName() string {
-	return "Echo"
+	return "echo"
 }
 
 func (v *Bar_Echo_Args) EnvelopeType() wire.EnvelopeType {
@@ -173,15 +173,6 @@ func (v *Bar_Echo_Result) String() string {
 	return fmt.Sprintf("Bar_Echo_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 func (v *Bar_Echo_Result) Equals(rhs *Bar_Echo_Result) bool {
 	if !_String_EqualsPtr(v.Success, rhs.Success) {
 		return false
@@ -190,7 +181,7 @@ func (v *Bar_Echo_Result) Equals(rhs *Bar_Echo_Result) bool {
 }
 
 func (v *Bar_Echo_Result) MethodName() string {
-	return "Echo"
+	return "echo"
 }
 
 func (v *Bar_Echo_Result) EnvelopeType() wire.EnvelopeType {
