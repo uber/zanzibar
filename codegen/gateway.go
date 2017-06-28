@@ -94,10 +94,6 @@ type ClientSpec struct {
 	// ClientName, PascalCase name of the client, the generated
 	// `Clients` struct will contain a field of this name
 	ClientName string
-	// ThriftServiceName, if the thrift file has multiple
-	// services then this is the service that describes the client
-	// TODO: this field needs to be deprecated for multi-service support
-	ThriftServiceName string
 	// ExposedMethods is a map of exposed method name to thrift "$service::$method"
 	// only the method values in this map are generated for the client
 	ExposedMethods map[string]string
@@ -224,14 +220,29 @@ func NewHTTPClientSpec(
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
+	exposedMethods := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	if len(exposedMethods) == 0 {
+		return nil, errors.Errorf(
+			"No methods are exposed in client config: %s",
+			instance.JSONFileName,
+		)
+	}
+
 	cspec, err := newClientSpec(instance, clientConfig, true, h)
 	if err != nil {
 		return nil, err
 	}
 
-	if cspec.ThriftServiceName == "" {
+	cspec.ExposedMethods = map[string]string{}
+	reversed := map[string]string{}
+	for key, val := range exposedMethods {
+		cspec.ExposedMethods[key] = val.(string)
+		reversed[val.(string)] = key
+	}
+
+	if len(cspec.ExposedMethods) != len(reversed) {
 		return nil, errors.Errorf(
-			"client config (%s) must have serviceName field",
+			"Keys or values of the exposedMethods of are not unique: %s",
 			instance.JSONFileName,
 		)
 	}
@@ -267,11 +278,6 @@ func newClientSpec(
 	}
 	mspec.PackageName = mspec.PackageName + "Client"
 
-	thriftServiceName := ""
-	if serviceName, ok := config["serviceName"]; ok {
-		thriftServiceName = serviceName.(string)
-	}
-
 	return &ClientSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           instance.JSONFileName,
@@ -283,7 +289,6 @@ func newClientSpec(
 		ThriftFile:         thriftFile,
 		ClientID:           instance.InstanceName,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
-		ThriftServiceName:  thriftServiceName,
 	}, nil
 }
 

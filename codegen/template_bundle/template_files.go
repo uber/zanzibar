@@ -806,16 +806,16 @@ import (
 )
 
 {{- $clientID := .ClientID -}}
+{{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := .ExportType }}
 {{- $exportName := .ExportName}}
-{{range .Services}}
-// {{$clientName}} is the http client for service {{.Name}}.
+// {{$clientName}} is the http client.
 type {{$clientName}} struct {
 	ClientID string
 	HTTPClient   *zanzibar.HTTPClient
 }
 
-// NewClient returns a new http client for service {{.Name}}.
+// NewClient returns a new http client.
 func {{$exportName}}(
 	gateway *zanzibar.Gateway,
 ) *{{$clientName}} {
@@ -831,32 +831,20 @@ func {{$exportName}}(
 
 {{/*  ========================= Method =========================  */ -}}
 
+{{range $svc := .Services}}
 {{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{if $methodName -}}
 
-// {{title .Name}} calls "{{.HTTPPath}}" endpoint.
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-func (c *{{$clientName}}) {{title .Name}}(
+// {{$methodName}} calls "{{.HTTPPath}}" endpoint.
+func (c *{{$clientName}}) {{$methodName}}(
 	ctx context.Context,
 	headers map[string]string,
-) (map[string]string, error) {
-{{else if eq .RequestType "" }}
-func (c *{{$clientName}}) {{title .Name}}(
-	ctx context.Context,
-	headers map[string]string,
-) ({{.ResponseType}}, map[string]string, error) {
-{{else if eq .ResponseType "" }}
-func (c *{{$clientName}}) {{title .Name}}(
-	ctx context.Context,
-	headers map[string]string,
+	{{if ne .RequestType "" -}}
 	r {{.RequestType}},
-) (map[string]string, error) {
-{{else}}
-func (c *{{$clientName}}) {{title .Name}}(
-	ctx context.Context,
-	headers map[string]string,
-	r {{.RequestType}},
-) ({{.ResponseType}}, map[string]string, error) {
-{{end}}
+	{{end -}}
+) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
@@ -1003,6 +991,7 @@ func (c *{{$clientName}}) {{title .Name}}(
 		"Unexpected http client response (%d)", res.StatusCode,
 	)
 }
+{{end}}
 {{end}} {{- /* <range .Methods> */ -}}
 {{end}} {{- /* <range .Services> */ -}}
 `)
@@ -1017,7 +1006,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5894, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 5583, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -274,6 +274,11 @@ func (g *HTTPClientGenerator) Generate(
 		)
 	}
 
+	exposedMethods, err := getExposedMethods(clientSpec, instance)
+	if err != nil {
+		return nil, err
+	}
+
 	clientMeta := &ClientMeta{
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
@@ -281,6 +286,7 @@ func (g *HTTPClientGenerator) Generate(
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
+		ExposedMethods:   exposedMethods,
 	}
 
 	client, err := g.templates.execTemplate(
@@ -368,45 +374,9 @@ func (g *TChannelClientGenerator) Generate(
 		)
 	}
 
-	// reverse index the exposed methods map
-	exposedMethods := map[string]string{}
-	for k, v := range clientSpec.ExposedMethods {
-		exposedMethods[v] = k
-	}
-
-	// TODO: Verify all exposedMethods exist and are valid.
-	for exposedMethod := range exposedMethods {
-		segments := strings.Split(exposedMethod, "::")
-		thriftService := segments[0]
-		thriftMethod := segments[1]
-		found := false
-
-		for _, candidateService := range clientSpec.ModuleSpec.Services {
-			if found {
-				break
-			}
-			if candidateService.Name != thriftService {
-				continue
-			}
-
-			for _, candidateMethod := range candidateService.Methods {
-				if candidateMethod.Name != thriftMethod {
-					continue
-				}
-
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return nil, errors.Errorf(
-				"Invalid exposedMethods for tchannel client (%q). "+
-					"The exposedMethod (%q) does not exist",
-				instance.InstanceName,
-				exposedMethod,
-			)
-		}
+	exposedMethods, err := getExposedMethods(clientSpec, instance)
+	if err != nil {
+		return nil, err
 	}
 
 	clientMeta := &ClientMeta{
@@ -1158,4 +1128,48 @@ func height(i *ModuleInstance, known map[*ModuleInstance]int) int {
 	}
 	known[i] = mh + 1
 	return mh + 1
+}
+
+func getExposedMethods(clientSpec *ClientSpec, instance *ModuleInstance) (map[string]string, error) {
+	// reverse index the exposed methods map
+	exposedMethods := map[string]string{}
+	for k, v := range clientSpec.ExposedMethods {
+		exposedMethods[v] = k
+	}
+
+	// TODO: Verify all exposedMethods exist and are valid.
+	for exposedMethod := range exposedMethods {
+		segments := strings.Split(exposedMethod, "::")
+		thriftService := segments[0]
+		thriftMethod := segments[1]
+		found := false
+
+		for _, candidateService := range clientSpec.ModuleSpec.Services {
+			if found {
+				break
+			}
+			if candidateService.Name != thriftService {
+				continue
+			}
+
+			for _, candidateMethod := range candidateService.Methods {
+				if candidateMethod.Name != thriftMethod {
+					continue
+				}
+
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, errors.Errorf(
+				"Invalid exposedMethods for client %q, method %q not found",
+				instance.InstanceName,
+				exposedMethod,
+			)
+		}
+	}
+
+	return exposedMethods, nil
 }

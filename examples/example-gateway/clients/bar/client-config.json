@@ -4,6 +4,18 @@
 	"config": {
 		"thriftFile": "clients/bar/bar.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"serviceName": "Bar"
+		"serviceName": "Bar",
+		"exposedMethods": {
+			"Normal": "Bar::normal",
+			"NoRequest": "Bar::noRequest",
+			"MissingArg": "Bar::missingArg",
+			"TooManyArgs": "Bar::tooManyArgs",
+			"ArgNotStruct": "Bar::argNotStruct",
+			"ArgWithHeaders": "Bar::argWithHeaders",
+			"ArgWithQueryParams": "Bar::argWithQueryParams",
+			"ArgWithQueryHeader": "Bar::argWithQueryHeader",
+			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
+			"Echo": "Echo::echo"
+		}
 	}
 }

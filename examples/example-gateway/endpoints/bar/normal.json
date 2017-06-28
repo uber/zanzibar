@@ -7,7 +7,7 @@
 	"thriftMethodName": "Bar::normal",
 	"workflowType": "httpClient",
 	"clientID": "bar",
-	"clientMethod": "normal",
+	"clientMethod": "Normal",
 	"testFixtures": [],
 	"middlewares": [
 		{"name" : "example",

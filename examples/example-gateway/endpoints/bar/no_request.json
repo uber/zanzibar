@@ -7,7 +7,7 @@
 	"thriftMethodName": "Bar::noRequest",
 	"workflowType": "httpClient",
 	"clientID": "bar",
-	"clientMethod": "noRequest",
+	"clientMethod": "NoRequest",
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},
