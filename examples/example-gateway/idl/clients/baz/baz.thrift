@@ -28,6 +28,9 @@ service SimpleService {
         1: required BazRequest arg
     ) throws (
         1: AuthErr authErr
+    ) (
+        zanzibar.http.reqHeaders = "x-uuid,x-token"
+        zanzibar.http.resHeaders = "some-res-header"
     )
 
     base.BazResponse Ping() ()

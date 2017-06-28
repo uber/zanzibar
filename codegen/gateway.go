@@ -370,12 +370,12 @@ type EndpointSpec struct {
 	Middlewares []MiddlewareSpec
 
 	// ReqHeaderMap, maps headers from server to client.
-	// Keeps keys in a sorted array so that goldenfiles have
+	// Keeps keys in a sorted array so that golden files have
 	// deterministic orderings
 	ReqHeaderMap     map[string]string
 	ReqHeaderMapKeys []string
 	// ResHeaderMap, maps headers from client to server.
-	// Keeps keys in a sorted array so that goldenfiles have
+	// Keeps keys in a sorted array so that golden files have
 	// deterministic orderings
 	ResHeaderMap     map[string]string
 	ResHeaderMapKeys []string

@@ -10,6 +10,11 @@
 	"clientMethod": "Call",
 	"testFixtures": [],
 	"middlewares": [],
-	"reqHeaderMap": {},
-	"resHeaderMap": {}
+	"reqHeaderMap": {
+		"X-Uuid": "X-Uuid",
+		"X-Token": "X-Token"
+	},
+	"resHeaderMap": {
+		"Some-Res-Header": "Some-Res-Header"
+	}
 }
