@@ -568,6 +568,8 @@ func (ms *MethodSpec) setTypeConverters(
 func (ms *MethodSpec) setQueryParamStatements(
 	funcSpec *compile.FunctionSpec,
 ) error {
+	// If a thrift field has a http.ref annotation then we
+	// should not read this field from query parameters.
 	statements := LineBuilder{}
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
@@ -577,8 +579,6 @@ func (ms *MethodSpec) setQueryParamStatements(
 		identifierName := camelCase(fieldName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
-		// If a thrift field has a http.ref annotation then we
-		// should not read this field from query parameters.
 		if httpRefAnnotation != "" {
 			continue
 		}
