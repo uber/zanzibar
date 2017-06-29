@@ -26,19 +26,52 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/mock/mock_repository"
 )
+
+type fakeFetcher struct {
+	Root       string
+	Remote     string
+	LocalDir   string
+	CurVersion string
+	NeedUpdate bool
+	errClone   error
+	errUpdate  error
+	errVersion error
+}
+
+func (f *fakeFetcher) Clone(root, remote string) (string, error) {
+	if root == f.Root && remote == f.Remote {
+		return f.LocalDir, f.errClone
+	}
+	return "", errors.Errorf("unknown root %q and remote %q", root, remote)
+}
+
+func (f *fakeFetcher) Update(localDir, remote string) (bool, error) {
+	if localDir == f.LocalDir {
+		return f.NeedUpdate, f.errUpdate
+	}
+	return false, errors.Errorf("unknown localDir %q", localDir)
+}
+
+func (f *fakeFetcher) Version(localDir string) (string, error) {
+	if localDir == f.LocalDir {
+		return f.CurVersion, f.errVersion
+	}
+	return "", errors.Errorf("unknown localDir %q", localDir)
+}
 
 func TestNewRepository(t *testing.T) {
 	root := os.TempDir()
 	localDir := filepath.Join(root, "repo")
 	remote := "gitolite@domain/repo"
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
-	fetcher.EXPECT().Clone(root, remote).Return(localDir, nil)
-	fetcher.EXPECT().Version(localDir).Return("version1", nil)
+	fetcher := &fakeFetcher{
+		Root:       root,
+		Remote:     remote,
+		LocalDir:   localDir,
+		CurVersion: "version1",
+	}
 	repository, err := NewRepository(root, remote, fetcher, 1*time.Minute)
 	if !assert.NoError(t, err) {
 		return
@@ -51,9 +84,13 @@ func TestNewRepository(t *testing.T) {
 func TestNewRepositoryWithCloneError(t *testing.T) {
 	root := os.TempDir()
 	remote := "gitolite@domain/repo"
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
-	errClone := errors.New("failed to clone")
-	fetcher.EXPECT().Clone(root, remote).Return("", errClone)
+	localDir := filepath.Join(root, "repo")
+	fetcher := &fakeFetcher{
+		Root:     root,
+		Remote:   remote,
+		LocalDir: localDir,
+		errClone: errors.New("failed to clone"),
+	}
 	_, err := NewRepository(root, remote, fetcher, 1*time.Minute)
 	assert.Error(t, err, "Should return an error.")
 }
@@ -62,37 +99,43 @@ func TestNewRepositoryWithVersionError(t *testing.T) {
 	root := os.TempDir()
 	remote := "gitolite@domain/repo"
 	localDir := filepath.Join(root, "repo")
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
-	errVersion := errors.New("failed to get version")
-	fetcher.EXPECT().Clone(root, remote).Return(localDir, nil)
-	fetcher.EXPECT().Version(localDir).Return("", errVersion)
+	fetcher := &fakeFetcher{
+		Root:       root,
+		Remote:     remote,
+		LocalDir:   localDir,
+		errVersion: errors.New("failed to get version"),
+	}
 	_, err := NewRepository(root, remote, fetcher, 1*time.Minute)
 	assert.Error(t, err, "Should return an error.")
 }
 
 func TestRepositoryUpdateSuccessfully(t *testing.T) {
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
+	remote := "remote"
+	localDir := "local_dir"
+	fetcher := &fakeFetcher{
+		Remote:     remote,
+		LocalDir:   localDir,
+		NeedUpdate: true,
+		CurVersion: "new_version",
+	}
 	r := &Repository{
-		remote:          "remote",
-		localDir:        "local_dir",
+		remote:          remote,
+		localDir:        localDir,
 		version:         "init_version",
 		fetcher:         fetcher,
 		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
-	fetcher.EXPECT().Update(r.localDir, r.remote).Return(true, nil)
-	fetcher.EXPECT().Version(r.localDir).Return("new_version", nil)
 	assert.Equal(t, true, r.Update(), "Failed to update repository.")
 	assert.Equal(t, "new_version", r.Version(), "Failed to update version.")
 }
 
 func TestRepositoryUpdateTooSoon(t *testing.T) {
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
 	r := &Repository{
 		remote:          "remote",
 		localDir:        "local_dir",
 		version:         "init_version",
-		fetcher:         fetcher,
+		fetcher:         &fakeFetcher{},
 		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 3 * time.Minute,
 	}
@@ -100,34 +143,43 @@ func TestRepositoryUpdateTooSoon(t *testing.T) {
 }
 
 func TestRepositoryUpdateWithError(t *testing.T) {
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
+	remote := "remote"
+	localDir := "local_dir"
+	fetcher := &fakeFetcher{
+		Remote:     remote,
+		LocalDir:   localDir,
+		NeedUpdate: false,
+		errUpdate:  errors.New("failed to upate"),
+	}
 	r := &Repository{
-		remote:          "remote",
-		localDir:        "local_dir",
+		remote:          remote,
+		localDir:        localDir,
 		version:         "init_version",
 		fetcher:         fetcher,
 		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
-	errUpdate := errors.New("failed to upate")
-	fetcher.EXPECT().Update(r.localDir, r.remote).Return(false, errUpdate)
 	assert.Equal(t, false, r.Update(), "Should not update repository.")
 	assert.Equal(t, "init_version", r.Version(), "Should not update version.")
 }
 
 func TestRepositoryUpdateWithUnknownVersion(t *testing.T) {
-	fetcher := mock_repository.NewMockFetcher(gomock.NewController(t))
+	remote := "remote"
+	localDir := "local_dir"
+	fetcher := &fakeFetcher{
+		Remote:     remote,
+		LocalDir:   localDir,
+		NeedUpdate: true,
+		errVersion: errors.New("failed to fetch version"),
+	}
 	r := &Repository{
-		remote:          "remote",
-		localDir:        "local_dir",
+		remote:          remote,
+		localDir:        localDir,
 		version:         "init_version",
 		fetcher:         fetcher,
 		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
-	fetcher.EXPECT().Update(r.localDir, r.remote).Return(true, nil)
-	errVersion := errors.New("failed to fetch version")
-	fetcher.EXPECT().Version(r.localDir).Return("", errVersion)
 	assert.Equal(t, true, r.Update(), "Failed to update repository.")
 	assert.Equal(t, "unknown", r.Version(), "Failed to update version.")
 }
