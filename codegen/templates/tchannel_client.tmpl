@@ -19,10 +19,30 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{- $clientName := .ExportType }}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+
+// Client defines {{$clientID}} client interface.
+type Client interface {
+{{range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if $methodName -}}
+	{{$methodName}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args {{.RequestType}},
+		{{end -}}
+	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+{{- end -}}
+{{- end -}}
+{{- end -}}
+}
+
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway) *{{$clientName}} {
+func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
