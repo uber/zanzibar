@@ -164,18 +164,18 @@ func NewTChannelClientSpec(
 		return nil, err
 	}
 
-	cspec.ExposedMethods = map[string]string{}
-	reversed := map[string]string{}
+	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
+	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
 		cspec.ExposedMethods[key] = val.(string)
+		if _, ok := reversed[val.(string)]; ok {
+			return nil, errors.Errorf(
+				"value %q of the exposedMethods is not unique: %s",
+				val.(string),
+				instance.JSONFileName,
+			)
+		}
 		reversed[val.(string)] = key
-	}
-
-	if len(cspec.ExposedMethods) != len(reversed) {
-		return nil, errors.Errorf(
-			"Keys or values of the exposedMethods of are not unique: %s",
-			instance.JSONFileName,
-		)
 	}
 
 	return cspec, nil
@@ -233,18 +233,18 @@ func NewHTTPClientSpec(
 		return nil, err
 	}
 
-	cspec.ExposedMethods = map[string]string{}
-	reversed := map[string]string{}
+	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
+	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
 		cspec.ExposedMethods[key] = val.(string)
+		if _, ok := reversed[val.(string)]; ok {
+			return nil, errors.Errorf(
+				"value %q of the exposedMethods is not unique: %s",
+				val.(string),
+				instance.JSONFileName,
+			)
+		}
 		reversed[val.(string)] = key
-	}
-
-	if len(cspec.ExposedMethods) != len(reversed) {
-		return nil, errors.Errorf(
-			"Keys or values of the exposedMethods of are not unique: %s",
-			instance.JSONFileName,
-		)
 	}
 
 	return cspec, nil
