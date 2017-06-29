@@ -33,8 +33,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 
-	"encoding/json"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -222,19 +220,11 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errLogs := gateway.ErrorLogs()
-
-	logLines := errLogs["Could not ReadAll() body"]
+	logLines := gateway.Logs("error", "Could not ReadAll() body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorField := lineStruct["error"].(string)
 	assert.Equal(t, "unexpected EOF", errorField)
 }
@@ -396,19 +386,12 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errorLogs := gateway.ErrorLogs()
-	logLines := errorLogs["Could not make client request"]
+	logLines := gateway.Logs("warn", "Could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorMsg := lineStruct["error"].(string)
 	assert.Contains(t, errorMsg, "dial tcp")
 }
@@ -648,19 +631,12 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	errorLogs := gateway.ErrorLogs()
-	logLines := errorLogs["Could not make client request"]
+	logLines := gateway.Logs("warn", "Could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorMsg := lineStruct["error"].(string)
 	assert.Contains(t, errorMsg, "dial tcp")
 }

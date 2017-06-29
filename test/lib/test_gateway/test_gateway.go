@@ -57,10 +57,15 @@ type TestGateway interface {
 	HTTPBackends() map[string]*testBackend.TestHTTPBackend
 	TChannelBackends() map[string]*testBackend.TestTChannelBackend
 	HTTPPort() int
-	ErrorLogs() map[string][]string
+	Logs(level string, msg string) []LogMessage
+	// AllLogs() returns a map of msg to a list of LogMessage
+	AllLogs() map[string][]LogMessage
 
 	Close()
 }
+
+// LogMessage is a json log record parsed into map.
+type LogMessage map[string]interface{}
 
 // ChildProcessGateway for testing
 type ChildProcessGateway struct {
@@ -72,7 +77,7 @@ type ChildProcessGateway struct {
 	m3Server         *testM3Server.FakeM3Server
 	backendsHTTP     map[string]*testBackend.TestHTTPBackend
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
-	errorLogs        map[string][]string
+	logMessages      map[string][]LogMessage
 	channel          *tchannel.Channel
 	serviceName      string
 	startTime        time.Time
@@ -172,7 +177,7 @@ func CreateGateway(
 		},
 		TChannelClient:   tchannelClient,
 		jsonLines:        []string{},
-		errorLogs:        map[string][]string{},
+		logMessages:      map[string][]LogMessage{},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
 	}
@@ -252,9 +257,31 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 	return gateway.RealHTTPPort
 }
 
-// ErrorLogs ...
-func (gateway *ChildProcessGateway) ErrorLogs() map[string][]string {
-	return gateway.errorLogs
+// Logs ...
+func (gateway *ChildProcessGateway) Logs(
+	level string, msg string,
+) []LogMessage {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
+
+	lines := gateway.logMessages[msg]
+	for _, line := range lines {
+		if line["level"].(string) != level {
+			return nil
+		}
+	}
+
+	return lines
+}
+
+// AllLogs ...
+func (gateway *ChildProcessGateway) AllLogs() map[string][]LogMessage {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
+
+	return gateway.logMessages
 }
 
 // Close test gateway

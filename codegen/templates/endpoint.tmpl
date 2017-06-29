@@ -64,9 +64,12 @@ func (handler *{{$handlerName}}) HandleRequest(
 
 	{{if ne .RequestType ""}}
 	var requestBody {{unref .RequestType}}
+
+	{{- if ne .HTTPMethod "GET"}}
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+	{{end}}
 	{{end}}
 
 	{{range $headerName, $headerInfo := .ReqHeaderFields}}
@@ -77,6 +80,10 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{else}}
 	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
 	{{end}}
+	{{end}}
+
+	{{range $index, $line := .QueryParamGoStatements -}}
+	{{$line}}
 	{{end}}
 
 	workflow := {{$workflow}}{

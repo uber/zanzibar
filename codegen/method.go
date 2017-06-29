@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -57,6 +58,10 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
+	IsEndpoint   bool
+
+	// Statements for reading query parameters.
+	QueryParamGoStatements []string
 
 	// ReqHeaderFields is a map of "header name" to
 	// a golang field accessor expression like ".Foo.Bar"
@@ -142,6 +147,7 @@ func NewMethod(
 	var err error
 	var ok bool
 	method.Name = funcSpec.MethodName()
+	method.IsEndpoint = isEndpoint
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
 
@@ -186,9 +192,16 @@ func NewMethod(
 	method.setValidStatusCodes()
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
-		return nil, errors.Errorf(
-			"invalid annotation: HTTP GET method with body type",
-		)
+		if !method.IsEndpoint {
+			return nil, errors.Errorf(
+				"invalid annotation: HTTP GET method cannot have a body",
+			)
+		}
+
+		err := method.setQueryParamStatements(funcSpec)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var httpPath string
@@ -515,8 +528,8 @@ func (ms *MethodSpec) setTypeConverters(
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
 	typeConverter := &TypeConverter{
-		Lines:  []string{},
-		Helper: h,
+		LineBuilder: LineBuilder{},
+		Helper:      h,
 	}
 
 	err := typeConverter.GenStructConverter(structType, downstreamStructType)
@@ -524,7 +537,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertRequestGoStatements = typeConverter.Lines
+	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
@@ -538,8 +551,8 @@ func (ms *MethodSpec) setTypeConverters(
 	downstreamRespFields := downstreamRespType.(*compile.StructSpec).Fields
 
 	respConverter := &TypeConverter{
-		Lines:  []string{},
-		Helper: h,
+		LineBuilder: LineBuilder{},
+		Helper:      h,
 	}
 
 	err = respConverter.GenStructConverter(downstreamRespFields, respFields)
@@ -547,7 +560,121 @@ func (ms *MethodSpec) setTypeConverters(
 		return err
 	}
 
-	ms.ConvertResponseGoStatements = respConverter.Lines
+	ms.ConvertResponseGoStatements = respConverter.GetLines()
+
+	return nil
+}
+
+func pointerMethodType(typeSpec compile.TypeSpec) string {
+	var pointerMethod string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		pointerMethod = "Bool"
+	case *compile.I8Spec:
+		pointerMethod = "Int8"
+	case *compile.I16Spec:
+		pointerMethod = "Int16"
+	case *compile.I32Spec:
+		pointerMethod = "Int32"
+	case *compile.I64Spec:
+		pointerMethod = "Int64"
+	case *compile.DoubleSpec:
+		pointerMethod = "Float64"
+	case *compile.StringSpec:
+		pointerMethod = "String"
+	default:
+		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+	}
+
+	return pointerMethod
+}
+
+func getQueryMethodForType(typeSpec compile.TypeSpec) string {
+	var queryMethod string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		queryMethod = "GetQueryBool"
+	case *compile.I8Spec:
+		queryMethod = "GetQueryInt8"
+	case *compile.I16Spec:
+		queryMethod = "GetQueryInt16"
+	case *compile.I32Spec:
+		queryMethod = "GetQueryInt32"
+	case *compile.I64Spec:
+		queryMethod = "GetQueryInt64"
+	case *compile.DoubleSpec:
+		queryMethod = "GetQueryFloat64"
+	case *compile.StringSpec:
+		queryMethod = "GetQueryValue"
+	default:
+		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+	}
+
+	return queryMethod
+}
+
+func (ms *MethodSpec) setQueryParamStatements(
+	funcSpec *compile.FunctionSpec,
+) error {
+	// If a thrift field has a http.ref annotation then we
+	// should not read this field from query parameters.
+	statements := LineBuilder{}
+	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	for _, field := range structType {
+		realType := compile.RootTypeSpec(field.Type)
+		fieldName := field.Name
+		identifierName := camelCase(fieldName) + "Query"
+
+		httpRefAnnotation := field.Annotations[antHTTPRef]
+		if httpRefAnnotation != "" {
+			continue
+		}
+
+		okIdentifierName := camelCase(fieldName) + "Ok"
+		if field.Required {
+			statements.appendf("%s := req.CheckQueryValue(%q)",
+				okIdentifierName, fieldName,
+			)
+			statements.appendf("if !%s {", okIdentifierName)
+			statements.append("\treturn")
+			statements.append("}")
+		} else {
+			statements.appendf("%s := req.HasQueryValue(%q)",
+				okIdentifierName, fieldName,
+			)
+			statements.appendf("if %s {", okIdentifierName)
+		}
+
+		pointerMethod := pointerMethodType(realType)
+		queryMethodName := getQueryMethodForType(realType)
+
+		statements.appendf("%s, ok := req.%s(%q)",
+			identifierName, queryMethodName, fieldName,
+		)
+
+		statements.append("if !ok {")
+		statements.append("\treturn")
+		statements.append("}")
+
+		if field.Required {
+			statements.appendf("requestBody.%s = %s",
+				strings.Title(field.Name), identifierName,
+			)
+		} else {
+			statements.appendf("\trequestBody.%s = ptr.%s(%s)",
+				strings.Title(field.Name), pointerMethod, identifierName,
+			)
+			statements.append("}")
+		}
+
+		// new line after block.
+		statements.append("")
+	}
+
+	ms.QueryParamGoStatements = statements.GetLines()
 
 	return nil
 }

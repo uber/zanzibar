@@ -91,4 +91,42 @@ service Bar {
         zanzibar.http.path = "/bar/echo"
         zanzibar.http.status = "200"
     )
+
+    BarResponse argWithQueryParams(
+        1: required string name
+        2: optional string userUUID
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithQueryParams"
+        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithQueryHeader(
+        1: optional string userUUID
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithQueryHeader"
+        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithManyQueryParams(
+        1: required string aStr
+        2: optional string anOptStr
+        3: required bool aBool
+        4: optional bool anOptBool
+        5: required i8 aInt8
+        6: optional i8 anOptInt8
+        7: required i16 aInt16
+        8: optional i16 anOptInt16
+        9: required i32 aInt32
+        10: optional i32 anOptInt32
+        11: required i64 aInt64
+        12: optional i64 anOptInt64
+        13: required double aFloat64
+        14: optional double anOptFloat64
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithManyQueryParams"
+        zanzibar.http.status = "200"
+    )
 }

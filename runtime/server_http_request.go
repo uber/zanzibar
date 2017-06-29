@@ -28,6 +28,8 @@ import (
 
 	"time"
 
+	"strconv"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -41,6 +43,8 @@ type ServerHTTPRequest struct {
 	started     bool
 	startTime   time.Time
 	metrics     *EndpointMetrics
+	queryValues url.Values
+	parseFailed bool
 
 	Logger *zap.Logger
 	Scope  tally.Scope
@@ -61,6 +65,7 @@ func NewServerHTTPRequest(
 	req := &ServerHTTPRequest{
 		gateway:     endpoint.gateway,
 		httpRequest: r,
+		queryValues: nil,
 
 		Logger: endpoint.gateway.Logger,
 		Scope:  endpoint.gateway.MetricScope,
@@ -103,16 +108,283 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		headerValue := req.httpRequest.Header.Get(headerName)
 		if headerValue == "" {
-			req.res.SendErrorString(
-				400, "Missing mandatory header: "+headerName,
-			)
 			req.Logger.Warn("Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
+
+			if !req.parseFailed {
+				req.res.SendErrorString(
+					400, "Missing mandatory header: "+headerName,
+				)
+				req.parseFailed = true
+			}
+
 			return false
 		}
 
 	}
+	return true
+}
+
+func (req *ServerHTTPRequest) parseQueryValues() bool {
+	if req.parseFailed {
+		return false
+	}
+
+	if req.queryValues != nil {
+		return true
+	}
+
+	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string",
+			zap.String("error", err.Error()),
+		)
+
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return false
+	}
+
+	req.queryValues = values
+	return true
+}
+
+// GetQueryValue will return the first query parameter for key or empty string
+func (req *ServerHTTPRequest) GetQueryValue(key string) (string, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return "", false
+	}
+
+	return req.queryValues.Get(key), true
+}
+
+// GetQueryBool will return a query param as a boolean
+func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return false, false
+	}
+
+	value := req.queryValues.Get(key)
+	if value == "true" {
+		return true, true
+	} else if value == "false" {
+		return false, true
+	}
+
+	err := &strconv.NumError{
+		Func: "ParseBool",
+		Num:  value,
+		Err:  strconv.ErrSyntax,
+	}
+
+	req.Logger.Warn("Got request with invalid query string types",
+		zap.String("expected", "bool"),
+		zap.String("actual", value),
+		zap.String("key", key),
+		zap.String("error", err.Error()),
+	)
+	if !req.parseFailed {
+		req.res.SendErrorString(
+			400, "Could not parse query string",
+		)
+		req.parseFailed = true
+	}
+	return false, false
+}
+
+// GetQueryInt8 will return a query params as int8
+func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 8)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int8"),
+			zap.String("actual", value),
+			zap.String("key", key),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int8(number), true
+}
+
+// GetQueryInt16 will return a query params as int16
+func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 16)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int16"),
+			zap.String("actual", value),
+			zap.String("key", key),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int16(number), true
+}
+
+// GetQueryInt32 will return a query params as int32
+func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 32)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int32"),
+			zap.String("actual", value),
+			zap.String("key", key),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return int32(number), true
+}
+
+// GetQueryInt64 will return a query param as int64
+func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "int64"),
+			zap.String("actual", value),
+			zap.String("key", key),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return number, true
+}
+
+// GetQueryFloat64 will return query param key as float64
+func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return 0, false
+	}
+
+	value := req.queryValues.Get(key)
+	number, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		req.Logger.Warn("Got request with invalid query string types",
+			zap.String("expected", "float64"),
+			zap.String("actual", value),
+			zap.String("key", key),
+			zap.String("error", err.Error()),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return 0, false
+	}
+
+	return number, true
+}
+
+// GetQueryValues will return all query parameters for key.
+func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	return req.queryValues[key], true
+}
+
+// CheckQueryValue will check for a required query param.
+func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
+	success := req.parseQueryValues()
+	if !success {
+		return false
+	}
+
+	values := req.queryValues[key]
+	if len(values) == 0 {
+		req.Logger.Warn("Got request with missing query string value",
+			zap.String("expectedKey", key),
+		)
+		if !req.parseFailed {
+			req.res.SendErrorString(
+				400, "Could not parse query string",
+			)
+			req.parseFailed = true
+		}
+		return false
+	}
+
+	return true
+}
+
+// HasQueryValue will return bool if the query param exists.
+func (req *ServerHTTPRequest) HasQueryValue(key string) bool {
+	success := req.parseQueryValues()
+	if !success {
+		return false
+	}
+
+	values := req.queryValues[key]
+	if len(values) == 0 {
+		return false
+	}
+
 	return true
 }
 
@@ -132,10 +404,14 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.res.SendErrorString(500, "Could not ReadAll() body")
 		req.Logger.Error("Could not ReadAll() body",
 			zap.String("error", err.Error()),
 		)
+		if !req.parseFailed {
+			req.res.SendErrorString(500, "Could not ReadAll() body")
+			req.parseFailed = true
+		}
+
 		return nil, false
 	}
 
@@ -148,10 +424,13 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.res.SendErrorString(400, "Could not parse json: "+err.Error())
 		req.Logger.Warn("Could not parse json",
 			zap.String("error", err.Error()),
 		)
+		if !req.parseFailed {
+			req.res.SendErrorString(400, "Could not parse json: "+err.Error())
+			req.parseFailed = true
+		}
 		return false
 	}
 

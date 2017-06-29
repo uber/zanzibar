@@ -46,7 +46,7 @@ type BenchGateway struct {
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
 	logBytes         *bytes.Buffer
 	readLogs         bool
-	errorLogs        map[string][]string
+	logMessages      map[string][]testGateway.LogMessage
 	httpClient       *http.Client
 	tchannelClient   zanzibar.TChannelClient
 }
@@ -122,8 +122,8 @@ func CreateGateway(
 		backendsTChannel: backendsTChannel,
 		logBytes:         bytes.NewBuffer(nil),
 
-		readLogs:  false,
-		errorLogs: map[string][]string{},
+		readLogs:    false,
+		logMessages: map[string][]testGateway.LogMessage{},
 	}
 
 	config := zanzibar.NewStaticConfigOrDie([]string{
@@ -161,11 +161,10 @@ func (gateway *BenchGateway) HTTPPort() int {
 	return int(gateway.ActualGateway.RealHTTPPort)
 }
 
-// ErrorLogs ...
-func (gateway *BenchGateway) ErrorLogs() map[string][]string {
-	if gateway.readLogs {
-		return gateway.errorLogs
-	}
+func (gateway *BenchGateway) buildLogs() {
+	// Logs can be a little late...
+	// So just wait a bit...
+	time.Sleep(time.Millisecond * 15)
 
 	lines := strings.Split(gateway.logBytes.String(), "\n")
 	for i := 0; i < len(lines); i++ {
@@ -183,17 +182,43 @@ func (gateway *BenchGateway) ErrorLogs() map[string][]string {
 
 		msg := lineStruct["msg"].(string)
 
-		msgLogs := gateway.errorLogs[msg]
+		msgLogs := gateway.logMessages[msg]
 		if msgLogs == nil {
-			msgLogs = []string{line}
+			msgLogs = []testGateway.LogMessage{lineStruct}
 		} else {
-			msgLogs = append(msgLogs, line)
+			msgLogs = append(msgLogs, lineStruct)
 		}
-		gateway.errorLogs[msg] = msgLogs
+		gateway.logMessages[msg] = msgLogs
 	}
 
 	gateway.readLogs = true
-	return gateway.errorLogs
+}
+
+// Logs ...
+func (gateway *BenchGateway) Logs(
+	level string, msg string,
+) []testGateway.LogMessage {
+	if !gateway.readLogs {
+		gateway.buildLogs()
+	}
+
+	lines := gateway.logMessages[msg]
+	for _, line := range lines {
+		if line["level"].(string) != level {
+			return nil
+		}
+	}
+
+	return lines
+}
+
+// AllLogs ...
+func (gateway *BenchGateway) AllLogs() map[string][]testGateway.LogMessage {
+	if !gateway.readLogs {
+		gateway.buildLogs()
+	}
+
+	return gateway.logMessages
 }
 
 // HTTPBackends returns the HTTP backends of the gateway

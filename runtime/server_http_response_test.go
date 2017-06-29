@@ -22,7 +22,6 @@ package zanzibar_test
 
 import (
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -78,19 +77,12 @@ func TestInvalidStatusCode(t *testing.T) {
 
 	assert.Equal(t, "true", string(bytes))
 
-	errorLogs := bgateway.ErrorLogs()
-	logLines := errorLogs["Could not emit statusCode metric"]
+	logLines := bgateway.Logs("error", "Could not emit statusCode metric")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	code := lineStruct["UnexpectedStatusCode"].(float64)
 	assert.Equal(t, 999.0, code)
 }
@@ -142,8 +134,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.ErrorLogs()
-	logLines := errorLogs["Could not serialize nil pointer body"]
+	logLines := bgateway.Logs("error", "Could not serialize nil pointer body")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
@@ -202,19 +193,12 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 		string(bytes),
 	)
 
-	errorLogs := bgateway.ErrorLogs()
-	logLines := errorLogs["Could not serialize json response"]
+	logLines := bgateway.Logs("error", "Could not serialize json response")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
-	line := logLines[0]
-	lineStruct := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
-	if !assert.NoError(t, jsonErr, "cannot decode json lines") {
-		return
-	}
-
+	lineStruct := logLines[0]
 	errorText := lineStruct["error"].(string)
 	assert.Equal(t, "cannot serialize", errorText)
 }
