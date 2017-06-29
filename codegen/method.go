@@ -565,6 +565,56 @@ func (ms *MethodSpec) setTypeConverters(
 	return nil
 }
 
+func pointerMethodType(typeSpec compile.TypeSpec) string {
+	var pointerMethod string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		pointerMethod = "Bool"
+	case *compile.I8Spec:
+		pointerMethod = "Int8"
+	case *compile.I16Spec:
+		pointerMethod = "Int16"
+	case *compile.I32Spec:
+		pointerMethod = "Int32"
+	case *compile.I64Spec:
+		pointerMethod = "Int64"
+	case *compile.DoubleSpec:
+		pointerMethod = "Float64"
+	case *compile.StringSpec:
+		pointerMethod = "String"
+	default:
+		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+	}
+
+	return pointerMethod
+}
+
+func getQueryMethodForType(typeSpec compile.TypeSpec) string {
+	var queryMethod string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		queryMethod = "GetQueryBool"
+	case *compile.I8Spec:
+		queryMethod = "GetQueryInt8"
+	case *compile.I16Spec:
+		queryMethod = "GetQueryInt16"
+	case *compile.I32Spec:
+		queryMethod = "GetQueryInt32"
+	case *compile.I64Spec:
+		queryMethod = "GetQueryInt64"
+	case *compile.DoubleSpec:
+		queryMethod = "GetQueryFloat64"
+	case *compile.StringSpec:
+		queryMethod = "GetQueryValue"
+	default:
+		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+	}
+
+	return queryMethod
+}
+
 func (ms *MethodSpec) setQueryParamStatements(
 	funcSpec *compile.FunctionSpec,
 ) error {
@@ -598,47 +648,12 @@ func (ms *MethodSpec) setQueryParamStatements(
 			statements.appendf("if %s {", okIdentifierName)
 		}
 
-		var pointerMethod string
+		pointerMethod := pointerMethodType(realType)
+		queryMethodName := getQueryMethodForType(realType)
 
-		switch realType.(type) {
-		case *compile.BoolSpec:
-			statements.appendf("%s, ok := req.GetQueryBool(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Bool"
-		case *compile.I8Spec:
-			statements.appendf("%s, ok := req.GetQueryInt8(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Int8"
-		case *compile.I16Spec:
-			statements.appendf("%s, ok := req.GetQueryInt16(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Int16"
-		case *compile.I32Spec:
-			statements.appendf("%s, ok := req.GetQueryInt32(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Int32"
-		case *compile.I64Spec:
-			statements.appendf("%s, ok := req.GetQueryInt64(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Int64"
-		case *compile.DoubleSpec:
-			statements.appendf("%s, ok := req.GetQueryFloat64(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "Float64"
-		case *compile.StringSpec:
-			statements.appendf("%s, ok := req.GetQueryValue(%q)",
-				identifierName, fieldName,
-			)
-			pointerMethod = "String"
-		default:
-			panic(fmt.Sprintf("Unknown type (%T) %v", realType, realType))
-		}
+		statements.appendf("%s, ok := req.%s(%q)",
+			identifierName, queryMethodName, fieldName,
+		)
 
 		statements.append("if !ok {")
 		statements.append("\treturn")
