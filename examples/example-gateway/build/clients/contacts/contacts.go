@@ -32,39 +32,53 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// ContactsClient is the http client.
-type ContactsClient struct {
-	ClientID   string
-	HTTPClient *zanzibar.HTTPClient
+// Client defines contacts client interface.
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+	SaveContacts(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsContactsContacts.SaveContactsRequest,
+	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
 }
 
 // NewClient returns a new http client.
-func NewClient(
-	gateway *zanzibar.Gateway,
-) *ContactsClient {
+func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.contacts.ip")
 	port := gateway.Config.MustGetInt("clients.contacts.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
-	return &ContactsClient{
-		ClientID:   "contacts",
-		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
+	return &contactsClient{
+		clientID:   "contacts",
+		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
+// contactsClient is the http client.
+type contactsClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
+}
+
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *contactsClient) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
+
 // SaveContacts calls "/:userUUID/contacts" endpoint.
-func (c *ContactsClient) SaveContacts(
+func (c *contactsClient) SaveContacts(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "saveContacts", c.HTTPClient,
+		c.clientID, "saveContacts", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
+	fullURL := c.httpClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
