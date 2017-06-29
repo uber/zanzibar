@@ -37,11 +37,11 @@ import (
 // Clients datastructure that holds all the generated clients
 // This should only hold clients generate from specs
 type Clients struct {
-	Bar       *barClientGenerated.BarClient
-	Baz       *bazClientGenerated.BazClient
-	Contacts  *contactsClientGenerated.ContactsClient
-	GoogleNow *googlenowClientGenerated.GoogleNowClient
-	Quux      *quuxClientStatic.Quux
+	Bar       barClientGenerated.Client
+	Baz       bazClientGenerated.Client
+	Contacts  contactsClientGenerated.Client
+	GoogleNow googlenowClientGenerated.Client
+	Quux      quuxClientStatic.Client
 }
 
 // CreateClients will make all clients

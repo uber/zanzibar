@@ -20,7 +20,7 @@ type Dependencies struct {
 // {{$classType | pascal}}Dependencies contains {{$classType}} dependencies
 type {{$classType | pascal}}Dependencies struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
 	{{end -}}
 }
 {{end -}}

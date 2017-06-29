@@ -4,7 +4,7 @@
 	"config": {
 		"serviceName": "quux",
 		"customImportPath": "github.com/uber/zanzibar/examples/example-gateway/clients/quux",
-		"customClientType": "*Quux",
+		"customClientType": "Client",
 		"customPackageName": "quux"
 	},
 	"dependencies": {

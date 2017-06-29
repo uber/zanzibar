@@ -25,10 +25,12 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// Quux is a custom client that does nothing yet
-type Quux struct{}
+// Client is a custom client that does nothing yet
+type Client interface{}
+
+type quux struct{}
 
 // NewClient creates a new Quux client
-func NewClient(g *zanzibar.Gateway, dependencies quuxClient.ClientDependencies) *Quux {
-	return &Quux{}
+func NewClient(g *zanzibar.Gateway, dependencies quuxClient.ClientDependencies) Client {
+	return &quux{}
 }
