@@ -3,14 +3,12 @@ PKG_FILES = benchmarks codegen examples runtime test
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
-	grep -v "workspace/..." | grep -v "mock/..." | \
-	awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
+	grep -v "workspace/..." | awk -vORS=, '{ print $1 }' | sed 's/,$$/\n/')
 
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" \
-	-e "codegen/templates/" -e "codegen/template_bundle/" -e "mock"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
 # list all executables
 PROGS = benchmarks/benchserver/benchserver \
@@ -24,9 +22,7 @@ EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 check-licence:
 	@echo "Checking uber-licence..."
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
-	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' \
-		--dir '!vendor' --dir '!examples' --dir '!.tmp_gen' \
-		--dir '!template_bundle' --dir '!mock'
+	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
 
 .PHONY: fix-licence
 fix-licence:
