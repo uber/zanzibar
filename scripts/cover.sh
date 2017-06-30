@@ -14,7 +14,7 @@ if [ $# -eq 0 ]
 then
 	FILES=$(go list -e ./... | grep -v "vendor" | \
 		grep -v "workspace" | \
-		grep "test\|examples\|runtime\|codegen")
+		grep "test\|examples\|runtime\|codegen\|repository")
 elif [ $# -eq 1 ]
 then
 	FILES=$(go list -e ./... | grep -v "vendor" | \
