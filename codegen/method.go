@@ -249,12 +249,6 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	return nil
 }
 
-func isStructType(spec compile.TypeSpec) bool {
-	spec = compile.RootTypeSpec(spec)
-	_, isStruct := spec.(*compile.StructSpec)
-	return isStruct
-}
-
 func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.ResultSpec, packageHelper *PackageHelper) error {
 	if respSpec == nil {
 		ms.ResponseType = ""
