@@ -1,5 +1,5 @@
 hash: 9c89b932f9af1747c2e0fa0757019541e3260c81e87ca7ca2a8747cbe77e436e
-updated: 2017-05-15T16:04:13.094984243-07:00
+updated: 2017-06-26T16:24:37.132113705-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 460c7bb0abd6e927f2767cadc91aa6ef776a98b4
+  version: 5695738f733662da3e9afc2283bba6f3c879002d
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -50,9 +50,10 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
   subpackages:
   - assert
+  - mock
   - require
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
@@ -111,7 +112,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 34057069f4ab13dc4433c68d368737ebeafcccdc
+  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
   subpackages:
   - context
 testImports: []

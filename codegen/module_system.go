@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -563,11 +564,12 @@ type ClientsInitGenerator struct {
 func (g *ClientsInitGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	clients := []*ClientSpec{}
-	instances := sortInstances(instance.ResolvedDependencies["client"])
+	clientDeps := instance.ResolvedDependencies["client"]
+	clients := make([]*ClientSpec, len(clientDeps))
+	instances := sortInstances(clientDeps, "client")
 
-	for _, instance := range instances {
-		clients = append(clients, instance.GeneratedSpec().(*ClientSpec))
+	for i, instance := range instances {
+		clients[i] = instance.GeneratedSpec().(*ClientSpec)
 	}
 
 	includedPkgs := []GoPackageImport{}
@@ -584,10 +586,7 @@ func (g *ClientsInitGenerator) Generate(
 					AliasName:   instances[i].PackageInfo.GeneratedPackageAlias,
 				})
 			}
-			continue
-		}
-
-		if len(client.ModuleSpec.Services) != 0 {
+		} else if len(client.ModuleSpec.Services) != 0 {
 			includedPkgs = append(includedPkgs, GoPackageImport{
 				PackageName: client.ImportPackagePath,
 				AliasName:   client.ImportPackageAlias,
@@ -1118,11 +1117,11 @@ func GenerateDependencyStruct(
 }
 
 // sort the clients by client height in DAG, lowest node first
-func sortInstances(instances []*ModuleInstance) []*ModuleInstance {
+func sortInstances(instances []*ModuleInstance, depType string) []*ModuleInstance {
 	heightMap := map[*ModuleInstance]int{}
 	sortedGroup := [][]*ModuleInstance{}
 	for _, instance := range instances {
-		h := height(instance, heightMap)
+		h := height(instance, depType, heightMap, []*ModuleInstance{})
 		l := len(sortedGroup)
 		if l < h+1 {
 			for i := 0; i < h+1-l; i++ {
@@ -1139,19 +1138,31 @@ func sortInstances(instances []*ModuleInstance) []*ModuleInstance {
 	return sorted
 }
 
-// TODO: needs to refactor for generic use for any module class type
-func height(i *ModuleInstance, known map[*ModuleInstance]int) int {
+func height(i *ModuleInstance, depType string, known map[*ModuleInstance]int, seen []*ModuleInstance) int {
+	// detect dependency cycle
+	for _, instance := range seen {
+		if i == instance {
+			var path string
+			for _, ins := range seen {
+				path += ins.InstanceName + "->"
+			}
+			path += i.InstanceName
+			panic(fmt.Sprintf("Dependency cycle detected for %q type: %s", depType, path))
+		}
+	}
+
 	if h, ok := known[i]; ok {
 		return h
 	}
-	if len(i.ResolvedDependencies["client"]) == 0 {
+	if len(i.ResolvedDependencies[depType]) == 0 {
 		known[i] = 0
 		return 0
 	}
 
 	mh := 0
-	for _, instance := range i.ResolvedDependencies["client"] {
-		ch := height(instance, known)
+	seen = append(seen, i)
+	for _, instance := range i.ResolvedDependencies[depType] {
+		ch := height(instance, depType, known, seen)
 		if ch > mh {
 			mh = ch
 		}
