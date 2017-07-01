@@ -30,6 +30,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
@@ -39,7 +40,7 @@ import (
 // NewClient returns a new TChannel client for service baz.
 func NewClient(gateway *zanzibar.Gateway) *BazClient {
 	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
-	sc := gateway.Channel.GetSubChannel(serviceName)
+	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := gateway.Config.MustGetString("clients.baz.ip")
 	port := gateway.Config.MustGetInt("clients.baz.port")

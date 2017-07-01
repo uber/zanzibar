@@ -1311,6 +1311,7 @@ import (
 	"time"
 
 	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/tchannel-go"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -1325,7 +1326,7 @@ import (
 func {{$exportName}}(gateway *zanzibar.Gateway) *{{$clientName}} {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	sc := gateway.Channel.GetSubChannel(serviceName)
+	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{/* TODO: (lu) support multiple host port */ -}}
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
@@ -1423,7 +1424,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3328, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3378, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
