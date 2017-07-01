@@ -75,7 +75,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	assert.NoError(t, err)
 
 	var resp string
-	assert.NoError(t, res.ReadAndUnmarshalNonStructBody(&resp))
+	assert.NoError(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "foo", resp)
 }
 
@@ -120,7 +120,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	assert.NoError(t, err)
 
 	var resp string
-	assert.Error(t, res.ReadAndUnmarshalNonStructBody(&resp))
+	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "", resp)
 }
 

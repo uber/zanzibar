@@ -638,7 +638,7 @@ func (c *barClient) Echo(
 	switch res.StatusCode {
 	case 200:
 		var responseBody string
-		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}

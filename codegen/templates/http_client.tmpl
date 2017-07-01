@@ -143,11 +143,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
@@ -188,11 +184,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}

@@ -934,11 +934,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
@@ -979,11 +975,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
@@ -1030,7 +1022,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
