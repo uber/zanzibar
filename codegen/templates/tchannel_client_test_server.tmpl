@@ -73,7 +73,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = {{.WrapResponse "r"}}
+		res.Success = {{.RefResponse "r"}}
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -92,7 +92,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = {{.WrapResponse "r"}}
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 

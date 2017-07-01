@@ -1529,7 +1529,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = {{.WrapResponse "r"}}
+		res.Success = {{.RefResponse "r"}}
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -1548,7 +1548,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = {{.WrapResponse "r"}}
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 
@@ -1569,7 +1569,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3036, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
