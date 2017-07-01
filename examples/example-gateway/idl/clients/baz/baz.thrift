@@ -21,7 +21,7 @@ service SimpleService {
         2: required BazRequest arg2
     ) throws (
         1: AuthErr authErr
-        2: OtherAuthErr otherAuthErr       
+        2: OtherAuthErr otherAuthErr
     )
 
     void Call(
@@ -44,5 +44,25 @@ service SimpleService {
 service SecondService {
     string Echo(
         1: required string arg
+    )
+
+    base.UUID EchoUUID(
+        1: required base.UUID arg
+    )
+
+    list<string> EchoList(
+        1: required list<string> arg
+    )
+
+    list<base.UUID> EchoUUIDList(
+        1: required list<base.UUID> arg
+    )
+
+    set<string> EchoSet(
+        1: required set<string> arg
+    )
+
+    map<base.UUID, base.BazResponse> EchoMap(
+        1: required map<base.UUID, string> arg
     )
 }

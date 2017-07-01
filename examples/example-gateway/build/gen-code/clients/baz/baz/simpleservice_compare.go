@@ -208,12 +208,6 @@ func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazResponse_Read(w wire.Value) (*base.BazResponse, error) {
-	var v base.BazResponse
-	err := v.FromWire(w)
-	return &v, err
-}
-
 func _OtherAuthErr_Read(w wire.Value) (*OtherAuthErr, error) {
 	var v OtherAuthErr
 	err := v.FromWire(w)

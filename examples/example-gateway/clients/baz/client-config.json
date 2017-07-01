@@ -9,7 +9,13 @@
 			"Compare": "SimpleService::Compare",
 			"Ping": "SimpleService::Ping",
 			"DeliberateDiffNoop": "SimpleService::SillyNoop",
-			"Echo": "SecondService::Echo"
+
+			"Echo": "SecondService::Echo",
+			"EchoUUID": "SecondService::EchoUUID",
+			"EchoList": "SecondService::EchoList",
+			"EchoUUIDList": "SecondService::EchoUUIDList",
+			"EchoSet": "SecondService::EchoSet",
+			"EchoMap": "SecondService::EchoMap"
 		}
 	}
 }
