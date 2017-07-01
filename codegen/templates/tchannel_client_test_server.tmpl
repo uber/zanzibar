@@ -73,7 +73,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+		res.Success = {{.WrapResponse "r"}}
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -92,7 +92,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+			res.Success = {{.WrapResponse "r"}}
 		} {{end -}}
 	{{end}}
 

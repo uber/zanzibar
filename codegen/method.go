@@ -264,6 +264,22 @@ func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.Re
 	ms.ResponseType = typeName
 	return nil
 }
+
+// WrapResponse wraps the response variable with '&' if it is not pointer type
+func (ms *MethodSpec) WrapResponse(respVar string) string {
+	respSpec := ms.CompiledThriftSpec.ResultSpec
+	if respSpec == nil || respSpec.ReturnType == nil {
+		return ""
+	}
+
+	switch compile.RootTypeSpec(respSpec.ReturnType).ThriftName() {
+	case "bool", "byte", "i16", "i32", "i64", "double", "string":
+		return "&" + respVar
+	default:
+		return respVar
+	}
+}
+
 func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	if statusCode == "" {
 		return errors.Errorf("no http OK status code set by annotation '%s' ", antHTTPStatus)
