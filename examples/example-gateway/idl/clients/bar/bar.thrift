@@ -2,6 +2,8 @@ namespace java com.uber.zanzibar.clients.bar
 
 include "../foo/foo.thrift"
 
+typedef string UUID
+
 struct BarRequest {
     1: required string stringField (
         zanzibar.http.ref = "params.someParamsField"
@@ -80,6 +82,33 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
         zanzibar.http.path = "/bar/argWithHeaders"
+        zanzibar.http.status = "200"
+    )
+
+    list<string> echoStringList (
+        1: required list<string> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/bar/echo-string-list"
+        zanzibar.http.status = "200"
+    )
+
+    list<BarResponse> echoBarList (
+        1: required list<UUID> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/bar/echo-bar-list"
+        zanzibar.http.status = "200"
+    )
+
+    map<UUID, BarResponse> echoBarMap (
+        1: required map<string, UUID> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/bar/echo-bar-map"
         zanzibar.http.status = "200"
     )
 
