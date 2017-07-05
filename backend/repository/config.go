@@ -123,7 +123,7 @@ const (
 	HTTP ProtocolType = "http"
 	// TCHANNEL type
 	TCHANNEL ProtocolType = "tchannel"
-	// Custom type
+	// CUSTOM type
 	CUSTOM ProtocolType = "custom"
 	// UNKNOWN type
 	UNKNOWN ProtocolType = "unknown"
