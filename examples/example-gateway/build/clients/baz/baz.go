@@ -37,8 +37,35 @@ import (
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
+// Client defines baz client interface.
+type Client interface {
+	Echo(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_Echo_Args,
+	) (string, map[string]string, error)
+	Call(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_Call_Args,
+	) (map[string]string, error)
+	Compare(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_Compare_Args,
+	) (*clientsBazBase.BazResponse, map[string]string, error)
+	Ping(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (*clientsBazBase.BazResponse, map[string]string, error)
+	DeliberateDiffNoop(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (map[string]string, error)
+}
+
 // NewClient returns a new TChannel client for service baz.
-func NewClient(gateway *zanzibar.Gateway) *BazClient {
+func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
@@ -61,18 +88,18 @@ func NewClient(gateway *zanzibar.Gateway) *BazClient {
 		},
 	)
 
-	return &BazClient{
+	return &bazClient{
 		client: client,
 	}
 }
 
-// BazClient is the TChannel client for downstream service.
-type BazClient struct {
+// bazClient is the TChannel client for downstream service.
+type bazClient struct {
 	client zanzibar.TChannelClient
 }
 
 // Echo is a client RPC call for method "SecondService::Echo"
-func (c *BazClient) Echo(
+func (c *bazClient) Echo(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_Echo_Args,
@@ -87,7 +114,7 @@ func (c *BazClient) Echo(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for Echo")
+			err = errors.New("bazClient received no result or unknown exception for Echo")
 		}
 	}
 	if err != nil {
@@ -99,7 +126,7 @@ func (c *BazClient) Echo(
 }
 
 // Call is a client RPC call for method "SimpleService::Call"
-func (c *BazClient) Call(
+func (c *bazClient) Call(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Call_Args,
@@ -115,7 +142,7 @@ func (c *BazClient) Call(
 		case result.AuthErr != nil:
 			err = result.AuthErr
 		default:
-			err = errors.New("BazClient received no result or unknown exception for Call")
+			err = errors.New("bazClient received no result or unknown exception for Call")
 		}
 	}
 	if err != nil {
@@ -126,7 +153,7 @@ func (c *BazClient) Call(
 }
 
 // Compare is a client RPC call for method "SimpleService::Compare"
-func (c *BazClient) Compare(
+func (c *bazClient) Compare(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
@@ -145,7 +172,7 @@ func (c *BazClient) Compare(
 		case result.OtherAuthErr != nil:
 			err = result.OtherAuthErr
 		default:
-			err = errors.New("BazClient received no result or unknown exception for Compare")
+			err = errors.New("bazClient received no result or unknown exception for Compare")
 		}
 	}
 	if err != nil {
@@ -157,7 +184,7 @@ func (c *BazClient) Compare(
 }
 
 // Ping is a client RPC call for method "SimpleService::Ping"
-func (c *BazClient) Ping(
+func (c *bazClient) Ping(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (*clientsBazBase.BazResponse, map[string]string, error) {
@@ -172,7 +199,7 @@ func (c *BazClient) Ping(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for Ping")
+			err = errors.New("bazClient received no result or unknown exception for Ping")
 		}
 	}
 	if err != nil {
@@ -184,7 +211,7 @@ func (c *BazClient) Ping(
 }
 
 // DeliberateDiffNoop is a client RPC call for method "SimpleService::SillyNoop"
-func (c *BazClient) DeliberateDiffNoop(
+func (c *bazClient) DeliberateDiffNoop(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error) {
@@ -202,7 +229,7 @@ func (c *BazClient) DeliberateDiffNoop(
 		case result.ServerErr != nil:
 			err = result.ServerErr
 		default:
-			err = errors.New("BazClient received no result or unknown exception for SillyNoop")
+			err = errors.New("bazClient received no result or unknown exception for SillyNoop")
 		}
 	}
 	if err != nil {

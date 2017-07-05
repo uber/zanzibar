@@ -32,39 +32,57 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// GoogleNowClient is the http client.
-type GoogleNowClient struct {
-	ClientID   string
-	HTTPClient *zanzibar.HTTPClient
+// Client defines google-now client interface.
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+	AddCredentials(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
+	) (map[string]string, error)
+	CheckCredentials(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (map[string]string, error)
+}
+
+// googleNowClient is the http client.
+type googleNowClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client.
-func NewClient(
-	gateway *zanzibar.Gateway,
-) *GoogleNowClient {
+func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.google-now.ip")
 	port := gateway.Config.MustGetInt("clients.google-now.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
-	return &GoogleNowClient{
-		ClientID:   "google-now",
-		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
+	return &googleNowClient{
+		clientID:   "google-now",
+		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *googleNowClient) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
+
 // AddCredentials calls "/add-credentials" endpoint.
-func (c *GoogleNowClient) AddCredentials(
+func (c *googleNowClient) AddCredentials(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "addCredentials", c.HTTPClient,
+		c.clientID, "addCredentials", c.httpClient,
 	)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/add-credentials"
+	fullURL := c.httpClient.BaseURL + "/add-credentials"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -99,17 +117,17 @@ func (c *GoogleNowClient) AddCredentials(
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
-func (c *GoogleNowClient) CheckCredentials(
+func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "checkCredentials", c.HTTPClient,
+		c.clientID, "checkCredentials", c.httpClient,
 	)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/check-credentials"
+	fullURL := c.httpClient.BaseURL + "/check-credentials"
 
 	err := req.WriteJSON("POST", fullURL, headers, nil)
 	if err != nil {

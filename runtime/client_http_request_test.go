@@ -116,7 +116,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 	)
 
 	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
-	client := clients.Bar.HTTPClient
+	client := clients.Bar.HTTPClient()
 
 	req := zanzibar.NewClientHTTPRequest("bar", "bar-path", client)
 

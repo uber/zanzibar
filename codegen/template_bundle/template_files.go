@@ -79,7 +79,8 @@ type Dependencies struct {
 // {{$classType | pascal}}Dependencies contains {{$classType}} dependencies
 type {{$classType | pascal}}Dependencies struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{- /* TODO: the dependency type should cover all types instead of just interface type */ -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
 	{{end -}}
 }
 {{end -}}
@@ -95,7 +96,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1033, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1127, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -807,29 +808,52 @@ import (
 
 {{- $clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{- $clientName := .ExportType }}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
-// {{$clientName}} is the http client.
-type {{$clientName}} struct {
-	ClientID string
-	HTTPClient   *zanzibar.HTTPClient
+
+// Client defines {{$clientID}} client interface.
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+{{- range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if $methodName -}}
+	{{$methodName}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args {{.RequestType}},
+		{{end -}}
+	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+{{- end -}}
+{{- end -}}
+{{- end -}}
 }
 
-// NewClient returns a new http client.
-func {{$exportName}}(
-	gateway *zanzibar.Gateway,
-) *{{$clientName}} {
+// {{$clientName}} is the http client.
+type {{$clientName}} struct {
+	clientID string
+	httpClient   *zanzibar.HTTPClient
+}
+
+// {{$exportName}} returns a new http client.
+func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
-		ClientID: "{{$clientID}}",
-		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
+		clientID: "{{$clientID}}",
+		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
-{{/*  ========================= Method =========================  */ -}}
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *{{$clientName}}) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
 
 {{range $svc := .Services}}
 {{range .Methods}}
@@ -849,7 +873,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "{{.Name}}", c.HTTPClient,
+		c.clientID, "{{.Name}}", c.httpClient,
 	)
 
 	{{- if .ReqHeaders }}
@@ -861,7 +885,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end}}
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL
+	fullURL := c.httpClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})
@@ -1006,7 +1030,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 5583, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1026,7 +1050,7 @@ import (
 // This should only hold clients generate from specs
 type Clients struct {
 	{{range $idx, $clientInfo := .ClientInfo -}}
-	{{$clientInfo.FieldName}} {{if $clientInfo.IsPointerType}}*{{end}}{{$clientInfo.PackageAlias}}.{{$clientInfo.ExportType}}
+	{{$clientInfo.FieldName}} {{$clientInfo.PackageAlias}}.{{$clientInfo.ExportType}}
 	{{end}}
 }
 
@@ -1060,7 +1084,7 @@ func init_clientsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 1086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "init_clients.tmpl", size: 1046, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1309,10 +1333,30 @@ import (
 
 {{$clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{- $clientName := .ExportType }}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+
+// Client defines {{$clientID}} client interface.
+type Client interface {
+{{range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if $methodName -}}
+	{{$methodName}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args {{.RequestType}},
+		{{end -}}
+	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+{{- end -}}
+{{- end -}}
+{{- end -}}
+}
+
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway) *{{$clientName}} {
+func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -1413,7 +1457,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3378, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3933, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

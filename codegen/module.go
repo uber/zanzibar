@@ -503,7 +503,7 @@ func readPackageInfo(
 		),
 		ExportName:            "New" + qualifiedClassName,
 		QualifiedInstanceName: qualifiedInstanceName,
-		ExportType:            qualifiedInstanceName + qualifiedClassName,
+		ExportType:            qualifiedClassName,
 		GeneratedPackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,

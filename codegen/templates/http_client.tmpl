@@ -17,29 +17,52 @@ import (
 
 {{- $clientID := .ClientID -}}
 {{$exposedMethods := .ExposedMethods -}}
-{{- $clientName := .ExportType }}
+{{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
-// {{$clientName}} is the http client.
-type {{$clientName}} struct {
-	ClientID string
-	HTTPClient   *zanzibar.HTTPClient
+
+// Client defines {{$clientID}} client interface.
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+{{- range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if $methodName -}}
+	{{$methodName}}(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		{{if ne .RequestType "" -}}
+		args {{.RequestType}},
+		{{end -}}
+	) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error)
+{{- end -}}
+{{- end -}}
+{{- end -}}
 }
 
-// NewClient returns a new http client.
-func {{$exportName}}(
-	gateway *zanzibar.Gateway,
-) *{{$clientName}} {
+// {{$clientName}} is the http client.
+type {{$clientName}} struct {
+	clientID string
+	httpClient   *zanzibar.HTTPClient
+}
+
+// {{$exportName}} returns a new http client.
+func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
-		ClientID: "{{$clientID}}",
-		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
+		clientID: "{{$clientID}}",
+		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
-{{/*  ========================= Method =========================  */ -}}
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *{{$clientName}}) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
 
 {{range $svc := .Services}}
 {{range .Methods}}
@@ -59,7 +82,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "{{.Name}}", c.HTTPClient,
+		c.clientID, "{{.Name}}", c.httpClient,
 	)
 
 	{{- if .ReqHeaders }}
@@ -71,7 +94,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end}}
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL
+	fullURL := c.httpClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
 	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})

@@ -32,38 +32,95 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// BarClient is the http client.
-type BarClient struct {
-	ClientID   string
-	HTTPClient *zanzibar.HTTPClient
+// Client defines bar client interface.
+type Client interface {
+	HTTPClient() *zanzibar.HTTPClient
+	ArgNotStruct(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgNotStruct_Args,
+	) (map[string]string, error)
+	ArgWithHeaders(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithHeaders_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithManyQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithQueryHeader(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithQueryHeader_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithQueryParams_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	MissingArg(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	NoRequest(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	Normal(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_Normal_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	TooManyArgs(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_TooManyArgs_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	Echo(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_Echo_Args,
+	) (string, map[string]string, error)
+}
+
+// barClient is the http client.
+type barClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client.
-func NewClient(
-	gateway *zanzibar.Gateway,
-) *BarClient {
+func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.bar.ip")
 	port := gateway.Config.MustGetInt("clients.bar.port")
 
 	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
-	return &BarClient{
-		ClientID:   "bar",
-		HTTPClient: zanzibar.NewHTTPClient(gateway, baseURL),
+	return &barClient{
+		clientID:   "bar",
+		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
 
+// HTTPClient returns the underlying HTTP client, should only be
+// used for internal testing.
+func (c *barClient) HTTPClient() *zanzibar.HTTPClient {
+	return c.httpClient
+}
+
 // ArgNotStruct calls "/arg-not-struct-path" endpoint.
-func (c *BarClient) ArgNotStruct(
+func (c *barClient) ArgNotStruct(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgNotStruct_Args,
 ) (map[string]string, error) {
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argNotStruct", c.HTTPClient,
+		c.clientID, "argNotStruct", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/arg-not-struct-path"
+	fullURL := c.httpClient.BaseURL + "/arg-not-struct-path"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -113,19 +170,19 @@ func (c *BarClient) ArgNotStruct(
 }
 
 // ArgWithHeaders calls "/bar/argWithHeaders" endpoint.
-func (c *BarClient) ArgWithHeaders(
+func (c *barClient) ArgWithHeaders(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithHeaders_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argWithHeaders", c.HTTPClient,
+		c.clientID, "argWithHeaders", c.httpClient,
 	)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithHeaders"
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithHeaders"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -161,18 +218,18 @@ func (c *BarClient) ArgWithHeaders(
 }
 
 // ArgWithManyQueryParams calls "/bar/argWithManyQueryParams" endpoint.
-func (c *BarClient) ArgWithManyQueryParams(
+func (c *barClient) ArgWithManyQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argWithManyQueryParams", c.HTTPClient,
+		c.clientID, "argWithManyQueryParams", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithManyQueryParams"
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -208,18 +265,18 @@ func (c *BarClient) ArgWithManyQueryParams(
 }
 
 // ArgWithQueryHeader calls "/bar/argWithQueryHeader" endpoint.
-func (c *BarClient) ArgWithQueryHeader(
+func (c *barClient) ArgWithQueryHeader(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithQueryHeader_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argWithQueryHeader", c.HTTPClient,
+		c.clientID, "argWithQueryHeader", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithQueryHeader"
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryHeader"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -255,18 +312,18 @@ func (c *BarClient) ArgWithQueryHeader(
 }
 
 // ArgWithQueryParams calls "/bar/argWithQueryParams" endpoint.
-func (c *BarClient) ArgWithQueryParams(
+func (c *barClient) ArgWithQueryParams(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithQueryParams_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "argWithQueryParams", c.HTTPClient,
+		c.clientID, "argWithQueryParams", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/argWithQueryParams"
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -302,17 +359,17 @@ func (c *BarClient) ArgWithQueryParams(
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
-func (c *BarClient) MissingArg(
+func (c *barClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "missingArg", c.HTTPClient,
+		c.clientID, "missingArg", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/missing-arg-path"
+	fullURL := c.httpClient.BaseURL + "/missing-arg-path"
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
@@ -363,17 +420,17 @@ func (c *BarClient) MissingArg(
 }
 
 // NoRequest calls "/no-request-path" endpoint.
-func (c *BarClient) NoRequest(
+func (c *barClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "noRequest", c.HTTPClient,
+		c.clientID, "noRequest", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/no-request-path"
+	fullURL := c.httpClient.BaseURL + "/no-request-path"
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
@@ -424,18 +481,18 @@ func (c *BarClient) NoRequest(
 }
 
 // Normal calls "/bar-path" endpoint.
-func (c *BarClient) Normal(
+func (c *barClient) Normal(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_Normal_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "normal", c.HTTPClient,
+		c.clientID, "normal", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar-path"
+	fullURL := c.httpClient.BaseURL + "/bar-path"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -486,18 +543,18 @@ func (c *BarClient) Normal(
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
-func (c *BarClient) TooManyArgs(
+func (c *barClient) TooManyArgs(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Bar_TooManyArgs_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "tooManyArgs", c.HTTPClient,
+		c.clientID, "tooManyArgs", c.httpClient,
 	)
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/too-many-args-path"
+	fullURL := c.httpClient.BaseURL + "/too-many-args-path"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
@@ -548,19 +605,19 @@ func (c *BarClient) TooManyArgs(
 }
 
 // Echo calls "/echo" endpoint.
-func (c *BarClient) Echo(
+func (c *barClient) Echo(
 	ctx context.Context,
 	headers map[string]string,
 	r *clientsBarBar.Echo_Echo_Args,
 ) (string, map[string]string, error) {
 	var defaultRes string
 	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "echo", c.HTTPClient,
+		c.clientID, "echo", c.httpClient,
 	)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/echo"
+	fullURL := c.httpClient.BaseURL + "/echo"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {

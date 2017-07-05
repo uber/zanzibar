@@ -34,5 +34,5 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Bar *barClientGenerated.BarClient
+	Bar barClientGenerated.Client
 }
