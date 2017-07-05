@@ -21,7 +21,7 @@
 			"MethodName": "argNotStruct",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "argNotStruct",
+			"ClientMethod": "ArgNotStruct",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -35,7 +35,7 @@
 			"MethodName": "argWithHeaders",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "argWithHeaders",
+			"ClientMethod": "ArgWithHeaders",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -49,7 +49,7 @@
 			"MethodName": "argWithManyQueryParams",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "argWithManyQueryParams",
+			"ClientMethod": "ArgWithManyQueryParams",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -63,7 +63,7 @@
 			"MethodName": "argWithQueryHeader",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "argWithQueryHeader",
+			"ClientMethod": "ArgWithQueryHeader",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -77,7 +77,7 @@
 			"MethodName": "argWithQueryParams",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "argWithQueryParams",
+			"ClientMethod": "ArgWithQueryParams",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -91,7 +91,7 @@
 			"MethodName": "missingArg",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "missingArg",
+			"ClientMethod": "MissingArg",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -105,7 +105,7 @@
 			"MethodName": "noRequest",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "noRequest",
+			"ClientMethod": "NoRequest",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -119,7 +119,7 @@
 			"MethodName": "normal",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "normal",
+			"ClientMethod": "Normal",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -133,7 +133,7 @@
 			"MethodName": "tooManyArgs",
 			"WorkflowType": "httpClient",
 			"ClientID": "bar",
-			"ClientMethod": "tooManyArgs",
+			"ClientMethod": "TooManyArgs",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -231,7 +231,7 @@
 			"MethodName": "addCredentials",
 			"WorkflowType": "httpClient",
 			"ClientID": "google-now",
-			"ClientMethod": "addCredentials",
+			"ClientMethod": "AddCredentials",
 			"TestFixture": "",
 			"Middlewares": null
 		},
@@ -245,7 +245,7 @@
 			"MethodName": "checkCredentials",
 			"WorkflowType": "httpClient",
 			"ClientID": "google-now",
-			"ClientMethod": "checkCredentials",
+			"ClientMethod": "CheckCredentials",
 			"TestFixture": "",
 			"Middlewares": null
 		}
@@ -255,7 +255,18 @@
 			"ID": "bar",
 			"Type": "http",
 			"ThriftFile": "clients/bar/bar.thrift",
-			"ExposedMethods": null
+			"ExposedMethods": {
+				"ArgNotStruct": "Bar::argNotStruct",
+				"ArgWithHeaders": "Bar::argWithHeaders",
+				"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
+				"ArgWithQueryHeader": "Bar::argWithQueryHeader",
+				"ArgWithQueryParams": "Bar::argWithQueryParams",
+				"Echo": "Echo::echo",
+				"MissingArg": "Bar::missingArg",
+				"NoRequest": "Bar::noRequest",
+				"Normal": "Bar::normal",
+				"TooManyArgs": "Bar::tooManyArgs"
+			}
 		},
 		"baz": {
 			"ID": "baz",
@@ -273,13 +284,18 @@
 			"ID": "contacts",
 			"Type": "http",
 			"ThriftFile": "clients/contacts/contacts.thrift",
-			"ExposedMethods": null
+			"ExposedMethods": {
+				"SaveContacts": "Contacts::saveContacts"
+			}
 		},
 		"google-now": {
 			"ID": "google-now",
 			"Type": "http",
 			"ThriftFile": "clients/googlenow/googlenow.thrift",
-			"ExposedMethods": null
+			"ExposedMethods": {
+				"AddCredentials": "GoogleNowService::addCredentials",
+				"CheckCredentials": "GoogleNowService::checkCredentials"
+			}
 		},
 		"quux": {
 			"ID": "quux",
@@ -315,10 +331,6 @@
 						"Type": "http"
 					},
 					{
-						"Name": "echo",
-						"Type": "http"
-					},
-					{
 						"Name": "missingArg",
 						"Type": "http"
 					},
@@ -332,6 +344,16 @@
 					},
 					{
 						"Name": "tooManyArgs",
+						"Type": "http"
+					}
+				]
+			},
+			"Echo": {
+				"Name": "Echo",
+				"Path": "clients/bar/bar.thrift",
+				"Methods": [
+					{
+						"Name": "echo",
 						"Type": "http"
 					}
 				]
