@@ -128,6 +128,7 @@ test-only:
 	@ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
+		./backend/... \
 		./runtime/... \
 		./test/... | \
 		grep -v '\[no test files\]'

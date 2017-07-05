@@ -18,42 +18,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package codegen_test
+package lib
 
 import (
-	"encoding/json"
-	"strings"
+	"bytes"
+	"flag"
+	"io/ioutil"
+	"os"
 	"testing"
 
+	"github.com/pmezard/go-difflib/difflib"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/codegen"
-	testlib "github.com/uber/zanzibar/test/lib"
 )
 
-const parsedBarFile = "test_data/bar.json"
+// UpdateGoldenFile sets the flag if updates golden files with expected response.
+var UpdateGoldenFile = flag.Bool("update", false, "Updates the golden files with expected response.")
 
-func TestModuleSpec(t *testing.T) {
-	barThrift := "../examples/example-gateway/idl/clients/bar/bar.thrift"
-	m, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
-	assert.NoError(t, err, "unable to parse the thrift file")
-	convertThriftPathToRelative(m)
-	actual, err := json.MarshalIndent(m, "", "\t")
-	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
-	testlib.CompareGoldenFile(t, parsedBarFile, actual)
-}
-
-func convertThriftPathToRelative(m *codegen.ModuleSpec) {
-	index := strings.LastIndex(m.ThriftFile, "zanzibar")
-	m.ThriftFile = m.ThriftFile[index:]
-
-	for _, service := range m.Services {
-		service.CompileSpec = nil
-		service.ThriftFile = service.ThriftFile[index:]
-		for _, method := range service.Methods {
-			if method.Downstream != nil {
-				convertThriftPathToRelative(method.Downstream)
-			}
-			method.CompiledThriftSpec = nil
+// CompareGoldenFile compares or updates golden file with some JSON bytes.
+func CompareGoldenFile(t *testing.T, goldenFilePath string, actual []byte) {
+	if *UpdateGoldenFile {
+		err := ioutil.WriteFile(goldenFilePath, actual, os.ModePerm)
+		if err != nil {
+			t.Fatalf("Fail to write into file : %s\n", err)
 		}
+		return
 	}
+	exp, err := ioutil.ReadFile(goldenFilePath)
+	assert.NoError(t, err, "Failed to read %s with error %s", goldenFilePath, err)
+	if bytes.Equal(exp, actual) {
+		return
+	}
+
+	diffCtx := difflib.ContextDiff{
+		A:        difflib.SplitLines(string(exp)),
+		B:        difflib.SplitLines(string(actual)),
+		FromFile: "Expected",
+		ToFile:   "Actual",
+		Context:  5,
+		Eol:      "\n",
+	}
+	d, err := difflib.GetContextDiffString(diffCtx)
+	assert.NoError(t, err, "Failed to compute diff.")
+	t.Errorf("Result doesn't match golden file %s.\n %s\n", goldenFilePath, d)
 }
