@@ -299,8 +299,8 @@
 		},
 		"quux": {
 			"ID": "quux",
-			"Type": "unknown",
-			"ThriftFile": "Users/zhenghui/go/src/github.com/uber/zanzibar/examples/example-gateway",
+			"Type": "custom",
+			"ThriftFile": "",
 			"ExposedMethods": null
 		}
 	},

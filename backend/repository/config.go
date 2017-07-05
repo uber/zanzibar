@@ -123,6 +123,8 @@ const (
 	HTTP ProtocolType = "http"
 	// TCHANNEL type
 	TCHANNEL ProtocolType = "tchannel"
+	// Custom type
+	CUSTOM ProtocolType = "custom"
 	// UNKNOWN type
 	UNKNOWN ProtocolType = "unknown"
 )
@@ -232,8 +234,10 @@ func (r *Repository) clientConfigs(thriftRootDir string, gatewaySpec *codegen.Ga
 		clientConfig := &ClientConfig{
 			ID:             spec.ClientID,
 			Type:           clientType,
-			ThriftFile:     r.relativePath(thriftRootDir, spec.ThriftFile),
 			ExposedMethods: spec.ExposedMethods,
+		}
+		if clientType != CUSTOM {
+			clientConfig.ThriftFile = r.relativePath(thriftRootDir, spec.ThriftFile)
 		}
 		cfgs[clientConfig.ID] = clientConfig
 	}
@@ -327,6 +331,8 @@ func ProtocolTypeFromString(str string) ProtocolType {
 		return HTTP
 	case "tchannel":
 		return TCHANNEL
+	case "custom":
+		return CUSTOM
 	default:
 		return UNKNOWN
 	}
