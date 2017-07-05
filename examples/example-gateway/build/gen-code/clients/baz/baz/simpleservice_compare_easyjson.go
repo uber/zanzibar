@@ -59,7 +59,7 @@ func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 				if out.AuthErr == nil {
 					out.AuthErr = new(AuthErr)
 				}
-				(*out.AuthErr).UnmarshalEasyJSON(in)
+				easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz(in, &*out.AuthErr)
 			}
 		case "otherAuthErr":
 			if in.IsNull() {
@@ -69,7 +69,7 @@ func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 				if out.OtherAuthErr == nil {
 					out.OtherAuthErr = new(OtherAuthErr)
 				}
-				(*out.OtherAuthErr).UnmarshalEasyJSON(in)
+				easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz1(in, &*out.OtherAuthErr)
 			}
 		default:
 			in.SkipRecursive()
@@ -106,7 +106,7 @@ func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 		if in.AuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.AuthErr).MarshalEasyJSON(out)
+			easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz(out, *in.AuthErr)
 		}
 	}
 	if in.OtherAuthErr != nil {
@@ -118,7 +118,7 @@ func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 		if in.OtherAuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.OtherAuthErr).MarshalEasyJSON(out)
+			easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz1(out, *in.OtherAuthErr)
 		}
 	}
 	out.RawByte('}')
@@ -146,6 +146,102 @@ func (v *SimpleService_Compare_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_Compare_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBazSimpleServiceCompare(l, v)
+}
+func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz1(in *jlexer.Lexer, out *OtherAuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz1(out *jwriter.Writer, in OtherAuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
+}
+func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz(in *jlexer.Lexer, out *AuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz(out *jwriter.Writer, in AuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
 }
 func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBazSimpleServiceCompare1(in *jlexer.Lexer, out *SimpleService_Compare_Args) {
 	isTopLevel := in.IsStart()
@@ -176,7 +272,7 @@ func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 				if out.Arg1 == nil {
 					out.Arg1 = new(BazRequest)
 				}
-				(*out.Arg1).UnmarshalEasyJSON(in)
+				easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(in, &*out.Arg1)
 			}
 			Arg1Set = true
 		case "arg2":
@@ -187,7 +283,7 @@ func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 				if out.Arg2 == nil {
 					out.Arg2 = new(BazRequest)
 				}
-				(*out.Arg2).UnmarshalEasyJSON(in)
+				easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(in, &*out.Arg2)
 			}
 			Arg2Set = true
 		default:
@@ -218,7 +314,7 @@ func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 	if in.Arg1 == nil {
 		out.RawString("null")
 	} else {
-		(*in.Arg1).MarshalEasyJSON(out)
+		easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(out, *in.Arg1)
 	}
 	if !first {
 		out.RawByte(',')
@@ -228,7 +324,7 @@ func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCod
 	if in.Arg2 == nil {
 		out.RawString("null")
 	} else {
-		(*in.Arg2).MarshalEasyJSON(out)
+		easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(out, *in.Arg2)
 	}
 	out.RawByte('}')
 }
@@ -255,4 +351,78 @@ func (v *SimpleService_Compare_Args) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_Compare_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBazSimpleServiceCompare1(l, v)
+}
+func easyjson4d8a931DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(in *jlexer.Lexer, out *BazRequest) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var B1Set bool
+	var S2Set bool
+	var I3Set bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "b1":
+			out.B1 = bool(in.Bool())
+			B1Set = true
+		case "s2":
+			out.S2 = string(in.String())
+			S2Set = true
+		case "i3":
+			out.I3 = int32(in.Int32())
+			I3Set = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !B1Set {
+		in.AddError(fmt.Errorf("key 'b1' is required"))
+	}
+	if !S2Set {
+		in.AddError(fmt.Errorf("key 's2' is required"))
+	}
+	if !I3Set {
+		in.AddError(fmt.Errorf("key 'i3' is required"))
+	}
+}
+func easyjson4d8a931EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBazBaz2(out *jwriter.Writer, in BazRequest) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"b1\":")
+	out.Bool(bool(in.B1))
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"s2\":")
+	out.String(string(in.S2))
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"i3\":")
+	out.Int32(int32(in.I3))
+	out.RawByte('}')
 }
