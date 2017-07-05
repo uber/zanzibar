@@ -830,7 +830,13 @@ type Client interface {
 {{- end -}}
 }
 
-// NewClient returns a new http client.
+// {{$clientName}} is the http client.
+type {{$clientName}} struct {
+	clientID string
+	httpClient   *zanzibar.HTTPClient
+}
+
+// {{$exportName}} returns a new http client.
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
@@ -841,14 +847,6 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
 }
-
-// {{$clientName}} is the http client.
-type {{$clientName}} struct {
-	clientID string
-	httpClient   *zanzibar.HTTPClient
-}
-
-{{/*  ========================= Method =========================  */ -}}
 
 // HTTPClient returns the underlying HTTP client, should only be
 // used for internal testing.
@@ -1031,7 +1029,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6352, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

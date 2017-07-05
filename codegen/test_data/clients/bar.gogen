@@ -85,6 +85,12 @@ type Client interface {
 	) (string, map[string]string, error)
 }
 
+// barClient is the http client.
+type barClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
+}
+
 // NewClient returns a new http client.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.bar.ip")
@@ -95,12 +101,6 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		clientID:   "bar",
 		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
-}
-
-// barClient is the http client.
-type barClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
 }
 
 // HTTPClient returns the underlying HTTP client, should only be

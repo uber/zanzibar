@@ -42,6 +42,12 @@ type Client interface {
 	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
 }
 
+// contactsClient is the http client.
+type contactsClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
+}
+
 // NewClient returns a new http client.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.contacts.ip")
@@ -52,12 +58,6 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		clientID:   "contacts",
 		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
-}
-
-// contactsClient is the http client.
-type contactsClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
 }
 
 // HTTPClient returns the underlying HTTP client, should only be

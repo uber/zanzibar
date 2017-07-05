@@ -46,6 +46,12 @@ type Client interface {
 	) (map[string]string, error)
 }
 
+// googleNowClient is the http client.
+type googleNowClient struct {
+	clientID   string
+	httpClient *zanzibar.HTTPClient
+}
+
 // NewClient returns a new http client.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.google-now.ip")
@@ -56,12 +62,6 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		clientID:   "google-now",
 		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
 	}
-}
-
-// googleNowClient is the http client.
-type googleNowClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
