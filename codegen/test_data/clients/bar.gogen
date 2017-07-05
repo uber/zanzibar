@@ -32,13 +32,13 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// BarClient is the http client for service Bar.
+// BarClient is the http client.
 type BarClient struct {
 	ClientID   string
 	HTTPClient *zanzibar.HTTPClient
 }
 
-// NewClient returns a new http client for service Bar.
+// NewClient returns a new http client.
 func NewClient(
 	gateway *zanzibar.Gateway,
 ) *BarClient {
@@ -58,7 +58,6 @@ func (c *BarClient) ArgNotStruct(
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgNotStruct_Args,
 ) (map[string]string, error) {
-
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argNotStruct", c.HTTPClient,
 	)
@@ -119,7 +118,6 @@ func (c *BarClient) ArgWithHeaders(
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithHeaders_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithHeaders", c.HTTPClient,
@@ -168,7 +166,6 @@ func (c *BarClient) ArgWithManyQueryParams(
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithManyQueryParams", c.HTTPClient,
@@ -216,7 +213,6 @@ func (c *BarClient) ArgWithQueryHeader(
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithQueryHeader_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithQueryHeader", c.HTTPClient,
@@ -264,7 +260,6 @@ func (c *BarClient) ArgWithQueryParams(
 	headers map[string]string,
 	r *clientsBarBar.Bar_ArgWithQueryParams_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "argWithQueryParams", c.HTTPClient,
@@ -306,60 +301,11 @@ func (c *BarClient) ArgWithQueryParams(
 	)
 }
 
-// Echo calls "/bar/echo" endpoint.
-func (c *BarClient) Echo(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Bar_Echo_Args,
-) (string, map[string]string, error) {
-
-	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(
-		c.ClientID, "echo", c.HTTPClient,
-	)
-	// TODO(jakev): Ensure we validate mandatory headers
-
-	// Generate full URL.
-	fullURL := c.HTTPClient.BaseURL + "/bar" + "/echo"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody string
-		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	}
-
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
-}
-
 // MissingArg calls "/missing-arg-path" endpoint.
 func (c *BarClient) MissingArg(
 	ctx context.Context,
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "missingArg", c.HTTPClient,
@@ -421,7 +367,6 @@ func (c *BarClient) NoRequest(
 	ctx context.Context,
 	headers map[string]string,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "noRequest", c.HTTPClient,
@@ -484,7 +429,6 @@ func (c *BarClient) Normal(
 	headers map[string]string,
 	r *clientsBarBar.Bar_Normal_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "normal", c.HTTPClient,
@@ -547,7 +491,6 @@ func (c *BarClient) TooManyArgs(
 	headers map[string]string,
 	r *clientsBarBar.Bar_TooManyArgs_Args,
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
-
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "tooManyArgs", c.HTTPClient,
@@ -597,6 +540,53 @@ func (c *BarClient) TooManyArgs(
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// Echo calls "/echo" endpoint.
+func (c *BarClient) Echo(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_Echo_Args,
+) (string, map[string]string, error) {
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(
+		c.ClientID, "echo", c.HTTPClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.HTTPClient.BaseURL + "/echo"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalNonStructBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
 	}
 
 	return defaultRes, respHeaders, errors.Errorf(

@@ -7,7 +7,7 @@
 	"thriftMethodName": "Bar::argWithManyQueryParams",
 	"workflowType": "httpClient",
 	"clientID": "bar",
-	"clientMethod": "argWithManyQueryParams",
+	"clientMethod": "ArgWithManyQueryParams",
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},

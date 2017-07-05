@@ -32,13 +32,13 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// GoogleNowClient is the http client for service GoogleNowService.
+// GoogleNowClient is the http client.
 type GoogleNowClient struct {
 	ClientID   string
 	HTTPClient *zanzibar.HTTPClient
 }
 
-// NewClient returns a new http client for service GoogleNowService.
+// NewClient returns a new http client.
 func NewClient(
 	gateway *zanzibar.Gateway,
 ) *GoogleNowClient {
@@ -58,7 +58,6 @@ func (c *GoogleNowClient) AddCredentials(
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
-
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "addCredentials", c.HTTPClient,
 	)
@@ -104,7 +103,6 @@ func (c *GoogleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
-
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "checkCredentials", c.HTTPClient,
 	)

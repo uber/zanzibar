@@ -32,13 +32,13 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// ContactsClient is the http client for service Contacts.
+// ContactsClient is the http client.
 type ContactsClient struct {
 	ClientID   string
 	HTTPClient *zanzibar.HTTPClient
 }
 
-// NewClient returns a new http client for service Contacts.
+// NewClient returns a new http client.
 func NewClient(
 	gateway *zanzibar.Gateway,
 ) *ContactsClient {
@@ -58,7 +58,6 @@ func (c *ContactsClient) SaveContacts(
 	headers map[string]string,
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
-
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(
 		c.ClientID, "saveContacts", c.HTTPClient,

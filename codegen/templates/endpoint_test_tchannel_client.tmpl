@@ -54,7 +54,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	defer gateway.Close()
 
 	{{range .ClientStubs}}
-	{{$clientFunc := printf "fake%s" (Title .ClientMethod) -}}
+	{{$clientFunc := printf "fake%s" (title .ClientMethod) -}}
 	{{$clientFunc}} := func(
 		ctx context.Context,
 		reqHeaders map[string]string,

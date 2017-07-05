@@ -7,7 +7,7 @@
 	"thriftMethodName": "Bar::argWithQueryHeader",
 	"workflowType": "httpClient",
 	"clientID": "bar",
-	"clientMethod": "argWithQueryHeader",
+	"clientMethod": "ArgWithQueryHeader",
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},
