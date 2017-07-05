@@ -201,6 +201,7 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 	return goType(p, typeSpec)
 }
 
+// goType returns the Go type string representation for the given thrift type.
 func goType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	switch s := spec.(type) {
 	case *compile.BoolSpec:
@@ -254,6 +255,9 @@ func goType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	}
 }
 
+// goReferenceType returns the Go reference type string representation for the given thrift type.
+// for types like slice and map that are already of reference type, it returns the result of goType;
+// for struct type, it returns the pointer of the result of goType.
 func goReferenceType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	t, err := goType(p, spec)
 	if err != nil {
@@ -267,6 +271,7 @@ func goReferenceType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	return t, nil
 }
 
+// goCustomType returns the user-defined Go type with its importing package.
 func goCustomType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	f := spec.ThriftFile()
 	if f == "" {
@@ -281,6 +286,7 @@ func goCustomType(p PackageHelper, spec compile.TypeSpec) (string, error) {
 	return pkg + "." + pascalCase(spec.ThriftName()), nil
 }
 
+// isStructType returns true if the given thrift type is struct, false otherwise.
 func isStructType(spec compile.TypeSpec) bool {
 	spec = compile.RootTypeSpec(spec)
 	_, isStruct := spec.(*compile.StructSpec)
@@ -290,22 +296,14 @@ func isStructType(spec compile.TypeSpec) bool {
 // isHashable returns true if the given type is considered hashable by thriftrw.
 //
 // Only primitive types, enums, and typedefs of other hashable types are considered hashable.
-func isHashable(t compile.TypeSpec) bool {
-	return isPrimitiveType(t)
-}
-
-// isPrimitiveType returns true if the given type is a primitive type.
-// Primitive types, enums, and typedefs of primitive types are considered primitive.
-//
 // binary is not considered a primitive type because it is represented as []byte in Go.
-func isPrimitiveType(spec compile.TypeSpec) bool {
+func isHashable(spec compile.TypeSpec) bool {
 	spec = compile.RootTypeSpec(spec)
 	switch spec.(type) {
 	case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
-		*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec:
+		*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec, *compile.EnumSpec:
 		return true
+	default:
+		return false
 	}
-
-	_, isEnum := spec.(*compile.EnumSpec)
-	return isEnum
 }
