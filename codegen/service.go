@@ -178,7 +178,7 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if service == nil {
 		return errors.Errorf(
-			"Module does not have service (%s)\n", serviceName,
+			"Module does not have service %q\n", serviceName,
 		)
 	}
 
@@ -192,27 +192,17 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if method == nil {
 		return errors.Errorf(
-			"Service (%s) does not have method (%s)\n", serviceName, methodName,
+			"Service %q does not have method %q\n", serviceName, methodName,
 		)
 	}
 
-	var err error
-	// TODO: we should do the same thing for http client as well
-	if clientSpec.ClientType == "tchannel" {
-		serviceMethod, ok := clientSpec.ExposedMethods[clientMethod]
-		if !ok {
-			return errors.Errorf("Client %q does not expose method %q", clientSpec.ClientName, clientMethod)
-		}
-		sm := strings.Split(serviceMethod, "::")
-
-		err = method.setDownstream(clientSpec.ModuleSpec, sm[0], sm[1])
-	} else {
-		err = method.setDownstream(
-			clientSpec.ModuleSpec,
-			clientSpec.ThriftServiceName,
-			clientMethod,
-		)
+	serviceMethod, ok := clientSpec.ExposedMethods[clientMethod]
+	if !ok {
+		return errors.Errorf("Client %q does not expose method %q", clientSpec.ClientName, clientMethod)
 	}
+	sm := strings.Split(serviceMethod, "::")
+
+	err := method.setDownstream(clientSpec.ModuleSpec, sm[0], sm[1])
 
 	if err != nil {
 		return err

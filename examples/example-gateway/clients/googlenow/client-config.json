@@ -4,6 +4,10 @@
 	"config": {
 		"thriftFile": "clients/googlenow/googlenow.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"serviceName": "GoogleNowService"
+		"serviceName": "GoogleNowService",
+		"exposedMethods": {
+			"AddCredentials": "GoogleNowService::addCredentials",
+			"CheckCredentials": "GoogleNowService::checkCredentials"
+		}
 	}
 }

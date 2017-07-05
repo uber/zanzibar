@@ -289,53 +289,6 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
-					"Name": "echo",
-					"HTTPMethod": "POST",
-					"EndpointName": "",
-					"HTTPPath": "/bar/echo",
-					"PathSegments": [
-						{
-							"Type": "static",
-							"Text": "bar",
-							"BodyIdentifier": ""
-						},
-						{
-							"Type": "static",
-							"Text": "echo",
-							"BodyIdentifier": ""
-						}
-					],
-					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
-					"ResHeaderFields": null,
-					"ReqHeaders": [
-						"x-uuid"
-					],
-					"ResHeaders": null,
-					"RequestType": "*clientsBarBar.Bar_Echo_Args",
-					"ResponseType": "string",
-					"OKStatusCode": {
-						"Code": 200,
-						"Message": ""
-					},
-					"Exceptions": [],
-					"ExceptionsIndex": {},
-					"ValidStatusCodes": [
-						200
-					],
-					"RequestBoxed": false,
-					"ThriftService": "Bar",
-					"GenCodePkgName": "clientsBarBar",
-					"WantAnnot": true,
-					"CompiledThriftSpec": null,
-					"Downstream": null,
-					"DownstreamService": "",
-					"DownstreamMethod": null,
-					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
-				},
-				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
@@ -606,6 +559,57 @@
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				}
+			],
+			"CompileSpec": null
+		},
+		{
+			"Name": "Echo",
+			"ThriftFile": "zanzibar/examples/example-gateway/idl/clients/bar/bar.thrift",
+			"WantAnnot": true,
+			"IsEndpoint": false,
+			"Methods": [
+				{
+					"Name": "echo",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_Echo_Args",
+					"ResponseType": "string",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
 					"GenCodePkgName": "clientsBarBar",
 					"WantAnnot": true,
 					"CompiledThriftSpec": null,

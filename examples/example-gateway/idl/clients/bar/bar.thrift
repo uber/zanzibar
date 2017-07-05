@@ -83,15 +83,6 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
-    string echo (
-        1: required string name
-    ) (
-        zanzibar.http.method = "POST"
-        zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/bar/echo"
-        zanzibar.http.status = "200"
-    )
-
     BarResponse argWithQueryParams(
         1: required string name
         2: optional string userUUID
@@ -127,6 +118,17 @@ service Bar {
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/argWithManyQueryParams"
+        zanzibar.http.status = "200"
+    )
+}
+
+service  Echo {
+    string echo (
+        1: required string name
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo"
         zanzibar.http.status = "200"
     )
 }

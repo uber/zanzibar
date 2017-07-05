@@ -44,7 +44,6 @@ type MainFiles struct {
 var funcMap = tmpl.FuncMap{
 	"lower":         strings.ToLower,
 	"title":         strings.Title,
-	"Title":         strings.Title,
 	"fullTypeName":  fullTypeName,
 	"camel":         camelCase,
 	"split":         strings.Split,

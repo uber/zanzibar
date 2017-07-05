@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-type Bar_Echo_Args struct {
+type Echo_Echo_Args struct {
 	Name string `json:"name,required"`
 }
 
-func (v *Bar_Echo_Args) ToWire() (wire.Value, error) {
+func (v *Echo_Echo_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -30,7 +30,7 @@ func (v *Bar_Echo_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Bar_Echo_Args) FromWire(w wire.Value) error {
+func (v *Echo_Echo_Args) FromWire(w wire.Value) error {
 	var err error
 	nameIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -46,12 +46,12 @@ func (v *Bar_Echo_Args) FromWire(w wire.Value) error {
 		}
 	}
 	if !nameIsSet {
-		return errors.New("field Name of Bar_Echo_Args is required")
+		return errors.New("field Name of Echo_Echo_Args is required")
 	}
 	return nil
 }
 
-func (v *Bar_Echo_Args) String() string {
+func (v *Echo_Echo_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -59,48 +59,48 @@ func (v *Bar_Echo_Args) String() string {
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
-	return fmt.Sprintf("Bar_Echo_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_Echo_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *Bar_Echo_Args) Equals(rhs *Bar_Echo_Args) bool {
+func (v *Echo_Echo_Args) Equals(rhs *Echo_Echo_Args) bool {
 	if !(v.Name == rhs.Name) {
 		return false
 	}
 	return true
 }
 
-func (v *Bar_Echo_Args) MethodName() string {
+func (v *Echo_Echo_Args) MethodName() string {
 	return "echo"
 }
 
-func (v *Bar_Echo_Args) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_Echo_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-var Bar_Echo_Helper = struct {
-	Args           func(name string) *Bar_Echo_Args
+var Echo_Echo_Helper = struct {
+	Args           func(name string) *Echo_Echo_Args
 	IsException    func(error) bool
-	WrapResponse   func(string, error) (*Bar_Echo_Result, error)
-	UnwrapResponse func(*Bar_Echo_Result) (string, error)
+	WrapResponse   func(string, error) (*Echo_Echo_Result, error)
+	UnwrapResponse func(*Echo_Echo_Result) (string, error)
 }{}
 
 func init() {
-	Bar_Echo_Helper.Args = func(name string) *Bar_Echo_Args {
-		return &Bar_Echo_Args{Name: name}
+	Echo_Echo_Helper.Args = func(name string) *Echo_Echo_Args {
+		return &Echo_Echo_Args{Name: name}
 	}
-	Bar_Echo_Helper.IsException = func(err error) bool {
+	Echo_Echo_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
-	Bar_Echo_Helper.WrapResponse = func(success string, err error) (*Bar_Echo_Result, error) {
+	Echo_Echo_Helper.WrapResponse = func(success string, err error) (*Echo_Echo_Result, error) {
 		if err == nil {
-			return &Bar_Echo_Result{Success: &success}, nil
+			return &Echo_Echo_Result{Success: &success}, nil
 		}
 		return nil, err
 	}
-	Bar_Echo_Helper.UnwrapResponse = func(result *Bar_Echo_Result) (success string, err error) {
+	Echo_Echo_Helper.UnwrapResponse = func(result *Echo_Echo_Result) (success string, err error) {
 		if result.Success != nil {
 			success = *result.Success
 			return
@@ -110,11 +110,11 @@ func init() {
 	}
 }
 
-type Bar_Echo_Result struct {
+type Echo_Echo_Result struct {
 	Success *string `json:"success,omitempty"`
 }
 
-func (v *Bar_Echo_Result) ToWire() (wire.Value, error) {
+func (v *Echo_Echo_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -130,12 +130,12 @@ func (v *Bar_Echo_Result) ToWire() (wire.Value, error) {
 		i++
 	}
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("Bar_Echo_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("Echo_Echo_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Bar_Echo_Result) FromWire(w wire.Value) error {
+func (v *Echo_Echo_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -155,12 +155,12 @@ func (v *Bar_Echo_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("Bar_Echo_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("Echo_Echo_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
 
-func (v *Bar_Echo_Result) String() string {
+func (v *Echo_Echo_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -170,20 +170,20 @@ func (v *Bar_Echo_Result) String() string {
 		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
 		i++
 	}
-	return fmt.Sprintf("Bar_Echo_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_Echo_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *Bar_Echo_Result) Equals(rhs *Bar_Echo_Result) bool {
+func (v *Echo_Echo_Result) Equals(rhs *Echo_Echo_Result) bool {
 	if !_String_EqualsPtr(v.Success, rhs.Success) {
 		return false
 	}
 	return true
 }
 
-func (v *Bar_Echo_Result) MethodName() string {
+func (v *Echo_Echo_Result) MethodName() string {
 	return "echo"
 }
 
-func (v *Bar_Echo_Result) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_Echo_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }
