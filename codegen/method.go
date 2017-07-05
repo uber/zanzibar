@@ -274,8 +274,9 @@ func (ms *MethodSpec) RefResponse(respVar string) string {
 		return respVar
 	}
 
-	switch compile.RootTypeSpec(respSpec.ReturnType).ThriftName() {
-	case "bool", "byte", "i16", "i32", "i64", "double", "string":
+	switch compile.RootTypeSpec(respSpec.ReturnType).(type) {
+	case *compile.BoolSpec, *compile.I8Spec, *compile.I16Spec, *compile.I32Spec,
+		*compile.I64Spec, *compile.DoubleSpec, *compile.StringSpec, *compile.EnumSpec:
 		return "&" + respVar
 	default:
 		return respVar

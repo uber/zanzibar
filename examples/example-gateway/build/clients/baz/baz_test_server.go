@@ -35,36 +35,309 @@ import (
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-// SecondServiceEchoFunc is the handler function for "Echo" method of thrift service "SecondService".
-type SecondServiceEchoFunc func(
+// SecondServiceEchoBinaryFunc is the handler function for "EchoBinary" method of thrift service "SecondService".
+type SecondServiceEchoBinaryFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_Echo_Args,
-) (string, map[string]string, error)
+	args *clientsBazBaz.SecondService_EchoBinary_Args,
+) ([]byte, map[string]string, error)
 
-// NewSecondServiceEchoHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoHandler(f SecondServiceEchoFunc) zanzibar.TChannelHandler {
-	return &SecondServiceEchoHandler{f}
+// NewSecondServiceEchoBinaryHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoBinaryHandler(f SecondServiceEchoBinaryFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoBinaryHandler{f}
 }
 
-// SecondServiceEchoHandler handles the "Echo" method call of thrift service "SecondService".
-type SecondServiceEchoHandler struct {
-	echo SecondServiceEchoFunc
+// SecondServiceEchoBinaryHandler handles the "EchoBinary" method call of thrift service "SecondService".
+type SecondServiceEchoBinaryHandler struct {
+	echobinary SecondServiceEchoBinaryFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
-func (h *SecondServiceEchoHandler) Handle(
+func (h *SecondServiceEchoBinaryHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_Echo_Args
-	var res clientsBazBaz.SecondService_Echo_Result
+	var req clientsBazBaz.SecondService_EchoBinary_Args
+	var res clientsBazBaz.SecondService_EchoBinary_Result
 
 	if err := req.FromWire(*wireValue); err != nil {
 		return false, nil, nil, err
 	}
-	r, respHeaders, err := h.echo(ctx, reqHeaders, &req)
+	r, respHeaders, err := h.echobinary(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoBoolFunc is the handler function for "EchoBool" method of thrift service "SecondService".
+type SecondServiceEchoBoolFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoBool_Args,
+) (bool, map[string]string, error)
+
+// NewSecondServiceEchoBoolHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoBoolHandler(f SecondServiceEchoBoolFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoBoolHandler{f}
+}
+
+// SecondServiceEchoBoolHandler handles the "EchoBool" method call of thrift service "SecondService".
+type SecondServiceEchoBoolHandler struct {
+	echobool SecondServiceEchoBoolFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoBoolHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoBool_Args
+	var res clientsBazBaz.SecondService_EchoBool_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echobool(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoDoubleFunc is the handler function for "EchoDouble" method of thrift service "SecondService".
+type SecondServiceEchoDoubleFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoDouble_Args,
+) (float64, map[string]string, error)
+
+// NewSecondServiceEchoDoubleHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoDoubleHandler(f SecondServiceEchoDoubleFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoDoubleHandler{f}
+}
+
+// SecondServiceEchoDoubleHandler handles the "EchoDouble" method call of thrift service "SecondService".
+type SecondServiceEchoDoubleHandler struct {
+	echodouble SecondServiceEchoDoubleFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoDoubleHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoDouble_Args
+	var res clientsBazBaz.SecondService_EchoDouble_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echodouble(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoEnumFunc is the handler function for "EchoEnum" method of thrift service "SecondService".
+type SecondServiceEchoEnumFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoEnum_Args,
+) (clientsBazBaz.Fruit, map[string]string, error)
+
+// NewSecondServiceEchoEnumHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoEnumHandler(f SecondServiceEchoEnumFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoEnumHandler{f}
+}
+
+// SecondServiceEchoEnumHandler handles the "EchoEnum" method call of thrift service "SecondService".
+type SecondServiceEchoEnumHandler struct {
+	echoenum SecondServiceEchoEnumFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoEnumHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoEnum_Args
+	var res clientsBazBaz.SecondService_EchoEnum_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echoenum(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoI16Func is the handler function for "EchoI16" method of thrift service "SecondService".
+type SecondServiceEchoI16Func func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI16_Args,
+) (int16, map[string]string, error)
+
+// NewSecondServiceEchoI16Handler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoI16Handler(f SecondServiceEchoI16Func) zanzibar.TChannelHandler {
+	return &SecondServiceEchoI16Handler{f}
+}
+
+// SecondServiceEchoI16Handler handles the "EchoI16" method call of thrift service "SecondService".
+type SecondServiceEchoI16Handler struct {
+	echoi16 SecondServiceEchoI16Func
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoI16Handler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoI16_Args
+	var res clientsBazBaz.SecondService_EchoI16_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echoi16(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoI32Func is the handler function for "EchoI32" method of thrift service "SecondService".
+type SecondServiceEchoI32Func func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI32_Args,
+) (int32, map[string]string, error)
+
+// NewSecondServiceEchoI32Handler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoI32Handler(f SecondServiceEchoI32Func) zanzibar.TChannelHandler {
+	return &SecondServiceEchoI32Handler{f}
+}
+
+// SecondServiceEchoI32Handler handles the "EchoI32" method call of thrift service "SecondService".
+type SecondServiceEchoI32Handler struct {
+	echoi32 SecondServiceEchoI32Func
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoI32Handler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoI32_Args
+	var res clientsBazBaz.SecondService_EchoI32_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echoi32(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoI64Func is the handler function for "EchoI64" method of thrift service "SecondService".
+type SecondServiceEchoI64Func func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI64_Args,
+) (int64, map[string]string, error)
+
+// NewSecondServiceEchoI64Handler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoI64Handler(f SecondServiceEchoI64Func) zanzibar.TChannelHandler {
+	return &SecondServiceEchoI64Handler{f}
+}
+
+// SecondServiceEchoI64Handler handles the "EchoI64" method call of thrift service "SecondService".
+type SecondServiceEchoI64Handler struct {
+	echoi64 SecondServiceEchoI64Func
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoI64Handler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoI64_Args
+	var res clientsBazBaz.SecondService_EchoI64_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echoi64(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoI8Func is the handler function for "EchoI8" method of thrift service "SecondService".
+type SecondServiceEchoI8Func func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI8_Args,
+) (int8, map[string]string, error)
+
+// NewSecondServiceEchoI8Handler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoI8Handler(f SecondServiceEchoI8Func) zanzibar.TChannelHandler {
+	return &SecondServiceEchoI8Handler{f}
+}
+
+// SecondServiceEchoI8Handler handles the "EchoI8" method call of thrift service "SecondService".
+type SecondServiceEchoI8Handler struct {
+	echoi8 SecondServiceEchoI8Func
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoI8Handler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoI8_Args
+	var res clientsBazBaz.SecondService_EchoI8_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echoi8(ctx, reqHeaders, &req)
 
 	if err != nil {
 		return false, nil, nil, err
@@ -187,6 +460,45 @@ func (h *SecondServiceEchoSetHandler) Handle(
 		return false, nil, nil, err
 	}
 	res.Success = r
+
+	return err == nil, &res, respHeaders, nil
+}
+
+// SecondServiceEchoStringFunc is the handler function for "EchoString" method of thrift service "SecondService".
+type SecondServiceEchoStringFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoString_Args,
+) (string, map[string]string, error)
+
+// NewSecondServiceEchoStringHandler wraps a handler function so it can be registered with a thrift server.
+func NewSecondServiceEchoStringHandler(f SecondServiceEchoStringFunc) zanzibar.TChannelHandler {
+	return &SecondServiceEchoStringHandler{f}
+}
+
+// SecondServiceEchoStringHandler handles the "EchoString" method call of thrift service "SecondService".
+type SecondServiceEchoStringHandler struct {
+	echostring SecondServiceEchoStringFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SecondServiceEchoStringHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SecondService_EchoString_Args
+	var res clientsBazBaz.SecondService_EchoString_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.echostring(ctx, reqHeaders, &req)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+	res.Success = &r
 
 	return err == nil, &res, respHeaders, nil
 }

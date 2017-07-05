@@ -39,11 +39,76 @@ import (
 
 // Client defines baz client interface.
 type Client interface {
-	Echo(
+	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_Echo_Args,
+		args *clientsBazBaz.SecondService_EchoBinary_Args,
+	) ([]byte, map[string]string, error)
+	EchoBool(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoBool_Args,
+	) (bool, map[string]string, error)
+	EchoDouble(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoDouble_Args,
+	) (float64, map[string]string, error)
+	EchoEnum(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoEnum_Args,
+	) (clientsBazBaz.Fruit, map[string]string, error)
+	EchoI16(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoI16_Args,
+	) (int16, map[string]string, error)
+	EchoI32(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoI32_Args,
+	) (int32, map[string]string, error)
+	EchoI64(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoI64_Args,
+	) (int64, map[string]string, error)
+	EchoI8(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoI8_Args,
+	) (int8, map[string]string, error)
+	EchoList(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoList_Args,
+	) ([]string, map[string]string, error)
+	EchoMap(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoMap_Args,
+	) (map[clientsBazBase.UUID]*clientsBazBase.BazResponse, map[string]string, error)
+	EchoSet(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoSet_Args,
+	) (map[string]struct{}, map[string]string, error)
+	EchoString(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoString_Args,
 	) (string, map[string]string, error)
+	EchoUUID(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoUUID_Args,
+	) (clientsBazBase.UUID, map[string]string, error)
+	EchoUUIDList(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SecondService_EchoUUIDList_Args,
+	) ([]clientsBazBase.UUID, map[string]string, error)
 	Call(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -98,35 +163,224 @@ type bazClient struct {
 	client zanzibar.TChannelClient
 }
 
-// Echo is a client RPC call for method "SecondService::Echo"
-func (c *bazClient) Echo(
+// EchoBinary is a client RPC call for method "SecondService::EchoBinary"
+func (c *bazClient) EchoBinary(
 	ctx context.Context,
 	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_Echo_Args,
-) (string, map[string]string, error) {
-	var result clientsBazBaz.SecondService_Echo_Result
-	var resp string
+	args *clientsBazBaz.SecondService_EchoBinary_Args,
+) ([]byte, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoBinary_Result
+	var resp []byte
 
 	success, respHeaders, err := c.client.Call(
-		ctx, "SecondService", "Echo", reqHeaders, args, &result,
+		ctx, "SecondService", "EchoBinary", reqHeaders, args, &result,
 	)
 
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("bazClient received no result or unknown exception for Echo")
+			err = errors.New("bazClient received no result or unknown exception for EchoBinary")
 		}
 	}
 	if err != nil {
 		return resp, nil, err
 	}
 
-	resp, err = clientsBazBaz.SecondService_Echo_Helper.UnwrapResponse(&result)
+	resp, err = clientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoBool is a client RPC call for method "SecondService::EchoBool"
+func (c *bazClient) EchoBool(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoBool_Args,
+) (bool, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoBool_Result
+	var resp bool
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoBool", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoBool")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoDouble is a client RPC call for method "SecondService::EchoDouble"
+func (c *bazClient) EchoDouble(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoDouble_Args,
+) (float64, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoDouble_Result
+	var resp float64
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoDouble", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoDouble")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoEnum is a client RPC call for method "SecondService::EchoEnum"
+func (c *bazClient) EchoEnum(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoEnum_Args,
+) (clientsBazBaz.Fruit, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoEnum_Result
+	var resp clientsBazBaz.Fruit
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoEnum", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoEnum")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoI16 is a client RPC call for method "SecondService::EchoI16"
+func (c *bazClient) EchoI16(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI16_Args,
+) (int16, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoI16_Result
+	var resp int16
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoI16", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoI16")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoI32 is a client RPC call for method "SecondService::EchoI32"
+func (c *bazClient) EchoI32(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI32_Args,
+) (int32, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoI32_Result
+	var resp int32
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoI32", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoI32")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoI64 is a client RPC call for method "SecondService::EchoI64"
+func (c *bazClient) EchoI64(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI64_Args,
+) (int64, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoI64_Result
+	var resp int64
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoI64", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoI64")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
+// EchoI8 is a client RPC call for method "SecondService::EchoI8"
+func (c *bazClient) EchoI8(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoI8_Args,
+) (int8, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoI8_Result
+	var resp int8
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoI8", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoI8")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	return resp, respHeaders, err
 }
 
 // EchoList is a client RPC call for method "SecondService::EchoList"
-func (c *BazClient) EchoList(
+func (c *bazClient) EchoList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoList_Args,
@@ -141,7 +395,7 @@ func (c *BazClient) EchoList(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for EchoList")
+			err = errors.New("bazClient received no result or unknown exception for EchoList")
 		}
 	}
 	if err != nil {
@@ -153,7 +407,7 @@ func (c *BazClient) EchoList(
 }
 
 // EchoMap is a client RPC call for method "SecondService::EchoMap"
-func (c *BazClient) EchoMap(
+func (c *bazClient) EchoMap(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoMap_Args,
@@ -168,7 +422,7 @@ func (c *BazClient) EchoMap(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for EchoMap")
+			err = errors.New("bazClient received no result or unknown exception for EchoMap")
 		}
 	}
 	if err != nil {
@@ -180,7 +434,7 @@ func (c *BazClient) EchoMap(
 }
 
 // EchoSet is a client RPC call for method "SecondService::EchoSet"
-func (c *BazClient) EchoSet(
+func (c *bazClient) EchoSet(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoSet_Args,
@@ -195,7 +449,7 @@ func (c *BazClient) EchoSet(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for EchoSet")
+			err = errors.New("bazClient received no result or unknown exception for EchoSet")
 		}
 	}
 	if err != nil {
@@ -206,8 +460,35 @@ func (c *BazClient) EchoSet(
 	return resp, respHeaders, err
 }
 
+// EchoString is a client RPC call for method "SecondService::EchoString"
+func (c *bazClient) EchoString(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SecondService_EchoString_Args,
+) (string, map[string]string, error) {
+	var result clientsBazBaz.SecondService_EchoString_Result
+	var resp string
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SecondService", "EchoString", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for EchoString")
+		}
+	}
+	if err != nil {
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
+	return resp, respHeaders, err
+}
+
 // EchoUUID is a client RPC call for method "SecondService::EchoUUID"
-func (c *BazClient) EchoUUID(
+func (c *bazClient) EchoUUID(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoUUID_Args,
@@ -222,7 +503,7 @@ func (c *BazClient) EchoUUID(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for EchoUUID")
+			err = errors.New("bazClient received no result or unknown exception for EchoUUID")
 		}
 	}
 	if err != nil {
@@ -234,7 +515,7 @@ func (c *BazClient) EchoUUID(
 }
 
 // EchoUUIDList is a client RPC call for method "SecondService::EchoUUIDList"
-func (c *BazClient) EchoUUIDList(
+func (c *bazClient) EchoUUIDList(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoUUIDList_Args,
@@ -249,7 +530,7 @@ func (c *BazClient) EchoUUIDList(
 	if err == nil && !success {
 		switch {
 		default:
-			err = errors.New("BazClient received no result or unknown exception for EchoUUIDList")
+			err = errors.New("bazClient received no result or unknown exception for EchoUUIDList")
 		}
 	}
 	if err != nil {

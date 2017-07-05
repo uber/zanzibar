@@ -1,6 +1,13 @@
 namespace java com.uber.zanzibar.clients.baz
 include "base.thrift"
 
+enum Fruit {
+   APPLE,
+   BANANA,
+   PEACH,
+   GRAPE
+}
+
 struct BazRequest {
     1: required bool b1
     2: required string s2
@@ -42,8 +49,40 @@ service SimpleService {
 }
 
 service SecondService {
-    string Echo(
+    i8 EchoI8(
+        1: required i8 arg
+    )
+
+    i16 EchoI16(
+        1: required i16 arg
+    )
+
+    i32 EchoI32(
+        1: required i32 arg
+    )
+
+    i64 EchoI64(
+        1: required i64 arg
+    )
+
+    double EchoDouble(
+        1: required double arg
+    )
+
+    bool EchoBool (
+        1: required bool arg
+    )
+
+    binary EchoBinary (
+        1: required binary arg
+    )
+
+    string EchoString(
         1: required string arg
+    )
+
+    Fruit EchoEnum (
+        1: required Fruit arg = Fruit.APPLE
     )
 
     base.UUID EchoUUID(
