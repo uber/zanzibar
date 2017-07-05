@@ -11,7 +11,7 @@ import (
 )
 
 type Echo_EchoI8_Args struct {
-	Name string `json:"name,required"`
+	Arg int8 `json:"arg,required"`
 }
 
 func (v *Echo_EchoI8_Args) ToWire() (wire.Value, error) {
@@ -21,7 +21,7 @@ func (v *Echo_EchoI8_Args) ToWire() (wire.Value, error) {
 		w      wire.Value
 		err    error
 	)
-	w, err = wire.NewValueString(v.Name), error(nil)
+	w, err = wire.NewValueI8(v.Arg), error(nil)
 	if err != nil {
 		return w, err
 	}
@@ -32,21 +32,21 @@ func (v *Echo_EchoI8_Args) ToWire() (wire.Value, error) {
 
 func (v *Echo_EchoI8_Args) FromWire(w wire.Value) error {
 	var err error
-	nameIsSet := false
+	argIsSet := false
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
 		case 1:
-			if field.Value.Type() == wire.TBinary {
-				v.Name, err = field.Value.GetString(), error(nil)
+			if field.Value.Type() == wire.TI8 {
+				v.Arg, err = field.Value.GetI8(), error(nil)
 				if err != nil {
 					return err
 				}
-				nameIsSet = true
+				argIsSet = true
 			}
 		}
 	}
-	if !nameIsSet {
-		return errors.New("field Name of Echo_EchoI8_Args is required")
+	if !argIsSet {
+		return errors.New("field Arg of Echo_EchoI8_Args is required")
 	}
 	return nil
 }
@@ -57,13 +57,13 @@ func (v *Echo_EchoI8_Args) String() string {
 	}
 	var fields [1]string
 	i := 0
-	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
 	return fmt.Sprintf("Echo_EchoI8_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
 func (v *Echo_EchoI8_Args) Equals(rhs *Echo_EchoI8_Args) bool {
-	if !(v.Name == rhs.Name) {
+	if !(v.Arg == rhs.Arg) {
 		return false
 	}
 	return true
@@ -78,15 +78,15 @@ func (v *Echo_EchoI8_Args) EnvelopeType() wire.EnvelopeType {
 }
 
 var Echo_EchoI8_Helper = struct {
-	Args           func(name string) *Echo_EchoI8_Args
+	Args           func(arg int8) *Echo_EchoI8_Args
 	IsException    func(error) bool
 	WrapResponse   func(int8, error) (*Echo_EchoI8_Result, error)
 	UnwrapResponse func(*Echo_EchoI8_Result) (int8, error)
 }{}
 
 func init() {
-	Echo_EchoI8_Helper.Args = func(name string) *Echo_EchoI8_Args {
-		return &Echo_EchoI8_Args{Name: name}
+	Echo_EchoI8_Helper.Args = func(arg int8) *Echo_EchoI8_Args {
+		return &Echo_EchoI8_Args{Arg: arg}
 	}
 	Echo_EchoI8_Helper.IsException = func(err error) bool {
 		switch err.(type) {

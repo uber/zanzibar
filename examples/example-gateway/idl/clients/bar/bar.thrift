@@ -132,7 +132,7 @@ service Bar {
 
 service  Echo {
     i8 echoI8 (
-        1: required string name
+        1: required i8 arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
