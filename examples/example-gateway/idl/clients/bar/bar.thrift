@@ -4,6 +4,11 @@ include "../foo/foo.thrift"
 
 typedef string UUID
 
+enum Fruit {
+    APPLE,
+    BANANA
+}
+
 struct BarRequest {
     1: required string stringField (
         zanzibar.http.ref = "params.someParamsField"
@@ -85,32 +90,6 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
-    list<string> echoStringList (
-        1: required list<string> arg
-    ) (
-        zanzibar.http.method = "POST"
-        zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/bar/echo-string-list"
-        zanzibar.http.status = "200"
-    )
-
-    list<BarResponse> echoBarList (
-        1: required list<UUID> arg
-    ) (
-        zanzibar.http.method = "POST"
-        zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/bar/echo-bar-list"
-        zanzibar.http.status = "200"
-    )
-
-    map<UUID, BarResponse> echoBarMap (
-        1: required map<string, UUID> arg
-    ) (
-        zanzibar.http.method = "POST"
-        zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/bar/echo-bar-map"
-        zanzibar.http.status = "200"
-    )
 
     BarResponse argWithQueryParams(
         1: required string name
@@ -152,12 +131,129 @@ service Bar {
 }
 
 service  Echo {
-    string echo (
+    i8 echoI8 (
         1: required string name
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/echo"
+        zanzibar.http.path = "/echo/i8"
+        zanzibar.http.status = "200"
+    )
+
+    i16 echoI16(
+        1: required i16 arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/i16"
+        zanzibar.http.status = "200"
+    )
+
+    i32 echoI32(
+        1: required i32 arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/i32"
+        zanzibar.http.status = "200"
+    )
+
+    i64 echoI64(
+        1: required i64 arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/i64"
+        zanzibar.http.status = "200"
+    )
+
+    double echoDouble(
+        1: required double arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/double"
+        zanzibar.http.status = "200"
+    )
+
+    bool echoBool (
+        1: required bool arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/bool"
+        zanzibar.http.status = "200"
+    )
+
+    binary echoBinary (
+        1: required binary arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/binary"
+        zanzibar.http.status = "200"
+    )
+
+    string echoString(
+        1: required string arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/string"
+        zanzibar.http.status = "200"
+    )
+
+    Fruit echoEnum (
+        1: required Fruit arg = Fruit.APPLE
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/enum"
+        zanzibar.http.status = "200"
+    )
+
+    UUID echoUUID(
+        1: required UUID arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/uuid"
+        zanzibar.http.status = "200"
+    )
+
+    set<string> echoSet(
+        1: required set<string> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/set"
+        zanzibar.http.status = "200"
+    )
+
+    list<string> echoStringList (
+        1: required list<string> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/string-list"
+        zanzibar.http.status = "200"
+    )
+
+    list<BarResponse> echoBarList (
+        1: required list<UUID> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/bar-list"
+        zanzibar.http.status = "200"
+    )
+
+    map<UUID, BarResponse> echoBarMap (
+        1: required map<string, UUID> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/bar-map"
         zanzibar.http.status = "200"
     )
 }

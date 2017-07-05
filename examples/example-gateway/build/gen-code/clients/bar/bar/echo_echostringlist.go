@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type Bar_EchoStringList_Args struct {
+type Echo_EchoStringList_Args struct {
 	Arg []string `json:"arg,required"`
 }
 
@@ -41,7 +41,7 @@ func (_List_String_ValueList) ValueType() wire.Type {
 func (_List_String_ValueList) Close() {
 }
 
-func (v *Bar_EchoStringList_Args) ToWire() (wire.Value, error) {
+func (v *Echo_EchoStringList_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -49,7 +49,7 @@ func (v *Bar_EchoStringList_Args) ToWire() (wire.Value, error) {
 		err    error
 	)
 	if v.Arg == nil {
-		return w, errors.New("field Arg of Bar_EchoStringList_Args is required")
+		return w, errors.New("field Arg of Echo_EchoStringList_Args is required")
 	}
 	w, err = wire.NewValueList(_List_String_ValueList(v.Arg)), error(nil)
 	if err != nil {
@@ -77,7 +77,7 @@ func _List_String_Read(l wire.ValueList) ([]string, error) {
 	return o, err
 }
 
-func (v *Bar_EchoStringList_Args) FromWire(w wire.Value) error {
+func (v *Echo_EchoStringList_Args) FromWire(w wire.Value) error {
 	var err error
 	argIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -93,12 +93,12 @@ func (v *Bar_EchoStringList_Args) FromWire(w wire.Value) error {
 		}
 	}
 	if !argIsSet {
-		return errors.New("field Arg of Bar_EchoStringList_Args is required")
+		return errors.New("field Arg of Echo_EchoStringList_Args is required")
 	}
 	return nil
 }
 
-func (v *Bar_EchoStringList_Args) String() string {
+func (v *Echo_EchoStringList_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -106,7 +106,7 @@ func (v *Bar_EchoStringList_Args) String() string {
 	i := 0
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
-	return fmt.Sprintf("Bar_EchoStringList_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoStringList_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
 func _List_String_Equals(lhs, rhs []string) bool {
@@ -122,45 +122,45 @@ func _List_String_Equals(lhs, rhs []string) bool {
 	return true
 }
 
-func (v *Bar_EchoStringList_Args) Equals(rhs *Bar_EchoStringList_Args) bool {
+func (v *Echo_EchoStringList_Args) Equals(rhs *Echo_EchoStringList_Args) bool {
 	if !_List_String_Equals(v.Arg, rhs.Arg) {
 		return false
 	}
 	return true
 }
 
-func (v *Bar_EchoStringList_Args) MethodName() string {
+func (v *Echo_EchoStringList_Args) MethodName() string {
 	return "echoStringList"
 }
 
-func (v *Bar_EchoStringList_Args) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoStringList_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-var Bar_EchoStringList_Helper = struct {
-	Args           func(arg []string) *Bar_EchoStringList_Args
+var Echo_EchoStringList_Helper = struct {
+	Args           func(arg []string) *Echo_EchoStringList_Args
 	IsException    func(error) bool
-	WrapResponse   func([]string, error) (*Bar_EchoStringList_Result, error)
-	UnwrapResponse func(*Bar_EchoStringList_Result) ([]string, error)
+	WrapResponse   func([]string, error) (*Echo_EchoStringList_Result, error)
+	UnwrapResponse func(*Echo_EchoStringList_Result) ([]string, error)
 }{}
 
 func init() {
-	Bar_EchoStringList_Helper.Args = func(arg []string) *Bar_EchoStringList_Args {
-		return &Bar_EchoStringList_Args{Arg: arg}
+	Echo_EchoStringList_Helper.Args = func(arg []string) *Echo_EchoStringList_Args {
+		return &Echo_EchoStringList_Args{Arg: arg}
 	}
-	Bar_EchoStringList_Helper.IsException = func(err error) bool {
+	Echo_EchoStringList_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
-	Bar_EchoStringList_Helper.WrapResponse = func(success []string, err error) (*Bar_EchoStringList_Result, error) {
+	Echo_EchoStringList_Helper.WrapResponse = func(success []string, err error) (*Echo_EchoStringList_Result, error) {
 		if err == nil {
-			return &Bar_EchoStringList_Result{Success: success}, nil
+			return &Echo_EchoStringList_Result{Success: success}, nil
 		}
 		return nil, err
 	}
-	Bar_EchoStringList_Helper.UnwrapResponse = func(result *Bar_EchoStringList_Result) (success []string, err error) {
+	Echo_EchoStringList_Helper.UnwrapResponse = func(result *Echo_EchoStringList_Result) (success []string, err error) {
 		if result.Success != nil {
 			success = result.Success
 			return
@@ -170,11 +170,11 @@ func init() {
 	}
 }
 
-type Bar_EchoStringList_Result struct {
+type Echo_EchoStringList_Result struct {
 	Success []string `json:"success"`
 }
 
-func (v *Bar_EchoStringList_Result) ToWire() (wire.Value, error) {
+func (v *Echo_EchoStringList_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -190,12 +190,12 @@ func (v *Bar_EchoStringList_Result) ToWire() (wire.Value, error) {
 		i++
 	}
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("Bar_EchoStringList_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("Echo_EchoStringList_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Bar_EchoStringList_Result) FromWire(w wire.Value) error {
+func (v *Echo_EchoStringList_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -213,12 +213,12 @@ func (v *Bar_EchoStringList_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("Bar_EchoStringList_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("Echo_EchoStringList_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
 
-func (v *Bar_EchoStringList_Result) String() string {
+func (v *Echo_EchoStringList_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -228,20 +228,20 @@ func (v *Bar_EchoStringList_Result) String() string {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
 		i++
 	}
-	return fmt.Sprintf("Bar_EchoStringList_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoStringList_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *Bar_EchoStringList_Result) Equals(rhs *Bar_EchoStringList_Result) bool {
+func (v *Echo_EchoStringList_Result) Equals(rhs *Echo_EchoStringList_Result) bool {
 	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && _List_String_Equals(v.Success, rhs.Success))) {
 		return false
 	}
 	return true
 }
 
-func (v *Bar_EchoStringList_Result) MethodName() string {
+func (v *Echo_EchoStringList_Result) MethodName() string {
 	return "echoStringList"
 }
 
-func (v *Bar_EchoStringList_Result) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoStringList_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }

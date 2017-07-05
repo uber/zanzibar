@@ -15,7 +15,21 @@
 			"ArgWithQueryParams": "Bar::argWithQueryParams",
 			"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
-			"Echo": "Echo::echo"
+
+			"EchoI8": "Echo::echoI8",
+			"EchoI16": "Echo::echoI16",
+			"EchoI32": "Echo::echoI32",
+			"EchoI64": "Echo::echoI64",
+			"EchoDouble": "Echo::echoDouble",
+			"EchoBool": "Echo::echoBool",
+			"EchoBinary": "Echo::echoBinary",
+			"EchoString": "Echo::echoString",
+			"EchoEnum": "Echo::echoEnum",
+			"EchoUUID": "Echo::echoUUID",
+			"EchoSet": "Echo::echoSet",
+			"EchoStringList": "Echo::echoStringList",
+			"EchoBarList": "Echo::echoBarList",
+			"EchoBarMap": "Echo::echoBarMap"
 		}
 	}
 }
