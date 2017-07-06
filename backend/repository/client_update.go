@@ -20,8 +20,6 @@ type ClientJSONConfig struct {
 type configField struct {
 	ThriftFile     string            `json:"thriftFile"`
 	ThriftFileSha  string            `json:"thriftFileSha"`
-	ServiceName    string            `json:"serviceName,omitempty"`
-	MuttleyName    string            `json:"muttleyName,omitempty"`
 	ExposedMethods map[string]string `json:"exposedMethods,omitempty"`
 }
 
@@ -32,7 +30,6 @@ func NewClientConfigJSON(cfg ClientConfig) *ClientJSONConfig {
 		Type: string(cfg.Type),
 		Config: &configField{
 			ThriftFile:     cfg.ThriftFile,
-			MuttleyName:    cfg.MuttleyName,
 			ExposedMethods: cfg.ExposedMethods,
 		},
 	}

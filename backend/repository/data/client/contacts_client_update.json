@@ -1,6 +1,5 @@
 {
     "thriftFile": "clients/contacts/contacts.thrift",
-    "serviceName": "contacts",
     "type": "http",
     "name": "contacts",
     "exposedMethods": {

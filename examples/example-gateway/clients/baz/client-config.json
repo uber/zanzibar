@@ -7,9 +7,9 @@
 		"exposedMethods": {
 			"Call": "SimpleService::Call",
 			"Compare": "SimpleService::Compare",
-			"Ping": "SimpleService::Ping",
 			"DeliberateDiffNoop": "SimpleService::SillyNoop",
-			"Echo": "SecondService::Echo"
+			"Echo": "SecondService::Echo",
+			"Ping": "SimpleService::Ping"
 		}
 	}
 }

@@ -13,10 +13,74 @@ import (
 )
 
 const (
-	exampleGateway                     = "../../examples/example-gateway"
-	clientCfgUpdateRequestFile         = "data/client/contacts_client_update.json"
-	tchannelClientCfgUpdateRequestFile = "data/enigma_client_config_update.json"
+	exampleGateway                  = "../../examples/example-gateway"
+	httpClientUpdateRequestFile     = "data/client/contacts_client_update.json"
+	tchannelClientUpdateRequestFile = "data/client/baz_client_update.json"
 )
+
+func TestUpdateHTTPClient(t *testing.T) {
+	testUpdateClientConfig(t, httpClientUpdateRequestFile, "contacts")
+}
+
+func TestUpdateTchannelClient(t *testing.T) {
+	testUpdateClientConfig(t, tchannelClientUpdateRequestFile, "baz")
+}
+
+func testUpdateClientConfig(t *testing.T, requestFile string, clientName string) {
+	req := &ClientConfig{}
+	err := readJSONFile(requestFile, req)
+	assert.NoError(t, err, "Failed to unmarshal client config.")
+	tempDir, err := copyExample(t)
+	if !assert.NoError(t, err, "Failed to copy example.") {
+		return
+	}
+	r := &Repository{
+		localDir: tempDir,
+	}
+	clientCfgDir := "clients"
+	err = r.UpdateClientConfigs(req, clientCfgDir, "{{placeholder}}")
+	if !assert.NoError(t, err, "Failed to write client config.") {
+		return
+	}
+
+	clientConfigActFile := filepath.Join(tempDir, clientCfgDir, clientName, clientConfigFileName)
+	actualClientCfg, err := ioutil.ReadFile(clientConfigActFile)
+	if !assert.NoError(t, err, "Failed to read client config file.") {
+		return
+	}
+	clientConfigExpFile := filepath.Join(exampleGateway, clientCfgDir, clientName, clientConfigFileName)
+	testlib.CompareGoldenFile(t, clientConfigExpFile, actualClientCfg)
+
+	clientModuleCfg, err := ioutil.ReadFile(filepath.Join(tempDir, clientCfgDir, clientModuleFileName))
+	if !assert.NoError(t, err, "Failed to read client module config file.") {
+		return
+	}
+	clientModuleExpFile := filepath.Join(exampleGateway, clientCfgDir, clientModuleFileName)
+	testlib.CompareGoldenFile(t, clientModuleExpFile, clientModuleCfg)
+
+	productionJSON, err := ioutil.ReadFile(filepath.Join(tempDir, productionCfgJSONPath))
+	if !assert.NoError(t, err, "Failed to read client production JSON config file.") {
+		return
+	}
+	productionJSONExpFile := filepath.Join(exampleGateway, productionCfgJSONPath)
+	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
+}
+
+func copyExample(t *testing.T) (string, error) {
+	tempDir, err := ioutil.TempDir("", "example-gateway")
+	if err != nil {
+		return "", err
+	}
+	err = copyDir(exampleGateway, tempDir, []string{
+		filepath.Join(exampleGateway, "build"),
+		filepath.Join(exampleGateway, "middlewares"),
+	})
+	if err != nil {
+		return "", err
+	}
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	return tempDir, nil
+}
 
 func copyDir(src, dest string, ignoredPrefixes []string) error {
 	walkFn := func(path string, info os.FileInfo, err error) error {
@@ -50,60 +114,4 @@ func copyDir(src, dest string, ignoredPrefixes []string) error {
 		return err
 	}
 	return filepath.Walk(src, walkFn)
-}
-
-func copyExample(t *testing.T) (string, error) {
-	tempDir, err := ioutil.TempDir("", "example-gateway")
-	if err != nil {
-		return "", err
-	}
-	err = copyDir(exampleGateway, tempDir, []string{
-		filepath.Join(exampleGateway, "build"),
-		filepath.Join(exampleGateway, "middlewares"),
-	})
-	if err != nil {
-		return "", err
-	}
-	t.Logf("Temp dir is created at %s\n", tempDir)
-	return tempDir, nil
-}
-
-func TestUpdateClientConfig(t *testing.T) {
-	req := &ClientConfig{}
-	err := readJSONFile(clientCfgUpdateRequestFile, req)
-	assert.NoError(t, err, "Failed to unmarshal client config.")
-	tempDir, err := copyExample(t)
-	if !assert.NoError(t, err, "Failed to copy example.") {
-		return
-	}
-	r := &Repository{
-		localDir: tempDir,
-	}
-	clientCfgDir := "clients"
-	err = r.UpdateClientConfigs(req, clientCfgDir, "{{placeholder}}")
-	if !assert.NoError(t, err, "Failed to write client config.") {
-		return
-	}
-
-	clientConfigActFile := filepath.Join(tempDir, clientCfgDir, "contacts", clientConfigFileName)
-	actualClientCfg, err := ioutil.ReadFile(clientConfigActFile)
-	if !assert.NoError(t, err, "Failed to read client config file.") {
-		return
-	}
-	clientConfigExpFile := filepath.Join(exampleGateway, clientCfgDir, "contacts", clientConfigFileName)
-	testlib.CompareGoldenFile(t, clientConfigExpFile, actualClientCfg)
-
-	clientModuleCfg, err := ioutil.ReadFile(filepath.Join(tempDir, clientCfgDir, clientModuleFileName))
-	if !assert.NoError(t, err, "Failed to read client module config file.") {
-		return
-	}
-	clientModuleExpFile := filepath.Join(exampleGateway, clientCfgDir, clientModuleFileName)
-	testlib.CompareGoldenFile(t, clientModuleExpFile, clientModuleCfg)
-
-	productionJSON, err := ioutil.ReadFile(filepath.Join(tempDir, productionCfgJSONPath))
-	if !assert.NoError(t, err, "Failed to read client production JSON config file.") {
-		return
-	}
-	productionJSONExpFile := filepath.Join(exampleGateway, productionCfgJSONPath)
-	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
 }

@@ -1,0 +1,15 @@
+{
+    "thriftFile": "clients/baz/baz.thrift",
+    "type": "tchannel",
+    "name": "baz",
+    "muttleyName": "baz",
+    "exposedMethods": {
+        "Call": "SimpleService::Call",
+        "Compare": "SimpleService::Compare",
+        "DeliberateDiffNoop": "SimpleService::SillyNoop",
+        "Echo": "SecondService::Echo",
+        "Ping": "SimpleService::Ping"
+    },
+    "ip": "127.0.0.1",
+    "port": 4001
+}
