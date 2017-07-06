@@ -80,11 +80,11 @@ func TestUpdateClientConfig(t *testing.T) {
 		localDir: tempDir,
 	}
 	clientCfgDir := "clients"
-	err = r.UpdateClientConfigs(req, clientCfgDir, "sha1")
-
+	err = r.UpdateClientConfigs(req, clientCfgDir, "{{placeholder}}")
 	if !assert.NoError(t, err, "Failed to write client config.") {
 		return
 	}
+
 	clientConfigActFile := filepath.Join(tempDir, clientCfgDir, "contacts", clientConfigFileName)
 	actualClientCfg, err := ioutil.ReadFile(clientConfigActFile)
 	if !assert.NoError(t, err, "Failed to read client config file.") {
