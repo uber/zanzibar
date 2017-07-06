@@ -194,7 +194,7 @@ clean-cover:
 .PHONY: cover
 cover: clean-cover
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
-	bash ./scripts/cover.sh
+	@bash ./scripts/cover.sh
 
 .PHONY: generate-istanbul-json
 generate-istanbul-json:

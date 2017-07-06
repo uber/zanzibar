@@ -40,7 +40,7 @@ import (
 )
 
 func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
-	testCompareCounter := 0
+	testcompareCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -60,7 +60,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testCompareCounter++
+		testcompareCounter++
 
 		var resHeaders map[string]string
 
@@ -75,7 +75,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Compare",
+		"compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 
@@ -97,7 +97,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testCompareCounter)
+	assert.Equal(t, 1, testcompareCounter)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, `{"message":"different"}`, string(data))
 }

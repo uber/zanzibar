@@ -29,7 +29,7 @@ import (
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $thriftService := .DownstreamMethod.ThriftService -}}
 {{- $clientMethod := .DownstreamMethod -}}
-{{- $clientMethodName := title $clientMethod.Name -}}
+{{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 {{- $headers := .ReqHeaders -}}
@@ -95,7 +95,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
 		"{{$thriftService}}",
 		"{{$clientMethodName}}",
-		{{$clientPackage}}.New{{$thriftService}}{{$clientMethodName}}Handler({{$clientFunc}}),
+		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
 

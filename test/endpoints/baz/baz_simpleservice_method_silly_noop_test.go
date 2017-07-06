@@ -60,7 +60,7 @@ func BenchmarkSillyNoop(b *testing.B) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"SillyNoop",
+		"sillyNoop",
 		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
 	)
 

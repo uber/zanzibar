@@ -30,7 +30,7 @@ REAL_TEST_FILES=$(git grep -l 'func Test.' | \
 
 FILES_ARR=($FILES)
 
-echo "Starting coverage tests."
+echo "Starting coverage tests:"
 
 for file in "${FILES_ARR[@]}"; do
 
@@ -41,19 +41,28 @@ for file in "${FILES_ARR[@]}"; do
 	RAND=$(hexdump -n 8 -v -e '/1 "%02X"' /dev/urandom)
 	COVERNAME="./coverage/cover-unit-$RAND.out"
 
-	COVER_ON=1 ZANZIBAR_CACHE=1 go test \
-		-cover -coverprofile coverage.tmp $file 2>&1 | \
-		tee test.tmp.out >>test.out && \
-		mv coverage.tmp "$COVERNAME" 2>/dev/null || true
+	relativeName=$(echo $file | sed s#github.com/uber/zanzibar#.#)
+
+    # TODO: need better solution for coverage from different package
+    if [[ "$relativeName" == *"test/clients"* ]] || [[ "$relativeName" == *"test/endpoints"* ]]; then
+        coverpkg=$(echo $file | sed s#zanzibar/test/#zanzibar/examples/example-gateway/build/#)
+        COVER_ON=1 ZANZIBAR_CACHE=1 go test \
+            -cover -coverprofile coverage.tmp -coverpkg $coverpkg $file 2>&1 | \
+		    tee test.tmp.out >>test.out && \
+		    mv coverage.tmp "$COVERNAME" 2>/dev/null || true
+    else
+	    COVER_ON=1 ZANZIBAR_CACHE=1 go test \
+		    -cover -coverprofile coverage.tmp $file 2>&1 | \
+		    tee test.tmp.out >>test.out && \
+		    mv coverage.tmp "$COVERNAME" 2>/dev/null || true
+    fi
 
 	# cat test.tmp.out | grep -E '[0-9]s' || true
 	rm test.tmp.out
 
-	relativeName=$(echo $file | sed s#github.com/uber/zanzibar#.#)
-
 	end=`date +%s`
 	runtime=$((end-start))
-	printf "Finished coverage test  :  %-55s  :  +%3d \n" $relativeName $runtime
+	printf "Finished coverage test  :  %-60s  :  +%3d \n" $relativeName $runtime
 done
 
 echo ""
@@ -86,7 +95,7 @@ echo ""
 
 end=`date +%s`
 runtime=$((end-start))
-echo "Finished concatting coverage : +$runtime"
+echo "Finished concating coverage : +$runtime"
 
 make generate-istanbul-json
 

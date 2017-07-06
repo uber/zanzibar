@@ -4,7 +4,7 @@
 	"handleId": "ping",
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
-	"thriftMethodName": "SimpleService::Ping",
+	"thriftMethodName": "SimpleService::ping",
 	"workflowType": "tchannelClient",
 	"clientID": "baz",
 	"clientMethod": "Ping",

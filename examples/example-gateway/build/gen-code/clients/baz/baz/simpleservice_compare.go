@@ -101,7 +101,7 @@ func (v *SimpleService_Compare_Args) Equals(rhs *SimpleService_Compare_Args) boo
 }
 
 func (v *SimpleService_Compare_Args) MethodName() string {
-	return "Compare"
+	return "compare"
 }
 
 func (v *SimpleService_Compare_Args) EnvelopeType() wire.EnvelopeType {
@@ -208,12 +208,6 @@ func (v *SimpleService_Compare_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazResponse_Read(w wire.Value) (*base.BazResponse, error) {
-	var v base.BazResponse
-	err := v.FromWire(w)
-	return &v, err
-}
-
 func _OtherAuthErr_Read(w wire.Value) (*OtherAuthErr, error) {
 	var v OtherAuthErr
 	err := v.FromWire(w)
@@ -298,7 +292,7 @@ func (v *SimpleService_Compare_Result) Equals(rhs *SimpleService_Compare_Result)
 }
 
 func (v *SimpleService_Compare_Result) MethodName() string {
-	return "Compare"
+	return "compare"
 }
 
 func (v *SimpleService_Compare_Result) EnvelopeType() wire.EnvelopeType {

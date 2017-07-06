@@ -4,7 +4,7 @@
 	"handleId": "sillyNoop",
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
-	"thriftMethodName": "SimpleService::SillyNoop",
+	"thriftMethodName": "SimpleService::sillyNoop",
 	"workflowType": "tchannelClient",
 	"clientID": "baz",
 	"clientMethod": "DeliberateDiffNoop",

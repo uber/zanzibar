@@ -39,7 +39,7 @@ import (
 )
 
 func TestPingSuccessfulRequestOKResponse(t *testing.T) {
-	testPingCounter := 0
+	testpingCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -58,7 +58,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testPingCounter++
+		testpingCounter++
 
 		var resHeaders map[string]string
 
@@ -73,7 +73,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Ping",
+		"ping",
 		bazClient.NewSimpleServicePingHandler(fakePing),
 	)
 
@@ -95,7 +95,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testPingCounter)
+	assert.Equal(t, 1, testpingCounter)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, `{"message":"pong"}`, string(data))
 }

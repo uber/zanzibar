@@ -73,7 +73,7 @@ func BenchmarkCompare(b *testing.B) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Compare",
+		"compare",
 		bazServer.NewSimpleServiceCompareHandler(compare),
 	)
 

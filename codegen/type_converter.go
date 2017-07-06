@@ -65,56 +65,20 @@ type TypeConverter struct {
 	Helper PackageNameResolver
 }
 
-func (c *TypeConverter) getGoTypeName(
-	valueType compile.TypeSpec,
-) (string, error) {
-	switch s := valueType.(type) {
-	case *compile.BoolSpec:
-		return "bool", nil
-	case *compile.I8Spec:
-		return "int8", nil
-	case *compile.I16Spec:
-		return "int16", nil
-	case *compile.I32Spec:
-		return "int32", nil
-	case *compile.I64Spec:
-		return "int64", nil
-	case *compile.DoubleSpec:
-		return "float64", nil
-	case *compile.StringSpec:
-		return "string", nil
-	case *compile.BinarySpec:
-		return "[]byte", nil
-	case *compile.MapSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.SetSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.ListSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
-		return c.getIdentifierName(s)
-	default:
-		/* coverage ignore next line */
-		panic(fmt.Sprintf("Unknown type (%T) %v", valueType, valueType))
-	}
+func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error) {
+	return GoType(c.Helper, valueType)
 }
 
-func (c *TypeConverter) getIdentifierName(
-	fieldType compile.TypeSpec,
-) (string, error) {
-	pkgName, err := c.Helper.TypePackageName(fieldType.ThriftFile())
+func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
+	t, err := goCustomType(c.Helper, fieldType)
 	if err != nil {
 		return "", errors.Wrapf(
 			err,
-			"could not lookup fieldType when building converter for %s :",
+			"could not lookup fieldType when building converter for %s",
 			fieldType.ThriftName(),
 		)
 	}
-	typeName := pkgName + "." + fieldType.ThriftName()
-	return typeName, nil
+	return t, nil
 }
 
 func (c *TypeConverter) genConverterForStruct(
