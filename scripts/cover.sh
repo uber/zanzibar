@@ -30,7 +30,7 @@ REAL_TEST_FILES=$(git grep -l 'func Test.' | \
 
 FILES_ARR=($FILES)
 
-echo "Starting coverage tests."
+echo "Starting coverage tests:"
 
 for file in "${FILES_ARR[@]}"; do
 
@@ -53,7 +53,7 @@ for file in "${FILES_ARR[@]}"; do
 
 	end=`date +%s`
 	runtime=$((end-start))
-	printf "Finished coverage test  :  %-55s  :  +%3d \n" $relativeName $runtime
+	printf "Finished coverage test  :  %-60s  :  +%3d \n" $relativeName $runtime
 done
 
 echo ""
@@ -86,7 +86,7 @@ echo ""
 
 end=`date +%s`
 runtime=$((end-start))
-echo "Finished concatting coverage : +$runtime"
+echo "Finished concating coverage : +$runtime"
 
 make generate-istanbul-json
 
