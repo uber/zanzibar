@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type Echo_EchoSet_Args struct {
+type Echo_EchoStringSet_Args struct {
 	Arg map[string]struct{} `json:"arg,required"`
 }
 
@@ -41,7 +41,7 @@ func (_Set_String_ValueList) ValueType() wire.Type {
 func (_Set_String_ValueList) Close() {
 }
 
-func (v *Echo_EchoSet_Args) ToWire() (wire.Value, error) {
+func (v *Echo_EchoStringSet_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -49,7 +49,7 @@ func (v *Echo_EchoSet_Args) ToWire() (wire.Value, error) {
 		err    error
 	)
 	if v.Arg == nil {
-		return w, errors.New("field Arg of Echo_EchoSet_Args is required")
+		return w, errors.New("field Arg of Echo_EchoStringSet_Args is required")
 	}
 	w, err = wire.NewValueSet(_Set_String_ValueList(v.Arg)), error(nil)
 	if err != nil {
@@ -77,7 +77,7 @@ func _Set_String_Read(s wire.ValueList) (map[string]struct{}, error) {
 	return o, err
 }
 
-func (v *Echo_EchoSet_Args) FromWire(w wire.Value) error {
+func (v *Echo_EchoStringSet_Args) FromWire(w wire.Value) error {
 	var err error
 	argIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -93,12 +93,12 @@ func (v *Echo_EchoSet_Args) FromWire(w wire.Value) error {
 		}
 	}
 	if !argIsSet {
-		return errors.New("field Arg of Echo_EchoSet_Args is required")
+		return errors.New("field Arg of Echo_EchoStringSet_Args is required")
 	}
 	return nil
 }
 
-func (v *Echo_EchoSet_Args) String() string {
+func (v *Echo_EchoStringSet_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -106,7 +106,7 @@ func (v *Echo_EchoSet_Args) String() string {
 	i := 0
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
-	return fmt.Sprintf("Echo_EchoSet_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoStringSet_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
 func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
@@ -121,45 +121,45 @@ func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
 	return true
 }
 
-func (v *Echo_EchoSet_Args) Equals(rhs *Echo_EchoSet_Args) bool {
+func (v *Echo_EchoStringSet_Args) Equals(rhs *Echo_EchoStringSet_Args) bool {
 	if !_Set_String_Equals(v.Arg, rhs.Arg) {
 		return false
 	}
 	return true
 }
 
-func (v *Echo_EchoSet_Args) MethodName() string {
-	return "echoSet"
+func (v *Echo_EchoStringSet_Args) MethodName() string {
+	return "echoStringSet"
 }
 
-func (v *Echo_EchoSet_Args) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoStringSet_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-var Echo_EchoSet_Helper = struct {
-	Args           func(arg map[string]struct{}) *Echo_EchoSet_Args
+var Echo_EchoStringSet_Helper = struct {
+	Args           func(arg map[string]struct{}) *Echo_EchoStringSet_Args
 	IsException    func(error) bool
-	WrapResponse   func(map[string]struct{}, error) (*Echo_EchoSet_Result, error)
-	UnwrapResponse func(*Echo_EchoSet_Result) (map[string]struct{}, error)
+	WrapResponse   func(map[string]struct{}, error) (*Echo_EchoStringSet_Result, error)
+	UnwrapResponse func(*Echo_EchoStringSet_Result) (map[string]struct{}, error)
 }{}
 
 func init() {
-	Echo_EchoSet_Helper.Args = func(arg map[string]struct{}) *Echo_EchoSet_Args {
-		return &Echo_EchoSet_Args{Arg: arg}
+	Echo_EchoStringSet_Helper.Args = func(arg map[string]struct{}) *Echo_EchoStringSet_Args {
+		return &Echo_EchoStringSet_Args{Arg: arg}
 	}
-	Echo_EchoSet_Helper.IsException = func(err error) bool {
+	Echo_EchoStringSet_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
-	Echo_EchoSet_Helper.WrapResponse = func(success map[string]struct{}, err error) (*Echo_EchoSet_Result, error) {
+	Echo_EchoStringSet_Helper.WrapResponse = func(success map[string]struct{}, err error) (*Echo_EchoStringSet_Result, error) {
 		if err == nil {
-			return &Echo_EchoSet_Result{Success: success}, nil
+			return &Echo_EchoStringSet_Result{Success: success}, nil
 		}
 		return nil, err
 	}
-	Echo_EchoSet_Helper.UnwrapResponse = func(result *Echo_EchoSet_Result) (success map[string]struct{}, err error) {
+	Echo_EchoStringSet_Helper.UnwrapResponse = func(result *Echo_EchoStringSet_Result) (success map[string]struct{}, err error) {
 		if result.Success != nil {
 			success = result.Success
 			return
@@ -169,11 +169,11 @@ func init() {
 	}
 }
 
-type Echo_EchoSet_Result struct {
+type Echo_EchoStringSet_Result struct {
 	Success map[string]struct{} `json:"success"`
 }
 
-func (v *Echo_EchoSet_Result) ToWire() (wire.Value, error) {
+func (v *Echo_EchoStringSet_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -189,12 +189,12 @@ func (v *Echo_EchoSet_Result) ToWire() (wire.Value, error) {
 		i++
 	}
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("Echo_EchoSet_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("Echo_EchoStringSet_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Echo_EchoSet_Result) FromWire(w wire.Value) error {
+func (v *Echo_EchoStringSet_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -212,12 +212,12 @@ func (v *Echo_EchoSet_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("Echo_EchoSet_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("Echo_EchoStringSet_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
 
-func (v *Echo_EchoSet_Result) String() string {
+func (v *Echo_EchoStringSet_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -227,20 +227,20 @@ func (v *Echo_EchoSet_Result) String() string {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
 		i++
 	}
-	return fmt.Sprintf("Echo_EchoSet_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoStringSet_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *Echo_EchoSet_Result) Equals(rhs *Echo_EchoSet_Result) bool {
+func (v *Echo_EchoStringSet_Result) Equals(rhs *Echo_EchoStringSet_Result) bool {
 	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && _Set_String_Equals(v.Success, rhs.Success))) {
 		return false
 	}
 	return true
 }
 
-func (v *Echo_EchoSet_Result) MethodName() string {
-	return "echoSet"
+func (v *Echo_EchoStringSet_Result) MethodName() string {
+	return "echoStringSet"
 }
 
-func (v *Echo_EchoSet_Result) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoStringSet_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }

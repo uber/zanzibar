@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-type Echo_EchoUUID_Args struct {
+type Echo_EchoTypedef_Args struct {
 	Arg UUID `json:"arg,required"`
 }
 
-func (v *Echo_EchoUUID_Args) ToWire() (wire.Value, error) {
+func (v *Echo_EchoTypedef_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -30,7 +30,13 @@ func (v *Echo_EchoUUID_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Echo_EchoUUID_Args) FromWire(w wire.Value) error {
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
+}
+
+func (v *Echo_EchoTypedef_Args) FromWire(w wire.Value) error {
 	var err error
 	argIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -46,12 +52,12 @@ func (v *Echo_EchoUUID_Args) FromWire(w wire.Value) error {
 		}
 	}
 	if !argIsSet {
-		return errors.New("field Arg of Echo_EchoUUID_Args is required")
+		return errors.New("field Arg of Echo_EchoTypedef_Args is required")
 	}
 	return nil
 }
 
-func (v *Echo_EchoUUID_Args) String() string {
+func (v *Echo_EchoTypedef_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -59,48 +65,48 @@ func (v *Echo_EchoUUID_Args) String() string {
 	i := 0
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
-	return fmt.Sprintf("Echo_EchoUUID_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoTypedef_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *Echo_EchoUUID_Args) Equals(rhs *Echo_EchoUUID_Args) bool {
+func (v *Echo_EchoTypedef_Args) Equals(rhs *Echo_EchoTypedef_Args) bool {
 	if !(v.Arg == rhs.Arg) {
 		return false
 	}
 	return true
 }
 
-func (v *Echo_EchoUUID_Args) MethodName() string {
-	return "echoUUID"
+func (v *Echo_EchoTypedef_Args) MethodName() string {
+	return "echoTypedef"
 }
 
-func (v *Echo_EchoUUID_Args) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoTypedef_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-var Echo_EchoUUID_Helper = struct {
-	Args           func(arg UUID) *Echo_EchoUUID_Args
+var Echo_EchoTypedef_Helper = struct {
+	Args           func(arg UUID) *Echo_EchoTypedef_Args
 	IsException    func(error) bool
-	WrapResponse   func(UUID, error) (*Echo_EchoUUID_Result, error)
-	UnwrapResponse func(*Echo_EchoUUID_Result) (UUID, error)
+	WrapResponse   func(UUID, error) (*Echo_EchoTypedef_Result, error)
+	UnwrapResponse func(*Echo_EchoTypedef_Result) (UUID, error)
 }{}
 
 func init() {
-	Echo_EchoUUID_Helper.Args = func(arg UUID) *Echo_EchoUUID_Args {
-		return &Echo_EchoUUID_Args{Arg: arg}
+	Echo_EchoTypedef_Helper.Args = func(arg UUID) *Echo_EchoTypedef_Args {
+		return &Echo_EchoTypedef_Args{Arg: arg}
 	}
-	Echo_EchoUUID_Helper.IsException = func(err error) bool {
+	Echo_EchoTypedef_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
-	Echo_EchoUUID_Helper.WrapResponse = func(success UUID, err error) (*Echo_EchoUUID_Result, error) {
+	Echo_EchoTypedef_Helper.WrapResponse = func(success UUID, err error) (*Echo_EchoTypedef_Result, error) {
 		if err == nil {
-			return &Echo_EchoUUID_Result{Success: &success}, nil
+			return &Echo_EchoTypedef_Result{Success: &success}, nil
 		}
 		return nil, err
 	}
-	Echo_EchoUUID_Helper.UnwrapResponse = func(result *Echo_EchoUUID_Result) (success UUID, err error) {
+	Echo_EchoTypedef_Helper.UnwrapResponse = func(result *Echo_EchoTypedef_Result) (success UUID, err error) {
 		if result.Success != nil {
 			success = *result.Success
 			return
@@ -110,11 +116,11 @@ func init() {
 	}
 }
 
-type Echo_EchoUUID_Result struct {
+type Echo_EchoTypedef_Result struct {
 	Success *UUID `json:"success,omitempty"`
 }
 
-func (v *Echo_EchoUUID_Result) ToWire() (wire.Value, error) {
+func (v *Echo_EchoTypedef_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -130,12 +136,12 @@ func (v *Echo_EchoUUID_Result) ToWire() (wire.Value, error) {
 		i++
 	}
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("Echo_EchoUUID_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("Echo_EchoTypedef_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *Echo_EchoUUID_Result) FromWire(w wire.Value) error {
+func (v *Echo_EchoTypedef_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -155,12 +161,12 @@ func (v *Echo_EchoUUID_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("Echo_EchoUUID_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("Echo_EchoTypedef_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
 
-func (v *Echo_EchoUUID_Result) String() string {
+func (v *Echo_EchoTypedef_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -170,7 +176,7 @@ func (v *Echo_EchoUUID_Result) String() string {
 		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
 		i++
 	}
-	return fmt.Sprintf("Echo_EchoUUID_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("Echo_EchoTypedef_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
 func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
@@ -182,17 +188,17 @@ func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
 	return lhs == nil && rhs == nil
 }
 
-func (v *Echo_EchoUUID_Result) Equals(rhs *Echo_EchoUUID_Result) bool {
+func (v *Echo_EchoTypedef_Result) Equals(rhs *Echo_EchoTypedef_Result) bool {
 	if !_UUID_EqualsPtr(v.Success, rhs.Success) {
 		return false
 	}
 	return true
 }
 
-func (v *Echo_EchoUUID_Result) MethodName() string {
-	return "echoUUID"
+func (v *Echo_EchoTypedef_Result) MethodName() string {
+	return "echoTypedef"
 }
 
-func (v *Echo_EchoUUID_Result) EnvelopeType() wire.EnvelopeType {
+func (v *Echo_EchoTypedef_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }

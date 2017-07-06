@@ -212,21 +212,31 @@ service  Echo {
         zanzibar.http.status = "200"
     )
 
-    UUID echoUUID(
+    UUID echoTypedef(
         1: required UUID arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/echo/uuid"
+        zanzibar.http.path = "/echo/typedef"
         zanzibar.http.status = "200"
     )
 
-    set<string> echoSet(
+    set<string> echoStringSet(
         1: required set<string> arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/echo/set"
+        zanzibar.http.path = "/echo/string-set"
+        zanzibar.http.status = "200"
+    )
+
+    // value is unhashable
+    set<BarResponse> echoStructSet(
+        1: required set<BarResponse> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/struct-set"
         zanzibar.http.status = "200"
     )
 
@@ -239,21 +249,31 @@ service  Echo {
         zanzibar.http.status = "200"
     )
 
-    list<BarResponse> echoBarList (
+    list<BarResponse> echoStructList (
         1: required list<BarResponse> arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/echo/bar-list"
+        zanzibar.http.path = "/echo/struct-list"
         zanzibar.http.status = "200"
     )
 
-    map<UUID, BarResponse> echoBarMap (
-        1: required map<UUID, BarResponse> arg
+    map<string, BarResponse> echoStringMap (
+        1: required map<string, BarResponse> arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
-        zanzibar.http.path = "/echo/bar-map"
+        zanzibar.http.path = "/echo/string-map"
+        zanzibar.http.status = "200"
+    )
+
+    // key is unhashable
+    map<BarResponse, string> echoStructMap (
+        1: required map<BarResponse, string> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/struct-map"
         zanzibar.http.status = "200"
     )
 }

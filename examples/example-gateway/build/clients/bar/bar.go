@@ -78,16 +78,6 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_TooManyArgs_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
-	EchoBarList(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoBarList_Args,
-	) ([]*clientsBarBar.BarResponse, map[string]string, error)
-	EchoBarMap(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoBarMap_Args,
-	) (map[clientsBarBar.UUID]*clientsBarBar.BarResponse, map[string]string, error)
 	EchoBinary(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -128,11 +118,6 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Echo_EchoI8_Args,
 	) (int8, map[string]string, error)
-	EchoSet(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoSet_Args,
-	) (map[string]struct{}, map[string]string, error)
 	EchoString(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -143,10 +128,38 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Echo_EchoStringList_Args,
 	) ([]string, map[string]string, error)
-	EchoUUID(
+	EchoStringMap(
 		ctx context.Context,
 		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoUUID_Args,
+		args *clientsBarBar.Echo_EchoStringMap_Args,
+	) (map[string]*clientsBarBar.BarResponse, map[string]string, error)
+	EchoStringSet(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoStringSet_Args,
+	) (map[string]struct{}, map[string]string, error)
+	EchoStructList(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoStructList_Args,
+	) ([]*clientsBarBar.BarResponse, map[string]string, error)
+	EchoStructMap(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoStructMap_Args,
+	) ([]struct {
+		Key   *clientsBarBar.BarResponse
+		Value string
+	}, map[string]string, error)
+	EchoStructSet(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoStructSet_Args,
+	) ([]*clientsBarBar.BarResponse, map[string]string, error)
+	EchoTypedef(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoTypedef_Args,
 	) (clientsBarBar.UUID, map[string]string, error)
 }
 
@@ -669,100 +682,6 @@ func (c *barClient) TooManyArgs(
 	)
 }
 
-// EchoBarList calls "/echo/bar-list" endpoint.
-func (c *barClient) EchoBarList(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Echo_EchoBarList_Args,
-) ([]*clientsBarBar.BarResponse, map[string]string, error) {
-	var defaultRes []*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "echoBarList", c.httpClient,
-	)
-	// TODO(jakev): Ensure we validate mandatory headers
-
-	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/echo" + "/bar-list"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody []*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	}
-
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
-}
-
-// EchoBarMap calls "/echo/bar-map" endpoint.
-func (c *barClient) EchoBarMap(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Echo_EchoBarMap_Args,
-) (map[clientsBarBar.UUID]*clientsBarBar.BarResponse, map[string]string, error) {
-	var defaultRes map[clientsBarBar.UUID]*clientsBarBar.BarResponse
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "echoBarMap", c.httpClient,
-	)
-	// TODO(jakev): Ensure we validate mandatory headers
-
-	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/echo" + "/bar-map"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody map[clientsBarBar.UUID]*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	}
-
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
-}
-
 // EchoBinary calls "/echo/binary" endpoint.
 func (c *barClient) EchoBinary(
 	ctx context.Context,
@@ -1139,53 +1058,6 @@ func (c *barClient) EchoI8(
 	)
 }
 
-// EchoSet calls "/echo/set" endpoint.
-func (c *barClient) EchoSet(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Echo_EchoSet_Args,
-) (map[string]struct{}, map[string]string, error) {
-	var defaultRes map[string]struct{}
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "echoSet", c.httpClient,
-	)
-	// TODO(jakev): Ensure we validate mandatory headers
-
-	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/echo" + "/set"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody map[string]struct{}
-		err = res.ReadAndUnmarshalBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	}
-
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
-}
-
 // EchoString calls "/echo/string" endpoint.
 func (c *barClient) EchoString(
 	ctx context.Context,
@@ -1280,20 +1152,264 @@ func (c *barClient) EchoStringList(
 	)
 }
 
-// EchoUUID calls "/echo/uuid" endpoint.
-func (c *barClient) EchoUUID(
+// EchoStringMap calls "/echo/string-map" endpoint.
+func (c *barClient) EchoStringMap(
 	ctx context.Context,
 	headers map[string]string,
-	r *clientsBarBar.Echo_EchoUUID_Args,
-) (clientsBarBar.UUID, map[string]string, error) {
-	var defaultRes clientsBarBar.UUID
+	r *clientsBarBar.Echo_EchoStringMap_Args,
+) (map[string]*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes map[string]*clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "echoUUID", c.httpClient,
+		c.clientID, "echoStringMap", c.httpClient,
 	)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/echo" + "/uuid"
+	fullURL := c.httpClient.BaseURL + "/echo" + "/string-map"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody map[string]*clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// EchoStringSet calls "/echo/string-set" endpoint.
+func (c *barClient) EchoStringSet(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoStringSet_Args,
+) (map[string]struct{}, map[string]string, error) {
+	var defaultRes map[string]struct{}
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "echoStringSet", c.httpClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/string-set"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody map[string]struct{}
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// EchoStructList calls "/echo/struct-list" endpoint.
+func (c *barClient) EchoStructList(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoStructList_Args,
+) ([]*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes []*clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "echoStructList", c.httpClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-list"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody []*clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// EchoStructMap calls "/echo/struct-map" endpoint.
+func (c *barClient) EchoStructMap(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoStructMap_Args,
+) ([]struct {
+	Key   *clientsBarBar.BarResponse
+	Value string
+}, map[string]string, error) {
+	var defaultRes []struct {
+		Key   *clientsBarBar.BarResponse
+		Value string
+	}
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "echoStructMap", c.httpClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-map"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody []struct {
+			Key   *clientsBarBar.BarResponse
+			Value string
+		}
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// EchoStructSet calls "/echo/struct-set" endpoint.
+func (c *barClient) EchoStructSet(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoStructSet_Args,
+) ([]*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes []*clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "echoStructSet", c.httpClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-set"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody []*clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// EchoTypedef calls "/echo/typedef" endpoint.
+func (c *barClient) EchoTypedef(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoTypedef_Args,
+) (clientsBarBar.UUID, map[string]string, error) {
+	var defaultRes clientsBarBar.UUID
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "echoTypedef", c.httpClient,
+	)
+	// TODO(jakev): Ensure we validate mandatory headers
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/typedef"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {

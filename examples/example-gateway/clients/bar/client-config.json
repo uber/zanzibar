@@ -25,11 +25,13 @@
 			"EchoBinary": "Echo::echoBinary",
 			"EchoString": "Echo::echoString",
 			"EchoEnum": "Echo::echoEnum",
-			"EchoUUID": "Echo::echoUUID",
-			"EchoSet": "Echo::echoSet",
+			"EchoTypedef": "Echo::echoTypedef",
+			"EchoStringSet": "Echo::echoStringSet",
+			"EchoStructSet": "Echo::echoStructSet",
 			"EchoStringList": "Echo::echoStringList",
-			"EchoBarList": "Echo::echoBarList",
-			"EchoBarMap": "Echo::echoBarMap"
+			"EchoStructList": "Echo::echoStructList",
+			"EchoStringMap": "Echo::echoStringMap",
+			"EchoStructMap": "Echo::echoStructMap"
 		}
 	}
 }
