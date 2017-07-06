@@ -4,7 +4,6 @@
 	"config": {
 		"thriftFile": "clients/contacts/contacts.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"serviceName": "Contacts",
 		"exposedMethods": {
 			"SaveContacts": "Contacts::saveContacts"
 		}

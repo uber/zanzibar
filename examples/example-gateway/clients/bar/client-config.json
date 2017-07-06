@@ -4,7 +4,6 @@
 	"config": {
 		"thriftFile": "clients/bar/bar.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"serviceName": "Bar",
 		"exposedMethods": {
 			"Normal": "Bar::normal",
 			"NoRequest": "Bar::noRequest",
