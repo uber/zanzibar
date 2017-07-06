@@ -11,173 +11,7 @@ import (
 )
 
 type Echo_EchoBarList_Args struct {
-	Arg []UUID `json:"arg,required"`
-}
-
-type _List_UUID_ValueList []UUID
-
-func (v _List_UUID_ValueList) ForEach(f func(wire.Value) error) error {
-	for _, x := range v {
-		w, err := x.ToWire()
-		if err != nil {
-			return err
-		}
-		err = f(w)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _List_UUID_ValueList) Size() int {
-	return len(v)
-}
-
-func (_List_UUID_ValueList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_List_UUID_ValueList) Close() {
-}
-
-func (v *Echo_EchoBarList_Args) ToWire() (wire.Value, error) {
-	var (
-		fields [1]wire.Field
-		i      int = 0
-		w      wire.Value
-		err    error
-	)
-	if v.Arg == nil {
-		return w, errors.New("field Arg of Echo_EchoBarList_Args is required")
-	}
-	w, err = wire.NewValueList(_List_UUID_ValueList(v.Arg)), error(nil)
-	if err != nil {
-		return w, err
-	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
-	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
-}
-
-func _List_UUID_Read(l wire.ValueList) ([]UUID, error) {
-	if l.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-	o := make([]UUID, 0, l.Size())
-	err := l.ForEach(func(x wire.Value) error {
-		i, err := _UUID_Read(x)
-		if err != nil {
-			return err
-		}
-		o = append(o, i)
-		return nil
-	})
-	l.Close()
-	return o, err
-}
-
-func (v *Echo_EchoBarList_Args) FromWire(w wire.Value) error {
-	var err error
-	argIsSet := false
-	for _, field := range w.GetStruct().Fields {
-		switch field.ID {
-		case 1:
-			if field.Value.Type() == wire.TList {
-				v.Arg, err = _List_UUID_Read(field.Value.GetList())
-				if err != nil {
-					return err
-				}
-				argIsSet = true
-			}
-		}
-	}
-	if !argIsSet {
-		return errors.New("field Arg of Echo_EchoBarList_Args is required")
-	}
-	return nil
-}
-
-func (v *Echo_EchoBarList_Args) String() string {
-	if v == nil {
-		return "<nil>"
-	}
-	var fields [1]string
-	i := 0
-	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
-	i++
-	return fmt.Sprintf("Echo_EchoBarList_Args{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _List_UUID_Equals(lhs, rhs []UUID) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-	for i, lv := range lhs {
-		rv := rhs[i]
-		if !(lv == rv) {
-			return false
-		}
-	}
-	return true
-}
-
-func (v *Echo_EchoBarList_Args) Equals(rhs *Echo_EchoBarList_Args) bool {
-	if !_List_UUID_Equals(v.Arg, rhs.Arg) {
-		return false
-	}
-	return true
-}
-
-func (v *Echo_EchoBarList_Args) MethodName() string {
-	return "echoBarList"
-}
-
-func (v *Echo_EchoBarList_Args) EnvelopeType() wire.EnvelopeType {
-	return wire.Call
-}
-
-var Echo_EchoBarList_Helper = struct {
-	Args           func(arg []UUID) *Echo_EchoBarList_Args
-	IsException    func(error) bool
-	WrapResponse   func([]*BarResponse, error) (*Echo_EchoBarList_Result, error)
-	UnwrapResponse func(*Echo_EchoBarList_Result) ([]*BarResponse, error)
-}{}
-
-func init() {
-	Echo_EchoBarList_Helper.Args = func(arg []UUID) *Echo_EchoBarList_Args {
-		return &Echo_EchoBarList_Args{Arg: arg}
-	}
-	Echo_EchoBarList_Helper.IsException = func(err error) bool {
-		switch err.(type) {
-		default:
-			return false
-		}
-	}
-	Echo_EchoBarList_Helper.WrapResponse = func(success []*BarResponse, err error) (*Echo_EchoBarList_Result, error) {
-		if err == nil {
-			return &Echo_EchoBarList_Result{Success: success}, nil
-		}
-		return nil, err
-	}
-	Echo_EchoBarList_Helper.UnwrapResponse = func(result *Echo_EchoBarList_Result) (success []*BarResponse, err error) {
-		if result.Success != nil {
-			success = result.Success
-			return
-		}
-		err = errors.New("expected a non-void result")
-		return
-	}
-}
-
-type Echo_EchoBarList_Result struct {
-	Success []*BarResponse `json:"success"`
+	Arg []*BarResponse `json:"arg,required"`
 }
 
 type _List_BarResponse_ValueList []*BarResponse
@@ -210,6 +44,139 @@ func (_List_BarResponse_ValueList) ValueType() wire.Type {
 func (_List_BarResponse_ValueList) Close() {
 }
 
+func (v *Echo_EchoBarList_Args) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	if v.Arg == nil {
+		return w, errors.New("field Arg of Echo_EchoBarList_Args is required")
+	}
+	w, err = wire.NewValueList(_List_BarResponse_ValueList(v.Arg)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _List_BarResponse_Read(l wire.ValueList) ([]*BarResponse, error) {
+	if l.ValueType() != wire.TStruct {
+		return nil, nil
+	}
+	o := make([]*BarResponse, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := _BarResponse_Read(x)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
+}
+
+func (v *Echo_EchoBarList_Args) FromWire(w wire.Value) error {
+	var err error
+	argIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TList {
+				v.Arg, err = _List_BarResponse_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				argIsSet = true
+			}
+		}
+	}
+	if !argIsSet {
+		return errors.New("field Arg of Echo_EchoBarList_Args is required")
+	}
+	return nil
+}
+
+func (v *Echo_EchoBarList_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
+	i++
+	return fmt.Sprintf("Echo_EchoBarList_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_BarResponse_Equals(lhs, rhs []*BarResponse) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *Echo_EchoBarList_Args) Equals(rhs *Echo_EchoBarList_Args) bool {
+	if !_List_BarResponse_Equals(v.Arg, rhs.Arg) {
+		return false
+	}
+	return true
+}
+
+func (v *Echo_EchoBarList_Args) MethodName() string {
+	return "echoBarList"
+}
+
+func (v *Echo_EchoBarList_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+var Echo_EchoBarList_Helper = struct {
+	Args           func(arg []*BarResponse) *Echo_EchoBarList_Args
+	IsException    func(error) bool
+	WrapResponse   func([]*BarResponse, error) (*Echo_EchoBarList_Result, error)
+	UnwrapResponse func(*Echo_EchoBarList_Result) ([]*BarResponse, error)
+}{}
+
+func init() {
+	Echo_EchoBarList_Helper.Args = func(arg []*BarResponse) *Echo_EchoBarList_Args {
+		return &Echo_EchoBarList_Args{Arg: arg}
+	}
+	Echo_EchoBarList_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+	Echo_EchoBarList_Helper.WrapResponse = func(success []*BarResponse, err error) (*Echo_EchoBarList_Result, error) {
+		if err == nil {
+			return &Echo_EchoBarList_Result{Success: success}, nil
+		}
+		return nil, err
+	}
+	Echo_EchoBarList_Helper.UnwrapResponse = func(result *Echo_EchoBarList_Result) (success []*BarResponse, err error) {
+		if result.Success != nil {
+			success = result.Success
+			return
+		}
+		err = errors.New("expected a non-void result")
+		return
+	}
+}
+
+type Echo_EchoBarList_Result struct {
+	Success []*BarResponse `json:"success"`
+}
+
 func (v *Echo_EchoBarList_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -229,23 +196,6 @@ func (v *Echo_EchoBarList_Result) ToWire() (wire.Value, error) {
 		return wire.Value{}, fmt.Errorf("Echo_EchoBarList_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _List_BarResponse_Read(l wire.ValueList) ([]*BarResponse, error) {
-	if l.ValueType() != wire.TStruct {
-		return nil, nil
-	}
-	o := make([]*BarResponse, 0, l.Size())
-	err := l.ForEach(func(x wire.Value) error {
-		i, err := _BarResponse_Read(x)
-		if err != nil {
-			return err
-		}
-		o = append(o, i)
-		return nil
-	})
-	l.Close()
-	return o, err
 }
 
 func (v *Echo_EchoBarList_Result) FromWire(w wire.Value) error {
@@ -282,19 +232,6 @@ func (v *Echo_EchoBarList_Result) String() string {
 		i++
 	}
 	return fmt.Sprintf("Echo_EchoBarList_Result{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _List_BarResponse_Equals(lhs, rhs []*BarResponse) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-	for i, lv := range lhs {
-		rv := rhs[i]
-		if !lv.Equals(rv) {
-			return false
-		}
-	}
-	return true
 }
 
 func (v *Echo_EchoBarList_Result) Equals(rhs *Echo_EchoBarList_Result) bool {

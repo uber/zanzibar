@@ -11,185 +11,7 @@ import (
 )
 
 type Echo_EchoBarMap_Args struct {
-	Arg map[string]UUID `json:"arg,required"`
-}
-
-type _Map_String_UUID_MapItemList map[string]UUID
-
-func (m _Map_String_UUID_MapItemList) ForEach(f func(wire.MapItem) error) error {
-	for k, v := range m {
-		kw, err := wire.NewValueString(k), error(nil)
-		if err != nil {
-			return err
-		}
-		vw, err := v.ToWire()
-		if err != nil {
-			return err
-		}
-		err = f(wire.MapItem{Key: kw, Value: vw})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (m _Map_String_UUID_MapItemList) Size() int {
-	return len(m)
-}
-
-func (_Map_String_UUID_MapItemList) KeyType() wire.Type {
-	return wire.TBinary
-}
-
-func (_Map_String_UUID_MapItemList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_Map_String_UUID_MapItemList) Close() {
-}
-
-func (v *Echo_EchoBarMap_Args) ToWire() (wire.Value, error) {
-	var (
-		fields [1]wire.Field
-		i      int = 0
-		w      wire.Value
-		err    error
-	)
-	if v.Arg == nil {
-		return w, errors.New("field Arg of Echo_EchoBarMap_Args is required")
-	}
-	w, err = wire.NewValueMap(_Map_String_UUID_MapItemList(v.Arg)), error(nil)
-	if err != nil {
-		return w, err
-	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
-	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _Map_String_UUID_Read(m wire.MapItemList) (map[string]UUID, error) {
-	if m.KeyType() != wire.TBinary {
-		return nil, nil
-	}
-	if m.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-	o := make(map[string]UUID, m.Size())
-	err := m.ForEach(func(x wire.MapItem) error {
-		k, err := x.Key.GetString(), error(nil)
-		if err != nil {
-			return err
-		}
-		v, err := _UUID_Read(x.Value)
-		if err != nil {
-			return err
-		}
-		o[k] = v
-		return nil
-	})
-	m.Close()
-	return o, err
-}
-
-func (v *Echo_EchoBarMap_Args) FromWire(w wire.Value) error {
-	var err error
-	argIsSet := false
-	for _, field := range w.GetStruct().Fields {
-		switch field.ID {
-		case 1:
-			if field.Value.Type() == wire.TMap {
-				v.Arg, err = _Map_String_UUID_Read(field.Value.GetMap())
-				if err != nil {
-					return err
-				}
-				argIsSet = true
-			}
-		}
-	}
-	if !argIsSet {
-		return errors.New("field Arg of Echo_EchoBarMap_Args is required")
-	}
-	return nil
-}
-
-func (v *Echo_EchoBarMap_Args) String() string {
-	if v == nil {
-		return "<nil>"
-	}
-	var fields [1]string
-	i := 0
-	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
-	i++
-	return fmt.Sprintf("Echo_EchoBarMap_Args{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _Map_String_UUID_Equals(lhs, rhs map[string]UUID) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-	for lk, lv := range lhs {
-		rv, ok := rhs[lk]
-		if !ok {
-			return false
-		}
-		if !(lv == rv) {
-			return false
-		}
-	}
-	return true
-}
-
-func (v *Echo_EchoBarMap_Args) Equals(rhs *Echo_EchoBarMap_Args) bool {
-	if !_Map_String_UUID_Equals(v.Arg, rhs.Arg) {
-		return false
-	}
-	return true
-}
-
-func (v *Echo_EchoBarMap_Args) MethodName() string {
-	return "echoBarMap"
-}
-
-func (v *Echo_EchoBarMap_Args) EnvelopeType() wire.EnvelopeType {
-	return wire.Call
-}
-
-var Echo_EchoBarMap_Helper = struct {
-	Args           func(arg map[string]UUID) *Echo_EchoBarMap_Args
-	IsException    func(error) bool
-	WrapResponse   func(map[UUID]*BarResponse, error) (*Echo_EchoBarMap_Result, error)
-	UnwrapResponse func(*Echo_EchoBarMap_Result) (map[UUID]*BarResponse, error)
-}{}
-
-func init() {
-	Echo_EchoBarMap_Helper.Args = func(arg map[string]UUID) *Echo_EchoBarMap_Args {
-		return &Echo_EchoBarMap_Args{Arg: arg}
-	}
-	Echo_EchoBarMap_Helper.IsException = func(err error) bool {
-		switch err.(type) {
-		default:
-			return false
-		}
-	}
-	Echo_EchoBarMap_Helper.WrapResponse = func(success map[UUID]*BarResponse, err error) (*Echo_EchoBarMap_Result, error) {
-		if err == nil {
-			return &Echo_EchoBarMap_Result{Success: success}, nil
-		}
-		return nil, err
-	}
-	Echo_EchoBarMap_Helper.UnwrapResponse = func(result *Echo_EchoBarMap_Result) (success map[UUID]*BarResponse, err error) {
-		if result.Success != nil {
-			success = result.Success
-			return
-		}
-		err = errors.New("expected a non-void result")
-		return
-	}
-}
-
-type Echo_EchoBarMap_Result struct {
-	Success map[UUID]*BarResponse `json:"success"`
+	Arg map[UUID]*BarResponse `json:"arg,required"`
 }
 
 type _Map_UUID_BarResponse_MapItemList map[UUID]*BarResponse
@@ -230,25 +52,29 @@ func (_Map_UUID_BarResponse_MapItemList) ValueType() wire.Type {
 func (_Map_UUID_BarResponse_MapItemList) Close() {
 }
 
-func (v *Echo_EchoBarMap_Result) ToWire() (wire.Value, error) {
+func (v *Echo_EchoBarMap_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
 	)
-	if v.Success != nil {
-		w, err = wire.NewValueMap(_Map_UUID_BarResponse_MapItemList(v.Success)), error(nil)
-		if err != nil {
-			return w, err
-		}
-		fields[i] = wire.Field{ID: 0, Value: w}
-		i++
+	if v.Arg == nil {
+		return w, errors.New("field Arg of Echo_EchoBarMap_Args is required")
 	}
-	if i != 1 {
-		return wire.Value{}, fmt.Errorf("Echo_EchoBarMap_Result should have exactly one field: got %v fields", i)
+	w, err = wire.NewValueMap(_Map_UUID_BarResponse_MapItemList(v.Arg)), error(nil)
+	if err != nil {
+		return w, err
 	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
 }
 
 func _Map_UUID_BarResponse_Read(m wire.MapItemList) (map[UUID]*BarResponse, error) {
@@ -273,6 +99,127 @@ func _Map_UUID_BarResponse_Read(m wire.MapItemList) (map[UUID]*BarResponse, erro
 	})
 	m.Close()
 	return o, err
+}
+
+func (v *Echo_EchoBarMap_Args) FromWire(w wire.Value) error {
+	var err error
+	argIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TMap {
+				v.Arg, err = _Map_UUID_BarResponse_Read(field.Value.GetMap())
+				if err != nil {
+					return err
+				}
+				argIsSet = true
+			}
+		}
+	}
+	if !argIsSet {
+		return errors.New("field Arg of Echo_EchoBarMap_Args is required")
+	}
+	return nil
+}
+
+func (v *Echo_EchoBarMap_Args) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
+	i++
+	return fmt.Sprintf("Echo_EchoBarMap_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _Map_UUID_BarResponse_Equals(lhs, rhs map[UUID]*BarResponse) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for lk, lv := range lhs {
+		rv, ok := rhs[lk]
+		if !ok {
+			return false
+		}
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *Echo_EchoBarMap_Args) Equals(rhs *Echo_EchoBarMap_Args) bool {
+	if !_Map_UUID_BarResponse_Equals(v.Arg, rhs.Arg) {
+		return false
+	}
+	return true
+}
+
+func (v *Echo_EchoBarMap_Args) MethodName() string {
+	return "echoBarMap"
+}
+
+func (v *Echo_EchoBarMap_Args) EnvelopeType() wire.EnvelopeType {
+	return wire.Call
+}
+
+var Echo_EchoBarMap_Helper = struct {
+	Args           func(arg map[UUID]*BarResponse) *Echo_EchoBarMap_Args
+	IsException    func(error) bool
+	WrapResponse   func(map[UUID]*BarResponse, error) (*Echo_EchoBarMap_Result, error)
+	UnwrapResponse func(*Echo_EchoBarMap_Result) (map[UUID]*BarResponse, error)
+}{}
+
+func init() {
+	Echo_EchoBarMap_Helper.Args = func(arg map[UUID]*BarResponse) *Echo_EchoBarMap_Args {
+		return &Echo_EchoBarMap_Args{Arg: arg}
+	}
+	Echo_EchoBarMap_Helper.IsException = func(err error) bool {
+		switch err.(type) {
+		default:
+			return false
+		}
+	}
+	Echo_EchoBarMap_Helper.WrapResponse = func(success map[UUID]*BarResponse, err error) (*Echo_EchoBarMap_Result, error) {
+		if err == nil {
+			return &Echo_EchoBarMap_Result{Success: success}, nil
+		}
+		return nil, err
+	}
+	Echo_EchoBarMap_Helper.UnwrapResponse = func(result *Echo_EchoBarMap_Result) (success map[UUID]*BarResponse, err error) {
+		if result.Success != nil {
+			success = result.Success
+			return
+		}
+		err = errors.New("expected a non-void result")
+		return
+	}
+}
+
+type Echo_EchoBarMap_Result struct {
+	Success map[UUID]*BarResponse `json:"success"`
+}
+
+func (v *Echo_EchoBarMap_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	if v.Success != nil {
+		w, err = wire.NewValueMap(_Map_UUID_BarResponse_MapItemList(v.Success)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 0, Value: w}
+		i++
+	}
+	if i != 1 {
+		return wire.Value{}, fmt.Errorf("Echo_EchoBarMap_Result should have exactly one field: got %v fields", i)
+	}
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
 func (v *Echo_EchoBarMap_Result) FromWire(w wire.Value) error {
@@ -309,22 +256,6 @@ func (v *Echo_EchoBarMap_Result) String() string {
 		i++
 	}
 	return fmt.Sprintf("Echo_EchoBarMap_Result{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _Map_UUID_BarResponse_Equals(lhs, rhs map[UUID]*BarResponse) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-	for lk, lv := range lhs {
-		rv, ok := rhs[lk]
-		if !ok {
-			return false
-		}
-		if !lv.Equals(rv) {
-			return false
-		}
-	}
-	return true
 }
 
 func (v *Echo_EchoBarMap_Result) Equals(rhs *Echo_EchoBarMap_Result) bool {

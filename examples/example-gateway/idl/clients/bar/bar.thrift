@@ -240,7 +240,7 @@ service  Echo {
     )
 
     list<BarResponse> echoBarList (
-        1: required list<UUID> arg
+        1: required list<BarResponse> arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
@@ -249,7 +249,7 @@ service  Echo {
     )
 
     map<UUID, BarResponse> echoBarMap (
-        1: required map<string, UUID> arg
+        1: required map<UUID, BarResponse> arg
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"
