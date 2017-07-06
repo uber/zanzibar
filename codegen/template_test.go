@@ -29,6 +29,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
+	testlib "github.com/uber/zanzibar/test/lib"
 )
 
 const (
@@ -43,7 +44,7 @@ func cmpGoldenFile(t *testing.T, actualFile string, goldenFileDir string) {
 		return
 	}
 	goldenFile := filepath.Join(goldenFileDir, filepath.Base(actualFile)+"gen")
-	CompareGoldenFile(t, goldenFile, b, *updateGoldenFile)
+	testlib.CompareGoldenFile(t, goldenFile, b)
 }
 
 func TestGenerateBar(t *testing.T) {

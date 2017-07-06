@@ -27,8 +27,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const gatewayConfigFile = "gateway.json"
-
 // Repository operates one local repository:
 // get/set configurations and sync with its remote repository.
 type Repository struct {
@@ -41,6 +39,10 @@ type Repository struct {
 	// by RWMutex.
 	version        string
 	lastUpdateTime time.Time
+	// Cached gateway config.
+	gatewayConfig *Config
+	// Cached error when getting gateway config.
+	gatewayConfigError error
 	sync.RWMutex
 }
 

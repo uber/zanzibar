@@ -1,0 +1,549 @@
+{
+	"ID": "example-gateway",
+	"Repository": "",
+	"Team": "",
+	"Tier": 0,
+	"ThriftRootDir": "./idl",
+	"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
+	"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
+	"TargetGenDir": "./build",
+	"ClientConfigDir": "./clients",
+	"EndpointConfigDir": "./endpoints",
+	"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+	"Endpoints": {
+		"bar.argNotStruct": {
+			"ID": "bar.argNotStruct",
+			"Type": "http",
+			"HandleID": "argNotStruct",
+			"ConfigFile": "bar::argNotStruct",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "argNotStruct",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "ArgNotStruct",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.argWithHeaders": {
+			"ID": "bar.argWithHeaders",
+			"Type": "http",
+			"HandleID": "argWithHeaders",
+			"ConfigFile": "bar::argWithHeaders",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "argWithHeaders",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "ArgWithHeaders",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.argWithManyQueryParams": {
+			"ID": "bar.argWithManyQueryParams",
+			"Type": "http",
+			"HandleID": "argWithManyQueryParams",
+			"ConfigFile": "bar::argWithManyQueryParams",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "argWithManyQueryParams",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "ArgWithManyQueryParams",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.argWithQueryHeader": {
+			"ID": "bar.argWithQueryHeader",
+			"Type": "http",
+			"HandleID": "argWithQueryHeader",
+			"ConfigFile": "bar::argWithQueryHeader",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "argWithQueryHeader",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "ArgWithQueryHeader",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.argWithQueryParams": {
+			"ID": "bar.argWithQueryParams",
+			"Type": "http",
+			"HandleID": "argWithQueryParams",
+			"ConfigFile": "bar::argWithQueryParams",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "argWithQueryParams",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "ArgWithQueryParams",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.missingArg": {
+			"ID": "bar.missingArg",
+			"Type": "http",
+			"HandleID": "missingArg",
+			"ConfigFile": "bar::missingArg",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "missingArg",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "MissingArg",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.noRequest": {
+			"ID": "bar.noRequest",
+			"Type": "http",
+			"HandleID": "noRequest",
+			"ConfigFile": "bar::noRequest",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "noRequest",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "NoRequest",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.normal": {
+			"ID": "bar.normal",
+			"Type": "http",
+			"HandleID": "normal",
+			"ConfigFile": "bar::normal",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "normal",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "Normal",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bar.tooManyArgs": {
+			"ID": "bar.tooManyArgs",
+			"Type": "http",
+			"HandleID": "tooManyArgs",
+			"ConfigFile": "bar::tooManyArgs",
+			"ThriftFile": "endpoints/bar/bar.thrift",
+			"ThriftServiceName": "Bar",
+			"MethodName": "tooManyArgs",
+			"WorkflowType": "httpClient",
+			"ClientID": "bar",
+			"ClientMethod": "TooManyArgs",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"baz.call": {
+			"ID": "baz.call",
+			"Type": "http",
+			"HandleID": "call",
+			"ConfigFile": "baz::call",
+			"ThriftFile": "endpoints/baz/baz.thrift",
+			"ThriftServiceName": "SimpleService",
+			"MethodName": "Call",
+			"WorkflowType": "tchannelClient",
+			"ClientID": "baz",
+			"ClientMethod": "Call",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"baz.compare": {
+			"ID": "baz.compare",
+			"Type": "http",
+			"HandleID": "compare",
+			"ConfigFile": "baz::compare",
+			"ThriftFile": "endpoints/baz/baz.thrift",
+			"ThriftServiceName": "SimpleService",
+			"MethodName": "Compare",
+			"WorkflowType": "tchannelClient",
+			"ClientID": "baz",
+			"ClientMethod": "Compare",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"baz.ping": {
+			"ID": "baz.ping",
+			"Type": "http",
+			"HandleID": "ping",
+			"ConfigFile": "baz::ping",
+			"ThriftFile": "endpoints/baz/baz.thrift",
+			"ThriftServiceName": "SimpleService",
+			"MethodName": "Ping",
+			"WorkflowType": "tchannelClient",
+			"ClientID": "baz",
+			"ClientMethod": "Ping",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"baz.sillyNoop": {
+			"ID": "baz.sillyNoop",
+			"Type": "http",
+			"HandleID": "sillyNoop",
+			"ConfigFile": "baz::sillyNoop",
+			"ThriftFile": "endpoints/baz/baz.thrift",
+			"ThriftServiceName": "SimpleService",
+			"MethodName": "SillyNoop",
+			"WorkflowType": "tchannelClient",
+			"ClientID": "baz",
+			"ClientMethod": "DeliberateDiffNoop",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"bazTChannel.call": {
+			"ID": "bazTChannel.call",
+			"Type": "tchannel",
+			"HandleID": "call",
+			"ConfigFile": "bazTChannel::call",
+			"ThriftFile": "endpoints/tchannel/baz/baz.thrift",
+			"ThriftServiceName": "SimpleService",
+			"MethodName": "Call",
+			"WorkflowType": "custom",
+			"ClientID": "",
+			"ClientMethod": "",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"contacts.saveContacts": {
+			"ID": "contacts.saveContacts",
+			"Type": "http",
+			"HandleID": "saveContacts",
+			"ConfigFile": "contacts::saveContacts",
+			"ThriftFile": "endpoints/contacts/contacts.thrift",
+			"ThriftServiceName": "Contacts",
+			"MethodName": "saveContacts",
+			"WorkflowType": "custom",
+			"ClientID": "",
+			"ClientMethod": "",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"googlenow.addCredentials": {
+			"ID": "googlenow.addCredentials",
+			"Type": "http",
+			"HandleID": "addCredentials",
+			"ConfigFile": "googlenow::addCredentials",
+			"ThriftFile": "endpoints/googlenow/googlenow.thrift",
+			"ThriftServiceName": "GoogleNow",
+			"MethodName": "addCredentials",
+			"WorkflowType": "httpClient",
+			"ClientID": "google-now",
+			"ClientMethod": "AddCredentials",
+			"TestFixture": "",
+			"Middlewares": null
+		},
+		"googlenow.checkCredentials": {
+			"ID": "googlenow.checkCredentials",
+			"Type": "http",
+			"HandleID": "checkCredentials",
+			"ConfigFile": "googlenow::checkCredentials",
+			"ThriftFile": "endpoints/googlenow/googlenow.thrift",
+			"ThriftServiceName": "GoogleNow",
+			"MethodName": "checkCredentials",
+			"WorkflowType": "httpClient",
+			"ClientID": "google-now",
+			"ClientMethod": "CheckCredentials",
+			"TestFixture": "",
+			"Middlewares": null
+		}
+	},
+	"Clients": {
+		"bar": {
+			"ID": "bar",
+			"Type": "http",
+			"ThriftFile": "clients/bar/bar.thrift",
+			"ExposedMethods": {
+				"ArgNotStruct": "Bar::argNotStruct",
+				"ArgWithHeaders": "Bar::argWithHeaders",
+				"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
+				"ArgWithQueryHeader": "Bar::argWithQueryHeader",
+				"ArgWithQueryParams": "Bar::argWithQueryParams",
+				"Echo": "Echo::echo",
+				"MissingArg": "Bar::missingArg",
+				"NoRequest": "Bar::noRequest",
+				"Normal": "Bar::normal",
+				"TooManyArgs": "Bar::tooManyArgs"
+			}
+		},
+		"baz": {
+			"ID": "baz",
+			"Type": "tchannel",
+			"ThriftFile": "clients/baz/baz.thrift",
+			"ExposedMethods": {
+				"Call": "SimpleService::Call",
+				"Compare": "SimpleService::Compare",
+				"DeliberateDiffNoop": "SimpleService::SillyNoop",
+				"Echo": "SecondService::Echo",
+				"Ping": "SimpleService::Ping"
+			}
+		},
+		"contacts": {
+			"ID": "contacts",
+			"Type": "http",
+			"ThriftFile": "clients/contacts/contacts.thrift",
+			"ExposedMethods": {
+				"SaveContacts": "Contacts::saveContacts"
+			}
+		},
+		"google-now": {
+			"ID": "google-now",
+			"Type": "http",
+			"ThriftFile": "clients/googlenow/googlenow.thrift",
+			"ExposedMethods": {
+				"AddCredentials": "GoogleNowService::addCredentials",
+				"CheckCredentials": "GoogleNowService::checkCredentials"
+			}
+		},
+		"quux": {
+			"ID": "quux",
+			"Type": "custom",
+			"ThriftFile": "",
+			"ExposedMethods": null
+		}
+	},
+	"ThriftServices": {
+		"clients/bar/bar.thrift": {
+			"Bar": {
+				"Name": "Bar",
+				"Path": "clients/bar/bar.thrift",
+				"Methods": [
+					{
+						"Name": "argNotStruct",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithHeaders",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithManyQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithQueryHeader",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "missingArg",
+						"Type": "http"
+					},
+					{
+						"Name": "noRequest",
+						"Type": "http"
+					},
+					{
+						"Name": "normal",
+						"Type": "http"
+					},
+					{
+						"Name": "tooManyArgs",
+						"Type": "http"
+					}
+				]
+			},
+			"Echo": {
+				"Name": "Echo",
+				"Path": "clients/bar/bar.thrift",
+				"Methods": [
+					{
+						"Name": "echo",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"clients/baz/base.thrift": {},
+		"clients/baz/baz.thrift": {
+			"SecondService": {
+				"Name": "SecondService",
+				"Path": "clients/baz/baz.thrift",
+				"Methods": [
+					{
+						"Name": "Echo",
+						"Type": "tchannel"
+					}
+				]
+			},
+			"SimpleService": {
+				"Name": "SimpleService",
+				"Path": "clients/baz/baz.thrift",
+				"Methods": [
+					{
+						"Name": "Call",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "Compare",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "Ping",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "SillyNoop",
+						"Type": "tchannel"
+					}
+				]
+			}
+		},
+		"clients/contacts/contacts.thrift": {
+			"Contacts": {
+				"Name": "Contacts",
+				"Path": "clients/contacts/contacts.thrift",
+				"Methods": [
+					{
+						"Name": "saveContacts",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"clients/foo/foo.thrift": {},
+		"clients/googlenow/googlenow.thrift": {
+			"GoogleNowService": {
+				"Name": "GoogleNowService",
+				"Path": "clients/googlenow/googlenow.thrift",
+				"Methods": [
+					{
+						"Name": "addCredentials",
+						"Type": "http"
+					},
+					{
+						"Name": "checkCredentials",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"endpoints/bar/bar.thrift": {
+			"Bar": {
+				"Name": "Bar",
+				"Path": "endpoints/bar/bar.thrift",
+				"Methods": [
+					{
+						"Name": "argNotStruct",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithHeaders",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithManyQueryParams",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithQueryHeader",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithQueryParams",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "missingArg",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "noRequest",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "normal",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "tooManyArgs",
+						"Type": "tchannel"
+					}
+				]
+			}
+		},
+		"endpoints/baz/baz.thrift": {
+			"SimpleService": {
+				"Name": "SimpleService",
+				"Path": "endpoints/baz/baz.thrift",
+				"Methods": [
+					{
+						"Name": "Call",
+						"Type": "http"
+					},
+					{
+						"Name": "Compare",
+						"Type": "http"
+					},
+					{
+						"Name": "Ping",
+						"Type": "http"
+					},
+					{
+						"Name": "SillyNoop",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"endpoints/contacts/contacts.thrift": {
+			"Contacts": {
+				"Name": "Contacts",
+				"Path": "endpoints/contacts/contacts.thrift",
+				"Methods": [
+					{
+						"Name": "saveContacts",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"endpoints/foo/foo.thrift": {},
+		"endpoints/googlenow/googlenow.thrift": {
+			"GoogleNow": {
+				"Name": "GoogleNow",
+				"Path": "endpoints/googlenow/googlenow.thrift",
+				"Methods": [
+					{
+						"Name": "addCredentials",
+						"Type": "http"
+					},
+					{
+						"Name": "checkCredentials",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"endpoints/tchannel/baz/baz.thrift": {
+			"SimpleService": {
+				"Name": "SimpleService",
+				"Path": "endpoints/tchannel/baz/baz.thrift",
+				"Methods": [
+					{
+						"Name": "Call",
+						"Type": "http"
+					},
+					{
+						"Name": "Compare",
+						"Type": "http"
+					},
+					{
+						"Name": "Ping",
+						"Type": "http"
+					},
+					{
+						"Name": "SillyNoop",
+						"Type": "http"
+					}
+				]
+			}
+		}
+	},
+	"Middlewares": null
+}

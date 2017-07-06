@@ -18,42 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package codegen_test
+package repository
 
 import (
-	"bytes"
-	"io/ioutil"
-	"os"
+	"encoding/json"
+	"path/filepath"
 	"testing"
 
-	"github.com/pmezard/go-difflib/difflib"
 	"github.com/stretchr/testify/assert"
+	testlib "github.com/uber/zanzibar/test/lib"
 )
 
-// CompareGoldenFile compares or updates golden file with some JSON bytes.
-func CompareGoldenFile(t *testing.T, goldenFilePath string, actual []byte, updateGoldenFile bool) {
-	if updateGoldenFile {
-		err := ioutil.WriteFile(goldenFilePath, actual, os.ModePerm)
-		if err != nil {
-			t.Fatalf("Fail to write into file : %s\n", err)
-		}
-		return
-	}
-	exp, err := ioutil.ReadFile(goldenFilePath)
-	assert.NoError(t, err, "Failed to read %s with error %s", goldenFilePath, err)
-	if bytes.Equal(exp, actual) {
-		return
-	}
+const (
+	configGoldenFile = "data/gateway_config_expected.json"
+)
 
-	diffCtx := difflib.ContextDiff{
-		A:        difflib.SplitLines(string(exp)),
-		B:        difflib.SplitLines(string(actual)),
-		FromFile: "Expected",
-		ToFile:   "Actual",
-		Context:  5,
-		Eol:      "\n",
+func TestGatewayConfig(t *testing.T) {
+	localDir, err := filepath.Abs("../../examples/example-gateway")
+	assert.NoError(t, err, "failed to get absolute path")
+	repository := &Repository{
+		localDir: localDir,
 	}
-	d, err := difflib.GetContextDiffString(diffCtx)
-	assert.NoError(t, err, "Failed to compute diff.")
-	t.Errorf("Result doesn't match golden file %s.\n %s\n", goldenFilePath, d)
+	config, err := repository.GatewayConfig()
+	assert.NoError(t, err, "failed to get gateway config")
+	actual, err := json.MarshalIndent(config, "", "\t")
+	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
+	testlib.CompareGoldenFile(t, configGoldenFile, actual)
 }
