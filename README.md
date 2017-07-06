@@ -88,6 +88,7 @@ If you want to update a dependency:
 
 ## Update golden files
 
+Run the test that compares golden files with `-update` flag, e.g.,
 ```
-go test ./codegen/ -update
+go test ./backend/repository -update
 ```
