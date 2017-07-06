@@ -662,7 +662,7 @@ import (
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $thriftService := .DownstreamMethod.ThriftService -}}
 {{- $clientMethod := .DownstreamMethod -}}
-{{- $clientMethodName := title $clientMethod.Name -}}
+{{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 {{- $headers := .ReqHeaders -}}
@@ -728,7 +728,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
 		"{{$thriftService}}",
 		"{{$clientMethodName}}",
-		{{$clientPackage}}.New{{$thriftService}}{{$clientMethodName}}Handler({{$clientFunc}}),
+		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
 
@@ -934,11 +934,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
@@ -979,11 +975,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
 			var responseBody {{unref .ResponseType}}
-			{{if isPointerType .ResponseType -}}
 			err = res.ReadAndUnmarshalBody(&responseBody)
-			{{else -}}
-			err = res.ReadAndUnmarshalNonStructBody(&responseBody)
-			{{end -}}
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
@@ -1030,7 +1022,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6284, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1489,7 +1481,7 @@ import (
 {{$privateName := lower .Name -}}
 {{$genCodePkg := .GenCodePkgName -}}
 {{$func := printf "%s%sFunc" $svc.Name .Name -}}
-{{$handler := printf "%s%sHandler" $svc.Name .Name -}}
+{{$handler := printf "%s%sHandler" $svc.Name (title .Name) -}}
 // {{$func}} is the handler function for "{{.Name}}" method of thrift service "{{$svc.Name}}".
 type {{$func}} func (
 	ctx context.Context,
@@ -1537,7 +1529,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+		res.Success = {{.RefResponse "r"}}
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -1556,7 +1548,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 
@@ -1577,7 +1569,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3092, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

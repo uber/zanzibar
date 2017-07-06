@@ -578,14 +578,19 @@
 			"IsEndpoint": false,
 			"Methods": [
 				{
-					"Name": "echo",
+					"Name": "echoBinary",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
-					"HTTPPath": "/echo",
+					"HTTPPath": "/echo/binary",
 					"PathSegments": [
 						{
 							"Type": "static",
 							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "binary",
 							"BodyIdentifier": ""
 						}
 					],
@@ -597,8 +602,713 @@
 						"x-uuid"
 					],
 					"ResHeaders": null,
-					"RequestType": "*clientsBarBar.Echo_Echo_Args",
+					"RequestType": "*clientsBarBar.Echo_EchoBinary_Args",
+					"ResponseType": "[]byte",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoBool",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/bool",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "bool",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoBool_Args",
+					"ResponseType": "bool",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoDouble",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/double",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "double",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoDouble_Args",
+					"ResponseType": "float64",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoEnum",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/enum",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "enum",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoEnum_Args",
+					"ResponseType": "clientsBarBar.Fruit",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoI16",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/i16",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "i16",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoI16_Args",
+					"ResponseType": "int16",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoI32",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/i32",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "i32",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoI32_Args",
+					"ResponseType": "int32",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoI64",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/i64",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "i64",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoI64_Args",
+					"ResponseType": "int64",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoI8",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/i8",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "i8",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoI8_Args",
+					"ResponseType": "int8",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoString",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/string",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "string",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoString_Args",
 					"ResponseType": "string",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStringList",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/string-list",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "string-list",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStringList_Args",
+					"ResponseType": "[]string",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStringMap",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/string-map",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "string-map",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStringMap_Args",
+					"ResponseType": "map[string]*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStringSet",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/string-set",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "string-set",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStringSet_Args",
+					"ResponseType": "map[string]struct{}",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStructList",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/struct-list",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "struct-list",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStructList_Args",
+					"ResponseType": "[]*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStructMap",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/struct-map",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "struct-map",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStructMap_Args",
+					"ResponseType": "[]struct{Key *clientsBarBar.BarResponse; Value string}",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoStructSet",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/struct-set",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "struct-set",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoStructSet_Args",
+					"ResponseType": "[]*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "echoTypedef",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/typedef",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "typedef",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderFields": {},
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoTypedef_Args",
+					"ResponseType": "clientsBarBar.UUID",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""

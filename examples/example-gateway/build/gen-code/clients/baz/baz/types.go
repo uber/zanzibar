@@ -4,9 +4,13 @@
 package baz
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go.uber.org/thriftrw/wire"
+	"math"
+	"strconv"
 	"strings"
 )
 
@@ -178,6 +182,84 @@ func (v *BazRequest) Equals(rhs *BazRequest) bool {
 		return false
 	}
 	return true
+}
+
+type Fruit int32
+
+const (
+	FruitApple  Fruit = 0
+	FruitBanana Fruit = 1
+)
+
+func (v Fruit) ToWire() (wire.Value, error) {
+	return wire.NewValueI32(int32(v)), nil
+}
+
+func (v *Fruit) FromWire(w wire.Value) error {
+	*v = (Fruit)(w.GetI32())
+	return nil
+}
+
+func (v Fruit) String() string {
+	w := int32(v)
+	switch w {
+	case 0:
+		return "APPLE"
+	case 1:
+		return "BANANA"
+	}
+	return fmt.Sprintf("Fruit(%d)", w)
+}
+
+func (v Fruit) Equals(rhs Fruit) bool {
+	return v == rhs
+}
+
+func (v Fruit) MarshalJSON() ([]byte, error) {
+	switch int32(v) {
+	case 0:
+		return ([]byte)("\"APPLE\""), nil
+	case 1:
+		return ([]byte)("\"BANANA\""), nil
+	}
+	return ([]byte)(strconv.FormatInt(int64(v), 10)), nil
+}
+
+func (v *Fruit) UnmarshalJSON(text []byte) error {
+	d := json.NewDecoder(bytes.NewReader(text))
+	d.UseNumber()
+	t, err := d.Token()
+	if err != nil {
+		return err
+	}
+	switch w := t.(type) {
+	case json.Number:
+		x, err := w.Int64()
+		if err != nil {
+			return err
+		}
+		if x > math.MaxInt32 {
+			return fmt.Errorf("enum overflow from JSON %q for %q", text, "Fruit")
+		}
+		if x < math.MinInt32 {
+			return fmt.Errorf("enum underflow from JSON %q for %q", text, "Fruit")
+		}
+		*v = (Fruit)(x)
+		return nil
+	case string:
+		switch w {
+		case "APPLE":
+			*v = FruitApple
+			return nil
+		case "BANANA":
+			*v = FruitBanana
+			return nil
+		default:
+			return fmt.Errorf("unknown enum value %q for %q", w, "Fruit")
+		}
+	default:
+		return fmt.Errorf("invalid JSON value %q (%T) to unmarshal into %q", t, t, "Fruit")
+	}
 }
 
 type OtherAuthErr struct {

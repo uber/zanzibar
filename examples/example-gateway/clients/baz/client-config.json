@@ -5,11 +5,27 @@
 		"thriftFile": "clients/baz/baz.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"exposedMethods": {
-			"Call": "SimpleService::Call",
-			"Compare": "SimpleService::Compare",
-			"Ping": "SimpleService::Ping",
-			"DeliberateDiffNoop": "SimpleService::SillyNoop",
-			"Echo": "SecondService::Echo"
+			"Call": "SimpleService::call",
+			"Compare": "SimpleService::compare",
+			"Ping": "SimpleService::ping",
+			"DeliberateDiffNoop": "SimpleService::sillyNoop",
+
+			"EchoI8": "SecondService::echoI8",
+			"EchoI16": "SecondService::echoI16",
+			"EchoI32": "SecondService::echoI32",
+			"EchoI64": "SecondService::echoI64",
+			"EchoDouble": "SecondService::echoDouble",
+			"EchoBool": "SecondService::echoBool",
+			"EchoBinary": "SecondService::echoBinary",
+			"EchoString": "SecondService::echoString",
+			"EchoEnum": "SecondService::echoEnum",
+			"EchoTypedef": "SecondService::echoTypedef",
+			"EchoStringSet": "SecondService::echoStringSet",
+			"EchoStructSet": "SecondService::echoStructSet",
+			"EchoStringList": "SecondService::echoStringList",
+			"EchoStructList": "SecondService::echoStructList",
+			"EchoStringMap": "SecondService::echoStringMap",
+			"EchoStructMap": "SecondService::echoStructMap"
 		}
 	}
 }

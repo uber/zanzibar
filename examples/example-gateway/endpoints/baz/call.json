@@ -4,7 +4,7 @@
 	"handleId": "call",
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",
-	"thriftMethodName": "SimpleService::Call",
+	"thriftMethodName": "SimpleService::call",
 	"workflowType": "tchannelClient",
 	"clientID": "baz",
 	"clientMethod": "Call",

@@ -65,7 +65,7 @@ func BenchmarkPing(b *testing.B) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Ping",
+		"ping",
 		bazServer.NewSimpleServicePingHandler(ping),
 	)
 

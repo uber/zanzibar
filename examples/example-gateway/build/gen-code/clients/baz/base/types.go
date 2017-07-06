@@ -131,3 +131,25 @@ func (v *ServerErr) Equals(rhs *ServerErr) bool {
 func (v *ServerErr) Error() string {
 	return v.String()
 }
+
+type UUID string
+
+func (v UUID) ToWire() (wire.Value, error) {
+	x := (string)(v)
+	return wire.NewValueString(x), error(nil)
+}
+
+func (v UUID) String() string {
+	x := (string)(v)
+	return fmt.Sprint(x)
+}
+
+func (v *UUID) FromWire(w wire.Value) error {
+	x, err := w.GetString(), error(nil)
+	*v = (UUID)(x)
+	return err
+}
+
+func (lhs UUID) Equals(rhs UUID) bool {
+	return (lhs == rhs)
+}

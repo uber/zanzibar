@@ -86,39 +86,8 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	return rawBody, nil
 }
 
-// UnmarshalBody will parse body from the client response.
-func (res *ClientHTTPResponse) UnmarshalBody(
-	body json.Unmarshaler, rawBody []byte,
-) error {
-	err := body.UnmarshalJSON(rawBody)
-	if err != nil {
-		res.req.Logger.Warn("Could not parse client json",
-			zap.String("error", err.Error()),
-		)
-		return errors.Wrapf(
-			err,
-			"Could not parse client %q json",
-			res.req.ClientID,
-		)
-	}
-
-	return nil
-}
-
-// ReadAndUnmarshalBody will try to unmarshal into struct or fail
-func (res *ClientHTTPResponse) ReadAndUnmarshalBody(
-	body json.Unmarshaler,
-) error {
-	rawBody, err := res.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	return res.UnmarshalBody(body, rawBody)
-}
-
-// ReadAndUnmarshalNonStructBody will try to unmarshal non pointer value or fail
-func (res *ClientHTTPResponse) ReadAndUnmarshalNonStructBody(v interface{}) error {
+// ReadAndUnmarshalBody will try to unmarshal non pointer value or fail
+func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 	rawBody, err := res.ReadAll()
 	if err != nil {
 		/* coverage ignore next line */
