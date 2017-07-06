@@ -1,0 +1,11 @@
+{
+    "thriftFile": "clients/contacts/contacts.thrift",
+    "serviceName": "contacts",
+    "type": "http",
+    "name": "contacts",
+    "exposedMethods": {
+        "SaveContacts": "Contacts::saveContacts"
+    },
+    "ip": "127.0.0.1",
+    "port": 4000
+}

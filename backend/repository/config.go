@@ -78,10 +78,15 @@ type EndptMidConfig struct {
 
 // ClientConfig stores configuration for an client.
 type ClientConfig struct {
-	ID             string
-	Type           ProtocolType
-	ThriftFile     string
-	ExposedMethods map[string]string
+	Name              string            `json:"name"`
+	ThriftFile        string            `json:"thriftFile"`
+	MuttleyName       string            `json:"muttleyName,omitempty"`
+	Type              ProtocolType      `json:"type"`
+	ExposedMethods    map[string]string `json:"exposedMethods,omitempty"`
+	IP                string            `json:"ip"`
+	Port              int64             `json:"port"`
+	Timeout           int64             `json:"clientTimeout"`
+	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt"`
 }
 
 // MiddlewareConfig represents configuration for a middleware.
@@ -117,8 +122,13 @@ type ThriftMeta struct {
 type ProtocolType string
 
 const (
-	gatewayConfigFile = "gateway.json"
+	gatewayConfigFile     = "gateway.json"
+	productionCfgJSONPath = "config/production.json"
+	clientConfigFileName  = "client-config.json"
+	clientModuleFileName  = "clients-config.json"
+)
 
+const (
 	// HTTP type
 	HTTP ProtocolType = "http"
 	// TCHANNEL type
@@ -215,33 +225,100 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		config.ID,
 	)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read gateway spec")
+		return nil, errors.Wrap(err, "failed to read gateway spec")
 	}
 
 	if config.ThriftServices, err = r.thriftservices(config.ThriftRootDir, pkgHelper); err != nil {
-		return nil, errors.Wrapf(err, "failed to read thrift services")
+		return nil, errors.Wrap(err, "failed to read thrift services")
 	}
 
-	config.Clients = r.clientConfigs(config.ThriftRootDir, gatewaySpec)
+	if config.Clients, err = r.clientConfigs(config.ThriftRootDir, gatewaySpec); err != nil {
+		return nil, errors.Wrap(err, "failed to read client configuration")
+	}
 	config.Endpoints = r.endpointConfigs(config.ThriftRootDir, gatewaySpec)
 	return config, nil
 }
 
-func (r *Repository) clientConfigs(thriftRootDir string, gatewaySpec *codegen.GatewaySpec) map[string]*ClientConfig {
+func (r *Repository) clientConfigs(
+	thriftRootDir string,
+	gatewaySpec *codegen.GatewaySpec,
+) (map[string]*ClientConfig, error) {
 	cfgs := make(map[string]*ClientConfig, len(gatewaySpec.ClientModules))
-	for _, spec := range gatewaySpec.ClientModules {
-		clientType := ProtocolTypeFromString(spec.ClientType)
-		clientConfig := &ClientConfig{
-			ID:             spec.ClientID,
-			Type:           clientType,
-			ExposedMethods: spec.ExposedMethods,
-		}
-		if clientType != CUSTOM {
-			clientConfig.ThriftFile = r.relativePath(thriftRootDir, spec.ThriftFile)
-		}
-		cfgs[clientConfig.ID] = clientConfig
+	productionCfgJSON := map[string]interface{}{}
+	path := r.absPath(productionCfgJSONPath)
+	err := readJSONFile(path, &productionCfgJSON)
+	if err != nil {
+		return nil, err
 	}
-	return cfgs
+	for _, spec := range gatewaySpec.ClientModules {
+		cfgs[spec.ClientID], err = clientConfig(spec, productionCfgJSON)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse config %q for client %q", path, spec.ClientID)
+		}
+		if cfgs[spec.ClientID].Type != CUSTOM {
+			cfgs[spec.ClientID].ThriftFile = r.relativePath(thriftRootDir, spec.ThriftFile)
+		}
+	}
+	return cfgs, nil
+}
+
+func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interface{}) (*ClientConfig, error) {
+	clientConfig := &ClientConfig{
+		Name:           spec.ClientID,
+		Type:           ProtocolTypeFromString(spec.ClientType),
+		ExposedMethods: spec.ExposedMethods,
+	}
+	prefix := "clients." + spec.ClientID + "."
+	var err error
+	clientConfig.IP, err = convStrVal(productionCfgJSON, prefix+"ip")
+	if err != nil {
+		return nil, err
+	}
+	clientConfig.Port, err = convInt64Val(productionCfgJSON, prefix+"port")
+	if err != nil {
+		return nil, err
+	}
+	if spec.ClientType != "tchannel" {
+		return clientConfig, nil
+	}
+	// tchannel related fields.
+	clientConfig.MuttleyName, err = convStrVal(productionCfgJSON, prefix+"serviceName")
+	if err != nil {
+		return nil, err
+	}
+	clientConfig.Timeout, err = convInt64Val(productionCfgJSON, prefix+"timeout")
+	if err != nil {
+		return nil, err
+	}
+	clientConfig.TimeoutPerAttempt, err = convInt64Val(productionCfgJSON, prefix+"timeoutPerAttempt")
+	if err != nil {
+		return nil, err
+	}
+
+	return clientConfig, nil
+
+}
+
+func convStrVal(m map[string]interface{}, key string) (string, error) {
+	if _, ok := m[key]; !ok {
+		return "", errors.Errorf("key %q is not found", key)
+	}
+	val, ok := m[key].(string)
+	if !ok {
+		return "", errors.Errorf("key %q is not string, but %T", key, m[key])
+	}
+	return val, nil
+}
+
+func convInt64Val(m map[string]interface{}, key string) (int64, error) {
+	if _, ok := m[key]; !ok {
+		return 0, errors.Errorf("key %q is not found", key)
+	}
+	val, ok := m[key].(float64)
+	if !ok {
+		return 0, errors.Errorf("key %q is not int, but %T", key, m[key])
+	}
+	return int64(val), nil
 }
 
 func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.GatewaySpec) map[string]*EndpointConfig {
