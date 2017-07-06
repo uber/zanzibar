@@ -96,7 +96,7 @@ func (v *SecondService_EchoEnum_Args) Equals(rhs *SecondService_EchoEnum_Args) b
 }
 
 func (v *SecondService_EchoEnum_Args) MethodName() string {
-	return "EchoEnum"
+	return "echoEnum"
 }
 
 func (v *SecondService_EchoEnum_Args) EnvelopeType() wire.EnvelopeType {
@@ -207,7 +207,7 @@ func (v *SecondService_EchoEnum_Result) Equals(rhs *SecondService_EchoEnum_Resul
 }
 
 func (v *SecondService_EchoEnum_Result) MethodName() string {
-	return "EchoEnum"
+	return "echoEnum"
 }
 
 func (v *SecondService_EchoEnum_Result) EnvelopeType() wire.EnvelopeType {

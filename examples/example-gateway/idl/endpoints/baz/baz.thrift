@@ -24,7 +24,7 @@ exception ServerErr {
 
 service SimpleService {
   // have both request body and response body
-  BazResponse Compare(
+  BazResponse compare(
     1: required BazRequest arg1
     2: required BazRequest arg2
   ) throws (
@@ -38,7 +38,7 @@ service SimpleService {
   )
 
   // no response body
-  void Call(
+  void call(
     1: required BazRequest arg
   ) throws (
     1: AuthErr authErr (zanzibar.http.status = "403")
@@ -52,7 +52,7 @@ service SimpleService {
   )
 
   // no request body
-  BazResponse Ping() (
+  BazResponse ping() (
     zanzibar.http.status = "200"
     zanzibar.http.method = "GET"
     zanzibar.http.path = "/baz/ping"
@@ -60,7 +60,7 @@ service SimpleService {
   )
 
   // neither request body nor response body
-  void SillyNoop() throws (
+  void sillyNoop() throws (
     1: AuthErr authErr (zanzibar.http.status = "403")
     2: ServerErr serverErr (zanzibar.http.status = "500")
   ) (

@@ -101,7 +101,7 @@ func (v *SimpleService_Compare_Args) Equals(rhs *SimpleService_Compare_Args) boo
 }
 
 func (v *SimpleService_Compare_Args) MethodName() string {
-	return "Compare"
+	return "compare"
 }
 
 func (v *SimpleService_Compare_Args) EnvelopeType() wire.EnvelopeType {
@@ -292,7 +292,7 @@ func (v *SimpleService_Compare_Result) Equals(rhs *SimpleService_Compare_Result)
 }
 
 func (v *SimpleService_Compare_Result) MethodName() string {
-	return "Compare"
+	return "compare"
 }
 
 func (v *SimpleService_Compare_Result) EnvelopeType() wire.EnvelopeType {

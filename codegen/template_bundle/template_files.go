@@ -662,7 +662,7 @@ import (
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $thriftService := .DownstreamMethod.ThriftService -}}
 {{- $clientMethod := .DownstreamMethod -}}
-{{- $clientMethodName := title $clientMethod.Name -}}
+{{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
 {{- $headers := .ReqHeaders -}}
@@ -728,7 +728,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
 		"{{$thriftService}}",
 		"{{$clientMethodName}}",
-		{{$clientPackage}}.New{{$thriftService}}{{$clientMethodName}}Handler({{$clientFunc}}),
+		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
 
@@ -1481,7 +1481,7 @@ import (
 {{$privateName := lower .Name -}}
 {{$genCodePkg := .GenCodePkgName -}}
 {{$func := printf "%s%sFunc" $svc.Name .Name -}}
-{{$handler := printf "%s%sHandler" $svc.Name .Name -}}
+{{$handler := printf "%s%sHandler" $svc.Name (title .Name) -}}
 // {{$func}} is the handler function for "{{.Name}}" method of thrift service "{{$svc.Name}}".
 type {{$func}} func (
 	ctx context.Context,
@@ -1569,7 +1569,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

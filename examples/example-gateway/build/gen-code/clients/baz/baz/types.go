@@ -189,8 +189,6 @@ type Fruit int32
 const (
 	FruitApple  Fruit = 0
 	FruitBanana Fruit = 1
-	FruitPeach  Fruit = 2
-	FruitGrape  Fruit = 3
 )
 
 func (v Fruit) ToWire() (wire.Value, error) {
@@ -209,10 +207,6 @@ func (v Fruit) String() string {
 		return "APPLE"
 	case 1:
 		return "BANANA"
-	case 2:
-		return "PEACH"
-	case 3:
-		return "GRAPE"
 	}
 	return fmt.Sprintf("Fruit(%d)", w)
 }
@@ -227,10 +221,6 @@ func (v Fruit) MarshalJSON() ([]byte, error) {
 		return ([]byte)("\"APPLE\""), nil
 	case 1:
 		return ([]byte)("\"BANANA\""), nil
-	case 2:
-		return ([]byte)("\"PEACH\""), nil
-	case 3:
-		return ([]byte)("\"GRAPE\""), nil
 	}
 	return ([]byte)(strconv.FormatInt(int64(v), 10)), nil
 }
@@ -263,12 +253,6 @@ func (v *Fruit) UnmarshalJSON(text []byte) error {
 			return nil
 		case "BANANA":
 			*v = FruitBanana
-			return nil
-		case "PEACH":
-			*v = FruitPeach
-			return nil
-		case "GRAPE":
-			*v = FruitGrape
 			return nil
 		default:
 			return fmt.Errorf("unknown enum value %q for %q", w, "Fruit")

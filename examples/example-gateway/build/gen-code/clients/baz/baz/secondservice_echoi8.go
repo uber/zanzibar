@@ -70,7 +70,7 @@ func (v *SecondService_EchoI8_Args) Equals(rhs *SecondService_EchoI8_Args) bool 
 }
 
 func (v *SecondService_EchoI8_Args) MethodName() string {
-	return "EchoI8"
+	return "echoI8"
 }
 
 func (v *SecondService_EchoI8_Args) EnvelopeType() wire.EnvelopeType {
@@ -190,7 +190,7 @@ func (v *SecondService_EchoI8_Result) Equals(rhs *SecondService_EchoI8_Result) b
 }
 
 func (v *SecondService_EchoI8_Result) MethodName() string {
-	return "EchoI8"
+	return "echoI8"
 }
 
 func (v *SecondService_EchoI8_Result) EnvelopeType() wire.EnvelopeType {

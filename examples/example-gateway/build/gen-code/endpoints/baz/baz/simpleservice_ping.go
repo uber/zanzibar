@@ -42,7 +42,7 @@ func (v *SimpleService_Ping_Args) Equals(rhs *SimpleService_Ping_Args) bool {
 }
 
 func (v *SimpleService_Ping_Args) MethodName() string {
-	return "Ping"
+	return "ping"
 }
 
 func (v *SimpleService_Ping_Args) EnvelopeType() wire.EnvelopeType {
@@ -151,7 +151,7 @@ func (v *SimpleService_Ping_Result) Equals(rhs *SimpleService_Ping_Result) bool 
 }
 
 func (v *SimpleService_Ping_Result) MethodName() string {
-	return "Ping"
+	return "ping"
 }
 
 func (v *SimpleService_Ping_Result) EnvelopeType() wire.EnvelopeType {

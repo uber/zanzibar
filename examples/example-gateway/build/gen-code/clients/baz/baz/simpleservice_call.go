@@ -79,7 +79,7 @@ func (v *SimpleService_Call_Args) Equals(rhs *SimpleService_Call_Args) bool {
 }
 
 func (v *SimpleService_Call_Args) MethodName() string {
-	return "Call"
+	return "call"
 }
 
 func (v *SimpleService_Call_Args) EnvelopeType() wire.EnvelopeType {
@@ -202,7 +202,7 @@ func (v *SimpleService_Call_Result) Equals(rhs *SimpleService_Call_Result) bool 
 }
 
 func (v *SimpleService_Call_Result) MethodName() string {
-	return "Call"
+	return "call"
 }
 
 func (v *SimpleService_Call_Result) EnvelopeType() wire.EnvelopeType {

@@ -71,7 +71,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Call",
+		"call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 

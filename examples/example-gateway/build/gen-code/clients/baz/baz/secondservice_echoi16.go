@@ -70,7 +70,7 @@ func (v *SecondService_EchoI16_Args) Equals(rhs *SecondService_EchoI16_Args) boo
 }
 
 func (v *SecondService_EchoI16_Args) MethodName() string {
-	return "EchoI16"
+	return "echoI16"
 }
 
 func (v *SecondService_EchoI16_Args) EnvelopeType() wire.EnvelopeType {
@@ -190,7 +190,7 @@ func (v *SecondService_EchoI16_Result) Equals(rhs *SecondService_EchoI16_Result)
 }
 
 func (v *SecondService_EchoI16_Result) MethodName() string {
-	return "EchoI16"
+	return "echoI16"
 }
 
 func (v *SecondService_EchoI16_Result) EnvelopeType() wire.EnvelopeType {

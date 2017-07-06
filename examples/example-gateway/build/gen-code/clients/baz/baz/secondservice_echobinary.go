@@ -74,7 +74,7 @@ func (v *SecondService_EchoBinary_Args) Equals(rhs *SecondService_EchoBinary_Arg
 }
 
 func (v *SecondService_EchoBinary_Args) MethodName() string {
-	return "EchoBinary"
+	return "echoBinary"
 }
 
 func (v *SecondService_EchoBinary_Args) EnvelopeType() wire.EnvelopeType {
@@ -183,7 +183,7 @@ func (v *SecondService_EchoBinary_Result) Equals(rhs *SecondService_EchoBinary_R
 }
 
 func (v *SecondService_EchoBinary_Result) MethodName() string {
-	return "EchoBinary"
+	return "echoBinary"
 }
 
 func (v *SecondService_EchoBinary_Result) EnvelopeType() wire.EnvelopeType {

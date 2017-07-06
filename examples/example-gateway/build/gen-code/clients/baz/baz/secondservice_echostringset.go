@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type SecondService_EchoSet_Args struct {
+type SecondService_EchoStringSet_Args struct {
 	Arg map[string]struct{} `json:"arg,required"`
 }
 
@@ -41,7 +41,7 @@ func (_Set_String_ValueList) ValueType() wire.Type {
 func (_Set_String_ValueList) Close() {
 }
 
-func (v *SecondService_EchoSet_Args) ToWire() (wire.Value, error) {
+func (v *SecondService_EchoStringSet_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -49,7 +49,7 @@ func (v *SecondService_EchoSet_Args) ToWire() (wire.Value, error) {
 		err    error
 	)
 	if v.Arg == nil {
-		return w, errors.New("field Arg of SecondService_EchoSet_Args is required")
+		return w, errors.New("field Arg of SecondService_EchoStringSet_Args is required")
 	}
 	w, err = wire.NewValueSet(_Set_String_ValueList(v.Arg)), error(nil)
 	if err != nil {
@@ -77,7 +77,7 @@ func _Set_String_Read(s wire.ValueList) (map[string]struct{}, error) {
 	return o, err
 }
 
-func (v *SecondService_EchoSet_Args) FromWire(w wire.Value) error {
+func (v *SecondService_EchoStringSet_Args) FromWire(w wire.Value) error {
 	var err error
 	argIsSet := false
 	for _, field := range w.GetStruct().Fields {
@@ -93,12 +93,12 @@ func (v *SecondService_EchoSet_Args) FromWire(w wire.Value) error {
 		}
 	}
 	if !argIsSet {
-		return errors.New("field Arg of SecondService_EchoSet_Args is required")
+		return errors.New("field Arg of SecondService_EchoStringSet_Args is required")
 	}
 	return nil
 }
 
-func (v *SecondService_EchoSet_Args) String() string {
+func (v *SecondService_EchoStringSet_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -106,7 +106,7 @@ func (v *SecondService_EchoSet_Args) String() string {
 	i := 0
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
-	return fmt.Sprintf("SecondService_EchoSet_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("SecondService_EchoStringSet_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
 func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
@@ -121,45 +121,45 @@ func _Set_String_Equals(lhs, rhs map[string]struct{}) bool {
 	return true
 }
 
-func (v *SecondService_EchoSet_Args) Equals(rhs *SecondService_EchoSet_Args) bool {
+func (v *SecondService_EchoStringSet_Args) Equals(rhs *SecondService_EchoStringSet_Args) bool {
 	if !_Set_String_Equals(v.Arg, rhs.Arg) {
 		return false
 	}
 	return true
 }
 
-func (v *SecondService_EchoSet_Args) MethodName() string {
-	return "EchoSet"
+func (v *SecondService_EchoStringSet_Args) MethodName() string {
+	return "echoStringSet"
 }
 
-func (v *SecondService_EchoSet_Args) EnvelopeType() wire.EnvelopeType {
+func (v *SecondService_EchoStringSet_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-var SecondService_EchoSet_Helper = struct {
-	Args           func(arg map[string]struct{}) *SecondService_EchoSet_Args
+var SecondService_EchoStringSet_Helper = struct {
+	Args           func(arg map[string]struct{}) *SecondService_EchoStringSet_Args
 	IsException    func(error) bool
-	WrapResponse   func(map[string]struct{}, error) (*SecondService_EchoSet_Result, error)
-	UnwrapResponse func(*SecondService_EchoSet_Result) (map[string]struct{}, error)
+	WrapResponse   func(map[string]struct{}, error) (*SecondService_EchoStringSet_Result, error)
+	UnwrapResponse func(*SecondService_EchoStringSet_Result) (map[string]struct{}, error)
 }{}
 
 func init() {
-	SecondService_EchoSet_Helper.Args = func(arg map[string]struct{}) *SecondService_EchoSet_Args {
-		return &SecondService_EchoSet_Args{Arg: arg}
+	SecondService_EchoStringSet_Helper.Args = func(arg map[string]struct{}) *SecondService_EchoStringSet_Args {
+		return &SecondService_EchoStringSet_Args{Arg: arg}
 	}
-	SecondService_EchoSet_Helper.IsException = func(err error) bool {
+	SecondService_EchoStringSet_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		default:
 			return false
 		}
 	}
-	SecondService_EchoSet_Helper.WrapResponse = func(success map[string]struct{}, err error) (*SecondService_EchoSet_Result, error) {
+	SecondService_EchoStringSet_Helper.WrapResponse = func(success map[string]struct{}, err error) (*SecondService_EchoStringSet_Result, error) {
 		if err == nil {
-			return &SecondService_EchoSet_Result{Success: success}, nil
+			return &SecondService_EchoStringSet_Result{Success: success}, nil
 		}
 		return nil, err
 	}
-	SecondService_EchoSet_Helper.UnwrapResponse = func(result *SecondService_EchoSet_Result) (success map[string]struct{}, err error) {
+	SecondService_EchoStringSet_Helper.UnwrapResponse = func(result *SecondService_EchoStringSet_Result) (success map[string]struct{}, err error) {
 		if result.Success != nil {
 			success = result.Success
 			return
@@ -169,11 +169,11 @@ func init() {
 	}
 }
 
-type SecondService_EchoSet_Result struct {
+type SecondService_EchoStringSet_Result struct {
 	Success map[string]struct{} `json:"success"`
 }
 
-func (v *SecondService_EchoSet_Result) ToWire() (wire.Value, error) {
+func (v *SecondService_EchoStringSet_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -189,12 +189,12 @@ func (v *SecondService_EchoSet_Result) ToWire() (wire.Value, error) {
 		i++
 	}
 	if i != 1 {
-		return wire.Value{}, fmt.Errorf("SecondService_EchoSet_Result should have exactly one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("SecondService_EchoStringSet_Result should have exactly one field: got %v fields", i)
 	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v *SecondService_EchoSet_Result) FromWire(w wire.Value) error {
+func (v *SecondService_EchoStringSet_Result) FromWire(w wire.Value) error {
 	var err error
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -212,12 +212,12 @@ func (v *SecondService_EchoSet_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count != 1 {
-		return fmt.Errorf("SecondService_EchoSet_Result should have exactly one field: got %v fields", count)
+		return fmt.Errorf("SecondService_EchoStringSet_Result should have exactly one field: got %v fields", count)
 	}
 	return nil
 }
 
-func (v *SecondService_EchoSet_Result) String() string {
+func (v *SecondService_EchoStringSet_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -227,20 +227,20 @@ func (v *SecondService_EchoSet_Result) String() string {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
 		i++
 	}
-	return fmt.Sprintf("SecondService_EchoSet_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("SecondService_EchoStringSet_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func (v *SecondService_EchoSet_Result) Equals(rhs *SecondService_EchoSet_Result) bool {
+func (v *SecondService_EchoStringSet_Result) Equals(rhs *SecondService_EchoStringSet_Result) bool {
 	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && _Set_String_Equals(v.Success, rhs.Success))) {
 		return false
 	}
 	return true
 }
 
-func (v *SecondService_EchoSet_Result) MethodName() string {
-	return "EchoSet"
+func (v *SecondService_EchoStringSet_Result) MethodName() string {
+	return "echoStringSet"
 }
 
-func (v *SecondService_EchoSet_Result) EnvelopeType() wire.EnvelopeType {
+func (v *SecondService_EchoStringSet_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }

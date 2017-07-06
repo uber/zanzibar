@@ -42,7 +42,7 @@ func (v *SimpleService_SillyNoop_Args) Equals(rhs *SimpleService_SillyNoop_Args)
 }
 
 func (v *SimpleService_SillyNoop_Args) MethodName() string {
-	return "SillyNoop"
+	return "sillyNoop"
 }
 
 func (v *SimpleService_SillyNoop_Args) EnvelopeType() wire.EnvelopeType {
@@ -202,7 +202,7 @@ func (v *SimpleService_SillyNoop_Result) Equals(rhs *SimpleService_SillyNoop_Res
 }
 
 func (v *SimpleService_SillyNoop_Result) MethodName() string {
-	return "SillyNoop"
+	return "sillyNoop"
 }
 
 func (v *SimpleService_SillyNoop_Result) EnvelopeType() wire.EnvelopeType {
