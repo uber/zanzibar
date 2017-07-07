@@ -28,6 +28,7 @@ import (
 	"sort"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/codegen"
 )
 
 // ClientJSONConfig defines the JSON content of the configuration file.
@@ -44,7 +45,7 @@ type configField struct {
 }
 
 // NewClientConfigJSON converts ClientConfig to ClientJSONConfig.
-func NewClientConfigJSON(cfg ClientConfig) *ClientJSONConfig {
+func NewClientConfigJSON(cfg *ClientConfig) *ClientJSONConfig {
 	cfgJSON := &ClientJSONConfig{
 		Name: cfg.Name,
 		Type: string(cfg.Type),
@@ -61,7 +62,7 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	if err := validateClientUpdateRequest(req); err != nil {
 		return err
 	}
-	cfgJSON := NewClientConfigJSON(*req)
+	cfgJSON := NewClientConfigJSON(req)
 	cfgJSON.Config.ThriftFileSha = thriftFileSha
 	clientPath := filepath.Join(r.absPath(clientCfgDir), cfgJSON.Name)
 	r.Lock()
@@ -85,7 +86,7 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 	if len(req.ExposedMethods) == 0 {
 		return errors.New("invalid request: no method is exposed for the client")
 	}
-	if req.Type == "tchannel" && req.MuttleyName == "" {
+	if req.Type == "tchannel" && req.ServiceName == "" {
 		return errors.New("invalid request: muttley name is required for tchannel client")
 	}
 	if req.IP == "" || req.Port == 0 {
@@ -98,17 +99,6 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 		req.TimeoutPerAttempt = 10000
 	}
 	return nil
-}
-
-type clientModuleJSONConfig struct {
-	Name         string       `json:"name"`
-	Type         string       `json:"type"`
-	Config       interface{}  `json:"config"`
-	Dependencies dependencies `json:"dependencies"`
-}
-
-type dependencies struct {
-	Client []string `json:"client"`
 }
 
 // WriteClientModuleJSON writes the JSON file for the module to contain all clients.
@@ -124,11 +114,11 @@ func WriteClientModuleJSON(clientCfgDir string) error {
 		}
 	}
 	sort.Strings(subDirs)
-	content := &clientModuleJSONConfig{
+	content := &codegen.ClientClassConfig{
 		Name:   "clients",
 		Type:   "init",
-		Config: struct{}{},
-		Dependencies: dependencies{
+		Config: map[string]interface{}{},
+		Dependencies: codegen.ClientDependencies{
 			Client: subDirs,
 		},
 	}
@@ -144,7 +134,7 @@ func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 	// Update fields related to a client.
 	prefix := "clients." + req.Name + "."
 	if req.Type == "tchannel" {
-		content[prefix+"serviceName"] = req.MuttleyName
+		content[prefix+"serviceName"] = req.ServiceName
 		content[prefix+"timeout"] = req.Timeout
 		content[prefix+"timeoutPerAttempt"] = req.TimeoutPerAttempt
 	}

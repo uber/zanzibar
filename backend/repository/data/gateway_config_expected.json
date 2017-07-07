@@ -289,7 +289,7 @@
 			"name": "baz",
 			"type": "tchannel",
 			"thriftFile": "clients/baz/baz.thrift",
-			"muttleyName": "Qux",
+			"serviceName": "Qux",
 			"exposedMethods": {
 				"Call": "SimpleService::call",
 				"Compare": "SimpleService::compare",

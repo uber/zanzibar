@@ -81,7 +81,7 @@ type ClientConfig struct {
 	Name              string            `json:"name"`
 	Type              ProtocolType      `json:"type"`
 	ThriftFile        string            `json:"thriftFile,omitempty"`
-	MuttleyName       string            `json:"muttleyName,omitempty"`
+	ServiceName       string            `json:"serviceName,omitempty"`
 	ExposedMethods    map[string]string `json:"exposedMethods,omitempty"`
 	IP                string            `json:"ip,omitempty"`
 	Port              int64             `json:"port,omitempty"`
@@ -286,7 +286,7 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 		return clientConfig, nil
 	}
 	// tchannel related fields.
-	clientConfig.MuttleyName, err = convStrVal(productionCfgJSON, prefix+"serviceName")
+	clientConfig.ServiceName, err = convStrVal(productionCfgJSON, prefix+"serviceName")
 	if err != nil {
 		return nil, err
 	}
