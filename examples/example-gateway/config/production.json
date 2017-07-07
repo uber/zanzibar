@@ -1,36 +1,28 @@
 {
-	"serviceName": "example-gateway",
-	"http.port": 7783,
-	"useDatacenter": false,
-
-	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
-	"logger.output": "disk",
-
-	"metrics.tally.service": "example-gateway",
-	"metrics.m3.service": "example-gateway",
-
-	"tchannel.serviceName": "example-gateway",
-	"tchannel.processName": "example-gateway",
-	"tchannel.port": 7784,
-
-	"clients.contacts.port": 4000,
-	"clients.contacts.ip": "127.0.0.1",
-
-	"clients.google-now.port": 14120,
-	"clients.google-now.ip": "127.0.0.1",
-
-	"clients.bar.port": 4001,
 	"clients.bar.ip": "127.0.0.1",
-
-	"clients.baz.port": 4002,
+	"clients.bar.port": 4001,
 	"clients.baz.ip": "127.0.0.1",
+	"clients.baz.port": 4002,
 	"clients.baz.serviceName": "Qux",
 	"clients.baz.timeout": 1000,
 	"clients.baz.timeoutPerAttempt": 1000,
-
+	"clients.contacts.ip": "127.0.0.1",
+	"clients.contacts.port": 4000,
+	"clients.google-now.ip": "127.0.0.1",
+	"clients.google-now.port": 14120,
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [
 		"127.0.0.1:4002"
 	],
-	"clients.googleNowTChannel.timeout": 5000
+	"clients.googleNowTChannel.timeout": 5000,
+	"http.port": 7783,
+	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
+	"logger.output": "disk",
+	"metrics.m3.service": "example-gateway",
+	"metrics.tally.service": "example-gateway",
+	"serviceName": "example-gateway",
+	"tchannel.port": 7784,
+	"tchannel.processName": "example-gateway",
+	"tchannel.serviceName": "example-gateway",
+	"useDatacenter": false
 }

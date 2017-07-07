@@ -252,10 +252,10 @@
 	},
 	"Clients": {
 		"bar": {
-			"ID": "bar",
-			"Type": "http",
-			"ThriftFile": "clients/bar/bar.thrift",
-			"ExposedMethods": {
+			"name": "bar",
+			"type": "http",
+			"thriftFile": "clients/bar/bar.thrift",
+			"exposedMethods": {
 				"ArgNotStruct": "Bar::argNotStruct",
 				"ArgWithHeaders": "Bar::argWithHeaders",
 				"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
@@ -281,13 +281,16 @@
 				"NoRequest": "Bar::noRequest",
 				"Normal": "Bar::normal",
 				"TooManyArgs": "Bar::tooManyArgs"
-			}
+			},
+			"ip": "127.0.0.1",
+			"port": 4001
 		},
 		"baz": {
-			"ID": "baz",
-			"Type": "tchannel",
-			"ThriftFile": "clients/baz/baz.thrift",
-			"ExposedMethods": {
+			"name": "baz",
+			"type": "tchannel",
+			"thriftFile": "clients/baz/baz.thrift",
+			"muttleyName": "Qux",
+			"exposedMethods": {
 				"Call": "SimpleService::call",
 				"Compare": "SimpleService::compare",
 				"DeliberateDiffNoop": "SimpleService::sillyNoop",
@@ -308,30 +311,36 @@
 				"EchoStructSet": "SecondService::echoStructSet",
 				"EchoTypedef": "SecondService::echoTypedef",
 				"Ping": "SimpleService::ping"
-			}
+			},
+			"ip": "127.0.0.1",
+			"port": 4002,
+			"clientTimeout": 1000,
+			"clientTimeoutPerAttempt": 1000
 		},
 		"contacts": {
-			"ID": "contacts",
-			"Type": "http",
-			"ThriftFile": "clients/contacts/contacts.thrift",
-			"ExposedMethods": {
+			"name": "contacts",
+			"type": "http",
+			"thriftFile": "clients/contacts/contacts.thrift",
+			"exposedMethods": {
 				"SaveContacts": "Contacts::saveContacts"
-			}
+			},
+			"ip": "127.0.0.1",
+			"port": 4000
 		},
 		"google-now": {
-			"ID": "google-now",
-			"Type": "http",
-			"ThriftFile": "clients/googlenow/googlenow.thrift",
-			"ExposedMethods": {
+			"name": "google-now",
+			"type": "http",
+			"thriftFile": "clients/googlenow/googlenow.thrift",
+			"exposedMethods": {
 				"AddCredentials": "GoogleNowService::addCredentials",
 				"CheckCredentials": "GoogleNowService::checkCredentials"
-			}
+			},
+			"ip": "127.0.0.1",
+			"port": 14120
 		},
 		"quux": {
-			"ID": "quux",
-			"Type": "custom",
-			"ThriftFile": "",
-			"ExposedMethods": null
+			"name": "quux",
+			"type": "custom"
 		}
 	},
 	"ThriftServices": {

@@ -1,6 +1,27 @@
+// Copyright (c) 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 package repository
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -59,18 +80,11 @@ func testUpdateClientConfig(t *testing.T, requestFile string, clientName string)
 	testlib.CompareGoldenFile(t, clientModuleExpFile, clientModuleCfg)
 
 	productionJSON, err := ioutil.ReadFile(filepath.Join(tempDir, productionCfgJSONPath))
-
 	if !assert.NoError(t, err, "Failed to read client production JSON config file.") {
 		return
 	}
 	productionJSONExpFile := filepath.Join(exampleGateway, productionCfgJSONPath)
 	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
-
-	content := map[string]interface{}{}
-	err = readJSONFile(filepath.Join(tempDir, productionCfgJSONPath), &content)
-	assert.NoError(t, err)
-	err = writeToJSONFile(productionJSONExpFile, content)
-	assert.NoError(t, err)
 }
 
 func copyExample(t *testing.T) (string, error) {
@@ -108,12 +122,12 @@ func copyDir(src, dest string, ignoredPrefixes []string) error {
 			return os.Mkdir(destPath, info.Mode())
 		}
 		srcFile, err := os.Open(path)
-		defer srcFile.Close()
+		defer closeFile(srcFile)
 		if err != nil {
 			return err
 		}
 		destFile, err := os.Create(destPath)
-		defer destFile.Close()
+		defer closeFile(destFile)
 		if err != nil {
 			return err
 		}
@@ -121,4 +135,10 @@ func copyDir(src, dest string, ignoredPrefixes []string) error {
 		return err
 	}
 	return filepath.Walk(src, walkFn)
+}
+
+func closeFile(file *os.File) {
+	if err := file.Close(); err != nil {
+		fmt.Printf("Failed to close file %q: %+v", file.Name(), err)
+	}
 }

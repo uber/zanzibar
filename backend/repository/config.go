@@ -79,14 +79,14 @@ type EndptMidConfig struct {
 // ClientConfig stores configuration for an client.
 type ClientConfig struct {
 	Name              string            `json:"name"`
-	ThriftFile        string            `json:"thriftFile"`
-	MuttleyName       string            `json:"muttleyName,omitempty"`
 	Type              ProtocolType      `json:"type"`
+	ThriftFile        string            `json:"thriftFile,omitempty"`
+	MuttleyName       string            `json:"muttleyName,omitempty"`
 	ExposedMethods    map[string]string `json:"exposedMethods,omitempty"`
-	IP                string            `json:"ip"`
-	Port              int64             `json:"port"`
-	Timeout           int64             `json:"clientTimeout"`
-	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt"`
+	IP                string            `json:"ip,omitempty"`
+	Port              int64             `json:"port,omitempty"`
+	Timeout           int64             `json:"clientTimeout,omitempty"`
+	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`
 }
 
 // MiddlewareConfig represents configuration for a middleware.
@@ -268,6 +268,9 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 		Type:           ProtocolTypeFromString(spec.ClientType),
 		ExposedMethods: spec.ExposedMethods,
 	}
+	if clientConfig.Type != HTTP && clientConfig.Type != TCHANNEL {
+		return clientConfig, nil
+	}
 	prefix := "clients." + spec.ClientID + "."
 	var err error
 	clientConfig.IP, err = convStrVal(productionCfgJSON, prefix+"ip")
@@ -278,7 +281,7 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 	if err != nil {
 		return nil, err
 	}
-	if spec.ClientType != "tchannel" {
+	if clientConfig.Type == HTTP {
 		return clientConfig, nil
 	}
 	// tchannel related fields.
