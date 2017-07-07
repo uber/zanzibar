@@ -27,7 +27,7 @@ import (
 	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/googlenow"
+	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 	quuxClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux"
 	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
