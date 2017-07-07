@@ -144,7 +144,7 @@
 			"ConfigFile": "baz::call",
 			"ThriftFile": "endpoints/baz/baz.thrift",
 			"ThriftServiceName": "SimpleService",
-			"MethodName": "Call",
+			"MethodName": "call",
 			"WorkflowType": "tchannelClient",
 			"ClientID": "baz",
 			"ClientMethod": "Call",
@@ -158,7 +158,7 @@
 			"ConfigFile": "baz::compare",
 			"ThriftFile": "endpoints/baz/baz.thrift",
 			"ThriftServiceName": "SimpleService",
-			"MethodName": "Compare",
+			"MethodName": "compare",
 			"WorkflowType": "tchannelClient",
 			"ClientID": "baz",
 			"ClientMethod": "Compare",
@@ -172,7 +172,7 @@
 			"ConfigFile": "baz::ping",
 			"ThriftFile": "endpoints/baz/baz.thrift",
 			"ThriftServiceName": "SimpleService",
-			"MethodName": "Ping",
+			"MethodName": "ping",
 			"WorkflowType": "tchannelClient",
 			"ClientID": "baz",
 			"ClientMethod": "Ping",
@@ -186,7 +186,7 @@
 			"ConfigFile": "baz::sillyNoop",
 			"ThriftFile": "endpoints/baz/baz.thrift",
 			"ThriftServiceName": "SimpleService",
-			"MethodName": "SillyNoop",
+			"MethodName": "sillyNoop",
 			"WorkflowType": "tchannelClient",
 			"ClientID": "baz",
 			"ClientMethod": "DeliberateDiffNoop",
@@ -261,7 +261,22 @@
 				"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
 				"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 				"ArgWithQueryParams": "Bar::argWithQueryParams",
-				"Echo": "Echo::echo",
+				"EchoBinary": "Echo::echoBinary",
+				"EchoBool": "Echo::echoBool",
+				"EchoDouble": "Echo::echoDouble",
+				"EchoEnum": "Echo::echoEnum",
+				"EchoI16": "Echo::echoI16",
+				"EchoI32": "Echo::echoI32",
+				"EchoI64": "Echo::echoI64",
+				"EchoI8": "Echo::echoI8",
+				"EchoString": "Echo::echoString",
+				"EchoStringList": "Echo::echoStringList",
+				"EchoStringMap": "Echo::echoStringMap",
+				"EchoStringSet": "Echo::echoStringSet",
+				"EchoStructList": "Echo::echoStructList",
+				"EchoStructMap": "Echo::echoStructMap",
+				"EchoStructSet": "Echo::echoStructSet",
+				"EchoTypedef": "Echo::echoTypedef",
 				"MissingArg": "Bar::missingArg",
 				"NoRequest": "Bar::noRequest",
 				"Normal": "Bar::normal",
@@ -273,11 +288,26 @@
 			"Type": "tchannel",
 			"ThriftFile": "clients/baz/baz.thrift",
 			"ExposedMethods": {
-				"Call": "SimpleService::Call",
-				"Compare": "SimpleService::Compare",
-				"DeliberateDiffNoop": "SimpleService::SillyNoop",
-				"Echo": "SecondService::Echo",
-				"Ping": "SimpleService::Ping"
+				"Call": "SimpleService::call",
+				"Compare": "SimpleService::compare",
+				"DeliberateDiffNoop": "SimpleService::sillyNoop",
+				"EchoBinary": "SecondService::echoBinary",
+				"EchoBool": "SecondService::echoBool",
+				"EchoDouble": "SecondService::echoDouble",
+				"EchoEnum": "SecondService::echoEnum",
+				"EchoI16": "SecondService::echoI16",
+				"EchoI32": "SecondService::echoI32",
+				"EchoI64": "SecondService::echoI64",
+				"EchoI8": "SecondService::echoI8",
+				"EchoString": "SecondService::echoString",
+				"EchoStringList": "SecondService::echoStringList",
+				"EchoStringMap": "SecondService::echoStringMap",
+				"EchoStringSet": "SecondService::echoStringSet",
+				"EchoStructList": "SecondService::echoStructList",
+				"EchoStructMap": "SecondService::echoStructMap",
+				"EchoStructSet": "SecondService::echoStructSet",
+				"EchoTypedef": "SecondService::echoTypedef",
+				"Ping": "SimpleService::ping"
 			}
 		},
 		"contacts": {
@@ -353,7 +383,67 @@
 				"Path": "clients/bar/bar.thrift",
 				"Methods": [
 					{
-						"Name": "echo",
+						"Name": "echoBinary",
+						"Type": "http"
+					},
+					{
+						"Name": "echoBool",
+						"Type": "http"
+					},
+					{
+						"Name": "echoDouble",
+						"Type": "http"
+					},
+					{
+						"Name": "echoEnum",
+						"Type": "http"
+					},
+					{
+						"Name": "echoI16",
+						"Type": "http"
+					},
+					{
+						"Name": "echoI32",
+						"Type": "http"
+					},
+					{
+						"Name": "echoI64",
+						"Type": "http"
+					},
+					{
+						"Name": "echoI8",
+						"Type": "http"
+					},
+					{
+						"Name": "echoString",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStringList",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStringMap",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStringSet",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStructList",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStructMap",
+						"Type": "http"
+					},
+					{
+						"Name": "echoStructSet",
+						"Type": "http"
+					},
+					{
+						"Name": "echoTypedef",
 						"Type": "http"
 					}
 				]
@@ -366,7 +456,67 @@
 				"Path": "clients/baz/baz.thrift",
 				"Methods": [
 					{
-						"Name": "Echo",
+						"Name": "echoBinary",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoBool",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoDouble",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoEnum",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoI16",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoI32",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoI64",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoI8",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoString",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStringList",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStringMap",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStringSet",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStructList",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStructMap",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoStructSet",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "echoTypedef",
 						"Type": "tchannel"
 					}
 				]
@@ -376,19 +526,19 @@
 				"Path": "clients/baz/baz.thrift",
 				"Methods": [
 					{
-						"Name": "Call",
+						"Name": "call",
 						"Type": "tchannel"
 					},
 					{
-						"Name": "Compare",
+						"Name": "compare",
 						"Type": "tchannel"
 					},
 					{
-						"Name": "Ping",
+						"Name": "ping",
 						"Type": "tchannel"
 					},
 					{
-						"Name": "SillyNoop",
+						"Name": "sillyNoop",
 						"Type": "tchannel"
 					}
 				]
@@ -473,19 +623,19 @@
 				"Path": "endpoints/baz/baz.thrift",
 				"Methods": [
 					{
-						"Name": "Call",
+						"Name": "call",
 						"Type": "http"
 					},
 					{
-						"Name": "Compare",
+						"Name": "compare",
 						"Type": "http"
 					},
 					{
-						"Name": "Ping",
+						"Name": "ping",
 						"Type": "http"
 					},
 					{
-						"Name": "SillyNoop",
+						"Name": "sillyNoop",
 						"Type": "http"
 					}
 				]

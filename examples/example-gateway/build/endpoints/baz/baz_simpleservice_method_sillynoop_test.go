@@ -36,7 +36,7 @@ import (
 )
 
 func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
-	testSillyNoopCounter := 0
+	testsillyNoopCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -55,7 +55,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (map[string]string, error) {
-		testSillyNoopCounter++
+		testsillyNoopCounter++
 
 		var resHeaders map[string]string
 
@@ -64,7 +64,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"SillyNoop",
+		"sillyNoop",
 		bazClient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 	)
 
@@ -80,6 +80,6 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testSillyNoopCounter)
+	assert.Equal(t, 1, testsillyNoopCounter)
 	assert.Equal(t, 204, res.StatusCode)
 }

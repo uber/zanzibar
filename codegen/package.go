@@ -197,15 +197,5 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 	if typeSpec == nil {
 		return "", nil
 	}
-	tfile := typeSpec.ThriftFile()
-
-	if tfile == "" {
-		return typeSpec.ThriftName(), nil
-	}
-
-	pkg, err := p.TypePackageName(tfile)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get the full type")
-	}
-	return pkg + "." + typeSpec.ThriftName(), nil
+	return GoType(p, typeSpec)
 }

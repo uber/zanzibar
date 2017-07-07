@@ -27,6 +27,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
+	"go.uber.org/thriftrw/compile"
 )
 
 var fooThrift = filepath.Join(
@@ -102,4 +103,33 @@ func TestEndpointTestConfigPath(t *testing.T) {
 	p := h.EndpointTestConfigPath("foo", "bar")
 	exp := "foo/bar_test.json"
 	assert.Equal(t, exp, p, "wrong generated endpoint test config path")
+}
+
+func TestUnhashableKeyInMap(t *testing.T) {
+	h := newPackageHelper(t)
+	spec := &compile.MapSpec{
+		KeySpec:   &compile.BinarySpec{},
+		ValueSpec: &compile.StringSpec{},
+	}
+	typ, err := h.TypeFullName(spec)
+	assert.NoError(t, err)
+	assert.Equal(t, "[]struct{Key []byte; Value string}", typ)
+}
+
+func TestUnhashableValueInSet(t *testing.T) {
+	h := newPackageHelper(t)
+	spec := &compile.SetSpec{
+		ValueSpec: &compile.BinarySpec{},
+	}
+	typ, err := h.TypeFullName(spec)
+	assert.NoError(t, err)
+	assert.Equal(t, "[][]byte", typ)
+}
+
+func TestGoCustomTypeError(t *testing.T) {
+	h := newPackageHelper(t)
+	spec := &compile.StructSpec{}
+	_, err := h.TypeFullName(spec)
+	assert.Error(t, err)
+	assert.Equal(t, "goCustomType called with native type (*compile.StructSpec) &{false   0 [] map[]}", err.Error())
 }

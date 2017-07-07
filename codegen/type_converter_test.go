@@ -503,10 +503,9 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyString :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"could not lookup fieldType when building converter for MyString",
 	)
 }
 
@@ -537,10 +536,9 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyEnum :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"failed to get package for custom type (*compile.EnumSpec)",
 	)
 }
 
@@ -570,10 +568,9 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyStruct :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"could not lookup fieldType when building converter for MyStruct",
 	)
 }
 
@@ -702,10 +699,9 @@ func TestConvertWithBadImportListOfStruct(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyStruct :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"failed to get package for custom type (*compile.StructSpec)",
 	)
 }
 
@@ -767,10 +763,9 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyStruct :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"could not lookup fieldType when building converter for MyStruct",
 	)
 }
 
@@ -871,10 +866,9 @@ func TestConvertWithBadImportMapOfStruct(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyStruct :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"failed to get package for custom type (*compile.StructSpec)",
 	)
 }
 
@@ -936,10 +930,9 @@ func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not lookup fieldType when building converter for MyStruct :: "+
-			"Naive does not support relative imports",
+	assert.Contains(t,
 		err.Error(),
+		"could not lookup fieldType when building converter for MyStruct",
 	)
 }
 

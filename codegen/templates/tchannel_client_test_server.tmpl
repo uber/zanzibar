@@ -25,7 +25,7 @@ import (
 {{$privateName := lower .Name -}}
 {{$genCodePkg := .GenCodePkgName -}}
 {{$func := printf "%s%sFunc" $svc.Name .Name -}}
-{{$handler := printf "%s%sHandler" $svc.Name .Name -}}
+{{$handler := printf "%s%sHandler" $svc.Name (title .Name) -}}
 // {{$func}} is the handler function for "{{.Name}}" method of thrift service "{{$svc.Name}}".
 type {{$func}} func (
 	ctx context.Context,
@@ -73,7 +73,7 @@ func (h *{{$handler}}) Handle(
 			return false, nil, nil, err
 		}
 		{{if .ResponseType -}}
-		res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+		res.Success = {{.RefResponse "r"}}
 		{{end -}}
 	{{else -}}
 		if err != nil {
@@ -92,7 +92,7 @@ func (h *{{$handler}}) Handle(
 					return false, nil, nil, err
 			}
 		} {{if .ResponseType -}} else {
-			res.Success = {{if not (isPointerType .ResponseType)}}&{{end}}r
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 

@@ -37,7 +37,7 @@ import (
 )
 
 func TestCallSuccessfulRequestOKResponse(t *testing.T) {
-	testCallCounter := 0
+	testcallCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -57,7 +57,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Call_Args,
 	) (map[string]string, error) {
-		testCallCounter++
+		testcallCounter++
 
 		var resHeaders map[string]string
 
@@ -66,7 +66,7 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Call",
+		"call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
@@ -84,6 +84,6 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testCallCounter)
+	assert.Equal(t, 1, testcallCounter)
 	assert.Equal(t, 204, res.StatusCode)
 }
