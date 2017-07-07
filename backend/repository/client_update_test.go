@@ -139,6 +139,6 @@ func copyDir(src, dest string, ignoredPrefixes []string) error {
 
 func closeFile(file *os.File) {
 	if err := file.Close(); err != nil {
-		fmt.Printf("Failed to close file %q: %+v", file.Name(), err)
+		fmt.Errorf("Failed to close file %q: %+v", file.Name(), err)
 	}
 }

@@ -159,6 +159,7 @@ func writeToJSONFile(file string, content interface{}) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to marshal the content for file %q", file)
 	}
+	b = append(b, []byte("\n")...)
 	if err = ioutil.WriteFile(file, b, os.ModePerm); err != nil {
 		return errors.Wrapf(err, "failed to write to file %q", file)
 	}

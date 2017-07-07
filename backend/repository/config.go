@@ -268,6 +268,7 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 		Type:           ProtocolTypeFromString(spec.ClientType),
 		ExposedMethods: spec.ExposedMethods,
 	}
+	// TODO(zw): handle configurations of a customized client.
 	if clientConfig.Type != HTTP && clientConfig.Type != TCHANNEL {
 		return clientConfig, nil
 	}
@@ -297,9 +298,7 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 	if err != nil {
 		return nil, err
 	}
-
 	return clientConfig, nil
-
 }
 
 func convStrVal(m map[string]interface{}, key string) (string, error) {

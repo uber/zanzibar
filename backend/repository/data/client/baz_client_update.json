@@ -1,7 +1,8 @@
 {
-    "thriftFile": "clients/baz/baz.thrift",
-    "type": "tchannel",
+    "_comment_": "JSON for updating a tchannel client.",
     "name": "baz",
+    "type": "tchannel",
+    "thriftFile": "clients/baz/baz.thrift",
     "muttleyName": "Qux",
     "exposedMethods": {
         "Call": "SimpleService::call",

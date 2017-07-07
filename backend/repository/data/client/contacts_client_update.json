@@ -1,7 +1,8 @@
 {
-    "thriftFile": "clients/contacts/contacts.thrift",
-    "type": "http",
+    "_comment_": "JSON for updating a HTTP client",
     "name": "contacts",
+    "type": "http",
+    "thriftFile": "clients/contacts/contacts.thrift",
     "exposedMethods": {
         "SaveContacts": "Contacts::saveContacts"
     },
