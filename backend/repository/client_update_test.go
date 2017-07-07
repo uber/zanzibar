@@ -59,11 +59,18 @@ func testUpdateClientConfig(t *testing.T, requestFile string, clientName string)
 	testlib.CompareGoldenFile(t, clientModuleExpFile, clientModuleCfg)
 
 	productionJSON, err := ioutil.ReadFile(filepath.Join(tempDir, productionCfgJSONPath))
+
 	if !assert.NoError(t, err, "Failed to read client production JSON config file.") {
 		return
 	}
 	productionJSONExpFile := filepath.Join(exampleGateway, productionCfgJSONPath)
 	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
+
+	content := map[string]interface{}{}
+	err = readJSONFile(filepath.Join(tempDir, productionCfgJSONPath), &content)
+	assert.NoError(t, err)
+	err = writeToJSONFile(productionJSONExpFile, content)
+	assert.NoError(t, err)
 }
 
 func copyExample(t *testing.T) (string, error) {
