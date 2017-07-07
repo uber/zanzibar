@@ -42,7 +42,7 @@ type stackTracer interface {
 
 func checkError(err error, message string) {
 	if err != nil {
-		fmt.Printf("%s:\n %s \n", message, err)
+		fmt.Printf("%s:\n%s\n", message, err)
 
 		causeErr := errors.Cause(err)
 		if causeErr, ok := causeErr.(stackTracer); ok {
@@ -105,7 +105,7 @@ func main() {
 		configRoot,
 		packageHelper.CodeGenTargetPath(),
 	)
-	checkError(err, "Failed to generate module system components.")
+	checkError(err, "Failed to generate module system components")
 
 	fmt.Printf("Generating all modules\n\n")
 	fmt.Printf("Generating module initilization logic\n")

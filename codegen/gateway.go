@@ -119,7 +119,7 @@ func NewClientSpec(
 	if err := json.Unmarshal(instance.JSONFileRaw, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Could not parse class config json file %s: ",
+			"Could not parse class config json file: %s",
 			instance.JSONFileName,
 		)
 	}
@@ -133,7 +133,7 @@ func NewClientSpec(
 		return NewCustomClientSpec(instance, clientConfig, h)
 	default:
 		return nil, errors.Errorf(
-			"Cannot support unknown clientType for client %s",
+			"Cannot support unknown clientType for client %q",
 			instance.JSONFileName,
 		)
 	}
@@ -145,8 +145,8 @@ func NewTChannelClientSpec(
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	exposedMethods := clientConfig.Config["exposedMethods"].(map[string]interface{})
-	if len(exposedMethods) == 0 {
+	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	if !ok || len(exposedMethods) == 0 {
 		return nil, errors.Errorf(
 			"No methods are exposed in client config: %s",
 			instance.JSONFileName,
@@ -212,8 +212,8 @@ func NewHTTPClientSpec(
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	exposedMethods := clientConfig.Config["exposedMethods"].(map[string]interface{})
-	if len(exposedMethods) == 0 {
+	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	if !ok || len(exposedMethods) == 0 {
 		return nil, errors.Errorf(
 			"No methods are exposed in client config: %s",
 			instance.JSONFileName,
@@ -253,7 +253,7 @@ func newClientSpec(
 		fieldName := mandatoryClientFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
-				"client config %q must have %s field", instance.JSONFileName, fieldName,
+				"client config %q must have %q field", instance.JSONFileName, fieldName,
 			)
 		}
 	}
@@ -396,7 +396,7 @@ func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonF
 		fieldName := mandatoryFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return errors.Errorf(
-				"config %q must have %s field", jsonFile, fieldName,
+				"config %q must have %q field", jsonFile, fieldName,
 			)
 		}
 	}
@@ -425,7 +425,7 @@ func NewEndpointSpec(
 	err = json.Unmarshal(bytes, &endpointConfigObj)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not parse json file %s: ", jsonFile,
+			err, "Could not parse json file: %s", jsonFile,
 		)
 	}
 
@@ -442,7 +442,7 @@ func NewEndpointSpec(
 	}
 	if endpointType != "http" && endpointType != "tchannel" {
 		return nil, errors.Errorf(
-			"Cannot support unknown endpointType for endpoint %s", jsonFile,
+			"Cannot support unknown endpointType for endpoint: %s", jsonFile,
 		)
 	}
 
@@ -453,7 +453,7 @@ func NewEndpointSpec(
 	mspec, err := NewModuleSpec(thriftFile, endpointType == "http", true, h)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not build module spec for thrift %s: ", thriftFile,
+			err, "Could not build module spec for thrift: %s", thriftFile,
 		)
 	}
 
@@ -513,7 +513,7 @@ func NewEndpointSpec(
 	parts := strings.Split(thriftInfo, "::")
 	if len(parts) != 2 {
 		return nil, errors.Errorf(
-			"Cannot read thriftMethodName %q for endpoint json file %s : ",
+			"Cannot read thriftMethodName %q for endpoint json file: %s",
 			thriftInfo, jsonFile,
 		)
 	}
@@ -916,7 +916,7 @@ func NewGatewaySpec(
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Cannot create spec for client module %s :",
+				"Cannot create spec for client module: %s",
 				clientInstance.InstanceName,
 			)
 		}
