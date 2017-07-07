@@ -21,7 +21,9 @@
 package zanzibar
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -299,10 +301,11 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 	// TODO: Add a gateway level configurable body unmarshaller
 	// to extract only non-PII info.
 
-	// body, err := ioutil.ReadAll(r.Body)
-	// r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-	// fields = append(fields, zap.String("body", string(body)))
-
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		fields = append(fields, zap.String("body", string(body)))
+	}
 	return fields
 }
 
