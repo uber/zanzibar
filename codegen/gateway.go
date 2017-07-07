@@ -45,8 +45,6 @@ var mandatoryClientFields = []string{
 }
 var mandatoryCustomClientFields = []string{
 	"customImportPath",
-	"customClientType",
-	"customPackageName",
 }
 var mandatoryEndpointFields = []string{
 	"endpointType",
@@ -73,10 +71,6 @@ type ClientSpec struct {
 	ClientType string
 	// If "custom" then where to import custom code from
 	CustomImportPath string
-	// If "custom" then what the client type (in Go) in the custom package
-	CustomClientType string
-	// If "custom" then what the package name (in Go) the client package has
-	CustomPackageName string
 	// The path to the client package import
 	ImportPackagePath string
 	// The globally unique pacakge alias for the import
@@ -207,8 +201,6 @@ func NewCustomClientSpec(
 		ClientID:           clientConfig.Name,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
 		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
-		CustomClientType:   clientConfig.Config["customClientType"].(string),
-		CustomPackageName:  clientConfig.Config["customPackageName"].(string),
 	}
 
 	return clientSpec, nil
