@@ -440,20 +440,20 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
+	subScope := gateway.MetricScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
-			ProcessName: processName,
+			ProcessName:   processName,
+			Logger:        NewTChannelLogger(gateway.Logger),
+			StatsReporter: NewDefaultTChannelStatsReporter(subScope),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
 			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
 			//RelayHost:                opts.RelayHost,
 			//RelayLocalHandlers:       opts.RelayLocalHandlers,
 			//RelayMaxTimeout:          opts.RelayMaxTimeout,
-			//StatsReporter:            opts.StatsReporter,
 			//Tracer:
-
-			Logger: NewTChannelLogger(gateway.Logger),
 		})
 
 	if err != nil {
