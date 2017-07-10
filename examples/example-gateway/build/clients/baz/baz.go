@@ -191,10 +191,13 @@ func (c *bazClient) EchoBinary(
 	var resp []byte
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoBinary"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
 	)
@@ -202,6 +205,7 @@ func (c *bazClient) EchoBinary(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -230,10 +234,13 @@ func (c *bazClient) EchoBool(
 	var resp bool
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoBool"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoBool", reqHeaders, args, &result,
 	)
@@ -241,6 +248,7 @@ func (c *bazClient) EchoBool(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -269,10 +277,13 @@ func (c *bazClient) EchoDouble(
 	var resp float64
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoDouble"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
 	)
@@ -280,6 +291,7 @@ func (c *bazClient) EchoDouble(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -308,10 +320,13 @@ func (c *bazClient) EchoEnum(
 	var resp clientsBazBaz.Fruit
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoEnum"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
 	)
@@ -319,6 +334,7 @@ func (c *bazClient) EchoEnum(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -347,10 +363,13 @@ func (c *bazClient) EchoI16(
 	var resp int16
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoI16"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoI16", reqHeaders, args, &result,
 	)
@@ -358,6 +377,7 @@ func (c *bazClient) EchoI16(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -386,10 +406,13 @@ func (c *bazClient) EchoI32(
 	var resp int32
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoI32"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoI32", reqHeaders, args, &result,
 	)
@@ -397,6 +420,7 @@ func (c *bazClient) EchoI32(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -425,10 +449,13 @@ func (c *bazClient) EchoI64(
 	var resp int64
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoI64"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoI64", reqHeaders, args, &result,
 	)
@@ -436,6 +463,7 @@ func (c *bazClient) EchoI64(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -464,10 +492,13 @@ func (c *bazClient) EchoI8(
 	var resp int8
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoI8"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoI8", reqHeaders, args, &result,
 	)
@@ -475,6 +506,7 @@ func (c *bazClient) EchoI8(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -503,10 +535,13 @@ func (c *bazClient) EchoString(
 	var resp string
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoString"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoString", reqHeaders, args, &result,
 	)
@@ -514,6 +549,7 @@ func (c *bazClient) EchoString(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -542,10 +578,13 @@ func (c *bazClient) EchoStringList(
 	var resp []string
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStringList"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
 	)
@@ -553,6 +592,7 @@ func (c *bazClient) EchoStringList(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -581,10 +621,13 @@ func (c *bazClient) EchoStringMap(
 	var resp map[string]*clientsBazBase.BazResponse
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStringMap"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
 	)
@@ -592,6 +635,7 @@ func (c *bazClient) EchoStringMap(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -620,10 +664,13 @@ func (c *bazClient) EchoStringSet(
 	var resp map[string]struct{}
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStringSet"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
 	)
@@ -631,6 +678,7 @@ func (c *bazClient) EchoStringSet(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -659,10 +707,13 @@ func (c *bazClient) EchoStructList(
 	var resp []*clientsBazBase.BazResponse
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStructList"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
 	)
@@ -670,6 +721,7 @@ func (c *bazClient) EchoStructList(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -704,10 +756,13 @@ func (c *bazClient) EchoStructMap(
 	}
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStructMap"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStructMap", reqHeaders, args, &result,
 	)
@@ -715,6 +770,7 @@ func (c *bazClient) EchoStructMap(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -743,10 +799,13 @@ func (c *bazClient) EchoStructSet(
 	var resp []*clientsBazBase.BazResponse
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoStructSet"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
 	)
@@ -754,6 +813,7 @@ func (c *bazClient) EchoStructSet(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -782,10 +842,13 @@ func (c *bazClient) EchoTypedef(
 	var resp clientsBazBase.UUID
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "EchoTypedef"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
 	)
@@ -793,6 +856,7 @@ func (c *bazClient) EchoTypedef(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -820,10 +884,13 @@ func (c *bazClient) Call(
 	var result clientsBazBaz.SimpleService_Call_Result
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "Call"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "call", reqHeaders, args, &result,
 	)
@@ -831,6 +898,7 @@ func (c *bazClient) Call(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -860,10 +928,13 @@ func (c *bazClient) Compare(
 	var resp *clientsBazBase.BazResponse
 
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "Compare"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "compare", reqHeaders, args, &result,
 	)
@@ -871,6 +942,7 @@ func (c *bazClient) Compare(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -903,10 +975,13 @@ func (c *bazClient) Ping(
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "Ping"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "ping", reqHeaders, args, &result,
 	)
@@ -914,6 +989,7 @@ func (c *bazClient) Ping(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
@@ -941,10 +1017,13 @@ func (c *bazClient) DeliberateDiffNoop(
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
 	var fields []zapcore.Field
+	fields = append(fields, zap.String("Downstream-Client", "bazClient"))
+	fields = append(fields, zap.String("Downstream-Method", "DeliberateDiffNoop"))
 	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 	for k, v := range reqHeaders {
 		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Request-Body", args.String()))
 	success, respHeaders, err := c.client.Call(
 		ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
 	)
@@ -952,6 +1031,7 @@ func (c *bazClient) DeliberateDiffNoop(
 	for k, v := range respHeaders {
 		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 	}
+	fields = append(fields, zap.String("Downstream-Response-Body", result.String()))
 	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 	c.logger.Info(
 		"Finished a downstream TChannel request",
