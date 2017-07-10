@@ -85,8 +85,8 @@ func TestTChannelLoggerWithFields(t *testing.T) {
 		assert.Nil(t, logger.Fields(), "Fields() always return nil")
 
 		fields := []tchannel.LogField{
-			{"a", "foo"},
-			{"b", 42},
+			{Key: "a", Value: "foo"},
+			{Key: "b", Value: 42},
 		}
 		expectedFields := []zapcore.Field{}
 		for _, f := range fields {
