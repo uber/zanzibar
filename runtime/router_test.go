@@ -21,6 +21,7 @@
 package zanzibar_test
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
@@ -89,7 +90,12 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	}
 
 	for _, testReq := range testRequests {
-		resp, err := gateway.MakeRequest("GET", testReq.url, nil, nil)
+		resp, err := gateway.MakeRequest(
+			"GET",
+			testReq.url,
+			nil,
+			bytes.NewReader([]byte("{\"baz\":\"bat\"}")),
+		)
 		if !assert.NoError(t, err) {
 			return
 		}

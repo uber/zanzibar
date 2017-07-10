@@ -303,6 +303,7 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 	// to extract only non-PII info.
 
 	body, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		fields = append(fields, zap.Any("Request-Body", body))
 	}
@@ -312,8 +313,9 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 
 func logResponseFields(res *ServerHTTPResponse) []zapcore.Field {
 	var fields []zapcore.Field
-
 	fields = append(fields, zap.Int(statusCodeZapName, res.pendingStatusCode))
+	fields = append(fields, zap.ByteString("Request Body", res.Request.RawBody))
+	fields = append(fields, zap.ByteString("Response Body", res.pendingBodyBytes))
 	fields = append(fields, zap.Time("timestamp-finished", res.finishTime))
 	return fields
 }

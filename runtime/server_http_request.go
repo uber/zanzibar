@@ -55,6 +55,7 @@ type ServerHTTPRequest struct {
 	Method       string
 	Params       httprouter.Params
 	Header       Header
+	RawBody      []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -396,7 +397,7 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	if !success {
 		return false
 	}
-
+	req.RawBody = rawBody
 	return req.UnmarshalBody(body, rawBody)
 }
 
