@@ -297,14 +297,15 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 	// TODO add endpoint.id and endpoint.handlerId
 	// TODO log jaeger trace span
 
-	// Do not log body by default because PII and bandwidth.
+	// TODO: Do not log body by default because PII and bandwidth.
+	// Temporarily log during the developement cycle
 	// TODO: Add a gateway level configurable body unmarshaller
 	// to extract only non-PII info.
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-		fields = append(fields, zap.String("body", string(body)))
+		fields = append(fields, zap.String("Request-Body", string(body)))
 	}
 	return fields
 }
