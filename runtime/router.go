@@ -304,7 +304,7 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fields = append(fields, zap.String("Request-Body", string(body)))
+		fields = append(fields, zap.Any("Request-Body", body))
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	return fields
