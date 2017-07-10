@@ -1316,6 +1316,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"	
+	"go.uber.org/zap/zapcore"
 
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
@@ -1481,7 +1482,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4999, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5026, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
