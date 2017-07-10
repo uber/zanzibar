@@ -88,6 +88,11 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (bool, map[string]string, error) {
 	reader, err := response.Arg2Reader()
 	if err != nil {
+		// Do not wrap system errors.
+		if _, ok := err.(tchannel.SystemError); ok {
+			return false, nil, err
+		}
+
 		return false, nil, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
 	}
 
@@ -155,6 +160,11 @@ func (c *tchannelClient) Call(ctx context.Context, thriftService, methodName str
 		return err
 	})
 	if err != nil {
+		// Do not wrap system errors.
+		if _, ok := err.(tchannel.SystemError); ok {
+			return false, nil, err
+		}
+
 		return false, nil, errors.Wrapf(err, "could not make outbound call: %s", c.serviceName)
 	}
 
