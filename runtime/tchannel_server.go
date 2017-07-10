@@ -30,6 +30,8 @@ import (
 	tchannel "github.com/uber/tchannel-go"
 	netContext "golang.org/x/net/context"
 
+	"io"
+
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
@@ -131,8 +133,65 @@ func (s *TChannelRouter) onError(err error) {
 	}
 }
 
+// DoubleCloseReader makes double closes safe.
+type DoubleCloseReader struct {
+	io.ReadCloser
+
+	closed bool
+}
+
+// HardClose ignores the close error
+func (reader *DoubleCloseReader) HardClose() {
+	_ = reader.Close()
+}
+
+// Close is protected against double close. Any extra closes
+// are ignored instead of causing errors
+func (reader *DoubleCloseReader) Close() error {
+	if reader.closed {
+		return nil
+	}
+
+	err := reader.ReadCloser.Close()
+	reader.closed = true
+	return err
+}
+
+// WriteFlusher is an interface for a writer & flusher.
+type WriteFlusher interface {
+	io.WriteCloser
+
+	Flush() error
+}
+
+// DoubleCloseWriter makes double closes safe.
+type DoubleCloseWriter struct {
+	WriteFlusher
+
+	closed bool
+}
+
+// HardClose ignores the close error
+func (writer *DoubleCloseWriter) HardClose() {
+	_ = writer.Close()
+}
+
+// Close is protected against double close. Any extra closes
+// are ignored instead of causing errors
+func (writer *DoubleCloseWriter) Close() error {
+	if writer.closed {
+		return nil
+	}
+
+	err := writer.WriteFlusher.Close()
+	writer.closed = true
+	return err
+}
+
 func (s *TChannelRouter) handle(ctx context.Context, handler handler, service string, method string, call *tchannel.InboundCall) error {
-	reader, err := call.Arg2Reader()
+	treader, err := call.Arg2Reader()
+	reader := DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", service, method)
 	}
@@ -148,7 +207,9 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", service, method)
 	}
 
-	reader, err = call.Arg3Reader()
+	treader, err = call.Arg3Reader()
+	reader = DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", service, method)
 	}
@@ -198,7 +259,9 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		}
 	}
 
-	writer, err := call.Response().Arg2Writer()
+	twriter, err := call.Response().Arg2Writer()
+	writer := DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", service, method)
 	}
