@@ -253,6 +253,19 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", service, method)
 	}
 
+	respBuf := GetBuffer()
+	defer PutBuffer(respBuf)
+
+	err = WriteStruct(respBuf, resp)
+	if err != nil {
+		// If we could not write the body then we should do something else
+		// instead.
+
+		_ = call.Response().SendSystemError(errors.New("Server Error"))
+
+		return errors.Wrapf(err, "could not serialize arg3 for inbound call response: %s::%s", service, method)
+	}
+
 	if !success {
 		if err := call.Response().SetApplicationError(); err != nil {
 			return err
@@ -273,12 +286,14 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", service, method)
 	}
 
-	writer, err = call.Response().Arg3Writer()
+	twriter, err = call.Response().Arg3Writer()
+	writer = DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", service, method)
 	}
 
-	err = WriteStruct(writer, resp)
+	_, err = writer.Write(respBuf.Bytes())
 	if err != nil {
 		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", service, method)
 	}
