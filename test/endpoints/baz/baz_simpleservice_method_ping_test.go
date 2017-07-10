@@ -196,4 +196,25 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
+
+	allLogs := gateway.AllLogs()
+
+	assert.Equal(t, 7, len(allLogs))
+	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
+	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
+	assert.Equal(t, 1, len(allLogs["Failed after non-retriable error."]))
+	assert.Equal(t, 1, len(allLogs["Could not make client request"]))
+	assert.Equal(t, 1, len(allLogs["Workflow for endpoint returned error"]))
+	assert.Equal(t, 1, len(allLogs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
+
+	logLines := gateway.Logs("warn", "Could not make client request")
+	assert.Equal(t, 1, len(logLines))
+
+	logObj := logLines[0]
+	assert.Equal(
+		t,
+		"tchannel error ErrCodeUnexpected: Server Error",
+		logObj["error"].(string),
+	)
 }
