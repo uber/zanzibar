@@ -1419,11 +1419,8 @@ type {{$clientName}} struct {
 			var fields []zapcore.Field
 			fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 			for k, v := range reqHeaders {
-				if len(v) > 0 {
-					fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
-				}
+				fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
 			}
-			fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
 		{{end -}}
 
 		success, respHeaders, err := c.client.Call(
@@ -1432,9 +1429,7 @@ type {{$clientName}} struct {
 
 		{{if $logDownstream -}}
 			for k, v := range respHeaders {
-				if len(v) > 0 {
-					fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
-				}
+				fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
 			}
 			fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
 			c.logger.Info(
@@ -1482,11 +1477,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3933, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-=======
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4193, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
->>>>>>> Add tchannel req/res logging
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4676, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
