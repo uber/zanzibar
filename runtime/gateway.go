@@ -39,6 +39,9 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/opentracing/opentracing-go"
+	jaeger_config "github.com/uber/jaeger-client-go/config"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -69,6 +72,7 @@ type Gateway struct {
 	Config                *StaticConfig
 	HTTPRouter            *HTTPRouter
 	TChannelRouter        *TChannelRouter
+	Tracer                opentracing.Tracer
 
 	loggerFile      *os.File
 	scopeCloser     io.Closer
@@ -78,6 +82,7 @@ type Gateway struct {
 	httpServer      *HTTPServer
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
+	tracerCloser    io.Closer
 	//	- panic ???
 	//	- process reporter ?
 }
@@ -111,11 +116,16 @@ func CreateGateway(
 
 	gateway.HTTPRouter = NewHTTPRouter(gateway)
 
+	// order matters for following setup method calls
 	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
 	}
 
 	if err := gateway.setupMetrics(config); err != nil {
+		return nil, err
+	}
+
+	if err := gateway.setupTracer(config); err != nil {
 		return nil, err
 	}
 
@@ -235,6 +245,7 @@ func (gateway *Gateway) handleHealthRequest(
 
 // Close the http server
 func (gateway *Gateway) Close() {
+	_ = gateway.tracerCloser.Close()
 	gateway.metricsBackend.Flush()
 	_ = gateway.scopeCloser.Close()
 	if gateway.localHTTPServer != gateway.httpServer {
@@ -414,6 +425,25 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	return nil
 }
 
+func (gateway *Gateway) setupTracer(config *StaticConfig) error {
+	opts := []jaeger_config.Option{
+		// TChannel logger implements jaeger logger interface
+		jaeger_config.Logger(NewTChannelLogger(gateway.Logger)),
+		jaeger_config.Metrics(NewJaegerMetricsFactory(gateway.MetricScope)),
+	}
+	// TODO: using default tracing configurations here, we may want to set it from static config
+	jc := jaeger_config.Configuration{}
+	serviceName := config.MustGetString("tchannel.serviceName")
+	closer, err := jc.InitGlobalTracer(serviceName, opts...)
+	if err != nil {
+		return errors.Wrapf(err, "error initializing Jaeger tracer client")
+	}
+
+	gateway.Tracer = opentracing.GlobalTracer()
+	gateway.tracerCloser = closer
+	return nil
+}
+
 func (gateway *Gateway) setupHTTPServer() error {
 	listenIP, err := tchannel.ListenIP()
 	if err != nil {
@@ -448,13 +478,13 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			ProcessName:   processName,
 			Logger:        NewTChannelLogger(gateway.Logger),
 			StatsReporter: NewTChannelStatsReporter(subScope),
+			Tracer:        gateway.Tracer,
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
 			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
 			//RelayHost:                opts.RelayHost,
 			//RelayLocalHandlers:       opts.RelayLocalHandlers,
 			//RelayMaxTimeout:          opts.RelayMaxTimeout,
-			//Tracer:
 		})
 
 	if err != nil {
