@@ -59,6 +59,14 @@ func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannel
 }
 
 func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
+
+	bodyBuf := GetBuffer()
+	defer PutBuffer(bodyBuf)
+
+	if err := WriteStruct(bodyBuf, req); err != nil {
+		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
+	}
+
 	twriter, err := call.Arg2Writer()
 	writer := DoubleCloseWriter{WriteFlusher: twriter}
 	defer writer.HardClose()
@@ -80,7 +88,7 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 		return errors.Wrapf(err, "could not create arg3writer for outbound call %s: ", c.serviceName)
 	}
 
-	if err := WriteStruct(writer, req); err != nil {
+	if _, err := writer.Write(bodyBuf.Bytes()); err != nil {
 		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
 	}
 
