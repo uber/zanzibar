@@ -22,11 +22,10 @@ package zanzibar
 
 import (
 	"testing"
+	"time"
 
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
-	"time"
 )
 
 var tags = map[string]string{
@@ -37,96 +36,38 @@ var tags = map[string]string{
 	"target-endpoint": "operation",
 }
 
-func TestNewDefaultTChannelStatsReporterIncCounter(t *testing.T) {
+func TestNewTChannelStatsReporter(t *testing.T) {
 	testScope := tally.NewTestScope("", nil)
-	reporter := NewDefaultTChannelStatsReporter(testScope)
+	reporter := NewTChannelStatsReporter(testScope)
 
 	counterName := "outbound.success"
 	reporter.IncCounter(counterName, tags, 1)
 	reporter.IncCounter(counterName, tags, 41)
-
-	expectedKey := fmt.Sprintf(
-		"%s.%s.%s.%s",
-		counterName,
-		tags["service"],
-		tags["target-service"],
-		tags["target-endpoint"],
-	)
-
-	snapshot := testScope.Snapshot()
-	counterSnapshot, ok := snapshot.Counters()[expectedKey]
-	assert.True(t, ok)
-	assert.Equal(t, expectedKey, counterSnapshot.Name())
-	assert.Equal(t, int64(42), counterSnapshot.Value())
-}
-
-func TestNewDefaultTChannelStatsReporterUpdateGauge(t *testing.T) {
-	testScope := tally.NewTestScope("", nil)
-	reporter := NewDefaultTChannelStatsReporter(testScope)
 
 	gaugeName := "outbound.pending"
 	reporter.UpdateGauge(gaugeName, tags, 1)
 	reporter.UpdateGauge(gaugeName, tags, 42)
 	reporter.UpdateGauge(gaugeName, tags, 13)
 
-	expectedKey := fmt.Sprintf(
-		"%s.%s.%s.%s",
-		gaugeName,
-		tags["service"],
-		tags["target-service"],
-		tags["target-endpoint"],
-	)
-
-	snapshot := testScope.Snapshot()
-	gaugeSnapshot, ok := snapshot.Gauges()[expectedKey]
-	assert.True(t, ok)
-	assert.Equal(t, expectedKey, gaugeSnapshot.Name())
-	assert.Equal(t, float64(13), gaugeSnapshot.Value())
-}
-
-func TestNewDefaultTChannelStatsReporterRecordTimer(t *testing.T) {
-	testScope := tally.NewTestScope("", nil)
-	reporter := NewDefaultTChannelStatsReporter(testScope)
-
 	timerName := "outbound.pending"
 	reporter.RecordTimer(timerName, tags, 100)
 	reporter.RecordTimer(timerName, tags, 200)
 	reporter.RecordTimer(timerName, tags, 400)
 
-	expectedKey := fmt.Sprintf(
-		"%s.%s.%s.%s",
-		timerName,
-		tags["service"],
-		tags["target-service"],
-		tags["target-endpoint"],
-	)
-
 	snapshot := testScope.Snapshot()
-	timerSnapshot, ok := snapshot.Timers()[expectedKey]
+
+	counterSnapshot, ok := snapshot.Counters()[counterName]
 	assert.True(t, ok)
-	assert.Equal(t, expectedKey, timerSnapshot.Name())
-	assert.Equal(t, []time.Duration{100, 200, 400}, timerSnapshot.Values())
-}
-
-func TestNewTChannelStatsReporter(t *testing.T) {
-	testScope := tally.NewTestScope("", nil)
-	reporter := NewTChannelStatsReporter(
-		testScope,
-		func(name string, _ map[string]string) string {
-			return "custom." + name
-		},
-	)
-
-	counterName := "outbound.success"
-	reporter.IncCounter(counterName, tags, 1)
-	reporter.IncCounter(counterName, tags, 41)
-
-	expectedKey := fmt.Sprintf("custom.%s", counterName)
-
-	snapshot := testScope.Snapshot()
-	fmt.Println(snapshot.Counters())
-	counterSnapshot, ok := snapshot.Counters()[expectedKey]
-	assert.True(t, ok)
-	assert.Equal(t, expectedKey, counterSnapshot.Name())
+	assert.Equal(t, counterName, counterSnapshot.Name())
 	assert.Equal(t, int64(42), counterSnapshot.Value())
+
+	gaugeSnapshot, ok := snapshot.Gauges()[gaugeName]
+	assert.True(t, ok)
+	assert.Equal(t, gaugeName, gaugeSnapshot.Name())
+	assert.Equal(t, float64(13), gaugeSnapshot.Value())
+
+	timerSnapshot, ok := snapshot.Timers()[timerName]
+	assert.True(t, ok)
+	assert.Equal(t, timerName, timerSnapshot.Name())
+	assert.Equal(t, []time.Duration{100, 200, 400}, timerSnapshot.Values())
 }

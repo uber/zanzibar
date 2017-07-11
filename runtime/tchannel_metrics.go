@@ -25,47 +25,30 @@ import (
 
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/tchannel-go/stats"
 )
 
 type statsReporter struct {
-	scope     tally.Scope
-	metricKey MetricKeyFunc
+	scope tally.Scope
 }
 
-// MetricKeyFunc converts a tchannel metric name and a list of tags to a
-// key that is used when reporting to M3.
-type MetricKeyFunc func(name string, tags map[string]string) string
-
-// NewDefaultTChannelStatsReporter returns a StatsReporter that reports stats
-// using the given tally.Scope. It only reports a metric key that is generated
-// from the given list of tags.
-func NewDefaultTChannelStatsReporter(s tally.Scope) tchannel.StatsReporter {
+// NewTChannelStatsReporter returns a StatsReporter using the given tally.Scope.
+func NewTChannelStatsReporter(s tally.Scope) tchannel.StatsReporter {
 	return &statsReporter{
 		scope: s,
-		metricKey: func(name string, tags map[string]string) string {
-			return stats.MetricWithPrefix("", name, tags)
-		},
 	}
-}
-
-// NewTChannelStatsReporter returns a StatsReporter that reports stats
-// using the given tally.Scope, using the given metric key function.
-func NewTChannelStatsReporter(s tally.Scope, m MetricKeyFunc) tchannel.StatsReporter {
-	return &statsReporter{s, m}
 }
 
 // IncCounter ...
 func (s statsReporter) IncCounter(name string, tags map[string]string, value int64) {
-	s.scope.Counter(s.metricKey(name, tags)).Inc(value)
+	s.scope.Tagged(tags).Counter(name).Inc(value)
 }
 
 // UpdateGauge ...
 func (s statsReporter) UpdateGauge(name string, tags map[string]string, value int64) {
-	s.scope.Gauge(s.metricKey(name, tags)).Update(float64(value))
+	s.scope.Tagged(tags).Gauge(name).Update(float64(value))
 }
 
 // RecordTimer ...
 func (s statsReporter) RecordTimer(name string, tags map[string]string, d time.Duration) {
-	s.scope.Timer(s.metricKey(name, tags)).Record(d)
+	s.scope.Tagged(tags).Timer(name).Record(d)
 }

@@ -446,7 +446,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 		&tchannel.ChannelOptions{
 			ProcessName:   processName,
 			Logger:        NewTChannelLogger(gateway.Logger),
-			StatsReporter: NewDefaultTChannelStatsReporter(subScope),
+			StatsReporter: NewTChannelStatsReporter(subScope),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
 			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
