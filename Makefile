@@ -152,7 +152,6 @@ fast-bench:
 bench:
 	time -p sh -c "go test -run _NONE_ -bench . -benchmem -benchtime 7s -cpu 2 ./test/... | grep -v '^ok ' | grep -v '\[no test files\]' | grep -v '^PASS'"
 
-.PHONY: $(PROGS)
 $(PROGS): $(GO_FILES)
 	@echo Building $@
 	go build -o $@ $(dir ./$@)
@@ -170,7 +169,6 @@ run-%: $(EXAMPLE_SERVICES_DIR)%/
 
 .PHONY: bins
 bins: generate $(PROGS) $(EXAMPLE_SERVICES)
-	echo $(EXAMPLE_SERVICES)
 
 .PHONY: run
 run: run-example-gateway
