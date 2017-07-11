@@ -388,6 +388,7 @@ func (g *TChannelClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
+		LogDownstream:    true,
 	}
 
 	client, err := g.templates.execTemplate(

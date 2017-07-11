@@ -113,6 +113,7 @@ type ClientMeta struct {
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
 	ExposedMethods   map[string]string
+	LogDownstream    bool
 }
 
 func findMethod(

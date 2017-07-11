@@ -295,21 +295,18 @@ func logRequestFields(r *http.Request) []zapcore.Field {
 	// TODO add endpoint.id and endpoint.handlerId
 	// TODO log jaeger trace span
 
-	// Do not log body by default because PII and bandwidth.
-	// TODO: Add a gateway level configurable body unmarshaller
-	// to extract only non-PII info.
-
-	// body, err := ioutil.ReadAll(r.Body)
-	// r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-	// fields = append(fields, zap.String("body", string(body)))
-
 	return fields
 }
 
 func logResponseFields(res *ServerHTTPResponse) []zapcore.Field {
 	var fields []zapcore.Field
-
 	fields = append(fields, zap.Int(statusCodeZapName, res.pendingStatusCode))
+	// TODO: Do not log body by default because PII and bandwidth.
+	// Temporarily log during the developement cycle
+	// TODO: Add a gateway level configurable body unmarshaller
+	// to extract only non-PII info.
+	fields = append(fields, zap.ByteString("Request Body", res.Request.RawBody))
+	fields = append(fields, zap.ByteString("Response Body", res.pendingBodyBytes))
 	fields = append(fields, zap.Time("timestamp-finished", res.finishTime))
 	return fields
 }

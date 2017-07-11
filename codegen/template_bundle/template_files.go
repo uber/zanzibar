@@ -1315,6 +1315,9 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"	
+	"go.uber.org/zap/zapcore"
+
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
 
@@ -1327,6 +1330,7 @@ import (
 {{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+{{- $logDownstream := .LogDownstream}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -1376,12 +1380,14 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 
 	return &{{$clientName}}{
 		client: client,
+		logger: gateway.Logger,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
 	client        zanzibar.TChannelClient
+	logger *zap.Logger
 }
 
 {{range $svc := .Services}}
@@ -1405,9 +1411,32 @@ type {{$clientName}} struct {
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
+
+		{{if $logDownstream -}}
+			var fields []zapcore.Field
+			fields = append(fields, zap.String("Downstream-Client", "{{$clientName}}"))
+			fields = append(fields, zap.String("Downstream-Method", "{{$methodName}}"))
+			fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
+			for k, v := range reqHeaders {
+				fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
+			}
+			fields = append(fields, zap.Any("Downstream-Request-Body", args))
+		{{end -}}
+
 		success, respHeaders, err := c.client.Call(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
+
+		{{if $logDownstream -}}
+			for k, v := range respHeaders {
+				fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
+			}
+			fields = append(fields, zap.Any("Downstream-Response-Body", result))
+			fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
+			c.logger.Info(
+				"Finished a downstream TChannel request",
+				fields...)
+		{{end -}}
 
 		if err == nil && !success {
 			switch {
@@ -1449,7 +1478,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 3933, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4928, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
