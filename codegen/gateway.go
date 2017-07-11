@@ -104,9 +104,15 @@ type ModuleClassConfig struct {
 // ClientClassConfig represents the specific config for
 // a client. This is a downcast of the moduleClassConfig.
 type ClientClassConfig struct {
-	Name   string                 `json:"name"`
-	Type   string                 `json:"type"`
-	Config map[string]interface{} `json:"config"`
+	Name         string                 `json:"name"`
+	Type         string                 `json:"type"`
+	Config       map[string]interface{} `json:"config"`
+	Dependencies ClientDependencies     `json:"dependencies"`
+}
+
+// ClientDependencies lists all depedencies of a client.
+type ClientDependencies struct {
+	Client []string `json:"client"`
 }
 
 // NewClientSpec creates a client spec from a json file.
