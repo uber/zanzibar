@@ -192,7 +192,7 @@ func TestCompareInvalidArgs(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
-		"Compare",
+		"compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 

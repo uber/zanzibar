@@ -199,7 +199,8 @@ func TestPingWithInvalidResponse(t *testing.T) {
 
 	allLogs := gateway.AllLogs()
 
-	assert.Equal(t, 7, len(allLogs))
+	assert.Equal(t, 8, len(allLogs))
+	assert.Equal(t, 1, len(allLogs["Finished a downstream TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
 	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
 	assert.Equal(t, 1, len(allLogs["Failed after non-retriable error."]))
