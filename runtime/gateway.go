@@ -42,7 +42,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/opentracing/opentracing-go"
-	jaeger_config "github.com/uber/jaeger-client-go/config"
+	jaegerConfig "github.com/uber/jaeger-client-go/config"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -425,13 +425,13 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupTracer(config *StaticConfig) error {
-	opts := []jaeger_config.Option{
+	opts := []jaegerConfig.Option{
 		// TChannel logger implements jaeger logger interface
-		jaeger_config.Logger(NewTChannelLogger(gateway.Logger)),
-		jaeger_config.Metrics(NewJaegerMetricsFactory(gateway.MetricScope)),
+		jaegerConfig.Logger(NewTChannelLogger(gateway.Logger)),
+		jaegerConfig.Metrics(NewJaegerMetricsFactory(gateway.MetricScope)),
 	}
 	// TODO: using default tracing configurations here, we may want to set it from static config
-	jc := jaeger_config.Configuration{}
+	jc := jaegerConfig.Configuration{}
 	serviceName := config.MustGetString("tchannel.serviceName")
 	closer, err := jc.InitGlobalTracer(serviceName, opts...)
 	if err != nil {
