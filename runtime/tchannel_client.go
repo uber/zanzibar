@@ -68,11 +68,12 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 	}
 
 	twriter, err := call.Arg2Writer()
-	writer := DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for outbound call %s: ", c.serviceName)
 	}
+	writer := DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
+
 	headers = tchannel.InjectOutboundSpan(call.Response(), headers)
 	if err := WriteHeaders(writer, headers); err != nil {
 		return errors.Wrapf(err, "could not write headers for outbound call %s: ", c.serviceName)
@@ -82,11 +83,11 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 	}
 
 	twriter, err = call.Arg3Writer()
-	writer = DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3writer for outbound call %s: ", c.serviceName)
 	}
+	writer = DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
 
 	if _, err := writer.Write(bodyBuf.Bytes()); err != nil {
 		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
@@ -99,8 +100,6 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 // (response headers, whether there was an application error, unexpected error).
 func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, resp RWTStruct) (bool, map[string]string, error) {
 	treader, err := response.Arg2Reader()
-	reader := DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 	if err != nil {
 		// Do not wrap system errors.
 		if _, ok := err.(tchannel.SystemError); ok {
@@ -109,6 +108,8 @@ func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, r
 
 		return false, nil, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
 	}
+	reader := DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
 
 	headers, err := ReadHeaders(reader)
 	if err != nil {
@@ -125,11 +126,11 @@ func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, r
 
 	success := !response.ApplicationError()
 	treader, err = response.Arg3Reader()
-	reader = DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 	if err != nil {
 		return success, headers, errors.Wrapf(err, "could not create arg3Reader for outbound call response: %s", c.serviceName)
 	}
+	reader = DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
 
 	if err := ReadStruct(reader, resp); err != nil {
 		return success, headers, errors.Wrapf(err, "could not read outbound call response: %s", c.serviceName)

@@ -190,11 +190,12 @@ func (writer *DoubleCloseWriter) Close() error {
 
 func (s *TChannelRouter) handle(ctx context.Context, handler handler, service string, method string, call *tchannel.InboundCall) error {
 	treader, err := call.Arg2Reader()
-	reader := DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", service, method)
 	}
+	reader := DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
+
 	headers, err := ReadHeaders(reader)
 	if err != nil {
 		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", service, method)
@@ -208,11 +209,11 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 	}
 
 	treader, err = call.Arg3Reader()
-	reader = DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", service, method)
 	}
+	reader = DoubleCloseReader{ReadCloser: treader}
+	defer reader.HardClose()
 
 	buf := GetBuffer()
 	defer PutBuffer(buf)
@@ -273,11 +274,11 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 	}
 
 	twriter, err := call.Response().Arg2Writer()
-	writer := DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", service, method)
 	}
+	writer := DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
 
 	if err := WriteHeaders(writer, respHeaders); err != nil {
 		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", service, method)
@@ -287,11 +288,11 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 	}
 
 	twriter, err = call.Response().Arg3Writer()
-	writer = DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", service, method)
 	}
+	writer = DoubleCloseWriter{WriteFlusher: twriter}
+	defer writer.HardClose()
 
 	_, err = writer.Write(respBuf.Bytes())
 	if err != nil {
