@@ -158,3 +158,58 @@ func TestCompare(t *testing.T) {
 
 	assert.Equal(t, `{"message":"a message"}`, string(bytes))
 }
+
+func TestCompareInvalidArgs(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		map[string]interface{}{
+			"clients.baz.serviceName": "baz",
+		},
+		&testGateway.Options{
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
+		},
+		clients.CreateClients,
+		endpoints.Register,
+	)
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	callCounter := 0
+
+	fakeCompare := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *baz.SimpleService_Compare_Args,
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		callCounter++
+
+		return &clientsBazBase.BazResponse{
+			Message: "a message",
+		}, nil, nil
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"Compare",
+		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
+	)
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+
+	res, _, err := clients.Baz.Compare(
+		context.Background(),
+		nil,
+		&baz.SimpleService_Compare_Args{},
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t,
+		err.Error(),
+		"field Arg1 of SimpleService_Compare_Args is required",
+	)
+
+	assert.Nil(t, res)
+}
