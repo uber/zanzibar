@@ -14,9 +14,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
 )
 
 var cachedServer *zanzibar.Gateway

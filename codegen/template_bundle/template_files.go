@@ -1022,6 +1022,7 @@ func http_clientTmpl() (*asset, error) {
 }
 
 var _mainTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
+{{- $instance := . -}}
 
 package main
 
@@ -1032,9 +1033,8 @@ import (
 
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 func getDirName() string {
@@ -1042,10 +1042,11 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+// TODO: remove this
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"{{.RelativePathToAppConfig}}",
+		"../../../",
 		"config",
 	)
 }
@@ -1067,14 +1068,14 @@ func createGateway() (*zanzibar.Gateway, error) {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(gateway)
+	dependencies := module.InitializeDependencies(gateway)
 	gateway.Clients = clients
 
 	return gateway, nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{.GatewayName | pascal}}",
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}} gateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),
@@ -1110,7 +1111,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1679, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1693, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1131,9 +1132,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
 )
 
 var cachedServer *zanzibar.Gateway
@@ -1204,7 +1202,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1399, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1302, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1217,7 +1215,7 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if $moduleInstance.HasDependencies}}
+	{{if $moduleInstance.HasDependencies -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
@@ -1236,7 +1234,7 @@ type {{$className}}Dependencies struct {
 }
 {{end -}}
 
-func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$instance.PackageInfo.ExportType}} {
+func InitializeDependencies(gateway *zanzibar.Gateway) Dependencies {
 	{{- if not $instance.HasDependencies}}
 	return {{$instance.PackageInfo.ExportName}}(gateway)
 	{{- else}}
@@ -1261,7 +1259,7 @@ func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$ins
 	{{- end}}
 	{{end}}
 
-	return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
+	return &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1269,7 +1267,7 @@ func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$ins
 			{{- end}}
 		},
 		{{- end}}
-	})
+	}
 	{{- end}}
 }
 `)
@@ -1284,7 +1282,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2893, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2805, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

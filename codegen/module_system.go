@@ -142,14 +142,6 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("clients", ModuleClass{
-		Directory:         "clients",
-		ClassType:         SingleModule,
-		ClassDependencies: []string{},
-	}); err != nil {
-		return nil, errors.Wrapf(err, "Error registering clientInit class")
-	}
-
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass("endpoint", ModuleClass{
 		Directory:         "endpoints",
@@ -925,28 +917,10 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	// main.go and main_test.go shared meta
-	meta := &MainMeta{
-		IncludedPackages: []GoPackageImport{
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/clients",
-				AliasName: "",
-			},
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/endpoints",
-				AliasName: "",
-			},
-		},
-		GatewayName:             instance.InstanceName,
-		RelativePathToAppConfig: filepath.Join("..", "..", ".."),
-	}
-
 	// generate main.go
 	main, err := generator.templates.execTemplate(
 		"main.tmpl",
-		meta,
+		instance,
 		generator.packageHelper,
 	)
 	if err != nil {
@@ -960,7 +934,7 @@ func (generator *GatewayServiceGenerator) Generate(
 	// generate main_test.go
 	mainTest, err := generator.templates.execTemplate(
 		"main_test.tmpl",
-		meta,
+		instance,
 		generator.packageHelper,
 	)
 	if err != nil {

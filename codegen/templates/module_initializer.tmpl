@@ -6,7 +6,7 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if $moduleInstance.HasDependencies}}
+	{{if $moduleInstance.HasDependencies -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
@@ -25,7 +25,7 @@ type {{$className}}Dependencies struct {
 }
 {{end -}}
 
-func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$instance.PackageInfo.ExportType}} {
+func InitializeDependencies(gateway *zanzibar.Gateway) Dependencies {
 	{{- if not $instance.HasDependencies}}
 	return {{$instance.PackageInfo.ExportName}}(gateway)
 	{{- else}}
@@ -50,7 +50,7 @@ func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$ins
 	{{- end}}
 	{{end}}
 
-	return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
+	return &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -58,6 +58,6 @@ func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$ins
 			{{- end}}
 		},
 		{{- end}}
-	})
+	}
 	{{- end}}
 }

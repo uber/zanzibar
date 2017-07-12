@@ -340,13 +340,6 @@ func addMiddlewarePackages(middlewares []MiddlewareSpec, includedPkgs []GoPackag
 	return includedPkgs
 }
 
-// MainMeta ...
-type MainMeta struct {
-	IncludedPackages        []GoPackageImport
-	GatewayName             string
-	RelativePathToAppConfig string
-}
-
 func (t *Template) execTemplateAndFmt(
 	templName string,
 	filePath string,

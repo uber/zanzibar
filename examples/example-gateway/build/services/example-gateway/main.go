@@ -28,10 +28,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
 func getDirName() string {
@@ -39,10 +40,11 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+// TODO: remove this
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"../../..",
+		"../../../",
 		"config",
 	)
 }
@@ -64,14 +66,14 @@ func createGateway() (*zanzibar.Gateway, error) {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(gateway)
+	dependencies := module.InitializeDependencies(gateway)
 	gateway.Clients = clients
 
 	return gateway, nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started ExampleGateway",
+	server.Logger.Info("Started ExampleGateway gateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),

@@ -1,4 +1,5 @@
 {{- /* template to render gateway main.go */ -}}
+{{- $instance := . -}}
 
 package main
 
@@ -9,9 +10,8 @@ import (
 
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 func getDirName() string {
@@ -19,10 +19,11 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+// TODO: remove this
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"{{.RelativePathToAppConfig}}",
+		"../../../",
 		"config",
 	)
 }
@@ -44,14 +45,14 @@ func createGateway() (*zanzibar.Gateway, error) {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(gateway)
+	dependencies := module.InitializeDependencies(gateway)
 	gateway.Clients = clients
 
 	return gateway, nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{.GatewayName | pascal}}",
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}} gateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),

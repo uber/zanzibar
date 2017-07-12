@@ -3,11 +3,11 @@
 	"type": "gateway",
 	"config": {},
 	"dependencies": {
-		"endpoint": [
+		"client": [
 			"bar",
 			"baz",
 			"contacts",
-			"googlenow"
+			"google-now"
 		]
 	}
 }
