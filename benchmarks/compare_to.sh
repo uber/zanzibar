@@ -89,7 +89,7 @@ if [ "$BENCHMARK_FILE" == "bench" ]; then
 
     go get -u golang.org/x/tools/cmd/benchcmp
     echo "Comparing old $CURRENT_SHA to new $OTHER_SHA"
-    benchmp -best "bench_$CURRENT_SHA.txt" "bench_$OTHER_SHA.txt"
+    benchcmp -best "bench_$CURRENT_SHA.txt" "bench_$OTHER_SHA.txt"
 
 else
     run $CURRENT_SHA
