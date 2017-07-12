@@ -71,20 +71,6 @@ func PutBuffer(buf *bytes.Buffer) {
 	bufPool.Put(buf)
 }
 
-// WriteStruct writes the given Thriftrw struct to a writer.
-func WriteStruct(writer io.Writer, s RWTStruct) error {
-	wireValue, err := s.ToWire()
-	if err != nil {
-		return err
-	}
-
-	if err := protocol.Binary.Encode(wireValue, writer); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // ReadStruct reads the given Thriftrw struct.
 func ReadStruct(reader io.Reader, s RWTStruct) error {
 	readerAt, ok := reader.(io.ReaderAt)

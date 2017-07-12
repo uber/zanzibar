@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
 
+	"go.uber.org/thriftrw/protocol"
 	netContext "golang.org/x/net/context"
 )
 
@@ -59,11 +60,8 @@ func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannel
 }
 
 func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[string]string, req RWTStruct) error {
-
-	bodyBuf := GetBuffer()
-	defer PutBuffer(bodyBuf)
-
-	if err := WriteStruct(bodyBuf, req); err != nil {
+	structWireValue, err := req.ToWire()
+	if err != nil {
 		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
 	}
 
@@ -87,7 +85,8 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 		return errors.Wrapf(err, "could not create arg3writer for outbound call %s: ", c.serviceName)
 	}
 
-	if _, err := twriter.Write(bodyBuf.Bytes()); err != nil {
+	err = protocol.Binary.Encode(structWireValue, twriter)
+	if err != nil {
 		_ = twriter.Close()
 
 		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)

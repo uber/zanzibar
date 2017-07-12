@@ -201,10 +201,7 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", service, method)
 	}
 
-	respBuf := GetBuffer()
-	defer PutBuffer(respBuf)
-
-	err = WriteStruct(respBuf, resp)
+	structWireValue, err := resp.ToWire()
 	if err != nil {
 		// If we could not write the body then we should do something else
 		// instead.
@@ -239,7 +236,7 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", service, method)
 	}
 
-	_, err = twriter.Write(respBuf.Bytes())
+	err = protocol.Binary.Encode(structWireValue, twriter)
 	if err != nil {
 		_ = twriter.Close()
 
