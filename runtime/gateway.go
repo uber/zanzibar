@@ -433,7 +433,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	}
 	// TODO: using default tracing configurations here, we may want to set it from static config
 	jc := jaegerConfig.Configuration{}
-	serviceName := config.MustGetString("tchannel.serviceName")
+	serviceName := config.MustGetString("serviceName")
 	closer, err := jc.InitGlobalTracer(serviceName, opts...)
 	if err != nil {
 		return errors.Wrapf(err, "error initializing Jaeger tracer client")
