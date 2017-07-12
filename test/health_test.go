@@ -28,7 +28,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	m3 "github.com/uber-go/tally/m3/thrift"
+	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
@@ -113,18 +113,6 @@ func BenchmarkHealthCall(b *testing.B) {
 	b.StartTimer()
 }
 
-type SortMetricByName []*m3.Metric
-
-func (a SortMetricByName) Len() int {
-	return len(a)
-}
-func (a SortMetricByName) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-func (a SortMetricByName) Less(i, j int) bool {
-	return a[i].GetName() < a[j].GetName()
-}
-
 func TestHealthMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics: true,
@@ -149,7 +137,7 @@ func TestHealthMetrics(t *testing.T) {
 
 	cgateway.MetricsWaitGroup.Wait()
 	metrics := cgateway.M3Service.GetMetrics()
-	sort.Sort(SortMetricByName(metrics))
+	sort.Sort(lib.SortMetricsByName(metrics))
 
 	assert.Equal(t, len(metrics), 3, "expected one metric")
 

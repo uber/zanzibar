@@ -18,15 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package lib
 
 import (
-	"runtime"
-
-	"github.com/uber/zanzibar/runtime"
+	"github.com/uber-go/tally/m3/thrift"
 )
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
+// SortMetricsByName ...
+type SortMetricsByName []*m3.Metric
+
+// Len ...
+func (a SortMetricsByName) Len() int {
+	return len(a)
+}
+
+// Swap ...
+func (a SortMetricsByName) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+// Less ...
+func (a SortMetricsByName) Less(i, j int) bool {
+	return a[i].GetName() < a[j].GetName()
 }

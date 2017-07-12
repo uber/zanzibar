@@ -18,15 +18,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package zanzibar
 
 import (
-	"runtime"
+	"time"
 
-	"github.com/uber/zanzibar/runtime"
+	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
 )
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
+type statsReporter struct {
+	scope tally.Scope
+}
+
+// NewTChannelStatsReporter returns a StatsReporter using the given tally.Scope.
+func NewTChannelStatsReporter(s tally.Scope) tchannel.StatsReporter {
+	return &statsReporter{
+		scope: s,
+	}
+}
+
+// IncCounter ...
+func (s statsReporter) IncCounter(name string, tags map[string]string, value int64) {
+	s.scope.Tagged(tags).Counter(name).Inc(value)
+}
+
+// UpdateGauge ...
+func (s statsReporter) UpdateGauge(name string, tags map[string]string, value int64) {
+	s.scope.Tagged(tags).Gauge(name).Update(float64(value))
+}
+
+// RecordTimer ...
+func (s statsReporter) RecordTimer(name string, tags map[string]string, d time.Duration) {
+	s.scope.Tagged(tags).Timer(name).Record(d)
 }
