@@ -63,6 +63,8 @@ function benchmark_runner() {
 }
 
 function go_bench() {
+    local sha=$1
+
     rm -f "bench_$sha.txt"
     touch "bench_$sha.txt"
     for i in `seq 5`; do
