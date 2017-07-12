@@ -79,7 +79,7 @@ done
 rm -f benchmark.txt
 touch benchmark.txt
 
-if [ "$BENCHMARK_FILE" -eq "bench" ]; then
+if [ "$BENCHMARK_FILE" == "bench" ]; then
     run $CURRENT_SHA
     go_bench $CURRENT_SHA
     run $OTHER_SHA
