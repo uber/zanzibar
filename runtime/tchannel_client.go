@@ -71,14 +71,14 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for outbound call %s: ", c.serviceName)
 	}
-	writer := DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 
 	headers = tchannel.InjectOutboundSpan(call.Response(), headers)
-	if err := WriteHeaders(writer, headers); err != nil {
+	if err := WriteHeaders(twriter, headers); err != nil {
+		_ = twriter.Close()
+
 		return errors.Wrapf(err, "could not write headers for outbound call %s: ", c.serviceName)
 	}
-	if err := writer.Close(); err != nil {
+	if err := twriter.Close(); err != nil {
 		return errors.Wrapf(err, "could not close arg2writer for outbound call %s: ", c.serviceName)
 	}
 
@@ -86,14 +86,14 @@ func (c *tchannelClient) writeArgs(call *tchannel.OutboundCall, headers map[stri
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3writer for outbound call %s: ", c.serviceName)
 	}
-	writer = DoubleCloseWriter{WriteFlusher: twriter}
-	defer writer.HardClose()
 
-	if _, err := writer.Write(bodyBuf.Bytes()); err != nil {
+	if _, err := twriter.Write(bodyBuf.Bytes()); err != nil {
+		_ = twriter.Close()
+
 		return errors.Wrapf(err, "could not write request for outbound call %s: ", c.serviceName)
 	}
 
-	return writer.Close()
+	return twriter.Close()
 }
 
 // readResponse reads the response struct into resp, and returns:
@@ -108,19 +108,21 @@ func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, r
 
 		return false, nil, errors.Wrapf(err, "could not create arg2reader for outbound call response: %s", c.serviceName)
 	}
-	reader := DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 
-	headers, err := ReadHeaders(reader)
+	headers, err := ReadHeaders(treader)
 	if err != nil {
+		_ = treader.Close()
+
 		return false, nil, errors.Wrapf(err, "could not read headers for outbound call response: %s", c.serviceName)
 	}
 
-	if err := EnsureEmpty(reader, "reading response headers"); err != nil {
+	if err := EnsureEmpty(treader, "reading response headers"); err != nil {
+		_ = treader.Close()
+
 		return false, nil, errors.Wrapf(err, "could not ensure arg2reader is empty for outbound call response: %s", c.serviceName)
 	}
 
-	if err := reader.Close(); err != nil {
+	if err := treader.Close(); err != nil {
 		return false, nil, errors.Wrapf(err, "could not close arg2reader for outbound call response: %s", c.serviceName)
 	}
 
@@ -129,18 +131,20 @@ func (c *tchannelClient) readResponse(response *tchannel.OutboundCallResponse, r
 	if err != nil {
 		return success, headers, errors.Wrapf(err, "could not create arg3Reader for outbound call response: %s", c.serviceName)
 	}
-	reader = DoubleCloseReader{ReadCloser: treader}
-	defer reader.HardClose()
 
-	if err := ReadStruct(reader, resp); err != nil {
+	if err := ReadStruct(treader, resp); err != nil {
+		_ = treader.Close()
+
 		return success, headers, errors.Wrapf(err, "could not read outbound call response: %s", c.serviceName)
 	}
 
-	if err := EnsureEmpty(reader, "reading response body"); err != nil {
+	if err := EnsureEmpty(treader, "reading response body"); err != nil {
+		_ = treader.Close()
+
 		return false, nil, errors.Wrapf(err, "could not ensure arg3reader is empty for outbound call response: %s", c.serviceName)
 	}
 
-	return success, headers, reader.Close()
+	return success, headers, treader.Close()
 }
 
 // Call makes a RPC call to the given service.
