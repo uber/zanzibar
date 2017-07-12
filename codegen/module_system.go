@@ -328,7 +328,7 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
@@ -444,7 +444,7 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
@@ -546,7 +546,7 @@ func (g *CustomClientGenerator) Generate(
 	files := map[string][]byte{}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
@@ -717,6 +717,23 @@ func (g *EndpointGenerator) Generate(
 			)
 		}
 	}
+
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+	if dependencies != nil {
+		ret["module/dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
 		Files: ret,
 		Spec:  endpointSpecs,
@@ -1053,12 +1070,45 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+
+	initializer, err := GenerateInitializer(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service initializer for %s",
+			instance.InstanceName,
+		)
+	}
+
+	files := map[string][]byte{
+		"zanzibar-defaults.json": productionConfig,
+		"main.go":                main,
+		"main_test.go":           mainTest,
+		"module/init.go":         initializer,
+	}
+
+	if dependencies != nil {
+		files["module/dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
-		Files: map[string][]byte{
-			"zanzibar-defaults.json": productionConfig,
-			"main.go":                main,
-			"main_test.go":           mainTest,
-		},
+		Files: files,
 	}, nil
 }
 
@@ -1081,16 +1131,7 @@ func GenerateDependencyStruct(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	hasDependencies := false
-
-	for _, moduleInstances := range instance.ResolvedDependencies {
-		if len(moduleInstances) > 0 {
-			hasDependencies = true
-			break
-		}
-	}
-
-	if !hasDependencies {
+	if !instance.HasDependencies {
 		return nil, nil
 	}
 
@@ -1101,26 +1142,19 @@ func GenerateDependencyStruct(
 	)
 }
 
-// sort the clients by client height in DAG, lowest node first
-func sortInstances(instances []*ModuleInstance, depType string) []*ModuleInstance {
-	heightMap := map[*ModuleInstance]int{}
-	sortedGroup := [][]*ModuleInstance{}
-	for _, instance := range instances {
-		h := height(instance, depType, heightMap, []*ModuleInstance{})
-		l := len(sortedGroup)
-		if l < h+1 {
-			for i := 0; i < h+1-l; i++ {
-				sortedGroup = append(sortedGroup, []*ModuleInstance{})
-			}
-		}
-		sortedGroup[h] = append(sortedGroup[h], instance)
-	}
-
-	sorted := []*ModuleInstance{}
-	for _, g := range sortedGroup {
-		sorted = append(sorted, g...)
-	}
-	return sorted
+// GenerateInitializer generates a file that initializes a module fully
+// recursively, i.e. by initializing all of its dependencies in the correct
+// order
+func GenerateInitializer(
+	instance *ModuleInstance,
+	packageHelper *PackageHelper,
+	template *Template,
+) ([]byte, error) {
+	return template.execTemplate(
+		"module_initializer.tmpl",
+		instance,
+		packageHelper,
+	)
 }
 
 func height(i *ModuleInstance, depType string, known map[*ModuleInstance]int, seen []*ModuleInstance) int {

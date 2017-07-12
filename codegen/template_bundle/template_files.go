@@ -9,6 +9,7 @@
 // codegen/templates/init_clients.tmpl
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
+// codegen/templates/module_initializer.tmpl
 // codegen/templates/structs.tmpl
 // codegen/templates/tchannel_client.tmpl
 // codegen/templates/tchannel_client_test_server.tmpl
@@ -1263,6 +1264,86 @@ func main_testTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _module_initializerTmpl = []byte(`{{$instance := . -}}
+
+package module
+
+import (
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+    {{if $moduleInstance.HasDependencies}}
+    {{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
+    {{end -}}
+    {{end -}}
+    {{end -}}
+
+    "github.com/uber/zanzibar/runtime"
+)
+
+{{range $idx, $className := $instance.DependencyOrder -}}
+{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
+// {{$className}}Dependencies contains {{$className}} dependencies
+type {{$className}}Dependencies struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}
+
+func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$instance.PackageInfo.ExportType}} {
+    {{- if not $instance.HasDependencies}}
+    return {{$instance.PackageInfo.ExportName}}(gateway)
+    {{- else}}
+    {{- range $idx, $className := $instance.DependencyOrder}}
+    {{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+    initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
+
+    {{- range $idx, $dependency := $moduleInstances}}
+    {{- if $dependency.HasDependencies}}
+    initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.GeneratedPackageAlias}}.Dependencies{
+        {{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+        {{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+            {{- range $idy, $subDependency := $moduleInstances}}
+            {{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+            {{- end}}
+        },
+        {{- end}}
+    })
+    {{- else}}
+    initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
+    {{- end}}
+    {{- end}}
+    {{end}}
+
+    return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
+        {{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
+        {{$className | pascal}}: &{{$className | pascal}}Dependencies{
+            {{- range $idy, $subDependency := $moduleInstances}}
+            {{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+            {{- end}}
+        },
+        {{- end}}
+    })
+    {{- end}}
+}
+`)
+
+func module_initializerTmplBytes() ([]byte, error) {
+	return _module_initializerTmpl, nil
+}
+
+func module_initializerTmpl() (*asset, error) {
+	bytes, err := module_initializerTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3067, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _structsTmpl = []byte(`{{- /* template to render edge gateway http client code */ -}}
 
 package {{.PackageName}}
@@ -1795,6 +1876,7 @@ var _bindata = map[string]func() (*asset, error){
 	"init_clients.tmpl":                  init_clientsTmpl,
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
+	"module_initializer.tmpl":            module_initializerTmpl,
 	"structs.tmpl":                       structsTmpl,
 	"tchannel_client.tmpl":               tchannel_clientTmpl,
 	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
@@ -1851,6 +1933,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"init_clients.tmpl":                  {init_clientsTmpl, map[string]*bintree{}},
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
+	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       {structsTmpl, map[string]*bintree{}},
 	"tchannel_client.tmpl":               {tchannel_clientTmpl, map[string]*bintree{}},
 	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},

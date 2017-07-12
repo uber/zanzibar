@@ -583,16 +583,19 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	return &ModuleInstance{
-		PackageInfo:          packageInfo,
-		ClassName:            className,
-		ClassType:            jsonConfig.Type,
-		BaseDirectory:        baseDirectory,
-		Directory:            instanceDirectory,
-		InstanceName:         jsonConfig.Name,
-		Dependencies:         dependencies,
-		ResolvedDependencies: map[string][]*ModuleInstance{},
-		JSONFileName:         jsonFileName,
-		JSONFileRaw:          raw,
+		PackageInfo:           packageInfo,
+		ClassName:             className,
+		ClassType:             jsonConfig.Type,
+		BaseDirectory:         baseDirectory,
+		Directory:             instanceDirectory,
+		InstanceName:          jsonConfig.Name,
+		Dependencies:          dependencies,
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
+		DependencyOrder:       []string{},
+		HasDependencies:       false,
+		JSONFileName:          jsonFileName,
+		JSONFileRaw:           raw,
 	}, nil
 }
 
@@ -667,19 +670,27 @@ func readPackageInfo(
 		// package is "PackageName".
 		PackageAlias:          defaultAlias + "Static",
 		GeneratedPackageAlias: defaultAlias + "Generated",
+		ModulePackageAlias:    defaultAlias + "Module",
 		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,
 		),
-		ExportName:            "New" + qualifiedClassName,
-		QualifiedInstanceName: qualifiedInstanceName,
-		ExportType:            qualifiedClassName,
 		GeneratedPackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,
 			instanceDirectory,
 		),
-		IsExportGenerated: isExportGenerated,
+		ModulePackagePath: filepath.Join(
+			packageRoot,
+			relativeGeneratedPath,
+			instanceDirectory,
+			"module",
+		),
+		ExportName:            "New" + qualifiedClassName,
+		InitializerName:       "Initialize" + qualifiedClassName,
+		QualifiedInstanceName: qualifiedInstanceName,
+		ExportType:            qualifiedClassName,
+		IsExportGenerated:     isExportGenerated,
 	}, nil
 }
 
@@ -856,16 +867,25 @@ type PackageInfo struct {
 	PackageAlias string
 	// GeneratedPackageAlias is the unique import alias for generated packages
 	GeneratedPackageAlias string
+	// ModulePackageAlias is the unique import alias for the module system's,
+	// generated subpackage
+	ModulePackageAlias string
 	// PackagePath is the full package path for the non-generated code
 	PackagePath string
 	// GeneratedPackagePath is the full package path for the generated code
 	GeneratedPackagePath string
+	// ModulePacakgePath is the full package path for the generated dependency
+	// structs and initializers
+	ModulePackagePath string
 	// QualifiedInstanceName for this package. Pascal case name for this module.
 	QualifiedInstanceName string
 	// ExportName is the name on the module initializer function
 	ExportName string
 	// ExportType refers to the type returned by the module initializer
 	ExportType string
+	// InitializerName is the name of function that can fully initialize the
+	// module and its dependencies
+	InitializerName string
 	// IsExportGenerated is true if the export type is provided by the
 	// generated pacakge, otherwise it is assumed that the export type resides
 	// in the non-generated package
