@@ -155,6 +155,8 @@ func (system *ModuleSystem) populateResolvedDependencies(
 ) error {
 	// Resolve the class dependencies
 	for _, classInstance := range classInstances {
+		dependencyClassNames := map[string]bool{}
+
 		for _, classDependency := range classInstance.Dependencies {
 			moduleClassInstances, ok :=
 				resolvedModules[classDependency.ClassName]
@@ -196,6 +198,8 @@ func (system *ModuleSystem) populateResolvedDependencies(
 				resolvedDependencies = []*ModuleInstance{}
 			}
 
+			dependencyClassNames[classDependency.ClassName] = true
+			classInstance.HasDependencies = true
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
 				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
@@ -216,6 +220,166 @@ func appendUniqueModule(
 	}
 
 	return append(classDeps, instance)
+}
+
+func (system *ModuleSystem) populateRecursiveDependencies(
+	instances []*ModuleInstance,
+) error {
+	for _, classInstance := range instances {
+		recursiveDeps := map[string]map[string]*ModuleInstance{}
+		err := resolveRecursiveDependencies(
+			classInstance,
+			recursiveDeps,
+		)
+		if err != nil {
+			return err
+		}
+
+		for _, className := range system.classOrder {
+			moduleMap, ok := recursiveDeps[className]
+
+			if !ok {
+				continue
+			}
+
+			classInstance.DependencyOrder = append(
+				classInstance.DependencyOrder,
+				className,
+			)
+
+			moduleList := make([]*ModuleInstance, len(moduleMap))
+			index := 0
+			for _, moduleInstance := range moduleMap {
+				moduleList[index] = moduleInstance
+				index++
+			}
+			classInstance.RecursiveDependencies[className] = moduleList
+		}
+	}
+
+	return nil
+}
+
+func resolveRecursiveDependencies(
+	instance *ModuleInstance,
+	resolvedDeps map[string]map[string]*ModuleInstance,
+) error {
+	for className, depList := range instance.ResolvedDependencies {
+		classDeps := resolvedDeps[className]
+
+		if classDeps == nil {
+			classDeps = map[string]*ModuleInstance{}
+			resolvedDeps[className] = classDeps
+		}
+
+		for _, dep := range depList {
+			if classDeps[dep.InstanceName] == nil {
+				classDeps[dep.InstanceName] = dep
+				resolveRecursiveDependencies(dep, resolvedDeps)
+			}
+		}
+	}
+
+	return nil
+}
+
+func sortResolvedDeps(
+	recursiveDeps map[string]map[string]*ModuleInstance,
+) (map[string][]*ModuleInstance, error) {
+	sortedDeps := map[string][]*ModuleInstance{}
+
+	for className, deps := range recursiveDeps {
+		depList := make([]*ModuleInstance, len(deps))
+		index := 0
+
+		for _, dep := range deps {
+			depList[index] = dep
+			index++
+		}
+
+		sortedDepList, err := sortDependencyList(className, depList)
+		if err != nil {
+			return nil, err
+		}
+
+		sortedDeps[className] = sortedDepList
+	}
+
+	return sortedDeps, nil
+}
+
+func sortDependencyList(
+	className string,
+	instances []*ModuleInstance,
+) ([]*ModuleInstance, error) {
+	sorted := make([]*ModuleInstance, len(instances))
+
+	for i, instance := range instances {
+		insertIndex := i
+		for j := 0; j < i; j++ {
+			if insertIndex == i {
+				if peerDepends(sorted[j], instance) {
+					insertIndex = j
+				}
+			} else {
+				if peerDepends(instance, sorted[j]) {
+					return nil, errors.Errorf(
+						"Dependency cycle: %s cannot be initialized before %s",
+						sorted[j].InstanceName,
+						instance.InstanceName,
+					)
+				}
+			}
+		}
+
+		for shuffle := i; shuffle > insertIndex; shuffle-- {
+			sorted[shuffle] = sorted[shuffle-1]
+		}
+
+		sorted[insertIndex] = instance
+	}
+
+	return sorted, nil
+}
+
+// peerDepends returns true if module a and module b have the same class name
+// and a requires b
+func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
+	if a.ClassName != b.ClassName {
+		return false
+	}
+
+	for _, instance := range b.ResolvedDependencies[a.ClassName] {
+		if instance.InstanceName == a.InstanceName &&
+			instance.ClassName == a.ClassName &&
+			instance.ClassType == a.ClassType {
+			return true
+		}
+	}
+
+	return false
+}
+
+// sort the clients by client height in DAG, lowest node first
+func sortInstances(instances []*ModuleInstance, depType string) []*ModuleInstance {
+	heightMap := map[*ModuleInstance]int{}
+	sortedGroup := [][]*ModuleInstance{}
+	for _, instance := range instances {
+		h := height(instance, depType, heightMap, []*ModuleInstance{})
+		l := len(sortedGroup)
+		if l < h+1 {
+			for i := 0; i < h+1-l; i++ {
+				sortedGroup = append(sortedGroup, []*ModuleInstance{})
+			}
+		}
+		sortedGroup[h] = append(sortedGroup[h], instance)
+	}
+
+	sorted := []*ModuleInstance{}
+	for _, g := range sortedGroup {
+		sorted = append(sorted, g...)
+	}
+	return sorted
 }
 
 // ResolveModules resolves the module instances from the config on disk
@@ -276,11 +440,17 @@ func (system *ModuleSystem) ResolveModules(
 		resolvedModules[className] = classInstances
 
 		// Resolve dependencies for all classes
-		err := system.populateResolvedDependencies(
+		resolveErr := system.populateResolvedDependencies(
 			classInstances, resolvedModules,
 		)
-		if err != nil {
-			return nil, err
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
+
+		// Resolved recursive dependencies for all classes
+		recursiveErr := system.populateRecursiveDependencies(classInstances)
+		if recursiveErr != nil {
+			return nil, recursiveErr
 		}
 	}
 
@@ -757,6 +927,15 @@ type ModuleInstance struct {
 	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
 	ResolvedDependencies map[string][]*ModuleInstance
+	// Recursive dependencies is a list of dependent modules and all of their
+	// dependencies, i.e. the full tree of dependencies for this module. Each
+	// class list is sorted for initialization order
+	RecursiveDependencies map[string][]*ModuleInstance
+	// DependencyOrder is the bottom to top order in which the recursively
+	// resolved dependency class names can depend on each other
+	DependencyOrder []string
+	// HasDependencies is true if the instance has one or more dependencies
+	HasDependencies bool
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
