@@ -22,10 +22,12 @@ package testBackend
 
 import (
 	"net"
+	"os"
 	"strconv"
 
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/uber/zanzibar/runtime"
 )
@@ -114,10 +116,20 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		Port: port,
 	}
 
-	testLogger := zap.NewNop()
+	testLogger := zap.New(
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			os.Stdout,
+			zap.WarnLevel,
+		),
+	)
+	testLogger = testLogger.With(
+		zap.String("from", "test-tchannel-backend"),
+		zap.String("test-backend", serviceName),
+	)
 
 	tchannelOpts := &tchannel.ChannelOptions{
-		Logger: tchannel.NullLogger,
+		Logger: zanzibar.NewTChannelLogger(testLogger),
 	}
 
 	channel, err := tchannel.NewChannel(serviceName, tchannelOpts)

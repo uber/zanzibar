@@ -27,13 +27,14 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
@@ -41,12 +42,12 @@ var testCompareCounter int
 
 func compare(
 	ctx context.Context, reqHeaders map[string]string, args *baz.SimpleService_Compare_Args,
-) (*base.BazResponse, map[string]string, error) {
+) (*clientsBazBase.BazResponse, map[string]string, error) {
 	testCompareCounter++
 	r1 := args.Arg1
 	r2 := args.Arg2
 	if r1.B1 && r1.S2 == "hello" && r1.I3 == 42 && r2.B1 && r2.S2 == "hola" && r2.I3 == 42 {
-		return &base.BazResponse{
+		return &clientsBazBase.BazResponse{
 			Message: "different",
 		}, nil, nil
 	}
@@ -74,7 +75,7 @@ func BenchmarkCompare(b *testing.B) {
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
 		"compare",
-		bazServer.NewSimpleServiceCompareHandler(compare),
+		bazClient.NewSimpleServiceCompareHandler(compare),
 	)
 
 	b.ResetTimer()
@@ -104,4 +105,109 @@ func BenchmarkCompare(b *testing.B) {
 
 	b.StopTimer()
 	gateway.Close()
+}
+
+func TestCompare(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, testConfig, testOptions)
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	callCounter := 0
+
+	fakeCompare := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *baz.SimpleService_Compare_Args,
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		callCounter++
+
+		return &clientsBazBase.BazResponse{
+			Message: "a message",
+		}, nil, nil
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"compare",
+		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
+	)
+
+	res, err := gateway.MakeRequest(
+		"POST", "/baz/compare", nil,
+		bytes.NewBuffer([]byte(`{
+			"arg1":{ "b1":true,"s2":"a","i3":1 },
+			"arg2":{ "b1":true,"s2":"a","i3":1 }
+		}`)),
+	)
+
+	if !assert.NoError(t, err, "got request error") {
+		return
+	}
+
+	assert.Equal(t, 1, callCounter)
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got read error") {
+		return
+	}
+
+	assert.Equal(t, `{"message":"a message"}`, string(bytes))
+}
+
+func TestCompareInvalidArgs(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		map[string]interface{}{
+			"clients.baz.serviceName": "baz",
+		},
+		&testGateway.Options{
+			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+			KnownTChannelBackends: []string{"baz"},
+		},
+		clients.CreateClients,
+		endpoints.Register,
+	)
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	callCounter := 0
+
+	fakeCompare := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *baz.SimpleService_Compare_Args,
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		callCounter++
+
+		return &clientsBazBase.BazResponse{
+			Message: "a message",
+		}, nil, nil
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"compare",
+		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
+	)
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+
+	res, _, err := clients.Baz.Compare(
+		context.Background(),
+		nil,
+		&baz.SimpleService_Compare_Args{},
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t,
+		err.Error(),
+		"field Arg1 of SimpleService_Compare_Args is required",
+	)
+
+	assert.Nil(t, res)
 }
