@@ -24,22 +24,38 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 )
+
+var testConfig = map[string]interface{}{
+	"clients.baz.serviceName": "bazService",
+}
+var testOptions = &testGateway.Options{
+	KnownTChannelBackends: []string{"baz"},
+	TestBinary: filepath.Join(
+		getDirName(), "..", "..", "..", "examples", "example-gateway",
+		"build", "services", "example-gateway", "main.go",
+	),
+}
 
 var testPingCounter int
 
-func ping(ctx context.Context, reqHeaders map[string]string) (*base.BazResponse, map[string]string, error) {
+func ping(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (*clientsBazBase.BazResponse, map[string]string, error) {
 	testPingCounter++
-	res := base.BazResponse{
+	res := clientsBazBase.BazResponse{
 		Message: "pong",
 	}
 	return &res, nil, nil
@@ -66,7 +82,7 @@ func BenchmarkPing(b *testing.B) {
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
 		"ping",
-		bazServer.NewSimpleServicePingHandler(ping),
+		bazClient.NewSimpleServicePingHandler(ping),
 	)
 
 	b.ResetTimer()
@@ -96,4 +112,110 @@ func BenchmarkPing(b *testing.B) {
 
 	b.StopTimer()
 	gateway.Close()
+}
+
+func TestPing(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, testConfig, testOptions)
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	callCounter := 0
+
+	fakePing := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		callCounter++
+
+		return &clientsBazBase.BazResponse{
+			Message: "a message",
+		}, nil, nil
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"ping",
+		bazClient.NewSimpleServicePingHandler(fakePing),
+	)
+
+	res, err := gateway.MakeRequest("GET", "/baz/ping", nil, nil)
+
+	if !assert.NoError(t, err, "got request error") {
+		return
+	}
+
+	assert.Equal(t, 1, callCounter)
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got read error") {
+		return
+	}
+
+	assert.Equal(t, `{"message":"a message"}`, string(bytes))
+}
+
+func TestPingWithInvalidResponse(t *testing.T) {
+	gateway, err := testGateway.CreateGateway(t, testConfig, testOptions)
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	callCounter := 0
+
+	fakePing := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (*clientsBazBase.BazResponse, map[string]string, error) {
+		callCounter++
+
+		return nil, nil, nil
+	}
+
+	gateway.TChannelBackends()["baz"].Register(
+		"SimpleService",
+		"ping",
+		bazClient.NewSimpleServicePingHandler(fakePing),
+	)
+
+	res, err := gateway.MakeRequest("GET", "/baz/ping", nil, nil)
+
+	if !assert.NoError(t, err, "got request error") {
+		return
+	}
+
+	assert.Equal(t, 1, callCounter)
+	assert.Equal(t, 500, res.StatusCode)
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got read error") {
+		return
+	}
+
+	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
+
+	allLogs := gateway.AllLogs()
+
+	assert.Equal(t, 8, len(allLogs))
+	assert.Equal(t, 1, len(allLogs["Finished a downstream TChannel request"]))
+	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
+	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
+	assert.Equal(t, 1, len(allLogs["Failed after non-retriable error."]))
+	assert.Equal(t, 1, len(allLogs["Could not make client request"]))
+	assert.Equal(t, 1, len(allLogs["Workflow for endpoint returned error"]))
+	assert.Equal(t, 1, len(allLogs["Sending error for endpoint request"]))
+	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
+
+	logLines := gateway.Logs("warn", "Could not make client request")
+	assert.Equal(t, 1, len(logLines))
+
+	logObj := logLines[0]
+	assert.Equal(
+		t,
+		"tchannel error ErrCodeUnexpected: Server Error",
+		logObj["error"].(string),
+	)
 }

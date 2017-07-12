@@ -388,6 +388,7 @@ func (g *TChannelClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
+		LogDownstream:    true,
 	}
 
 	client, err := g.templates.execTemplate(
@@ -602,12 +603,11 @@ func (g *ClientsInitGenerator) Generate(
 	clientInfo := []ClientInfoMeta{}
 	for i, client := range clients {
 		meta := ClientInfoMeta{
-			IsPointerType: true,
-			FieldName:     strings.Title(client.ClientName),
-			PackagePath:   client.ImportPackagePath,
-			PackageAlias:  client.ImportPackageAlias,
-			ExportName:    client.ExportName,
-			ExportType:    client.ExportType,
+			FieldName:    strings.Title(client.ClientName),
+			PackagePath:  client.ImportPackagePath,
+			PackageAlias: client.ImportPackageAlias,
+			ExportName:   client.ExportName,
+			ExportType:   client.ExportType,
 		}
 
 		deps := instances[i].ResolvedDependencies["client"]
@@ -618,26 +618,6 @@ func (g *ClientsInitGenerator) Generate(
 			}
 			meta.DepPackageAlias = instances[i].PackageInfo.GeneratedPackageAlias
 			meta.DepFieldNames = depFieldNames
-		}
-
-		// TODO: there shouldn't be a special thing for custom
-		if client.ClientType == "custom" {
-			isPointerType := false
-			exportType := client.CustomClientType
-			if strings.HasPrefix(exportType, "*") {
-				isPointerType = true
-				exportType = strings.TrimLeft(exportType, "*")
-			}
-			meta.IsPointerType = isPointerType
-			meta.ExportType = exportType
-
-			clientInfo = append(clientInfo, meta)
-			continue
-		}
-
-		module := client.ModuleSpec
-		if len(module.Services) == 0 {
-			continue
 		}
 
 		clientInfo = append(clientInfo, meta)

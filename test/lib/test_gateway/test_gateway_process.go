@@ -40,6 +40,17 @@ var realTChannelAddrRegex = regexp.MustCompile(
 	`"realTChannelAddr":"([0-9\.\:]+)"`,
 )
 
+var infoIgnoreList = map[string]bool{
+	"Outbound connection is active.":            true,
+	"Channel.Close called.":                     true,
+	"Connection.Close called.":                  true,
+	"Connection state updated in Close.":        true,
+	"Connection state updated during shutdown.": true,
+	"Removed peer from root peer list.":         true,
+	"Inbound connection is active.":             true,
+	"Channel closed.":                           true,
+}
+
 // MalformedStdoutError is used when the child process has unexpected stdout
 type MalformedStdoutError struct {
 	Type       string
@@ -142,10 +153,7 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 		addJSONLine(testGateway, line1)
 	}
 
-	_, err = os.Stdout.WriteString(line1)
-	if err != nil {
-		return err
-	}
+	printJSONLine(line1)
 
 	m := realHTTPAddrRegex.FindStringSubmatch(line1)
 	if m == nil {
@@ -221,10 +229,27 @@ func (gateway *ChildProcessGateway) copyToStdout(reader *bufio.Reader) {
 			addJSONLine(gateway, line)
 		}
 
-		_, err2 := os.Stdout.WriteString(line)
-		if err2 != nil {
-			// TODO: betterer...
-			panic(err2)
+		printJSONLine(line)
+	}
+}
+
+func printJSONLine(line string) {
+	lineStruct := map[string]interface{}{}
+	jsonErr := json.Unmarshal([]byte(line), &lineStruct)
+	if jsonErr == nil {
+		// Validate the whitelist if its valid json.
+
+		msg := lineStruct["msg"].(string)
+
+		// Do not print a line if its in the ignore list.
+		if infoIgnoreList[msg] {
+			return
 		}
+	}
+
+	_, err := os.Stdout.WriteString(line)
+	if err != nil {
+		// TODO: betterer...
+		panic(err)
 	}
 }

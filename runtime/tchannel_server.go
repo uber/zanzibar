@@ -132,30 +132,37 @@ func (s *TChannelRouter) onError(err error) {
 }
 
 func (s *TChannelRouter) handle(ctx context.Context, handler handler, service string, method string, call *tchannel.InboundCall) error {
-	reader, err := call.Arg2Reader()
+	treader, err := call.Arg2Reader()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2reader for inbound call: %s::%s", service, method)
 	}
-	headers, err := ReadHeaders(reader)
+
+	headers, err := ReadHeaders(treader)
 	if err != nil {
+		_ = treader.Close()
+
 		return errors.Wrapf(err, "could not reade headers for inbound call: %s::%s", service, method)
 	}
-	if err := EnsureEmpty(reader, "reading request headers"); err != nil {
+	if err := EnsureEmpty(treader, "reading request headers"); err != nil {
+		_ = treader.Close()
+
 		return errors.Wrapf(err, "could not ensure arg2reader is empty for inbound call: %s::%s", service, method)
 	}
 
-	if err := reader.Close(); err != nil {
+	if err := treader.Close(); err != nil {
 		return errors.Wrapf(err, "could not close arg2reader for inbound call: %s::%s", service, method)
 	}
 
-	reader, err = call.Arg3Reader()
+	treader, err = call.Arg3Reader()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3reader for inbound call: %s::%s", service, method)
 	}
 
 	buf := GetBuffer()
 	defer PutBuffer(buf)
-	if _, err := buf.ReadFrom(reader); err != nil {
+	if _, err := buf.ReadFrom(treader); err != nil {
+		_ = treader.Close()
+
 		return errors.Wrapf(err, "could not read from arg3reader for inbound call: %s::%s", service, method)
 	}
 
@@ -174,7 +181,7 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 	}
 
 	if err != nil {
-		if er := reader.Close(); er != nil {
+		if er := treader.Close(); er != nil {
 			return errors.Wrapf(er, "could not close arg3reader for inbound call: %s::%s", service, method)
 		}
 		s.logger.Error("Unexpected tchannel system error",
@@ -185,11 +192,23 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		return call.Response().SendSystemError(errors.New("Server Error"))
 	}
 
-	if err := EnsureEmpty(reader, "reading request body"); err != nil {
+	if err := EnsureEmpty(treader, "reading request body"); err != nil {
+		_ = treader.Close()
+
 		return errors.Wrapf(err, "could not ensure arg3reader is empty for inbound call: %s::%s", service, method)
 	}
-	if err := reader.Close(); err != nil {
+	if err := treader.Close(); err != nil {
 		return errors.Wrapf(err, "could not close arg3reader is empty for inbound call: %s::%s", service, method)
+	}
+
+	structWireValue, err := resp.ToWire()
+	if err != nil {
+		// If we could not write the body then we should do something else
+		// instead.
+
+		_ = call.Response().SendSystemError(errors.New("Server Error"))
+
+		return errors.Wrapf(err, "could not serialize arg3 for inbound call response: %s::%s", service, method)
 	}
 
 	if !success {
@@ -198,29 +217,33 @@ func (s *TChannelRouter) handle(ctx context.Context, handler handler, service st
 		}
 	}
 
-	writer, err := call.Response().Arg2Writer()
+	twriter, err := call.Response().Arg2Writer()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg2writer for inbound call response: %s::%s", service, method)
 	}
 
-	if err := WriteHeaders(writer, respHeaders); err != nil {
+	if err := WriteHeaders(twriter, respHeaders); err != nil {
+		_ = twriter.Close()
+
 		return errors.Wrapf(err, "could not write headers for inbound call response: %s::%s", service, method)
 	}
-	if err := writer.Close(); err != nil {
+	if err := twriter.Close(); err != nil {
 		return errors.Wrapf(err, "could not close arg2writer for inbound call response: %s::%s", service, method)
 	}
 
-	writer, err = call.Response().Arg3Writer()
+	twriter, err = call.Response().Arg3Writer()
 	if err != nil {
 		return errors.Wrapf(err, "could not create arg3writer for inbound call response: %s::%s", service, method)
 	}
 
-	err = WriteStruct(writer, resp)
+	err = protocol.Binary.Encode(structWireValue, twriter)
 	if err != nil {
+		_ = twriter.Close()
+
 		return errors.Wrapf(err, "could not write arg3 for inbound call response: %s::%s", service, method)
 	}
 
-	if err := writer.Close(); err != nil {
+	if err := twriter.Close(); err != nil {
 		return errors.Wrapf(err, "could not close arg3writer for inbound call response: %s::%s", service, method)
 	}
 

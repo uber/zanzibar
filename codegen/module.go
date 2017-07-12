@@ -579,7 +579,7 @@ func (system *ModuleSystem) GenerateBuild(
 
 			if err != nil {
 				fmt.Printf(
-					"Error generating %q %q class of type %q\n%q\n",
+					"Error generating %q %q of type %q:\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
 					classInstance.ClassType,
