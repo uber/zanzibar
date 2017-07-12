@@ -360,28 +360,6 @@ func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
 	return false
 }
 
-// sort the clients by client height in DAG, lowest node first
-func sortInstances(instances []*ModuleInstance, depType string) []*ModuleInstance {
-	heightMap := map[*ModuleInstance]int{}
-	sortedGroup := [][]*ModuleInstance{}
-	for _, instance := range instances {
-		h := height(instance, depType, heightMap, []*ModuleInstance{})
-		l := len(sortedGroup)
-		if l < h+1 {
-			for i := 0; i < h+1-l; i++ {
-				sortedGroup = append(sortedGroup, []*ModuleInstance{})
-			}
-		}
-		sortedGroup[h] = append(sortedGroup[h], instance)
-	}
-
-	sorted := []*ModuleInstance{}
-	for _, g := range sortedGroup {
-		sorted = append(sorted, g...)
-	}
-	return sorted
-}
-
 // ResolveModules resolves the module instances from the config on disk
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in

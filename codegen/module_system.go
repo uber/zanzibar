@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -149,15 +148,6 @@ func NewDefaultModuleSystem(
 		ClassDependencies: []string{},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering clientInit class")
-	}
-	if err := system.RegisterClassType("clients", "init", &ClientsInitGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error registering clientInit class type",
-		)
 	}
 
 	// Register endpoint module class and type generators
@@ -552,95 +542,6 @@ func (g *CustomClientGenerator) Generate(
 	return &BuildResult{
 		Files: files,
 		Spec:  clientSpec,
-	}, nil
-}
-
-/*
- * Clients Init Generator
- */
-
-// ClientsInitGenerator generates a clients initialization file
-type ClientsInitGenerator struct {
-	templates     *Template
-	packageHelper *PackageHelper
-}
-
-// Generate returns the client initializer build result, which contains the
-// generated clients initializer file and no spec
-func (g *ClientsInitGenerator) Generate(
-	instance *ModuleInstance,
-) (*BuildResult, error) {
-	clientDeps := instance.ResolvedDependencies["client"]
-	clients := make([]*ClientSpec, len(clientDeps))
-	instances := sortInstances(clientDeps, "client")
-
-	for i, instance := range instances {
-		clients[i] = instance.GeneratedSpec().(*ClientSpec)
-	}
-
-	includedPkgs := []GoPackageImport{}
-	for i, client := range clients {
-		// TODO: there shouldn't be a special thing for custom
-		if client.ClientType == "custom" {
-			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: client.CustomImportPath,
-				AliasName:   client.ImportPackageAlias,
-			})
-			if len(instances[i].ResolvedDependencies["client"]) > 0 {
-				includedPkgs = append(includedPkgs, GoPackageImport{
-					PackageName: instances[i].PackageInfo.GeneratedPackagePath,
-					AliasName:   instances[i].PackageInfo.GeneratedPackageAlias,
-				})
-			}
-		} else if len(client.ModuleSpec.Services) != 0 {
-			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: client.ImportPackagePath,
-				AliasName:   client.ImportPackageAlias,
-			})
-		}
-	}
-
-	clientInfo := []ClientInfoMeta{}
-	for i, client := range clients {
-		meta := ClientInfoMeta{
-			FieldName:    strings.Title(client.ClientName),
-			PackagePath:  client.ImportPackagePath,
-			PackageAlias: client.ImportPackageAlias,
-			ExportName:   client.ExportName,
-			ExportType:   client.ExportType,
-		}
-
-		deps := instances[i].ResolvedDependencies["client"]
-		if len(deps) > 0 {
-			depFieldNames := []string{}
-			for _, dep := range deps {
-				depFieldNames = append(depFieldNames, strings.Title(dep.PackageInfo.QualifiedInstanceName))
-			}
-			meta.DepPackageAlias = instances[i].PackageInfo.GeneratedPackageAlias
-			meta.DepFieldNames = depFieldNames
-		}
-
-		clientInfo = append(clientInfo, meta)
-	}
-
-	meta := &ClientsInitFilesMeta{
-		IncludedPackages: includedPkgs,
-		ClientInfo:       clientInfo,
-	}
-
-	clientsInit, err := g.templates.execTemplate(
-		"init_clients.tmpl",
-		meta,
-		g.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Error executing client init template")
-	}
-
-	return &BuildResult{
-		Files: map[string][]byte{
-			"clients.go": clientsInit,
-		},
 	}, nil
 }
 
@@ -1155,37 +1056,4 @@ func GenerateInitializer(
 		instance,
 		packageHelper,
 	)
-}
-
-func height(i *ModuleInstance, depType string, known map[*ModuleInstance]int, seen []*ModuleInstance) int {
-	// detect dependency cycle
-	for _, instance := range seen {
-		if i == instance {
-			var path string
-			for _, ins := range seen {
-				path += ins.InstanceName + "->"
-			}
-			path += i.InstanceName
-			panic(fmt.Sprintf("Dependency cycle detected for %q type: %s", depType, path))
-		}
-	}
-
-	if h, ok := known[i]; ok {
-		return h
-	}
-	if len(i.ResolvedDependencies[depType]) == 0 {
-		known[i] = 0
-		return 0
-	}
-
-	mh := 0
-	seen = append(seen, i)
-	for _, instance := range i.ResolvedDependencies[depType] {
-		ch := height(instance, depType, known, seen)
-		if ch > mh {
-			mh = ch
-		}
-	}
-	known[i] = mh + 1
-	return mh + 1
 }

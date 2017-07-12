@@ -6,7 +6,6 @@
 // codegen/templates/endpoint_test.tmpl
 // codegen/templates/endpoint_test_tchannel_client.tmpl
 // codegen/templates/http_client.tmpl
-// codegen/templates/init_clients.tmpl
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
 // codegen/templates/module_initializer.tmpl
@@ -1022,60 +1021,6 @@ func http_clientTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _init_clientsTmpl = []byte(`{{- /* template to render gateway client initialization */ -}}
-
-package clients
-
-import (
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
-	"github.com/uber/zanzibar/runtime"
-)
-
-// Clients datastructure that holds all the generated clients
-// This should only hold clients generate from specs
-type Clients struct {
-	{{range $idx, $clientInfo := .ClientInfo -}}
-	{{$clientInfo.FieldName}} {{$clientInfo.PackageAlias}}.{{$clientInfo.ExportType}}
-	{{end}}
-}
-
-// CreateClients will make all clients
-func CreateClients(
-	gateway *zanzibar.Gateway,
-) interface{} {
-	{{range $idx, $cinfo := .ClientInfo -}}
-	_{{lower $cinfo.FieldName}} := {{$cinfo.PackageAlias}}.{{$cinfo.ExportName}}(gateway{{if $cinfo.DepFieldNames}}, {{$cinfo.DepPackageAlias}}.ClientDependencies{
-		{{range $fname := $cinfo.DepFieldNames -}}
-		{{$fname}}: _{{lower $fname}},
-		{{end}}
-	}{{end}})
-	{{end}}
-
-	return &Clients{
-		{{range $idx, $cinfo := .ClientInfo -}}
-		{{$cinfo.FieldName}}: _{{lower $cinfo.FieldName}},
-		{{end}}
-	}
-}
-`)
-
-func init_clientsTmplBytes() ([]byte, error) {
-	return _init_clientsTmpl, nil
-}
-
-func init_clientsTmpl() (*asset, error) {
-	bytes, err := init_clientsTmplBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "init_clients.tmpl", size: 1046, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
 var _mainTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
 
 package main
@@ -1272,13 +1217,13 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-    {{if $moduleInstance.HasDependencies}}
-    {{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
-    {{end -}}
-    {{end -}}
-    {{end -}}
+	{{if $moduleInstance.HasDependencies}}
+	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end -}}
 
-    "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 )
 
 {{range $idx, $className := $instance.DependencyOrder -}}
@@ -1292,40 +1237,40 @@ type {{$className}}Dependencies struct {
 {{end -}}
 
 func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$instance.PackageInfo.ExportType}} {
-    {{- if not $instance.HasDependencies}}
-    return {{$instance.PackageInfo.ExportName}}(gateway)
-    {{- else}}
-    {{- range $idx, $className := $instance.DependencyOrder}}
-    {{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
-    initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
+	{{- if not $instance.HasDependencies}}
+	return {{$instance.PackageInfo.ExportName}}(gateway)
+	{{- else}}
+	{{- range $idx, $className := $instance.DependencyOrder}}
+	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+	initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
 
-    {{- range $idx, $dependency := $moduleInstances}}
-    {{- if $dependency.HasDependencies}}
-    initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.GeneratedPackageAlias}}.Dependencies{
-        {{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-        {{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
-            {{- range $idy, $subDependency := $moduleInstances}}
-            {{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
-            {{- end}}
-        },
-        {{- end}}
-    })
-    {{- else}}
-    initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
-    {{- end}}
-    {{- end}}
-    {{end}}
+	{{- range $idx, $dependency := $moduleInstances}}
+	{{- if $dependency.HasDependencies}}
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.GeneratedPackageAlias}}.Dependencies{
+		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	})
+	{{- else}}
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
+	{{- end}}
+	{{- end}}
+	{{end}}
 
-    return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
-        {{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
-        {{$className | pascal}}: &{{$className | pascal}}Dependencies{
-            {{- range $idy, $subDependency := $moduleInstances}}
-            {{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
-            {{- end}}
-        },
-        {{- end}}
-    })
-    {{- end}}
+	return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
+		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	})
+	{{- end}}
 }
 `)
 
@@ -1339,7 +1284,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3067, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2893, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1873,7 +1818,6 @@ var _bindata = map[string]func() (*asset, error){
 	"endpoint_test.tmpl":                 endpoint_testTmpl,
 	"endpoint_test_tchannel_client.tmpl": endpoint_test_tchannel_clientTmpl,
 	"http_client.tmpl":                   http_clientTmpl,
-	"init_clients.tmpl":                  init_clientsTmpl,
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
@@ -1930,7 +1874,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"endpoint_test.tmpl":                 {endpoint_testTmpl, map[string]*bintree{}},
 	"endpoint_test_tchannel_client.tmpl": {endpoint_test_tchannel_clientTmpl, map[string]*bintree{}},
 	"http_client.tmpl":                   {http_clientTmpl, map[string]*bintree{}},
-	"init_clients.tmpl":                  {init_clientsTmpl, map[string]*bintree{}},
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
