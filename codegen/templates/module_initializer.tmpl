@@ -1,0 +1,63 @@
+{{$instance := . -}}
+
+package module
+
+import (
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{if $moduleInstance.HasDependencies}}
+	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end -}}
+
+	"github.com/uber/zanzibar/runtime"
+)
+
+{{range $idx, $className := $instance.DependencyOrder -}}
+{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
+// {{$className}}Dependencies contains {{$className}} dependencies
+type {{$className}}Dependencies struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}
+
+func {{$instance.PackageInfo.InitializerName}}(gateway *zanzibar.Gateway) {{$instance.PackageInfo.ExportType}} {
+	{{- if not $instance.HasDependencies}}
+	return {{$instance.PackageInfo.ExportName}}(gateway)
+	{{- else}}
+	{{- range $idx, $className := $instance.DependencyOrder}}
+	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+	initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
+
+	{{- range $idx, $dependency := $moduleInstances}}
+	{{- if $dependency.HasDependencies}}
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.GeneratedPackageAlias}}.Dependencies{
+		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	})
+	{{- else}}
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
+	{{- end}}
+	{{- end}}
+	{{end}}
+
+	return {{$instance.PackageInfo.ExportName}}(gateway, &Dependencies{
+		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	})
+	{{- end}}
+}
