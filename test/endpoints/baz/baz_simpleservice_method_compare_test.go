@@ -128,8 +128,6 @@ func TestCompare(t *testing.T) {
 		}, nil, nil
 	}
 
-	// bazClient.NewSimpleServiceCompareHandler
-
 	gateway.TChannelBackends()["baz"].Register(
 		"SimpleService",
 		"compare",
