@@ -56,18 +56,19 @@ type ThriftServiceMap map[string]map[string]*ThriftService
 
 // EndpointConfig stores configuration for an endpoint.
 type EndpointConfig struct {
-	ID                string
-	Type              ProtocolType
-	HandleID          string
-	ConfigFile        string
-	ThriftFile        string
-	ThriftServiceName string
-	MethodName        string
-	WorkflowType      string
-	ClientID          string
-	ClientMethod      string
-	TestFixture       string
-	Middlewares       []*EndptMidConfig
+	ID               string            `json:"endpointId"`
+	Type             ProtocolType      `json:"endpointType"`
+	HandleID         string            `json:"handleId"`
+	ThriftFile       string            `json:"thriftFile"`
+	ThriftFileSha    string            `json:"thriftFileSha",omitempty`
+	ThriftMethodName string            `json:"thriftMethodName"`
+	WorkflowType     string            `json:"workflowType"`
+	ClientID         string            `json:"clientID"`
+	ClientMethod     string            `json:"clientMethod"`
+	TestFixtures     []string          `json:"testFixtures"`
+	Middlewares      []*EndptMidConfig `json:"middlewares"`
+	ReqHeaderMap     map[string]string `json:"reqHeaderMap"`
+	ResHeaderMap     map[string]string `json:"resHeaderMap"`
 }
 
 // EndptMidConfig represents configuration for a middleware.
@@ -122,10 +123,11 @@ type ThriftMeta struct {
 type ProtocolType string
 
 const (
-	gatewayConfigFile     = "gateway.json"
-	productionCfgJSONPath = "config/production.json"
-	clientConfigFileName  = "client-config.json"
-	clientModuleFileName  = "clients-config.json"
+	gatewayConfigFile      = "gateway.json"
+	productionCfgJSONPath  = "config/production.json"
+	clientConfigFileName   = "client-config.json"
+	clientModuleFileName   = "clients-config.json"
+	endpointConfigFileName = "endpoint-config.json"
 )
 
 const (
@@ -325,19 +327,17 @@ func convInt64Val(m map[string]interface{}, key string) (int64, error) {
 
 func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.GatewaySpec) map[string]*EndpointConfig {
 	cfgs := make(map[string]*EndpointConfig, len(gatewaySpec.EndpointModules))
-	for file, spec := range gatewaySpec.EndpointModules {
+	for _, spec := range gatewaySpec.EndpointModules {
 		endpointID := spec.EndpointID + "." + spec.HandleID
 		cfgs[endpointID] = &EndpointConfig{
-			ID:                endpointID,
-			ConfigFile:        strings.TrimPrefix(file, r.localDir),
-			Type:              ProtocolTypeFromString(spec.EndpointType),
-			HandleID:          spec.HandleID,
-			ThriftFile:        r.relativePath(thriftRootDir, spec.ThriftFile),
-			ThriftServiceName: spec.ThriftServiceName,
-			MethodName:        spec.ThriftMethodName,
-			WorkflowType:      spec.WorkflowType,
-			ClientID:          spec.ClientID,
-			ClientMethod:      spec.ClientMethod,
+			ID:               endpointID,
+			Type:             ProtocolTypeFromString(spec.EndpointType),
+			HandleID:         spec.HandleID,
+			ThriftFile:       r.relativePath(thriftRootDir, spec.ThriftFile),
+			ThriftMethodName: spec.ThriftServiceName + "::" + spec.ThriftMethodName,
+			WorkflowType:     spec.WorkflowType,
+			ClientID:         spec.ClientID,
+			ClientMethod:     spec.ClientMethod,
 			// TODO(zw): add test fixtures and middleware config.
 		}
 	}

@@ -23,7 +23,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "ArgNotStruct",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.argWithHeaders": {
 			"ID": "bar.argWithHeaders",
@@ -37,7 +39,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "ArgWithHeaders",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.argWithManyQueryParams": {
 			"ID": "bar.argWithManyQueryParams",
@@ -51,7 +55,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "ArgWithManyQueryParams",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.argWithQueryHeader": {
 			"ID": "bar.argWithQueryHeader",
@@ -65,7 +71,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "ArgWithQueryHeader",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.argWithQueryParams": {
 			"ID": "bar.argWithQueryParams",
@@ -79,7 +87,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "ArgWithQueryParams",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.missingArg": {
 			"ID": "bar.missingArg",
@@ -93,7 +103,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "MissingArg",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.noRequest": {
 			"ID": "bar.noRequest",
@@ -107,7 +119,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "NoRequest",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.normal": {
 			"ID": "bar.normal",
@@ -121,7 +135,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "Normal",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bar.tooManyArgs": {
 			"ID": "bar.tooManyArgs",
@@ -135,7 +151,9 @@
 			"ClientID": "bar",
 			"ClientMethod": "TooManyArgs",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"baz.call": {
 			"ID": "baz.call",
@@ -149,7 +167,9 @@
 			"ClientID": "baz",
 			"ClientMethod": "Call",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"baz.compare": {
 			"ID": "baz.compare",
@@ -163,7 +183,9 @@
 			"ClientID": "baz",
 			"ClientMethod": "Compare",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"baz.ping": {
 			"ID": "baz.ping",
@@ -177,7 +199,9 @@
 			"ClientID": "baz",
 			"ClientMethod": "Ping",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"baz.sillyNoop": {
 			"ID": "baz.sillyNoop",
@@ -191,7 +215,9 @@
 			"ClientID": "baz",
 			"ClientMethod": "DeliberateDiffNoop",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"bazTChannel.call": {
 			"ID": "bazTChannel.call",
@@ -205,7 +231,9 @@
 			"ClientID": "",
 			"ClientMethod": "",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"contacts.saveContacts": {
 			"ID": "contacts.saveContacts",
@@ -219,7 +247,9 @@
 			"ClientID": "",
 			"ClientMethod": "",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"googlenow.addCredentials": {
 			"ID": "googlenow.addCredentials",
@@ -233,7 +263,9 @@
 			"ClientID": "google-now",
 			"ClientMethod": "AddCredentials",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		},
 		"googlenow.checkCredentials": {
 			"ID": "googlenow.checkCredentials",
@@ -247,7 +279,9 @@
 			"ClientID": "google-now",
 			"ClientMethod": "CheckCredentials",
 			"TestFixture": "",
-			"Middlewares": null
+			"Middlewares": null,
+			"ReqHeaderMap": null,
+			"ResHeaderMap": null
 		}
 	},
 	"Clients": {

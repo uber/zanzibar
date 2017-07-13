@@ -1,3 +1,23 @@
+// Copyright (c) 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 package repository
 
 import (
@@ -8,55 +28,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 )
-
-// EndpointConfigJSON is for serializing Endpoint into JSON file.
-type EndpointConfigJSON struct {
-	EndpointType     string                 `json:"endpointType"`
-	EndpointID       string                 `json:"endpointId"`
-	HandleID         string                 `json:"handleId"`
-	ThriftFile       string                 `json:"thriftFile"`
-	ThriftFileSha    string                 `json:"thriftFileSha"`
-	ThriftMethodName string                 `json:"thriftMethodName"`
-	WorkflowType     string                 `json:"workflowType"`
-	ClientID         string                 `json:"clientID"`
-	ClientMethod     string                 `json:"clientMethod"`
-	TestFixtures     []string               `json:"testFixtures"`
-	Middlewares      []MiddlewareConfigJSON `json:"middlewares"`
-	ReqHeaderMap     map[string]string      `json:"reqHeaderMap"`
-	ResHeaderMap     map[string]string      `json:"resHeaderMap"`
-}
-
-// MiddlewareConfigJSON is for serializing Endpoint Middleware configs into JSON file.
-type MiddlewareConfigJSON struct {
-	Name    string                 `json:"name"`
-	Options map[string]interface{} `json:"options"`
-}
-
-// NewEndpointConfigJSON converts an EndpointConfig to its JSON format.
-func NewEndpointConfigJSON(cfg *EndpointConfig) *EndpointConfigJSON {
-	// TODO: Use middleware schemas to validate configs.
-	midJsons := make([]MiddlewareConfigJSON, len(cfg.Middlewares))
-
-	for i, mid := range cfg.Middlewares {
-		midJsons[i].Name = mid.Name
-		midJsons[i].Options = mid.Options
-	}
-	cfgJSON := &EndpointConfigJSON{
-		EndpointType:     string(cfg.Type),
-		EndpointID:       strings.TrimSuffix(cfg.ID, "."+cfg.HandleID),
-		HandleID:         cfg.HandleID,
-		ThriftFile:       cfg.ThriftFile,
-		ThriftMethodName: cfg.ThriftServiceName + "::" + cfg.MethodName,
-		WorkflowType:     cfg.WorkflowType,
-		ClientID:         cfg.ClientID,
-		ClientMethod:     cfg.ClientMethod,
-		TestFixtures:     []string{},
-		Middlewares:      midJsons,
-		ReqHeaderMap:     map[string]string{},
-		ResHeaderMap:     map[string]string{},
-	}
-	return cfgJSON
-}
 
 // WriteEndpointConfig writes endpoint configs into a runtime repository and
 // also updates the meta json file for all endpoints.
@@ -77,15 +48,14 @@ func (r *Repository) WriteEndpointConfig(
 		return errors.Wrap(err, "failed to create endpoint config dir")
 	}
 	fileName := codegen.CamelToSnake(config.HandleID) + ".json"
-	cfgJSON := NewEndpointConfigJSON(config)
-	cfgJSON.ThriftFileSha = thriftFileSha
-	err = writeToJSONFile(filepath.Join(dir, fileName), cfgJSON)
+	config.ThriftFileSha = thriftFileSha
+	err = writeToJSONFile(filepath.Join(dir, fileName), config)
 	if err != nil {
-		return errors.Wrap(err, "failed to write to config file")
+		return errors.Wrap(err, "failed to write to endpoint config file")
 	}
-	err = updateEndpointMetaJSON(dir, "endpoint-config.json", fileName, cfgJSON)
+	err = updateEndpointMetaJSON(dir, endpointConfigFileName, fileName, config)
 	if err != nil {
-		return errors.Wrap(err, "failed to write endpoint-config.json")
+		return errors.Wrap(err, "failed to write endpoint group configuration")
 	}
 	return nil
 }
@@ -97,25 +67,20 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	}
 	clientCfg, ok := gatewayConfig.Clients[req.ClientID]
 	if !ok {
-		return errors.Errorf("can't find client %s", req.ClientID)
+		return errors.Errorf("can't find client %q", req.ClientID)
 	}
 	if clientCfg.Type == HTTP {
 		req.WorkflowType = "httpClient"
 	} else if clientCfg.Type == TCHANNEL {
 		req.WorkflowType = "tchannelClient"
 	} else {
-		return errors.Errorf("client type %s is not supported", clientCfg.Type)
+		return errors.Errorf("client type %q is not supported", clientCfg.Type)
 	}
-
-	// Client method is the second part of <thrift service>::<method name> for tchannel client.
-	// For http client, it is only <method name>.
-	parts := strings.Split(req.ClientMethod, "::")
-	req.ClientMethod = parts[len(parts)-1]
 	return nil
 }
 
 // updateEndpointMetaJSON adds an endpoint in the meta json file or updates the config for an exsiting endpoint.
-func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfgJSON *EndpointConfigJSON) error {
+func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfg *EndpointConfig) error {
 	metaFilePath := filepath.Join(configDir, metaFile)
 	fileContent := new(codegen.EndpointClassConfig)
 	err := readJSONFile(metaFilePath, fileContent)
@@ -129,13 +94,12 @@ func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfgJSON *Endpoi
 	if fileContent.Dependencies == nil {
 		fileContent.Dependencies = make(map[string][]string)
 	}
-	if c := fileContent.Dependencies["client"]; !findString(cfgJSON.ClientID, c) {
-		fileContent.Dependencies["client"] = append(c, cfgJSON.ClientID)
+	if c := fileContent.Dependencies["client"]; !findString(cfg.ClientID, c) {
+		fileContent.Dependencies["client"] = append(c, cfg.ClientID)
 	}
-	parts := strings.Split(cfgJSON.EndpointID, ".")
-	fileContent.Name = parts[0]
+	fileContent.Name = cfg.ID
 	if fileContent.Type == "" {
-		fileContent.Type = cfgJSON.EndpointType
+		fileContent.Type = string(cfg.Type)
 	}
 	return writeToJSONFile(metaFilePath, fileContent)
 }

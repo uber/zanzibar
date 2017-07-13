@@ -88,19 +88,30 @@ func testUpdateClientConfig(t *testing.T, requestFile string, clientName string)
 }
 
 func copyExample(t *testing.T) (string, error) {
-	tempDir, err := ioutil.TempDir("", "example-gateway")
+	tempDir, err := ioutil.TempDir("", "zanzibar")
 	if err != nil {
 		return "", err
 	}
-	err = copyDir(exampleGateway, tempDir, []string{
+	tempExample := filepath.Join(tempDir, "examples", "example-gateway")
+	tempRuntimeMiddleware := filepath.Join(tempDir, "runtime", "middlewares")
+	if err := os.MkdirAll(tempExample, os.ModePerm); err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(tempRuntimeMiddleware, os.ModePerm); err != nil {
+		return "", err
+	}
+	err = copyDir(exampleGateway, tempExample, []string{
 		filepath.Join(exampleGateway, "build"),
-		filepath.Join(exampleGateway, "middlewares"),
 	})
 	if err != nil {
 		return "", err
 	}
+	err = copyDir("../../runtime/middlewares", tempRuntimeMiddleware, nil)
+	if err != nil {
+		return "", err
+	}
 	t.Logf("Temp dir is created at %s\n", tempDir)
-	return tempDir, nil
+	return tempExample, nil
 }
 
 func copyDir(src, dest string, ignoredPrefixes []string) error {
