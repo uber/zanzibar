@@ -102,10 +102,12 @@ type Options struct {
 	KnownHTTPBackends     []string
 	KnownTChannelBackends []string
 	CountMetrics          bool
+	EnableRuntimeMetrics  bool
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
-	t *testing.T, opts *Options,
+	t *testing.T,
+	opts *Options,
 ) {
 	countMetrics := false
 	if opts != nil {
@@ -122,7 +124,9 @@ func (gateway *ChildProcessGateway) setupMetrics(
 
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
-	t *testing.T, config map[string]interface{}, opts *Options,
+	t *testing.T,
+	config map[string]interface{},
+	opts *Options,
 ) (TestGateway, error) {
 	startTime := time.Now()
 
@@ -192,12 +196,17 @@ func CreateGateway(
 		config["tchannel.port"] = 0
 	}
 
+	config["env"] = "test"
 	config["tchannel.serviceName"] = serviceName
 	config["tchannel.processName"] = serviceName
 	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
 	config["metrics.tally.service"] = serviceName
 	config["metrics.tally.flushInterval"] = 10
 	config["metrics.m3.flushInterval"] = 10
+	config["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
+	config["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
+	config["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
+	config["metrics.runtime.collectIntervalMs"] = 10
 	config["logger.output"] = "stdout"
 
 	err = testGateway.createAndSpawnChild(opts.TestBinary, config)
@@ -210,7 +219,10 @@ func CreateGateway(
 
 // MakeRequest helper
 func (gateway *ChildProcessGateway) MakeRequest(
-	method string, url string, headers map[string]string, body io.Reader,
+	method string,
+	url string,
+	headers map[string]string,
+	body io.Reader,
 ) (*http.Response, error) {
 	client := gateway.HTTPClient
 
@@ -259,7 +271,8 @@ func (gateway *ChildProcessGateway) HTTPPort() int {
 
 // Logs ...
 func (gateway *ChildProcessGateway) Logs(
-	level string, msg string,
+	level string,
+	msg string,
 ) []LogMessage {
 	// Logs can be a little late...
 	// So just wait a bit...
