@@ -33,6 +33,10 @@ import (
 const endpointUpdateRequestDir = "../../examples/example-gateway/endpoints"
 
 func TestUpdateEndpoint(t *testing.T) {
+	tempDir, err := copyExample(t)
+	if !assert.NoError(t, err, "Failed to copy example.") {
+		return
+	}
 	requestFiles := []string{
 		"googlenow/add_credentials.json",
 		"googlenow/check_credentials.json",
@@ -42,18 +46,14 @@ func TestUpdateEndpoint(t *testing.T) {
 	}
 	for _, file := range requestFiles {
 		t.Logf("Test request in %q\n", file)
-		testUpdateEndpointConfig(t, filepath.Join(endpointUpdateRequestDir, file))
+		testUpdateEndpointConfig(t, tempDir, filepath.Join(endpointUpdateRequestDir, file))
 	}
 }
 
-func testUpdateEndpointConfig(t *testing.T, requestFile string) {
+func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) {
 	req := &EndpointConfig{}
 	err := readJSONFile(requestFile, req)
 	assert.NoError(t, err, "Failed to unmarshal endpoint config.")
-	tempDir, err := copyExample(t)
-	if !assert.NoError(t, err, "Failed to copy example.") {
-		return
-	}
 	r := &Repository{
 		localDir: tempDir,
 	}
