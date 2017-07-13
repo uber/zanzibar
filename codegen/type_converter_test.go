@@ -958,3 +958,49 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 		err.Error(),
 	)
 }
+
+// Enduse that common acronyms are handled consistently with the
+// Thrift compiled acronym strings.
+func TestConvertStructWithAcoronymTypes(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+			1: required string uuid
+			2: optional string two
+		}
+
+		struct NestedBar {
+			1: required string uuid
+			2: optional string two
+		}
+
+		struct Foo {
+			3: optional NestedFoo three
+			4: required NestedFoo four
+		}
+
+		struct Bar {
+			3: optional NestedBar three
+			4: required NestedBar four
+		}`,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.uuid = string(in.Three.uuid)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.uuid = string(in.Four.uuid)
+			out.Four.Two = (*string)(in.Four.Two)
+		} else {
+			out.Four = nil
+		}
+	`), lines)
+}
