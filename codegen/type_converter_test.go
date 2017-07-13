@@ -990,14 +990,14 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 	assert.Equal(t, trim(`
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
-			out.Three.uuid = string(in.Three.uuid)
+			out.Three.UUID = string(in.Three.UUID)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
 		}
 		if in.Four != nil {
 			out.Four = &structs.NestedBar{}
-			out.Four.uuid = string(in.Four.uuid)
+			out.Four.UUID = string(in.Four.UUID)
 			out.Four.Two = (*string)(in.Four.Two)
 		} else {
 			out.Four = nil
