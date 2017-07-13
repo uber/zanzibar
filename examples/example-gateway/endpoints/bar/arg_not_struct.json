@@ -1,6 +1,6 @@
 {
-	"endpointType": "http",
 	"endpointId": "bar",
+	"endpointType": "http",
 	"handleId": "argNotStruct",
 	"thriftFile": "endpoints/bar/bar.thrift",
 	"thriftFileSha": "{{placeholder}}",
@@ -11,5 +11,5 @@
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},
-	"resHeaderMap": {}	
+	"resHeaderMap": {}
 }

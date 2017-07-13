@@ -38,9 +38,10 @@ func TestUpdateEndpoint(t *testing.T) {
 		"googlenow/check_credentials.json",
 		"bar/arg_not_struct.json",
 		"baz/call.json",
-		"contacts/save-contacts.json",
+		"baz/compare.json",
 	}
 	for _, file := range requestFiles {
+		t.Logf("Test request in %q\n", file)
 		testUpdateEndpointConfig(t, filepath.Join(endpointUpdateRequestDir, file))
 	}
 }

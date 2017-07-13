@@ -330,7 +330,7 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 	for _, spec := range gatewaySpec.EndpointModules {
 		endpointID := spec.EndpointID + "." + spec.HandleID
 		cfgs[endpointID] = &EndpointConfig{
-			ID:               endpointID,
+			ID:               spec.EndpointID,
 			Type:             ProtocolTypeFromString(spec.EndpointType),
 			HandleID:         spec.HandleID,
 			ThriftFile:       r.relativePath(thriftRootDir, spec.ThriftFile),
