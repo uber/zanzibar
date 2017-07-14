@@ -387,10 +387,12 @@ func findParamsAnnotation(
 	fields compile.FieldGroup, paramName string,
 ) (string, bool) {
 	var identifier string
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param == "params."+paramName[1:] {
-				identifier = prefix + "." + strings.Title(field.Name)
+				identifier = goPrefix + "." + strings.Title(field.Name)
 				return true
 			}
 		}
@@ -413,12 +415,14 @@ func (ms *MethodSpec) setRequestHeaderFields(
 	ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
 
 	// Scan for all annotations
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ReqHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: prefix + "." + strings.Title(field.Name),
+					FieldIdentifier: goPrefix + "." + strings.Title(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
@@ -442,12 +446,14 @@ func (ms *MethodSpec) setResponseHeaderFields(
 	ms.ResHeaderFields = map[string]HeaderFieldInfo{}
 
 	// Scan for all annotations
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: prefix + "." + strings.Title(field.Name),
+					FieldIdentifier: goPrefix + "." + strings.Title(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
@@ -613,7 +619,9 @@ func (ms *MethodSpec) setQueryParamStatements(
 	// should not read this field from query parameters.
 	statements := LineBuilder{}
 
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		realType := compile.RootTypeSpec(field.Type)
 
 		// If the type is a struct then we cannot really do anything
@@ -621,25 +629,30 @@ func (ms *MethodSpec) setQueryParamStatements(
 			return false
 		}
 
-		fieldName := field.Name
-		identifierName := camelCase(fieldName) + "Query"
+		var longFieldName string
+		if thriftPrefix == "" {
+			longFieldName = field.Name
+		} else {
+			longFieldName = thriftPrefix + "." + field.Name
+		}
+		identifierName := camelCase(longFieldName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
 		if httpRefAnnotation != "" {
 			return false
 		}
 
-		okIdentifierName := camelCase(fieldName) + "Ok"
+		okIdentifierName := camelCase(longFieldName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
-				okIdentifierName, fieldName,
+				okIdentifierName, longFieldName,
 			)
 			statements.appendf("if !%s {", okIdentifierName)
 			statements.append("\treturn")
 			statements.append("}")
 		} else {
 			statements.appendf("%s := req.HasQueryValue(%q)",
-				okIdentifierName, fieldName,
+				okIdentifierName, longFieldName,
 			)
 			statements.appendf("if %s {", okIdentifierName)
 		}
@@ -648,20 +661,22 @@ func (ms *MethodSpec) setQueryParamStatements(
 		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
-			identifierName, queryMethodName, fieldName,
+			identifierName, queryMethodName, longFieldName,
 		)
 
 		statements.append("if !ok {")
 		statements.append("\treturn")
 		statements.append("}")
 
+		requestyBodyFieldName := strings.Title(field.Name)
+
 		if field.Required {
 			statements.appendf("requestBody.%s = %s",
-				strings.Title(field.Name), identifierName,
+				requestyBodyFieldName, identifierName,
 			)
 		} else {
 			statements.appendf("\trequestBody.%s = ptr.%s(%s)",
-				strings.Title(field.Name), pointerMethod, identifierName,
+				requestyBodyFieldName, pointerMethod, identifierName,
 			)
 			statements.append("}")
 		}

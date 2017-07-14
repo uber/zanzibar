@@ -163,21 +163,29 @@ func pointerMethodType(typeSpec compile.TypeSpec) string {
 	return pointerMethod
 }
 
+type walkFieldVisitor func(
+	goPrefix string,
+	thriftPrefix string,
+	field *compile.FieldSpec,
+) bool
+
 func walkFieldGroups(
 	fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
+	visitField walkFieldVisitor,
 ) bool {
-	return walkFieldGroupsInternal("", fields, visitField)
+	return walkFieldGroupsInternal("", "", fields, visitField)
 }
 
 func walkFieldGroupsInternal(
-	prefix string, fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
+	goPrefix string,
+	thriftPrefix string,
+	fields compile.FieldGroup,
+	visitField walkFieldVisitor,
 ) bool {
 	for i := 0; i < len(fields); i++ {
 		field := fields[i]
 
-		bail := visitField(prefix, field)
+		bail := visitField(goPrefix, thriftPrefix, field)
 		if bail {
 			return true
 		}
@@ -195,7 +203,8 @@ func walkFieldGroupsInternal(
 		case *compile.EnumSpec:
 		case *compile.StructSpec:
 			bail := walkFieldGroupsInternal(
-				prefix+"."+strings.Title(field.Name),
+				goPrefix+"."+strings.Title(field.Name),
+				thriftPrefix+"."+field.Name,
 				t.Fields,
 				visitField,
 			)
