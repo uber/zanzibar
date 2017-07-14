@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
@@ -203,7 +202,7 @@ func walkFieldGroupsInternal(
 		case *compile.EnumSpec:
 		case *compile.StructSpec:
 			bail := walkFieldGroupsInternal(
-				goPrefix+"."+strings.Title(field.Name),
+				goPrefix+"."+pascalCase(field.Name),
 				thriftPrefix+"."+field.Name,
 				t.Fields,
 				visitField,
