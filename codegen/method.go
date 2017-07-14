@@ -392,7 +392,7 @@ func findParamsAnnotation(
 	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param == "params."+paramName[1:] {
-				identifier = goPrefix + "." + strings.Title(field.Name)
+				identifier = goPrefix + "." + pascalCase(field.Name)
 				return true
 			}
 		}
@@ -422,7 +422,7 @@ func (ms *MethodSpec) setRequestHeaderFields(
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ReqHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: goPrefix + "." + strings.Title(field.Name),
+					FieldIdentifier: goPrefix + "." + pascalCase(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
@@ -453,7 +453,7 @@ func (ms *MethodSpec) setResponseHeaderFields(
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: goPrefix + "." + strings.Title(field.Name),
+					FieldIdentifier: goPrefix + "." + pascalCase(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
