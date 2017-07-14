@@ -612,16 +612,21 @@ func (ms *MethodSpec) setQueryParamStatements(
 	// If a thrift field has a http.ref annotation then we
 	// should not read this field from query parameters.
 	statements := LineBuilder{}
-	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 
-	for _, field := range structType {
+	visitor := func(prefix string, field *compile.FieldSpec) bool {
 		realType := compile.RootTypeSpec(field.Type)
+
+		// If the type is a struct then we cannot really do anything
+		if _, ok := realType.(*compile.StructSpec); ok {
+			return false
+		}
+
 		fieldName := field.Name
 		identifierName := camelCase(fieldName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
 		if httpRefAnnotation != "" {
-			continue
+			return false
 		}
 
 		okIdentifierName := camelCase(fieldName) + "Ok"
@@ -663,7 +668,9 @@ func (ms *MethodSpec) setQueryParamStatements(
 
 		// new line after block.
 		statements.append("")
+		return false
 	}
+	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
 
 	ms.QueryParamGoStatements = statements.GetLines()
 
