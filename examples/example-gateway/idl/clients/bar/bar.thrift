@@ -31,6 +31,8 @@ struct BarResponse {
 struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
+    3: optional string authUUID
+    4: required string authUUID2
 }
 
 exception BarException {
