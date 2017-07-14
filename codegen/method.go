@@ -635,7 +635,7 @@ func (ms *MethodSpec) setQueryParamStatements(
 		} else {
 			longFieldName = thriftPrefix + "." + field.Name
 			if longFieldName[0] == '.' {
-				longFieldName = longFieldName[1:len(longFieldName)]
+				longFieldName = longFieldName[1:]
 			}
 		}
 		identifierName := camelCase(longFieldName) + "Query"
