@@ -26,23 +26,30 @@ package googlenow
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
 // CheckCredentialsHandler is the handler for "/googlenow/check-credentials"
 type CheckCredentialsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewCheckCredentialsEndpoint creates a handler
 func NewCheckCredentialsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *CheckCredentialsHandler {
 	return &CheckCredentialsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *CheckCredentialsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/googlenow/check-credentials".
@@ -80,7 +87,7 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
 type CheckCredentialsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

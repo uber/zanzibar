@@ -26,26 +26,33 @@ package baz
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // CallHandler is the handler for "/baz/call"
 type CallHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewCallEndpoint creates a handler
 func NewCallEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *CallHandler {
 	return &CallHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/baz/call".
@@ -93,7 +100,7 @@ func (handler *CallHandler) HandleRequest(
 
 // CallEndpoint calls thrift client Baz.Call
 type CallEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

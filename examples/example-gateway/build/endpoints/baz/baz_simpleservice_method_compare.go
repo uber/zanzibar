@@ -26,27 +26,34 @@ package baz
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // CompareHandler is the handler for "/baz/compare"
 type CompareHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewCompareEndpoint creates a handler
 func NewCompareEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *CompareHandler {
 	return &CompareHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *CompareHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/baz/compare".
@@ -96,7 +103,7 @@ func (handler *CompareHandler) HandleRequest(
 
 // CompareEndpoint calls thrift client Baz.Compare
 type CompareEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

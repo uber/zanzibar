@@ -26,27 +26,34 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // TooManyArgsHandler is the handler for "/bar/too-many-args-path"
 type TooManyArgsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewTooManyArgsEndpoint creates a handler
 func NewTooManyArgsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *TooManyArgsHandler {
 	return &TooManyArgsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *TooManyArgsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/bar/too-many-args-path".
@@ -95,7 +102,7 @@ func (handler *TooManyArgsHandler) HandleRequest(
 
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
 type TooManyArgsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

@@ -110,6 +110,7 @@ func main() {
 	fmt.Printf("Generating all modules\n\n")
 	fmt.Printf("Generating module initilization logic\n")
 
+	// TODO: delete this vvv
 	gatewaySpec, err := codegen.NewGatewaySpec(
 		moduleInstances,
 		packageHelper,

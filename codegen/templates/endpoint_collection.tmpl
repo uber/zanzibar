@@ -1,0 +1,53 @@
+{{- $instance := .Instance -}}
+{{- $endpointMeta := .EndpointMeta -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	zanzibar "github.com/uber/zanzibar/runtime"
+)
+
+type Endpoint interface{
+	Register(*zanzibar.Gateway) error
+}
+
+// NewEndpoint returns a collection of endpoints that can be registered on
+// a gateway
+{{- if $instance.HasDependencies}}
+func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+	return &EndpointHandlers{
+		{{- range $idx, $meta := $endpointMeta }}
+		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$handlerName}}: New{{$handlerName}}(g, deps),
+		{{- end}}
+	}
+}
+{{- else}}
+func NewEndpoint(g *zanzibar.Gateway) Endpoint {
+	return &EndpointHandlers{
+		{{- range $idx, $meta := $endpointMeta }}
+		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$handlerName}}: New{{$handlerName}}(g),
+		{{- end}}
+	}
+}
+{{- end}}
+
+// EndpointHandlers is a collection of individual endpoint handlers
+type EndpointHandlers struct {
+	{{- range $idx, $meta := $endpointMeta }}
+	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	{{$handlerName}} *{{$handlerName}}
+	{{- end}}
+}
+
+// Register registers the endpoint handlers with the gateway
+func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
+	{{- range $idx, $meta := $endpointMeta }}
+	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	handlers.{{$handlerName}}.Register(gateway)
+	{{- end}}
+}
+
+

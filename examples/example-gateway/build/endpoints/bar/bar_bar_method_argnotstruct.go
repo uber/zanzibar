@@ -26,26 +26,33 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // ArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
 type ArgNotStructHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewArgNotStructEndpoint creates a handler
 func NewArgNotStructEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *ArgNotStructHandler {
 	return &ArgNotStructHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".
@@ -89,7 +96,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
 type ArgNotStructEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

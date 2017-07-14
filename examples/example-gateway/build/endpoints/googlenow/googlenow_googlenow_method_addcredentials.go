@@ -26,26 +26,33 @@ package googlenow
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
 // AddCredentialsHandler is the handler for "/googlenow/add-credentials"
 type AddCredentialsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewAddCredentialsEndpoint creates a handler
 func NewAddCredentialsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *AddCredentialsHandler {
 	return &AddCredentialsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *AddCredentialsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/googlenow/add-credentials".
@@ -87,7 +94,7 @@ func (handler *AddCredentialsHandler) HandleRequest(
 
 // AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
 type AddCredentialsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

@@ -26,27 +26,34 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // ArgWithQueryParamsHandler is the handler for "/bar/argWithQueryParams"
 type ArgWithQueryParamsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewArgWithQueryParamsEndpoint creates a handler
 func NewArgWithQueryParamsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *ArgWithQueryParamsHandler {
 	return &ArgWithQueryParamsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *ArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithQueryParams".
@@ -101,7 +108,7 @@ func (handler *ArgWithQueryParamsHandler) HandleRequest(
 
 // ArgWithQueryParamsEndpoint calls thrift client Bar.ArgWithQueryParams
 type ArgWithQueryParamsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

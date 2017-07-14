@@ -26,26 +26,33 @@ package contacts
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 )
 
 // SaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
 type SaveContactsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewSaveContactsEndpoint creates a handler
 func NewSaveContactsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *SaveContactsHandler {
 	return &SaveContactsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/contacts/:userUUID/contacts".

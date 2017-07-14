@@ -26,27 +26,34 @@ package baz
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SillyNoopHandler is the handler for "/baz/silly-noop"
 type SillyNoopHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewSillyNoopEndpoint creates a handler
 func NewSillyNoopEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *SillyNoopHandler {
 	return &SillyNoopHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/baz/silly-noop".
@@ -92,7 +99,7 @@ func (handler *SillyNoopHandler) HandleRequest(
 
 // SillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
 type SillyNoopEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

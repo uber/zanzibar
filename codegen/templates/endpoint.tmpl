@@ -2,6 +2,8 @@
 
 package {{.PackageName}}
 
+{{- $instance := .Instance }}
+
 import (
 	"context"
 	"io/ioutil"
@@ -10,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
-	"{{.GatewayPackageName}}/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -23,6 +24,8 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 	{{- end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 {{ $workflow := .WorkflowName -}}
@@ -38,16 +41,22 @@ import (
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
 type {{$handlerName}} struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // New{{title .Name}}Endpoint creates a handler
 func New{{title .Name}}Endpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -142,7 +151,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflow}} struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

@@ -26,26 +26,33 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // NoRequestHandler is the handler for "/bar/no-request-path"
 type NoRequestHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewNoRequestEndpoint creates a handler
 func NewNoRequestEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *NoRequestHandler {
 	return &NoRequestHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *NoRequestHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/bar/no-request-path".
@@ -86,7 +93,7 @@ func (handler *NoRequestHandler) HandleRequest(
 
 // NoRequestEndpoint calls thrift client Bar.NoRequest
 type NoRequestEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

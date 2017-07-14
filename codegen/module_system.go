@@ -34,6 +34,7 @@ import (
 
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
+	Instance           *ModuleInstance
 	GatewayPackageName string
 	PackageName        string
 	IncludedPackages   []GoPackageImport
@@ -46,6 +47,13 @@ type EndpointMeta struct {
 	ReqHeaderMapKeys   []string
 	ResHeaderMap       map[string]string
 	ResHeaderMapKeys   []string
+}
+
+// EndpointCollectionMeta saves information used to generate an initializer
+// for a collection of endpoints
+type EndpointCollectionMeta struct {
+	Instance     *ModuleInstance
+	EndpointMeta []*EndpointMeta
 }
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
@@ -555,6 +563,7 @@ func (g *EndpointGenerator) Generate(
 	ret := map[string][]byte{}
 	endpointJsons := []string{}
 	endpointSpecs := []*EndpointSpec{}
+	endpointMeta := []*EndpointMeta{}
 	clientSpecs := readClientDependencySpecs(instance)
 
 	endpointConfig, err := readEndpointConfig(instance.JSONFileRaw)
@@ -592,7 +601,7 @@ func (g *EndpointGenerator) Generate(
 			)
 		}
 
-		err = g.generateEndpointFile(espec, instance, ret)
+		meta, err := g.generateEndpointFile(espec, instance, ret)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
@@ -600,6 +609,7 @@ func (g *EndpointGenerator) Generate(
 				instance.InstanceName,
 			)
 		}
+		endpointMeta = append(endpointMeta, meta)
 
 		err = g.generateEndpointTestFile(espec, instance, ret)
 		if err != nil {
@@ -627,6 +637,23 @@ func (g *EndpointGenerator) Generate(
 		ret["module/dependencies.go"] = dependencies
 	}
 
+	endpointCollection, err := g.templates.execTemplate(
+		"endpoint_collection.tmpl",
+		&EndpointCollectionMeta{
+			Instance:     instance,
+			EndpointMeta: endpointMeta,
+		},
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+	ret["endpoint.go"] = endpointCollection
+
 	return &BuildResult{
 		Files: ret,
 		Spec:  endpointSpecs,
@@ -635,13 +662,13 @@ func (g *EndpointGenerator) Generate(
 
 func (g *EndpointGenerator) generateEndpointFile(
 	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
-) error {
+) (*EndpointMeta, error) {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	thriftServiceName := e.ThriftServiceName
 
 	if len(m.Services) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	endpointDirectory := filepath.Join(
@@ -658,7 +685,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		if _, ok := out[structFilePath]; !ok {
 			structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			out[structFilePath] = structs
 		}
@@ -666,7 +693,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	method := findMethod(m, thriftServiceName, methodName)
 	if method == nil {
-		return errors.Errorf(
+		return nil, errors.Errorf(
 			"Could not find thriftServiceName %q + methodName %q in module",
 			thriftServiceName, methodName,
 		)
@@ -696,6 +723,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
+		Instance:           instance,
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
 		IncludedPackages:   includedPackages,
@@ -720,7 +748,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "Error executing endpoint template")
+		return nil, errors.Wrap(err, "Error executing endpoint template")
 	}
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
@@ -734,7 +762,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	out[endpointFilePath] = endpoint
 
-	return nil
+	return meta, nil
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(

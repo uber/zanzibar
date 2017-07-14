@@ -31,11 +31,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
 )
@@ -43,17 +43,23 @@ import (
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceCallHandler(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) zanzibar.TChannelHandler {
 	return &SimpleServiceCallHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 		Logger:  gateway.Logger,
 	}
 }
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".
 type SimpleServiceCallHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
+}
+
+func (handler *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // Handle handles RPC call of "SimpleService::Call".

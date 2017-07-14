@@ -26,27 +26,34 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // ArgWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
 type ArgWithManyQueryParamsHandler struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
 // NewArgWithManyQueryParamsEndpoint creates a handler
 func NewArgWithManyQueryParamsEndpoint(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *ArgWithManyQueryParamsHandler {
 	return &ArgWithManyQueryParamsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+func (handler *ArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+	// TODO: the endpoint handler should register itself
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithManyQueryParams".
@@ -215,7 +222,7 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 
 // ArgWithManyQueryParamsEndpoint calls thrift client Bar.ArgWithManyQueryParams
 type ArgWithManyQueryParamsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

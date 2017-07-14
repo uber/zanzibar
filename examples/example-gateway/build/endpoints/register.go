@@ -27,7 +27,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	tchannelBaz "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/runtime/middlewares/logger"
