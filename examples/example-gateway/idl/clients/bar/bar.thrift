@@ -28,6 +28,11 @@ struct BarResponse {
     )
 }
 
+struct QueryParamsStruct {
+    1: required string name
+    2: optional string userUUID
+}
+
 exception BarException {
     1: required string stringField (
         zanzibar.http.ref = "headers.another-header-field"
@@ -90,6 +95,13 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    BarResponse argWithNestedQueryParams(
+        1: required QueryParamsStruct request
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithNestedQueryParams"
+        zanzibar.http.status = "200"
+    )
 
     BarResponse argWithQueryParams(
         1: required string name
