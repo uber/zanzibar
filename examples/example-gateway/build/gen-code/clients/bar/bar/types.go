@@ -475,13 +475,15 @@ func (v *Fruit) UnmarshalJSON(text []byte) error {
 }
 
 type QueryParamsStruct struct {
-	Name     string  `json:"name,required"`
-	UserUUID *string `json:"userUUID,omitempty"`
+	Name      string  `json:"name,required"`
+	UserUUID  *string `json:"userUUID,omitempty"`
+	AuthUUID  *string `json:"authUUID,omitempty"`
+	AuthUUID2 string  `json:"authUUID2,required"`
 }
 
 func (v *QueryParamsStruct) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [4]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -500,12 +502,27 @@ func (v *QueryParamsStruct) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 2, Value: w}
 		i++
 	}
+	if v.AuthUUID != nil {
+		w, err = wire.NewValueString(*(v.AuthUUID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
+	w, err = wire.NewValueString(v.AuthUUID2), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 4, Value: w}
+	i++
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
 func (v *QueryParamsStruct) FromWire(w wire.Value) error {
 	var err error
 	nameIsSet := false
+	authUUID2IsSet := false
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
 		case 1:
@@ -525,10 +542,30 @@ func (v *QueryParamsStruct) FromWire(w wire.Value) error {
 					return err
 				}
 			}
+		case 3:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.AuthUUID = &x
+				if err != nil {
+					return err
+				}
+			}
+		case 4:
+			if field.Value.Type() == wire.TBinary {
+				v.AuthUUID2, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				authUUID2IsSet = true
+			}
 		}
 	}
 	if !nameIsSet {
 		return errors.New("field Name of QueryParamsStruct is required")
+	}
+	if !authUUID2IsSet {
+		return errors.New("field AuthUUID2 of QueryParamsStruct is required")
 	}
 	return nil
 }
@@ -537,7 +574,7 @@ func (v *QueryParamsStruct) String() string {
 	if v == nil {
 		return "<nil>"
 	}
-	var fields [2]string
+	var fields [4]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
@@ -545,6 +582,12 @@ func (v *QueryParamsStruct) String() string {
 		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
 		i++
 	}
+	if v.AuthUUID != nil {
+		fields[i] = fmt.Sprintf("AuthUUID: %v", *(v.AuthUUID))
+		i++
+	}
+	fields[i] = fmt.Sprintf("AuthUUID2: %v", v.AuthUUID2)
+	i++
 	return fmt.Sprintf("QueryParamsStruct{%v}", strings.Join(fields[:i], ", "))
 }
 
@@ -562,6 +605,12 @@ func (v *QueryParamsStruct) Equals(rhs *QueryParamsStruct) bool {
 		return false
 	}
 	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
+		return false
+	}
+	if !_String_EqualsPtr(v.AuthUUID, rhs.AuthUUID) {
+		return false
+	}
+	if !(v.AuthUUID2 == rhs.AuthUUID2) {
 		return false
 	}
 	return true
