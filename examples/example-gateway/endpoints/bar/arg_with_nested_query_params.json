@@ -7,7 +7,7 @@
 	"thriftMethodName": "Bar::argWithNestedQueryParams",
 	"workflowType": "httpClient",
 	"clientID": "bar",
-	"clientMethod": "argWithNestedQueryParams",
+	"clientMethod": "ArgWithNestedQueryParams",
 	"testFixtures": [],
 	"middlewares": [],
 	"reqHeaderMap": {},

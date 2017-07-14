@@ -12,6 +12,7 @@
 			"ArgNotStruct": "Bar::argNotStruct",
 			"ArgWithHeaders": "Bar::argWithHeaders",
 			"ArgWithQueryParams": "Bar::argWithQueryParams",
+			"ArgWithNestedQueryParams": "Bar::argWithNestedQueryParams",
 			"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
 
