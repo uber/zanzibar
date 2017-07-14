@@ -597,7 +597,10 @@ func pointerMethodType(typeSpec compile.TypeSpec) string {
 	case *compile.StringSpec:
 		pointerMethod = "String"
 	default:
-		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+		panic(fmt.Sprintf(
+			"Unknown type (%T) %v for query string parameter",
+			typeSpec, typeSpec,
+		))
 	}
 
 	return pointerMethod
@@ -622,7 +625,10 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	case *compile.StringSpec:
 		queryMethod = "GetQueryValue"
 	default:
-		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+		panic(fmt.Sprintf(
+			"Unknown type (%T) %v for query string parameter",
+			typeSpec, typeSpec,
+		))
 	}
 
 	return queryMethod
