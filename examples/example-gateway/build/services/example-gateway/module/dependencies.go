@@ -24,21 +24,21 @@
 package examplegatewayService
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
+	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
+	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 )
 
 // Dependencies contains dependencies for the example-gateway service module
 type Dependencies struct {
-	Client ClientDependencies
+	Endpoint EndpointDependencies
 }
 
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Bar       barClientGenerated.Client
-	Baz       bazClientGenerated.Client
-	Contacts  contactsClientGenerated.Client
-	GoogleNow googlenowClientGenerated.Client
+// EndpointDependencies contains endpoint dependencies
+type EndpointDependencies struct {
+	Bar       barEndpointGenerated.Endpoint
+	Baz       bazEndpointGenerated.Endpoint
+	Contacts  contactsEndpointGenerated.Endpoint
+	Googlenow googlenowEndpointGenerated.Endpoint
 }

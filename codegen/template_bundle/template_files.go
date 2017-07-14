@@ -1088,9 +1088,15 @@ func createGateway() (*zanzibar.Gateway, error) {
 	}
 
 	dependencies := module.InitializeDependencies(gateway)
-	gateway.Clients = clients
+	registerEndpoints(gateway, dependencies)
 
 	return gateway, nil
+}
+
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) {
+	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
+	deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	{{- end}}
 }
 
 func logAndWait(server *zanzibar.Gateway) {
@@ -1112,10 +1118,11 @@ func main() {
 		panic(err)
 	}
 
-	err = server.Bootstrap(endpoints.Register)
+	err = server.Bootstrap()
 	if err != nil {
 		panic(err)
 	}
+
 	logAndWait(server)
 }
 `)
@@ -1130,7 +1137,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1693, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1936, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

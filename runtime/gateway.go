@@ -46,10 +46,6 @@ const defaultM3MaxQueueSize = 10000
 const defaultM3MaxPacketSize = 1440 // 1440kb in UDP M3MaxPacketSize
 const defaultM3FlushInterval = 500 * time.Millisecond
 
-// Clients interface is a placeholder for the generated clients
-type Clients interface {
-}
-
 // Options configures the gateway
 type Options struct {
 	MetricsBackend tally.CachedStatsReporter
@@ -65,7 +61,6 @@ type Gateway struct {
 	RealTChannelPort int32
 	RealTChannelAddr string
 	WaitGroup        *sync.WaitGroup
-	Clients          Clients
 	Channel          *tchannel.Channel
 	Logger           *zap.Logger
 	MetricScope      tally.Scope
@@ -81,7 +76,6 @@ type Gateway struct {
 	httpServer        *HTTPServer
 	localHTTPServer   *HTTPServer
 	tchannelServer    *tchannel.Channel
-	// clients?
 	//	- panic ???
 	//	- process reporter ?
 }
@@ -131,6 +125,8 @@ func CreateGateway(
 		return nil, err
 	}
 
+	gateway.registerPredefined()
+
 	return gateway, nil
 }
 
@@ -139,10 +135,7 @@ func CreateGateway(
 type RegisterFn func(gateway *Gateway)
 
 // Bootstrap func
-func (gateway *Gateway) Bootstrap(register RegisterFn) error {
-	gateway.registerPredefined()
-	register(gateway)
-
+func (gateway *Gateway) Bootstrap() error {
 	// start HTTP server
 	_, err := gateway.localHTTPServer.JustListen()
 	if err != nil {

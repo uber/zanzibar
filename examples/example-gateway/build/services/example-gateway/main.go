@@ -31,7 +31,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
@@ -67,9 +66,16 @@ func createGateway() (*zanzibar.Gateway, error) {
 	}
 
 	dependencies := module.InitializeDependencies(gateway)
-	gateway.Clients = clients
+	registerEndpoints(gateway, dependencies)
 
 	return gateway, nil
+}
+
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) {
+	deps.Endpoint.Bar.Register(g)
+	deps.Endpoint.Baz.Register(g)
+	deps.Endpoint.Contacts.Register(g)
+	deps.Endpoint.Googlenow.Register(g)
 }
 
 func logAndWait(server *zanzibar.Gateway) {
@@ -91,9 +97,10 @@ func main() {
 		panic(err)
 	}
 
-	err = server.Bootstrap(endpoints.Register)
+	err = server.Bootstrap()
 	if err != nil {
 		panic(err)
 	}
+
 	logAndWait(server)
 }
