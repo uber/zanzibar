@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
@@ -132,4 +133,85 @@ func isHashable(spec compile.TypeSpec) bool {
 	default:
 		return false
 	}
+}
+
+func pointerMethodType(typeSpec compile.TypeSpec) string {
+	var pointerMethod string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		pointerMethod = "Bool"
+	case *compile.I8Spec:
+		pointerMethod = "Int8"
+	case *compile.I16Spec:
+		pointerMethod = "Int16"
+	case *compile.I32Spec:
+		pointerMethod = "Int32"
+	case *compile.I64Spec:
+		pointerMethod = "Int64"
+	case *compile.DoubleSpec:
+		pointerMethod = "Float64"
+	case *compile.StringSpec:
+		pointerMethod = "String"
+	default:
+		panic(fmt.Sprintf(
+			"Unknown type (%T) %v for allocating a pointer",
+			typeSpec, typeSpec,
+		))
+	}
+
+	return pointerMethod
+}
+
+func walkFieldGroups(
+	fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
+	return walkFieldGroupsInternal("", fields, visitField)
+}
+
+func walkFieldGroupsInternal(
+	prefix string, fields compile.FieldGroup,
+	visitField func(string, *compile.FieldSpec) bool,
+) bool {
+	for i := 0; i < len(fields); i++ {
+		field := fields[i]
+
+		bail := visitField(prefix, field)
+		if bail {
+			return true
+		}
+
+		realType := compile.RootTypeSpec(field.Type)
+		switch t := realType.(type) {
+		case *compile.BinarySpec:
+		case *compile.StringSpec:
+		case *compile.BoolSpec:
+		case *compile.DoubleSpec:
+		case *compile.I8Spec:
+		case *compile.I16Spec:
+		case *compile.I32Spec:
+		case *compile.I64Spec:
+		case *compile.EnumSpec:
+		case *compile.StructSpec:
+			bail := walkFieldGroupsInternal(
+				prefix+"."+strings.Title(field.Name),
+				t.Fields,
+				visitField,
+			)
+			if bail {
+				return true
+			}
+		case *compile.SetSpec:
+			// TODO: implement
+		case *compile.MapSpec:
+			// TODO: implement
+		case *compile.ListSpec:
+			// TODO: implement
+		default:
+			panic("unknown Spec")
+		}
+	}
+
+	return false
 }
