@@ -598,7 +598,7 @@ func pointerMethodType(typeSpec compile.TypeSpec) string {
 		pointerMethod = "String"
 	default:
 		panic(fmt.Sprintf(
-			"Unknown type (%T) %v for query string parameter",
+			"Unknown type (%T) %v for allocating a pointer",
 			typeSpec, typeSpec,
 		))
 	}
@@ -667,8 +667,8 @@ func (ms *MethodSpec) setQueryParamStatements(
 			statements.appendf("if %s {", okIdentifierName)
 		}
 
-		pointerMethod := pointerMethodType(realType)
 		queryMethodName := getQueryMethodForType(realType)
+		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
 			identifierName, queryMethodName, fieldName,
