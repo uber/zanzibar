@@ -50,9 +50,17 @@ func NewMissingArgEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *MissingArgHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/bar/missing-arg-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"missingArg",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/missing-arg-path".

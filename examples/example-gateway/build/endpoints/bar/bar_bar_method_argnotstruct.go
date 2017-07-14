@@ -50,9 +50,17 @@ func NewArgNotStructEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/bar/arg-not-struct-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argNotStruct",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".

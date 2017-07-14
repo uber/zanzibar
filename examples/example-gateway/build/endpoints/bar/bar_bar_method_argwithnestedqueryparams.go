@@ -51,9 +51,17 @@ func NewArgWithNestedQueryParamsEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *ArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/bar/argWithNestedQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithNestedQueryParams",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/argWithNestedQueryParams".

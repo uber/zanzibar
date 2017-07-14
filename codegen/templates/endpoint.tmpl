@@ -37,6 +37,9 @@ import (
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{ $responseType := .Method.ResponseType}}
 {{ $clientMethodName := title .ClientMethodName -}}
+{{ $endpointId := .Spec.EndpointID }}
+{{ $handleId := .Spec.HandleID }}
+{{ $middlewares := .Spec.Middlewares }}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -54,9 +57,32 @@ func New{{title .Name}}Endpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"{{.HTTPMethod}}", "{{.HTTPPath}}",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"{{$endpointId}}",
+			"{{$handleId}}",
+			{{ if len $middlewares | ne 0 -}}
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				{{range $idx, $middleware := $middlewares -}}
+				{{$middleware.Name}}.NewMiddleWare(
+					g,
+						{{$middleware.Name}}.Options{
+						{{range $key, $value := $middleware.Options -}}
+								{{$key}} : {{$value}},
+						{{end -}}
+						},
+				),
+				{{end -}}
+			}, handler.HandleRequest).Handle,
+			{{- else -}}
+			handler.HandleRequest,
+			{{- end}}
+		),
+	)
 }
 
 // HandleRequest handles "{{.HTTPPath}}".

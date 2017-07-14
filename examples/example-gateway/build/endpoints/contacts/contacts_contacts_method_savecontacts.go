@@ -50,9 +50,17 @@ func NewSaveContactsEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/contacts/:userUUID/contacts",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"contacts",
+			"saveContacts",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/contacts/:userUUID/contacts".

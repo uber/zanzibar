@@ -27,10 +27,12 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime/middlewares/logger"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -50,9 +52,28 @@ func NewNormalEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *NormalHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/bar/bar-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"normal",
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				example.NewMiddleWare(
+					g,
+					example.Options{
+						Foo: "test",
+					},
+				),
+				logger.NewMiddleWare(
+					g,
+					logger.Options{},
+				),
+			}, handler.HandleRequest).Handle,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/bar-path".

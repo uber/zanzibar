@@ -50,9 +50,17 @@ func NewNoRequestEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *NoRequestHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/bar/no-request-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"noRequest",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/no-request-path".

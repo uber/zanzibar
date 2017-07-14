@@ -86,6 +86,7 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
+	// TODO: delete this
 	gateway, err := codegen.NewGatewaySpec(
 		moduleInstances,
 		packageHelper,

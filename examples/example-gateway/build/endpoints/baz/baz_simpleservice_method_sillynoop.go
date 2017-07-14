@@ -51,9 +51,17 @@ func NewSillyNoopEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/baz/silly-noop",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"sillyNoop",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/baz/silly-noop".

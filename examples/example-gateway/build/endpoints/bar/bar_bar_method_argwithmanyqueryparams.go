@@ -51,9 +51,17 @@ func NewArgWithManyQueryParamsEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *ArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/bar/argWithManyQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithManyQueryParams",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/argWithManyQueryParams".

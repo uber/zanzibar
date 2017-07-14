@@ -51,9 +51,17 @@ func NewCompareEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *CompareHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/baz/compare",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"compare",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/baz/compare".

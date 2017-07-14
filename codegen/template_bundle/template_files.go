@@ -3,7 +3,6 @@
 // codegen/templates/dependency_struct.tmpl
 // codegen/templates/endpoint.tmpl
 // codegen/templates/endpoint_collection.tmpl
-// codegen/templates/endpoint_register.tmpl
 // codegen/templates/endpoint_test.tmpl
 // codegen/templates/endpoint_test_tchannel_client.tmpl
 // codegen/templates/http_client.tmpl
@@ -141,6 +140,9 @@ import (
 {{ $handlerName := title .Method.Name | printf "%sHandler" }}
 {{ $responseType := .Method.ResponseType}}
 {{ $clientMethodName := title .ClientMethodName -}}
+{{ $endpointId := .Spec.EndpointID }}
+{{ $handleId := .Spec.HandleID }}
+{{ $middlewares := .Spec.Middlewares }}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -158,9 +160,32 @@ func New{{title .Name}}Endpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"{{.HTTPMethod}}", "{{.HTTPPath}}",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"{{$endpointId}}",
+			"{{$handleId}}",
+			{{ if len $middlewares | ne 0 -}}
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				{{range $idx, $middleware := $middlewares -}}
+				{{$middleware.Name}}.NewMiddleWare(
+					g,
+						{{$middleware.Name}}.Options{
+						{{range $key, $value := $middleware.Options -}}
+								{{$key}} : {{$value}},
+						{{end -}}
+						},
+				),
+				{{end -}}
+			}, handler.HandleRequest).Handle,
+			{{- else -}}
+			handler.HandleRequest,
+			{{- end}}
+		),
+	)
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -428,7 +453,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8559, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -499,92 +524,6 @@ func endpoint_collectionTmpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1544, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _endpoint_registerTmpl = []byte(`{{- /* template to render gateway endpoint registration */ -}}
-
-package endpoints
-
-import (
-	"context"
-
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
-
-	"github.com/uber/zanzibar/runtime"
-)
-
-// Endpoints is a struct that holds all the endpoints
-type Endpoints struct {
-	{{range $idx, $e := .Endpoints -}}
-	{{$e.HandlerName}} {{$e.HandlerType}}
-	{{end}}
-}
-
-// CreateEndpoints bootstraps the endpoints.
-func CreateEndpoints(
-	gateway *zanzibar.Gateway,
-) interface{} {
-	return &Endpoints{
-		{{range $idx, $e := .Endpoints -}}
-		{{$e.HandlerName}}:
-			{{$e.PackageName}}.{{$e.Constructor}}(gateway),
-		{{end}}
-	}
-}
-
-// Register will register all endpoints
-func Register(g *zanzibar.Gateway) {
-	endpoints := CreateEndpoints(g).(*Endpoints)
-
-	{{/* TODO: simplify HTTPRouter API for clear mounting as TChannelRouter */ -}}
-	{{range $idx, $e := .Endpoints -}}
-	{{if eq .EndpointType "HTTP" -}}
-	g.HTTPRouter.Register(
-		"{{.Method.HTTPMethod}}", "{{.Method.HTTPPath}}",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"{{.EndpointID}}",
-			"{{.HandlerID}}",
-			{{ if len .Middlewares | ne 0 -}}
-			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				{{range $idx, $middleware := $e.Middlewares -}}
-				{{$middleware.Name}}.NewMiddleWare(
-					g,
-						{{$middleware.Name}}.Options{
-						{{range $key, $value := $middleware.Options -}}
-								{{$key}} : {{$value}},
-						{{end -}}
-						},
-				),
-				{{end -}}
-			}, endpoints.{{$e.HandlerName}}.HandleRequest).Handle,
-			{{- else -}}
-			endpoints.{{$e.HandlerName}}.HandleRequest,
-			{{- end}}
-		),
-	)
-	{{else -}}
-	g.TChannelRouter.Register("{{.Method.ThriftService}}", "{{.Method.Name}}", endpoints.{{.HandlerName}})
-	{{end -}}
-	{{end -}}
-}
-`)
-
-func endpoint_registerTmplBytes() ([]byte, error) {
-	return _endpoint_registerTmpl, nil
-}
-
-func endpoint_registerTmpl() (*asset, error) {
-	bytes, err := endpoint_registerTmplBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "endpoint_register.tmpl", size: 1728, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1747,9 +1686,13 @@ type {{$handlerName}} struct {
 	Logger *zap.Logger
 }
 
+// Register adds the tchannel handler to the gateway's tchannel router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.TChannelRouter.Register(
+		"{{.ThriftService}}",
+		"{{.Name}}",
+		handler,
+	)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".
@@ -1842,7 +1785,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3392, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1902,7 +1845,6 @@ var _bindata = map[string]func() (*asset, error){
 	"dependency_struct.tmpl":             dependency_structTmpl,
 	"endpoint.tmpl":                      endpointTmpl,
 	"endpoint_collection.tmpl":           endpoint_collectionTmpl,
-	"endpoint_register.tmpl":             endpoint_registerTmpl,
 	"endpoint_test.tmpl":                 endpoint_testTmpl,
 	"endpoint_test_tchannel_client.tmpl": endpoint_test_tchannel_clientTmpl,
 	"http_client.tmpl":                   http_clientTmpl,
@@ -1959,7 +1901,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"dependency_struct.tmpl":             {dependency_structTmpl, map[string]*bintree{}},
 	"endpoint.tmpl":                      {endpointTmpl, map[string]*bintree{}},
 	"endpoint_collection.tmpl":           {endpoint_collectionTmpl, map[string]*bintree{}},
-	"endpoint_register.tmpl":             {endpoint_registerTmpl, map[string]*bintree{}},
 	"endpoint_test.tmpl":                 {endpoint_testTmpl, map[string]*bintree{}},
 	"endpoint_test_tchannel_client.tmpl": {endpoint_test_tchannel_clientTmpl, map[string]*bintree{}},
 	"http_client.tmpl":                   {http_clientTmpl, map[string]*bintree{}},

@@ -50,9 +50,17 @@ func NewCallEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/baz/call",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"call",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/baz/call".

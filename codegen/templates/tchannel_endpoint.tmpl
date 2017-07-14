@@ -44,9 +44,13 @@ type {{$handlerName}} struct {
 	Logger *zap.Logger
 }
 
+// Register adds the tchannel handler to the gateway's tchannel router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.TChannelRouter.Register(
+		"{{.ThriftService}}",
+		"{{.Name}}",
+		handler,
+	)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".

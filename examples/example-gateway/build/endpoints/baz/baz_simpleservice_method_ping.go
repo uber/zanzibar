@@ -50,9 +50,17 @@ func NewPingEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *PingHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"GET", "/baz/ping",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"ping",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/baz/ping".

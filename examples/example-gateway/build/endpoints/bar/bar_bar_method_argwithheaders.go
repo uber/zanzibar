@@ -51,9 +51,17 @@ func NewArgWithHeadersEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *ArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/bar/argWithHeaders",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithHeaders",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/argWithHeaders".

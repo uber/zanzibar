@@ -47,9 +47,17 @@ func NewCheckCredentialsEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *CheckCredentialsHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/googlenow/check-credentials",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"googlenow",
+			"checkCredentials",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/googlenow/check-credentials".

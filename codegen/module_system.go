@@ -35,6 +35,7 @@ import (
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
 	Instance           *ModuleInstance
+	Spec               *EndpointSpec
 	GatewayPackageName string
 	PackageName        string
 	IncludedPackages   []GoPackageImport
@@ -724,6 +725,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:           instance,
+		Spec:               e,
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
 		PackageName:        m.PackageName,
 		IncludedPackages:   includedPackages,

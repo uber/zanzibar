@@ -51,9 +51,17 @@ func NewTooManyArgsEndpoint(
 	}
 }
 
+// Register adds the http handler to the gateway's http router
 func (handler *TooManyArgsHandler) Register(g *zanzibar.Gateway) error {
-	// TODO: the endpoint handler should register itself
-	return nil
+	return g.HTTPRouter.Register(
+		"POST", "/bar/too-many-args-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"tooManyArgs",
+			handler.HandleRequest,
+		),
+	)
 }
 
 // HandleRequest handles "/bar/too-many-args-path".
