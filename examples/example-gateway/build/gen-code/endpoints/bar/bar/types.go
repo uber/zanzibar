@@ -391,3 +391,96 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 	}
 	return true
 }
+
+type QueryParamsStruct struct {
+	Name     string  `json:"name,required"`
+	UserUUID *string `json:"userUUID,omitempty"`
+}
+
+func (v *QueryParamsStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	w, err = wire.NewValueString(v.Name), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.UserUUID != nil {
+		w, err = wire.NewValueString(*(v.UserUUID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func (v *QueryParamsStruct) FromWire(w wire.Value) error {
+	var err error
+	nameIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Name, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				nameIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.UserUUID = &x
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if !nameIsSet {
+		return errors.New("field Name of QueryParamsStruct is required")
+	}
+	return nil
+}
+
+func (v *QueryParamsStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	i++
+	if v.UserUUID != nil {
+		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
+		i++
+	}
+	return fmt.Sprintf("QueryParamsStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _String_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func (v *QueryParamsStruct) Equals(rhs *QueryParamsStruct) bool {
+	if !(v.Name == rhs.Name) {
+		return false
+	}
+	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
+		return false
+	}
+	return true
+}
