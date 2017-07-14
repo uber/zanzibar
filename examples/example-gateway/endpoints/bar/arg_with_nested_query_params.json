@@ -1,0 +1,15 @@
+{
+	"endpointType": "http",
+	"endpointId": "bar",
+	"handleId": "argWithNestedQueryParams",
+	"thriftFile": "endpoints/bar/bar.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "Bar::argWithNestedQueryParams",
+	"workflowType": "httpClient",
+	"clientID": "bar",
+	"clientMethod": "argWithNestedQueryParams",
+	"testFixtures": [],
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
+}
