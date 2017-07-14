@@ -38,25 +38,30 @@ import (
 
 // clientDependencies contains client dependencies
 type clientDependencies struct {
-	Bar       barClientGenerated.Client
 	Baz       bazClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
+	Bar       barClientGenerated.Client
 }
 
 // endpointDependencies contains endpoint dependencies
 type endpointDependencies struct {
+	Googlenow googlenowEndpointGenerated.Endpoint
 	Bar       barEndpointGenerated.Endpoint
 	Baz       bazEndpointGenerated.Endpoint
-	Googlenow googlenowEndpointGenerated.Endpoint
 }
 
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedClientDependencies := &clientDependencies{}
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
 
 	initializedEndpointDependencies := &endpointDependencies{}
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
+		Client: googlenowEndpointModule.ClientDependencies{
+			GoogleNow: initializedClientDependencies.GoogleNow,
+		},
+	})
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
 		Client: barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -65,11 +70,6 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
 		Client: bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
-		},
-	})
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
-		Client: googlenowEndpointModule.ClientDependencies{
-			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
 

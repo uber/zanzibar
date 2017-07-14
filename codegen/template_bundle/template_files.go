@@ -1157,6 +1157,7 @@ var _main_testTmpl = []byte(`{{- /* template to render gateway main_test.go
 This template is the test entrypoint for spawning a gateway
 as a child process using the test coverage features etc.
 */ -}}
+{{- $instance := . -}}
 
 package main
 
@@ -1169,6 +1170,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 var cachedServer *zanzibar.Gateway
@@ -1207,7 +1210,7 @@ func TestStartGateway(t *testing.T) {
 		),
 	)
 
-	server, err := createGateway()
+	gateway, err := createGateway()
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
@@ -1216,8 +1219,8 @@ func TestStartGateway(t *testing.T) {
 		return
 	}
 
-	cachedServer = server
-	err = server.Bootstrap(endpoints.Register)
+	cachedServer = gateway
+	err = gateway.Bootstrap()
 	if err != nil {
 		testLogger.Error(
 			"Failed to Bootstrap in TestStartGateway()",
@@ -1225,7 +1228,7 @@ func TestStartGateway(t *testing.T) {
 		)
 		return
 	}
-	logAndWait(server)
+	logAndWait(gateway)
 }
 `)
 
@@ -1239,7 +1242,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1302, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1366, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

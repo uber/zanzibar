@@ -71,7 +71,7 @@ func TestStartGateway(t *testing.T) {
 		),
 	)
 
-	server, err := createGateway()
+	gateway, err := createGateway()
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
@@ -80,8 +80,8 @@ func TestStartGateway(t *testing.T) {
 		return
 	}
 
-	cachedServer = server
-	err = server.Bootstrap(endpoints.Register)
+	cachedServer = gateway
+	err = gateway.Bootstrap()
 	if err != nil {
 		testLogger.Error(
 			"Failed to Bootstrap in TestStartGateway()",
@@ -89,5 +89,5 @@ func TestStartGateway(t *testing.T) {
 		)
 		return
 	}
-	logAndWait(server)
+	logAndWait(gateway)
 }
