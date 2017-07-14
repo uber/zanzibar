@@ -57,23 +57,23 @@ func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithNestedQueryParams_Args
 
-	nameOk := req.CheckQueryValue("name")
-	if !nameOk {
+	requestNameOk := req.CheckQueryValue("request.name")
+	if !requestNameOk {
 		return
 	}
-	nameQuery, ok := req.GetQueryValue("name")
+	requestNameQuery, ok := req.GetQueryValue("request.name")
 	if !ok {
 		return
 	}
-	requestBody.Name = nameQuery
+	requestBody.Name = requestNameQuery
 
-	userUUIDOk := req.HasQueryValue("userUUID")
-	if userUUIDOk {
-		userUUIDQuery, ok := req.GetQueryValue("userUUID")
+	requestUserUUIDOk := req.HasQueryValue("request.userUUID")
+	if requestUserUUIDOk {
+		requestUserUUIDQuery, ok := req.GetQueryValue("request.userUUID")
 		if !ok {
 			return
 		}
-		requestBody.UserUUID = ptr.String(userUUIDQuery)
+		requestBody.UserUUID = ptr.String(requestUserUUIDQuery)
 	}
 
 	workflow := ArgWithNestedQueryParamsEndpoint{
