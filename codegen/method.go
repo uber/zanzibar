@@ -198,7 +198,7 @@ func NewMethod(
 			)
 		}
 
-		err := method.setQueryParamStatements(funcSpec)
+		err := method.setQueryParamStatements(funcSpec, packageHelper)
 		if err != nil {
 			return nil, err
 		}
@@ -613,49 +613,66 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 }
 
 func (ms *MethodSpec) setQueryParamStatements(
-	funcSpec *compile.FunctionSpec,
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) error {
 	// If a thrift field has a http.ref annotation then we
 	// should not read this field from query parameters.
 	statements := LineBuilder{}
 
+	var finalError error
+
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
 
 		// If the type is a struct then we cannot really do anything
 		if _, ok := realType.(*compile.StructSpec); ok {
+			// if a field is a struct then we must do a nil check
+
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+
+			statements.appendf("if requestBody%s == nil {", longFieldName)
+			statements.appendf("\trequestBody%s = &%s{}",
+				longFieldName, typeName,
+			)
+			statements.append("}")
+
 			return false
 		}
 
-		var longFieldName string
+		var longQueryName string
 		if thriftPrefix == "" {
-			longFieldName = field.Name
+			longQueryName = field.Name
 		} else {
-			longFieldName = thriftPrefix + "." + field.Name
-			if longFieldName[0] == '.' {
-				longFieldName = longFieldName[1:]
+			longQueryName = thriftPrefix + "." + field.Name
+			if longQueryName[0] == '.' {
+				longQueryName = longQueryName[1:]
 			}
 		}
-		identifierName := camelCase(longFieldName) + "Query"
+		identifierName := camelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
 		if httpRefAnnotation != "" {
 			return false
 		}
 
-		okIdentifierName := camelCase(longFieldName) + "Ok"
+		okIdentifierName := camelCase(longQueryName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
-				okIdentifierName, longFieldName,
+				okIdentifierName, longQueryName,
 			)
 			statements.appendf("if !%s {", okIdentifierName)
 			statements.append("\treturn")
 			statements.append("}")
 		} else {
 			statements.appendf("%s := req.HasQueryValue(%q)",
-				okIdentifierName, longFieldName,
+				okIdentifierName, longQueryName,
 			)
 			statements.appendf("if %s {", okIdentifierName)
 		}
@@ -664,22 +681,20 @@ func (ms *MethodSpec) setQueryParamStatements(
 		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
-			identifierName, queryMethodName, longFieldName,
+			identifierName, queryMethodName, longQueryName,
 		)
 
 		statements.append("if !ok {")
 		statements.append("\treturn")
 		statements.append("}")
 
-		requestyBodyFieldName := strings.Title(field.Name)
-
 		if field.Required {
-			statements.appendf("requestBody.%s = %s",
-				requestyBodyFieldName, identifierName,
+			statements.appendf("requestBody%s = %s",
+				longFieldName, identifierName,
 			)
 		} else {
-			statements.appendf("\trequestBody.%s = ptr.%s(%s)",
-				requestyBodyFieldName, pointerMethod, identifierName,
+			statements.appendf("\trequestBody%s = ptr.%s(%s)",
+				longFieldName, pointerMethod, identifierName,
 			)
 			statements.append("}")
 		}
@@ -690,8 +705,11 @@ func (ms *MethodSpec) setQueryParamStatements(
 	}
 	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
 
-	ms.QueryParamGoStatements = statements.GetLines()
+	if finalError != nil {
+		return finalError
+	}
 
+	ms.QueryParamGoStatements = statements.GetLines()
 	return nil
 }
 
