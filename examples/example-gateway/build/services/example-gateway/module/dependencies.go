@@ -21,12 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package examplegatewayService
+package module
 
 import (
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 )
 
@@ -39,6 +38,5 @@ type Dependencies struct {
 type EndpointDependencies struct {
 	Bar       barEndpointGenerated.Endpoint
 	Baz       bazEndpointGenerated.Endpoint
-	Contacts  contactsEndpointGenerated.Endpoint
 	Googlenow googlenowEndpointGenerated.Endpoint
 }

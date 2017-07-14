@@ -106,7 +106,4 @@ func main() {
 		packageHelper.CodeGenTargetPath(),
 	)
 	checkError(err, "Failed to generate module system components")
-
-	fmt.Printf("Generating all modules\n\n")
-	fmt.Printf("Generating module initilization logic\n")
 }

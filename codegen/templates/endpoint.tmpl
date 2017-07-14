@@ -1,8 +1,6 @@
 {{/* template to render gateway http endpoint code */ -}}
-
-package {{.PackageName}}
-
 {{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
@@ -47,19 +45,19 @@ type {{$handlerName}} struct {
 	Clients *module.ClientDependencies
 }
 
-// New{{title .Name}}Endpoint creates a handler
-func New{{title .Name}}Endpoint(
+// New{{$handlerName}}} creates a handler
+func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -83,6 +81,8 @@ func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 			{{- end}}
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type ArgNotStructHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgNotStructEndpoint creates a handler
-func NewArgNotStructEndpoint(
+// NewArgNotStructHandler} creates a handler
+func NewArgNotStructHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ArgNotStructHandler {
 	return &ArgNotStructHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".

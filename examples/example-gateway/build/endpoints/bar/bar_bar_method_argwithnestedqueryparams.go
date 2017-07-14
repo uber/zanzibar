@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type ArgWithNestedQueryParamsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithNestedQueryParamsEndpoint creates a handler
-func NewArgWithNestedQueryParamsEndpoint(
+// NewArgWithNestedQueryParamsHandler} creates a handler
+func NewArgWithNestedQueryParamsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ArgWithNestedQueryParamsHandler {
 	return &ArgWithNestedQueryParamsHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *ArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/bar/argWithNestedQueryParams",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *ArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) er
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithNestedQueryParams".

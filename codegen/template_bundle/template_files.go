@@ -58,7 +58,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 }
 
 var _dependency_structTmpl = []byte(`{{$instance := . -}}
-package {{$instance.PackageInfo.PackageName}}
+package module
 
 import (
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
@@ -96,16 +96,14 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1127, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1096, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _endpointTmpl = []byte(`{{/* template to render gateway http endpoint code */ -}}
-
-package {{.PackageName}}
-
 {{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
@@ -150,19 +148,19 @@ type {{$handlerName}} struct {
 	Clients *module.ClientDependencies
 }
 
-// New{{title .Name}}Endpoint creates a handler
-func New{{title .Name}}Endpoint(
+// New{{$handlerName}}} creates a handler
+func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -186,6 +184,8 @@ func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 			{{- end}}
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -453,7 +453,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9338, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -506,8 +506,12 @@ type EndpointHandlers struct {
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	{{- range $idx, $meta := $endpointMeta }}
 	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
-	handlers.{{$handlerName}}.Register(gateway)
+	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
 	{{- end}}
+	return nil
 }
 
 
@@ -523,14 +527,14 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1544, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1620, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _endpoint_testTmpl = []byte(`{{/* template to render gateway http endpoint tests */ -}}
-
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"bytes"
@@ -639,14 +643,14 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2501, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2551, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _endpoint_test_tchannel_clientTmpl = []byte(`{{/* template to render gateway http endpoint tests */}}
-
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"bytes"
@@ -797,14 +801,14 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3851, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3901, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _http_clientTmpl = []byte(`{{- /* template to render edge gateway http client code */ -}}
-
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"bytes"
@@ -1035,7 +1039,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6040, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6090, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1088,15 +1092,22 @@ func createGateway() (*zanzibar.Gateway, error) {
 	}
 
 	dependencies := module.InitializeDependencies(gateway)
-	registerEndpoints(gateway, dependencies)
+	registerErr := registerEndpoints(gateway, dependencies)
+	if registerErr != nil {
+		return nil, registerErr
+	}
 
 	return gateway, nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) {
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
-	deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
 	{{- end}}
+	return nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
@@ -1137,7 +1148,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1936, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 2087, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1260,7 +1271,7 @@ type {{$className}}Dependencies struct {
 }
 {{end -}}
 
-func InitializeDependencies(gateway *zanzibar.Gateway) Dependencies {
+func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- if not $instance.HasDependencies}}
 	return {{$instance.PackageInfo.ExportName}}(gateway)
 	{{- else}}
@@ -1270,9 +1281,9 @@ func InitializeDependencies(gateway *zanzibar.Gateway) Dependencies {
 
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- if $dependency.HasDependencies}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.GeneratedPackageAlias}}.Dependencies{
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+		{{$className | pascal}}: {{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}
@@ -1287,7 +1298,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) Dependencies {
 
 	return &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+		{{$className | pascal}}: {{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}
@@ -1308,21 +1319,22 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2805, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2801, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _structsTmpl = []byte(`{{- /* template to render edge gateway http client code */ -}}
 
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"runtime"
 	"path/filepath"
 
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
+	{{range $idx, $pkg := .Spec.IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 )
@@ -1343,15 +1355,14 @@ func structsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "structs.tmpl", size: 380, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "structs.tmpl", size: 436, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _tchannel_clientTmpl = []byte(`{{- /* template to render edge gateway tchannel client code */ -}}
-
-// Package {{.PackageName}} is generated code used to make or handle TChannel calls using Thrift.
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
@@ -1522,15 +1533,14 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4928, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4880, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _tchannel_client_test_serverTmpl = []byte(`{{- /* template to render edge gateway tchannel server code */ -}}
-
-// Package {{.PackageName}} is generated code used to make or handle TChannel calls using Thrift.
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
@@ -1642,19 +1652,14 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 2994, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _tchannel_endpointTmpl = []byte(`{{- /* template to render edge gateway tchannel server code */ -}}
-// Code generated by zanzibar
-// @generated
-
 {{- $instance := .Instance }}
-
-// Package {{.PackageName}} is generated code used to handle TChannel calls using Thrift.
-package {{.PackageName}}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
@@ -1682,7 +1687,7 @@ func New{{$handlerName}}(
 	deps *module.Dependencies,
 ) zanzibar.TChannelHandler {
 	return &{{$handlerName}}{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 		Logger: gateway.Logger,
 	}
 }
@@ -1792,7 +1797,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3485, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3371, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

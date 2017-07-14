@@ -66,16 +66,28 @@ func createGateway() (*zanzibar.Gateway, error) {
 	}
 
 	dependencies := module.InitializeDependencies(gateway)
-	registerEndpoints(gateway, dependencies)
+	registerErr := registerEndpoints(gateway, dependencies)
+	if registerErr != nil {
+		return nil, registerErr
+	}
 
 	return gateway, nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) {
-	deps.Endpoint.Bar.Register(g)
-	deps.Endpoint.Baz.Register(g)
-	deps.Endpoint.Contacts.Register(g)
-	deps.Endpoint.Googlenow.Register(g)
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	err0 := deps.Endpoint.Bar.Register(g)
+	if err0 != nil {
+		return err0
+	}
+	err1 := deps.Endpoint.Baz.Register(g)
+	if err1 != nil {
+		return err1
+	}
+	err2 := deps.Endpoint.Googlenow.Register(g)
+	if err2 != nil {
+		return err2
+	}
+	return nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {

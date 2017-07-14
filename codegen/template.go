@@ -106,7 +106,7 @@ func NewTemplate() (*Template, error) {
 
 // ClientMeta ...
 type ClientMeta struct {
-	PackageName      string
+	Instance         *ModuleInstance
 	ExportName       string
 	ExportType       string
 	ClientID         string

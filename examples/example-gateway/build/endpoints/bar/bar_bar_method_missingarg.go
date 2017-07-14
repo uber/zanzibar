@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type MissingArgHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewMissingArgEndpoint creates a handler
-func NewMissingArgEndpoint(
+// NewMissingArgHandler} creates a handler
+func NewMissingArgHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *MissingArgHandler {
 	return &MissingArgHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *MissingArgHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/bar/missing-arg-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *MissingArgHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/missing-arg-path".

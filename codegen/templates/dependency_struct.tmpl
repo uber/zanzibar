@@ -1,5 +1,5 @@
 {{$instance := . -}}
-package {{$instance.PackageInfo.PackageName}}
+package module
 
 import (
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}

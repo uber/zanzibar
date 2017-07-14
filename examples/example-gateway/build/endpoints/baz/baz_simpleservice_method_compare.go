@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type CompareHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewCompareEndpoint creates a handler
-func NewCompareEndpoint(
+// NewCompareHandler} creates a handler
+func NewCompareHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *CompareHandler {
 	return &CompareHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *CompareHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/baz/compare",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *CompareHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/baz/compare".

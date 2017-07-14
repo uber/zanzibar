@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package contacts
+package contactsEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type SaveContactsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSaveContactsEndpoint creates a handler
-func NewSaveContactsEndpoint(
+// NewSaveContactsHandler} creates a handler
+func NewSaveContactsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SaveContactsHandler {
 	return &SaveContactsHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/contacts/:userUUID/contacts",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/contacts/:userUUID/contacts".

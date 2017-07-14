@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type TooManyArgsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewTooManyArgsEndpoint creates a handler
-func NewTooManyArgsEndpoint(
+// NewTooManyArgsHandler} creates a handler
+func NewTooManyArgsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *TooManyArgsHandler {
 	return &TooManyArgsHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *TooManyArgsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/bar/too-many-args-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *TooManyArgsHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/too-many-args-path".

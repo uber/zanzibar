@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type ArgWithQueryHeaderHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithQueryHeaderEndpoint creates a handler
-func NewArgWithQueryHeaderEndpoint(
+// NewArgWithQueryHeaderHandler} creates a handler
+func NewArgWithQueryHeaderHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ArgWithQueryHeaderHandler {
 	return &ArgWithQueryHeaderHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *ArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/bar/argWithQueryHeader",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *ArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithQueryHeader".

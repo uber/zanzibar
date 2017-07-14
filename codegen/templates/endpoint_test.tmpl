@@ -1,6 +1,6 @@
 {{/* template to render gateway http endpoint tests */ -}}
-
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"bytes"

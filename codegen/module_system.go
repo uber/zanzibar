@@ -37,7 +37,6 @@ type EndpointMeta struct {
 	Instance           *ModuleInstance
 	Spec               *EndpointSpec
 	GatewayPackageName string
-	PackageName        string
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
@@ -57,9 +56,15 @@ type EndpointCollectionMeta struct {
 	EndpointMeta []*EndpointMeta
 }
 
+// StructMeta saves information to generate an endpoint's thrift structs file
+type StructMeta struct {
+	Instance *ModuleInstance
+	Spec     *ModuleSpec
+}
+
 // EndpointTestMeta saves meta data used to render an endpoint test.
 type EndpointTestMeta struct {
-	PackageName      string
+	Instance         *ModuleInstance
 	Method           *MethodSpec
 	TestStubs        []TestStub
 	ClientName       string
@@ -272,9 +277,9 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
@@ -372,9 +377,9 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
@@ -684,7 +689,15 @@ func (g *EndpointGenerator) generateEndpointFile(
 			structFilePath = e.GoStructsFileName
 		}
 		if _, ok := out[structFilePath]; !ok {
-			structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
+			meta := &StructMeta{
+				Instance: instance,
+				Spec:     m,
+			}
+			structs, err := g.templates.execTemplate(
+				"structs.tmpl",
+				meta,
+				g.packageHelper,
+			)
 			if err != nil {
 				return nil, err
 			}
@@ -727,7 +740,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 		Instance:           instance,
 		Spec:               e,
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
-		PackageName:        m.PackageName,
 		IncludedPackages:   includedPackages,
 		Method:             method,
 		ReqHeaderMap:       e.ReqHeaderMap,
@@ -880,10 +892,10 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	}
 
 	meta := &EndpointTestMeta{
-		PackageName: m.PackageName,
-		Method:      method,
-		TestStubs:   testStubs,
-		ClientID:    e.ClientSpec.ClientID,
+		Instance:  instance,
+		Method:    method,
+		TestStubs: testStubs,
+		ClientID:  e.ClientSpec.ClientID,
 	}
 
 	tempName := "endpoint_test.tmpl"

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type CallHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewCallEndpoint creates a handler
-func NewCallEndpoint(
+// NewCallHandler} creates a handler
+func NewCallHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *CallHandler {
 	return &CallHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/baz/call",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/baz/call".

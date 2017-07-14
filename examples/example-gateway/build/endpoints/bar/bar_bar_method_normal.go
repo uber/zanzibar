@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -42,19 +42,19 @@ type NormalHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewNormalEndpoint creates a handler
-func NewNormalEndpoint(
+// NewNormalHandler} creates a handler
+func NewNormalHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *NormalHandler {
 	return &NormalHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *NormalHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/bar/bar-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -74,6 +74,8 @@ func (handler *NormalHandler) Register(g *zanzibar.Gateway) error {
 			}, handler.HandleRequest).Handle,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/bar-path".

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type ArgWithHeadersHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithHeadersEndpoint creates a handler
-func NewArgWithHeadersEndpoint(
+// NewArgWithHeadersHandler} creates a handler
+func NewArgWithHeadersHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ArgWithHeadersHandler {
 	return &ArgWithHeadersHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *ArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/bar/argWithHeaders",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *ArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithHeaders".

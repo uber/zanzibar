@@ -65,14 +65,45 @@ type EndpointHandlers struct {
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	handlers.ArgNotStructHandler.Register(gateway)
-	handlers.ArgWithHeadersHandler.Register(gateway)
-	handlers.ArgWithQueryParamsHandler.Register(gateway)
-	handlers.ArgWithNestedQueryParamsHandler.Register(gateway)
-	handlers.ArgWithQueryHeaderHandler.Register(gateway)
-	handlers.ArgWithManyQueryParamsHandler.Register(gateway)
-	handlers.MissingArgHandler.Register(gateway)
-	handlers.NoRequestHandler.Register(gateway)
-	handlers.NormalHandler.Register(gateway)
-	handlers.TooManyArgsHandler.Register(gateway)
+	err0 := handlers.ArgNotStructHandler.Register(gateway)
+	if err0 != nil {
+		return err0
+	}
+	err1 := handlers.ArgWithHeadersHandler.Register(gateway)
+	if err1 != nil {
+		return err1
+	}
+	err2 := handlers.ArgWithQueryParamsHandler.Register(gateway)
+	if err2 != nil {
+		return err2
+	}
+	err3 := handlers.ArgWithNestedQueryParamsHandler.Register(gateway)
+	if err3 != nil {
+		return err3
+	}
+	err4 := handlers.ArgWithQueryHeaderHandler.Register(gateway)
+	if err4 != nil {
+		return err4
+	}
+	err5 := handlers.ArgWithManyQueryParamsHandler.Register(gateway)
+	if err5 != nil {
+		return err5
+	}
+	err6 := handlers.MissingArgHandler.Register(gateway)
+	if err6 != nil {
+		return err6
+	}
+	err7 := handlers.NoRequestHandler.Register(gateway)
+	if err7 != nil {
+		return err7
+	}
+	err8 := handlers.NormalHandler.Register(gateway)
+	if err8 != nil {
+		return err8
+	}
+	err9 := handlers.TooManyArgsHandler.Register(gateway)
+	if err9 != nil {
+		return err9
+	}
+	return nil
 }

@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type SillyNoopHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSillyNoopEndpoint creates a handler
-func NewSillyNoopEndpoint(
+// NewSillyNoopHandler} creates a handler
+func NewSillyNoopHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SillyNoopHandler {
 	return &SillyNoopHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/baz/silly-noop",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/baz/silly-noop".

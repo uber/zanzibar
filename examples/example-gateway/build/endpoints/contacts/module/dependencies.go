@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package contactsEndpoint
+package module
 
 import (
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"

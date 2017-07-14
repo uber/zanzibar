@@ -53,8 +53,21 @@ type EndpointHandlers struct {
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	handlers.CallHandler.Register(gateway)
-	handlers.CompareHandler.Register(gateway)
-	handlers.PingHandler.Register(gateway)
-	handlers.SillyNoopHandler.Register(gateway)
+	err0 := handlers.CallHandler.Register(gateway)
+	if err0 != nil {
+		return err0
+	}
+	err1 := handlers.CompareHandler.Register(gateway)
+	if err1 != nil {
+		return err1
+	}
+	err2 := handlers.PingHandler.Register(gateway)
+	if err2 != nil {
+		return err2
+	}
+	err3 := handlers.SillyNoopHandler.Register(gateway)
+	if err3 != nil {
+		return err3
+	}
+	return nil
 }

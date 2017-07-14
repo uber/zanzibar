@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -41,19 +41,19 @@ type ArgWithManyQueryParamsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithManyQueryParamsEndpoint creates a handler
-func NewArgWithManyQueryParamsEndpoint(
+// NewArgWithManyQueryParamsHandler} creates a handler
+func NewArgWithManyQueryParamsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ArgWithManyQueryParamsHandler {
 	return &ArgWithManyQueryParamsHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *ArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/bar/argWithManyQueryParams",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -62,6 +62,8 @@ func (handler *ArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) erro
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/argWithManyQueryParams".

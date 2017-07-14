@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type NoRequestHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewNoRequestEndpoint creates a handler
-func NewNoRequestEndpoint(
+// NewNoRequestHandler} creates a handler
+func NewNoRequestHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *NoRequestHandler {
 	return &NoRequestHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *NoRequestHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"GET", "/bar/no-request-path",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *NoRequestHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/bar/no-request-path".

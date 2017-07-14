@@ -49,6 +49,13 @@ type EndpointHandlers struct {
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	handlers.AddCredentialsHandler.Register(gateway)
-	handlers.CheckCredentialsHandler.Register(gateway)
+	err0 := handlers.AddCredentialsHandler.Register(gateway)
+	if err0 != nil {
+		return err0
+	}
+	err1 := handlers.CheckCredentialsHandler.Register(gateway)
+	if err1 != nil {
+		return err1
+	}
+	return nil
 }

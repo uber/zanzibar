@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package googlenow
+package googlenowEndpoint
 
 import (
 	"context"
@@ -40,19 +40,19 @@ type AddCredentialsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewAddCredentialsEndpoint creates a handler
-func NewAddCredentialsEndpoint(
+// NewAddCredentialsHandler} creates a handler
+func NewAddCredentialsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *AddCredentialsHandler {
 	return &AddCredentialsHandler{
-		Clients: deps.Client,
+		Clients: &deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
 func (handler *AddCredentialsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	g.HTTPRouter.Register(
 		"POST", "/googlenow/add-credentials",
 		zanzibar.NewRouterEndpoint(
 			g,
@@ -61,6 +61,8 @@ func (handler *AddCredentialsHandler) Register(g *zanzibar.Gateway) error {
 			handler.HandleRequest,
 		),
 	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "/googlenow/add-credentials".

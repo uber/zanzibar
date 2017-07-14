@@ -46,8 +46,12 @@ type EndpointHandlers struct {
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	{{- range $idx, $meta := $endpointMeta }}
 	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
-	handlers.{{$handlerName}}.Register(gateway)
+	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
 	{{- end}}
+	return nil
 }
 
 

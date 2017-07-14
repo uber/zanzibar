@@ -1,13 +1,14 @@
 {{- /* template to render edge gateway http client code */ -}}
 
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"runtime"
 	"path/filepath"
 
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
+	{{range $idx, $pkg := .Spec.IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 )
