@@ -72,14 +72,8 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{end}}
 	{{end}}
 
-	{{range $headerName, $headerInfo := .ReqHeaderFields}}
-	{{camel $headerName}}Value, _ := req.Header.Get("{{$headerName}}")
-	{{if $headerInfo.IsPointer}}
-	{{$fieldId := $headerInfo.FieldIdentifier}}
-	requestBody{{$fieldId}} = ptr.String({{camel $headerName}}Value)
-	{{else}}
-	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
-	{{end}}
+	{{range $index, $line := .ReqHeaderGoStatements -}}
+	{{$line}}
 	{{end}}
 
 	{{range $index, $line := .QueryParamGoStatements -}}
