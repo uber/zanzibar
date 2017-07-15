@@ -470,6 +470,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+// Endpoint registers a request handler on a gateway
 type Endpoint interface{
 	Register(*zanzibar.Gateway) error
 }
@@ -533,7 +534,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1884, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1937, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

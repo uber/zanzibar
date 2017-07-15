@@ -28,6 +28,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+// Endpoint registers a request handler on a gateway
 type Endpoint interface {
 	Register(*zanzibar.Gateway) error
 }
