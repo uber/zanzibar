@@ -29,6 +29,8 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
+// CreateGateway creates a new instances of the example-gateway
+// service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,

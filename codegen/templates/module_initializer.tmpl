@@ -25,6 +25,8 @@ type {{$className}}Dependencies struct {
 }
 {{end -}}
 
+// InitializeDependencies fully initializes all dependencies in the dep tree
+// for the {{$instance.InstanceName}} {{$instance.ClassName}}
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- if not $instance.HasDependencies}}
 	return {{$instance.PackageInfo.ExportName}}(gateway)

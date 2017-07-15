@@ -1276,6 +1276,8 @@ type {{$className}}Dependencies struct {
 }
 {{end -}}
 
+// InitializeDependencies fully initializes all dependencies in the dep tree
+// for the {{$instance.InstanceName}} {{$instance.ClassName}}
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- if not $instance.HasDependencies}}
 	return {{$instance.PackageInfo.ExportName}}(gateway)
@@ -1324,7 +1326,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2803, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2942, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1345,6 +1347,8 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
+// CreateGateway creates a new instances of the {{$instance.InstanceName}}
+// service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,
@@ -1384,7 +1388,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1006, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1118, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -58,6 +58,8 @@ type endpointDependencies struct {
 	Googlenow   googlenowEndpointGenerated.Endpoint
 }
 
+// InitializeDependencies fully initializes all dependencies in the dep tree
+// for the example-gateway service
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedClientDependencies := &clientDependencies{}
 	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)

@@ -14,6 +14,8 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
+// CreateGateway creates a new instances of the {{$instance.InstanceName}}
+// service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,
