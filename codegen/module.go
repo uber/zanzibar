@@ -294,7 +294,10 @@ func resolveRecursiveDependencies(
 		for _, dep := range depList {
 			if classDeps[dep.InstanceName] == nil {
 				classDeps[dep.InstanceName] = dep
-				resolveRecursiveDependencies(dep, resolvedDeps)
+				err := resolveRecursiveDependencies(dep, resolvedDeps)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
