@@ -2,6 +2,20 @@
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
 
+{{- $workflow := .WorkflowName }}
+{{- $reqHeaderMap := .ReqHeaderMap }}
+{{- $reqHeaderMapKeys := .ReqHeaderMapKeys }}
+{{- $resHeaderMap := .ResHeaderMap }}
+{{- $resHeaderMapKeys := .ResHeaderMapKeys }}
+{{- $clientName := title .ClientName }}
+{{- $serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name }}
+{{- $handlerName := printf "%sHandler"  $serviceMethod }}
+{{- $responseType := .Method.ResponseType }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $endpointId := .Spec.EndpointID }}
+{{- $handleId := .Spec.HandleID }}
+{{- $middlewares := .Spec.Middlewares }}
+
 import (
 	"context"
 	"io/ioutil"
@@ -23,22 +37,15 @@ import (
 	{{end}}
 	{{- end}}
 
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	"{{$middleware.Path}}"
+	{{- end}}
+	{{- end}}
+
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-{{ $workflow := .WorkflowName -}}
-{{ $reqHeaderMap := .ReqHeaderMap -}}
-{{ $reqHeaderMapKeys := .ReqHeaderMapKeys -}}
-{{ $resHeaderMap := .ResHeaderMap -}}
-{{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
-{{ $clientName := title .ClientName -}}
-{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
-{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-{{ $responseType := .Method.ResponseType}}
-{{ $clientMethodName := title .ClientMethodName -}}
-{{ $endpointId := .Spec.EndpointID }}
-{{ $handleId := .Spec.HandleID }}
-{{ $middlewares := .Spec.Middlewares }}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"

@@ -106,6 +106,20 @@ var _endpointTmpl = []byte(`{{/* template to render gateway http endpoint code *
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
 
+{{- $workflow := .WorkflowName }}
+{{- $reqHeaderMap := .ReqHeaderMap }}
+{{- $reqHeaderMapKeys := .ReqHeaderMapKeys }}
+{{- $resHeaderMap := .ResHeaderMap }}
+{{- $resHeaderMapKeys := .ResHeaderMapKeys }}
+{{- $clientName := title .ClientName }}
+{{- $serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name }}
+{{- $handlerName := printf "%sHandler"  $serviceMethod }}
+{{- $responseType := .Method.ResponseType }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $endpointId := .Spec.EndpointID }}
+{{- $handleId := .Spec.HandleID }}
+{{- $middlewares := .Spec.Middlewares }}
+
 import (
 	"context"
 	"io/ioutil"
@@ -127,22 +141,15 @@ import (
 	{{end}}
 	{{- end}}
 
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	"{{$middleware.Path}}"
+	{{- end}}
+	{{- end}}
+
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-{{ $workflow := .WorkflowName -}}
-{{ $reqHeaderMap := .ReqHeaderMap -}}
-{{ $reqHeaderMapKeys := .ReqHeaderMapKeys -}}
-{{ $resHeaderMap := .ResHeaderMap -}}
-{{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
-{{ $clientName := title .ClientName -}}
-{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
-{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-{{ $responseType := .Method.ResponseType}}
-{{ $clientMethodName := title .ClientMethodName -}}
-{{ $endpointId := .Spec.EndpointID }}
-{{ $handleId := .Spec.HandleID }}
-{{ $middlewares := .Spec.Middlewares }}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
@@ -455,7 +462,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9404, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9542, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

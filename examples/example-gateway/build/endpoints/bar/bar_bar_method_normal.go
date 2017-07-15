@@ -27,12 +27,13 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/runtime/middlewares/logger"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	"github.com/uber/zanzibar/runtime/middlewares/logger"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
