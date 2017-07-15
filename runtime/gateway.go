@@ -130,10 +130,6 @@ func CreateGateway(
 	return gateway, nil
 }
 
-// RegisterFn type to register generated endpoints.
-// Not importing the "endpoints" package avoids cyclic dependencies.
-type RegisterFn func(gateway *Gateway)
-
 // Bootstrap func
 func (gateway *Gateway) Bootstrap() error {
 	// start HTTP server
