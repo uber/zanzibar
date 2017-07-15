@@ -40,7 +40,7 @@ type ContactssaveContactsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewContactssaveContactsHandler} creates a handler
+// NewContactssaveContactsHandler creates a handler
 func NewContactssaveContactsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

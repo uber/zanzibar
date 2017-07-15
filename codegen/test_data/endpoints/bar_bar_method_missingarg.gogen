@@ -40,7 +40,7 @@ type BarmissingArgHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarmissingArgHandler} creates a handler
+// NewBarmissingArgHandler creates a handler
 func NewBarmissingArgHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

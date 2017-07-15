@@ -56,7 +56,6 @@ type endpointDependencies struct {
 	BazTChannel baztchannelEndpointGenerated.Endpoint
 	Contacts    contactsEndpointGenerated.Endpoint
 	Googlenow   googlenowEndpointGenerated.Endpoint
-	BazTChannel baztchannelEndpointGenerated.Endpoint
 }
 
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
@@ -90,11 +89,6 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
-		},
-	})
-	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(gateway, &baztchannelEndpointModule.Dependencies{
-		Client: &baztchannelEndpointModule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
 		},
 	})
 

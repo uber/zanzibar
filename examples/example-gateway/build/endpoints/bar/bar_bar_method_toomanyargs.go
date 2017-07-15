@@ -41,7 +41,7 @@ type BartooManyArgsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBartooManyArgsHandler} creates a handler
+// NewBartooManyArgsHandler creates a handler
 func NewBartooManyArgsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

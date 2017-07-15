@@ -40,7 +40,7 @@ type SimpleServicecallHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSimpleServicecallHandler} creates a handler
+// NewSimpleServicecallHandler creates a handler
 func NewSimpleServicecallHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

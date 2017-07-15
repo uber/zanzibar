@@ -41,7 +41,7 @@ type BarargWithHeadersHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarargWithHeadersHandler} creates a handler
+// NewBarargWithHeadersHandler creates a handler
 func NewBarargWithHeadersHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

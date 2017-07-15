@@ -150,7 +150,7 @@ type {{$handlerName}} struct {
 	Clients *module.ClientDependencies
 }
 
-// New{{$handlerName}}} creates a handler
+// New{{$handlerName}} creates a handler
 func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
@@ -455,7 +455,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9405, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9404, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

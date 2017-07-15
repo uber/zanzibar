@@ -40,7 +40,7 @@ type GoogleNowaddCredentialsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewGoogleNowaddCredentialsHandler} creates a handler
+// NewGoogleNowaddCredentialsHandler creates a handler
 func NewGoogleNowaddCredentialsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

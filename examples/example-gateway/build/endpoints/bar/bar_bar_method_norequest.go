@@ -40,7 +40,7 @@ type BarnoRequestHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarnoRequestHandler} creates a handler
+// NewBarnoRequestHandler creates a handler
 func NewBarnoRequestHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

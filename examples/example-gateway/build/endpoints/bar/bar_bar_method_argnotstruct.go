@@ -40,7 +40,7 @@ type BarargNotStructHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarargNotStructHandler} creates a handler
+// NewBarargNotStructHandler creates a handler
 func NewBarargNotStructHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

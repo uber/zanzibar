@@ -42,7 +42,7 @@ type BarnormalHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarnormalHandler} creates a handler
+// NewBarnormalHandler creates a handler
 func NewBarnormalHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

@@ -41,7 +41,7 @@ type SimpleServicecompareHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSimpleServicecompareHandler} creates a handler
+// NewSimpleServicecompareHandler creates a handler
 func NewSimpleServicecompareHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

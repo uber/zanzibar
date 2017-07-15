@@ -41,7 +41,7 @@ type BarargWithManyQueryParamsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarargWithManyQueryParamsHandler} creates a handler
+// NewBarargWithManyQueryParamsHandler creates a handler
 func NewBarargWithManyQueryParamsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,

@@ -41,7 +41,7 @@ type SimpleServicesillyNoopHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSimpleServicesillyNoopHandler} creates a handler
+// NewSimpleServicesillyNoopHandler creates a handler
 func NewSimpleServicesillyNoopHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
