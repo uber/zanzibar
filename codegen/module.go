@@ -28,6 +28,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -203,6 +204,18 @@ func (system *ModuleSystem) populateResolvedDependencies(
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
 				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
+
+		// Sort the dependencies for deterministic code generation
+		for className, deps := range classInstance.ResolvedDependencies {
+			sortedModuleList, err := sortDependencyList(
+				className,
+				deps,
+			)
+			if err != nil {
+				return err
+			}
+			classInstance.ResolvedDependencies[className] = sortedModuleList
+		}
 	}
 
 	return nil
@@ -253,7 +266,13 @@ func (system *ModuleSystem) populateRecursiveDependencies(
 				moduleList[index] = moduleInstance
 				index++
 			}
-			classInstance.RecursiveDependencies[className] = moduleList
+
+			sortedModuleList, err := sortDependencyList(className, moduleList)
+			if err != nil {
+				return err
+			}
+
+			classInstance.RecursiveDependencies[className] = sortedModuleList
 		}
 	}
 
@@ -283,35 +302,26 @@ func resolveRecursiveDependencies(
 	return nil
 }
 
-func sortResolvedDeps(
-	recursiveDeps map[string]map[string]*ModuleInstance,
-) (map[string][]*ModuleInstance, error) {
-	sortedDeps := map[string][]*ModuleInstance{}
+type sortableDependencyList []*ModuleInstance
 
-	for className, deps := range recursiveDeps {
-		depList := make([]*ModuleInstance, len(deps))
-		index := 0
+func (s sortableDependencyList) Len() int {
+	return len(s)
+}
 
-		for _, dep := range deps {
-			depList[index] = dep
-			index++
-		}
+func (s sortableDependencyList) Less(i int, j int) bool {
+	return s[i].InstanceName < s[j].InstanceName
+}
 
-		sortedDepList, err := sortDependencyList(className, depList)
-		if err != nil {
-			return nil, err
-		}
-
-		sortedDeps[className] = sortedDepList
-	}
-
-	return sortedDeps, nil
+func (s sortableDependencyList) Swap(i int, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 func sortDependencyList(
 	className string,
 	instances []*ModuleInstance,
 ) ([]*ModuleInstance, error) {
+	instanceList := sortableDependencyList(instances[:])
+	sort.Sort(instanceList)
 	sorted := make([]*ModuleInstance, len(instances))
 
 	for i, instance := range instances {
@@ -321,7 +331,9 @@ func sortDependencyList(
 				if peerDepends(sorted[j], instance) {
 					insertIndex = j
 				}
-			} else {
+			}
+
+			if insertIndex != i {
 				if peerDepends(instance, sorted[j]) {
 					return nil, errors.Errorf(
 						"Dependency cycle: %s cannot be initialized before %s",
@@ -349,10 +361,9 @@ func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
 		return false
 	}
 
-	for _, instance := range b.ResolvedDependencies[a.ClassName] {
-		if instance.InstanceName == a.InstanceName &&
-			instance.ClassName == a.ClassName &&
-			instance.ClassType == a.ClassType {
+	for _, dependency := range a.Dependencies {
+		if dependency.InstanceName == b.InstanceName &&
+			dependency.ClassName == b.ClassName {
 			return true
 		}
 	}
@@ -419,7 +430,8 @@ func (system *ModuleSystem) ResolveModules(
 
 		// Resolve dependencies for all classes
 		resolveErr := system.populateResolvedDependencies(
-			classInstances, resolvedModules,
+			classInstances,
+			resolvedModules,
 		)
 		if resolveErr != nil {
 			return nil, resolveErr
