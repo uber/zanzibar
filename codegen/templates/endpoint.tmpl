@@ -51,7 +51,7 @@ func New{{$handlerName}}(
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

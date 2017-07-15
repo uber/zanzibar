@@ -47,7 +47,7 @@ func NewTooManyArgsHandler(
 	deps *module.Dependencies,
 ) *TooManyArgsHandler {
 	return &TooManyArgsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

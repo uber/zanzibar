@@ -46,7 +46,7 @@ func NewNoRequestHandler(
 	deps *module.Dependencies,
 ) *NoRequestHandler {
 	return &NoRequestHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

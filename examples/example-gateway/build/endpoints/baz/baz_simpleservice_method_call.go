@@ -46,7 +46,7 @@ func NewCallHandler(
 	deps *module.Dependencies,
 ) *CallHandler {
 	return &CallHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

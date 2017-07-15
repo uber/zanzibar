@@ -42,7 +42,7 @@ func NewSimpleServiceCallHandler(
 	deps *module.Dependencies,
 ) zanzibar.TChannelHandler {
 	return &SimpleServiceCallHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 		Logger:  gateway.Logger,
 	}
 }

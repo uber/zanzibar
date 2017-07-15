@@ -47,7 +47,7 @@ func NewArgWithQueryParamsHandler(
 	deps *module.Dependencies,
 ) *ArgWithQueryParamsHandler {
 	return &ArgWithQueryParamsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

@@ -47,7 +47,7 @@ func NewCompareHandler(
 	deps *module.Dependencies,
 ) *CompareHandler {
 	return &CompareHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

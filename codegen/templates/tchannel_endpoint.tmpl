@@ -28,7 +28,7 @@ func New{{$handlerName}}(
 	deps *module.Dependencies,
 ) zanzibar.TChannelHandler {
 	return &{{$handlerName}}{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 		Logger: gateway.Logger,
 	}
 }

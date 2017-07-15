@@ -46,7 +46,7 @@ func NewArgNotStructHandler(
 	deps *module.Dependencies,
 ) *ArgNotStructHandler {
 	return &ArgNotStructHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

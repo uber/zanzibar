@@ -38,43 +38,43 @@ import (
 
 // clientDependencies contains client dependencies
 type clientDependencies struct {
-	Baz       bazClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
 	Bar       barClientGenerated.Client
+	Baz       bazClientGenerated.Client
 }
 
 // endpointDependencies contains endpoint dependencies
 type endpointDependencies struct {
-	Googlenow googlenowEndpointGenerated.Endpoint
 	Bar       barEndpointGenerated.Endpoint
 	Baz       bazEndpointGenerated.Endpoint
+	Googlenow googlenowEndpointGenerated.Endpoint
 }
 
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedClientDependencies := &clientDependencies{}
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
 
 	initializedEndpointDependencies := &endpointDependencies{}
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
-		Client: googlenowEndpointModule.ClientDependencies{
-			GoogleNow: initializedClientDependencies.GoogleNow,
-		},
-	})
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
-		Client: barEndpointModule.ClientDependencies{
+		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
-		Client: bazEndpointModule.ClientDependencies{
+		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
+		Client: &googlenowEndpointModule.ClientDependencies{
+			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
 
 	return &Dependencies{
-		Endpoint: EndpointDependencies{
+		Endpoint: &EndpointDependencies{
 			Bar:       initializedEndpointDependencies.Bar,
 			Baz:       initializedEndpointDependencies.Baz,
 			Googlenow: initializedEndpointDependencies.Googlenow,

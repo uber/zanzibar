@@ -43,7 +43,7 @@ func NewCheckCredentialsHandler(
 	deps *module.Dependencies,
 ) *CheckCredentialsHandler {
 	return &CheckCredentialsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

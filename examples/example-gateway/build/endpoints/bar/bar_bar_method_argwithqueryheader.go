@@ -47,7 +47,7 @@ func NewArgWithQueryHeaderHandler(
 	deps *module.Dependencies,
 ) *ArgWithQueryHeaderHandler {
 	return &ArgWithQueryHeaderHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

@@ -12,7 +12,7 @@ import (
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
-	{{$classType | pascal}} {{$classType | pascal}}Dependencies
+	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}
 }
 

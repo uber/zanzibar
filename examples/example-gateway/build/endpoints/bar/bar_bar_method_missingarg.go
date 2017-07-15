@@ -46,7 +46,7 @@ func NewMissingArgHandler(
 	deps *module.Dependencies,
 ) *MissingArgHandler {
 	return &MissingArgHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

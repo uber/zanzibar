@@ -29,7 +29,7 @@ import (
 
 // Dependencies contains dependencies for the googlenow endpoint module
 type Dependencies struct {
-	Client ClientDependencies
+	Client *ClientDependencies
 }
 
 // ClientDependencies contains client dependencies

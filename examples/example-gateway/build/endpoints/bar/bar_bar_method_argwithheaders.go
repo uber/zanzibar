@@ -47,7 +47,7 @@ func NewArgWithHeadersHandler(
 	deps *module.Dependencies,
 ) *ArgWithHeadersHandler {
 	return &ArgWithHeadersHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

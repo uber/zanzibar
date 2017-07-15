@@ -71,7 +71,7 @@ import (
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
-	{{$classType | pascal}} {{$classType | pascal}}Dependencies
+	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}
 }
 
@@ -96,7 +96,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1096, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1097, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -154,7 +154,7 @@ func New{{$handlerName}}(
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 
@@ -453,7 +453,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9338, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9337, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1286,7 +1286,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- if $dependency.HasDependencies}}
 	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-		{{$className | pascal}}: {{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}
@@ -1301,7 +1301,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 
 	return &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
-		{{$className | pascal}}: {{$className | pascal}}Dependencies{
+		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}
@@ -1322,7 +1322,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2801, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2803, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1690,7 +1690,7 @@ func New{{$handlerName}}(
 	deps *module.Dependencies,
 ) zanzibar.TChannelHandler {
 	return &{{$handlerName}}{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 		Logger: gateway.Logger,
 	}
 }
@@ -1800,7 +1800,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3371, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

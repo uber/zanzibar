@@ -46,7 +46,7 @@ func NewAddCredentialsHandler(
 	deps *module.Dependencies,
 ) *AddCredentialsHandler {
 	return &AddCredentialsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

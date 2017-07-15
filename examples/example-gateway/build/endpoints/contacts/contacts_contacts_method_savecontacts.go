@@ -46,7 +46,7 @@ func NewSaveContactsHandler(
 	deps *module.Dependencies,
 ) *SaveContactsHandler {
 	return &SaveContactsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

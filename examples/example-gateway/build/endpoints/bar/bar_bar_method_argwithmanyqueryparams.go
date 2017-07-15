@@ -47,7 +47,7 @@ func NewArgWithManyQueryParamsHandler(
 	deps *module.Dependencies,
 ) *ArgWithManyQueryParamsHandler {
 	return &ArgWithManyQueryParamsHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

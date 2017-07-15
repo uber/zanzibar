@@ -46,7 +46,7 @@ func NewPingHandler(
 	deps *module.Dependencies,
 ) *PingHandler {
 	return &PingHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

@@ -48,7 +48,7 @@ func NewNormalHandler(
 	deps *module.Dependencies,
 ) *NormalHandler {
 	return &NormalHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 

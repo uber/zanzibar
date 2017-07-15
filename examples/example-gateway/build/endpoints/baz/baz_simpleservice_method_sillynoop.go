@@ -47,7 +47,7 @@ func NewSillyNoopHandler(
 	deps *module.Dependencies,
 ) *SillyNoopHandler {
 	return &SillyNoopHandler{
-		Clients: &deps.Client,
+		Clients: deps.Client,
 	}
 }
 
