@@ -63,10 +63,8 @@ type MethodSpec struct {
 	// Statements for reading query parameters.
 	QueryParamGoStatements []string
 
-	// ReqHeaderFields is a map of "header name" to
-	// a golang field accessor expression like ".Foo.Bar"
-	// Use to place request headers in the body
-	ReqHeaderFields map[string]HeaderFieldInfo
+	// Statements for reading request headers
+	ReqHeaderGoStatements []string
 
 	// ResHeaderFields is a map of header name to a golang
 	// field accessor expression used to read fields out
@@ -212,7 +210,10 @@ func NewMethod(
 	}
 	method.setHTTPPath(httpPath, funcSpec)
 
-	method.setRequestHeaderFields(funcSpec)
+	err = method.setRequestHeaderFields(funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
 	method.setResponseHeaderFields(funcSpec)
 
 	return method, nil
@@ -409,27 +410,77 @@ func findParamsAnnotation(
 }
 
 func (ms *MethodSpec) setRequestHeaderFields(
-	funcSpec *compile.FunctionSpec,
-) {
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) error {
 	fields := compile.FieldGroup(funcSpec.ArgsSpec)
-	ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
+	// ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
+
+	statements := LineBuilder{}
+
+	var finalError error
+	var seenHeaders bool
 
 	// Scan for all annotations
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		// If the type is a struct then we cannot really do anything
+		if _, ok := realType.(*compile.StructSpec); ok {
+			// if a field is a struct then we must do a nil check
+
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+
+			statements.appendf("if requestBody%s == nil {", longFieldName)
+			statements.appendf("\trequestBody%s = &%s{}",
+				longFieldName, typeName,
+			)
+			statements.append("}")
+
+			return false
+		}
+
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				ms.ReqHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: goPrefix + "." + pascalCase(field.Name),
-					IsPointer:       !field.Required,
+				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
+				variableName := camelCase(headerName) + "Value"
+
+				statements.appendf("%s, _ := req.Header.Get(%q)",
+					variableName, headerName,
+				)
+
+				if !field.Required {
+					statements.appendf("requestBody%s = ptr.String(%s)",
+						bodyIdentifier, variableName,
+					)
+				} else {
+					statements.appendf("requestBody%s = %s",
+						bodyIdentifier, variableName,
+					)
 				}
+
+				seenHeaders = true
 			}
 		}
 		return false
 	}
 	walkFieldGroups(fields, visitor)
+
+	if finalError != nil {
+		return finalError
+	}
+
+	if seenHeaders {
+		ms.ReqHeaderGoStatements = statements.GetLines()
+	}
+	return nil
 }
 
 func (ms *MethodSpec) setResponseHeaderFields(
