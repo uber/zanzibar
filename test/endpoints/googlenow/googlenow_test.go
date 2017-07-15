@@ -34,6 +34,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
@@ -52,7 +54,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
@@ -114,7 +116,7 @@ func TestAddCredentials(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -167,7 +169,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -233,7 +235,7 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -283,7 +285,7 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 
@@ -350,7 +352,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 
@@ -400,7 +402,7 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 
@@ -443,7 +445,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -480,7 +482,7 @@ func TestAddCredentialsMissingOneHeader(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -531,7 +533,7 @@ func TestAddCredentialsHeaderMapping(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -595,7 +597,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 

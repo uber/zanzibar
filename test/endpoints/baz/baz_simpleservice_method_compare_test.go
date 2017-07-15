@@ -34,6 +34,8 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var testCompareCounter int
@@ -62,7 +64,7 @@ func BenchmarkCompare(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
@@ -163,7 +165,7 @@ func TestCompareInvalidArgs(t *testing.T) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

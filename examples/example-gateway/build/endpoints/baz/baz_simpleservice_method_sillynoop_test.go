@@ -43,7 +43,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

@@ -25,6 +25,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestCreatingTChannel(t *testing.T) {
@@ -33,7 +35,7 @@ func TestCreatingTChannel(t *testing.T) {
 			"tchannel.serviceName": "",
 		},
 		nil,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	assert.Error(t, err)
 

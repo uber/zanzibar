@@ -39,7 +39,7 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

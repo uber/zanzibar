@@ -29,6 +29,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestReadAndUnmarshalNonStructBody(t *testing.T) {
@@ -41,7 +43,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -85,7 +87,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {

@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
 
+	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
@@ -23,7 +24,7 @@ func getDirName() string {
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"../../../",
+		"../../../../",
 		"config",
 	)
 }
@@ -40,15 +41,9 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 	
-	gateway, err := zanzibar.CreateGateway(config, nil)
+	gateway, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerEndpoints(gateway, dependencies)
-	if registerErr != nil {
-		return nil, registerErr
 	}
 
 	return gateway, nil
@@ -65,7 +60,7 @@ func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{$instance.InstanceName | pascal}} gateway",
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),

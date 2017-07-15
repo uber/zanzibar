@@ -166,6 +166,8 @@ func createTestBinaryFile(
 
 	mainTestPath := strings.Replace(mainPath, "main.go", "main_test.go", -1)
 
+	fmt.Println(mainTestPath)
+
 	randStr, err := makeRandStr()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not make rand str...")

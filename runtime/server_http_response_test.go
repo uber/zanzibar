@@ -30,13 +30,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestInvalidStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -88,7 +90,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -147,7 +149,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -213,7 +215,7 @@ func TestResponsePeekBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -274,7 +276,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -323,7 +325,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {

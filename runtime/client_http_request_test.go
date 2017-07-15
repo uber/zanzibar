@@ -32,6 +32,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var defaultTestOptions *testGateway.Options = &testGateway.Options{
@@ -46,7 +48,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -70,7 +72,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -95,7 +97,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -142,7 +144,7 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -181,7 +183,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -214,7 +216,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -246,7 +248,7 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return

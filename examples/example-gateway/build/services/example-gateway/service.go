@@ -21,46 +21,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package examplegatewayServiceGenerated
 
 import (
-	"os"
-	"path/filepath"
-	"runtime"
-
 	"github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
-
-// TODO: remove this
-func getConfigDirName() string {
-	return filepath.Join(
-		getDirName(),
-		"../../../",
-		"config",
-	)
-}
-
-func getConfig() *zanzibar.StaticConfig {
-	return zanzibar.NewStaticConfigOrDie([]string{
-		// TODO: zanzibar-defaults should be bundled in the binary
-		filepath.Join(getDirName(), "zanzibar-defaults.json"),
-		filepath.Join(getConfigDirName(), "production.json"),
-		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
-	}, nil)
-}
-
-func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
-
-	gateway, err := zanzibar.CreateGateway(config, nil)
+func CreateGateway(
+	config *zanzibar.StaticConfig,
+	opts *zanzibar.Options,
+) (*zanzibar.Gateway, error) {
+	gateway, err := zanzibar.CreateGateway(config, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -96,31 +69,4 @@ func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 		return err4
 	}
 	return nil
-}
-
-func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started ExampleGateway gateway",
-		zap.String("realHTTPAddr", server.RealHTTPAddr),
-		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
-	)
-
-	// TODO: handle sigterm gracefully
-	server.Wait()
-	// TODO: emit metrics about startup.
-	// TODO: setup and configure tracing/jeager.
-}
-
-func main() {
-	server, err := createGateway()
-	if err != nil {
-		panic(err)
-	}
-
-	err = server.Bootstrap()
-	if err != nil {
-		panic(err)
-	}
-
-	logAndWait(server)
 }

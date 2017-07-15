@@ -31,6 +31,8 @@ import (
 
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var testCallCounter int
@@ -55,7 +57,7 @@ func BenchmarkCall(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		nil,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())

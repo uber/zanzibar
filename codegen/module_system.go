@@ -960,6 +960,19 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	// generate main.go
+	service, err := generator.templates.execTemplate(
+		"service.tmpl",
+		instance,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service service.go for %s",
+			instance.InstanceName,
+		)
+	}
+
 	main, err := generator.templates.execTemplate(
 		"main.tmpl",
 		instance,
@@ -1014,10 +1027,11 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	files := map[string][]byte{
-		"zanzibar-defaults.json": productionConfig,
-		"main.go":                main,
-		"main_test.go":           mainTest,
-		"module/init.go":         initializer,
+		"service.go":                  service,
+		"main/main.go":                main,
+		"main/main_test.go":           mainTest,
+		"main/zanzibar-defaults.json": productionConfig,
+		"module/init.go":              initializer,
 	}
 
 	if dependencies != nil {

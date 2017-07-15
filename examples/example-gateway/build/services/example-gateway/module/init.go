@@ -43,29 +43,39 @@ import (
 
 // clientDependencies contains client dependencies
 type clientDependencies struct {
+	Bar       barClientGenerated.Client
 	Baz       bazClientGenerated.Client
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
-	Bar       barClientGenerated.Client
 }
 
 // endpointDependencies contains endpoint dependencies
 type endpointDependencies struct {
+	Bar         barEndpointGenerated.Endpoint
+	Baz         bazEndpointGenerated.Endpoint
 	Contacts    contactsEndpointGenerated.Endpoint
 	Googlenow   googlenowEndpointGenerated.Endpoint
 	BazTChannel baztchannelEndpointGenerated.Endpoint
-	Bar         barEndpointGenerated.Endpoint
-	Baz         bazEndpointGenerated.Endpoint
 }
 
 func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	initializedClientDependencies := &clientDependencies{}
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway)
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
 
 	initializedEndpointDependencies := &endpointDependencies{}
+	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
+		Client: &barEndpointModule.ClientDependencies{
+			Bar: initializedClientDependencies.Bar,
+		},
+	})
+	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
+		Client: &bazEndpointModule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
 	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(gateway, &contactsEndpointModule.Dependencies{
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
@@ -78,16 +88,6 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	})
 	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(gateway, &baztchannelEndpointModule.Dependencies{
 		Client: &baztchannelEndpointModule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
-		},
-	})
-	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
-		Client: &barEndpointModule.ClientDependencies{
-			Bar: initializedClientDependencies.Bar,
-		},
-	})
-	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
-		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})

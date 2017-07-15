@@ -52,7 +52,7 @@ func TestBootstrapError(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 

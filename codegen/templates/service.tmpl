@@ -1,0 +1,43 @@
+{{- /* template to render gateway main.go */ -}}
+{{- $instance := . -}}
+
+package {{$instance.PackageInfo.GeneratedPackageAlias}}
+
+import (
+	"os"
+	"path/filepath"
+	"runtime"
+
+	"go.uber.org/zap"
+	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+func CreateGateway(
+	config *zanzibar.StaticConfig,
+	opts *zanzibar.Options,
+) (*zanzibar.Gateway, error) {
+	gateway, err := zanzibar.CreateGateway(config, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	dependencies := module.InitializeDependencies(gateway)
+	registerErr := registerEndpoints(gateway, dependencies)
+	if registerErr != nil {
+		return nil, registerErr
+	}
+
+	return gateway, nil
+}
+
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
+	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
+	{{- end}}
+	return nil
+}

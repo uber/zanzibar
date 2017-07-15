@@ -32,7 +32,7 @@ func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
+			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

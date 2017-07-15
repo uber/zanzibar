@@ -9,6 +9,7 @@
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
 // codegen/templates/module_initializer.tmpl
+// codegen/templates/service.tmpl
 // codegen/templates/structs.tmpl
 // codegen/templates/tchannel_client.tmpl
 // codegen/templates/tchannel_client_test_server.tmpl
@@ -571,7 +572,7 @@ func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
+			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -648,7 +649,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2551, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2559, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -700,7 +701,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main.go",
+			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -806,7 +807,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3901, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3909, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1062,6 +1063,7 @@ import (
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
 
+	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
@@ -1074,7 +1076,7 @@ func getDirName() string {
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"../../../",
+		"../../../../",
 		"config",
 	)
 }
@@ -1091,15 +1093,9 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 	
-	gateway, err := zanzibar.CreateGateway(config, nil)
+	gateway, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerEndpoints(gateway, dependencies)
-	if registerErr != nil {
-		return nil, registerErr
 	}
 
 	return gateway, nil
@@ -1116,7 +1112,7 @@ func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 }
 
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{$instance.InstanceName | pascal}} gateway",
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),
@@ -1153,7 +1149,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 2087, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1971, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1328,6 +1324,66 @@ func module_initializerTmpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2803, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _serviceTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
+{{- $instance := . -}}
+
+package {{$instance.PackageInfo.GeneratedPackageAlias}}
+
+import (
+	"os"
+	"path/filepath"
+	"runtime"
+
+	"go.uber.org/zap"
+	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+func CreateGateway(
+	config *zanzibar.StaticConfig,
+	opts *zanzibar.Options,
+) (*zanzibar.Gateway, error) {
+	gateway, err := zanzibar.CreateGateway(config, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	dependencies := module.InitializeDependencies(gateway)
+	registerErr := registerEndpoints(gateway, dependencies)
+	if registerErr != nil {
+		return nil, registerErr
+	}
+
+	return gateway, nil
+}
+
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
+	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
+	{{- end}}
+	return nil
+}
+`)
+
+func serviceTmplBytes() ([]byte, error) {
+	return _serviceTmpl, nil
+}
+
+func serviceTmpl() (*asset, error) {
+	bytes, err := serviceTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "service.tmpl", size: 1006, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1873,6 +1929,7 @@ var _bindata = map[string]func() (*asset, error){
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
+	"service.tmpl":                       serviceTmpl,
 	"structs.tmpl":                       structsTmpl,
 	"tchannel_client.tmpl":               tchannel_clientTmpl,
 	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
@@ -1929,6 +1986,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
+	"service.tmpl":                       {serviceTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       {structsTmpl, map[string]*bintree{}},
 	"tchannel_client.tmpl":               {tchannel_clientTmpl, map[string]*bintree{}},
 	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},
