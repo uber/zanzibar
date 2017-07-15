@@ -362,6 +362,7 @@ func easyjson883a4a87DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		return
 	}
 	var NameSet bool
+	var AuthUUID2Set bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -385,6 +386,19 @@ func easyjson883a4a87DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				}
 				*out.UserUUID = string(in.String())
 			}
+		case "authUUID":
+			if in.IsNull() {
+				in.Skip()
+				out.AuthUUID = nil
+			} else {
+				if out.AuthUUID == nil {
+					out.AuthUUID = new(string)
+				}
+				*out.AuthUUID = string(in.String())
+			}
+		case "authUUID2":
+			out.AuthUUID2 = string(in.String())
+			AuthUUID2Set = true
 		default:
 			in.SkipRecursive()
 		}
@@ -396,6 +410,9 @@ func easyjson883a4a87DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !NameSet {
 		in.AddError(fmt.Errorf("key 'name' is required"))
+	}
+	if !AuthUUID2Set {
+		in.AddError(fmt.Errorf("key 'authUUID2' is required"))
 	}
 }
 func easyjson883a4a87EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out *jwriter.Writer, in QueryParamsStruct) {
@@ -420,5 +437,23 @@ func easyjson883a4a87EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.String(string(*in.UserUUID))
 		}
 	}
+	if in.AuthUUID != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"authUUID\":")
+		if in.AuthUUID == nil {
+			out.RawString("null")
+		} else {
+			out.String(string(*in.AuthUUID))
+		}
+	}
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"authUUID2\":")
+	out.String(string(in.AuthUUID2))
 	out.RawByte('}')
 }
