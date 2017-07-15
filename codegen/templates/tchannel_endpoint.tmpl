@@ -26,7 +26,7 @@ import (
 func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) zanzibar.TChannelHandler {
+) *{{$handlerName}} {
 	return &{{$handlerName}}{
 		Clients: deps.Client,
 		Logger: gateway.Logger,
@@ -41,11 +41,13 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.TChannelRouter.Register(
+	g.TChannelRouter.Register(
 		"{{.ThriftService}}",
 		"{{.Name}}",
 		handler,
 	)
+	// TODO: Register should return an error for route conflicts
+	return nil
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".

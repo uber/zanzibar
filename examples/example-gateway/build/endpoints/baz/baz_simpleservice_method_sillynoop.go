@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// SillyNoopHandler is the handler for "/baz/silly-noop"
-type SillyNoopHandler struct {
+// SimpleServicesillyNoopHandler is the handler for "/baz/silly-noop"
+type SimpleServicesillyNoopHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSillyNoopHandler} creates a handler
-func NewSillyNoopHandler(
+// NewSimpleServicesillyNoopHandler} creates a handler
+func NewSimpleServicesillyNoopHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *SillyNoopHandler {
-	return &SillyNoopHandler{
+) *SimpleServicesillyNoopHandler {
+	return &SimpleServicesillyNoopHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
+func (handler *SimpleServicesillyNoopHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/baz/silly-noop",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *SillyNoopHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/baz/silly-noop".
-func (handler *SillyNoopHandler) HandleRequest(
+func (handler *SimpleServicesillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

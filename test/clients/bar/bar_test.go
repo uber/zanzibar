@@ -27,8 +27,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	barClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+
 	barGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -48,8 +48,7 @@ func TestEchoI8(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -81,7 +80,7 @@ func TestEchoI8(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoI8(
 		context.Background(), nil, &barGen.Echo_EchoI8_Args{Arg: arg},
@@ -94,8 +93,7 @@ func TestEchoI16(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -127,7 +125,7 @@ func TestEchoI16(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoI16(
 		context.Background(), nil, &barGen.Echo_EchoI16_Args{Arg: arg},
@@ -140,8 +138,7 @@ func TestEchoI32(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -173,7 +170,7 @@ func TestEchoI32(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoI32(
 		context.Background(), nil, &barGen.Echo_EchoI32_Args{Arg: arg},
@@ -186,8 +183,7 @@ func TestEchoI64(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -219,7 +215,7 @@ func TestEchoI64(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoI64(
 		context.Background(), nil, &barGen.Echo_EchoI64_Args{Arg: arg},
@@ -232,8 +228,7 @@ func TestEchoDouble(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -265,7 +260,7 @@ func TestEchoDouble(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoDouble(
 		context.Background(), nil, &barGen.Echo_EchoDouble_Args{Arg: arg},
@@ -278,8 +273,7 @@ func TestEchoBool(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -311,7 +305,7 @@ func TestEchoBool(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoBool(
 		context.Background(), nil, &barGen.Echo_EchoBool_Args{Arg: arg},
@@ -324,8 +318,7 @@ func TestEchoString(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -357,7 +350,7 @@ func TestEchoString(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoString(
 		context.Background(), nil, &barGen.Echo_EchoString_Args{Arg: arg},
@@ -370,8 +363,7 @@ func TestEchoBinary(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -403,7 +395,7 @@ func TestEchoBinary(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoBinary(
 		context.Background(), nil, &barGen.Echo_EchoBinary_Args{Arg: arg},
@@ -416,8 +408,7 @@ func TestEchoEnum(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -450,7 +441,7 @@ func TestEchoEnum(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoEnum(
 		context.Background(), nil, &barGen.Echo_EchoEnum_Args{Arg: arg},
@@ -463,8 +454,7 @@ func TestEchoTypedef(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -496,7 +486,7 @@ func TestEchoTypedef(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoTypedef(
 		context.Background(), nil, &barGen.Echo_EchoTypedef_Args{Arg: arg},
@@ -509,8 +499,7 @@ func TestEchoStringSet(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -545,7 +534,7 @@ func TestEchoStringSet(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStringSet(
 		context.Background(), nil, &barGen.Echo_EchoStringSet_Args{Arg: arg},
@@ -558,8 +547,7 @@ func TestEchoStructSet(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -603,7 +591,7 @@ func TestEchoStructSet(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStructSet(
 		context.Background(), nil, &barGen.Echo_EchoStructSet_Args{Arg: arg},
@@ -616,8 +604,7 @@ func TestEchoStringList(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -649,7 +636,7 @@ func TestEchoStringList(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStringList(
 		context.Background(), nil, &barGen.Echo_EchoStringList_Args{Arg: arg},
@@ -662,8 +649,7 @@ func TestEchoStructList(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -707,7 +693,7 @@ func TestEchoStructList(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStructList(
 		context.Background(), nil, &barGen.Echo_EchoStructList_Args{Arg: arg},
@@ -720,8 +706,7 @@ func TestEchoStringMap(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -765,7 +750,7 @@ func TestEchoStringMap(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStringMap(
 		context.Background(), nil, &barGen.Echo_EchoStringMap_Args{Arg: arg},
@@ -778,8 +763,7 @@ func TestEchoStructMap(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -828,7 +812,7 @@ func TestEchoStructMap(t *testing.T) {
 			assert.NoError(t, err)
 		},
 	)
-	bar := bgateway.ActualGateway.Clients.(*clients.Clients).Bar
+	bar := barClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := bar.EchoStructMap(
 		context.Background(), nil, &barGen.Echo_EchoStructMap_Args{Arg: arg},

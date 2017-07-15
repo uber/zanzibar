@@ -83,9 +83,17 @@ func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err1 != nil {
 		return err1
 	}
-	err2 := deps.Endpoint.Googlenow.Register(g)
+	err2 := deps.Endpoint.Contacts.Register(g)
 	if err2 != nil {
 		return err2
+	}
+	err3 := deps.Endpoint.Googlenow.Register(g)
+	if err3 != nil {
+		return err3
+	}
+	err4 := deps.Endpoint.BazTChannel.Register(g)
+	if err4 != nil {
+		return err4
 	}
 	return nil
 }

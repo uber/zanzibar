@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
-type ArgWithNestedQueryParamsHandler struct {
+// BarargWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
+type BarargWithNestedQueryParamsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithNestedQueryParamsHandler} creates a handler
-func NewArgWithNestedQueryParamsHandler(
+// NewBarargWithNestedQueryParamsHandler} creates a handler
+func NewBarargWithNestedQueryParamsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *ArgWithNestedQueryParamsHandler {
-	return &ArgWithNestedQueryParamsHandler{
+) *BarargWithNestedQueryParamsHandler {
+	return &BarargWithNestedQueryParamsHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *ArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarargWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/argWithNestedQueryParams",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *ArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) er
 }
 
 // HandleRequest handles "/bar/argWithNestedQueryParams".
-func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
+func (handler *BarargWithNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

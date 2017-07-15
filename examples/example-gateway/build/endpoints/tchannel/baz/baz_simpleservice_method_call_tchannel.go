@@ -40,7 +40,7 @@ import (
 func NewSimpleServiceCallHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) zanzibar.TChannelHandler {
+) *SimpleServiceCallHandler {
 	return &SimpleServiceCallHandler{
 		Clients: deps.Client,
 		Logger:  gateway.Logger,
@@ -55,11 +55,13 @@ type SimpleServiceCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (handler *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	return g.TChannelRouter.Register(
+	g.TChannelRouter.Register(
 		"SimpleService",
 		"Call",
 		handler,
 	)
+	// TODO: Register should return an error for route conflicts
+	return nil
 }
 
 // Handle handles RPC call of "SimpleService::Call".

@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
-type ArgWithHeadersHandler struct {
+// BarargWithHeadersHandler is the handler for "/bar/argWithHeaders"
+type BarargWithHeadersHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithHeadersHandler} creates a handler
-func NewArgWithHeadersHandler(
+// NewBarargWithHeadersHandler} creates a handler
+func NewBarargWithHeadersHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *ArgWithHeadersHandler {
-	return &ArgWithHeadersHandler{
+) *BarargWithHeadersHandler {
+	return &BarargWithHeadersHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *ArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarargWithHeadersHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/argWithHeaders",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *ArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/argWithHeaders".
-func (handler *ArgWithHeadersHandler) HandleRequest(
+func (handler *BarargWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

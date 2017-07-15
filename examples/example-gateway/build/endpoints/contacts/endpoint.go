@@ -36,18 +36,18 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SaveContactsHandler: NewSaveContactsHandler(g, deps),
+		ContactssaveContactsHandler: NewContactssaveContactsHandler(g, deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	SaveContactsHandler *SaveContactsHandler
+	ContactssaveContactsHandler *ContactssaveContactsHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.SaveContactsHandler.Register(gateway)
+	err0 := handlers.ContactssaveContactsHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}

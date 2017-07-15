@@ -32,7 +32,8 @@ import (
 {{ $resHeaderMap := .ResHeaderMap -}}
 {{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
 {{ $clientName := title .ClientName -}}
-{{ $handlerName := title .Method.Name | printf "%sHandler" }}
+{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 {{ $responseType := .Method.ResponseType}}
 {{ $clientMethodName := title .ClientMethodName -}}
 {{ $endpointId := .Spec.EndpointID }}

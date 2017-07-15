@@ -24,9 +24,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	baz "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	bazGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -47,8 +45,7 @@ func TestEchoI8(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -70,9 +67,9 @@ func TestEchoI8(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoI8",
-		baz.NewSecondServiceEchoI8Handler(fake),
+		bazClient.NewSecondServiceEchoI8Handler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoI8(
 		context.Background(), nil, &bazGen.SecondService_EchoI8_Args{Arg: arg},
@@ -85,8 +82,7 @@ func TestEchoI16(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -108,9 +104,9 @@ func TestEchoI16(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoI16",
-		baz.NewSecondServiceEchoI16Handler(fake),
+		bazClient.NewSecondServiceEchoI16Handler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoI16(
 		context.Background(), nil, &bazGen.SecondService_EchoI16_Args{Arg: arg},
@@ -123,8 +119,7 @@ func TestEchoI32(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -146,9 +141,9 @@ func TestEchoI32(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoI32",
-		baz.NewSecondServiceEchoI32Handler(fake),
+		bazClient.NewSecondServiceEchoI32Handler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoI32(
 		context.Background(), nil, &bazGen.SecondService_EchoI32_Args{Arg: arg},
@@ -161,8 +156,7 @@ func TestEchoI64(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -184,9 +178,9 @@ func TestEchoI64(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoI64",
-		baz.NewSecondServiceEchoI64Handler(fake),
+		bazClient.NewSecondServiceEchoI64Handler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoI64(
 		context.Background(), nil, &bazGen.SecondService_EchoI64_Args{Arg: arg},
@@ -199,8 +193,7 @@ func TestEchoDouble(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -222,9 +215,9 @@ func TestEchoDouble(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoDouble",
-		baz.NewSecondServiceEchoDoubleHandler(fake),
+		bazClient.NewSecondServiceEchoDoubleHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoDouble(
 		context.Background(), nil, &bazGen.SecondService_EchoDouble_Args{Arg: arg},
@@ -237,8 +230,7 @@ func TestEchoBool(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -260,9 +252,9 @@ func TestEchoBool(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoBool",
-		baz.NewSecondServiceEchoBoolHandler(fake),
+		bazClient.NewSecondServiceEchoBoolHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoBool(
 		context.Background(), nil, &bazGen.SecondService_EchoBool_Args{Arg: arg},
@@ -275,8 +267,7 @@ func TestEchoString(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -298,9 +289,9 @@ func TestEchoString(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoString",
-		baz.NewSecondServiceEchoStringHandler(fake),
+		bazClient.NewSecondServiceEchoStringHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoString(
 		context.Background(), nil, &bazGen.SecondService_EchoString_Args{Arg: arg},
@@ -313,8 +304,7 @@ func TestEchoBinary(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -336,9 +326,9 @@ func TestEchoBinary(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoBinary",
-		baz.NewSecondServiceEchoBinaryHandler(fake),
+		bazClient.NewSecondServiceEchoBinaryHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoBinary(
 		context.Background(), nil, &bazGen.SecondService_EchoBinary_Args{Arg: arg},
@@ -351,8 +341,7 @@ func TestEchoEnum(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -375,9 +364,9 @@ func TestEchoEnum(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoEnum",
-		baz.NewSecondServiceEchoEnumHandler(fake),
+		bazClient.NewSecondServiceEchoEnumHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoEnum(
 		context.Background(), nil, &bazGen.SecondService_EchoEnum_Args{Arg: arg},
@@ -390,8 +379,7 @@ func TestEchoTypedef(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -413,9 +401,9 @@ func TestEchoTypedef(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoTypedef",
-		baz.NewSecondServiceEchoTypedefHandler(fake),
+		bazClient.NewSecondServiceEchoTypedefHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoTypedef(
 		context.Background(), nil, &bazGen.SecondService_EchoTypedef_Args{Arg: arg},
@@ -428,8 +416,7 @@ func TestEchoStringSet(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -454,9 +441,9 @@ func TestEchoStringSet(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStringSet",
-		baz.NewSecondServiceEchoStringSetHandler(fake),
+		bazClient.NewSecondServiceEchoStringSetHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStringSet(
 		context.Background(), nil, &bazGen.SecondService_EchoStringSet_Args{Arg: arg},
@@ -468,8 +455,7 @@ func TestEchoStructSet(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -495,9 +481,9 @@ func TestEchoStructSet(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStructSet",
-		baz.NewSecondServiceEchoStructSetHandler(fake),
+		bazClient.NewSecondServiceEchoStructSetHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStructSet(
 		context.Background(), nil, &bazGen.SecondService_EchoStructSet_Args{Arg: arg},
@@ -510,8 +496,7 @@ func TestEchoStringList(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -533,9 +518,9 @@ func TestEchoStringList(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStringList",
-		baz.NewSecondServiceEchoStringListHandler(fake),
+		bazClient.NewSecondServiceEchoStringListHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStringList(
 		context.Background(), nil, &bazGen.SecondService_EchoStringList_Args{Arg: arg},
@@ -548,8 +533,7 @@ func TestEchoStructList(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -575,9 +559,9 @@ func TestEchoStructList(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStructList",
-		baz.NewSecondServiceEchoStructListHandler(fake),
+		bazClient.NewSecondServiceEchoStructListHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStructList(
 		context.Background(), nil, &bazGen.SecondService_EchoStructList_Args{Arg: arg},
@@ -590,8 +574,7 @@ func TestEchoStringMap(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -617,9 +600,9 @@ func TestEchoStringMap(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStringMap",
-		baz.NewSecondServiceEchoStringMapHandler(fake),
+		bazClient.NewSecondServiceEchoStringMapHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStringMap(
 		context.Background(), nil, &bazGen.SecondService_EchoStringMap_Args{Arg: arg},
@@ -631,8 +614,7 @@ func TestEchoStructMap(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -667,9 +649,9 @@ func TestEchoStructMap(t *testing.T) {
 	bgateway.TChannelBackends()["baz"].Register(
 		"SecondService",
 		"echoStructMap",
-		baz.NewSecondServiceEchoStructMapHandler(fake),
+		bazClient.NewSecondServiceEchoStructMapHandler(fake),
 	)
-	baz := bgateway.ActualGateway.Clients.(*clients.Clients).Baz
+	baz := bazClient.NewClient(bgateway.ActualGateway)
 
 	result, _, err := baz.EchoStructMap(
 		context.Background(), nil, &bazGen.SecondService_EchoStructMap_Args{Arg: arg},

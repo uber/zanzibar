@@ -18,7 +18,8 @@ type Endpoint interface{
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g, deps),
 		{{- end}}
 	}
@@ -27,7 +28,8 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g),
 		{{- end}}
 	}
@@ -37,7 +39,8 @@ func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	{{$serviceMethod := printf "%s%s" $meta.Method.ThriftService $meta.Method.Name -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	{{$handlerName}} *{{$handlerName}}
 	{{- end}}
 }
@@ -45,7 +48,8 @@ type EndpointHandlers struct {
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
 	if err{{$idx}} != nil {
 		return err{{$idx}}

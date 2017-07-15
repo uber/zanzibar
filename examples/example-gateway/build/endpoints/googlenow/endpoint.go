@@ -36,24 +36,24 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		AddCredentialsHandler:   NewAddCredentialsHandler(g, deps),
-		CheckCredentialsHandler: NewCheckCredentialsHandler(g, deps),
+		GoogleNowaddCredentialsHandler:   NewGoogleNowaddCredentialsHandler(g, deps),
+		GoogleNowcheckCredentialsHandler: NewGoogleNowcheckCredentialsHandler(g, deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	AddCredentialsHandler   *AddCredentialsHandler
-	CheckCredentialsHandler *CheckCredentialsHandler
+	GoogleNowaddCredentialsHandler   *GoogleNowaddCredentialsHandler
+	GoogleNowcheckCredentialsHandler *GoogleNowcheckCredentialsHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.AddCredentialsHandler.Register(gateway)
+	err0 := handlers.GoogleNowaddCredentialsHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}
-	err1 := handlers.CheckCredentialsHandler.Register(gateway)
+	err1 := handlers.GoogleNowcheckCredentialsHandler.Register(gateway)
 	if err1 != nil {
 		return err1
 	}

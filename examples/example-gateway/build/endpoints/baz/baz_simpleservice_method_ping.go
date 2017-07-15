@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// PingHandler is the handler for "/baz/ping"
-type PingHandler struct {
+// SimpleServicepingHandler is the handler for "/baz/ping"
+type SimpleServicepingHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewPingHandler} creates a handler
-func NewPingHandler(
+// NewSimpleServicepingHandler} creates a handler
+func NewSimpleServicepingHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *PingHandler {
-	return &PingHandler{
+) *SimpleServicepingHandler {
+	return &SimpleServicepingHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *PingHandler) Register(g *zanzibar.Gateway) error {
+func (handler *SimpleServicepingHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/baz/ping",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *PingHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/baz/ping".
-func (handler *PingHandler) HandleRequest(
+func (handler *SimpleServicepingHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

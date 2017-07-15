@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// CallHandler is the handler for "/baz/call"
-type CallHandler struct {
+// SimpleServicecallHandler is the handler for "/baz/call"
+type SimpleServicecallHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewCallHandler} creates a handler
-func NewCallHandler(
+// NewSimpleServicecallHandler} creates a handler
+func NewSimpleServicecallHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *CallHandler {
-	return &CallHandler{
+) *SimpleServicecallHandler {
+	return &SimpleServicecallHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
+func (handler *SimpleServicecallHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/baz/call",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *CallHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/baz/call".
-func (handler *CallHandler) HandleRequest(
+func (handler *SimpleServicecallHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

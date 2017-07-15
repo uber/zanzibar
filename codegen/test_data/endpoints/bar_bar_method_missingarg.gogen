@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// MissingArgHandler is the handler for "/bar/missing-arg-path"
-type MissingArgHandler struct {
-	Clients *clients.Clients
+// BarmissingArgHandler is the handler for "/bar/missing-arg-path"
+type BarmissingArgHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewMissingArgEndpoint creates a handler
-func NewMissingArgEndpoint(
+// NewBarmissingArgHandler} creates a handler
+func NewBarmissingArgHandler(
 	gateway *zanzibar.Gateway,
-) *MissingArgHandler {
-	return &MissingArgHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarmissingArgHandler {
+	return &BarmissingArgHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarmissingArgHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/bar/missing-arg-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"missingArg",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/missing-arg-path".
-func (handler *MissingArgHandler) HandleRequest(
+func (handler *BarmissingArgHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -86,7 +103,7 @@ func (handler *MissingArgHandler) HandleRequest(
 
 // MissingArgEndpoint calls thrift client Bar.MissingArg
 type MissingArgEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

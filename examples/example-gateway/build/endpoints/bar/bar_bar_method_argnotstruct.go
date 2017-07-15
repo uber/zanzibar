@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
-type ArgNotStructHandler struct {
+// BarargNotStructHandler is the handler for "/bar/arg-not-struct-path"
+type BarargNotStructHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgNotStructHandler} creates a handler
-func NewArgNotStructHandler(
+// NewBarargNotStructHandler} creates a handler
+func NewBarargNotStructHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *ArgNotStructHandler {
-	return &ArgNotStructHandler{
+) *BarargNotStructHandler {
+	return &BarargNotStructHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarargNotStructHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *ArgNotStructHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".
-func (handler *ArgNotStructHandler) HandleRequest(
+func (handler *BarargNotStructHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

@@ -25,9 +25,9 @@ import (
 	"net/http"
 	"testing"
 
+	barClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -46,8 +46,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -71,8 +70,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -97,8 +95,7 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -115,8 +112,8 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 		},
 	)
 
-	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
-	client := clients.Bar.HTTPClient()
+	barClient := barClient.NewClient(bgateway.ActualGateway)
+	client := barClient.HTTPClient()
 
 	req := zanzibar.NewClientHTTPRequest("bar", "bar-path", client)
 
@@ -145,8 +142,7 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -169,8 +165,8 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 			}`))
 		},
 	)
-	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
-	bClient := clients.Bar
+
+	bClient := barClient.NewClient(bgateway.ActualGateway)
 
 	body, headers, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -185,8 +181,7 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -202,8 +197,8 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 			_, _ = w.Write([]byte(`{"stringField":"test"}`))
 		},
 	)
-	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
-	bClient := clients.Bar
+
+	bClient := barClient.NewClient(bgateway.ActualGateway)
 
 	body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -219,8 +214,7 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -236,8 +230,8 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 			_, _ = w.Write([]byte(`{"stringField":"test"}`))
 		},
 	)
-	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
-	bClient := clients.Bar
+
+	bClient := barClient.NewClient(bgateway.ActualGateway)
 
 	body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -252,8 +246,7 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		nil,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -269,9 +262,9 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	)
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	clients := bgateway.ActualGateway.Clients.(*clients.Clients)
+	bClient := barClient.NewClient(bgateway.ActualGateway)
 
-	_, err = clients.Bar.ArgNotStruct(
+	_, err = bClient.ArgNotStruct(
 		context.Background(), nil,
 		&clientsBarBar.Bar_ArgNotStruct_Args{
 			Request: "request",

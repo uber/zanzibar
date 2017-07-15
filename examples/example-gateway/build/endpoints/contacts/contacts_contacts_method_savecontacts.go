@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 )
 
-// SaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
-type SaveContactsHandler struct {
+// ContactssaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
+type ContactssaveContactsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSaveContactsHandler} creates a handler
-func NewSaveContactsHandler(
+// NewContactssaveContactsHandler} creates a handler
+func NewContactssaveContactsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *SaveContactsHandler {
-	return &SaveContactsHandler{
+) *ContactssaveContactsHandler {
+	return &ContactssaveContactsHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
+func (handler *ContactssaveContactsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/contacts/:userUUID/contacts",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *SaveContactsHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/contacts/:userUUID/contacts".
-func (handler *SaveContactsHandler) HandleRequest(
+func (handler *ContactssaveContactsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

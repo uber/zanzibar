@@ -21,7 +21,7 @@
 package quux
 
 import (
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -31,6 +31,6 @@ type Client interface{}
 type quux struct{}
 
 // NewClient creates a new Quux client
-func NewClient(g *zanzibar.Gateway, dependencies quuxClient.ClientDependencies) Client {
+func NewClient(g *zanzibar.Gateway, deps module.Dependencies) Client {
 	return &quux{}
 }

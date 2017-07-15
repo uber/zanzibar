@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
-type ArgWithQueryHeaderHandler struct {
+// BarargWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
+type BarargWithQueryHeaderHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewArgWithQueryHeaderHandler} creates a handler
-func NewArgWithQueryHeaderHandler(
+// NewBarargWithQueryHeaderHandler} creates a handler
+func NewBarargWithQueryHeaderHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *ArgWithQueryHeaderHandler {
-	return &ArgWithQueryHeaderHandler{
+) *BarargWithQueryHeaderHandler {
+	return &BarargWithQueryHeaderHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *ArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarargWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/argWithQueryHeader",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *ArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/argWithQueryHeader".
-func (handler *ArgWithQueryHeaderHandler) HandleRequest(
+func (handler *BarargWithQueryHeaderHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

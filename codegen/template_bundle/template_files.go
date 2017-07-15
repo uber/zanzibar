@@ -135,7 +135,8 @@ import (
 {{ $resHeaderMap := .ResHeaderMap -}}
 {{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
 {{ $clientName := title .ClientName -}}
-{{ $handlerName := title .Method.Name | printf "%sHandler" }}
+{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 {{ $responseType := .Method.ResponseType}}
 {{ $clientMethodName := title .ClientMethodName -}}
 {{ $endpointId := .Spec.EndpointID }}
@@ -453,7 +454,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9337, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9405, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -478,7 +479,8 @@ type Endpoint interface{
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g, deps),
 		{{- end}}
 	}
@@ -487,7 +489,8 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g),
 		{{- end}}
 	}
@@ -497,7 +500,8 @@ func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	{{$serviceMethod := printf "%s%s" $meta.Method.ThriftService $meta.Method.Name -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	{{$handlerName}} *{{$handlerName}}
 	{{- end}}
 }
@@ -505,7 +509,8 @@ type EndpointHandlers struct {
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{- $handlerName := title $meta.Method.Name | printf "%sHandler" }}
+	{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
 	if err{{$idx}} != nil {
 		return err{{$idx}}
@@ -527,7 +532,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1620, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1884, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1688,7 +1693,7 @@ import (
 func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) zanzibar.TChannelHandler {
+) *{{$handlerName}} {
 	return &{{$handlerName}}{
 		Clients: deps.Client,
 		Logger: gateway.Logger,
@@ -1703,11 +1708,13 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.TChannelRouter.Register(
+	g.TChannelRouter.Register(
 		"{{.ThriftService}}",
 		"{{.Name}}",
 		handler,
 	)
+	// TODO: Register should return an error for route conflicts
+	return nil
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".
@@ -1800,7 +1807,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3370, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3430, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

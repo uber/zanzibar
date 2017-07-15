@@ -26,7 +26,9 @@ package module
 import (
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
+	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
+	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 )
 
 // Dependencies contains dependencies for the example-gateway service module
@@ -36,7 +38,9 @@ type Dependencies struct {
 
 // EndpointDependencies contains endpoint dependencies
 type EndpointDependencies struct {
-	Bar       barEndpointGenerated.Endpoint
-	Baz       bazEndpointGenerated.Endpoint
-	Googlenow googlenowEndpointGenerated.Endpoint
+	Bar         barEndpointGenerated.Endpoint
+	Baz         bazEndpointGenerated.Endpoint
+	Contacts    contactsEndpointGenerated.Endpoint
+	Googlenow   googlenowEndpointGenerated.Endpoint
+	BazTChannel baztchannelEndpointGenerated.Endpoint
 }

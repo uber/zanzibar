@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
-// AddCredentialsHandler is the handler for "/googlenow/add-credentials"
-type AddCredentialsHandler struct {
+// GoogleNowaddCredentialsHandler is the handler for "/googlenow/add-credentials"
+type GoogleNowaddCredentialsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewAddCredentialsHandler} creates a handler
-func NewAddCredentialsHandler(
+// NewGoogleNowaddCredentialsHandler} creates a handler
+func NewGoogleNowaddCredentialsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *AddCredentialsHandler {
-	return &AddCredentialsHandler{
+) *GoogleNowaddCredentialsHandler {
+	return &GoogleNowaddCredentialsHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *AddCredentialsHandler) Register(g *zanzibar.Gateway) error {
+func (handler *GoogleNowaddCredentialsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/googlenow/add-credentials",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *AddCredentialsHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/googlenow/add-credentials".
-func (handler *AddCredentialsHandler) HandleRequest(
+func (handler *GoogleNowaddCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

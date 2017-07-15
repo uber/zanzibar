@@ -6,7 +6,9 @@
 		"endpoint": [
 			"bar",
 			"baz",
-			"googlenow"
+			"contacts",
+			"googlenow",
+			"bazTChannel"
 		]
 	}
 }

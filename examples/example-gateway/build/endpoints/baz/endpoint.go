@@ -36,36 +36,36 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		CallHandler:      NewCallHandler(g, deps),
-		CompareHandler:   NewCompareHandler(g, deps),
-		PingHandler:      NewPingHandler(g, deps),
-		SillyNoopHandler: NewSillyNoopHandler(g, deps),
+		SimpleServicecallHandler:      NewSimpleServicecallHandler(g, deps),
+		SimpleServicecompareHandler:   NewSimpleServicecompareHandler(g, deps),
+		SimpleServicepingHandler:      NewSimpleServicepingHandler(g, deps),
+		SimpleServicesillyNoopHandler: NewSimpleServicesillyNoopHandler(g, deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	CallHandler      *CallHandler
-	CompareHandler   *CompareHandler
-	PingHandler      *PingHandler
-	SillyNoopHandler *SillyNoopHandler
+	SimpleServicecallHandler      *SimpleServicecallHandler
+	SimpleServicecompareHandler   *SimpleServicecompareHandler
+	SimpleServicepingHandler      *SimpleServicepingHandler
+	SimpleServicesillyNoopHandler *SimpleServicesillyNoopHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.CallHandler.Register(gateway)
+	err0 := handlers.SimpleServicecallHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}
-	err1 := handlers.CompareHandler.Register(gateway)
+	err1 := handlers.SimpleServicecompareHandler.Register(gateway)
 	if err1 != nil {
 		return err1
 	}
-	err2 := handlers.PingHandler.Register(gateway)
+	err2 := handlers.SimpleServicepingHandler.Register(gateway)
 	if err2 != nil {
 		return err2
 	}
-	err3 := handlers.SillyNoopHandler.Register(gateway)
+	err3 := handlers.SimpleServicesillyNoopHandler.Register(gateway)
 	if err3 != nil {
 		return err3
 	}
