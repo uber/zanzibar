@@ -155,6 +155,6 @@ func isTestFile(filename string) bool {
 	if len(filename) < 8 {
 		return false
 	}
-	footer := filename[len(filename)-8 : len(filename)]
+	footer := filename[len(filename)-8:]
 	return footer == "_test.go"
 }
