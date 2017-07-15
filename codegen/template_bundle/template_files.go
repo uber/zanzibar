@@ -175,14 +175,8 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{end}}
 	{{end}}
 
-	{{range $headerName, $headerInfo := .ReqHeaderFields}}
-	{{camel $headerName}}Value, _ := req.Header.Get("{{$headerName}}")
-	{{if $headerInfo.IsPointer}}
-	{{$fieldId := $headerInfo.FieldIdentifier}}
-	requestBody{{$fieldId}} = ptr.String({{camel $headerName}}Value)
-	{{else}}
-	requestBody{{$headerInfo.FieldIdentifier}} = {{camel $headerName}}Value
-	{{end}}
+	{{range $index, $line := .ReqHeaderGoStatements -}}
+	{{$line}}
 	{{end}}
 
 	{{range $index, $line := .QueryParamGoStatements -}}
@@ -424,7 +418,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 8636, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 8343, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -880,7 +874,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	// TODO(jakev): Ensure we validate mandatory headers
 	{{- end}}
 
-	{{- if .ReqHeaderFields }}
+	{{- if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
@@ -1022,7 +1016,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6034, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6040, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -57,12 +57,12 @@ func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithNestedQueryParams_Args
 
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
+	}
 	xUUIDValue, _ := req.Header.Get("x-uuid")
-
 	requestBody.Request.AuthUUID = ptr.String(xUUIDValue)
-
 	xUUID2Value, _ := req.Header.Get("x-uuid2")
-
 	requestBody.Request.AuthUUID2 = xUUID2Value
 
 	if requestBody.Request == nil {
