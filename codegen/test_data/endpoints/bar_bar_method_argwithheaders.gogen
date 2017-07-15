@@ -64,7 +64,6 @@ func (handler *ArgWithHeadersHandler) HandleRequest(
 	}
 
 	xUUIDValue, _ := req.Header.Get("x-uuid")
-
 	requestBody.UserUUID = ptr.String(xUUIDValue)
 
 	workflow := ArgWithHeadersEndpoint{

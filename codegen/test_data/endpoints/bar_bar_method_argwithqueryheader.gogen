@@ -58,7 +58,6 @@ func (handler *ArgWithQueryHeaderHandler) HandleRequest(
 	var requestBody endpointsBarBar.Bar_ArgWithQueryHeader_Args
 
 	xUUIDValue, _ := req.Header.Get("x-uuid")
-
 	requestBody.UserUUID = ptr.String(xUUIDValue)
 
 	workflow := ArgWithQueryHeaderEndpoint{
