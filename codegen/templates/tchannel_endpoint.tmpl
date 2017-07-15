@@ -40,11 +40,11 @@ type {{$handlerName}} struct {
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
-func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.TChannelRouter.Register(
 		"{{.ThriftService}}",
 		"{{.Name}}",
-		handler,
+		h,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil

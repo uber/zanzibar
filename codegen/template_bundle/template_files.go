@@ -1764,11 +1764,11 @@ type {{$handlerName}} struct {
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
-func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.TChannelRouter.Register(
 		"{{.ThriftService}}",
 		"{{.Name}}",
-		handler,
+		h,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil
@@ -1864,7 +1864,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3430, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3418, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

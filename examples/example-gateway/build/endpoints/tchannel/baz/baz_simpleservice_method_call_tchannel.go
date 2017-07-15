@@ -54,11 +54,11 @@ type SimpleServiceCallHandler struct {
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
-func (handler *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
 	g.TChannelRouter.Register(
 		"SimpleService",
 		"Call",
-		handler,
+		h,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil
