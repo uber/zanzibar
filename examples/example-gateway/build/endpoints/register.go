@@ -37,23 +37,24 @@ import (
 
 // Endpoints is a struct that holds all the endpoints
 type Endpoints struct {
-	BarArgNotStructHTTPHandler           *bar.ArgNotStructHandler
-	BarArgWithHeadersHTTPHandler         *bar.ArgWithHeadersHandler
-	BarArgWithManyQueryParamsHTTPHandler *bar.ArgWithManyQueryParamsHandler
-	BarArgWithQueryHeaderHTTPHandler     *bar.ArgWithQueryHeaderHandler
-	BarArgWithQueryParamsHTTPHandler     *bar.ArgWithQueryParamsHandler
-	BarMissingArgHTTPHandler             *bar.MissingArgHandler
-	BarNoRequestHTTPHandler              *bar.NoRequestHandler
-	BarNormalHTTPHandler                 *bar.NormalHandler
-	BarTooManyArgsHTTPHandler            *bar.TooManyArgsHandler
-	BazCallHTTPHandler                   *baz.CallHandler
-	BazCompareHTTPHandler                *baz.CompareHandler
-	BazPingHTTPHandler                   *baz.PingHandler
-	BazSillyNoopHTTPHandler              *baz.SillyNoopHandler
-	ContactsSaveContactsHTTPHandler      *contacts.SaveContactsHandler
-	GooglenowAddCredentialsHTTPHandler   *googlenow.AddCredentialsHandler
-	GooglenowCheckCredentialsHTTPHandler *googlenow.CheckCredentialsHandler
-	BazTChannelCallTChannelHandler       zanzibar.TChannelHandler
+	BarArgNotStructHTTPHandler             *bar.ArgNotStructHandler
+	BarArgWithHeadersHTTPHandler           *bar.ArgWithHeadersHandler
+	BarArgWithManyQueryParamsHTTPHandler   *bar.ArgWithManyQueryParamsHandler
+	BarArgWithNestedQueryParamsHTTPHandler *bar.ArgWithNestedQueryParamsHandler
+	BarArgWithQueryHeaderHTTPHandler       *bar.ArgWithQueryHeaderHandler
+	BarArgWithQueryParamsHTTPHandler       *bar.ArgWithQueryParamsHandler
+	BarMissingArgHTTPHandler               *bar.MissingArgHandler
+	BarNoRequestHTTPHandler                *bar.NoRequestHandler
+	BarNormalHTTPHandler                   *bar.NormalHandler
+	BarTooManyArgsHTTPHandler              *bar.TooManyArgsHandler
+	BazCallHTTPHandler                     *baz.CallHandler
+	BazCompareHTTPHandler                  *baz.CompareHandler
+	BazPingHTTPHandler                     *baz.PingHandler
+	BazSillyNoopHTTPHandler                *baz.SillyNoopHandler
+	ContactsSaveContactsHTTPHandler        *contacts.SaveContactsHandler
+	GooglenowAddCredentialsHTTPHandler     *googlenow.AddCredentialsHandler
+	GooglenowCheckCredentialsHTTPHandler   *googlenow.CheckCredentialsHandler
+	BazTChannelCallTChannelHandler         zanzibar.TChannelHandler
 }
 
 // CreateEndpoints bootstraps the endpoints.
@@ -61,23 +62,24 @@ func CreateEndpoints(
 	gateway *zanzibar.Gateway,
 ) interface{} {
 	return &Endpoints{
-		BarArgNotStructHTTPHandler:           bar.NewArgNotStructEndpoint(gateway),
-		BarArgWithHeadersHTTPHandler:         bar.NewArgWithHeadersEndpoint(gateway),
-		BarArgWithManyQueryParamsHTTPHandler: bar.NewArgWithManyQueryParamsEndpoint(gateway),
-		BarArgWithQueryHeaderHTTPHandler:     bar.NewArgWithQueryHeaderEndpoint(gateway),
-		BarArgWithQueryParamsHTTPHandler:     bar.NewArgWithQueryParamsEndpoint(gateway),
-		BarMissingArgHTTPHandler:             bar.NewMissingArgEndpoint(gateway),
-		BarNoRequestHTTPHandler:              bar.NewNoRequestEndpoint(gateway),
-		BarNormalHTTPHandler:                 bar.NewNormalEndpoint(gateway),
-		BarTooManyArgsHTTPHandler:            bar.NewTooManyArgsEndpoint(gateway),
-		BazCallHTTPHandler:                   baz.NewCallEndpoint(gateway),
-		BazCompareHTTPHandler:                baz.NewCompareEndpoint(gateway),
-		BazPingHTTPHandler:                   baz.NewPingEndpoint(gateway),
-		BazSillyNoopHTTPHandler:              baz.NewSillyNoopEndpoint(gateway),
-		ContactsSaveContactsHTTPHandler:      contacts.NewSaveContactsEndpoint(gateway),
-		GooglenowAddCredentialsHTTPHandler:   googlenow.NewAddCredentialsEndpoint(gateway),
-		GooglenowCheckCredentialsHTTPHandler: googlenow.NewCheckCredentialsEndpoint(gateway),
-		BazTChannelCallTChannelHandler:       tchannelBaz.NewSimpleServiceCallHandler(gateway),
+		BarArgNotStructHTTPHandler:             bar.NewArgNotStructEndpoint(gateway),
+		BarArgWithHeadersHTTPHandler:           bar.NewArgWithHeadersEndpoint(gateway),
+		BarArgWithManyQueryParamsHTTPHandler:   bar.NewArgWithManyQueryParamsEndpoint(gateway),
+		BarArgWithNestedQueryParamsHTTPHandler: bar.NewArgWithNestedQueryParamsEndpoint(gateway),
+		BarArgWithQueryHeaderHTTPHandler:       bar.NewArgWithQueryHeaderEndpoint(gateway),
+		BarArgWithQueryParamsHTTPHandler:       bar.NewArgWithQueryParamsEndpoint(gateway),
+		BarMissingArgHTTPHandler:               bar.NewMissingArgEndpoint(gateway),
+		BarNoRequestHTTPHandler:                bar.NewNoRequestEndpoint(gateway),
+		BarNormalHTTPHandler:                   bar.NewNormalEndpoint(gateway),
+		BarTooManyArgsHTTPHandler:              bar.NewTooManyArgsEndpoint(gateway),
+		BazCallHTTPHandler:                     baz.NewCallEndpoint(gateway),
+		BazCompareHTTPHandler:                  baz.NewCompareEndpoint(gateway),
+		BazPingHTTPHandler:                     baz.NewPingEndpoint(gateway),
+		BazSillyNoopHTTPHandler:                baz.NewSillyNoopEndpoint(gateway),
+		ContactsSaveContactsHTTPHandler:        contacts.NewSaveContactsEndpoint(gateway),
+		GooglenowAddCredentialsHTTPHandler:     googlenow.NewAddCredentialsEndpoint(gateway),
+		GooglenowCheckCredentialsHTTPHandler:   googlenow.NewCheckCredentialsEndpoint(gateway),
+		BazTChannelCallTChannelHandler:         tchannelBaz.NewSimpleServiceCallHandler(gateway),
 	}
 }
 
@@ -110,6 +112,15 @@ func Register(g *zanzibar.Gateway) {
 			"bar",
 			"argWithManyQueryParams",
 			endpoints.BarArgWithManyQueryParamsHTTPHandler.HandleRequest,
+		),
+	)
+	g.HTTPRouter.Register(
+		"GET", "/bar/argWithNestedQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithNestedQueryParams",
+			endpoints.BarArgWithNestedQueryParamsHTTPHandler.HandleRequest,
 		),
 	)
 	g.HTTPRouter.Register(

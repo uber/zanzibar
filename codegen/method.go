@@ -63,10 +63,8 @@ type MethodSpec struct {
 	// Statements for reading query parameters.
 	QueryParamGoStatements []string
 
-	// ReqHeaderFields is a map of "header name" to
-	// a golang field accessor expression like ".Foo.Bar"
-	// Use to place request headers in the body
-	ReqHeaderFields map[string]HeaderFieldInfo
+	// Statements for reading request headers
+	ReqHeaderGoStatements []string
 
 	// ResHeaderFields is a map of header name to a golang
 	// field accessor expression used to read fields out
@@ -198,7 +196,7 @@ func NewMethod(
 			)
 		}
 
-		err := method.setQueryParamStatements(funcSpec)
+		err := method.setQueryParamStatements(funcSpec, packageHelper)
 		if err != nil {
 			return nil, err
 		}
@@ -212,7 +210,10 @@ func NewMethod(
 	}
 	method.setHTTPPath(httpPath, funcSpec)
 
-	method.setRequestHeaderFields(funcSpec)
+	err = method.setRequestHeaderFields(funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
 	method.setResponseHeaderFields(funcSpec)
 
 	return method, nil
@@ -387,10 +388,12 @@ func findParamsAnnotation(
 	fields compile.FieldGroup, paramName string,
 ) (string, bool) {
 	var identifier string
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param == "params."+paramName[1:] {
-				identifier = prefix + "." + strings.Title(field.Name)
+				identifier = goPrefix + "." + pascalCase(field.Name)
 				return true
 			}
 		}
@@ -407,25 +410,77 @@ func findParamsAnnotation(
 }
 
 func (ms *MethodSpec) setRequestHeaderFields(
-	funcSpec *compile.FunctionSpec,
-) {
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) error {
 	fields := compile.FieldGroup(funcSpec.ArgsSpec)
-	ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
+	// ms.ReqHeaderFields = map[string]HeaderFieldInfo{}
+
+	statements := LineBuilder{}
+
+	var finalError error
+	var seenHeaders bool
 
 	// Scan for all annotations
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		// If the type is a struct then we cannot really do anything
+		if _, ok := realType.(*compile.StructSpec); ok {
+			// if a field is a struct then we must do a nil check
+
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+
+			statements.appendf("if requestBody%s == nil {", longFieldName)
+			statements.appendf("\trequestBody%s = &%s{}",
+				longFieldName, typeName,
+			)
+			statements.append("}")
+
+			return false
+		}
+
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				ms.ReqHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: prefix + "." + strings.Title(field.Name),
-					IsPointer:       !field.Required,
+				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
+				variableName := camelCase(headerName) + "Value"
+
+				statements.appendf("%s, _ := req.Header.Get(%q)",
+					variableName, headerName,
+				)
+
+				if !field.Required {
+					statements.appendf("requestBody%s = ptr.String(%s)",
+						bodyIdentifier, variableName,
+					)
+				} else {
+					statements.appendf("requestBody%s = %s",
+						bodyIdentifier, variableName,
+					)
 				}
+
+				seenHeaders = true
 			}
 		}
 		return false
 	}
 	walkFieldGroups(fields, visitor)
+
+	if finalError != nil {
+		return finalError
+	}
+
+	if seenHeaders {
+		ms.ReqHeaderGoStatements = statements.GetLines()
+	}
+	return nil
 }
 
 func (ms *MethodSpec) setResponseHeaderFields(
@@ -442,12 +497,14 @@ func (ms *MethodSpec) setResponseHeaderFields(
 	ms.ResHeaderFields = map[string]HeaderFieldInfo{}
 
 	// Scan for all annotations
-	visitor := func(prefix string, field *compile.FieldSpec) bool {
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: prefix + "." + strings.Title(field.Name),
+					FieldIdentifier: goPrefix + "." + pascalCase(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
@@ -578,31 +635,6 @@ func (ms *MethodSpec) setTypeConverters(
 	return nil
 }
 
-func pointerMethodType(typeSpec compile.TypeSpec) string {
-	var pointerMethod string
-
-	switch typeSpec.(type) {
-	case *compile.BoolSpec:
-		pointerMethod = "Bool"
-	case *compile.I8Spec:
-		pointerMethod = "Int8"
-	case *compile.I16Spec:
-		pointerMethod = "Int16"
-	case *compile.I32Spec:
-		pointerMethod = "Int32"
-	case *compile.I64Spec:
-		pointerMethod = "Int64"
-	case *compile.DoubleSpec:
-		pointerMethod = "Float64"
-	case *compile.StringSpec:
-		pointerMethod = "String"
-	default:
-		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
-	}
-
-	return pointerMethod
-}
-
 func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	var queryMethod string
 
@@ -622,50 +654,84 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	case *compile.StringSpec:
 		queryMethod = "GetQueryValue"
 	default:
-		panic(fmt.Sprintf("Unknown type (%T) %v", typeSpec, typeSpec))
+		panic(fmt.Sprintf(
+			"Unknown type (%T) %v for query string parameter",
+			typeSpec, typeSpec,
+		))
 	}
 
 	return queryMethod
 }
 
 func (ms *MethodSpec) setQueryParamStatements(
-	funcSpec *compile.FunctionSpec,
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) error {
 	// If a thrift field has a http.ref annotation then we
 	// should not read this field from query parameters.
-	statements := LineBuilder{}
-	structType := compile.FieldGroup(funcSpec.ArgsSpec)
+	var statements LineBuilder
 
-	for _, field := range structType {
+	var finalError error
+
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		fieldName := field.Name
-		identifierName := camelCase(fieldName) + "Query"
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		// If the type is a struct then we cannot really do anything
+		if _, ok := realType.(*compile.StructSpec); ok {
+			// if a field is a struct then we must do a nil check
+
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+
+			statements.appendf("if requestBody%s == nil {", longFieldName)
+			statements.appendf("\trequestBody%s = &%s{}",
+				longFieldName, typeName,
+			)
+			statements.append("}")
+
+			return false
+		}
+
+		var longQueryName string
+		if thriftPrefix == "" {
+			longQueryName = field.Name
+		} else if thriftPrefix[0] == '.' {
+			longQueryName = thriftPrefix[1:] + "." + field.Name
+		} else {
+			longQueryName = thriftPrefix + "." + field.Name
+		}
+		identifierName := camelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
 		if httpRefAnnotation != "" {
-			continue
+			return false
 		}
 
-		okIdentifierName := camelCase(fieldName) + "Ok"
+		okIdentifierName := camelCase(longQueryName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
-				okIdentifierName, fieldName,
+				okIdentifierName, longQueryName,
 			)
 			statements.appendf("if !%s {", okIdentifierName)
 			statements.append("\treturn")
 			statements.append("}")
 		} else {
 			statements.appendf("%s := req.HasQueryValue(%q)",
-				okIdentifierName, fieldName,
+				okIdentifierName, longQueryName,
 			)
 			statements.appendf("if %s {", okIdentifierName)
 		}
 
-		pointerMethod := pointerMethodType(realType)
 		queryMethodName := getQueryMethodForType(realType)
+		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
-			identifierName, queryMethodName, fieldName,
+			identifierName, queryMethodName, longQueryName,
 		)
 
 		statements.append("if !ok {")
@@ -673,22 +739,27 @@ func (ms *MethodSpec) setQueryParamStatements(
 		statements.append("}")
 
 		if field.Required {
-			statements.appendf("requestBody.%s = %s",
-				strings.Title(field.Name), identifierName,
+			statements.appendf("requestBody%s = %s",
+				longFieldName, identifierName,
 			)
 		} else {
-			statements.appendf("\trequestBody.%s = ptr.%s(%s)",
-				strings.Title(field.Name), pointerMethod, identifierName,
+			statements.appendf("\trequestBody%s = ptr.%s(%s)",
+				longFieldName, pointerMethod, identifierName,
 			)
 			statements.append("}")
 		}
 
 		// new line after block.
 		statements.append("")
+		return false
+	}
+	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
+
+	if finalError != nil {
+		return finalError
 	}
 
 	ms.QueryParamGoStatements = statements.GetLines()
-
 	return nil
 }
 
@@ -705,57 +776,4 @@ func headers(annotation string) []string {
 		return nil
 	}
 	return strings.Split(annotation, ",")
-}
-
-func walkFieldGroups(
-	fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
-) bool {
-	return walkFieldGroupsInternal("", fields, visitField)
-}
-
-func walkFieldGroupsInternal(
-	prefix string, fields compile.FieldGroup,
-	visitField func(string, *compile.FieldSpec) bool,
-) bool {
-	for i := 0; i < len(fields); i++ {
-		field := fields[i]
-
-		bail := visitField(prefix, field)
-		if bail {
-			return true
-		}
-
-		realType := compile.RootTypeSpec(field.Type)
-		switch t := realType.(type) {
-		case *compile.BinarySpec:
-		case *compile.StringSpec:
-		case *compile.BoolSpec:
-		case *compile.DoubleSpec:
-		case *compile.I8Spec:
-		case *compile.I16Spec:
-		case *compile.I32Spec:
-		case *compile.I64Spec:
-		case *compile.EnumSpec:
-		case *compile.StructSpec:
-			bail := walkFieldGroupsInternal(
-				prefix+"."+strings.Title(field.Name),
-				t.Fields,
-				visitField,
-			)
-			if bail {
-				return true
-			}
-		case *compile.SetSpec:
-			// TODO: implement
-		case *compile.MapSpec:
-			// TODO: implement
-		case *compile.ListSpec:
-			// TODO: implement
-		default:
-			panic("unknown Spec")
-		}
-	}
-
-	return false
 }

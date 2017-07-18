@@ -26,7 +26,7 @@ package bar
 import (
 	"context"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
@@ -35,32 +35,59 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 )
 
-// ArgWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
-type ArgWithQueryHeaderHandler struct {
+// ArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
+type ArgWithNestedQueryParamsHandler struct {
 	Clients *clients.Clients
 }
 
-// NewArgWithQueryHeaderEndpoint creates a handler
-func NewArgWithQueryHeaderEndpoint(
+// NewArgWithNestedQueryParamsEndpoint creates a handler
+func NewArgWithNestedQueryParamsEndpoint(
 	gateway *zanzibar.Gateway,
-) *ArgWithQueryHeaderHandler {
-	return &ArgWithQueryHeaderHandler{
+) *ArgWithNestedQueryParamsHandler {
+	return &ArgWithNestedQueryParamsHandler{
 		Clients: gateway.Clients.(*clients.Clients),
 	}
 }
 
-// HandleRequest handles "/bar/argWithQueryHeader".
-func (handler *ArgWithQueryHeaderHandler) HandleRequest(
+// HandleRequest handles "/bar/argWithNestedQueryParams".
+func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	var requestBody endpointsBarBar.Bar_ArgWithQueryHeader_Args
+	var requestBody endpointsBarBar.Bar_ArgWithNestedQueryParams_Args
 
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
+	}
 	xUUIDValue, _ := req.Header.Get("x-uuid")
-	requestBody.UserUUID = ptr.String(xUUIDValue)
+	requestBody.Request.AuthUUID = ptr.String(xUUIDValue)
+	xUUID2Value, _ := req.Header.Get("x-uuid2")
+	requestBody.Request.AuthUUID2 = xUUID2Value
 
-	workflow := ArgWithQueryHeaderEndpoint{
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
+	}
+	requestNameOk := req.CheckQueryValue("request.name")
+	if !requestNameOk {
+		return
+	}
+	requestNameQuery, ok := req.GetQueryValue("request.name")
+	if !ok {
+		return
+	}
+	requestBody.Request.Name = requestNameQuery
+
+	requestUserUUIDOk := req.HasQueryValue("request.userUUID")
+	if requestUserUUIDOk {
+		requestUserUUIDQuery, ok := req.GetQueryValue("request.userUUID")
+		if !ok {
+			return
+		}
+		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
+	}
+
+	workflow := ArgWithNestedQueryParamsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -83,24 +110,24 @@ func (handler *ArgWithQueryHeaderHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// ArgWithQueryHeaderEndpoint calls thrift client Bar.ArgWithQueryHeader
-type ArgWithQueryHeaderEndpoint struct {
+// ArgWithNestedQueryParamsEndpoint calls thrift client Bar.ArgWithNestedQueryParams
+type ArgWithNestedQueryParamsEndpoint struct {
 	Clients *clients.Clients
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w ArgWithQueryHeaderEndpoint) Handle(
+func (w ArgWithNestedQueryParamsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ArgWithQueryHeader_Args,
+	r *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
-	clientRequest := convertToArgWithQueryHeaderClientRequest(r)
+	clientRequest := convertToArgWithNestedQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
 
-	clientRespBody, _, err := w.Clients.Bar.ArgWithQueryHeader(
+	clientRespBody, _, err := w.Clients.Bar.ArgWithNestedQueryParams(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -123,19 +150,27 @@ func (w ArgWithQueryHeaderEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithQueryHeaderClientResponse(clientRespBody)
+	response := convertArgWithNestedQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertToArgWithQueryHeaderClientRequest(in *endpointsBarBar.Bar_ArgWithQueryHeader_Args) *clientsBarBar.Bar_ArgWithQueryHeader_Args {
-	out := &clientsBarBar.Bar_ArgWithQueryHeader_Args{}
+func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
+	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
-	out.UserUUID = (*string)(in.UserUUID)
+	if in.Request != nil {
+		out.Request = &clientsBarBar.QueryParamsStruct{}
+		out.Request.Name = string(in.Request.Name)
+		out.Request.UserUUID = (*string)(in.Request.UserUUID)
+		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
+		out.Request.AuthUUID2 = string(in.Request.AuthUUID2)
+	} else {
+		out.Request = nil
+	}
 
 	return out
 }
 
-func convertArgWithQueryHeaderClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

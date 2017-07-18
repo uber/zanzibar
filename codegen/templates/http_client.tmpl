@@ -89,7 +89,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	// TODO(jakev): Ensure we validate mandatory headers
 	{{- end}}
 
-	{{- if .ReqHeaderFields }}
+	{{- if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
