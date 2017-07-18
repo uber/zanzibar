@@ -26,8 +26,6 @@ import (
 	"strings"
 	"testing"
 
-	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
@@ -107,8 +105,6 @@ func convertTypes(
 	overrideMap, err = addSpecToMap(overrideMap,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
 		"")
-
-	fmt.Printf("%v", overrideMap)
 
 	if err != nil {
 		return "", err
