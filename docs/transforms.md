@@ -1,18 +1,27 @@
-| ToFieldOpt | FromFieldOpt | OverriddenFieldOpt | OverrideConfig | 
-| :----------:|:--------------:|:----------:|:---------|
-| Optional      | Optional | Optional | false |
-| Optional      | Optional | Optional | true |
-| Optional      | Optional | Required | false |
-| Optional      | Optional | Required | true |
-| Optional      | Required | Optional | false |
-| Optional      | Required | Optional | true |
-| Optional      | Required | Required | false |
-| Optional      | Required | Required | true |
-| Required      | Optional | Optional | false |
-| Required      | Optional | Optional | true |
-| Required      | Optional | Required | false |
-| Required      | Optional | Required | true |
-| Required      | Required | Optional | false |
-| Required      | Required | Optional | true |
-| Required      | Required | Required | false |
-| Required      | Required | Required | true |
+
+Examples of mappings and overriding of fields based on the types of the
+ToField, FromField, OverriddenField and whether the Override flag is set in the transform.
+The ToField is the output of the transform, the OverriddenField is the default input field,
+and the FromField is the input field defined in the transform.
+
+For legacy reasons, we support the Override Flag in transforms to allow endpoint owners
+to configure whether the FromFeild should overwrite the OverriddenField when it is present.
+
+| ToFieldOpt | FromFieldOpt | OverriddenFieldOpt | OverrideFlag | Code |
+| :----------:|:--------------:|:----------:|:---------:|:---------|
+| Optional      | Optional | Optional | false | := overridden \| from
+| Optional      | Optional | Optional | true | := from \| overridden
+| Optional      | Optional | Required | false | := overridden
+| Optional      | Optional | Required | true | := from \| overridden
+| Optional      | Required | Optional | false | :=  overridden \|from
+| Optional      | Required | Optional | true | := overridden \| from
+| Optional      | Required | Required | false | := from
+| Optional      | Required | Required | true | := overridden
+| Required      | Optional | Optional | false | := overridden \| from \| new
+| Required      | Optional | Optional | true | := from \| overridden \| new
+| Required      | Optional | Required | false | := overridden
+| Required      | Optional | Required | true | := from \| overridden
+| Required      | Required | Optional | false | :=  overridden \|from
+| Required      | Required | Optional | true | := from
+| Required      | Required | Required | false | := overridden
+| Required      | Required | Required | true | := from
