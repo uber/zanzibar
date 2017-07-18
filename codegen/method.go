@@ -668,7 +668,7 @@ func (ms *MethodSpec) setQueryParamStatements(
 ) error {
 	// If a thrift field has a http.ref annotation then we
 	// should not read this field from query parameters.
-	statements := LineBuilder{}
+	var statements LineBuilder
 
 	var finalError error
 
@@ -700,11 +700,10 @@ func (ms *MethodSpec) setQueryParamStatements(
 		var longQueryName string
 		if thriftPrefix == "" {
 			longQueryName = field.Name
+		} else if thriftPrefix[0] == '.' {
+			longQueryName = thriftPrefix[1:] + "." + field.Name
 		} else {
 			longQueryName = thriftPrefix + "." + field.Name
-			if longQueryName[0] == '.' {
-				longQueryName = longQueryName[1:]
-			}
 		}
 		identifierName := camelCase(longQueryName) + "Query"
 
