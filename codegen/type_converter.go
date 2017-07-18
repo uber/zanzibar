@@ -88,43 +88,6 @@ func (c *TypeConverter) assignWithOverride(
 	c.append(indent, "}")
 }
 
-func (c *TypeConverter) getGoTypeName(
-	valueType compile.TypeSpec,
-) (string, error) {
-	switch s := valueType.(type) {
-	case *compile.BoolSpec:
-		return "bool", nil
-	case *compile.I8Spec:
-		return "int8", nil
-	case *compile.I16Spec:
-		return "int16", nil
-	case *compile.I32Spec:
-		return "int32", nil
-	case *compile.I64Spec:
-		return "int64", nil
-	case *compile.DoubleSpec:
-		return "float64", nil
-	case *compile.StringSpec:
-		return "string", nil
-	case *compile.BinarySpec:
-		return "[]byte", nil
-	case *compile.MapSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.SetSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.ListSpec:
-		/* coverage ignore next line */
-		panic("Not Implemented")
-	case *compile.EnumSpec, *compile.StructSpec, *compile.TypedefSpec:
-		return c.getIdentifierName(s)
-	default:
-		/* coverage ignore next line */
-		panic(fmt.Sprintf("Unknown type (%T) %v", valueType, valueType))
-	}
-}
-
 func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
 	t, err := goCustomType(c.Helper, fieldType)
 	if err != nil {
@@ -283,10 +246,10 @@ func (c *TypeConverter) genConverterForList(
 	c.append("for index, value := range ", sourceIdentifier, " {")
 
 	if isStruct {
-		indent = "\t" + indent
+		nestedIndent := "\t" + indent
 
 		if checkOverride {
-			indent = "\t" + indent
+			nestedIndent = "\t" + nestedIndent
 			c.append("\t", "if isOverridden {")
 		}
 		fromFieldType, ok := fromField.Type.(*compile.ListSpec)
@@ -304,7 +267,7 @@ func (c *TypeConverter) genConverterForList(
 			"value",
 			keyPrefix+pascalCase(toField.Name)+"[index]",
 			strings.TrimPrefix(fromIdentifier, "in.")+"[index]",
-			"	"+indent,
+			nestedIndent,
 			nil,
 		)
 		if err != nil {
@@ -328,16 +291,16 @@ func (c *TypeConverter) genConverterForList(
 				"value",
 				keyPrefix+strings.Title(toField.Name)+"[index]",
 				strings.TrimPrefix(overriddenIdentifier, "in.")+"[index]",
-				indent,
+				nestedIndent,
 				nil,
 			)
 			if err != nil {
 				return err
 			}
-			c.append("	", "}")
+			c.append("\t", "}")
 		}
 	} else {
-		c.append("	", toIdentifier, "[index] = ", typeName, "(value)")
+		c.append("\t", toIdentifier, "[index] = ", typeName, "(value)")
 	}
 
 	c.append("}")
@@ -406,10 +369,10 @@ func (c *TypeConverter) genConverterForMap(
 	c.appendf("for key, value := range %s {", sourceIdentifier)
 
 	if isStruct {
-		indent = "\t" + indent
+		nestedIndent := "\t" + indent
 
 		if checkOverride {
-			indent = "\t" + indent
+			nestedIndent = "\t" + nestedIndent
 			c.append("\t", "if isOverridden {")
 		}
 
@@ -428,7 +391,7 @@ func (c *TypeConverter) genConverterForMap(
 			"value",
 			keyPrefix+pascalCase(toField.Name)+"[key]",
 			strings.TrimPrefix(fromIdentifier, "in.")+"[key]",
-			"	"+indent,
+			nestedIndent,
 			nil,
 		)
 		if err != nil {
@@ -453,7 +416,7 @@ func (c *TypeConverter) genConverterForMap(
 				"value",
 				keyPrefix+strings.Title(toField.Name)+"[key]",
 				strings.TrimPrefix(overriddenIdentifier, "in.")+"[key]",
-				indent,
+				nestedIndent,
 				nil,
 			)
 			if err != nil {
@@ -489,7 +452,7 @@ func (c *TypeConverter) genStructConverter(
 			}
 		}
 
-		toIdentifier := indent + "out." + keyPrefix + pascalCase(toField.Name)
+		toIdentifier := "out." + keyPrefix + pascalCase(toField.Name)
 		overriddenIdentifier := ""
 		fromIdentifier := ""
 

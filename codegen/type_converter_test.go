@@ -1022,12 +1022,11 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 		err.Error(),
 	)
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 // Enduse that common acronyms are handled consistently with the
 // Thrift compiled acronym strings.
 func TestConvertStructWithAcoronymTypes(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`struct NestedFoo {
@@ -1050,6 +1049,7 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
+		fieldMap,
 	)
 
 	assert.NoError(t, err)
@@ -1069,10 +1069,8 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 			out.Four = nil
 		}
 	`), lines)
-=======
-=======
+}
 
->>>>>>> 323165ba... add helper method for tertiary assignment
 func TestConverterMap(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["One"] = codegen.FieldMapperEntry{
@@ -1277,11 +1275,7 @@ func TestConverterMapStructWithSubFields(t *testing.T) {
 	`), lines)
 }
 
-<<<<<<< HEAD
 func TestConverterMapOverride(t *testing.T) {
->>>>>>> 3c1579fb... Add transforms with overrride
-=======
-func TestConverterMapListType(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Two",
@@ -1390,7 +1384,6 @@ func TestConverterMapListOfStructType(t *testing.T) {
 			}
 		}
 	`), lines)
->>>>>>> 567902ee... Add tests, fix converter to conform to tests
 }
 
 func TestConverterMapMapType(t *testing.T) {
@@ -1475,7 +1468,6 @@ func TestConverterMapMapType(t *testing.T) {
 			}
 		}
 	`), lines)
-
 }
 
 func TestConvertWithMisMatchListTypesForOverride(t *testing.T) {
