@@ -1,6 +1,6 @@
 {
-	"endpointType": "http",
 	"endpointId": "baz",
+	"endpointType": "http",
 	"handleId": "compare",
 	"thriftFile": "endpoints/baz/baz.thrift",
 	"thriftFileSha": "{{placeholder}}",

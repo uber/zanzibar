@@ -728,13 +728,13 @@ func (e *EndpointSpec) SetDownstream(
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
 type EndpointClassConfig struct {
-	Name         string              `json:"name"`
-	Type         string              `json:"type"`
-	Dependencies map[string][]string `json:"dependencies"`
-	Config       struct {
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Config struct {
 		Ratelimit int32    `json:"rateLimit"`
 		Endpoints []string `json:"endpoints"`
 	} `json:"config"`
+	Dependencies map[string][]string `json:"dependencies"`
 }
 
 func parseEndpointJsons(

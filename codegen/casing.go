@@ -23,6 +23,8 @@ package codegen
 import (
 	"bytes"
 	"regexp"
+	"strings"
+	"unicode"
 )
 
 // commonInitialisms, taken from
@@ -115,4 +117,31 @@ func pascalCase(src string) string {
 		chunks[idx] = ensureGolangAncronymCasing(bytes.Title(val))
 	}
 	return string(bytes.Join(chunks, nil))
+}
+
+// CamelToSnake converts a given string to snake case, based on
+// https://github.com/serenize/snaker/blob/master/snaker.go
+func CamelToSnake(s string) string {
+	var words []string
+	var lastPos int
+	rs := []rune(s)
+
+	for i := 0; i < len(rs); i++ {
+		if i > 0 && unicode.IsUpper(rs[i]) {
+			if initialism := startsWithInitialism(s[lastPos:]); initialism != "" {
+				words = append(words, initialism)
+				i += len(initialism) - 1
+				lastPos = i
+				continue
+			}
+
+			words = append(words, s[lastPos:i])
+			lastPos = i
+		}
+	}
+	// append the last word
+	if s[lastPos:] != "" {
+		words = append(words, s[lastPos:])
+	}
+	return strings.ToLower(strings.Join(words, "_"))
 }
