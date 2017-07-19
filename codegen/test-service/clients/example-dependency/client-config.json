@@ -1,0 +1,10 @@
+{
+	"name": "example-dependency",
+	"type": "tchannel",
+	"config": {
+		"headers": {
+				"x-service-name": "example"
+		}
+	},
+	"dependencies": {}
+}

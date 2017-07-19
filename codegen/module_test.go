@@ -155,7 +155,6 @@ func TestExampleService(t *testing.T) {
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
 
-	// TODO: this doesn't yet generate the build to a dir
 	// TODO: this should return a collection of errors if they occur
 	instances, err := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/codegen/test-service",
@@ -164,6 +163,28 @@ func TestExampleService(t *testing.T) {
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
+	}
+
+	expectedClientDependency := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "tchannel",
+		Directory:     "clients/example-dependency",
+		InstanceName:  "example-dependency",
+		JSONFileName:  "client-config.json",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampledependencyClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example-dependency",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampledependencyClientStatic",
+			PackageName:           "exampledependencyClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example-dependency",
+		},
+		Dependencies:          []ModuleDependency{},
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
 	}
 
 	expectedClientInstance := ModuleInstance{
@@ -183,22 +204,31 @@ func TestExampleService(t *testing.T) {
 			PackageName:           "exampleClient",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
 		},
-		ResolvedDependencies: map[string][]*ModuleInstance{},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example-dependency",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientDependency,
+			},
+		},
 	}
 
 	expectedEndpointInstance := ModuleInstance{
 		BaseDirectory: testServiceDir,
 		ClassName:     "endpoint",
 		ClassType:     "http",
-		Dependencies: []ModuleDependency{
-			{
-				ClassName:    "client",
-				InstanceName: "example",
-			},
-		},
-		Directory:    "endpoints/health",
-		InstanceName: "health",
-		JSONFileName: "endpoint-config.json",
+		Directory:     "endpoints/health",
+		InstanceName:  "health",
+		JSONFileName:  "endpoint-config.json",
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
@@ -209,8 +239,21 @@ func TestExampleService(t *testing.T) {
 			PackageName:           "healthEndpoint",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
 		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+		},
 		ResolvedDependencies: map[string][]*ModuleInstance{
 			"client": {
+				&expectedClientInstance,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				// Note that the dependencies are ordered
+				&expectedClientDependency,
 				&expectedClientInstance,
 			},
 		},
@@ -218,16 +261,15 @@ func TestExampleService(t *testing.T) {
 
 	for className, classInstances := range instances {
 		if className == "client" {
-			if len(classInstances) != 1 {
+			if len(classInstances) != 2 {
 				t.Errorf(
-					"Expected 1 client class instance but found %d",
+					"Expected 2 client class instance but found %d",
 					len(classInstances),
 				)
 			}
 
-			i := classInstances[0]
-
-			compareInstances(t, i, &expectedClientInstance)
+			compareInstances(t, classInstances[0], &expectedClientInstance)
+			compareInstances(t, classInstances[1], &expectedClientDependency)
 		} else if className == "endpoint" {
 			if len(classInstances) != 1 {
 				t.Errorf(
@@ -251,6 +293,62 @@ func TestExampleService(t *testing.T) {
 		} else {
 			t.Errorf("Unexpected resolved class type %s", className)
 		}
+	}
+}
+
+func TestExampleServiceCycles(t *testing.T) {
+	moduleSystem := NewModuleSystem()
+	var err error
+
+	err = moduleSystem.RegisterClass("client", ModuleClass{
+		ClassType: MultiModule,
+		Directory: "clients",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass("endpoint", ModuleClass{
+		ClassType:         MultiModule,
+		ClassDependencies: []string{"client"},
+		Directory:         "endpoints",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service-cycle")
+
+	_, err = moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+	)
+	if err == nil {
+		t.Errorf("Expected cycle error generating build")
+	}
+
+	if err.Error() != "Dependency cycle: example-a cannot be initialized before example-b" {
+		t.Errorf("Expected error due to dependency cycle, received: %s", err)
 	}
 }
 
@@ -441,12 +539,89 @@ func compareInstances(
 		)
 	}
 
-	if len(actual.ResolvedDependencies) != len(expected.ResolvedDependencies) {
+	if len(expected.ResolvedDependencies) != len(actual.ResolvedDependencies) {
 		t.Errorf(
-			"Expected %s to have %d dependencies but found %d",
+			"Expected %s %s to have %d resolved dependency class names but found %d",
+			expected.InstanceName,
 			expected.ClassName,
-			len(expected.Dependencies),
-			len(actual.Dependencies),
+			len(expected.ResolvedDependencies),
+			len(actual.ResolvedDependencies),
 		)
+	}
+
+	for className, expectedDeps := range expected.ResolvedDependencies {
+		actualDeps := actual.ResolvedDependencies[className]
+
+		if len(actualDeps) != len(expectedDeps) {
+			t.Errorf(
+				"Expected %s %s to have %d resolved %s dependencies but found %d",
+				expected.InstanceName,
+				expected.ClassName,
+				len(expected.Dependencies),
+				className,
+				len(actual.Dependencies),
+			)
+		}
+
+		for i, expectedDependency := range expectedDeps {
+			actualDependency := actualDeps[i]
+			if actualDependency.ClassName != expectedDependency.ClassName ||
+				actualDependency.InstanceName != expectedDependency.InstanceName {
+				t.Errorf(
+					"Expected %s %s to have %s %s as the resolved %s dependency at index %d, but found %s %s",
+					expected.InstanceName,
+					expected.ClassName,
+					expectedDependency.InstanceName,
+					expectedDependency.ClassName,
+					className,
+					i,
+					actualDependency.InstanceName,
+					actualDependency.ClassName,
+				)
+			}
+		}
+	}
+
+	if len(expected.RecursiveDependencies) != len(actual.RecursiveDependencies) {
+		t.Errorf(
+			"Expected %s %s to have %d recursive dependency class names but found %d",
+			expected.InstanceName,
+			expected.ClassName,
+			len(expected.ResolvedDependencies),
+			len(actual.ResolvedDependencies),
+		)
+	}
+
+	for className, expectedDeps := range expected.RecursiveDependencies {
+		actualDeps := actual.RecursiveDependencies[className]
+
+		if len(actualDeps) != len(expectedDeps) {
+			t.Errorf(
+				"Expected %s %s to have %d recursive %s dependencies but found %d",
+				expected.InstanceName,
+				expected.ClassName,
+				len(expectedDeps),
+				className,
+				len(actualDeps),
+			)
+		}
+
+		for i, expectedDependency := range expectedDeps {
+			actualDependency := actualDeps[i]
+			if actualDependency.ClassName != expectedDependency.ClassName ||
+				actualDependency.InstanceName != expectedDependency.InstanceName {
+				t.Errorf(
+					"Expected %s %s to have %s %s as the recursive %s dependency at index %d, but found %s %s",
+					expected.InstanceName,
+					expected.ClassName,
+					expectedDependency.InstanceName,
+					expectedDependency.ClassName,
+					className,
+					i,
+					actualDependency.InstanceName,
+					actualDependency.ClassName,
+				)
+			}
+		}
 	}
 }
