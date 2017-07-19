@@ -36,6 +36,8 @@ import:
   version: v1.3.0
 - package: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
+- package: github.com/uber/jaeger-client-go
+  version: 2.8.0
 # tchannel needs master for golang.org/x/net
 - package: golang.org/x/net
   version: master

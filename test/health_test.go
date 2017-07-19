@@ -137,7 +137,7 @@ func TestHealthMetrics(t *testing.T) {
 
 	cgateway.MetricsWaitGroup.Wait()
 	metrics := cgateway.M3Service.GetMetrics()
-	sort.Sort(lib.SortMetricsByName(metrics))
+	sort.Sort(lib.SortMetricsByNameAndTags(metrics))
 
 	assert.Equal(t, len(metrics), 3, "expected one metric")
 
