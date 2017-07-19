@@ -352,6 +352,157 @@ func TestExampleServiceCycles(t *testing.T) {
 	}
 }
 
+func TestSortDependencies(t *testing.T) {
+	testInstanceA := createTestInstance("example-a")
+	testInstanceB := createTestInstance("example-b")
+	testInstanceC := createTestInstance("example-c", testInstanceB)
+	testInstanceD := createTestInstance("example-d", testInstanceC)
+	testInstanceE := createTestInstance("example-e")
+	testInstanceF := createTestInstance("example-f")
+	testInstanceG := createTestInstance("example-g", testInstanceF)
+
+	if !peerDepends(testInstanceC, testInstanceB) {
+		t.Errorf("Expected test instance c to depend on test instance b")
+	}
+	if !peerDepends(testInstanceD, testInstanceC) {
+		t.Errorf("Expected test instance d to depend on test instance c")
+	}
+	if !peerDepends(testInstanceG, testInstanceF) {
+		t.Errorf("Expected test instance g to depend on test instance f")
+	}
+
+	permutations := generatePermutations([]*ModuleInstance{
+		testInstanceA,
+		testInstanceB,
+		testInstanceC,
+		testInstanceD,
+		testInstanceE,
+		testInstanceF,
+		testInstanceG,
+	})
+
+	for _, classList := range permutations {
+		sortedList, err := sortDependencyList("client", classList)
+
+		if err != nil {
+			t.Errorf("Unexpected error when sorting peer list: %s", err)
+		}
+
+		if !isBefore(sortedList, "example-b", "example-c") {
+			t.Errorf("Expected example-b to be before example-c in sorted list")
+		}
+
+		if !isBefore(sortedList, "example-c", "example-d") {
+			t.Errorf("Expected example-c to be before example-d in sorted list")
+		}
+
+		if !isBefore(sortedList, "example-f", "example-g") {
+			t.Errorf("Expected example-f to be before example-g in sorted list")
+		}
+	}
+
+}
+
+func createTestInstance(name string, depInstances ...*ModuleInstance) *ModuleInstance {
+	dependencies := []ModuleDependency{}
+	resolvedDependencies := map[string][]*ModuleInstance{}
+	recursiveDependencies := map[string][]*ModuleInstance{}
+
+	for _, dep := range depInstances {
+		dependencies = append(dependencies, ModuleDependency{
+			ClassName:    dep.ClassName,
+			InstanceName: dep.InstanceName,
+		})
+
+		resolvedList, ok := resolvedDependencies[dep.ClassName]
+
+		if !ok {
+			resolvedList = []*ModuleInstance{}
+		}
+
+		resolvedDependencies[dep.ClassName] = appendUniqueModule(
+			resolvedList,
+			dep,
+		)
+
+		recursiveDependencies[dep.ClassName] =
+			resolvedDependencies[dep.ClassName]
+
+		for className, recursiveDepList := range dep.RecursiveDependencies {
+			for _, recursiveDep := range recursiveDepList {
+				recursiveList := recursiveDependencies[className]
+
+				if recursiveList == nil {
+					recursiveList = []*ModuleInstance{}
+				}
+
+				recursiveDependencies[className] = appendUniqueModule(
+					recursiveList,
+					recursiveDep,
+				)
+			}
+		}
+	}
+
+	return &ModuleInstance{
+		ClassName:    "client",
+		ClassType:    "http",
+		Directory:    "clients/example",
+		InstanceName: name,
+		JSONFileName: "client-config.json",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "exampleClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/clients/example",
+			IsExportGenerated:     true,
+			PackageAlias:          "exampleClientStatic",
+			PackageName:           "exampleClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/clients/example",
+		},
+		Dependencies:          dependencies,
+		ResolvedDependencies:  resolvedDependencies,
+		RecursiveDependencies: recursiveDependencies,
+	}
+}
+
+func generatePermutations(instances []*ModuleInstance) [][]*ModuleInstance {
+	results := [][]*ModuleInstance{}
+
+	if len(instances) <= 1 {
+		return [][]*ModuleInstance{
+			instances,
+		}
+	}
+
+	for i := 0; i < len(instances); i++ {
+		instanceCopy := make([]*ModuleInstance, len(instances))
+		copy(instanceCopy, instances)
+		instanceCopy[i], instanceCopy[0] = instanceCopy[0], instanceCopy[i]
+		permutations := generatePermutations(instanceCopy[1:])
+
+		for _, permutation := range permutations {
+			results = append(results, append(permutation, instanceCopy[0]))
+		}
+	}
+	return results
+}
+
+// Returns true of module with instance name a comes before instance name b
+func isBefore(sortedList []*ModuleInstance, a string, b string) bool {
+	hasSeenA := false
+	for _, module := range sortedList {
+		if module.InstanceName == a {
+			hasSeenA = true
+		}
+
+		if module.InstanceName == b {
+			return hasSeenA
+		}
+	}
+	return false
+}
+
 func getTestDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	dirname := filepath.Dir(file)
