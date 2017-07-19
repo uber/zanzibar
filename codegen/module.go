@@ -364,7 +364,7 @@ func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
 		return false
 	}
 
-	for _, dependency := range a.Dependencies {
+	for _, dependency := range a.RecursiveDependencies[a.ClassName] {
 		if dependency.InstanceName == b.InstanceName &&
 			dependency.ClassName == b.ClassName {
 			return true
