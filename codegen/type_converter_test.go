@@ -1574,3 +1574,38 @@ func TestConverterMapMapTypeIncompatabile(t *testing.T) {
 		err.Error(),
 	)
 }
+
+func TestConverterInvalidMapping(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Garbage",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner {
+			1: optional string field
+		}
+		
+		struct Foo {
+			1: optional map<string, Inner> one
+			2: optional map<string, string> two
+		}
+
+		struct Bar {
+			1: optional map<string, Inner> one
+			2: optional map<string, Inner> two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", lines)
+	assert.Equal(t,
+		"Failed to find field ( Garbage ) for transform.",
+		err.Error(),
+	)
+}

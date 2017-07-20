@@ -661,6 +661,12 @@ func addSpecToMap(
 				)
 			}
 		}
+		if overrideMap[k].Field == nil {
+			return overrideMap, errors.Errorf(
+				"Failed to find field ( %s ) for transform.",
+				v.QualifiedName,
+			)
+		}
 	}
 	return overrideMap, nil
 }
