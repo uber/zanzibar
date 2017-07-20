@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarnoRequestHandler is the handler for "/bar/no-request-path"
-type BarnoRequestHandler struct {
+// BarNoRequestHandler is the handler for "/bar/no-request-path"
+type BarNoRequestHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarnoRequestHandler creates a handler
-func NewBarnoRequestHandler(
+// NewBarNoRequestHandler creates a handler
+func NewBarNoRequestHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *BarnoRequestHandler {
-	return &BarnoRequestHandler{
+) *BarNoRequestHandler {
+	return &BarNoRequestHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarnoRequestHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarNoRequestHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/no-request-path",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *BarnoRequestHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/no-request-path".
-func (handler *BarnoRequestHandler) HandleRequest(
+func (handler *BarNoRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

@@ -37,36 +37,36 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SimpleServicecallHandler:      NewSimpleServicecallHandler(g, deps),
-		SimpleServicecompareHandler:   NewSimpleServicecompareHandler(g, deps),
-		SimpleServicepingHandler:      NewSimpleServicepingHandler(g, deps),
-		SimpleServicesillyNoopHandler: NewSimpleServicesillyNoopHandler(g, deps),
+		SimpleServiceCallHandler:      NewSimpleServiceCallHandler(g, deps),
+		SimpleServiceCompareHandler:   NewSimpleServiceCompareHandler(g, deps),
+		SimpleServicePingHandler:      NewSimpleServicePingHandler(g, deps),
+		SimpleServiceSillyNoopHandler: NewSimpleServiceSillyNoopHandler(g, deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	SimpleServicecallHandler      *SimpleServicecallHandler
-	SimpleServicecompareHandler   *SimpleServicecompareHandler
-	SimpleServicepingHandler      *SimpleServicepingHandler
-	SimpleServicesillyNoopHandler *SimpleServicesillyNoopHandler
+	SimpleServiceCallHandler      *SimpleServiceCallHandler
+	SimpleServiceCompareHandler   *SimpleServiceCompareHandler
+	SimpleServicePingHandler      *SimpleServicePingHandler
+	SimpleServiceSillyNoopHandler *SimpleServiceSillyNoopHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.SimpleServicecallHandler.Register(gateway)
+	err0 := handlers.SimpleServiceCallHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}
-	err1 := handlers.SimpleServicecompareHandler.Register(gateway)
+	err1 := handlers.SimpleServiceCompareHandler.Register(gateway)
 	if err1 != nil {
 		return err1
 	}
-	err2 := handlers.SimpleServicepingHandler.Register(gateway)
+	err2 := handlers.SimpleServicePingHandler.Register(gateway)
 	if err2 != nil {
 		return err2
 	}
-	err3 := handlers.SimpleServicesillyNoopHandler.Register(gateway)
+	err3 := handlers.SimpleServiceSillyNoopHandler.Register(gateway)
 	if err3 != nil {
 		return err3
 	}

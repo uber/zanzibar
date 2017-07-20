@@ -18,7 +18,7 @@ import (
 )
 
 {{$workflow := .WorkflowName -}}
-{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 {{$handlerName := printf "%sHandler"  $serviceMethod -}}
 {{$genCodePkg := .Method.GenCodePkgName -}}
 {{with .Method -}}

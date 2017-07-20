@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarargWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
-type BarargWithManyQueryParamsHandler struct {
+// BarArgWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
+type BarArgWithManyQueryParamsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarargWithManyQueryParamsHandler creates a handler
-func NewBarargWithManyQueryParamsHandler(
+// NewBarArgWithManyQueryParamsHandler creates a handler
+func NewBarArgWithManyQueryParamsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *BarargWithManyQueryParamsHandler {
-	return &BarargWithManyQueryParamsHandler{
+) *BarArgWithManyQueryParamsHandler {
+	return &BarArgWithManyQueryParamsHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarargWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/argWithManyQueryParams",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *BarargWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) e
 }
 
 // HandleRequest handles "/bar/argWithManyQueryParams".
-func (handler *BarargWithManyQueryParamsHandler) HandleRequest(
+func (handler *BarArgWithManyQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

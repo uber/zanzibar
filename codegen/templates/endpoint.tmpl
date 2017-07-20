@@ -8,7 +8,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderMap := .ResHeaderMap }}
 {{- $resHeaderMapKeys := .ResHeaderMapKeys }}
 {{- $clientName := title .ClientName }}
-{{- $serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
 {{- $responseType := .Method.ResponseType }}
 {{- $clientMethodName := title .ClientMethodName }}

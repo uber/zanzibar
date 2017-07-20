@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// SimpleServicecompareHandler is the handler for "/baz/compare"
-type SimpleServicecompareHandler struct {
+// SimpleServiceCompareHandler is the handler for "/baz/compare"
+type SimpleServiceCompareHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewSimpleServicecompareHandler creates a handler
-func NewSimpleServicecompareHandler(
+// NewSimpleServiceCompareHandler creates a handler
+func NewSimpleServiceCompareHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *SimpleServicecompareHandler {
-	return &SimpleServicecompareHandler{
+) *SimpleServiceCompareHandler {
+	return &SimpleServiceCompareHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SimpleServicecompareHandler) Register(g *zanzibar.Gateway) error {
+func (handler *SimpleServiceCompareHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/baz/compare",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *SimpleServicecompareHandler) Register(g *zanzibar.Gateway) error 
 }
 
 // HandleRequest handles "/baz/compare".
-func (handler *SimpleServicecompareHandler) HandleRequest(
+func (handler *SimpleServiceCompareHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

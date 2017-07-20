@@ -112,7 +112,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderMap := .ResHeaderMap }}
 {{- $resHeaderMapKeys := .ResHeaderMapKeys }}
 {{- $clientName := title .ClientName }}
-{{- $serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
 {{- $responseType := .Method.ResponseType }}
 {{- $clientMethodName := title .ClientMethodName }}
@@ -462,7 +462,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9542, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9558, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -488,7 +488,7 @@ type Endpoint interface{
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g, deps),
 		{{- end}}
@@ -498,7 +498,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
-		{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 		{{$handlerName}}: New{{$handlerName}}(g),
 		{{- end}}
@@ -509,7 +509,7 @@ func NewEndpoint(g *zanzibar.Gateway) Endpoint {
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{$serviceMethod := printf "%s%s" $meta.Method.ThriftService $meta.Method.Name -}}
+	{{$serviceMethod := printf "%s%s" (title $meta.Method.ThriftService) (title $meta.Method.Name) -}}
 	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	{{$handlerName}} *{{$handlerName}}
 	{{- end}}
@@ -518,7 +518,7 @@ type EndpointHandlers struct {
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	{{- range $idx, $meta := $endpointMeta }}
-	{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+	{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
 	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
 	if err{{$idx}} != nil {
@@ -541,7 +541,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1937, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 2001, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1753,7 +1753,7 @@ import (
 )
 
 {{$workflow := .WorkflowName -}}
-{{$serviceMethod := printf "%s%s" .Method.ThriftService .Method.Name -}}
+{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 {{$handlerName := printf "%sHandler"  $serviceMethod -}}
 {{$genCodePkg := .Method.GenCodePkgName -}}
 {{with .Method -}}
@@ -1875,7 +1875,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3418, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3434, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
