@@ -617,6 +617,7 @@ func (ms *MethodSpec) setDownstream(
 func (ms *MethodSpec) setTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
+	transforms map[string]FieldMapperEntry,
 	h *PackageHelper,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
@@ -630,8 +631,7 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper:      h,
 	}
 
-	// TODO(sindelar): Build transform map from config files
-	err := typeConverter.GenStructConverter(structType, downstreamStructType, nil)
+	err := typeConverter.GenStructConverter(structType, downstreamStructType, transforms)
 	if err != nil {
 		return err
 	}
@@ -654,7 +654,7 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper:      h,
 	}
 
-	// TODO(sindelar): Build transform map from config files
+	// TODO(sindelar): Add response transforms
 	err = respConverter.GenStructConverter(downstreamRespFields, respFields, nil)
 	if err != nil {
 		return err

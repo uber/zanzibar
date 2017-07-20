@@ -102,13 +102,6 @@ func convertTypes(
 	if err != nil {
 		return "", err
 	}
-	overrideMap, err = addSpecToMap(overrideMap,
-		program.Types[toStruct].(*compile.StructSpec).Fields,
-		"")
-
-	if err != nil {
-		return "", err
-	}
 
 	err = converter.GenStructConverter(
 		program.Types[fromStruct].(*compile.StructSpec).Fields,
@@ -120,29 +113,6 @@ func convertTypes(
 	}
 
 	return trim(strings.Join(converter.GetLines(), "\n")), nil
-}
-
-func addSpecToMap(
-	overrideMap map[string]codegen.FieldMapperEntry,
-	fields compile.FieldGroup,
-	prefix string,
-) (map[string]codegen.FieldMapperEntry, error) {
-	for k, v := range overrideMap {
-		for _, spec := range fields {
-			fieldQualName := prefix + strings.Title(spec.Name)
-			if v.QualifiedName == fieldQualName {
-				v.Field = spec
-				overrideMap[k] = v
-			} else if strings.HasPrefix(v.QualifiedName, fieldQualName) {
-				overrideMap, _ = addSpecToMap(
-					overrideMap,
-					spec.Type.(*compile.StructSpec).Fields,
-					fieldQualName+".",
-				)
-			}
-		}
-	}
-	return overrideMap, nil
 }
 
 func countTabs(line string) int {

@@ -611,14 +611,19 @@ func (c *TypeConverter) genStructConverter(
 // GenStructConverter will add lines to the TypeConverter for mapping
 // from one go struct to another based on two thriftrw.FieldGroups.
 // fieldMap is a may from keys that are the qualified field path names for
-// destination fields (from the incoming request) and the entries are source
-// fields (sent to the downstream client)
+// destination fields (sent to the downstream client) and the entries are source
+// fields (from the incoming request)
 func (c *TypeConverter) GenStructConverter(
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
 ) error {
-	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
+	// Add compiled FieldSpecs to the FieldMapperEntry
+	fieldMap, err := addSpecToMap(fieldMap, fromFields, "")
+	if err != nil {
+		return err
+	}
+	err = c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
 	if err != nil {
 		return err
 	}
@@ -629,10 +634,33 @@ func (c *TypeConverter) GenStructConverter(
 // FieldMapperEntry defines a source field and optional arguments
 // converting and overriding fields.
 type FieldMapperEntry struct {
-	QualifiedName string
+	QualifiedName string //
 	Field         *compile.FieldSpec
 
 	Override      bool
 	typeConverter string // TODO: implement. i.e string(int) etc
 	transform     string // TODO: implement. i.e. camelCasing, Title, etc
+}
+
+func addSpecToMap(
+	overrideMap map[string]FieldMapperEntry,
+	fields compile.FieldGroup,
+	prefix string,
+) (map[string]FieldMapperEntry, error) {
+	for k, v := range overrideMap {
+		for _, spec := range fields {
+			fieldQualName := prefix + pascalCase(spec.Name)
+			if v.QualifiedName == fieldQualName {
+				v.Field = spec
+				overrideMap[k] = v
+			} else if strings.HasPrefix(v.QualifiedName, fieldQualName) {
+				overrideMap, _ = addSpecToMap(
+					overrideMap,
+					spec.Type.(*compile.StructSpec).Fields,
+					fieldQualName+".",
+				)
+			}
+		}
+	}
+	return overrideMap, nil
 }
