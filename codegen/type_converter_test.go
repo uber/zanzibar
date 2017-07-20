@@ -1170,15 +1170,15 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = (*bool)(in.Two)
+		out.One = (*bool)(in.One)
+		if in.Two != nil {
+			out.One = (*bool)(in.Two)
+		}
 		out.Two = bool(in.Two)
 		if in.One != nil {
 			out.Two = bool(in.One)
 		}
-		out.Three = (*bool)(in.Three)
-		if in.Four != nil {
-			out.Three = (*bool)(in.Four)
-		}
+		out.Three = (*bool)(in.Four)
 		out.Four = (*bool)(in.Four)
 		`), lines)
 }
