@@ -25,7 +25,10 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type handler struct{}
@@ -75,7 +78,8 @@ func TestExampleService(t *testing.T) {
 	moduleSystem := NewModuleSystem()
 	var err error
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -101,10 +105,11 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClass("endpoint", ModuleClass{
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
-		Directory:         "endpoints",
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
+		Directory: "endpoints",
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
@@ -128,7 +133,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected double creation of http endpoint to error")
 	}
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -136,7 +142,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	err = moduleSystem.RegisterClass("newclient", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "newClient",
 		ClassType: MultiModule,
 		Directory: "./clients/",
 	})
@@ -144,7 +151,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected registering a module in the same directory to throw")
 	}
 
-	err = moduleSystem.RegisterClass("newclient", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "newClient",
 		ClassType: MultiModule,
 		Directory: "./clients/../../../foo",
 	})
@@ -300,7 +308,8 @@ func TestExampleServiceCycles(t *testing.T) {
 	moduleSystem := NewModuleSystem()
 	var err error
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -317,10 +326,11 @@ func TestExampleServiceCycles(t *testing.T) {
 		t.Errorf("Unexpected error registering http client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClass("endpoint", ModuleClass{
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
-		Directory:         "endpoints",
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
+		Directory: "endpoints",
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
@@ -401,6 +411,61 @@ func TestSortDependencies(t *testing.T) {
 		}
 	}
 
+}
+
+func TestSortableModuleClassList(t *testing.T) {
+	a := &ModuleClass{
+		Name: "a",
+	}
+	b := &ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"a"},
+	}
+	c := &ModuleClass{
+		Name:      "c",
+		DependsOn: []string{"b"},
+	}
+	d := &ModuleClass{
+		Name:       "d",
+		DependedBy: []string{"c"},
+	}
+	list := []*ModuleClass{a, b, c, d}
+	expected := sortableModuleClassList([]*ModuleClass{a, b, d, c})
+	sorted := sortableModuleClassList(list)
+	sort.Sort(sorted)
+	assert.Equal(t, expected, sorted)
+}
+
+func TestSortableModuleClassListPanic1(t *testing.T) {
+	a := &ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"b"},
+	}
+	b := &ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"a"},
+	}
+	list := []*ModuleClass{a, b}
+	sorted := sortableModuleClassList(list)
+	assert.PanicsWithValue(t, "cyclic dependency between module class \"b\" and \"a\"", func() {
+		sort.Sort(sorted)
+	})
+}
+
+func TestSortableModuleClassListPanic2(t *testing.T) {
+	a := &ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"b"},
+	}
+	b := &ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"a"},
+	}
+	list := []*ModuleClass{a, b}
+	sorted := sortableModuleClassList(list)
+	assert.PanicsWithValue(t, "cyclic dependency between module class \"b\" and \"a\"", func() {
+		sort.Sort(sorted)
+	})
 }
 
 func createTestInstance(name string, depInstances ...*ModuleInstance) *ModuleInstance {

@@ -63,10 +63,8 @@ type ModuleSystem struct {
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
-func (system *ModuleSystem) RegisterClass(
-	name string,
-	class ModuleClass,
-) error {
+func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
+	name := class.Name
 	if name == "" {
 		return errors.Errorf("A module class name must not be empty")
 	}
@@ -80,7 +78,7 @@ func (system *ModuleSystem) RegisterClass(
 
 	// Validate the module class dependencies
 	// (this validation ensures that circular deps cannot exist)
-	for _, moduleType := range class.ClassDependencies {
+	for _, moduleType := range class.DependsOn {
 		if moduleType != name && system.classes[moduleType] == nil {
 			return errors.Errorf(
 				"The module class %q depends on class type %q, "+
@@ -115,7 +113,6 @@ func (system *ModuleSystem) RegisterClass(
 
 	class.types = map[string]BuildGenerator{}
 	system.classes[name] = &class
-	system.classOrder = append(system.classOrder, name)
 
 	return nil
 }
@@ -305,6 +302,66 @@ func resolveRecursiveDependencies(
 	return nil
 }
 
+type sortableModuleClassList []*ModuleClass
+
+func (s sortableModuleClassList) Len() int {
+	return len(s)
+}
+
+func (s sortableModuleClassList) Less(i int, j int) bool {
+	// ij being true means i < j, ji being true means i > j
+	var ij, ji bool
+	ni := s[i].Name
+	nj := s[j].Name
+
+	// j depends on i
+	for _, value := range s[j].DependsOn {
+		if ni == value {
+			ij = true
+			break
+		}
+	}
+	// i depends on j
+	for _, value := range s[j].DependedBy {
+		if ni == value {
+			ji = true
+			break
+		}
+	}
+	// i depends on j
+	for _, value := range s[i].DependsOn {
+		if nj == value {
+			ji = true
+			break
+		}
+	}
+	// j depends on i
+	for _, value := range s[i].DependedBy {
+		if nj == value {
+			ij = true
+			break
+		}
+	}
+
+	if ij && ji {
+		panic(fmt.Sprintf("cyclic dependency between module class %q and %q", ni, nj))
+	}
+
+	// ij, ji being false has no ordering indication
+	if ij {
+		return true
+	}
+	if ji {
+		return false
+	}
+
+	return ni < nj
+}
+
+func (s sortableModuleClassList) Swap(i int, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
 type sortableDependencyList []*ModuleInstance
 
 func (s sortableDependencyList) Len() int {
@@ -374,6 +431,23 @@ func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
 	return false
 }
 
+// resolveClassOrder sorts the registered classes by dependency and sets
+// classOrder field
+func (system *ModuleSystem) resolveClassOrder() {
+	classes := make([]*ModuleClass, len(system.classes))
+	i := 0
+	for _, c := range system.classes {
+		classes[i] = c
+		i++
+	}
+	sorted := sortableModuleClassList(classes)
+	sort.Sort(sorted)
+	system.classOrder = make([]string, len(system.classes))
+	for i, c := range sorted {
+		system.classOrder[i] = c.Name
+	}
+}
+
 // ResolveModules resolves the module instances from the config on disk
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
@@ -383,7 +457,7 @@ func (system *ModuleSystem) ResolveModules(
 	baseDirectory string,
 	targetGenDir string,
 ) (map[string][]*ModuleInstance, error) {
-
+	system.resolveClassOrder()
 	resolvedModules := map[string][]*ModuleInstance{}
 
 	for _, className := range system.classOrder {
@@ -825,10 +899,12 @@ func formatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	ClassType         moduleClassType
-	Directory         string
-	ClassDependencies []string
-	types             map[string]BuildGenerator
+	Name       string
+	ClassType  moduleClassType
+	Directory  string
+	DependsOn  []string
+	DependedBy []string
+	types      map[string]BuildGenerator
 }
 
 // BuildResult is the result of running a module generator
