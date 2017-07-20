@@ -6,5 +6,7 @@
 				"x-service-name": "example"
 		}
 	},
-	"dependencies": {}
+	"dependencies": {
+		"client": ["example-dependency"]
+	}
 }

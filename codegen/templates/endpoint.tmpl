@@ -1,6 +1,20 @@
 {{/* template to render gateway http endpoint code */ -}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
-package {{.PackageName}}
+{{- $workflow := .WorkflowName }}
+{{- $reqHeaderMap := .ReqHeaderMap }}
+{{- $reqHeaderMapKeys := .ReqHeaderMapKeys }}
+{{- $resHeaderMap := .ResHeaderMap }}
+{{- $resHeaderMapKeys := .ResHeaderMapKeys }}
+{{- $clientName := title .ClientName }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $handlerName := printf "%sHandler"  $serviceMethod }}
+{{- $responseType := .Method.ResponseType }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $endpointId := .Spec.EndpointID }}
+{{- $handleId := .Spec.HandleID }}
+{{- $middlewares := .Spec.Middlewares }}
 
 import (
 	"context"
@@ -10,7 +24,6 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
-	"{{.GatewayPackageName}}/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -23,31 +36,61 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 	{{- end}}
+
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	"{{$middleware.Path}}"
+	{{- end}}
+	{{- end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-{{ $workflow := .WorkflowName -}}
-{{ $reqHeaderMap := .ReqHeaderMap -}}
-{{ $reqHeaderMapKeys := .ReqHeaderMapKeys -}}
-{{ $resHeaderMap := .ResHeaderMap -}}
-{{ $resHeaderMapKeys := .ResHeaderMapKeys -}}
-{{ $clientName := title .ClientName -}}
-{{ $handlerName := title .Method.Name | printf "%sHandler" }}
-{{ $responseType := .Method.ResponseType}}
-{{ $clientMethodName := title .ClientMethodName -}}
 {{with .Method -}}
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
 type {{$handlerName}} struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 }
 
-// New{{title .Name}}Endpoint creates a handler
-func New{{title .Name}}Endpoint(
+// New{{$handlerName}} creates a handler
+func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
+	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
-		Clients: gateway.Clients.(*clients.Clients),
+		Clients: deps.Client,
 	}
+}
+
+// Register adds the http handler to the gateway's http router
+func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"{{.HTTPMethod}}", "{{.HTTPPath}}",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"{{$endpointId}}",
+			"{{$handleId}}",
+			{{ if len $middlewares | ne 0 -}}
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				{{range $idx, $middleware := $middlewares -}}
+				{{$middleware.Name}}.NewMiddleWare(
+					g,
+						{{$middleware.Name}}.Options{
+						{{range $key, $value := $middleware.Options -}}
+								{{$key}} : {{$value}},
+						{{end -}}
+						},
+				),
+				{{end -}}
+			}, handler.HandleRequest).Handle,
+			{{- else -}}
+			handler.HandleRequest,
+			{{- end}}
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -142,7 +185,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 
 // {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
 type {{$workflow}} struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

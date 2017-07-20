@@ -57,18 +57,19 @@
 			"resHeaderMap": null
 		},
 		"bar.argWithNestedQueryParams": {
-			"ID": "bar.argWithNestedQueryParams",
-			"Type": "http",
-			"HandleID": "argWithNestedQueryParams",
-			"ConfigFile": "bar::argWithNestedQueryParams",
-			"ThriftFile": "endpoints/bar/bar.thrift",
-			"ThriftServiceName": "Bar",
-			"MethodName": "argWithNestedQueryParams",
-			"WorkflowType": "httpClient",
-			"ClientID": "bar",
-			"ClientMethod": "ArgWithNestedQueryParams",
-			"TestFixture": "",
-			"Middlewares": null
+			"endpointId": "bar",
+			"endpointType": "http",
+			"handleId": "argWithNestedQueryParams",
+			"thriftFile": "endpoints/bar/bar.thrift",
+			"thriftFileSha": "",
+			"thriftMethodName": "Bar::argWithNestedQueryParams",
+			"workflowType": "httpClient",
+			"clientID": "bar",
+			"clientMethod": "ArgWithNestedQueryParams",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
 		},
 		"bar.argWithQueryHeader": {
 			"endpointId": "bar",

@@ -21,35 +21,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	"github.com/uber/zanzibar/runtime/middlewares/logger"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// NormalHandler is the handler for "/bar/bar-path"
-type NormalHandler struct {
-	Clients *clients.Clients
+// BarNormalHandler is the handler for "/bar/bar-path"
+type BarNormalHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewNormalEndpoint creates a handler
-func NewNormalEndpoint(
+// NewBarNormalHandler creates a handler
+func NewBarNormalHandler(
 	gateway *zanzibar.Gateway,
-) *NormalHandler {
-	return &NormalHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarNormalHandler {
+	return &BarNormalHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarNormalHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/bar/bar-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"normal",
+			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+				example.NewMiddleWare(
+					g,
+					example.Options{
+						Foo: "test",
+					},
+				),
+				logger.NewMiddleWare(
+					g,
+					logger.Options{},
+				),
+			}, handler.HandleRequest).Handle,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/bar-path".
-func (handler *NormalHandler) HandleRequest(
+func (handler *BarNormalHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -90,7 +121,7 @@ func (handler *NormalHandler) HandleRequest(
 
 // NormalEndpoint calls thrift client Bar.Normal
 type NormalEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

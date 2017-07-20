@@ -106,7 +106,7 @@ func NewTemplate() (*Template, error) {
 
 // ClientMeta ...
 type ClientMeta struct {
-	PackageName      string
+	Instance         *ModuleInstance
 	ExportName       string
 	ExportType       string
 	ClientID         string
@@ -338,13 +338,6 @@ func addMiddlewarePackages(middlewares []MiddlewareSpec, includedPkgs []GoPackag
 		}
 	}
 	return includedPkgs
-}
-
-// MainMeta ...
-type MainMeta struct {
-	IncludedPackages        []GoPackageImport
-	GatewayName             string
-	RelativePathToAppConfig string
 }
 
 func (t *Template) execTemplateAndFmt(

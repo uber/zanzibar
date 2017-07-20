@@ -21,18 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package quuxClient
+package module
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 )
 
-// Dependencies contains dependencies for the quux client module
+// Dependencies contains dependencies for the contacts endpoint module
 type Dependencies struct {
-	Client ClientDependencies
+	Client *ClientDependencies
 }
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Bar barClientGenerated.Client
+	Contacts contactsClientGenerated.Client
 }

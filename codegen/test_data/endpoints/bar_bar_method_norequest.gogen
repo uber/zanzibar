@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// NoRequestHandler is the handler for "/bar/no-request-path"
-type NoRequestHandler struct {
-	Clients *clients.Clients
+// BarNoRequestHandler is the handler for "/bar/no-request-path"
+type BarNoRequestHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewNoRequestEndpoint creates a handler
-func NewNoRequestEndpoint(
+// NewBarNoRequestHandler creates a handler
+func NewBarNoRequestHandler(
 	gateway *zanzibar.Gateway,
-) *NoRequestHandler {
-	return &NoRequestHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarNoRequestHandler {
+	return &BarNoRequestHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarNoRequestHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/bar/no-request-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"noRequest",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/no-request-path".
-func (handler *NoRequestHandler) HandleRequest(
+func (handler *BarNoRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -86,7 +103,7 @@ func (handler *NoRequestHandler) HandleRequest(
 
 // NoRequestEndpoint calls thrift client Bar.NoRequest
 type NoRequestEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

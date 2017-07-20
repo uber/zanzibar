@@ -28,9 +28,9 @@ import (
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	bazServer "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var testSillyNoopCounter int
@@ -50,8 +50,7 @@ func BenchmarkSillyNoop(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())

@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
-type ArgWithHeadersHandler struct {
-	Clients *clients.Clients
+// BarArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
+type BarArgWithHeadersHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewArgWithHeadersEndpoint creates a handler
-func NewArgWithHeadersEndpoint(
+// NewBarArgWithHeadersHandler creates a handler
+func NewBarArgWithHeadersHandler(
 	gateway *zanzibar.Gateway,
-) *ArgWithHeadersHandler {
-	return &ArgWithHeadersHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarArgWithHeadersHandler {
+	return &BarArgWithHeadersHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/bar/argWithHeaders",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithHeaders",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/argWithHeaders".
-func (handler *ArgWithHeadersHandler) HandleRequest(
+func (handler *BarArgWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -91,7 +108,7 @@ func (handler *ArgWithHeadersHandler) HandleRequest(
 
 // ArgWithHeadersEndpoint calls thrift client Bar.ArgWithHeaders
 type ArgWithHeadersEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

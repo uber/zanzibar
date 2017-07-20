@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
-type ArgWithNestedQueryParamsHandler struct {
-	Clients *clients.Clients
+// BarArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
+type BarArgWithNestedQueryParamsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewArgWithNestedQueryParamsEndpoint creates a handler
-func NewArgWithNestedQueryParamsEndpoint(
+// NewBarArgWithNestedQueryParamsHandler creates a handler
+func NewBarArgWithNestedQueryParamsHandler(
 	gateway *zanzibar.Gateway,
-) *ArgWithNestedQueryParamsHandler {
-	return &ArgWithNestedQueryParamsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarArgWithNestedQueryParamsHandler {
+	return &BarArgWithNestedQueryParamsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/bar/argWithNestedQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithNestedQueryParams",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/argWithNestedQueryParams".
-func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
+func (handler *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -112,7 +129,7 @@ func (handler *ArgWithNestedQueryParamsHandler) HandleRequest(
 
 // ArgWithNestedQueryParamsEndpoint calls thrift client Bar.ArgWithNestedQueryParams
 type ArgWithNestedQueryParamsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

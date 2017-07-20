@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// SillyNoopHandler is the handler for "/baz/silly-noop"
-type SillyNoopHandler struct {
-	Clients *clients.Clients
+// SimpleServiceSillyNoopHandler is the handler for "/baz/silly-noop"
+type SimpleServiceSillyNoopHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewSillyNoopEndpoint creates a handler
-func NewSillyNoopEndpoint(
+// NewSimpleServiceSillyNoopHandler creates a handler
+func NewSimpleServiceSillyNoopHandler(
 	gateway *zanzibar.Gateway,
-) *SillyNoopHandler {
-	return &SillyNoopHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *SimpleServiceSillyNoopHandler {
+	return &SimpleServiceSillyNoopHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *SimpleServiceSillyNoopHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/baz/silly-noop",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"sillyNoop",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/baz/silly-noop".
-func (handler *SillyNoopHandler) HandleRequest(
+func (handler *SimpleServiceSillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -92,7 +109,7 @@ func (handler *SillyNoopHandler) HandleRequest(
 
 // SillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
 type SillyNoopEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

@@ -31,10 +31,10 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 var testConfig = map[string]interface{}{
@@ -44,7 +44,7 @@ var testOptions = &testGateway.Options{
 	KnownTChannelBackends: []string{"baz"},
 	TestBinary: filepath.Join(
 		getDirName(), "..", "..", "..", "examples", "example-gateway",
-		"build", "services", "example-gateway", "main.go",
+		"build", "services", "example-gateway", "main", "main.go",
 	),
 }
 
@@ -71,8 +71,7 @@ func BenchmarkPing(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())

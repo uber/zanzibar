@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package googlenow
+package googlenowEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
-// AddCredentialsHandler is the handler for "/googlenow/add-credentials"
-type AddCredentialsHandler struct {
-	Clients *clients.Clients
+// GoogleNowAddCredentialsHandler is the handler for "/googlenow/add-credentials"
+type GoogleNowAddCredentialsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewAddCredentialsEndpoint creates a handler
-func NewAddCredentialsEndpoint(
+// NewGoogleNowAddCredentialsHandler creates a handler
+func NewGoogleNowAddCredentialsHandler(
 	gateway *zanzibar.Gateway,
-) *AddCredentialsHandler {
-	return &AddCredentialsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *GoogleNowAddCredentialsHandler {
+	return &GoogleNowAddCredentialsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/googlenow/add-credentials",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"googlenow",
+			"addCredentials",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/googlenow/add-credentials".
-func (handler *AddCredentialsHandler) HandleRequest(
+func (handler *GoogleNowAddCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -87,7 +104,7 @@ func (handler *AddCredentialsHandler) HandleRequest(
 
 // AddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
 type AddCredentialsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

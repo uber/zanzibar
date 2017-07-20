@@ -28,18 +28,17 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestInvalidStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -91,8 +90,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -151,8 +149,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -218,8 +215,7 @@ func TestResponsePeekBody(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -280,8 +276,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -330,8 +325,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {

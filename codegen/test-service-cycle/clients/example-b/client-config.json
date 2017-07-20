@@ -1,0 +1,12 @@
+{
+	"name": "example-b",
+	"type": "http",
+	"config": {
+		"headers": {
+				"x-service-name": "example"
+		}
+	},
+	"dependencies": {
+		"client": ["example-a"]
+	}
+}

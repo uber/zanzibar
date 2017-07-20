@@ -21,32 +21,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package googlenow
+package googlenowEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
-// CheckCredentialsHandler is the handler for "/googlenow/check-credentials"
-type CheckCredentialsHandler struct {
-	Clients *clients.Clients
+// GoogleNowCheckCredentialsHandler is the handler for "/googlenow/check-credentials"
+type GoogleNowCheckCredentialsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewCheckCredentialsEndpoint creates a handler
-func NewCheckCredentialsEndpoint(
+// NewGoogleNowCheckCredentialsHandler creates a handler
+func NewGoogleNowCheckCredentialsHandler(
 	gateway *zanzibar.Gateway,
-) *CheckCredentialsHandler {
-	return &CheckCredentialsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *GoogleNowCheckCredentialsHandler {
+	return &GoogleNowCheckCredentialsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *GoogleNowCheckCredentialsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/googlenow/check-credentials",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"googlenow",
+			"checkCredentials",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/googlenow/check-credentials".
-func (handler *CheckCredentialsHandler) HandleRequest(
+func (handler *GoogleNowCheckCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -80,7 +97,7 @@ func (handler *CheckCredentialsHandler) HandleRequest(
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
 type CheckCredentialsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

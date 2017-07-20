@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main.go",
+			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

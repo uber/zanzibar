@@ -46,7 +46,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -100,7 +100,7 @@ func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -162,7 +162,7 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -235,7 +235,7 @@ func TestBarManyQueryParamsWithInvalidBool(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -299,7 +299,7 @@ func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -363,7 +363,7 @@ func TestBarManyQueryParamsWithInvalidInt16(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -427,7 +427,7 @@ func TestBarManyQueryParamsWithInvalidInt32(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -491,7 +491,7 @@ func TestBarManyQueryParamsWithInvalidInt64(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -555,7 +555,7 @@ func TestBarManyQueryParamsWithInvalidFloat64(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -619,7 +619,7 @@ func TestBarWithQueryHeaders(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -675,7 +675,7 @@ func TestBarWithManyQueryParamsRequiredCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -738,7 +738,7 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -806,7 +806,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -871,7 +871,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

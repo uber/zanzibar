@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Package bazClient is generated code used to make or handle TChannel calls using Thrift.
 package bazClient
 
 import (

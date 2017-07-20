@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// PingHandler is the handler for "/baz/ping"
-type PingHandler struct {
-	Clients *clients.Clients
+// SimpleServicePingHandler is the handler for "/baz/ping"
+type SimpleServicePingHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewPingEndpoint creates a handler
-func NewPingEndpoint(
+// NewSimpleServicePingHandler creates a handler
+func NewSimpleServicePingHandler(
 	gateway *zanzibar.Gateway,
-) *PingHandler {
-	return &PingHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *SimpleServicePingHandler {
+	return &SimpleServicePingHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *SimpleServicePingHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/baz/ping",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"ping",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/baz/ping".
-func (handler *PingHandler) HandleRequest(
+func (handler *SimpleServicePingHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -79,7 +96,7 @@ func (handler *PingHandler) HandleRequest(
 
 // PingEndpoint calls thrift client Baz.Ping
 type PingEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

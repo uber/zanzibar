@@ -61,18 +61,17 @@ func getZanzibarDirName() string {
 	return filepath.Join(getDirName(), "..", "..", "..")
 }
 
-// CreateClientsFn ...
-type CreateClientsFn func(gateway *zanzibar.Gateway) interface{}
-
-// RegisterFn ...
-type RegisterFn func(g *zanzibar.Gateway)
+// CreateGatewayFn creates a new gateway to benchmark
+type CreateGatewayFn func(
+	config *zanzibar.StaticConfig,
+	opts *zanzibar.Options,
+) (*zanzibar.Gateway, error)
 
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
 	seedConfig map[string]interface{},
 	opts *testGateway.Options,
-	createClients CreateClientsFn,
-	regEndpoints RegisterFn,
+	createGateway CreateGatewayFn,
 ) (testGateway.TestGateway, error) {
 	if seedConfig == nil {
 		seedConfig = map[string]interface{}{}
@@ -130,13 +129,12 @@ func CreateGateway(
 		filepath.Join(getZanzibarDirName(), "config", "production.json"),
 	}, seedConfig)
 
-	gateway, err := zanzibar.CreateGateway(config, &zanzibar.Options{
+	gateway, err := createGateway(config, &zanzibar.Options{
 		LogWriter: zapcore.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
 	}
-	gateway.Clients = createClients(gateway)
 
 	benchGateway.ActualGateway = gateway
 
@@ -148,7 +146,7 @@ func CreateGateway(
 			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
 		})
 
-	err = gateway.Bootstrap(zanzibar.RegisterFn(regEndpoints))
+	err = gateway.Bootstrap()
 	if err != nil {
 		return nil, err
 	}
