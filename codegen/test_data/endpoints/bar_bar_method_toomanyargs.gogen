@@ -36,23 +36,23 @@ import (
 	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// BartooManyArgsHandler is the handler for "/bar/too-many-args-path"
-type BartooManyArgsHandler struct {
+// BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
+type BarTooManyArgsHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBartooManyArgsHandler creates a handler
-func NewBartooManyArgsHandler(
+// NewBarTooManyArgsHandler creates a handler
+func NewBarTooManyArgsHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *BartooManyArgsHandler {
-	return &BartooManyArgsHandler{
+) *BarTooManyArgsHandler {
+	return &BarTooManyArgsHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BartooManyArgsHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarTooManyArgsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/too-many-args-path",
 		zanzibar.NewRouterEndpoint(
@@ -67,7 +67,7 @@ func (handler *BartooManyArgsHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/too-many-args-path".
-func (handler *BartooManyArgsHandler) HandleRequest(
+func (handler *BarTooManyArgsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

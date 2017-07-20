@@ -35,23 +35,23 @@ import (
 	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// BarmissingArgHandler is the handler for "/bar/missing-arg-path"
-type BarmissingArgHandler struct {
+// BarMissingArgHandler is the handler for "/bar/missing-arg-path"
+type BarMissingArgHandler struct {
 	Clients *module.ClientDependencies
 }
 
-// NewBarmissingArgHandler creates a handler
-func NewBarmissingArgHandler(
+// NewBarMissingArgHandler creates a handler
+func NewBarMissingArgHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *BarmissingArgHandler {
-	return &BarmissingArgHandler{
+) *BarMissingArgHandler {
+	return &BarMissingArgHandler{
 		Clients: deps.Client,
 	}
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarmissingArgHandler) Register(g *zanzibar.Gateway) error {
+func (handler *BarMissingArgHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/missing-arg-path",
 		zanzibar.NewRouterEndpoint(
@@ -66,7 +66,7 @@ func (handler *BarmissingArgHandler) Register(g *zanzibar.Gateway) error {
 }
 
 // HandleRequest handles "/bar/missing-arg-path".
-func (handler *BarmissingArgHandler) HandleRequest(
+func (handler *BarMissingArgHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
