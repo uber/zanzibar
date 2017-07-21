@@ -122,7 +122,6 @@ func NewDefaultModuleSystem(
 		Name:      "client",
 		Directory: "clients",
 		ClassType: MultiModule,
-		DependsOn: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -191,7 +190,7 @@ func NewDefaultModuleSystem(
 		Name:      "service",
 		Directory: "services",
 		ClassType: MultiModule,
-		DependsOn: []string{"client"},
+		DependsOn: []string{"endpoint"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,

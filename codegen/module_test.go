@@ -25,7 +25,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -413,59 +412,194 @@ func TestSortDependencies(t *testing.T) {
 
 }
 
-func TestSortableModuleClassList(t *testing.T) {
-	a := &ModuleClass{
-		Name: "a",
-	}
-	b := &ModuleClass{
-		Name:      "b",
-		DependsOn: []string{"a"},
-	}
-	c := &ModuleClass{
+func TestSortModuleClasses(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependsOn:  []string{"a"},
+		DependedBy: []string{"c"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
 		Name:      "c",
 		DependsOn: []string{"b"},
-	}
-	d := &ModuleClass{
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
 		Name:       "d",
+		DependsOn:  []string{"a"},
 		DependedBy: []string{"c"},
-	}
-	list := []*ModuleClass{a, b, c, d}
-	expected := sortableModuleClassList([]*ModuleClass{a, b, d, c})
-	sorted := sortableModuleClassList(list)
-	sort.Sort(sorted)
-	assert.Equal(t, expected, sorted)
+		Directory:  "d",
+	})
+	assert.NoError(t, err)
+	expected := []string{"a", "b", "d", "c"}
+	err = ms.resolveClassOrder()
+	assert.NoError(t, err)
+	assert.Equal(t, expected, ms.classOrder)
 }
 
-func TestSortableModuleClassListPanic1(t *testing.T) {
-	a := &ModuleClass{
+func TestSortModuleClassesNoDeps(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
 		Name:      "a",
-		DependsOn: []string{"b"},
-	}
-	b := &ModuleClass{
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "c",
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "d",
+		Directory: "d",
+	})
+	assert.NoError(t, err)
+	expected := []string{"a", "b", "c", "d"}
+	err = ms.resolveClassOrder()
+	assert.NoError(t, err)
+	assert.Equal(t, expected, ms.classOrder)
+}
+
+func TestSortModuleClassesUndefined(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"c"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
 		Name:      "b",
 		DependsOn: []string{"a"},
-	}
-	list := []*ModuleClass{a, b}
-	sorted := sortableModuleClassList(list)
-	assert.PanicsWithValue(t, "cyclic dependency between module class \"b\" and \"a\"", func() {
-		sort.Sort(sorted)
+		Directory: "b",
 	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "module class \"a\" depends on \"c\" which is not defined")
 }
 
-func TestSortableModuleClassListPanic2(t *testing.T) {
-	a := &ModuleClass{
+func TestSortModuleClassesUndefined2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
-		DependedBy: []string{"b"},
-	}
-	b := &ModuleClass{
+		DependedBy: []string{"c"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
 		Name:       "b",
 		DependedBy: []string{"a"},
-	}
-	list := []*ModuleClass{a, b}
-	sorted := sortableModuleClassList(list)
-	assert.PanicsWithValue(t, "cyclic dependency between module class \"b\" and \"a\"", func() {
-		sort.Sort(sorted)
+		Directory:  "b",
 	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "module class \"a\" is depended by \"c\" which is not defined")
+}
+
+func TestSortableModuleClassCycle(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"b"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"a"},
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b")
+}
+
+func TestSortableModuleClassCycle2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"b"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"a"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b")
+}
+
+func TestSortModuleClassesIndirectCycle(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"b"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"c"},
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "c",
+		DependsOn: []string{"a"},
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b->c->a")
+}
+
+func TestSortModuleClassesIndirectCycle2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"b"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"c"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "c",
+		DependedBy: []string{"a"},
+		Directory:  "c",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->c->b->a")
 }
 
 func createTestInstance(name string, depInstances ...*ModuleInstance) *ModuleInstance {

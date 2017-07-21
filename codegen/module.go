@@ -76,19 +76,6 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 		)
 	}
 
-	// Validate the module class dependencies
-	// (this validation ensures that circular deps cannot exist)
-	for _, moduleType := range class.DependsOn {
-		if moduleType != name && system.classes[moduleType] == nil {
-			return errors.Errorf(
-				"The module class %q depends on class type %q, "+
-					"which is not yet defined",
-				name,
-				moduleType,
-			)
-		}
-	}
-
 	class.Directory = filepath.Clean(class.Directory)
 
 	if strings.HasPrefix(class.Directory, "..") {
@@ -302,66 +289,6 @@ func resolveRecursiveDependencies(
 	return nil
 }
 
-type sortableModuleClassList []*ModuleClass
-
-func (s sortableModuleClassList) Len() int {
-	return len(s)
-}
-
-func (s sortableModuleClassList) Less(i int, j int) bool {
-	// ij being true means i < j, ji being true means i > j
-	var ij, ji bool
-	ni := s[i].Name
-	nj := s[j].Name
-
-	// j depends on i
-	for _, value := range s[j].DependsOn {
-		if ni == value {
-			ij = true
-			break
-		}
-	}
-	// i depends on j
-	for _, value := range s[j].DependedBy {
-		if ni == value {
-			ji = true
-			break
-		}
-	}
-	// i depends on j
-	for _, value := range s[i].DependsOn {
-		if nj == value {
-			ji = true
-			break
-		}
-	}
-	// j depends on i
-	for _, value := range s[i].DependedBy {
-		if nj == value {
-			ij = true
-			break
-		}
-	}
-
-	if ij && ji {
-		panic(fmt.Sprintf("cyclic dependency between module class %q and %q", ni, nj))
-	}
-
-	// ij, ji being false has no ordering indication
-	if ij {
-		return true
-	}
-	if ji {
-		return false
-	}
-
-	return ni < nj
-}
-
-func (s sortableModuleClassList) Swap(i int, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
 type sortableDependencyList []*ModuleInstance
 
 func (s sortableDependencyList) Len() int {
@@ -431,21 +358,129 @@ func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
 	return false
 }
 
+type byName []*ModuleClass
+
+func (n byName) Len() int           { return len(n) }
+func (n byName) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func (n byName) Less(i, j int) bool { return n[i].Name < n[j].Name }
+
+// sort the module classes by class height in DAG, lowest node first
+func sortModuleClasses(classes []*ModuleClass) ([]*ModuleClass, error) {
+	heightMap := map[*ModuleClass]int{}
+	sortedGroup := [][]*ModuleClass{}
+
+	sort.Sort(byName(classes))
+	for _, class := range classes {
+		h, err := height(class, heightMap, []*ModuleClass{})
+		if err != nil {
+			return nil, err
+		}
+		l := len(sortedGroup)
+		if l < h+1 {
+			for i := 0; i < h+1-l; i++ {
+				sortedGroup = append(sortedGroup, []*ModuleClass{})
+			}
+		}
+		sortedGroup[h] = append(sortedGroup[h], class)
+	}
+
+	sorted := []*ModuleClass{}
+	for _, g := range sortedGroup {
+		sort.Sort(byName(g))
+		sorted = append(sorted, g...)
+	}
+	return sorted, nil
+}
+
+// height marks the height of each module class height in the dependency tree
+func height(i *ModuleClass, known map[*ModuleClass]int, seen []*ModuleClass) (int, error) {
+	// detect dependency cycle
+	for _, class := range seen {
+		if i == class {
+			var path string
+			for _, c := range seen {
+				path += c.Name + "->"
+			}
+			path += i.Name
+			return 0, fmt.Errorf("dependency cycle detected for module class %q: %s", i.Name, path)
+		}
+	}
+
+	if h, ok := known[i]; ok {
+		return h, nil
+	}
+	if len(i.dependentClasses) == 0 {
+		known[i] = 0
+		return 0, nil
+	}
+
+	mh := 0
+	seen = append(seen, i)
+	for _, instance := range i.dependentClasses {
+		ch, err := height(instance, known, seen)
+		if err != nil {
+			return 0, err
+		}
+		if ch > mh {
+			mh = ch
+		}
+	}
+	known[i] = mh + 1
+	return mh + 1, nil
+}
+
+func appendUniqueClass(list []*ModuleClass, toAppend *ModuleClass) []*ModuleClass {
+	for _, value := range list {
+		if toAppend == value {
+			return list
+		}
+	}
+	return append(list, toAppend)
+}
+
+// populateClassDependencies consolidates the dependencies claimed by module classes
+func (system *ModuleSystem) populateClassDependencies() error {
+	for _, c := range system.classes {
+		for _, d := range c.DependsOn {
+			dc, ok := system.classes[d]
+			if !ok {
+				return fmt.Errorf("module class %q depends on %q which is not defined", c.Name, d)
+			}
+			c.dependentClasses = appendUniqueClass(c.dependentClasses, dc)
+		}
+		for _, d := range c.DependedBy {
+			dc, ok := system.classes[d]
+			if !ok {
+				return fmt.Errorf("module class %q is depended by %q which is not defined", c.Name, d)
+			}
+			dc.dependentClasses = appendUniqueClass(dc.dependentClasses, c)
+		}
+	}
+	return nil
+}
+
 // resolveClassOrder sorts the registered classes by dependency and sets
 // classOrder field
-func (system *ModuleSystem) resolveClassOrder() {
+func (system *ModuleSystem) resolveClassOrder() error {
+	err := system.populateClassDependencies()
+	if err != nil {
+		return errors.Wrap(err, "error resolving module class order")
+	}
 	classes := make([]*ModuleClass, len(system.classes))
 	i := 0
 	for _, c := range system.classes {
 		classes[i] = c
 		i++
 	}
-	sorted := sortableModuleClassList(classes)
-	sort.Sort(sorted)
+	sorted, err := sortModuleClasses(classes)
+	if err != nil {
+		return errors.Wrap(err, "error resolving module class order")
+	}
 	system.classOrder = make([]string, len(system.classes))
 	for i, c := range sorted {
 		system.classOrder[i] = c.Name
 	}
+	return nil
 }
 
 // ResolveModules resolves the module instances from the config on disk
@@ -457,7 +492,11 @@ func (system *ModuleSystem) ResolveModules(
 	baseDirectory string,
 	targetGenDir string,
 ) (map[string][]*ModuleInstance, error) {
-	system.resolveClassOrder()
+	// resolve module class order before read and resolve each module
+	if err := system.resolveClassOrder(); err != nil {
+		return nil, err
+	}
+
 	resolvedModules := map[string][]*ModuleInstance{}
 
 	for _, className := range system.classOrder {
@@ -905,6 +944,9 @@ type ModuleClass struct {
 	DependsOn  []string
 	DependedBy []string
 	types      map[string]BuildGenerator
+
+	// private field which is populated before module resolving
+	dependentClasses []*ModuleClass
 }
 
 // BuildResult is the result of running a module generator
