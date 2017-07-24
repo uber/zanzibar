@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package repository_test
+package repository
 
 import (
 	"io/ioutil"
 	"path/filepath"
 	"sort"
-	"time"
 
 	"go.uber.org/thriftrw/compile"
 
@@ -33,9 +32,7 @@ import (
 )
 
 const (
-	runtimePrefix     = "edge-gateways-runtime"
-	remoteIDLRegistry = "gitolite@code.uber.internal:rt/idl-registry"
-	idlRegistryRoot   = "idl"
+	runtimePrefix = "edge-gateways-runtime"
 )
 
 // Manager manages all remote repositories.
@@ -45,43 +42,26 @@ type Manager struct {
 	RepoMap map[string]*Repository
 
 	// root directory for local copies of remote repositories.
-	localRootDir    string
-	git             Git
-	refreshInterval time.Duration
+	localRootDir string
 
 	// IDL-registry repository.
-	idlRegistry *Repository
+	idlRegistry IDLRegistry
 
 	// TODO: Add a Middleware schema repository
 }
 
 // NewManager creates a manager for remote git repositories.
 func NewManager(
-	repos []*Repository,
+	repoMap map[string]*Repository,
 	localRoot string,
-	refreshIntervel time.Duration,
-	idlRegistry *Repository,
-	idlRegistryThriftRoot string,
-) (*Manager, error) {
-	if len(repos) == 0 {
-		return nil, errors.New("no remote repository is specified")
-	}
-	repoMap := make(map[string]*Repository, len(remotes))
-	for _, remote := range remotes {
-		cfg, err := repo.LatestGatewayConfig()
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get gateway config")
-		}
-		manager.RepoMap[cfg.ID] = repo
-	}
+	idlRegistry IDLRegistry,
+) *Manager {
 	manager := &Manager{
-		RepoMap:         repoMap,
-		localRootDir:    localRootDir,
-		idlRegistry:     idlRegistry,
-		idlRegistryList: idlRegistryAllFileMeta(filepath.Join(idlRegistry.LocalDir(), "meta.json")),
-		refreshInterval: refreshInterval,
+		RepoMap:      repoMap,
+		localRootDir: localRoot,
+		idlRegistry:  idlRegistry,
 	}
-	return manager, nil
+	return manager
 }
 
 // NewRuntimeRepository creates a repository for running Zanzibar with new configurations.
@@ -94,22 +74,22 @@ func (m *Manager) NewRuntimeRepository(gatewayID string) (*Repository, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create runtime directory")
 	}
-	return NewRepository(root, r.Remote(), r.git, m.refreshInterval)
+	return NewRepository(root, r.Remote(), r.fetcher, r.refreshInterval)
 }
 
 // IDLThriftService returns thrift services contained in a thrift file in IDL-registry.
-func (reg *idlRegistry) ThriftService(path string) (map[string]*ThriftService, error) {
-	if err := reg.update(); err != nil {
+func (m *Manager) IDLThriftService(path string) (map[string]*ThriftService, error) {
+	if err := m.idlRegistry.Update(); err != nil {
 		return nil, err
 	}
-	reg.lock.RLock()
-	defer reg.lock.RUnlock()
 
+	localRootDir := m.idlRegistry.RootDir()
+	thriftRootDir := m.idlRegistry.ThriftRootDir()
 	packageHelper, err := codegen.NewPackageHelper(
 		"idl-registry",          // packgeRoot
-		reg.repo.LocalDir(),     // configDirName
+		localRootDir,            // configDirName
 		"",                      // middlewareConfig
-		reg.idlDir,              // thriftRootDir
+		thriftRootDir,           // thriftRootDir
 		"idl-registry/gen-code", // genCodePackage
 		"./build",               // targetGenDir
 		"",                      // copyrightHeader
@@ -119,7 +99,7 @@ func (reg *idlRegistry) ThriftService(path string) (map[string]*ThriftService, e
 	}
 
 	// Parse service module as tchannel service.
-	thriftAbsPath := filepath.Join(reg.repo.LocalDir(), reg.idlDir, path)
+	thriftAbsPath := filepath.Join(localRootDir, thriftRootDir, path)
 	mspec, err := codegen.NewModuleSpec(thriftAbsPath, false, false, packageHelper)
 	if err != nil {
 		return nil, err
@@ -212,7 +192,7 @@ func (m *Manager) UpdateThriftFiles(r *Repository, paths []string) error {
 }
 
 // UpdateClients updates configurations for a list of clients.
-func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientUpdateRequest) error {
+func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientConfig) error {
 	for i := range req {
 		thrift := req[i].ThriftFile
 		// Adds non-exsiting file into the repository.
@@ -249,9 +229,9 @@ func (m *Manager) UpdateEndpoints(r *Repository, endpointCfgDir string, req []En
 
 // UpdateRequest is the request to update thrift files, clients and endpoint.
 type UpdateRequest struct {
-	ThriftFiles     []string              `json:"thrift_files"`
-	ClientUpdates   []ClientUpdateRequest `json:"client_updates"`
-	EndpointUpdates []EndpointConfig      `json:"endpoint_updates"`
+	ThriftFiles     []string         `json:"thrift_files"`
+	ClientUpdates   []ClientConfig   `json:"client_updates"`
+	EndpointUpdates []EndpointConfig `json:"endpoint_updates"`
 }
 
 // UpdateAll writes the updates for thrift files, clients and endpoints.
@@ -271,7 +251,7 @@ func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, 
 // thriftMetaInIDLRegistry returns meta for a set of thrift file in IDL-registry.
 func (m *Manager) thriftMetaInIDLRegistry(paths []string) (map[string]*ThriftMeta, error) {
 	meta := make(map[string]*ThriftMeta, len(paths))
-	idlRootAbsPath := m.idlRegistry.absPath(idlRegistryRoot)
+	idlRootAbsPath := filepath.Join(m.idlRegistry.RootDir(), m.idlRegistry.ThriftRootDir())
 	for _, path := range paths {
 		module, err := compile.Compile(filepath.Join(idlRootAbsPath, path))
 		if err != nil {
@@ -282,15 +262,12 @@ func (m *Manager) thriftMetaInIDLRegistry(paths []string) (map[string]*ThriftMet
 		}
 	}
 	for path := range meta {
-		b, err := m.idlRegistry.ReadFile(filepath.Join(idlRegistryRoot, path))
+		thriftPath := filepath.Join(m.idlRegistry.RootDir(), m.idlRegistry.ThriftRootDir(), path)
+		tm, err := m.idlRegistry.ThriftMeta(thriftPath, true)
 		if err != nil {
 			return nil, err
 		}
-		meta[path] = &ThriftMeta{
-			Path:    path,
-			Version: m.idlRegistryFileVersion(path),
-			Content: string(b),
-		}
+		meta[path] = tm
 	}
 	return meta, nil
 }
@@ -312,4 +289,12 @@ func addThriftDependencies(idlRoot string, module *compile.Module, meta map[stri
 		}
 	}
 	return nil
+}
+
+// ReadFile returns the content of a file in a relativePath in a repository.
+func (r *Repository) ReadFile(relativePath string) ([]byte, error) {
+	r.RLock()
+	defer r.RUnlock()
+	path := filepath.Join(r.localDir, relativePath)
+	return ioutil.ReadFile(path)
 }

@@ -30,7 +30,9 @@ import (
 
 // IDLRegistry provides the content and version of a thrift file.
 type IDLRegistry interface {
-	// Returns the absolute path of the root directory for thrift files.
+	// RootDir returns the path of the root directory for the registry.
+	RootDir() string
+	// ThriftRootDir returns the relative path of the thrift root directory.
 	ThriftRootDir() string
 	// Updates the IDLRegistry to sync with remote source.
 	Update() error
@@ -64,13 +66,19 @@ func NewIDLRegistry(idlDirRel string, repo *Repository) (IDLRegistry, error) {
 	}, nil
 }
 
+// RootDir returns the path of the root directory for the registry.
+func (reg *idlRegistry) RootDir() string {
+	return reg.repo.LocalDir()
+}
+
+// ThriftRootDir returns the relative path of the thrift root directory.
 func (reg *idlRegistry) ThriftRootDir() string {
-	return filepath.Join(reg.repo.LocalDir(), reg.idlDir)
+	return reg.idlDir
 }
 
 // IDLRegistryFile returns the content and meta data of a file in IDL-registry.
 func (reg *idlRegistry) ThriftMeta(path string, needFileContent bool) (*ThriftMeta, error) {
-	if err := reg.update(); err != nil {
+	if err := reg.Update(); err != nil {
 		return nil, err
 	}
 	reg.lock.RLock()
