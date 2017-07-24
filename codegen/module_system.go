@@ -198,10 +198,8 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("service", "gateway", &GatewayServiceGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("service", "gateway",
+		NewGatewayServiceGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering Gateway service class type",
@@ -942,6 +940,14 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 type GatewayServiceGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+}
+
+// NewGatewayServiceGenerator creates a new gateway service generator.
+func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGenerator {
+	return &GatewayServiceGenerator{
+		templates:     t,
+		packageHelper: h,
+	}
 }
 
 // Generate returns the gateway build result, which contains the service and
