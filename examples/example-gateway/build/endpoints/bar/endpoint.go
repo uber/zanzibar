@@ -42,6 +42,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		BarArgWithQueryParamsHandler:       NewBarArgWithQueryParamsHandler(g, deps),
 		BarArgWithNestedQueryParamsHandler: NewBarArgWithNestedQueryParamsHandler(g, deps),
 		BarArgWithQueryHeaderHandler:       NewBarArgWithQueryHeaderHandler(g, deps),
+		BarArgWithParamsHandler:            NewBarArgWithParamsHandler(g, deps),
 		BarArgWithManyQueryParamsHandler:   NewBarArgWithManyQueryParamsHandler(g, deps),
 		BarMissingArgHandler:               NewBarMissingArgHandler(g, deps),
 		BarNoRequestHandler:                NewBarNoRequestHandler(g, deps),
@@ -57,6 +58,7 @@ type EndpointHandlers struct {
 	BarArgWithQueryParamsHandler       *BarArgWithQueryParamsHandler
 	BarArgWithNestedQueryParamsHandler *BarArgWithNestedQueryParamsHandler
 	BarArgWithQueryHeaderHandler       *BarArgWithQueryHeaderHandler
+	BarArgWithParamsHandler            *BarArgWithParamsHandler
 	BarArgWithManyQueryParamsHandler   *BarArgWithManyQueryParamsHandler
 	BarMissingArgHandler               *BarMissingArgHandler
 	BarNoRequestHandler                *BarNoRequestHandler
@@ -86,25 +88,29 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	if err4 != nil {
 		return err4
 	}
-	err5 := handlers.BarArgWithManyQueryParamsHandler.Register(gateway)
+	err5 := handlers.BarArgWithParamsHandler.Register(gateway)
 	if err5 != nil {
 		return err5
 	}
-	err6 := handlers.BarMissingArgHandler.Register(gateway)
+	err6 := handlers.BarArgWithManyQueryParamsHandler.Register(gateway)
 	if err6 != nil {
 		return err6
 	}
-	err7 := handlers.BarNoRequestHandler.Register(gateway)
+	err7 := handlers.BarMissingArgHandler.Register(gateway)
 	if err7 != nil {
 		return err7
 	}
-	err8 := handlers.BarNormalHandler.Register(gateway)
+	err8 := handlers.BarNoRequestHandler.Register(gateway)
 	if err8 != nil {
 		return err8
 	}
-	err9 := handlers.BarTooManyArgsHandler.Register(gateway)
+	err9 := handlers.BarNormalHandler.Register(gateway)
 	if err9 != nil {
 		return err9
+	}
+	err10 := handlers.BarTooManyArgsHandler.Register(gateway)
+	if err10 != nil {
+		return err10
 	}
 	return nil
 }

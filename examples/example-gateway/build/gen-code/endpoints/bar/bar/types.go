@@ -392,6 +392,65 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 	return true
 }
 
+type ParamsStruct struct {
+	UserUUID string `json:"userUUID,required"`
+}
+
+func (v *ParamsStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	w, err = wire.NewValueString(v.UserUUID), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func (v *ParamsStruct) FromWire(w wire.Value) error {
+	var err error
+	userUUIDIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.UserUUID, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				userUUIDIsSet = true
+			}
+		}
+	}
+	if !userUUIDIsSet {
+		return errors.New("field UserUUID of ParamsStruct is required")
+	}
+	return nil
+}
+
+func (v *ParamsStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("UserUUID: %v", v.UserUUID)
+	i++
+	return fmt.Sprintf("ParamsStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func (v *ParamsStruct) Equals(rhs *ParamsStruct) bool {
+	if !(v.UserUUID == rhs.UserUUID) {
+		return false
+	}
+	return true
+}
+
 type QueryParamsStruct struct {
 	Name      string  `json:"name,required"`
 	UserUUID  *string `json:"userUUID,omitempty"`
