@@ -227,7 +227,7 @@ func (m *Manager) UpdateEndpoints(r *Repository, endpointCfgDir string, req []En
 	return nil
 }
 
-// UpdateRequest is the request to update thrift files, clients and endpoint.
+// UpdateRequest is the request to update thrift files, clients and endpoints.
 type UpdateRequest struct {
 	ThriftFiles     []string         `json:"thrift_files"`
 	ClientUpdates   []ClientConfig   `json:"client_updates"`

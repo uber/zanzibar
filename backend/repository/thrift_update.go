@@ -109,13 +109,9 @@ func (r *Repository) writeThriftConfig(meta map[string]*ThriftMeta) error {
 func (r *Repository) ThriftFileVersion(thriftFile string) (string, error) {
 	path := r.absPath(metaJSONFilePath)
 	r.RLock()
-	b, err := ioutil.ReadFile(path)
-	r.RUnlock()
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to read file meta file %s", path)
-	}
+	defer r.RUnlock()
 	meta := make(map[string]*ThriftMeta)
-	err = json.Unmarshal(b, &meta)
+	err := readJSONFile(path, &meta)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to unmarshal the content of thrift meta file")
 	}
