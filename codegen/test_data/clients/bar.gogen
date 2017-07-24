@@ -413,7 +413,7 @@ func (c *barClient) ArgWithParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
 
-	err := req.WriteJSON("GET", fullURL, headers, r)
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
