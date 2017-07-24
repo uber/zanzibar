@@ -191,9 +191,13 @@ func NewMethod(
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
 		if !method.IsEndpoint {
-			return nil, errors.Errorf(
-				"invalid annotation: HTTP GET method cannot have a body",
-			)
+			hasNonParams := scanForNonParams(funcSpec)
+
+			if hasNonParams {
+				return nil, errors.Errorf(
+					"Not implemented: query parameter support for HTTP client",
+				)
+			}
 		}
 
 		err := method.setQueryParamStatements(funcSpec, packageHelper)
@@ -217,6 +221,34 @@ func NewMethod(
 	method.setResponseHeaderFields(funcSpec)
 
 	return method, nil
+}
+
+func scanForNonParams(funcSpec *compile.FunctionSpec) bool {
+	hasNonParams := false
+
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+		// ignore nested structs
+		if _, ok := realType.(*compile.StructSpec); ok {
+			return false
+		}
+
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param[0:6] != "params" {
+				hasNonParams = true
+				return true
+			}
+		} else {
+			hasNonParams = true
+			return true
+		}
+
+		return false
+	}
+	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
+	return hasNonParams
 }
 
 // setRequestType sets the request type of the method specification. If the
