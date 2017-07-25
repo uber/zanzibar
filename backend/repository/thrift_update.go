@@ -37,12 +37,8 @@ const (
 func (r *Repository) ThriftConfig(idlRoot string) (map[string]*ThriftMeta, error) {
 	r.RLock()
 	defer r.RUnlock()
-	b, err := ioutil.ReadFile(r.absPath(metaJSONFilePath))
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to read idls.json for thrift files")
-	}
 	config := make(map[string]*ThriftMeta)
-	err = json.Unmarshal(b, &config)
+	err := readJSONFile(r.absPath(metaJSONFilePath), &config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal idls.json file")
 	}
