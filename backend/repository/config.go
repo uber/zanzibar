@@ -60,7 +60,7 @@ type EndpointConfig struct {
 	Type             ProtocolType      `json:"endpointType"`
 	HandleID         string            `json:"handleId"`
 	ThriftFile       string            `json:"thriftFile"`
-	ThriftFileSha    string            `json:"thriftFileSha",omitempty`
+	ThriftFileSha    string            `json:"thriftFileSha,omitempty"`
 	ThriftMethodName string            `json:"thriftMethodName"`
 	WorkflowType     string            `json:"workflowType"`
 	ClientID         string            `json:"clientID"`

@@ -1,0 +1,29 @@
+{
+	"remotes": {
+        "clients/baz": {
+            "shasums": {
+                "bases.thrift": "e0729d2985ec0aeb95891cba969f1fadecedb648",
+                "baz.thrift": "e0729d2985ec0aeb95891cba969f1fadecedb648"
+            },
+            "time": 1489436705663,
+            "version": 1489436705663
+        },
+        "clients/googlenow": {
+            "shasums": {
+                "googlenow.thrift": "815ae46357b5712b51e2499e7c1eb7c09c34d5f1"
+            },
+            "time": 1495129645880,
+            "version": 1495129645880
+        },
+        "endpoints": {
+            "shasums": {
+                "baz/baz.thrift": "v2",
+                "googlenow/googlenow.thrift": "v2"
+            },
+            "time": 1495129645880,
+            "version": 1495129645889
+        }
+    },
+    "time": "2017-07-22T19:08:01.377Z",
+    "version": 1495480081377
+}
