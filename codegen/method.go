@@ -235,12 +235,8 @@ func scanForNonParams(funcSpec *compile.FunctionSpec) bool {
 			return false
 		}
 
-		if param, ok := field.Annotations[antHTTPRef]; ok {
-			if param[0:6] != "params" {
-				hasNonParams = true
-				return true
-			}
-		} else {
+		param, ok := field.Annotations[antHTTPRef]
+		if !ok || param[0:6] != "params" {
 			hasNonParams = true
 			return true
 		}
