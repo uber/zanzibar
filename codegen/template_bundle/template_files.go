@@ -923,7 +923,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end -}}
 	{{- end}}
 
-	{{if ne .RequestType ""}}
+	{{$emptyBody := or (eq .HTTPMethod "GET") (eq .HTTPMethod "DELETE") -}}
+	{{if (and (ne .RequestType "") (not $emptyBody))}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
@@ -1053,7 +1054,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6090, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6188, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
