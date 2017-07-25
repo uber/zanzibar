@@ -118,10 +118,10 @@ func NewDefaultModuleSystem(
 	}
 
 	// Register client module class and type generators
-	if err := system.RegisterClass("client", ModuleClass{
-		Directory:         "clients",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "client",
+		Directory: "clients",
+		ClassType: MultiModule,
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -157,10 +157,11 @@ func NewDefaultModuleSystem(
 	}
 
 	// Register endpoint module class and type generators
-	if err := system.RegisterClass("endpoint", ModuleClass{
-		Directory:         "endpoints",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		Directory: "endpoints",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -185,10 +186,11 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("service", ModuleClass{
-		Directory:         "services",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "service",
+		Directory: "services",
+		ClassType: MultiModule,
+		DependsOn: []string{"endpoint"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -196,10 +198,8 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("service", "gateway", &GatewayServiceGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("service", "gateway",
+		NewGatewayServiceGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering Gateway service class type",
@@ -940,6 +940,14 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 type GatewayServiceGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+}
+
+// NewGatewayServiceGenerator creates a new gateway service generator.
+func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGenerator {
+	return &GatewayServiceGenerator{
+		templates:     t,
+		packageHelper: h,
+	}
 }
 
 // Generate returns the gateway build result, which contains the service and
