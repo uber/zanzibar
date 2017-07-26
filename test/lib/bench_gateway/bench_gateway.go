@@ -41,6 +41,7 @@ import (
 // BenchGateway for testing
 type BenchGateway struct {
 	ActualGateway *zanzibar.Gateway
+	Dependencies  interface{}
 
 	backendsHTTP     map[string]*testBackend.TestHTTPBackend
 	backendsTChannel map[string]*testBackend.TestTChannelBackend
@@ -65,7 +66,7 @@ func getZanzibarDirName() string {
 type CreateGatewayFn func(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,
-) (*zanzibar.Gateway, error)
+) (*zanzibar.Gateway, interface{}, error)
 
 // CreateGateway bootstrap gateway for testing
 func CreateGateway(
@@ -129,13 +130,14 @@ func CreateGateway(
 		filepath.Join(getZanzibarDirName(), "config", "production.json"),
 	}, seedConfig)
 
-	gateway, err := createGateway(config, &zanzibar.Options{
+	gateway, dependencies, err := createGateway(config, &zanzibar.Options{
 		LogWriter: zapcore.AddSync(benchGateway.logBytes),
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	benchGateway.Dependencies = dependencies
 	benchGateway.ActualGateway = gateway
 
 	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
