@@ -15,10 +15,17 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
+// DependenciesTree contains all deps for this service.
+type DependenciesTree struct {
+	{{range $idx, $className := $instance.DependencyOrder -}}
+	{{$className | title}} *{{$className | title}}DependenciesNodes
+	{{end -}}
+}
+
 {{range $idx, $className := $instance.DependencyOrder -}}
 {{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}Dependencies contains {{$className}} dependencies
-type {{$className}}Dependencies struct {
+// {{$className}}DependenciesNodes contains {{$className}} dependencies
+type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
 	{{end -}}
@@ -27,13 +34,18 @@ type {{$className}}Dependencies struct {
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the {{$instance.InstanceName}} {{$instance.ClassName}}
-func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
+func InitializeDependencies(
+	gateway *zanzibar.Gateway,
+) (*DependenciesTree, *Dependencies) {
 	{{- if not $instance.HasDependencies}}
-	return {{$instance.PackageInfo.ExportName}}(gateway)
+	return nil, {{$instance.PackageInfo.ExportName}}(gateway)
 	{{- else}}
+	tree := &DependenciesTree{}
+
 	{{- range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
-	initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
+	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
+	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- if $dependency.HasDependencies}}
@@ -52,7 +64,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- end}}
 	{{end}}
 
-	return &Dependencies{
+	return tree, &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
