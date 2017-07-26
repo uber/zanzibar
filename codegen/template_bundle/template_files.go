@@ -1283,7 +1283,7 @@ type DependenciesTree struct {
 
 {{range $idx, $className := $instance.DependencyOrder -}}
 {{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}Dependencies contains {{$className}} dependencies
+// {{$className | title}}DependenciesNodes contains {{$className}} dependencies
 type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
@@ -1346,7 +1346,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3337, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3350, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

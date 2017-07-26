@@ -24,7 +24,7 @@ type DependenciesTree struct {
 
 {{range $idx, $className := $instance.DependencyOrder -}}
 {{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}DependenciesNodes contains {{$className}} dependencies
+// {{$className | title}}DependenciesNodes contains {{$className}} dependencies
 type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}

@@ -47,7 +47,7 @@ type DependenciesTree struct {
 	Endpoint *EndpointDependenciesNodes
 }
 
-// clientDependencies contains client dependencies
+// ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
 	Bar       barClientGenerated.Client
 	Baz       bazClientGenerated.Client
@@ -55,7 +55,7 @@ type ClientDependenciesNodes struct {
 	GoogleNow googlenowClientGenerated.Client
 }
 
-// endpointDependencies contains endpoint dependencies
+// EndpointDependenciesNodes contains endpoint dependencies
 type EndpointDependenciesNodes struct {
 	Bar         barEndpointGenerated.Endpoint
 	Baz         bazEndpointGenerated.Endpoint
