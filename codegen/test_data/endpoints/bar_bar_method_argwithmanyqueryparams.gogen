@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// ArgWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
-type ArgWithManyQueryParamsHandler struct {
-	Clients *clients.Clients
+// BarArgWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
+type BarArgWithManyQueryParamsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewArgWithManyQueryParamsEndpoint creates a handler
-func NewArgWithManyQueryParamsEndpoint(
+// NewBarArgWithManyQueryParamsHandler creates a handler
+func NewBarArgWithManyQueryParamsHandler(
 	gateway *zanzibar.Gateway,
-) *ArgWithManyQueryParamsHandler {
-	return &ArgWithManyQueryParamsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarArgWithManyQueryParamsHandler {
+	return &BarArgWithManyQueryParamsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarArgWithManyQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/bar/argWithManyQueryParams",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithManyQueryParams",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/argWithManyQueryParams".
-func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
+func (handler *BarArgWithManyQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -215,7 +232,7 @@ func (handler *ArgWithManyQueryParamsHandler) HandleRequest(
 
 // ArgWithManyQueryParamsEndpoint calls thrift client Bar.ArgWithManyQueryParams
 type ArgWithManyQueryParamsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

@@ -162,7 +162,7 @@ $(PROGS): $(GO_FILES)
 .PHONY: $(EXAMPLE_SERVICES)
 $(EXAMPLE_SERVICES): $(GO_FILES)
 	@echo Building $@
-	go build -o "$@../../../bin/$(shell basename $@)" ./$@
+	go build -o "$@../../../bin/$(shell basename $@)" ./$@main
 
 run-%: $(EXAMPLE_SERVICES_DIR)%/
 	cd "$(EXAMPLE_BASE_DIR)"; \

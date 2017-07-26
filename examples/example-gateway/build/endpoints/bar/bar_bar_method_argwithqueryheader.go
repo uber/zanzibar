@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// ArgWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
-type ArgWithQueryHeaderHandler struct {
-	Clients *clients.Clients
+// BarArgWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
+type BarArgWithQueryHeaderHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewArgWithQueryHeaderEndpoint creates a handler
-func NewArgWithQueryHeaderEndpoint(
+// NewBarArgWithQueryHeaderHandler creates a handler
+func NewBarArgWithQueryHeaderHandler(
 	gateway *zanzibar.Gateway,
-) *ArgWithQueryHeaderHandler {
-	return &ArgWithQueryHeaderHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarArgWithQueryHeaderHandler {
+	return &BarArgWithQueryHeaderHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"GET", "/bar/argWithQueryHeader",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argWithQueryHeader",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/argWithQueryHeader".
-func (handler *ArgWithQueryHeaderHandler) HandleRequest(
+func (handler *BarArgWithQueryHeaderHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -58,7 +75,6 @@ func (handler *ArgWithQueryHeaderHandler) HandleRequest(
 	var requestBody endpointsBarBar.Bar_ArgWithQueryHeader_Args
 
 	xUUIDValue, _ := req.Header.Get("x-uuid")
-
 	requestBody.UserUUID = ptr.String(xUUIDValue)
 
 	workflow := ArgWithQueryHeaderEndpoint{
@@ -86,7 +102,7 @@ func (handler *ArgWithQueryHeaderHandler) HandleRequest(
 
 // ArgWithQueryHeaderEndpoint calls thrift client Bar.ArgWithQueryHeader
 type ArgWithQueryHeaderEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

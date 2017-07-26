@@ -29,9 +29,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
@@ -47,8 +46,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if err != nil {
 		b.Error("got bootstrap err: " + err.Error())
@@ -108,7 +106,7 @@ func TestSaveContactsCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

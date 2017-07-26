@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// TooManyArgsHandler is the handler for "/bar/too-many-args-path"
-type TooManyArgsHandler struct {
-	Clients *clients.Clients
+// BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
+type BarTooManyArgsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewTooManyArgsEndpoint creates a handler
-func NewTooManyArgsEndpoint(
+// NewBarTooManyArgsHandler creates a handler
+func NewBarTooManyArgsHandler(
 	gateway *zanzibar.Gateway,
-) *TooManyArgsHandler {
-	return &TooManyArgsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarTooManyArgsHandler {
+	return &BarTooManyArgsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarTooManyArgsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/bar/too-many-args-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"tooManyArgs",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/too-many-args-path".
-func (handler *TooManyArgsHandler) HandleRequest(
+func (handler *BarTooManyArgsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -95,7 +112,7 @@ func (handler *TooManyArgsHandler) HandleRequest(
 
 // TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
 type TooManyArgsEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

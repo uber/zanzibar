@@ -31,11 +31,8 @@ import (
 )
 
 func TestInitThriftMeta(t *testing.T) {
-
 	src := "../../examples/example-gateway/idl/"
-
 	meta := map[string]*ThriftMeta{}
-
 	walkFn := func(path string, info os.FileInfo, err error) error {
 		if err != nil || src == path {
 			return err

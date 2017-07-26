@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -35,8 +34,9 @@ import (
 
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
+	Instance           *ModuleInstance
+	Spec               *EndpointSpec
 	GatewayPackageName string
-	PackageName        string
 	IncludedPackages   []GoPackageImport
 	Method             *MethodSpec
 	ClientName         string
@@ -49,9 +49,22 @@ type EndpointMeta struct {
 	ResHeaderMapKeys   []string
 }
 
+// EndpointCollectionMeta saves information used to generate an initializer
+// for a collection of endpoints
+type EndpointCollectionMeta struct {
+	Instance     *ModuleInstance
+	EndpointMeta []*EndpointMeta
+}
+
+// StructMeta saves information to generate an endpoint's thrift structs file
+type StructMeta struct {
+	Instance *ModuleInstance
+	Spec     *ModuleSpec
+}
+
 // EndpointTestMeta saves meta data used to render an endpoint test.
 type EndpointTestMeta struct {
-	PackageName      string
+	Instance         *ModuleInstance
 	Method           *MethodSpec
 	TestStubs        []TestStub
 	ClientName       string
@@ -105,10 +118,10 @@ func NewDefaultModuleSystem(
 	}
 
 	// Register client module class and type generators
-	if err := system.RegisterClass("client", ModuleClass{
-		Directory:         "clients",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "client",
+		Directory: "clients",
+		ClassType: MultiModule,
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -143,28 +156,12 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("clients", ModuleClass{
-		Directory:         "clients",
-		ClassType:         SingleModule,
-		ClassDependencies: []string{},
-	}); err != nil {
-		return nil, errors.Wrapf(err, "Error registering clientInit class")
-	}
-	if err := system.RegisterClassType("clients", "init", &ClientsInitGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error registering clientInit class type",
-		)
-	}
-
 	// Register endpoint module class and type generators
-	if err := system.RegisterClass("endpoint", ModuleClass{
-		Directory:         "endpoints",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		Directory: "endpoints",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -189,10 +186,11 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClass("service", ModuleClass{
-		Directory:         "services",
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
+	if err := system.RegisterClass(ModuleClass{
+		Name:      "service",
+		Directory: "services",
+		ClassType: MultiModule,
+		DependsOn: []string{"endpoint"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -200,10 +198,8 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("service", "gateway", &GatewayServiceGenerator{
-		templates:     tmpl,
-		packageHelper: h,
-	}); err != nil {
+	if err := system.RegisterClassType("service", "gateway",
+		NewGatewayServiceGenerator(tmpl, h)); err != nil {
 		return nil, errors.Wrapf(
 			err,
 			"Error registering Gateway service class type",
@@ -281,9 +277,9 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
@@ -328,7 +324,7 @@ func (g *HTTPClientGenerator) Generate(
 	}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
@@ -381,9 +377,9 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	clientMeta := &ClientMeta{
+		Instance:         instance,
 		ExportName:       clientSpec.ExportName,
 		ExportType:       clientSpec.ExportType,
-		PackageName:      clientSpec.ModuleSpec.PackageName,
 		Services:         clientSpec.ModuleSpec.Services,
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
@@ -444,7 +440,7 @@ func (g *TChannelClientGenerator) Generate(
 	}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
@@ -546,101 +542,12 @@ func (g *CustomClientGenerator) Generate(
 	files := map[string][]byte{}
 
 	if dependencies != nil {
-		files["dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	return &BuildResult{
 		Files: files,
 		Spec:  clientSpec,
-	}, nil
-}
-
-/*
- * Clients Init Generator
- */
-
-// ClientsInitGenerator generates a clients initialization file
-type ClientsInitGenerator struct {
-	templates     *Template
-	packageHelper *PackageHelper
-}
-
-// Generate returns the client initializer build result, which contains the
-// generated clients initializer file and no spec
-func (g *ClientsInitGenerator) Generate(
-	instance *ModuleInstance,
-) (*BuildResult, error) {
-	clientDeps := instance.ResolvedDependencies["client"]
-	clients := make([]*ClientSpec, len(clientDeps))
-	instances := sortInstances(clientDeps, "client")
-
-	for i, instance := range instances {
-		clients[i] = instance.GeneratedSpec().(*ClientSpec)
-	}
-
-	includedPkgs := []GoPackageImport{}
-	for i, client := range clients {
-		// TODO: there shouldn't be a special thing for custom
-		if client.ClientType == "custom" {
-			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: client.CustomImportPath,
-				AliasName:   client.ImportPackageAlias,
-			})
-			if len(instances[i].ResolvedDependencies["client"]) > 0 {
-				includedPkgs = append(includedPkgs, GoPackageImport{
-					PackageName: instances[i].PackageInfo.GeneratedPackagePath,
-					AliasName:   instances[i].PackageInfo.GeneratedPackageAlias,
-				})
-			}
-		} else if len(client.ModuleSpec.Services) != 0 {
-			includedPkgs = append(includedPkgs, GoPackageImport{
-				PackageName: client.ImportPackagePath,
-				AliasName:   client.ImportPackageAlias,
-			})
-		}
-	}
-
-	clientInfo := []ClientInfoMeta{}
-	for i, client := range clients {
-		meta := ClientInfoMeta{
-			FieldName:    strings.Title(client.ClientName),
-			PackagePath:  client.ImportPackagePath,
-			PackageAlias: client.ImportPackageAlias,
-			ExportName:   client.ExportName,
-			ExportType:   client.ExportType,
-		}
-
-		deps := instances[i].ResolvedDependencies["client"]
-		if len(deps) > 0 {
-			depFieldNames := []string{}
-			for _, dep := range deps {
-				depFieldNames = append(depFieldNames, strings.Title(dep.PackageInfo.QualifiedInstanceName))
-			}
-			meta.DepPackageAlias = instances[i].PackageInfo.GeneratedPackageAlias
-			meta.DepFieldNames = depFieldNames
-		}
-
-		clientInfo = append(clientInfo, meta)
-	}
-
-	meta := &ClientsInitFilesMeta{
-		IncludedPackages: includedPkgs,
-		ClientInfo:       clientInfo,
-	}
-
-	clientsInit, err := g.templates.execTemplate(
-		"init_clients.tmpl",
-		meta,
-		g.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Error executing client init template")
-	}
-
-	return &BuildResult{
-		Files: map[string][]byte{
-			"clients.go": clientsInit,
-		},
 	}, nil
 }
 
@@ -662,6 +569,7 @@ func (g *EndpointGenerator) Generate(
 	ret := map[string][]byte{}
 	endpointJsons := []string{}
 	endpointSpecs := []*EndpointSpec{}
+	endpointMeta := []*EndpointMeta{}
 	clientSpecs := readClientDependencySpecs(instance)
 
 	endpointConfig, err := readEndpointConfig(instance.JSONFileRaw)
@@ -699,7 +607,7 @@ func (g *EndpointGenerator) Generate(
 			)
 		}
 
-		err = g.generateEndpointFile(espec, instance, ret)
+		meta, err := g.generateEndpointFile(espec, instance, ret)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
@@ -707,6 +615,7 @@ func (g *EndpointGenerator) Generate(
 				instance.InstanceName,
 			)
 		}
+		endpointMeta = append(endpointMeta, meta)
 
 		err = g.generateEndpointTestFile(espec, instance, ret)
 		if err != nil {
@@ -717,6 +626,40 @@ func (g *EndpointGenerator) Generate(
 			)
 		}
 	}
+
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+	if dependencies != nil {
+		ret["module/dependencies.go"] = dependencies
+	}
+
+	endpointCollection, err := g.templates.execTemplate(
+		"endpoint_collection.tmpl",
+		&EndpointCollectionMeta{
+			Instance:     instance,
+			EndpointMeta: endpointMeta,
+		},
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+	ret["endpoint.go"] = endpointCollection
+
 	return &BuildResult{
 		Files: ret,
 		Spec:  endpointSpecs,
@@ -725,13 +668,13 @@ func (g *EndpointGenerator) Generate(
 
 func (g *EndpointGenerator) generateEndpointFile(
 	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
-) error {
+) (*EndpointMeta, error) {
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	thriftServiceName := e.ThriftServiceName
 
 	if len(m.Services) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	endpointDirectory := filepath.Join(
@@ -746,9 +689,17 @@ func (g *EndpointGenerator) generateEndpointFile(
 			structFilePath = e.GoStructsFileName
 		}
 		if _, ok := out[structFilePath]; !ok {
-			structs, err := g.templates.execTemplate("structs.tmpl", m, g.packageHelper)
+			meta := &StructMeta{
+				Instance: instance,
+				Spec:     m,
+			}
+			structs, err := g.templates.execTemplate(
+				"structs.tmpl",
+				meta,
+				g.packageHelper,
+			)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			out[structFilePath] = structs
 		}
@@ -756,7 +707,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	method := findMethod(m, thriftServiceName, methodName)
 	if method == nil {
-		return errors.Errorf(
+		return nil, errors.Errorf(
 			"Could not find thriftServiceName %q + methodName %q in module",
 			thriftServiceName, methodName,
 		)
@@ -786,8 +737,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
+		Instance:           instance,
+		Spec:               e,
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
-		PackageName:        m.PackageName,
 		IncludedPackages:   includedPackages,
 		Method:             method,
 		ReqHeaderMap:       e.ReqHeaderMap,
@@ -810,7 +762,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "Error executing endpoint template")
+		return nil, errors.Wrap(err, "Error executing endpoint template")
 	}
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
@@ -824,7 +776,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	out[endpointFilePath] = endpoint
 
-	return nil
+	return meta, nil
 }
 
 func (g *EndpointGenerator) generateEndpointTestFile(
@@ -940,10 +892,10 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	}
 
 	meta := &EndpointTestMeta{
-		PackageName: m.PackageName,
-		Method:      method,
-		TestStubs:   testStubs,
-		ClientID:    e.ClientSpec.ClientID,
+		Instance:  instance,
+		Method:    method,
+		TestStubs: testStubs,
+		ClientID:  e.ClientSpec.ClientID,
 	}
 
 	tempName := "endpoint_test.tmpl"
@@ -990,6 +942,14 @@ type GatewayServiceGenerator struct {
 	packageHelper *PackageHelper
 }
 
+// NewGatewayServiceGenerator creates a new gateway service generator.
+func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGenerator {
+	return &GatewayServiceGenerator{
+		templates:     t,
+		packageHelper: h,
+	}
+}
+
 // Generate returns the gateway build result, which contains the service and
 // service test main files, and no spec
 func (generator *GatewayServiceGenerator) Generate(
@@ -1007,28 +967,23 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	// main.go and main_test.go shared meta
-	meta := &MainMeta{
-		IncludedPackages: []GoPackageImport{
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/clients",
-				AliasName: "",
-			},
-			{
-				PackageName: generator.packageHelper.GoGatewayPackageName() +
-					"/endpoints",
-				AliasName: "",
-			},
-		},
-		GatewayName:             instance.InstanceName,
-		RelativePathToAppConfig: filepath.Join("..", "..", ".."),
+	// generate main.go
+	service, err := generator.templates.execTemplate(
+		"service.tmpl",
+		instance,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service service.go for %s",
+			instance.InstanceName,
+		)
 	}
 
-	// generate main.go
 	main, err := generator.templates.execTemplate(
 		"main.tmpl",
-		meta,
+		instance,
 		generator.packageHelper,
 	)
 	if err != nil {
@@ -1042,7 +997,7 @@ func (generator *GatewayServiceGenerator) Generate(
 	// generate main_test.go
 	mainTest, err := generator.templates.execTemplate(
 		"main_test.tmpl",
-		meta,
+		instance,
 		generator.packageHelper,
 	)
 	if err != nil {
@@ -1053,12 +1008,46 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s",
+			instance.InstanceName,
+		)
+	}
+
+	initializer, err := GenerateInitializer(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service initializer for %s",
+			instance.InstanceName,
+		)
+	}
+
+	files := map[string][]byte{
+		"service.go":                  service,
+		"main/main.go":                main,
+		"main/main_test.go":           mainTest,
+		"main/zanzibar-defaults.json": productionConfig,
+		"module/init.go":              initializer,
+	}
+
+	if dependencies != nil {
+		files["module/dependencies.go"] = dependencies
+	}
+
 	return &BuildResult{
-		Files: map[string][]byte{
-			"zanzibar-defaults.json": productionConfig,
-			"main.go":                main,
-			"main_test.go":           mainTest,
-		},
+		Files: files,
 	}, nil
 }
 
@@ -1081,16 +1070,7 @@ func GenerateDependencyStruct(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	hasDependencies := false
-
-	for _, moduleInstances := range instance.ResolvedDependencies {
-		if len(moduleInstances) > 0 {
-			hasDependencies = true
-			break
-		}
-	}
-
-	if !hasDependencies {
+	if !instance.HasDependencies {
 		return nil, nil
 	}
 
@@ -1101,57 +1081,17 @@ func GenerateDependencyStruct(
 	)
 }
 
-// sort the clients by client height in DAG, lowest node first
-func sortInstances(instances []*ModuleInstance, depType string) []*ModuleInstance {
-	heightMap := map[*ModuleInstance]int{}
-	sortedGroup := [][]*ModuleInstance{}
-	for _, instance := range instances {
-		h := height(instance, depType, heightMap, []*ModuleInstance{})
-		l := len(sortedGroup)
-		if l < h+1 {
-			for i := 0; i < h+1-l; i++ {
-				sortedGroup = append(sortedGroup, []*ModuleInstance{})
-			}
-		}
-		sortedGroup[h] = append(sortedGroup[h], instance)
-	}
-
-	sorted := []*ModuleInstance{}
-	for _, g := range sortedGroup {
-		sorted = append(sorted, g...)
-	}
-	return sorted
-}
-
-func height(i *ModuleInstance, depType string, known map[*ModuleInstance]int, seen []*ModuleInstance) int {
-	// detect dependency cycle
-	for _, instance := range seen {
-		if i == instance {
-			var path string
-			for _, ins := range seen {
-				path += ins.InstanceName + "->"
-			}
-			path += i.InstanceName
-			panic(fmt.Sprintf("Dependency cycle detected for %q type: %s", depType, path))
-		}
-	}
-
-	if h, ok := known[i]; ok {
-		return h
-	}
-	if len(i.ResolvedDependencies[depType]) == 0 {
-		known[i] = 0
-		return 0
-	}
-
-	mh := 0
-	seen = append(seen, i)
-	for _, instance := range i.ResolvedDependencies[depType] {
-		ch := height(instance, depType, known, seen)
-		if ch > mh {
-			mh = ch
-		}
-	}
-	known[i] = mh + 1
-	return mh + 1
+// GenerateInitializer generates a file that initializes a module fully
+// recursively, i.e. by initializing all of its dependencies in the correct
+// order
+func GenerateInitializer(
+	instance *ModuleInstance,
+	packageHelper *PackageHelper,
+	template *Template,
+) ([]byte, error) {
+	return template.execTemplate(
+		"module_initializer.tmpl",
+		instance,
+		packageHelper,
+	)
 }

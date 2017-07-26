@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bar
+package barEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/.tmp_gen/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
 )
 
-// ArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
-type ArgNotStructHandler struct {
-	Clients *clients.Clients
+// BarArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
+type BarArgNotStructHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewArgNotStructEndpoint creates a handler
-func NewArgNotStructEndpoint(
+// NewBarArgNotStructHandler creates a handler
+func NewBarArgNotStructHandler(
 	gateway *zanzibar.Gateway,
-) *ArgNotStructHandler {
-	return &ArgNotStructHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *BarArgNotStructHandler {
+	return &BarArgNotStructHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *BarArgNotStructHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/bar/arg-not-struct-path",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"bar",
+			"argNotStruct",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/bar/arg-not-struct-path".
-func (handler *ArgNotStructHandler) HandleRequest(
+func (handler *BarArgNotStructHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -89,7 +106,7 @@ func (handler *ArgNotStructHandler) HandleRequest(
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
 type ArgNotStructEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }

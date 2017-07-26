@@ -98,8 +98,13 @@ func camelCase(src string) string {
 }
 
 func ensureGolangAncronymCasing(segment []byte) []byte {
-	if upper := bytes.ToUpper(segment); commonInitialisms[string(upper)] {
+	upper := bytes.ToUpper(segment)
+	if commonInitialisms[string(upper)] {
 		return upper
+	}
+
+	if initial := startsWithInitialism(string(upper)); initial != "" {
+		return append([]byte(initial), segment[len(initial):]...)
 	}
 
 	return segment

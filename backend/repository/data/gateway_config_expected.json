@@ -53,6 +53,34 @@
 			"reqHeaderMap": null,
 			"resHeaderMap": null
 		},
+		"bar.argWithNestedQueryParams": {
+			"endpointId": "bar",
+			"endpointType": "http",
+			"handleId": "argWithNestedQueryParams",
+			"thriftFile": "endpoints/bar/bar.thrift",
+			"thriftMethodName": "Bar::argWithNestedQueryParams",
+			"workflowType": "httpClient",
+			"clientID": "bar",
+			"clientMethod": "ArgWithNestedQueryParams",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
+		},
+		"bar.argWithParams": {
+			"endpointId": "bar",
+			"endpointType": "http",
+			"handleId": "argWithParams",
+			"thriftFile": "endpoints/bar/bar.thrift",
+			"thriftMethodName": "Bar::argWithParams",
+			"workflowType": "httpClient",
+			"clientID": "bar",
+			"clientMethod": "ArgWithParams",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
+		},
 		"bar.argWithQueryHeader": {
 			"endpointId": "bar",
 			"endpointType": "http",
@@ -259,6 +287,8 @@
 				"ArgNotStruct": "Bar::argNotStruct",
 				"ArgWithHeaders": "Bar::argWithHeaders",
 				"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
+				"ArgWithNestedQueryParams": "Bar::argWithNestedQueryParams",
+				"ArgWithParams": "Bar::argWithParams",
 				"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 				"ArgWithQueryParams": "Bar::argWithQueryParams",
 				"EchoBinary": "Echo::echoBinary",
@@ -359,6 +389,14 @@
 					},
 					{
 						"Name": "argWithManyQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithNestedQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "argWithParams",
 						"Type": "http"
 					},
 					{
@@ -597,6 +635,14 @@
 					},
 					{
 						"Name": "argWithManyQueryParams",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithNestedQueryParams",
+						"Type": "tchannel"
+					},
+					{
+						"Name": "argWithParams",
 						"Type": "tchannel"
 					},
 					{

@@ -1,0 +1,62 @@
+{{- $instance := .Instance -}}
+{{- $endpointMeta := .EndpointMeta -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	zanzibar "github.com/uber/zanzibar/runtime"
+)
+
+// Endpoint registers a request handler on a gateway
+type Endpoint interface{
+	Register(*zanzibar.Gateway) error
+}
+
+// NewEndpoint returns a collection of endpoints that can be registered on
+// a gateway
+{{- if $instance.HasDependencies}}
+func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+	return &EndpointHandlers{
+		{{- range $idx, $meta := $endpointMeta }}
+		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
+		{{$handlerName}}: New{{$handlerName}}(g, deps),
+		{{- end}}
+	}
+}
+{{- else}}
+func NewEndpoint(g *zanzibar.Gateway) Endpoint {
+	return &EndpointHandlers{
+		{{- range $idx, $meta := $endpointMeta }}
+		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
+		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
+		{{$handlerName}}: New{{$handlerName}}(g),
+		{{- end}}
+	}
+}
+{{- end}}
+
+// EndpointHandlers is a collection of individual endpoint handlers
+type EndpointHandlers struct {
+	{{- range $idx, $meta := $endpointMeta }}
+	{{$serviceMethod := printf "%s%s" (title $meta.Method.ThriftService) (title $meta.Method.Name) -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
+	{{$handlerName}} *{{$handlerName}}
+	{{- end}}
+}
+
+// Register registers the endpoint handlers with the gateway
+func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
+	{{- range $idx, $meta := $endpointMeta }}
+	{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
+	{{$handlerName := printf "%sHandler"  $serviceMethod -}}
+	err{{$idx}} := handlers.{{$handlerName}}.Register(gateway)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
+	{{- end}}
+	return nil
+}
+
+

@@ -28,6 +28,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -62,10 +63,8 @@ type ModuleSystem struct {
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
-func (system *ModuleSystem) RegisterClass(
-	name string,
-	class ModuleClass,
-) error {
+func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
+	name := class.Name
 	if name == "" {
 		return errors.Errorf("A module class name must not be empty")
 	}
@@ -75,19 +74,6 @@ func (system *ModuleSystem) RegisterClass(
 			"The module class %q is already defined",
 			name,
 		)
-	}
-
-	// Validate the module class dependencies
-	// (this validation ensures that circular deps cannot exist)
-	for _, moduleType := range class.ClassDependencies {
-		if moduleType != name && system.classes[moduleType] == nil {
-			return errors.Errorf(
-				"The module class %q depends on class type %q, "+
-					"which is not yet defined",
-				name,
-				moduleType,
-			)
-		}
 	}
 
 	class.Directory = filepath.Clean(class.Directory)
@@ -114,7 +100,6 @@ func (system *ModuleSystem) RegisterClass(
 
 	class.types = map[string]BuildGenerator{}
 	system.classes[name] = &class
-	system.classOrder = append(system.classOrder, name)
 
 	return nil
 }
@@ -155,6 +140,8 @@ func (system *ModuleSystem) populateResolvedDependencies(
 ) error {
 	// Resolve the class dependencies
 	for _, classInstance := range classInstances {
+		dependencyClassNames := map[string]bool{}
+
 		for _, classDependency := range classInstance.Dependencies {
 			moduleClassInstances, ok :=
 				resolvedModules[classDependency.ClassName]
@@ -196,8 +183,22 @@ func (system *ModuleSystem) populateResolvedDependencies(
 				resolvedDependencies = []*ModuleInstance{}
 			}
 
+			dependencyClassNames[classDependency.ClassName] = true
+			classInstance.HasDependencies = true
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
 				appendUniqueModule(resolvedDependencies, dependencyInstance)
+		}
+
+		// Sort the dependencies for deterministic code generation
+		for className, deps := range classInstance.ResolvedDependencies {
+			sortedModuleList, err := sortDependencyList(
+				className,
+				deps,
+			)
+			if err != nil {
+				return err
+			}
+			classInstance.ResolvedDependencies[className] = sortedModuleList
 		}
 	}
 
@@ -218,6 +219,270 @@ func appendUniqueModule(
 	return append(classDeps, instance)
 }
 
+func (system *ModuleSystem) populateRecursiveDependencies(
+	instances []*ModuleInstance,
+) error {
+	for _, classInstance := range instances {
+		recursiveDeps := map[string]map[string]*ModuleInstance{}
+		err := resolveRecursiveDependencies(
+			classInstance,
+			recursiveDeps,
+		)
+		if err != nil {
+			return err
+		}
+
+		for _, className := range system.classOrder {
+			moduleMap, ok := recursiveDeps[className]
+
+			if !ok {
+				continue
+			}
+
+			classInstance.DependencyOrder = append(
+				classInstance.DependencyOrder,
+				className,
+			)
+
+			moduleList := make([]*ModuleInstance, len(moduleMap))
+			index := 0
+			for _, moduleInstance := range moduleMap {
+				moduleList[index] = moduleInstance
+				index++
+			}
+
+			sortedModuleList, err := sortDependencyList(className, moduleList)
+			if err != nil {
+				return err
+			}
+
+			classInstance.RecursiveDependencies[className] = sortedModuleList
+		}
+	}
+
+	return nil
+}
+
+func resolveRecursiveDependencies(
+	instance *ModuleInstance,
+	resolvedDeps map[string]map[string]*ModuleInstance,
+) error {
+	for className, depList := range instance.ResolvedDependencies {
+		classDeps := resolvedDeps[className]
+
+		if classDeps == nil {
+			classDeps = map[string]*ModuleInstance{}
+			resolvedDeps[className] = classDeps
+		}
+
+		for _, dep := range depList {
+			if classDeps[dep.InstanceName] == nil {
+				classDeps[dep.InstanceName] = dep
+				err := resolveRecursiveDependencies(dep, resolvedDeps)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+type sortableDependencyList []*ModuleInstance
+
+func (s sortableDependencyList) Len() int {
+	return len(s)
+}
+
+func (s sortableDependencyList) Less(i int, j int) bool {
+	return s[i].InstanceName < s[j].InstanceName
+}
+
+func (s sortableDependencyList) Swap(i int, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func sortDependencyList(
+	className string,
+	instances []*ModuleInstance,
+) ([]*ModuleInstance, error) {
+	instanceList := sortableDependencyList(instances[:])
+	sort.Sort(instanceList)
+	sorted := make([]*ModuleInstance, len(instances))
+
+	for i, instance := range instances {
+		insertIndex := i
+		for j := 0; j < i; j++ {
+			if insertIndex == i {
+				if peerDepends(sorted[j], instance) {
+					insertIndex = j
+				}
+			}
+
+			if insertIndex != i {
+				if peerDepends(instance, sorted[j]) {
+					return nil, errors.Errorf(
+						"Dependency cycle: %s cannot be initialized before %s",
+						sorted[j].InstanceName,
+						instance.InstanceName,
+					)
+				}
+			}
+		}
+
+		for shuffle := i; shuffle > insertIndex; shuffle-- {
+			sorted[shuffle] = sorted[shuffle-1]
+		}
+
+		sorted[insertIndex] = instance
+	}
+
+	return sorted, nil
+}
+
+// peerDepends returns true if module a and module b have the same class name
+// and a requires b
+func peerDepends(a *ModuleInstance, b *ModuleInstance) bool {
+	if a.ClassName != b.ClassName {
+		return false
+	}
+
+	for _, dependency := range a.RecursiveDependencies[a.ClassName] {
+		if dependency.InstanceName == b.InstanceName &&
+			dependency.ClassName == b.ClassName {
+			return true
+		}
+	}
+
+	return false
+}
+
+type byName []*ModuleClass
+
+func (n byName) Len() int           { return len(n) }
+func (n byName) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func (n byName) Less(i, j int) bool { return n[i].Name < n[j].Name }
+
+// sort the module classes by class height in DAG, lowest node first
+func sortModuleClasses(classes []*ModuleClass) ([]*ModuleClass, error) {
+	heightMap := map[*ModuleClass]int{}
+	sortedGroup := [][]*ModuleClass{}
+
+	sort.Sort(byName(classes))
+	for _, class := range classes {
+		h, err := height(class, heightMap, []*ModuleClass{})
+		if err != nil {
+			return nil, err
+		}
+		l := len(sortedGroup)
+		if l < h+1 {
+			for i := 0; i < h+1-l; i++ {
+				sortedGroup = append(sortedGroup, []*ModuleClass{})
+			}
+		}
+		sortedGroup[h] = append(sortedGroup[h], class)
+	}
+
+	sorted := []*ModuleClass{}
+	for _, g := range sortedGroup {
+		sort.Sort(byName(g))
+		sorted = append(sorted, g...)
+	}
+	return sorted, nil
+}
+
+// height marks the height of each module class height in the dependency tree
+func height(i *ModuleClass, known map[*ModuleClass]int, seen []*ModuleClass) (int, error) {
+	// detect dependency cycle
+	for _, class := range seen {
+		if i == class {
+			var path string
+			for _, c := range seen {
+				path += c.Name + "->"
+			}
+			path += i.Name
+			return 0, fmt.Errorf("dependency cycle detected for module class %q: %s", i.Name, path)
+		}
+	}
+
+	if h, ok := known[i]; ok {
+		return h, nil
+	}
+	if len(i.dependentClasses) == 0 {
+		known[i] = 0
+		return 0, nil
+	}
+
+	mh := 0
+	seen = append(seen, i)
+	for _, instance := range i.dependentClasses {
+		ch, err := height(instance, known, seen)
+		if err != nil {
+			return 0, err
+		}
+		if ch > mh {
+			mh = ch
+		}
+	}
+	known[i] = mh + 1
+	return mh + 1, nil
+}
+
+func appendUniqueClass(list []*ModuleClass, toAppend *ModuleClass) []*ModuleClass {
+	for _, value := range list {
+		if toAppend == value {
+			return list
+		}
+	}
+	return append(list, toAppend)
+}
+
+// populateClassDependencies consolidates the dependencies claimed by module classes
+func (system *ModuleSystem) populateClassDependencies() error {
+	for _, c := range system.classes {
+		for _, d := range c.DependsOn {
+			dc, ok := system.classes[d]
+			if !ok {
+				return fmt.Errorf("module class %q depends on %q which is not defined", c.Name, d)
+			}
+			c.dependentClasses = appendUniqueClass(c.dependentClasses, dc)
+		}
+		for _, d := range c.DependedBy {
+			dc, ok := system.classes[d]
+			if !ok {
+				return fmt.Errorf("module class %q is depended by %q which is not defined", c.Name, d)
+			}
+			dc.dependentClasses = appendUniqueClass(dc.dependentClasses, c)
+		}
+	}
+	return nil
+}
+
+// resolveClassOrder sorts the registered classes by dependency and sets
+// classOrder field
+func (system *ModuleSystem) resolveClassOrder() error {
+	err := system.populateClassDependencies()
+	if err != nil {
+		return errors.Wrap(err, "error resolving module class order")
+	}
+	classes := make([]*ModuleClass, len(system.classes))
+	i := 0
+	for _, c := range system.classes {
+		classes[i] = c
+		i++
+	}
+	sorted, err := sortModuleClasses(classes)
+	if err != nil {
+		return errors.Wrap(err, "error resolving module class order")
+	}
+	system.classOrder = make([]string, len(system.classes))
+	for i, c := range sorted {
+		system.classOrder[i] = c.Name
+	}
+	return nil
+}
+
 // ResolveModules resolves the module instances from the config on disk
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
@@ -227,6 +492,10 @@ func (system *ModuleSystem) ResolveModules(
 	baseDirectory string,
 	targetGenDir string,
 ) (map[string][]*ModuleInstance, error) {
+	// resolve module class order before read and resolve each module
+	if err := system.resolveClassOrder(); err != nil {
+		return nil, err
+	}
 
 	resolvedModules := map[string][]*ModuleInstance{}
 
@@ -276,11 +545,18 @@ func (system *ModuleSystem) ResolveModules(
 		resolvedModules[className] = classInstances
 
 		// Resolve dependencies for all classes
-		err := system.populateResolvedDependencies(
-			classInstances, resolvedModules,
+		resolveErr := system.populateResolvedDependencies(
+			classInstances,
+			resolvedModules,
 		)
-		if err != nil {
-			return nil, err
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
+
+		// Resolved recursive dependencies for all classes
+		recursiveErr := system.populateRecursiveDependencies(classInstances)
+		if recursiveErr != nil {
+			return nil, recursiveErr
 		}
 	}
 
@@ -413,16 +689,19 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	return &ModuleInstance{
-		PackageInfo:          packageInfo,
-		ClassName:            className,
-		ClassType:            jsonConfig.Type,
-		BaseDirectory:        baseDirectory,
-		Directory:            instanceDirectory,
-		InstanceName:         jsonConfig.Name,
-		Dependencies:         dependencies,
-		ResolvedDependencies: map[string][]*ModuleInstance{},
-		JSONFileName:         jsonFileName,
-		JSONFileRaw:          raw,
+		PackageInfo:           packageInfo,
+		ClassName:             className,
+		ClassType:             jsonConfig.Type,
+		BaseDirectory:         baseDirectory,
+		Directory:             instanceDirectory,
+		InstanceName:          jsonConfig.Name,
+		Dependencies:          dependencies,
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
+		DependencyOrder:       []string{},
+		HasDependencies:       false,
+		JSONFileName:          jsonFileName,
+		JSONFileRaw:           raw,
 	}, nil
 }
 
@@ -497,19 +776,27 @@ func readPackageInfo(
 		// package is "PackageName".
 		PackageAlias:          defaultAlias + "Static",
 		GeneratedPackageAlias: defaultAlias + "Generated",
+		ModulePackageAlias:    defaultAlias + "Module",
 		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,
 		),
-		ExportName:            "New" + qualifiedClassName,
-		QualifiedInstanceName: qualifiedInstanceName,
-		ExportType:            qualifiedClassName,
 		GeneratedPackagePath: filepath.Join(
 			packageRoot,
 			relativeGeneratedPath,
 			instanceDirectory,
 		),
-		IsExportGenerated: isExportGenerated,
+		ModulePackagePath: filepath.Join(
+			packageRoot,
+			relativeGeneratedPath,
+			instanceDirectory,
+			"module",
+		),
+		ExportName:            "New" + qualifiedClassName,
+		InitializerName:       "Initialize" + qualifiedClassName,
+		QualifiedInstanceName: qualifiedInstanceName,
+		ExportType:            qualifiedClassName,
+		IsExportGenerated:     isExportGenerated,
 	}, nil
 }
 
@@ -651,10 +938,15 @@ func formatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	ClassType         moduleClassType
-	Directory         string
-	ClassDependencies []string
-	types             map[string]BuildGenerator
+	Name       string
+	ClassType  moduleClassType
+	Directory  string
+	DependsOn  []string
+	DependedBy []string
+	types      map[string]BuildGenerator
+
+	// private field which is populated before module resolving
+	dependentClasses []*ModuleClass
 }
 
 // BuildResult is the result of running a module generator
@@ -686,16 +978,25 @@ type PackageInfo struct {
 	PackageAlias string
 	// GeneratedPackageAlias is the unique import alias for generated packages
 	GeneratedPackageAlias string
+	// ModulePackageAlias is the unique import alias for the module system's,
+	// generated subpackage
+	ModulePackageAlias string
 	// PackagePath is the full package path for the non-generated code
 	PackagePath string
 	// GeneratedPackagePath is the full package path for the generated code
 	GeneratedPackagePath string
+	// ModulePacakgePath is the full package path for the generated dependency
+	// structs and initializers
+	ModulePackagePath string
 	// QualifiedInstanceName for this package. Pascal case name for this module.
 	QualifiedInstanceName string
 	// ExportName is the name on the module initializer function
 	ExportName string
 	// ExportType refers to the type returned by the module initializer
 	ExportType string
+	// InitializerName is the name of function that can fully initialize the
+	// module and its dependencies
+	InitializerName string
 	// IsExportGenerated is true if the export type is provided by the
 	// generated pacakge, otherwise it is assumed that the export type resides
 	// in the non-generated package
@@ -757,6 +1058,15 @@ type ModuleInstance struct {
 	// Resolved dependencies is a list of dependent modules after processing
 	// (fully resolved)
 	ResolvedDependencies map[string][]*ModuleInstance
+	// Recursive dependencies is a list of dependent modules and all of their
+	// dependencies, i.e. the full tree of dependencies for this module. Each
+	// class list is sorted for initialization order
+	RecursiveDependencies map[string][]*ModuleInstance
+	// DependencyOrder is the bottom to top order in which the recursively
+	// resolved dependency class names can depend on each other
+	DependencyOrder []string
+	// HasDependencies is true if the instance has one or more dependencies
+	HasDependencies bool
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing

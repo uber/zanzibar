@@ -41,7 +41,7 @@ func TestBarWithHeadersTransformCall(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -108,7 +108,7 @@ func TestBarWithHeadersTransformFailWithoutHeaders(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -169,7 +169,7 @@ func TestBarWithHeadersTransformWithDuplicateField(t *testing.T) {
 		TestBinary: filepath.Join(
 			getDirName(), "..", "..", "..",
 			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main.go",
+			"services", "example-gateway", "main", "main.go",
 		),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {

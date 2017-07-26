@@ -2,7 +2,7 @@
 	"remotes": {
 	"clients/baz": {
 		"shasums": {
-		"bases.thrift": "e0729d2985ec0aeb95891cba969f1fadecedb648",
+		"base.thrift": "e0729d2985ec0aeb95891cba969f1fadecedb648",
 		"baz.thrift": "e0729d2985ec0aeb95891cba969f1fadecedb648"
 	},
 	"time": 1489436705663,

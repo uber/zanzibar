@@ -50,6 +50,16 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_ArgWithManyQueryParams_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithNestedQueryParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithNestedQueryParams_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithParams(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithParams_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryHeader(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -310,6 +320,100 @@ func (c *barClient) ArgWithManyQueryParams(
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
 
 	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// ArgWithNestedQueryParams calls "/bar/argWithNestedQueryParams" endpoint.
+func (c *barClient) ArgWithNestedQueryParams(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ArgWithNestedQueryParams_Args,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes *clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "argWithNestedQueryParams", c.httpClient,
+	)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, errors.Errorf(
+		"Unexpected http client response (%d)", res.StatusCode,
+	)
+}
+
+// ArgWithParams calls "/bar/:uuid/segment/:user-uuid" endpoint.
+func (c *barClient) ArgWithParams(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ArgWithParams_Args,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes *clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "argWithParams", c.httpClient,
+	)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

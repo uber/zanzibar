@@ -29,13 +29,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
@@ -48,8 +48,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -107,8 +106,9 @@ func (c *corruptReader) Read(b []byte) (n int, err error) {
 
 func TestDoubleParseQueryValues(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -166,8 +166,9 @@ func TestDoubleParseQueryValues(t *testing.T) {
 
 func TestFailingGetQueryBool(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -222,8 +223,9 @@ func TestFailingGetQueryBool(t *testing.T) {
 
 func TestFailingGetQueryInt8(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -278,8 +280,9 @@ func TestFailingGetQueryInt8(t *testing.T) {
 
 func TestFailingHasQueryValue(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -334,8 +337,9 @@ func TestFailingHasQueryValue(t *testing.T) {
 
 func TestFailingGetQueryInt16(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -390,8 +394,9 @@ func TestFailingGetQueryInt16(t *testing.T) {
 
 func TestFailingGetQueryInt32(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -446,8 +451,9 @@ func TestFailingGetQueryInt32(t *testing.T) {
 
 func TestFailingGetQueryInt64(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -502,8 +508,9 @@ func TestFailingGetQueryInt64(t *testing.T) {
 
 func TestFailingGetQueryFloat64(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -558,8 +565,9 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 
 func TestFailingGetQueryValues(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {
@@ -614,8 +622,9 @@ func TestFailingGetQueryValues(t *testing.T) {
 
 func TestGetQueryValues(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions,
-		clients.CreateClients, endpoints.Register,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 
 	if !assert.NoError(t, err) {

@@ -191,7 +191,7 @@ func (c *TypeConverter) genConverterForList(
 			valueStruct,
 			fromFieldType.ValueSpec,
 			"value",
-			keyPrefix+strings.Title(toField.Name)+"[index]",
+			keyPrefix+pascalCase(toField.Name)+"[index]",
 			"	"+indent,
 		)
 		if err != nil {
@@ -256,7 +256,7 @@ func (c *TypeConverter) genConverterForMap(
 			valueStruct,
 			fromFieldType.ValueSpec,
 			"value",
-			keyPrefix+strings.Title(toField.Name)+"[key]",
+			keyPrefix+pascalCase(toField.Name)+"[key]",
 			"	"+indent,
 		)
 		if err != nil {
@@ -294,8 +294,8 @@ func (c *TypeConverter) genStructConverter(
 			)
 		}
 
-		toIdentifier := indent + "out." + keyPrefix + strings.Title(toField.Name)
-		fromIdentifier := "in." + keyPrefix + strings.Title(fromField.Name)
+		toIdentifier := indent + "out." + keyPrefix + pascalCase(toField.Name)
+		fromIdentifier := "in." + keyPrefix + pascalCase(fromField.Name)
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
@@ -341,7 +341,7 @@ func (c *TypeConverter) genStructConverter(
 				toFieldType,
 				fromField.Type,
 				fromIdentifier,
-				keyPrefix+strings.Title(toField.Name),
+				keyPrefix+pascalCase(toField.Name),
 				indent,
 			)
 			if err != nil {

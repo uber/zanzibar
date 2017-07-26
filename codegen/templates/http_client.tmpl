@@ -1,6 +1,6 @@
 {{- /* template to render edge gateway http client code */ -}}
-
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"bytes"
@@ -89,7 +89,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	// TODO(jakev): Ensure we validate mandatory headers
 	{{- end}}
 
-	{{- if .ReqHeaderFields }}
+	{{- if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
@@ -101,7 +101,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end -}}
 	{{- end}}
 
-	{{if ne .RequestType ""}}
+	{{$emptyBody := or (eq .HTTPMethod "GET") (eq .HTTPMethod "DELETE") -}}
+	{{if (and (ne .RequestType "") (not $emptyBody))}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)

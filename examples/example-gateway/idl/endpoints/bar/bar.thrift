@@ -19,6 +19,17 @@ struct BarResponse {
     )
 }
 
+struct QueryParamsStruct {
+    1: required string name
+    2: optional string userUUID
+    3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
+    4: required string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+}
+
+struct ParamsStruct {
+    1: required string userUUID
+}
+
 exception BarException {
     1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
@@ -95,6 +106,14 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    BarResponse argWithNestedQueryParams(
+        1: required QueryParamsStruct request
+    ) (
+        zanzibar.http.method = "GET"
+        zanzibar.http.path = "/bar/argWithNestedQueryParams"
+        zanzibar.http.status = "200"
+    )
+
     BarResponse argWithQueryHeader(
         1: optional string userUUID (
             zanzibar.http.ref = "headers.x-uuid"
@@ -102,6 +121,15 @@ service Bar {
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryHeader"
+        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithParams(
+        1: required string uuid
+        2: optional ParamsStruct params
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithParams"
         zanzibar.http.status = "200"
     )
 

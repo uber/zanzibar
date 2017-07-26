@@ -21,35 +21,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package contacts
+package contactsEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 )
 
-// SaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
-type SaveContactsHandler struct {
-	Clients *clients.Clients
+// ContactsSaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
+type ContactsSaveContactsHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewSaveContactsEndpoint creates a handler
-func NewSaveContactsEndpoint(
+// NewContactsSaveContactsHandler creates a handler
+func NewContactsSaveContactsHandler(
 	gateway *zanzibar.Gateway,
-) *SaveContactsHandler {
-	return &SaveContactsHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *ContactsSaveContactsHandler {
+	return &ContactsSaveContactsHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *ContactsSaveContactsHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/contacts/:userUUID/contacts",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"contacts",
+			"saveContacts",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/contacts/:userUUID/contacts".
-func (handler *SaveContactsHandler) HandleRequest(
+func (handler *ContactsSaveContactsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,

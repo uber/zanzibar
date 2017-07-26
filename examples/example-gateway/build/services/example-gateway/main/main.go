@@ -28,10 +28,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
 func getDirName() string {
@@ -39,10 +40,11 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+// TODO: remove this
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"../../..",
+		"../../../../",
 		"config",
 	)
 }
@@ -59,15 +61,36 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 
-	gateway, err := zanzibar.CreateGateway(config, nil)
+	gateway, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(gateway)
-	gateway.Clients = clients
-
 	return gateway, nil
+}
+
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	err0 := deps.Endpoint.Bar.Register(g)
+	if err0 != nil {
+		return err0
+	}
+	err1 := deps.Endpoint.Baz.Register(g)
+	if err1 != nil {
+		return err1
+	}
+	err2 := deps.Endpoint.BazTChannel.Register(g)
+	if err2 != nil {
+		return err2
+	}
+	err3 := deps.Endpoint.Contacts.Register(g)
+	if err3 != nil {
+		return err3
+	}
+	err4 := deps.Endpoint.Googlenow.Register(g)
+	if err4 != nil {
+		return err4
+	}
+	return nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
@@ -89,9 +112,10 @@ func main() {
 		panic(err)
 	}
 
-	err = server.Bootstrap(endpoints.Register)
+	err = server.Bootstrap()
 	if err != nil {
 		panic(err)
 	}
+
 	logAndWait(server)
 }

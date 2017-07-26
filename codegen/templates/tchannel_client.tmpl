@@ -1,7 +1,6 @@
 {{- /* template to render edge gateway tchannel client code */ -}}
-
-// Package {{.PackageName}} is generated code used to make or handle TChannel calls using Thrift.
-package {{.PackageName}}
+{{- $instance := .Instance }}
+package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"

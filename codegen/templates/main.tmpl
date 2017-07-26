@@ -1,4 +1,5 @@
 {{- /* template to render gateway main.go */ -}}
+{{- $instance := . -}}
 
 package main
 
@@ -9,9 +10,9 @@ import (
 
 	"go.uber.org/zap"
 	"github.com/uber/zanzibar/runtime"
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+
+	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 func getDirName() string {
@@ -19,10 +20,11 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+// TODO: remove this
 func getConfigDirName() string {
 	return filepath.Join(
 		getDirName(),
-		"{{.RelativePathToAppConfig}}",
+		"../../../../",
 		"config",
 	)
 }
@@ -39,19 +41,26 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 	
-	gateway, err := zanzibar.CreateGateway(config, nil)
+	gateway, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	clients := clients.CreateClients(gateway)
-	gateway.Clients = clients
-
 	return gateway, nil
 }
 
+func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
+	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err{{$idx}} != nil {
+		return err{{$idx}}
+	}
+	{{- end}}
+	return nil
+}
+
 func logAndWait(server *zanzibar.Gateway) {
-	server.Logger.Info("Started {{.GatewayName | pascal}}",
+	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
 		zap.Any("config", server.InspectOrDie()),
@@ -69,9 +78,10 @@ func main() {
 		panic(err)
 	}
 
-	err = server.Bootstrap(endpoints.Register)
+	err = server.Bootstrap()
 	if err != nil {
 		panic(err)
 	}
+
 	logAndWait(server)
 }

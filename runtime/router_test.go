@@ -28,18 +28,17 @@ import (
 	"io/ioutil"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestTrailingSlashRoutes(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -116,8 +115,7 @@ func TestRouterNotFound(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -147,8 +145,7 @@ func TestRouterInvalidMethod(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
-		clients.CreateClients,
-		endpoints.Register,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return

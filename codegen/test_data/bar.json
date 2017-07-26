@@ -35,7 +35,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": null,
 					"ResHeaders": null,
@@ -105,7 +105,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -157,7 +157,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -167,6 +167,120 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithManyQueryParams_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "argWithNestedQueryParams",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/bar/argWithNestedQueryParams",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "argWithNestedQueryParams",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": null,
+					"ReqHeaderGoStatements": null,
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_ArgWithNestedQueryParams_Args",
+					"ResponseType": "*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
+					"Name": "argWithParams",
+					"HTTPMethod": "GET",
+					"EndpointName": "",
+					"HTTPPath": "/bar/:uuid/segment/:user-uuid",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "param",
+							"Text": "",
+							"BodyIdentifier": ".UUID"
+						},
+						{
+							"Type": "static",
+							"Text": "segment",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "param",
+							"Text": "",
+							"BodyIdentifier": ".Params.UserUUID"
+						}
+					],
+					"IsEndpoint": false,
+					"QueryParamGoStatements": [
+						"if requestBody.Params == nil {",
+						"\trequestBody.Params = \u0026clientsBarBar.ParamsStruct{}",
+						"}"
+					],
+					"ReqHeaderGoStatements": null,
+					"ResHeaderFields": {
+						"some-header-field": {
+							"FieldIdentifier": ".StringField",
+							"IsPointer": false
+						}
+					},
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_ArgWithParams_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"OKStatusCode": {
 						"Code": 200,
@@ -207,7 +321,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -257,7 +371,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -302,7 +416,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -372,7 +486,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -442,7 +556,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -512,7 +626,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -596,7 +710,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -643,7 +757,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -690,7 +804,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -737,7 +851,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -784,7 +898,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -831,7 +945,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -878,7 +992,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -925,7 +1039,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -972,7 +1086,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1019,7 +1133,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1066,7 +1180,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1113,7 +1227,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1160,7 +1274,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1207,7 +1321,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1254,7 +1368,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"
@@ -1301,7 +1415,7 @@
 					],
 					"IsEndpoint": false,
 					"QueryParamGoStatements": null,
-					"ReqHeaderFields": {},
+					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
 						"x-uuid"

@@ -21,36 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package bazEndpoint
 
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// CompareHandler is the handler for "/baz/compare"
-type CompareHandler struct {
-	Clients *clients.Clients
+// SimpleServiceCompareHandler is the handler for "/baz/compare"
+type SimpleServiceCompareHandler struct {
+	Clients *module.ClientDependencies
 }
 
-// NewCompareEndpoint creates a handler
-func NewCompareEndpoint(
+// NewSimpleServiceCompareHandler creates a handler
+func NewSimpleServiceCompareHandler(
 	gateway *zanzibar.Gateway,
-) *CompareHandler {
-	return &CompareHandler{
-		Clients: gateway.Clients.(*clients.Clients),
+	deps *module.Dependencies,
+) *SimpleServiceCompareHandler {
+	return &SimpleServiceCompareHandler{
+		Clients: deps.Client,
 	}
 }
 
+// Register adds the http handler to the gateway's http router
+func (handler *SimpleServiceCompareHandler) Register(g *zanzibar.Gateway) error {
+	g.HTTPRouter.Register(
+		"POST", "/baz/compare",
+		zanzibar.NewRouterEndpoint(
+			g,
+			"baz",
+			"compare",
+			handler.HandleRequest,
+		),
+	)
+	// TODO: register should return errors on route conflicts
+	return nil
+}
+
 // HandleRequest handles "/baz/compare".
-func (handler *CompareHandler) HandleRequest(
+func (handler *SimpleServiceCompareHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -96,7 +113,7 @@ func (handler *CompareHandler) HandleRequest(
 
 // CompareEndpoint calls thrift client Baz.Compare
 type CompareEndpoint struct {
-	Clients *clients.Clients
+	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
