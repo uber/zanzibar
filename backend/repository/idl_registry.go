@@ -85,7 +85,7 @@ func (reg *idlRegistry) ThriftMeta(path string, needFileContent bool) (*ThriftMe
 	defer reg.lock.RUnlock()
 	meta, ok := reg.metaMap[path]
 	if !ok {
-		return nil, errors.Errorf("failed to find file %q", path)
+		return nil, errors.Errorf("failed to find file %q", path, reg.metaMap)
 	}
 	if !needFileContent {
 		return meta, nil

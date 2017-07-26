@@ -23,7 +23,6 @@ package repository
 import (
 	"io/ioutil"
 	"path/filepath"
-	"sort"
 
 	"go.uber.org/thriftrw/compile"
 
@@ -126,7 +125,7 @@ func (m *Manager) IDLThriftService(path string) (map[string]*ThriftService, erro
 }
 
 // ThriftList returns the full list of thrift files in a gateway.
-func (m *Manager) ThriftList(gateway string) ([]*ThriftMeta, error) {
+func (m *Manager) ThriftList(gateway string) (map[string]*ThriftMeta, error) {
 	repo, ok := m.RepoMap[gateway]
 	if !ok {
 		return nil, errors.Errorf("gateway %s is not found", gateway)
@@ -135,18 +134,7 @@ func (m *Manager) ThriftList(gateway string) ([]*ThriftMeta, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get gateway config")
 	}
-	metaMap, err := repo.ThriftConfig(cfg.ThriftRootDir)
-	if err != nil {
-		return nil, err
-	}
-	list := make([]*ThriftMeta, 0, len(metaMap))
-	for _, thriftMeta := range metaMap {
-		list = append(list, thriftMeta)
-	}
-	sort.Slice(list, func(i, j int) bool {
-		return list[i].Path < list[j].Path
-	})
-	return list, nil
+	return repo.ThriftConfig(cfg.ThriftRootDir)
 }
 
 // ThriftFile returns the content and meta data of a file in a gateway.
@@ -262,8 +250,7 @@ func (m *Manager) thriftMetaInIDLRegistry(paths []string) (map[string]*ThriftMet
 		}
 	}
 	for path := range meta {
-		thriftPath := filepath.Join(m.idlRegistry.RootDir(), m.idlRegistry.ThriftRootDir(), path)
-		tm, err := m.idlRegistry.ThriftMeta(thriftPath, true)
+		tm, err := m.idlRegistry.ThriftMeta(path, true)
 		if err != nil {
 			return nil, err
 		}

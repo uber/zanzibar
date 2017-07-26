@@ -1,0 +1,30 @@
+{
+	"name": "baz",
+	"type": "tchannel",
+	"config": {
+		"thriftFile": "clients/baz/baz.thrift",
+		"thriftFileSha": "e0729d2985ec0aeb95891cba969f1fadecedb648",
+		"exposedMethods": {
+			"Call": "SimpleService::call",
+			"Compare": "SimpleService::compare",
+			"DeliberateDiffNoop": "SimpleService::sillyNoop",
+			"EchoBinary": "SecondService::echoBinary",
+			"EchoBool": "SecondService::echoBool",
+			"EchoDouble": "SecondService::echoDouble",
+			"EchoEnum": "SecondService::echoEnum",
+			"EchoI16": "SecondService::echoI16",
+			"EchoI32": "SecondService::echoI32",
+			"EchoI64": "SecondService::echoI64",
+			"EchoI8": "SecondService::echoI8",
+			"EchoString": "SecondService::echoString",
+			"EchoStringList": "SecondService::echoStringList",
+			"EchoStringMap": "SecondService::echoStringMap",
+			"EchoStringSet": "SecondService::echoStringSet",
+			"EchoStructList": "SecondService::echoStructList",
+			"EchoStructMap": "SecondService::echoStructMap",
+			"EchoStructSet": "SecondService::echoStructSet",
+			"EchoTypedef": "SecondService::echoTypedef",
+			"Ping": "SimpleService::ping"
+		}
+	}
+}

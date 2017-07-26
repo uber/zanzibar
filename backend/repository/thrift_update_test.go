@@ -60,7 +60,7 @@ func TestInitThriftMeta(t *testing.T) {
 }
 
 func TestThriftConfig(t *testing.T) {
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
@@ -80,8 +80,8 @@ func TestThriftConfig(t *testing.T) {
 }
 
 func TestThriftVersion(t *testing.T) {
-
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
@@ -94,7 +94,7 @@ func TestThriftVersion(t *testing.T) {
 	}
 	assert.Equal(t, "v1", v)
 
-	v, err = r.ThriftFileVersion("no-such-file.thrift")
+	_, err = r.ThriftFileVersion("no-such-file.thrift")
 	assert.Error(t, err, "should failed to fetch a non exist file.")
 }
 
@@ -109,7 +109,8 @@ func TestWriteThriftFileAndConfig(t *testing.T) {
 		},
 	}
 
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
