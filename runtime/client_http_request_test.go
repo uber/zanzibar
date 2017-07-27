@@ -25,8 +25,6 @@ import (
 	"net/http"
 	"testing"
 
-	barClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-
 	"github.com/stretchr/testify/assert"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -114,7 +112,8 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 		},
 	)
 
-	barClient := barClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 
 	req := zanzibar.NewClientHTTPRequest("bar", "bar-path", client)
@@ -168,7 +167,8 @@ func TestMakingClientCalLWithRespHeaders(t *testing.T) {
 		},
 	)
 
-	bClient := barClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bClient := deps.Client.Bar
 
 	body, headers, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -200,7 +200,8 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 		},
 	)
 
-	bClient := barClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bClient := deps.Client.Bar
 
 	body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -233,7 +234,8 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 		},
 	)
 
-	bClient := barClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bClient := deps.Client.Bar
 
 	body, _, err := bClient.Normal(
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
@@ -264,7 +266,8 @@ func TestMakingCallWithThriftException(t *testing.T) {
 	)
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bClient := barClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bClient := deps.Client.Bar
 
 	_, err = bClient.ArgNotStruct(
 		context.Background(), nil,

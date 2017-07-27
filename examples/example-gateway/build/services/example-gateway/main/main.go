@@ -61,7 +61,7 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 
-	gateway, err := service.CreateGateway(config, nil)
+	gateway, _, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
 	}
