@@ -29,24 +29,27 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
+// DependenciesTree re-exported for convenience.
+type DependenciesTree module.DependenciesTree
+
 // CreateGateway creates a new instances of the example-gateway
 // service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,
-) (*zanzibar.Gateway, error) {
+) (*zanzibar.Gateway, interface{}, error) {
 	gateway, err := zanzibar.CreateGateway(config, opts)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	dependencies := module.InitializeDependencies(gateway)
+	tree, dependencies := module.InitializeDependencies(gateway)
 	registerErr := registerEndpoints(gateway, dependencies)
 	if registerErr != nil {
-		return nil, registerErr
+		return nil, nil, registerErr
 	}
 
-	return gateway, nil
+	return gateway, (*DependenciesTree)(tree), nil
 }
 
 func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
