@@ -30,7 +30,9 @@ import (
 	testlib "github.com/uber/zanzibar/test/lib"
 )
 
-func TestInitThriftMeta(t *testing.T) {
+// initThriftMetaInExampleIDL initializes the idls.json file for 'example-gateway/idl'.
+// Run this function when new IDLs are added into 'example-gateway/idl'.
+func initThriftMetaInExampleIDL(t *testing.T) {
 	src := "../../examples/example-gateway/idl/"
 	meta := map[string]*ThriftMeta{}
 	walkFn := func(path string, info os.FileInfo, err error) error {
