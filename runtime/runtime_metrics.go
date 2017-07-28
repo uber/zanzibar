@@ -108,7 +108,7 @@ func StartRuntimeMetricsCollector(
 	if !config.EnableCPUMetrics && !config.EnableMemMetrics && !config.EnableGCMetrics {
 		return nil
 	}
-	rm := NewRuntimeMetricsCollector(config, scope)
+	rm := NewRuntimeMetricsCollector(config, scope.SubScope("runtime"))
 	rm.Start()
 	return rm
 }

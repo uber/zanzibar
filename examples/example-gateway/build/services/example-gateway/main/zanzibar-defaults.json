@@ -17,7 +17,7 @@
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
-	"metrics.runtime.collectIntervalMs": 1000,
+	"metrics.runtime.collectInterval": 1000,
 
 	"tchannel.serviceName": "my-gateway",
 	"tchannel.processName": "my-gateway"

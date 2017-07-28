@@ -62,20 +62,22 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	Logger           *zap.Logger
-	MetricScope      tally.Scope
+	RootScope        tally.Scope
+	AllWorkersScope  tally.Scope
+	PerWorkerScope   tally.Scope
 	ServiceName      string
 	Config           *StaticConfig
 	HTTPRouter       *HTTPRouter
 	TChannelRouter   *TChannelRouter
 
-	loggerFile        *os.File
-	metricScopeCloser io.Closer
-	metricsBackend    tally.CachedStatsReporter
-	runtimeMetrics    RuntimeMetricsCollector
-	logWriter         zapcore.WriteSyncer
-	httpServer        *HTTPServer
-	localHTTPServer   *HTTPServer
-	tchannelServer    *tchannel.Channel
+	loggerFile      *os.File
+	scopeCloser     io.Closer
+	metricsBackend  tally.CachedStatsReporter
+	runtimeMetrics  RuntimeMetricsCollector
+	logWriter       zapcore.WriteSyncer
+	httpServer      *HTTPServer
+	localHTTPServer *HTTPServer
+	tchannelServer  *tchannel.Channel
 	//	- panic ???
 	//	- process reporter ?
 }
@@ -234,7 +236,7 @@ func (gateway *Gateway) handleHealthRequest(
 // Close the http server
 func (gateway *Gateway) Close() {
 	gateway.metricsBackend.Flush()
-	_ = gateway.metricScopeCloser.Close()
+	_ = gateway.scopeCloser.Close()
 	if gateway.localHTTPServer != gateway.httpServer {
 		gateway.localHTTPServer.Close()
 	}
@@ -279,74 +281,57 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 	}
 }
 
-func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
+func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
-	env := config.MustGetString("env")
-	hostname := getHostname()
 	service := config.MustGetString("metrics.tally.service")
 
-	var metricsBackend tally.CachedStatsReporter
 	if metricsType == "m3" {
 		if gateway.metricsBackend != nil {
 			panic("expected no metrics backend in gateway.")
 		}
 
 		// TODO: Why aren't common tags emitted?
-		// m3.Options.Env and m3.Options.Service adds 'env' and 'service' common tags.
-		// Providing 'host' common tag to prevent m3.Options.IncludeHost from returning an error on 'unknown'host.
+		// NewReporter adds 'env' and 'service' common tags; and no 'host' tag.
 		commonTags := map[string]string{
-			"host": hostname,
+			"env": config.MustGetString("env"),
 		}
-		m3Backend, err := m3.NewReporter(m3.Options{
+		opts := m3.Options{
 			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
 			Service:            service,
 			CommonTags:         commonTags,
-			Env:                env,
 			IncludeHost:        false,
 			MaxQueueSize:       defaultM3MaxQueueSize,
 			MaxPacketSizeBytes: defaultM3MaxPacketSize,
-		})
-		if err != nil {
+		}
+		if gateway.metricsBackend, err = m3.NewReporter(opts); err != nil {
 			return err
 		}
-
-		metricsBackend = tally.CachedStatsReporter(m3Backend)
-		gateway.metricsBackend = metricsBackend
-	} else {
-		if gateway.metricsBackend == nil {
-			panic("expected gateway to have MetricsBackend in opts")
-		}
-		metricsBackend = gateway.metricsBackend
+	} else if gateway.metricsBackend == nil {
+		panic("expected gateway to have MetricsBackend in opts")
 	}
 
 	// TODO: decide what default tags we want...
 	defaultTags := map[string]string{}
-
-	// create metrics root scope
-	gateway.MetricScope, gateway.metricScopeCloser = tally.NewRootScope(
-		tally.ScopeOptions{
-			Tags:           defaultTags,
-			Prefix:         service + ".production.all-workers",
-			CachedReporter: metricsBackend,
-			Separator:      tally.DefaultSeparator,
-		},
-		time.Duration(config.MustGetInt("metrics.tally.flushInterval"))*time.Millisecond,
-	)
+	rootScopeOpts := tally.ScopeOptions{
+		Tags:           defaultTags,
+		Prefix:         service + ".production",
+		CachedReporter: gateway.metricsBackend,
+		Separator:      tally.DefaultSeparator,
+	}
+	reportInterval := time.Duration(config.MustGetInt("metrics.tally.flushInterval")) * time.Millisecond
+	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(rootScopeOpts, reportInterval)
+	gateway.AllWorkersScope = gateway.RootScope.SubScope("all-workers")
+	gateway.PerWorkerScope = gateway.RootScope.SubScope("per-worker")
 
 	// start collecting runtime metrics
-	gateway.runtimeMetrics = StartRuntimeMetricsCollector(
-		RuntimeMetricsOptions{
-			EnableCPUMetrics: config.MustGetBoolean("metrics.runtime.enableCPUMetrics"),
-			EnableMemMetrics: config.MustGetBoolean("metrics.runtime.enableMemMetrics"),
-			EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
-			CollectInterval:  time.Duration(config.MustGetInt("metrics.runtime.collectIntervalMs")) * time.Millisecond,
-		},
-		gateway.MetricScope.SubScope("runtime").Tagged(map[string]string{
-			"host":    hostname,
-			"service": service,
-			"env":     env,
-		}),
-	)
+	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
+	runtimeMetricsOpts := RuntimeMetricsOptions{
+		EnableCPUMetrics: config.MustGetBoolean("metrics.runtime.enableCPUMetrics"),
+		EnableMemMetrics: config.MustGetBoolean("metrics.runtime.enableMemMetrics"),
+		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
+		CollectInterval:  collectInterval,
+	}
+	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerWorkerScope)
 
 	return nil
 }
@@ -410,7 +395,10 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
-	host := getHostname()
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
 
 	datacenter := gateway.Config.MustGetString("datacenter")
 
@@ -450,7 +438,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
-	subScope := gateway.MetricScope.SubScope("tchannel")
+	subScope := gateway.AllWorkersScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
@@ -507,12 +495,4 @@ func GetDirnameFromRuntimeCaller(file string) string {
 
 	// If dirname is not absolute then its a package name...
 	return filepath.Join(os.Getenv("GOPATH"), "src", dirname)
-}
-
-func getHostname() string {
-	host, err := os.Hostname()
-	if err != nil {
-		return "unknown"
-	}
-	return host
 }

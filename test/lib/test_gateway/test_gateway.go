@@ -206,7 +206,7 @@ func CreateGateway(
 	config["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
 	config["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
 	config["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
-	config["metrics.runtime.collectIntervalMs"] = 10
+	config["metrics.runtime.collectInterval"] = 10
 	config["logger.output"] = "stdout"
 
 	err = testGateway.createAndSpawnChild(opts.TestBinary, config)
