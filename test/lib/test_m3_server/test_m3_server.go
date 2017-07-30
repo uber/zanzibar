@@ -32,6 +32,7 @@ import (
 	metrics "github.com/uber-go/tally/m3"
 	customtransport "github.com/uber-go/tally/m3/customtransports"
 	m3 "github.com/uber-go/tally/m3/thrift"
+	"github.com/uber/zanzibar/test/lib"
 )
 
 var localListenAddr = &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)}
@@ -51,7 +52,7 @@ type FakeM3Server struct {
 // Which can be used to wait for receival of messages
 func NewFakeM3Server(
 	t *testing.T,
-	wg *sync.WaitGroup,
+	wg *lib.WaitAtLeast,
 	countBatches bool,
 	countMetrics bool,
 	protocol metrics.Protocol,
@@ -102,7 +103,7 @@ func (f *FakeM3Server) Close() error {
 
 // NewFakeM3Service creates an M3Service
 func NewFakeM3Service(
-	wg *sync.WaitGroup,
+	wg *lib.WaitAtLeast,
 	countBatches bool,
 	countMetrics bool,
 ) *FakeM3Service {
@@ -118,7 +119,7 @@ type FakeM3Service struct {
 	lock         sync.RWMutex
 	batches      []*m3.MetricBatch
 	metrics      []*m3.Metric
-	wg           *sync.WaitGroup
+	wg           *lib.WaitAtLeast
 	countBatches bool
 	countMetrics bool
 }

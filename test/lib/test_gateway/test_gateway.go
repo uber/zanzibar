@@ -26,7 +26,6 @@ import (
 	"io"
 	"net/http"
 	"os/exec"
-	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -35,6 +34,7 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
 )
@@ -86,7 +86,7 @@ type ChildProcessGateway struct {
 	HTTPClient       *http.Client
 	TChannelClient   zanzibar.TChannelClient
 	M3Service        *testM3Server.FakeM3Service
-	MetricsWaitGroup sync.WaitGroup
+	MetricsWaitGroup lib.WaitAtLeast
 	RealHTTPAddr     string
 	RealHTTPHost     string
 	RealHTTPPort     int
@@ -184,6 +184,9 @@ func CreateGateway(
 		logMessages:      map[string][]LogMessage{},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
+		MetricsWaitGroup: lib.WaitAtLeast{
+			Wait: make(chan bool),
+		},
 	}
 
 	testGateway.setupMetrics(t, opts)
