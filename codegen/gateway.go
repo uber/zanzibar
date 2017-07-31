@@ -949,11 +949,3 @@ func NewGatewaySpec(
 
 	return spec, nil
 }
-
-// GenerateEndpointRegisterFile will generate endpoints registration for the gateway
-func (gateway *GatewaySpec) GenerateEndpointRegisterFile() error {
-	_, err := gateway.Template.GenerateEndpointRegisterFile(
-		gateway.EndpointModules, gateway.PackageHelper,
-	)
-	return err
-}
