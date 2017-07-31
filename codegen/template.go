@@ -33,6 +33,24 @@ import (
 	"github.com/uber/zanzibar/codegen/template_bundle"
 )
 
+// AssetProvider provides access to template assets
+type AssetProvider interface {
+	// AssetNames returns a list of named assets available
+	AssetNames() []string
+	// Asset returns the bytes for a provided asset name
+	Asset(string) ([]byte, error)
+}
+
+type defaultAssetCollection struct{}
+
+func (*defaultAssetCollection) AssetNames() []string {
+	return templates.AssetNames()
+}
+
+func (*defaultAssetCollection) Asset(assetName string) ([]byte, error) {
+	return templates.Asset(assetName)
+}
+
 var funcMap = tmpl.FuncMap{
 	"lower":         strings.ToLower,
 	"title":         strings.Title,
@@ -81,9 +99,17 @@ type Template struct {
 
 // NewTemplate creates a bundle of templates.
 func NewTemplate() (*Template, error) {
+	return NewTemplateFromAssetProvider(&defaultAssetCollection{})
+}
+
+// NewTemplateFromAssetProvider returns a template helper for the
+// provided asset collection
+func NewTemplateFromAssetProvider(
+	assetProvider AssetProvider,
+) (*Template, error) {
 	t := tmpl.New("main").Funcs(funcMap)
-	for _, file := range templates.AssetNames() {
-		fileContent, err := templates.Asset(file)
+	for _, file := range assetProvider.AssetNames() {
+		fileContent, err := assetProvider.Asset(file)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
