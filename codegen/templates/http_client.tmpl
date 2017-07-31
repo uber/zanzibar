@@ -213,9 +213,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.RawHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody: res.GetRawBody(),
+	}
 }
 {{end}}
 {{end}} {{- /* <range .Methods> */ -}}
