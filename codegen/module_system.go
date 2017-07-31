@@ -1095,3 +1095,48 @@ func GenerateInitializer(
 		packageHelper,
 	)
 }
+
+/*
+ * General client meta
+ */
+
+// ClientMeta ...
+type ClientMeta struct {
+	Instance         *ModuleInstance
+	ExportName       string
+	ExportType       string
+	ClientID         string
+	IncludedPackages []GoPackageImport
+	Services         []*ServiceSpec
+	ExposedMethods   map[string]string
+	LogDownstream    bool
+}
+
+func findMethod(
+	m *ModuleSpec, serviceName string, methodName string,
+) *MethodSpec {
+	for _, service := range m.Services {
+		if service.Name != serviceName {
+			continue
+		}
+
+		for _, method := range service.Methods {
+			if method.Name == methodName {
+				return method
+			}
+		}
+	}
+	return nil
+}
+
+type sortByClientName []*ClientSpec
+
+func (c sortByClientName) Len() int {
+	return len(c)
+}
+func (c sortByClientName) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+func (c sortByClientName) Less(i, j int) bool {
+	return c[i].ClientName < c[j].ClientName
+}
