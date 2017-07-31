@@ -1,0 +1,16 @@
+{
+	"GoogleNowService": {
+		"Name": "GoogleNowService",
+		"Path": "clients/googlenow/googlenow.thrift",
+		"Methods": [
+			{
+				"Name": "addCredentials",
+				"Type": "http"
+			},
+			{
+				"Name": "checkCredentials",
+				"Type": "http"
+			}
+		]
+	}
+}

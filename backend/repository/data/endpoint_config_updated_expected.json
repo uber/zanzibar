@@ -1,0 +1,15 @@
+{
+	"endpointId": "baz",
+	"endpointType": "http",
+	"handleId": "compare",
+	"thriftFile": "endpoints/baz/baz.thrift",
+	"thriftFileSha": "v1",
+	"thriftMethodName": "SimpleService::compare",
+	"workflowType": "tchannelClient",
+	"clientID": "baz",
+	"clientMethod": "Compare",
+	"testFixtures": [],
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
+}
