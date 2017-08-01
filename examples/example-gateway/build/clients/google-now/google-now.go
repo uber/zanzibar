@@ -27,7 +27,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/pkg/errors"
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -111,9 +110,10 @@ func (c *googleNowClient) AddCredentials(
 		return respHeaders, nil
 	}
 
-	return respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // CheckCredentials calls "/check-credentials" endpoint.
@@ -156,7 +156,8 @@ func (c *googleNowClient) CheckCredentials(
 		return respHeaders, nil
 	}
 
-	return respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }

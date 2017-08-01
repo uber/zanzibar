@@ -27,7 +27,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -252,9 +251,10 @@ func (c *barClient) ArgNotStruct(
 		}
 	}
 
-	return respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithHeaders calls "/bar/argWithHeaders" endpoint.
@@ -300,9 +300,10 @@ func (c *barClient) ArgWithHeaders(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithManyQueryParams calls "/bar/argWithManyQueryParams" endpoint.
@@ -347,9 +348,10 @@ func (c *barClient) ArgWithManyQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithNestedQueryParams calls "/bar/argWithNestedQueryParams" endpoint.
@@ -394,9 +396,10 @@ func (c *barClient) ArgWithNestedQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithParams calls "/bar/:uuid/segment/:user-uuid" endpoint.
@@ -441,9 +444,10 @@ func (c *barClient) ArgWithParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithQueryHeader calls "/bar/argWithQueryHeader" endpoint.
@@ -488,9 +492,10 @@ func (c *barClient) ArgWithQueryHeader(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // ArgWithQueryParams calls "/bar/argWithQueryParams" endpoint.
@@ -535,9 +540,10 @@ func (c *barClient) ArgWithQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // MissingArg calls "/missing-arg-path" endpoint.
@@ -596,9 +602,10 @@ func (c *barClient) MissingArg(
 		}
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // NoRequest calls "/no-request-path" endpoint.
@@ -657,9 +664,10 @@ func (c *barClient) NoRequest(
 		}
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // Normal calls "/bar-path" endpoint.
@@ -719,9 +727,10 @@ func (c *barClient) Normal(
 		}
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // TooManyArgs calls "/too-many-args-path" endpoint.
@@ -781,9 +790,10 @@ func (c *barClient) TooManyArgs(
 		}
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoBinary calls "/echo/binary" endpoint.
@@ -828,9 +838,10 @@ func (c *barClient) EchoBinary(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoBool calls "/echo/bool" endpoint.
@@ -875,9 +886,10 @@ func (c *barClient) EchoBool(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoDouble calls "/echo/double" endpoint.
@@ -922,9 +934,10 @@ func (c *barClient) EchoDouble(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoEnum calls "/echo/enum" endpoint.
@@ -969,9 +982,10 @@ func (c *barClient) EchoEnum(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoI16 calls "/echo/i16" endpoint.
@@ -1016,9 +1030,10 @@ func (c *barClient) EchoI16(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoI32 calls "/echo/i32" endpoint.
@@ -1063,9 +1078,10 @@ func (c *barClient) EchoI32(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoI64 calls "/echo/i64" endpoint.
@@ -1110,9 +1126,10 @@ func (c *barClient) EchoI64(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoI8 calls "/echo/i8" endpoint.
@@ -1157,9 +1174,10 @@ func (c *barClient) EchoI8(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoString calls "/echo/string" endpoint.
@@ -1204,9 +1222,10 @@ func (c *barClient) EchoString(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStringList calls "/echo/string-list" endpoint.
@@ -1251,9 +1270,10 @@ func (c *barClient) EchoStringList(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStringMap calls "/echo/string-map" endpoint.
@@ -1298,9 +1318,10 @@ func (c *barClient) EchoStringMap(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStringSet calls "/echo/string-set" endpoint.
@@ -1345,9 +1366,10 @@ func (c *barClient) EchoStringSet(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStructList calls "/echo/struct-list" endpoint.
@@ -1392,9 +1414,10 @@ func (c *barClient) EchoStructList(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStructMap calls "/echo/struct-map" endpoint.
@@ -1448,9 +1471,10 @@ func (c *barClient) EchoStructMap(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoStructSet calls "/echo/struct-set" endpoint.
@@ -1495,9 +1519,10 @@ func (c *barClient) EchoStructSet(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }
 
 // EchoTypedef calls "/echo/typedef" endpoint.
@@ -1542,7 +1567,8 @@ func (c *barClient) EchoTypedef(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }

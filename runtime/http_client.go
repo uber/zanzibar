@@ -20,8 +20,12 @@
 
 package zanzibar
 
-import "net/http"
-import "go.uber.org/zap"
+import (
+	"net/http"
+	"strconv"
+
+	"go.uber.org/zap"
+)
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
@@ -30,6 +34,17 @@ type HTTPClient struct {
 	Client  *http.Client
 	Logger  *zap.Logger
 	BaseURL string
+}
+
+// UnexpectedHTTPError defines an error for HTTP
+type UnexpectedHTTPError struct {
+	StatusCode int
+	RawBody    []byte
+}
+
+func (rawErr *UnexpectedHTTPError) Error() string {
+	return "Unexpected http client response (" +
+		strconv.Itoa(rawErr.StatusCode) + ")"
 }
 
 // NewHTTPClient will allocate a http client.
