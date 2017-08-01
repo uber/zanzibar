@@ -36,13 +36,13 @@ type HTTPClient struct {
 	BaseURL string
 }
 
-// RawHTTPError defines an error for HTTP
-type RawHTTPError struct {
+// UnexpectedHTTPError defines an error for HTTP
+type UnexpectedHTTPError struct {
 	StatusCode int
 	RawBody    []byte
 }
 
-func (rawErr *RawHTTPError) Error() string {
+func (rawErr *UnexpectedHTTPError) Error() string {
 	return "Unexpected http client response (" +
 		strconv.Itoa(rawErr.StatusCode) + ")"
 }

@@ -213,7 +213,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.RawHTTPError{
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
 	}
