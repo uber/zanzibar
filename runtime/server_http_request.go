@@ -69,7 +69,7 @@ func NewServerHTTPRequest(
 		queryValues: nil,
 
 		Logger: endpoint.gateway.Logger,
-		Scope:  endpoint.gateway.AllWorkersScope,
+		Scope:  endpoint.gateway.MetricsScope,
 
 		URL:     r.URL,
 		Method:  r.Method,

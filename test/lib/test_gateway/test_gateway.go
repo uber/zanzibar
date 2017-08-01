@@ -184,9 +184,7 @@ func CreateGateway(
 		logMessages:      map[string][]LogMessage{},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
-		MetricsWaitGroup: lib.WaitAtLeast{
-			Wait: make(chan bool),
-		},
+		MetricsWaitGroup: lib.WaitAtLeast{},
 	}
 
 	testGateway.setupMetrics(t, opts)

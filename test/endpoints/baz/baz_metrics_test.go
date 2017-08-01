@@ -88,7 +88,7 @@ func TestCallMetrics(t *testing.T) {
 		return
 	}
 
-	<-cg.MetricsWaitGroup.Wait
+	cg.MetricsWaitGroup.Wait()
 	metrics := cg.M3Service.GetMetrics()
 	sort.Sort(lib.SortMetricsByName(metrics))
 	assert.Equal(t, 7, len(metrics))

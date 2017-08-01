@@ -131,7 +131,7 @@ func TestHealthMetrics(t *testing.T) {
 
 	assert.Equal(t, res.Status, "200 OK", "got http 200")
 
-	<-cgateway.MetricsWaitGroup.Wait
+	cgateway.MetricsWaitGroup.Wait()
 	metrics := cgateway.M3Service.GetMetrics()
 	sort.Sort(lib.SortMetricsByName(metrics))
 
@@ -243,7 +243,7 @@ func TestRuntimeMetrics(t *testing.T) {
 	// Expect 30 runtime metrics
 	cgateway.MetricsWaitGroup.Add(30)
 
-	<-cgateway.MetricsWaitGroup.Wait
+	cgateway.MetricsWaitGroup.Wait()
 	metrics := cgateway.M3Service.GetMetrics()
 	sort.Sort(lib.SortMetricsByName(metrics))
 

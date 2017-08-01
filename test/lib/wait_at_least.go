@@ -24,19 +24,22 @@ import (
 	"sync"
 )
 
-// WaitAtLeast signals the wait channel when at least the added count are done.
-// This avoids sync.WaitGroup panic when count is negative.
+// WaitAtLeast wait group signals the wait channel when at least the added
+// count are done. This avoids sync.WaitGroup panic when count is negative.
 //
 // Usage:
-//     w := WaitAtLeast{ Wait: make(chan bool) }
-//     w.Add(1)
-//     <-w.Wait
-//     go func() { w.Done() }()
+//     wg := WaitAtLeast{}
+//     wg.Add(1)
+//     wg.Wait()
+//     go func() {
+//         wg.Done()
+//     }()
 //
 type WaitAtLeast struct {
 	mutex sync.Mutex
-	count int
-	Wait  chan bool
+	wg    sync.WaitGroup
+	add   int
+	done  int
 }
 
 // Add positive wait count.
@@ -47,9 +50,19 @@ func (w *WaitAtLeast) Add(count int) {
 	if count <= 0 {
 		panic("non-positive count")
 	}
-	w.count += count
-	if w.count <= 0 {
-		w.Wait <- true
+
+	w.add += count
+	w.wg.Add(count)
+
+	// complete matching add/done
+	done := w.done
+	if w.add < w.done {
+		done = w.add
+	}
+	for i := 0; i < done; i++ {
+		w.done--
+		w.add--
+		w.wg.Done()
 	}
 }
 
@@ -58,8 +71,17 @@ func (w *WaitAtLeast) Done() {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
-	w.count--
-	if w.count == 0 {
-		w.Wait <- true
+	// complete matching add/done
+	if w.add > 0 {
+		w.add--
+		w.wg.Done()
+		return
 	}
+
+	w.done++
+}
+
+// Wait for matching add/done.
+func (w *WaitAtLeast) Wait() {
+	w.wg.Wait()
 }

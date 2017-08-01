@@ -53,22 +53,22 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort         int32
-	TChannelPort     int32
-	RealHTTPPort     int32
-	RealHTTPAddr     string
-	RealTChannelPort int32
-	RealTChannelAddr string
-	WaitGroup        *sync.WaitGroup
-	Channel          *tchannel.Channel
-	Logger           *zap.Logger
-	RootScope        tally.Scope
-	AllWorkersScope  tally.Scope
-	PerWorkerScope   tally.Scope
-	ServiceName      string
-	Config           *StaticConfig
-	HTTPRouter       *HTTPRouter
-	TChannelRouter   *TChannelRouter
+	HTTPPort              int32
+	TChannelPort          int32
+	RealHTTPPort          int32
+	RealHTTPAddr          string
+	RealTChannelPort      int32
+	RealTChannelAddr      string
+	WaitGroup             *sync.WaitGroup
+	Channel               *tchannel.Channel
+	Logger                *zap.Logger
+	RootScope             tally.Scope
+	MetricsScope          tally.Scope
+	PerWorkerMetricsScope tally.Scope
+	ServiceName           string
+	Config                *StaticConfig
+	HTTPRouter            *HTTPRouter
+	TChannelRouter        *TChannelRouter
 
 	loggerFile      *os.File
 	scopeCloser     io.Closer
@@ -320,8 +320,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	}
 	reportInterval := time.Duration(config.MustGetInt("metrics.tally.flushInterval")) * time.Millisecond
 	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(rootScopeOpts, reportInterval)
-	gateway.AllWorkersScope = gateway.RootScope.SubScope("all-workers")
-	gateway.PerWorkerScope = gateway.RootScope.SubScope("per-worker")
+	gateway.MetricsScope = gateway.RootScope.SubScope("all-workers")
+	gateway.PerWorkerMetricsScope = gateway.RootScope.SubScope("per-worker").Tagged(map[string]string{
+		"host": getHostname(),
+	})
 
 	// start collecting runtime metrics
 	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
@@ -331,7 +333,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
 		CollectInterval:  collectInterval,
 	}
-	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerWorkerScope)
+	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerWorkerMetricsScope)
 
 	return nil
 }
@@ -395,10 +397,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
-	host, err := os.Hostname()
-	if err != nil {
-		host = "unknown"
-	}
+	host := getHostname()
 
 	datacenter := gateway.Config.MustGetString("datacenter")
 
@@ -438,7 +437,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
-	subScope := gateway.AllWorkersScope.SubScope("tchannel")
+	subScope := gateway.MetricsScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
@@ -495,4 +494,12 @@ func GetDirnameFromRuntimeCaller(file string) string {
 
 	// If dirname is not absolute then its a package name...
 	return filepath.Join(os.Getenv("GOPATH"), "src", dirname)
+}
+
+func getHostname() string {
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+	return host
 }
