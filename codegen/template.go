@@ -97,14 +97,13 @@ type Template struct {
 	template *tmpl.Template
 }
 
-// NewTemplate creates a bundle of templates.
-func NewTemplate() (*Template, error) {
-	return NewTemplateFromAssetProvider(&defaultAssetCollection{})
+// NewDefaultTemplate creates a bundle of templates.
+func NewDefaultTemplate() (*Template, error) {
+	return NewTemplate(&defaultAssetCollection{})
 }
 
-// NewTemplateFromAssetProvider returns a template helper for the
-// provided asset collection
-func NewTemplateFromAssetProvider(
+// NewTemplate returns a template helper for the provided asset collection
+func NewTemplate(
 	assetProvider AssetProvider,
 ) (*Template, error) {
 	t := tmpl.New("main").Funcs(funcMap)
