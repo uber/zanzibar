@@ -96,13 +96,17 @@ func TestCallMetrics(t *testing.T) {
 	expectedEndpoitTags := map[string]string{
 		"endpoint": "baz",
 		"handler":  "call",
+		"service":  "test-gateway",
+		"env":      "test",
 	}
 
 	expectedTchannelTags := map[string]string{
 		"app":             "test-gateway",
 		"service":         "test-gateway",
+		"env":             "test",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService::call",
+		"host":            lib.GetHostname(),
 	}
 
 	latencyMetric := metrics[0]
@@ -113,7 +117,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	tags := latencyMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	for tag := range tags {
 		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
@@ -126,7 +130,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	tags = recvdMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	for tag := range tags {
 		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
@@ -141,7 +145,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	tags = statusCodeMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 	for tag := range tags {
 		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
 	}
@@ -157,12 +161,9 @@ func TestCallMetrics(t *testing.T) {
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 5, len(tags), "expected 2 tags")
+	assert.Equal(t, 6, len(tags), "expected 6 tags")
 
 	for tag := range tags {
-		if tag.GetTagName() == "host" {
-			continue
-		}
 		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
 	}
 
@@ -177,11 +178,8 @@ func TestCallMetrics(t *testing.T) {
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 5, len(tags), "expected 2 tags")
+	assert.Equal(t, 6, len(tags), "expected 6 tags")
 	for tag := range tags {
-		if tag.GetTagName() == "host" {
-			continue
-		}
 		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
 	}
 
@@ -195,11 +193,8 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 5, len(tags), "expected 2 tags")
+	assert.Equal(t, 6, len(tags), "expected 6 tags")
 	for tag := range tags {
-		if tag.GetTagName() == "host" {
-			continue
-		}
 		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
 	}
 
@@ -213,7 +208,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 5, len(tags), "expected 2 tags")
+	assert.Equal(t, 6, len(tags), "expected 6 tags")
 	for tag := range tags {
 		if tag.GetTagName() == "host" {
 			continue

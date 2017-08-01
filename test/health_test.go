@@ -155,10 +155,12 @@ func TestHealthMetrics(t *testing.T) {
 	)
 
 	tags := latencyMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 	expectedTags := map[string]string{
 		"endpoint": "health",
 		"handler":  "health",
+		"service":  "test-gateway",
+		"env":      "test",
 	}
 	for tag := range tags {
 		assert.Equal(t,
@@ -184,10 +186,12 @@ func TestHealthMetrics(t *testing.T) {
 	)
 
 	tags = recvdMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 	expectedTags = map[string]string{
 		"endpoint": "health",
 		"handler":  "health",
+		"service":  "test-gateway",
+		"env":      "test",
 	}
 	for tag := range tags {
 		assert.Equal(t,
@@ -213,10 +217,12 @@ func TestHealthMetrics(t *testing.T) {
 	)
 
 	tags = statusCodeMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 	expectedTags = map[string]string{
 		"endpoint": "health",
 		"handler":  "health",
+		"service":  "test-gateway",
+		"env":      "test",
 	}
 	for tag := range tags {
 		assert.Equal(t,
@@ -285,15 +291,15 @@ func TestRuntimeMetrics(t *testing.T) {
 	for i, m := range metrics {
 		assert.Equal(t, testData[i], m.Name, "expected correct name")
 
-		// TODO: Why are common tags not emitted?
-		//tags := m.Tags
-		//assert.Equal(t, 2, len(tags), "expected 2 tags")
-		//expectedTags := map[string]string{
-		//	"env":     "test",
-		//	"service": "test-gateway",
-		//}
-		//for tag := range tags {
-		//	assert.Equal(t, expectedTags[tag.GetTagName()], tag.GetTagValue(), "expected tag value to be correct")
-		//}
+		tags := m.Tags
+		assert.Equal(t, 3, len(tags), "expected 3 tags")
+		expectedTags := map[string]string{
+			"env":     "test",
+			"service": "test-gateway",
+			"host":    lib.GetHostname(),
+		}
+		for tag := range tags {
+			assert.Equal(t, expectedTags[tag.GetTagName()], tag.GetTagValue(), "expected tag value to be correct")
+		}
 	}
 }

@@ -197,18 +197,18 @@ func CreateGateway(
 		config["tchannel.port"] = 0
 	}
 
-	config["env"] = "test"
 	config["tchannel.serviceName"] = serviceName
 	config["tchannel.processName"] = serviceName
-	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
 	config["metrics.tally.service"] = serviceName
 	config["metrics.tally.flushInterval"] = 10
+	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
 	config["metrics.m3.flushInterval"] = 10
 	config["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
 	config["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
 	config["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
 	config["metrics.runtime.collectInterval"] = 10
 	config["logger.output"] = "stdout"
+	config["env"] = "test"
 
 	err = testGateway.createAndSpawnChild(opts.TestBinary, config)
 	if err != nil {

@@ -284,6 +284,7 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
 	service := config.MustGetString("metrics.tally.service")
+	env := config.MustGetString("env")
 
 	if metricsType == "m3" {
 		if gateway.metricsBackend != nil {
@@ -292,12 +293,11 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 
 		// TODO: Why aren't common tags emitted?
 		// NewReporter adds 'env' and 'service' common tags; and no 'host' tag.
-		commonTags := map[string]string{
-			"env": config.MustGetString("env"),
-		}
+		commonTags := map[string]string{}
 		opts := m3.Options{
 			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
 			Service:            service,
+			Env:                env,
 			CommonTags:         commonTags,
 			IncludeHost:        false,
 			MaxQueueSize:       defaultM3MaxQueueSize,
@@ -310,16 +310,20 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		panic("expected gateway to have MetricsBackend in opts")
 	}
 
-	// TODO: decide what default tags we want...
-	defaultTags := map[string]string{}
-	rootScopeOpts := tally.ScopeOptions{
-		Tags:           defaultTags,
-		Prefix:         service + ".production",
-		CachedReporter: gateway.metricsBackend,
-		Separator:      tally.DefaultSeparator,
+	// Adding 'env' and 'service' common tags, since they are not emitted by metrics backend.
+	defaultTags := map[string]string{
+		"env":     env,
+		"service": service,
 	}
-	reportInterval := time.Duration(config.MustGetInt("metrics.tally.flushInterval")) * time.Millisecond
-	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(rootScopeOpts, reportInterval)
+	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
+		tally.ScopeOptions{
+			Tags:           defaultTags,
+			Prefix:         service + ".production",
+			CachedReporter: gateway.metricsBackend,
+			Separator:      tally.DefaultSeparator,
+		},
+		time.Duration(config.MustGetInt("metrics.tally.flushInterval"))*time.Millisecond,
+	)
 	gateway.MetricsScope = gateway.RootScope.SubScope("all-workers")
 	gateway.PerWorkerMetricsScope = gateway.RootScope.SubScope("per-worker").Tagged(map[string]string{
 		"host": getHostname(),
