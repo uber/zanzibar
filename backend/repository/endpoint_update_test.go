@@ -33,7 +33,8 @@ import (
 const endpointUpdateRequestDir = "../../examples/example-gateway/endpoints"
 
 func TestUpdateEndpoint(t *testing.T) {
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}

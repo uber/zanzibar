@@ -9,6 +9,7 @@
 			"arg_with_query_params.json",
 			"arg_with_nested_query_params.json",
 			"arg_with_query_header.json",
+			"arg_with_params.json",
 			"arg_with_many_query_params.json",
 			"missing_arg.json",
 			"no_request.json",

@@ -48,16 +48,23 @@ func CompareGoldenFile(t *testing.T, goldenFilePath string, actual []byte) {
 	if bytes.Equal(exp, actual) {
 		return
 	}
+	DiffStrings(t, string(exp), string(actual))
+	t.Errorf("Result doesn't match golden file %s.\n", goldenFilePath)
+}
 
+// DiffStrings output detailed diff between two strings.
+func DiffStrings(t *testing.T, exp, actual string) {
 	diffCtx := difflib.ContextDiff{
-		A:        difflib.SplitLines(string(exp)),
-		B:        difflib.SplitLines(string(actual)),
+		A:        difflib.SplitLines(exp),
+		B:        difflib.SplitLines(actual),
 		FromFile: "Expected",
 		ToFile:   "Actual",
 		Context:  5,
 		Eol:      "\n",
 	}
 	d, err := difflib.GetContextDiffString(diffCtx)
-	assert.NoError(t, err, "Failed to compute diff.")
-	t.Errorf("Result doesn't match golden file %s.\n %s\n", goldenFilePath, d)
+	if !assert.NoError(t, err, "Failed to compute diff.") {
+		return
+	}
+	t.Errorf("Unexpected result: \n%s\n", d)
 }

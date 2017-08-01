@@ -26,6 +26,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type handler struct{}
@@ -75,7 +77,8 @@ func TestExampleService(t *testing.T) {
 	moduleSystem := NewModuleSystem()
 	var err error
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -101,10 +104,11 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClass("endpoint", ModuleClass{
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
-		Directory:         "endpoints",
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
+		Directory: "endpoints",
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
@@ -128,7 +132,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected double creation of http endpoint to error")
 	}
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -136,7 +141,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	err = moduleSystem.RegisterClass("newclient", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "newClient",
 		ClassType: MultiModule,
 		Directory: "./clients/",
 	})
@@ -144,7 +150,8 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected registering a module in the same directory to throw")
 	}
 
-	err = moduleSystem.RegisterClass("newclient", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "newClient",
 		ClassType: MultiModule,
 		Directory: "./clients/../../../foo",
 	})
@@ -300,7 +307,8 @@ func TestExampleServiceCycles(t *testing.T) {
 	moduleSystem := NewModuleSystem()
 	var err error
 
-	err = moduleSystem.RegisterClass("client", ModuleClass{
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "client",
 		ClassType: MultiModule,
 		Directory: "clients",
 	})
@@ -317,10 +325,11 @@ func TestExampleServiceCycles(t *testing.T) {
 		t.Errorf("Unexpected error registering http client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClass("endpoint", ModuleClass{
-		ClassType:         MultiModule,
-		ClassDependencies: []string{"client"},
-		Directory:         "endpoints",
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:      "endpoint",
+		ClassType: MultiModule,
+		DependsOn: []string{"client"},
+		Directory: "endpoints",
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
@@ -401,6 +410,196 @@ func TestSortDependencies(t *testing.T) {
 		}
 	}
 
+}
+
+func TestSortModuleClasses(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependsOn:  []string{"a"},
+		DependedBy: []string{"c"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "c",
+		DependsOn: []string{"b"},
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "d",
+		DependsOn:  []string{"a"},
+		DependedBy: []string{"c"},
+		Directory:  "d",
+	})
+	assert.NoError(t, err)
+	expected := []string{"a", "b", "d", "c"}
+	err = ms.resolveClassOrder()
+	assert.NoError(t, err)
+	assert.Equal(t, expected, ms.classOrder)
+}
+
+func TestSortModuleClassesNoDeps(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "c",
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "d",
+		Directory: "d",
+	})
+	assert.NoError(t, err)
+	expected := []string{"a", "b", "c", "d"}
+	err = ms.resolveClassOrder()
+	assert.NoError(t, err)
+	assert.Equal(t, expected, ms.classOrder)
+}
+
+func TestSortModuleClassesUndefined(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"c"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"a"},
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "module class \"a\" depends on \"c\" which is not defined")
+}
+
+func TestSortModuleClassesUndefined2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"c"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"a"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "module class \"a\" is depended by \"c\" which is not defined")
+}
+
+func TestSortableModuleClassCycle(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"b"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"a"},
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b")
+}
+
+func TestSortableModuleClassCycle2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"b"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"a"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b")
+}
+
+func TestSortModuleClassesIndirectCycle(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:      "a",
+		DependsOn: []string{"b"},
+		Directory: "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "b",
+		DependsOn: []string{"c"},
+		Directory: "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:      "c",
+		DependsOn: []string{"a"},
+		Directory: "c",
+	})
+	assert.NoError(t, err)
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->b->c->a")
+}
+
+func TestSortModuleClassesIndirectCycle2(t *testing.T) {
+	ms := NewModuleSystem()
+	err := ms.RegisterClass(ModuleClass{
+		Name:       "a",
+		DependedBy: []string{"b"},
+		Directory:  "a",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "b",
+		DependedBy: []string{"c"},
+		Directory:  "b",
+	})
+	assert.NoError(t, err)
+	err = ms.RegisterClass(ModuleClass{
+		Name:       "c",
+		DependedBy: []string{"a"},
+		Directory:  "c",
+	})
+	assert.NoError(t, err)
+
+	err = ms.resolveClassOrder()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "dependency cycle detected for module class \"a\": a->c->b->a")
 }
 
 func createTestInstance(name string, depInstances ...*ModuleInstance) *ModuleInstance {

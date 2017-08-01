@@ -26,6 +26,10 @@ struct QueryParamsStruct {
     4: required string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
 }
 
+struct ParamsStruct {
+    1: required string userUUID
+}
+
 exception BarException {
     1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
@@ -117,6 +121,15 @@ service Bar {
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryHeader"
+        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithParams(
+        1: required string uuid
+        2: optional ParamsStruct params
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithParams"
         zanzibar.http.status = "200"
     )
 

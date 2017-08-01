@@ -51,7 +51,8 @@ func testUpdateClientConfig(t *testing.T, requestFile string, clientName string)
 	req := &ClientConfig{}
 	err := readJSONFile(requestFile, req)
 	assert.NoError(t, err, "Failed to unmarshal client config.")
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
@@ -87,8 +88,8 @@ func testUpdateClientConfig(t *testing.T, requestFile string, clientName string)
 	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
 }
 
-func copyExample(t *testing.T) (string, error) {
-	tempDir, err := ioutil.TempDir("", "zanzibar")
+func copyExample(localRoot string) (string, error) {
+	tempDir, err := ioutil.TempDir(localRoot, "zanzibar")
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +111,6 @@ func copyExample(t *testing.T) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	t.Logf("Temp dir is created at %s\n", tempDir)
 	return tempExample, nil
 }
 

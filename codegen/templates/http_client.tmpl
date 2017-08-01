@@ -101,7 +101,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end -}}
 	{{- end}}
 
-	{{if ne .RequestType ""}}
+	{{$emptyBody := or (eq .HTTPMethod "GET") (eq .HTTPMethod "DELETE") -}}
+	{{if (and (ne .RequestType "") (not $emptyBody))}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
 	{{else}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, nil)
