@@ -33,7 +33,25 @@ import (
 	"github.com/uber/zanzibar/codegen/template_bundle"
 )
 
-var funcMap = tmpl.FuncMap{
+// AssetProvider provides access to template assets
+type AssetProvider interface {
+	// AssetNames returns a list of named assets available
+	AssetNames() []string
+	// Asset returns the bytes for a provided asset name
+	Asset(string) ([]byte, error)
+}
+
+type defaultAssetCollection struct{}
+
+func (*defaultAssetCollection) AssetNames() []string {
+	return templates.AssetNames()
+}
+
+func (*defaultAssetCollection) Asset(assetName string) ([]byte, error) {
+	return templates.Asset(assetName)
+}
+
+var defaultFuncMap = tmpl.FuncMap{
 	"lower":         strings.ToLower,
 	"title":         strings.Title,
 	"fullTypeName":  fullTypeName,
@@ -79,11 +97,22 @@ type Template struct {
 	template *tmpl.Template
 }
 
-// NewTemplate creates a bundle of templates.
-func NewTemplate() (*Template, error) {
-	t := tmpl.New("main").Funcs(funcMap)
-	for _, file := range templates.AssetNames() {
-		fileContent, err := templates.Asset(file)
+// NewDefaultTemplate creates a bundle of templates.
+func NewDefaultTemplate() (*Template, error) {
+	return NewTemplate(
+		&defaultAssetCollection{},
+		defaultFuncMap,
+	)
+}
+
+// NewTemplate returns a template helper for the provided asset collection
+func NewTemplate(
+	assetProvider AssetProvider,
+	functionMap tmpl.FuncMap,
+) (*Template, error) {
+	t := tmpl.New("main").Funcs(functionMap)
+	for _, file := range assetProvider.AssetNames() {
+		fileContent, err := assetProvider.Asset(file)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,

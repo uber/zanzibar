@@ -111,7 +111,7 @@ func NewDefaultModuleSystem(
 	h *PackageHelper,
 ) (*ModuleSystem, error) {
 	system := NewModuleSystem()
-	tmpl, err := NewTemplate()
+	tmpl, err := NewDefaultTemplate()
 
 	if err != nil {
 		return nil, err

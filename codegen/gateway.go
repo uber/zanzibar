@@ -844,11 +844,6 @@ func parseMiddlewareConfig(
 
 // GatewaySpec collects information for the entire gateway
 type GatewaySpec struct {
-	// package helper for gateway
-	PackageHelper *PackageHelper
-	// tempalte instance for gateway
-	Template *Template
-
 	ClientModules     map[string]*ClientSpec
 	EndpointModules   map[string]*EndpointSpec
 	MiddlewareModules map[string]*MiddlewareSpec
@@ -869,13 +864,8 @@ func NewGatewaySpec(
 	middlewareConfig string,
 	gatewayName string,
 ) (*GatewaySpec, error) {
-	tmpl, err := NewTemplate()
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot create template")
-	}
-
 	endpointGroupJsons := []string{}
-	err = filepath.Walk(
+	err := filepath.Walk(
 		filepath.Join(configDirName, endpointConfig),
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -898,8 +888,6 @@ func NewGatewaySpec(
 	}
 
 	spec := &GatewaySpec{
-		PackageHelper:     packageHelper,
-		Template:          tmpl,
 		ClientModules:     map[string]*ClientSpec{},
 		EndpointModules:   map[string]*EndpointSpec{},
 		MiddlewareModules: map[string]*MiddlewareSpec{},
