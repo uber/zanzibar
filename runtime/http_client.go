@@ -21,7 +21,13 @@
 package zanzibar
 
 import "net/http"
-import "go.uber.org/zap"
+import (
+	"net"
+	"time"
+
+	"github.com/uber-go/tally"
+	"go.uber.org/zap"
+)
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
@@ -29,6 +35,7 @@ type HTTPClient struct {
 
 	Client  *http.Client
 	Logger  *zap.Logger
+	Scope   *tally.Scope
 	BaseURL string
 }
 
@@ -36,17 +43,46 @@ type HTTPClient struct {
 func NewHTTPClient(
 	gateway *Gateway, baseURL string,
 ) *HTTPClient {
+	scope := gateway.MetricScope.SubScope("") // TODO: get http client name
+	timer := scope.Timer("dial")
+	success := scope.Counter("dial.success")
+	error := scope.Counter("dial.error")
+
 	return &HTTPClient{
 		gateway: gateway,
-
-		Logger: gateway.Logger,
+		Logger:  gateway.Logger,
 		Client: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
 				MaxIdleConns:        500,
 				MaxIdleConnsPerHost: 500,
+				Dial:                getInstrumentedDial(timer, success, error),
 			},
 		},
 		BaseURL: baseURL,
+	}
+}
+
+func getInstrumentedDial(timer tally.Timer, successCtr, errorCtr tally.Counter) func(string, string) (net.Conn, error) {
+	return func(n, a string) (conn net.Conn, err error) {
+		stat := instrument(timer, successCtr, errorCtr)
+		defer func() {
+			stat(err)
+		}()
+
+		return net.Dial(n, a)
+	}
+}
+
+func instrument(timer tally.Timer, successCtr, errorCtr tally.Counter) func(error) {
+	start := time.Now()
+
+	return func(err error) {
+		timer.Record(time.Since(start))
+		if err == nil {
+			successCtr.Inc(1)
+		} else {
+			errorCtr.Inc(1)
+		}
 	}
 }
