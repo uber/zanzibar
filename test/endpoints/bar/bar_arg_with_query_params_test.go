@@ -52,13 +52,11 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithQueryParams",
+		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"name":"foo","userUUID":"bar"}`),
-				bytes,
+				"name=foo&userUUID=bar",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
