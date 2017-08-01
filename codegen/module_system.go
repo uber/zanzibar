@@ -286,7 +286,7 @@ func (g *HTTPClientGenerator) Generate(
 		ExposedMethods:   exposedMethods,
 	}
 
-	client, err := g.templates.execTemplate(
+	client, err := g.templates.ExecTemplate(
 		"http_client.tmpl",
 		clientMeta,
 		g.packageHelper,
@@ -387,7 +387,7 @@ func (g *TChannelClientGenerator) Generate(
 		LogDownstream:    true,
 	}
 
-	client, err := g.templates.execTemplate(
+	client, err := g.templates.ExecTemplate(
 		"tchannel_client.tmpl",
 		clientMeta,
 		g.packageHelper,
@@ -400,7 +400,7 @@ func (g *TChannelClientGenerator) Generate(
 		)
 	}
 
-	server, err := g.templates.execTemplate(
+	server, err := g.templates.ExecTemplate(
 		"tchannel_client_test_server.tmpl",
 		clientMeta,
 		g.packageHelper,
@@ -643,7 +643,7 @@ func (g *EndpointGenerator) Generate(
 		ret["module/dependencies.go"] = dependencies
 	}
 
-	endpointCollection, err := g.templates.execTemplate(
+	endpointCollection, err := g.templates.ExecTemplate(
 		"endpoint_collection.tmpl",
 		&EndpointCollectionMeta{
 			Instance:     instance,
@@ -693,7 +693,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 				Instance: instance,
 				Spec:     m,
 			}
-			structs, err := g.templates.execTemplate(
+			structs, err := g.templates.ExecTemplate(
 				"structs.tmpl",
 				meta,
 				g.packageHelper,
@@ -754,9 +754,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	var endpoint []byte
 	if e.EndpointType == "http" {
-		endpoint, err = g.templates.execTemplate("endpoint.tmpl", meta, g.packageHelper)
+		endpoint, err = g.templates.ExecTemplate("endpoint.tmpl", meta, g.packageHelper)
 	} else if e.EndpointType == "tchannel" {
-		endpoint, err = g.templates.execTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
+		endpoint, err = g.templates.ExecTemplate("tchannel_endpoint.tmpl", meta, g.packageHelper)
 	} else {
 		err = errors.Errorf("Endpoint type '%s' is not supported", e.EndpointType)
 	}
@@ -912,7 +912,7 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		tempName = "endpoint_test_tchannel_client.tmpl"
 	}
 
-	endpointTest, err := g.templates.execTemplate(tempName, meta, g.packageHelper)
+	endpointTest, err := g.templates.ExecTemplate(tempName, meta, g.packageHelper)
 	if err != nil {
 		return errors.Wrap(err, "Error executing endpoint test template")
 	}
@@ -968,7 +968,7 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	// generate main.go
-	service, err := generator.templates.execTemplate(
+	service, err := generator.templates.ExecTemplate(
 		"service.tmpl",
 		instance,
 		generator.packageHelper,
@@ -981,7 +981,7 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	main, err := generator.templates.execTemplate(
+	main, err := generator.templates.ExecTemplate(
 		"main.tmpl",
 		instance,
 		generator.packageHelper,
@@ -995,7 +995,7 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	// generate main_test.go
-	mainTest, err := generator.templates.execTemplate(
+	mainTest, err := generator.templates.ExecTemplate(
 		"main_test.tmpl",
 		instance,
 		generator.packageHelper,
@@ -1074,7 +1074,7 @@ func GenerateDependencyStruct(
 		return nil, nil
 	}
 
-	return template.execTemplate(
+	return template.ExecTemplate(
 		"dependency_struct.tmpl",
 		instance,
 		packageHelper,
@@ -1089,7 +1089,7 @@ func GenerateInitializer(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	return template.execTemplate(
+	return template.ExecTemplate(
 		"module_initializer.tmpl",
 		instance,
 		packageHelper,
