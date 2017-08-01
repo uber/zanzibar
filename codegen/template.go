@@ -51,7 +51,7 @@ func (*defaultAssetCollection) Asset(assetName string) ([]byte, error) {
 	return templates.Asset(assetName)
 }
 
-var funcMap = tmpl.FuncMap{
+var defaultFuncMap = tmpl.FuncMap{
 	"lower":         strings.ToLower,
 	"title":         strings.Title,
 	"fullTypeName":  fullTypeName,
@@ -99,14 +99,18 @@ type Template struct {
 
 // NewDefaultTemplate creates a bundle of templates.
 func NewDefaultTemplate() (*Template, error) {
-	return NewTemplate(&defaultAssetCollection{})
+	return NewTemplate(
+		&defaultAssetCollection{},
+		defaultFuncMap,
+	)
 }
 
 // NewTemplate returns a template helper for the provided asset collection
 func NewTemplate(
 	assetProvider AssetProvider,
+	functionMap tmpl.FuncMap,
 ) (*Template, error) {
-	t := tmpl.New("main").Funcs(funcMap)
+	t := tmpl.New("main").Funcs(functionMap)
 	for _, file := range assetProvider.AssetNames() {
 		fileContent, err := assetProvider.Asset(file)
 		if err != nil {
