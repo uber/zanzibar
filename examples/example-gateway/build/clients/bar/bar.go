@@ -25,6 +25,7 @@ package barClient
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
@@ -512,7 +513,16 @@ func (c *barClient) ArgWithQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	queryValues := &url.Values{}
+	nameQuery := string(r.Name)
+	queryValues.Set("name", nameQuery)
+	if r.UserUUID != nil {
+		userUUIDQuery := string(*r.UserUUID)
+		queryValues.Set("userUUID", userUUIDQuery)
+	}
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

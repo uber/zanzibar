@@ -34,7 +34,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": null,
@@ -104,7 +105,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -156,7 +158,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -206,7 +209,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -266,11 +270,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": [
-						"if requestBody.Params == nil {",
-						"\trequestBody.Params = \u0026clientsBarBar.ParamsStruct{}",
-						"}"
-					],
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -320,7 +321,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -354,7 +356,7 @@
 				},
 				{
 					"Name": "argWithQueryParams",
-					"HTTPMethod": "POST",
+					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryParams",
 					"PathSegments": [
@@ -370,7 +372,17 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"queryValues := \u0026url.Values{}",
+						"nameQuery := string(r.Name)",
+						"queryValues.Set(\"name\", nameQuery)",
+						"if r.UserUUID != nil {",
+						"\tuserUUIDQuery := string(*r.UserUUID)",
+						"\tqueryValues.Set(\"userUUID\", userUUIDQuery)",
+						"}",
+						"fullURL += \"?\" + queryValues.Encode()"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -415,7 +427,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -485,7 +498,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -555,7 +569,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -625,7 +640,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -709,7 +725,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -756,7 +773,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -803,7 +821,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -850,7 +869,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -897,7 +917,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -944,7 +965,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -991,7 +1013,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1038,7 +1061,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1085,7 +1109,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1132,7 +1157,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1179,7 +1205,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1226,7 +1253,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1273,7 +1301,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1320,7 +1349,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1367,7 +1397,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1414,7 +1445,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
