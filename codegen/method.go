@@ -61,7 +61,10 @@ type MethodSpec struct {
 	IsEndpoint   bool
 
 	// Statements for reading query parameters.
-	QueryParamGoStatements []string
+	ParseQueryParamGoStatements []string
+
+	// Statements for writing query parameters
+	WriteQueryParamGoStatements []string
 
 	// Statements for reading request headers
 	ReqHeaderGoStatements []string
@@ -190,19 +193,16 @@ func NewMethod(
 	method.setValidStatusCodes()
 
 	if method.HTTPMethod == "GET" && method.RequestType != "" {
-		if !method.IsEndpoint {
-			hasNonParams := scanForNonParams(funcSpec)
-
-			if hasNonParams {
-				return nil, errors.Errorf(
-					"Not implemented: query parameter support for HTTP client",
-				)
+		if method.IsEndpoint {
+			err := method.setParseQueryParamStatements(funcSpec, packageHelper)
+			if err != nil {
+				return nil, err
 			}
-		}
-
-		err := method.setQueryParamStatements(funcSpec, packageHelper)
-		if err != nil {
-			return nil, err
+		} else {
+			err := method.setWriteQueryParamStatements(funcSpec, packageHelper)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -693,7 +693,98 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	return queryMethod
 }
 
-func (ms *MethodSpec) setQueryParamStatements(
+func getQueryEncodeExpression(typeSpec compile.TypeSpec) string {
+	var encodeExpression string
+
+	switch typeSpec.(type) {
+	case *compile.BoolSpec:
+		encodeExpression = "strconv.FormatBool"
+	case *compile.I8Spec:
+		encodeExpression = "strconv.Itoa"
+	case *compile.I16Spec:
+		encodeExpression = "strconv.Itoa"
+	case *compile.I32Spec:
+		encodeExpression = "strconv.Itoa"
+	case *compile.I64Spec:
+		encodeExpression = "strconv.Itoa"
+	case *compile.DoubleSpec:
+		encodeExpression = "strconv.FormatFloat"
+	case *compile.StringSpec:
+		encodeExpression = "string"
+	default:
+		panic(fmt.Sprintf(
+			"Unknown type (%T) %v for query string parameter",
+			typeSpec, typeSpec,
+		))
+	}
+
+	return encodeExpression
+}
+
+func (ms *MethodSpec) setWriteQueryParamStatements(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) error {
+	var statements LineBuilder
+	var hasQueryFields bool
+
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+
+		if _, ok := realType.(*compile.StructSpec); ok {
+			// If a field is a struct then skip
+
+			// TODO nil checks here.
+
+			return false
+		}
+
+		httpRefAnnotation := field.Annotations[antHTTPRef]
+		if httpRefAnnotation != "" {
+			return false
+		}
+
+		longQueryName := getLongQueryName(field, thriftPrefix)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		identifierName := camelCase(longQueryName) + "Query"
+		encodeFunc := getQueryEncodeExpression(realType)
+
+		if !hasQueryFields {
+			statements.append("queryValues := &url.Values{}")
+			hasQueryFields = true
+		}
+
+		if field.Required {
+			statements.appendf("%s := %s(r%s)",
+				identifierName, encodeFunc, longFieldName,
+			)
+			statements.appendf("queryValues.Set(\"%s\", %s)",
+				longQueryName, identifierName,
+			)
+		} else {
+			statements.appendf("if r%s != nil {", longFieldName)
+			statements.appendf("\t%s := %s(*r%s)",
+				identifierName, encodeFunc, longFieldName,
+			)
+			statements.appendf("\tqueryValues.Set(\"%s\", %s)",
+				longQueryName, identifierName,
+			)
+			statements.append("}")
+		}
+
+		return false
+	}
+	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
+
+	if hasQueryFields {
+		statements.append("fullURL += \"?\" + queryValues.Encode()")
+	}
+	ms.WriteQueryParamGoStatements = statements.GetLines()
+	return nil
+}
+
+func (ms *MethodSpec) setParseQueryParamStatements(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) error {
 	// If a thrift field has a http.ref annotation then we
@@ -727,14 +818,7 @@ func (ms *MethodSpec) setQueryParamStatements(
 			return false
 		}
 
-		var longQueryName string
-		if thriftPrefix == "" {
-			longQueryName = field.Name
-		} else if thriftPrefix[0] == '.' {
-			longQueryName = thriftPrefix[1:] + "." + field.Name
-		} else {
-			longQueryName = thriftPrefix + "." + field.Name
-		}
+		longQueryName := getLongQueryName(field, thriftPrefix)
 		identifierName := camelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
@@ -789,8 +873,21 @@ func (ms *MethodSpec) setQueryParamStatements(
 		return finalError
 	}
 
-	ms.QueryParamGoStatements = statements.GetLines()
+	ms.ParseQueryParamGoStatements = statements.GetLines()
 	return nil
+}
+
+func getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
+	var longQueryName string
+	if thriftPrefix == "" {
+		longQueryName = field.Name
+	} else if thriftPrefix[0] == '.' {
+		longQueryName = thriftPrefix[1:] + "." + field.Name
+	} else {
+		longQueryName = thriftPrefix + "." + field.Name
+	}
+
+	return longQueryName
 }
 
 func isRequestBoxed(f *compile.FunctionSpec) bool {
