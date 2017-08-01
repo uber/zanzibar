@@ -106,7 +106,7 @@ func (c *contactsClient) SaveContacts(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

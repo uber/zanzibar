@@ -251,7 +251,7 @@ func (c *barClient) ArgNotStruct(
 		}
 	}
 
-	return respHeaders, &zanzibar.RawHTTPError{
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -300,7 +300,7 @@ func (c *barClient) ArgWithHeaders(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -348,7 +348,7 @@ func (c *barClient) ArgWithManyQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -396,7 +396,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -444,7 +444,7 @@ func (c *barClient) ArgWithParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -492,7 +492,7 @@ func (c *barClient) ArgWithQueryHeader(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -540,7 +540,7 @@ func (c *barClient) ArgWithQueryParams(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -602,7 +602,7 @@ func (c *barClient) MissingArg(
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -664,7 +664,7 @@ func (c *barClient) NoRequest(
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -727,7 +727,7 @@ func (c *barClient) Normal(
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -790,7 +790,7 @@ func (c *barClient) TooManyArgs(
 		}
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -838,7 +838,7 @@ func (c *barClient) EchoBinary(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -886,7 +886,7 @@ func (c *barClient) EchoBool(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -934,7 +934,7 @@ func (c *barClient) EchoDouble(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -982,7 +982,7 @@ func (c *barClient) EchoEnum(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1030,7 +1030,7 @@ func (c *barClient) EchoI16(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1078,7 +1078,7 @@ func (c *barClient) EchoI32(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1126,7 +1126,7 @@ func (c *barClient) EchoI64(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1174,7 +1174,7 @@ func (c *barClient) EchoI8(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1222,7 +1222,7 @@ func (c *barClient) EchoString(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1270,7 +1270,7 @@ func (c *barClient) EchoStringList(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1318,7 +1318,7 @@ func (c *barClient) EchoStringMap(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1366,7 +1366,7 @@ func (c *barClient) EchoStringSet(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1414,7 +1414,7 @@ func (c *barClient) EchoStructList(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1471,7 +1471,7 @@ func (c *barClient) EchoStructMap(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1519,7 +1519,7 @@ func (c *barClient) EchoStructSet(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -1567,7 +1567,7 @@ func (c *barClient) EchoTypedef(
 		return responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, &zanzibar.RawHTTPError{
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

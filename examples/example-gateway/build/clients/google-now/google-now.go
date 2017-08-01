@@ -110,7 +110,7 @@ func (c *googleNowClient) AddCredentials(
 		return respHeaders, nil
 	}
 
-	return respHeaders, &zanzibar.RawHTTPError{
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}
@@ -156,7 +156,7 @@ func (c *googleNowClient) CheckCredentials(
 		return respHeaders, nil
 	}
 
-	return respHeaders, &zanzibar.RawHTTPError{
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

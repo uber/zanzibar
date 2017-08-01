@@ -1035,7 +1035,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.RawHTTPError{
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody: res.GetRawBody(),
 	}
@@ -1055,7 +1055,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6198, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
