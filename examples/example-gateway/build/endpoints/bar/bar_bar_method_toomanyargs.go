@@ -26,32 +26,19 @@ package barEndpoint
 import (
 	"context"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/clients"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
+	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
-
-	 "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
-
-
 )
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
 type BarTooManyArgsHandler struct {
 	Clients *module.ClientDependencies
-
-)
-
-// TooManyArgsHandler is the handler for "/bar/too-many-args-path"
-type TooManyArgsHandler struct {
-	Clients *clients.Clients
 }
 
 // NewBarTooManyArgsHandler creates a handler
