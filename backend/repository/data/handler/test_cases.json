@@ -1,0 +1,840 @@
+[
+	{
+		"name": "create-diff",
+		"request": {
+			"method": "POST",
+			"url": "/create-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"client_updates": [
+					{
+						"clientTimeout": 1000,
+						"clientTimeoutPerAttempt": 1000,
+						"exposedMethods": {
+							"Call": "SimpleService::call",
+							"Compare": "SimpleService::compare",
+							"DeliberateDiffNoop": "SimpleService::sillyNoop",
+							"EchoBinary": "SecondService::echoBinary",
+							"EchoBool": "SecondService::echoBool",
+							"EchoDouble": "SecondService::echoDouble",
+							"EchoEnum": "SecondService::echoEnum",
+							"EchoI16": "SecondService::echoI16",
+							"EchoI32": "SecondService::echoI32",
+							"EchoI64": "SecondService::echoI64",
+							"EchoI8": "SecondService::echoI8",
+							"EchoString": "SecondService::echoString",
+							"EchoStringList": "SecondService::echoStringList",
+							"EchoStringMap": "SecondService::echoStringMap",
+							"EchoStringSet": "SecondService::echoStringSet",
+							"EchoStructList": "SecondService::echoStructList",
+							"EchoStructMap": "SecondService::echoStructMap",
+							"EchoStructSet": "SecondService::echoStructSet",
+							"EchoTypedef": "SecondService::echoTypedef",
+							"Ping": "SimpleService::ping"
+						},
+						"ip": "127.0.0.1",
+						"name": "baz",
+						"port": 4002,
+						"serviceName": "Qux",
+						"thriftFile": "clients/baz/baz.thrift",
+						"type": "tchannel"
+					}
+				],
+				"endpoint_updates": [
+					{
+						"clientID": "baz",
+						"clientMethod": "Compare",
+						"endpointId": "baz",
+						"endpointType": "http",
+						"handleId": "compare",
+						"middlewares": [],
+						"reqHeaderMap": {},
+						"resHeaderMap": {},
+						"testFixtures": [],
+						"thriftFile": "endpoints/baz/baz.thrift",
+						"thriftFileSha": "{{placeholder}}",
+						"thriftMethodName": "SimpleService::compare",
+						"workflowType": "tchannelClient"
+					}
+				],
+				"thrift_files": [
+					"clients/baz/baz.thrift"
+				]
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"diff_uri": "http://diff-for-example-gateway"
+			}
+		}
+	},
+	{
+		"name": "get-gateway-config",
+		"request": {
+			"method": "GET",
+			"url": "/gateways"
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"example-gateway": {
+					"ClientConfigDir": "./clients",
+					"Clients": {
+						"bar": {
+							"exposedMethods": {
+								"ArgNotStruct": "Bar::argNotStruct",
+								"ArgWithHeaders": "Bar::argWithHeaders",
+								"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
+								"ArgWithNestedQueryParams": "Bar::argWithNestedQueryParams",
+								"ArgWithParams": "Bar::argWithParams",
+								"ArgWithQueryHeader": "Bar::argWithQueryHeader",
+								"ArgWithQueryParams": "Bar::argWithQueryParams",
+								"EchoBinary": "Echo::echoBinary",
+								"EchoBool": "Echo::echoBool",
+								"EchoDouble": "Echo::echoDouble",
+								"EchoEnum": "Echo::echoEnum",
+								"EchoI16": "Echo::echoI16",
+								"EchoI32": "Echo::echoI32",
+								"EchoI64": "Echo::echoI64",
+								"EchoI8": "Echo::echoI8",
+								"EchoString": "Echo::echoString",
+								"EchoStringList": "Echo::echoStringList",
+								"EchoStringMap": "Echo::echoStringMap",
+								"EchoStringSet": "Echo::echoStringSet",
+								"EchoStructList": "Echo::echoStructList",
+								"EchoStructMap": "Echo::echoStructMap",
+								"EchoStructSet": "Echo::echoStructSet",
+								"EchoTypedef": "Echo::echoTypedef",
+								"MissingArg": "Bar::missingArg",
+								"NoRequest": "Bar::noRequest",
+								"Normal": "Bar::normal",
+								"TooManyArgs": "Bar::tooManyArgs"
+							},
+							"ip": "127.0.0.1",
+							"name": "bar",
+							"port": 4001,
+							"thriftFile": "clients/bar/bar.thrift",
+							"type": "http"
+						},
+						"baz": {
+							"clientTimeout": 1000,
+							"clientTimeoutPerAttempt": 1000,
+							"exposedMethods": {
+								"Call": "SimpleService::call",
+								"Compare": "SimpleService::compare",
+								"DeliberateDiffNoop": "SimpleService::sillyNoop",
+								"EchoBinary": "SecondService::echoBinary",
+								"EchoBool": "SecondService::echoBool",
+								"EchoDouble": "SecondService::echoDouble",
+								"EchoEnum": "SecondService::echoEnum",
+								"EchoI16": "SecondService::echoI16",
+								"EchoI32": "SecondService::echoI32",
+								"EchoI64": "SecondService::echoI64",
+								"EchoI8": "SecondService::echoI8",
+								"EchoString": "SecondService::echoString",
+								"EchoStringList": "SecondService::echoStringList",
+								"EchoStringMap": "SecondService::echoStringMap",
+								"EchoStringSet": "SecondService::echoStringSet",
+								"EchoStructList": "SecondService::echoStructList",
+								"EchoStructMap": "SecondService::echoStructMap",
+								"EchoStructSet": "SecondService::echoStructSet",
+								"EchoTypedef": "SecondService::echoTypedef",
+								"Ping": "SimpleService::ping"
+							},
+							"ip": "127.0.0.1",
+							"name": "baz",
+							"port": 4002,
+							"serviceName": "Qux",
+							"thriftFile": "clients/baz/baz.thrift",
+							"type": "tchannel"
+						},
+						"contacts": {
+							"exposedMethods": {
+								"SaveContacts": "Contacts::saveContacts"
+							},
+							"ip": "127.0.0.1",
+							"name": "contacts",
+							"port": 4000,
+							"thriftFile": "clients/contacts/contacts.thrift",
+							"type": "http"
+						},
+						"google-now": {
+							"exposedMethods": {
+								"AddCredentials": "GoogleNowService::addCredentials",
+								"CheckCredentials": "GoogleNowService::checkCredentials"
+							},
+							"ip": "127.0.0.1",
+							"name": "google-now",
+							"port": 14120,
+							"thriftFile": "clients/googlenow/googlenow.thrift",
+							"type": "http"
+						},
+						"quux": {
+							"name": "quux",
+							"type": "custom"
+						}
+					},
+					"EndpointConfigDir": "./endpoints",
+					"Endpoints": {
+						"bar.argNotStruct": {
+							"clientID": "bar",
+							"clientMethod": "ArgNotStruct",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argNotStruct",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argNotStruct",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithHeaders": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithHeaders",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithHeaders",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithHeaders",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithManyQueryParams": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithManyQueryParams",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithManyQueryParams",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithManyQueryParams",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithNestedQueryParams": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithNestedQueryParams",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithNestedQueryParams",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithNestedQueryParams",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithParams": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithParams",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithParams",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithParams",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithQueryHeader": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithQueryHeader",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithQueryHeader",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithQueryHeader",
+							"workflowType": "httpClient"
+						},
+						"bar.argWithQueryParams": {
+							"clientID": "bar",
+							"clientMethod": "ArgWithQueryParams",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "argWithQueryParams",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::argWithQueryParams",
+							"workflowType": "httpClient"
+						},
+						"bar.missingArg": {
+							"clientID": "bar",
+							"clientMethod": "MissingArg",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "missingArg",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::missingArg",
+							"workflowType": "httpClient"
+						},
+						"bar.noRequest": {
+							"clientID": "bar",
+							"clientMethod": "NoRequest",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "noRequest",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::noRequest",
+							"workflowType": "httpClient"
+						},
+						"bar.normal": {
+							"clientID": "bar",
+							"clientMethod": "Normal",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "normal",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::normal",
+							"workflowType": "httpClient"
+						},
+						"bar.tooManyArgs": {
+							"clientID": "bar",
+							"clientMethod": "TooManyArgs",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "tooManyArgs",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::tooManyArgs",
+							"workflowType": "httpClient"
+						},
+						"baz.call": {
+							"clientID": "baz",
+							"clientMethod": "Call",
+							"endpointId": "baz",
+							"endpointType": "http",
+							"handleId": "call",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/baz/baz.thrift",
+							"thriftMethodName": "SimpleService::call",
+							"workflowType": "tchannelClient"
+						},
+						"baz.compare": {
+							"clientID": "baz",
+							"clientMethod": "Compare",
+							"endpointId": "baz",
+							"endpointType": "http",
+							"handleId": "compare",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/baz/baz.thrift",
+							"thriftMethodName": "SimpleService::compare",
+							"workflowType": "tchannelClient"
+						},
+						"baz.ping": {
+							"clientID": "baz",
+							"clientMethod": "Ping",
+							"endpointId": "baz",
+							"endpointType": "http",
+							"handleId": "ping",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/baz/baz.thrift",
+							"thriftMethodName": "SimpleService::ping",
+							"workflowType": "tchannelClient"
+						},
+						"baz.sillyNoop": {
+							"clientID": "baz",
+							"clientMethod": "DeliberateDiffNoop",
+							"endpointId": "baz",
+							"endpointType": "http",
+							"handleId": "sillyNoop",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/baz/baz.thrift",
+							"thriftMethodName": "SimpleService::sillyNoop",
+							"workflowType": "tchannelClient"
+						},
+						"bazTChannel.call": {
+							"clientID": "",
+							"clientMethod": "",
+							"endpointId": "bazTChannel",
+							"endpointType": "tchannel",
+							"handleId": "call",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/tchannel/baz/baz.thrift",
+							"thriftMethodName": "SimpleService::Call",
+							"workflowType": "custom"
+						},
+						"contacts.saveContacts": {
+							"clientID": "",
+							"clientMethod": "",
+							"endpointId": "contacts",
+							"endpointType": "http",
+							"handleId": "saveContacts",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/contacts/contacts.thrift",
+							"thriftMethodName": "Contacts::saveContacts",
+							"workflowType": "custom"
+						},
+						"googlenow.addCredentials": {
+							"clientID": "google-now",
+							"clientMethod": "AddCredentials",
+							"endpointId": "googlenow",
+							"endpointType": "http",
+							"handleId": "addCredentials",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/googlenow/googlenow.thrift",
+							"thriftMethodName": "GoogleNow::addCredentials",
+							"workflowType": "httpClient"
+						},
+						"googlenow.checkCredentials": {
+							"clientID": "google-now",
+							"clientMethod": "CheckCredentials",
+							"endpointId": "googlenow",
+							"endpointType": "http",
+							"handleId": "checkCredentials",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/googlenow/googlenow.thrift",
+							"thriftMethodName": "GoogleNow::checkCredentials",
+							"workflowType": "httpClient"
+						}
+					},
+					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
+					"ID": "example-gateway",
+					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+					"Middlewares": null,
+					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
+					"Repository": "example-gateway",
+					"TargetGenDir": "./build",
+					"Team": "",
+					"ThriftRootDir": "./idl",
+					"ThriftServices": {
+						"clients/bar/bar.thrift": {
+							"Bar": {
+								"Methods": [
+									{
+										"Name": "argNotStruct",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithHeaders",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithManyQueryParams",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithNestedQueryParams",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithParams",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithQueryHeader",
+										"Type": "http"
+									},
+									{
+										"Name": "argWithQueryParams",
+										"Type": "http"
+									},
+									{
+										"Name": "missingArg",
+										"Type": "http"
+									},
+									{
+										"Name": "noRequest",
+										"Type": "http"
+									},
+									{
+										"Name": "normal",
+										"Type": "http"
+									},
+									{
+										"Name": "tooManyArgs",
+										"Type": "http"
+									}
+								],
+								"Name": "Bar",
+								"Path": "clients/bar/bar.thrift"
+							},
+							"Echo": {
+								"Methods": [
+									{
+										"Name": "echoBinary",
+										"Type": "http"
+									},
+									{
+										"Name": "echoBool",
+										"Type": "http"
+									},
+									{
+										"Name": "echoDouble",
+										"Type": "http"
+									},
+									{
+										"Name": "echoEnum",
+										"Type": "http"
+									},
+									{
+										"Name": "echoI16",
+										"Type": "http"
+									},
+									{
+										"Name": "echoI32",
+										"Type": "http"
+									},
+									{
+										"Name": "echoI64",
+										"Type": "http"
+									},
+									{
+										"Name": "echoI8",
+										"Type": "http"
+									},
+									{
+										"Name": "echoString",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStringList",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStringMap",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStringSet",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStructList",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStructMap",
+										"Type": "http"
+									},
+									{
+										"Name": "echoStructSet",
+										"Type": "http"
+									},
+									{
+										"Name": "echoTypedef",
+										"Type": "http"
+									}
+								],
+								"Name": "Echo",
+								"Path": "clients/bar/bar.thrift"
+							}
+						},
+						"clients/baz/base.thrift": {},
+						"clients/baz/baz.thrift": {
+							"SecondService": {
+								"Methods": [
+									{
+										"Name": "echoBinary",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoBool",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoDouble",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoEnum",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoI16",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoI32",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoI64",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoI8",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoString",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStringList",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStringMap",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStringSet",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStructList",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStructMap",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoStructSet",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "echoTypedef",
+										"Type": "tchannel"
+									}
+								],
+								"Name": "SecondService",
+								"Path": "clients/baz/baz.thrift"
+							},
+							"SimpleService": {
+								"Methods": [
+									{
+										"Name": "call",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "compare",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "ping",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "sillyNoop",
+										"Type": "tchannel"
+									}
+								],
+								"Name": "SimpleService",
+								"Path": "clients/baz/baz.thrift"
+							}
+						},
+						"clients/contacts/contacts.thrift": {
+							"Contacts": {
+								"Methods": [
+									{
+										"Name": "saveContacts",
+										"Type": "http"
+									}
+								],
+								"Name": "Contacts",
+								"Path": "clients/contacts/contacts.thrift"
+							}
+						},
+						"clients/foo/foo.thrift": {},
+						"clients/googlenow/googlenow.thrift": {
+							"GoogleNowService": {
+								"Methods": [
+									{
+										"Name": "addCredentials",
+										"Type": "http"
+									},
+									{
+										"Name": "checkCredentials",
+										"Type": "http"
+									}
+								],
+								"Name": "GoogleNowService",
+								"Path": "clients/googlenow/googlenow.thrift"
+							}
+						},
+						"endpoints/bar/bar.thrift": {
+							"Bar": {
+								"Methods": [
+									{
+										"Name": "argNotStruct",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithHeaders",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithManyQueryParams",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithNestedQueryParams",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithParams",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithQueryHeader",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "argWithQueryParams",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "missingArg",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "noRequest",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "normal",
+										"Type": "tchannel"
+									},
+									{
+										"Name": "tooManyArgs",
+										"Type": "tchannel"
+									}
+								],
+								"Name": "Bar",
+								"Path": "endpoints/bar/bar.thrift"
+							}
+						},
+						"endpoints/baz/baz.thrift": {
+							"SimpleService": {
+								"Methods": [
+									{
+										"Name": "call",
+										"Type": "http"
+									},
+									{
+										"Name": "compare",
+										"Type": "http"
+									},
+									{
+										"Name": "ping",
+										"Type": "http"
+									},
+									{
+										"Name": "sillyNoop",
+										"Type": "http"
+									}
+								],
+								"Name": "SimpleService",
+								"Path": "endpoints/baz/baz.thrift"
+							}
+						},
+						"endpoints/contacts/contacts.thrift": {
+							"Contacts": {
+								"Methods": [
+									{
+										"Name": "saveContacts",
+										"Type": "http"
+									}
+								],
+								"Name": "Contacts",
+								"Path": "endpoints/contacts/contacts.thrift"
+							}
+						},
+						"endpoints/foo/foo.thrift": {},
+						"endpoints/googlenow/googlenow.thrift": {
+							"GoogleNow": {
+								"Methods": [
+									{
+										"Name": "addCredentials",
+										"Type": "http"
+									},
+									{
+										"Name": "checkCredentials",
+										"Type": "http"
+									}
+								],
+								"Name": "GoogleNow",
+								"Path": "endpoints/googlenow/googlenow.thrift"
+							}
+						},
+						"endpoints/tchannel/baz/baz.thrift": {
+							"SimpleService": {
+								"Methods": [
+									{
+										"Name": "Call",
+										"Type": "http"
+									},
+									{
+										"Name": "Compare",
+										"Type": "http"
+									},
+									{
+										"Name": "Ping",
+										"Type": "http"
+									},
+									{
+										"Name": "SillyNoop",
+										"Type": "http"
+									}
+								],
+								"Name": "SimpleService",
+								"Path": "endpoints/tchannel/baz/baz.thrift"
+							}
+						}
+					},
+					"Tier": 0
+				}
+			}
+		}
+	}
+]
