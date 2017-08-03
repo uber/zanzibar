@@ -619,11 +619,18 @@ func (c *TypeConverter) GenStructConverter(
 	fieldMap map[string]FieldMapperEntry,
 ) error {
 	// Add compiled FieldSpecs to the FieldMapperEntry
-	fieldMap, err := addSpecToMap(fieldMap, fromFields, "")
-	if err != nil {
-		return err
+	fieldMap = addSpecToMap(fieldMap, fromFields, "")
+	// Check for vlaues not populated recursively by addSpecToMap
+	for k, v := range fieldMap {
+		if fieldMap[k].Field == nil {
+			return errors.Errorf(
+				"Failed to find field ( %s ) for transform.",
+				v.QualifiedName,
+			)
+		}
 	}
-	err = c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
+
+	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
 	if err != nil {
 		return err
 	}
@@ -646,27 +653,22 @@ func addSpecToMap(
 	overrideMap map[string]FieldMapperEntry,
 	fields compile.FieldGroup,
 	prefix string,
-) (map[string]FieldMapperEntry, error) {
+) map[string]FieldMapperEntry {
 	for k, v := range overrideMap {
 		for _, spec := range fields {
 			fieldQualName := prefix + pascalCase(spec.Name)
 			if v.QualifiedName == fieldQualName {
 				v.Field = spec
 				overrideMap[k] = v
+				break
 			} else if strings.HasPrefix(v.QualifiedName, fieldQualName) {
-				overrideMap, _ = addSpecToMap(
+				overrideMap = addSpecToMap(
 					overrideMap,
 					spec.Type.(*compile.StructSpec).Fields,
 					fieldQualName+".",
 				)
 			}
 		}
-		if overrideMap[k].Field == nil {
-			return overrideMap, errors.Errorf(
-				"Failed to find field ( %s ) for transform.",
-				v.QualifiedName,
-			)
-		}
 	}
-	return overrideMap, nil
+	return overrideMap
 }
