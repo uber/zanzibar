@@ -326,7 +326,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	)
 	gateway.MetricsScope = gateway.RootScope.SubScope("all-workers")
 	gateway.PerWorkerMetricsScope = gateway.RootScope.SubScope("per-worker").Tagged(map[string]string{
-		"host": getHostname(),
+		"host": GetHostname(),
 	})
 
 	// start collecting runtime metrics
@@ -401,7 +401,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
-	host := getHostname()
+	host := GetHostname()
 
 	datacenter := gateway.Config.MustGetString("datacenter")
 
@@ -500,7 +500,8 @@ func GetDirnameFromRuntimeCaller(file string) string {
 	return filepath.Join(os.Getenv("GOPATH"), "src", dirname)
 }
 
-func getHostname() string {
+// GetHostname returns hostname
+func GetHostname() string {
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unknown"

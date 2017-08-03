@@ -28,11 +28,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
-
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/test/lib"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func TestCallMetrics(t *testing.T) {
@@ -106,7 +106,7 @@ func TestCallMetrics(t *testing.T) {
 		"env":             "test",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService::call",
-		"host":            lib.GetHostname(),
+		"host":            zanzibar.GetHostname(),
 	}
 
 	latencyMetric := metrics[0]

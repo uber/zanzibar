@@ -29,6 +29,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -296,7 +297,7 @@ func TestRuntimeMetrics(t *testing.T) {
 		expectedTags := map[string]string{
 			"env":     "test",
 			"service": "test-gateway",
-			"host":    lib.GetHostname(),
+			"host":    zanzibar.GetHostname(),
 		}
 		for tag := range tags {
 			assert.Equal(t, expectedTags[tag.GetTagName()], tag.GetTagValue(), "expected tag value to be correct")
