@@ -1,5 +1,5 @@
-hash: 815cb7302675a73cd0223fda54ae7456e4c2bc9afc0cb828f348fdbd1c899526
-updated: 2017-08-03T15:29:27.397456819-07:00
+hash: 5bd8f923639f0f7014bbf186ae4a4cf0028e87ec2f2fd01f00fca2406fd35682
+updated: 2017-08-03T16:20:53.117457421-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -50,7 +50,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
   subpackages:
   - assert
   - require
