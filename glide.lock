@@ -1,5 +1,5 @@
-hash: 9c89b932f9af1747c2e0fa0757019541e3260c81e87ca7ca2a8747cbe77e436e
-updated: 2017-06-26T16:24:37.132113705-07:00
+hash: 815cb7302675a73cd0223fda54ae7456e4c2bc9afc0cb828f348fdbd1c899526
+updated: 2017-08-03T15:29:27.397456819-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 5695738f733662da3e9afc2283bba6f3c879002d
+  version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -50,10 +50,9 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
   - assert
-  - mock
   - require
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
@@ -77,6 +76,8 @@ imports:
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/thriftrw
   version: bbc73fe4e851cac67043d021242eb03920c2f1dd
+  repo: git@github.com:Raynos/thriftrw-go
+  vcs: git
   subpackages:
   - ast
   - compile
@@ -112,7 +113,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
   subpackages:
   - context
 testImports: []
