@@ -47,3 +47,4 @@ import:
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - package: github.com/stretchr/testify
   version: f6abca593680b2315d2075e0f5e2a9751e3f431a
+- package: github.com/wacul/ptr

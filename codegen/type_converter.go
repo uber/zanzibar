@@ -185,7 +185,7 @@ func (c *TypeConverter) genConverterForPrimitive(
 		c.assignWithOverride(
 			indent,
 			toIdentifier,
-			fmt.Sprintf("(*%s)", typeName),
+			fmt.Sprintf("ptr.*%s", pascalCase(typeName)),
 			fromIdentifier,
 			overriddenIdentifier,
 		)
@@ -540,7 +540,7 @@ func (c *TypeConverter) genStructConverter(
 				c.assignWithOverride(
 					indent,
 					toIdentifier,
-					fmt.Sprintf("(*%s)", typeName),
+					fmt.Sprintf("ptr.%s", pascalCase(typeName)),
 					fromIdentifier,
 					overriddenIdentifier,
 				)
