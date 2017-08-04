@@ -33,10 +33,11 @@ import (
 // ClientHTTPResponse is the struct managing the client response
 // when making outbound http calls.
 type ClientHTTPResponse struct {
-	req         *ClientHTTPRequest
-	finishTime  time.Time
-	finished    bool
-	rawResponse *http.Response
+	req              *ClientHTTPRequest
+	finishTime       time.Time
+	finished         bool
+	rawResponse      *http.Response
+	rawResponseBytes []byte
 
 	StatusCode int
 	Header     http.Header
@@ -83,7 +84,13 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 		)
 	}
 
+	res.rawResponseBytes = rawBody
 	return rawBody, nil
+}
+
+// GetRawBody returns the body as byte array if it has been read.
+func (res *ClientHTTPResponse) GetRawBody() []byte {
+	return res.rawResponseBytes
 }
 
 // ReadAndUnmarshalBody will try to unmarshal non pointer value or fail

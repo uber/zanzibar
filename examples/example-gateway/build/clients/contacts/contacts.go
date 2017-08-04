@@ -27,7 +27,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/pkg/errors"
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -107,7 +106,8 @@ func (c *contactsClient) SaveContacts(
 		return &responseBody, respHeaders, nil
 	}
 
-	return defaultRes, respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
 }

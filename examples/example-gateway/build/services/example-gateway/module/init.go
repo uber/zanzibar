@@ -41,16 +41,22 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-// clientDependencies contains client dependencies
-type clientDependencies struct {
+// DependenciesTree contains all deps for this service.
+type DependenciesTree struct {
+	Client   *ClientDependenciesNodes
+	Endpoint *EndpointDependenciesNodes
+}
+
+// ClientDependenciesNodes contains client dependencies
+type ClientDependenciesNodes struct {
 	Bar       barClientGenerated.Client
 	Baz       bazClientGenerated.Client
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
 }
 
-// endpointDependencies contains endpoint dependencies
-type endpointDependencies struct {
+// EndpointDependenciesNodes contains endpoint dependencies
+type EndpointDependenciesNodes struct {
 	Bar         barEndpointGenerated.Endpoint
 	Baz         bazEndpointGenerated.Endpoint
 	BazTChannel baztchannelEndpointGenerated.Endpoint
@@ -60,14 +66,19 @@ type endpointDependencies struct {
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the example-gateway service
-func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
-	initializedClientDependencies := &clientDependencies{}
+func InitializeDependencies(
+	gateway *zanzibar.Gateway,
+) (*DependenciesTree, *Dependencies) {
+	tree := &DependenciesTree{}
+	initializedClientDependencies := &ClientDependenciesNodes{}
+	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
 	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway)
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
 
-	initializedEndpointDependencies := &endpointDependencies{}
+	initializedEndpointDependencies := &EndpointDependenciesNodes{}
+	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -94,7 +105,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 		},
 	})
 
-	return &Dependencies{
+	return tree, &Dependencies{
 		Endpoint: &EndpointDependencies{
 			Bar:         initializedEndpointDependencies.Bar,
 			Baz:         initializedEndpointDependencies.Baz,

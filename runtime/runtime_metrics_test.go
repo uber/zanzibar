@@ -21,47 +21,26 @@
 package zanzibar
 
 import (
-	"net/http"
-	"strconv"
+	"testing"
+	"time"
 
-	"go.uber.org/zap"
+	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 )
 
-// HTTPClient defines a http client.
-type HTTPClient struct {
-	gateway *Gateway
-
-	Client  *http.Client
-	Logger  *zap.Logger
-	BaseURL string
-}
-
-// UnexpectedHTTPError defines an error for HTTP
-type UnexpectedHTTPError struct {
-	StatusCode int
-	RawBody    []byte
-}
-
-func (rawErr *UnexpectedHTTPError) Error() string {
-	return "Unexpected http client response (" +
-		strconv.Itoa(rawErr.StatusCode) + ")"
-}
-
-// NewHTTPClient will allocate a http client.
-func NewHTTPClient(
-	gateway *Gateway, baseURL string,
-) *HTTPClient {
-	return &HTTPClient{
-		gateway: gateway,
-
-		Logger: gateway.Logger,
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-		},
-		BaseURL: baseURL,
+func TestRuntimeCollector_IsRunning(t *testing.T) {
+	opts := RuntimeMetricsOptions{
+		EnableCPUMetrics: true,
+		EnableMemMetrics: true,
+		EnableGCMetrics:  true,
+		CollectInterval:  time.Second,
 	}
+	rm := StartRuntimeMetricsCollector(opts, tally.NoopScope)
+	assert.True(t, rm.IsRunning())
+
+	rm.Start()
+	assert.True(t, rm.IsRunning())
+
+	rm.Stop()
+	assert.False(t, rm.IsRunning())
 }

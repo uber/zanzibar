@@ -22,14 +22,44 @@ package repository
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	testlib "github.com/uber/zanzibar/test/lib"
 )
 
+// initThriftMetaInExampleIDL initializes the idls.json file for 'example-gateway/idl'.
+// Run this function when new IDLs are added into 'example-gateway/idl'.
+func initThriftMetaInExampleIDL(t *testing.T) {
+	src := "../../examples/example-gateway/idl/"
+	meta := map[string]*ThriftMeta{}
+	walkFn := func(path string, info os.FileInfo, err error) error {
+		if err != nil || src == path {
+			return err
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		meta[rel] = &ThriftMeta{
+			Path:    rel,
+			Version: "v1",
+		}
+		return nil
+	}
+	assert.NoError(t, filepath.Walk(src, walkFn))
+	if err := writeToJSONFile(filepath.Join(src, "..", "idls.json"), meta); err != nil {
+		t.Fatalf("failed to write json %s", err)
+	}
+}
+
 func TestThriftConfig(t *testing.T) {
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
@@ -49,8 +79,8 @@ func TestThriftConfig(t *testing.T) {
 }
 
 func TestThriftVersion(t *testing.T) {
-
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}
@@ -78,7 +108,8 @@ func TestWriteThriftFileAndConfig(t *testing.T) {
 		},
 	}
 
-	tempDir, err := copyExample(t)
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
 		return
 	}

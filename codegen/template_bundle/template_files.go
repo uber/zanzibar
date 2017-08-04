@@ -1035,9 +1035,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{end}}
 
-	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, errors.Errorf(
-		"Unexpected http client response (%d)", res.StatusCode,
-	)
+	return {{if ne .ResponseType ""}}defaultRes, {{end}}respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody: res.GetRawBody(),
+	}
 }
 {{end}}
 {{end}} {{- /* <range .Methods> */ -}}
@@ -1054,7 +1055,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6188, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1102,7 +1103,7 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 	
-	gateway, err := service.CreateGateway(config, nil)
+	gateway, _, err := service.CreateGateway(config, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1158,7 +1159,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1971, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1974, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1274,10 +1275,17 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
+// DependenciesTree contains all deps for this service.
+type DependenciesTree struct {
+	{{range $idx, $className := $instance.DependencyOrder -}}
+	{{$className | title}} *{{$className | title}}DependenciesNodes
+	{{end -}}
+}
+
 {{range $idx, $className := $instance.DependencyOrder -}}
 {{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}Dependencies contains {{$className}} dependencies
-type {{$className}}Dependencies struct {
+// {{$className | title}}DependenciesNodes contains {{$className}} dependencies
+type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
 	{{end -}}
@@ -1286,13 +1294,18 @@ type {{$className}}Dependencies struct {
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the {{$instance.InstanceName}} {{$instance.ClassName}}
-func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
+func InitializeDependencies(
+	gateway *zanzibar.Gateway,
+) (*DependenciesTree, *Dependencies) {
 	{{- if not $instance.HasDependencies}}
-	return {{$instance.PackageInfo.ExportName}}(gateway)
+	return nil, {{$instance.PackageInfo.ExportName}}(gateway)
 	{{- else}}
+	tree := &DependenciesTree{}
+
 	{{- range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
-	initialized{{$className | pascal}}Dependencies := &{{$className}}Dependencies{}
+	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
+	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- if $dependency.HasDependencies}}
@@ -1311,7 +1324,7 @@ func InitializeDependencies(gateway *zanzibar.Gateway) *Dependencies {
 	{{- end}}
 	{{end}}
 
-	return &Dependencies{
+	return tree, &Dependencies{
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1334,7 +1347,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2942, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3350, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1355,24 +1368,27 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
+// DependenciesTree re-exported for convenience.
+type DependenciesTree module.DependenciesTree
+
 // CreateGateway creates a new instances of the {{$instance.InstanceName}}
 // service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
 	opts *zanzibar.Options,
-) (*zanzibar.Gateway, error) {
+) (*zanzibar.Gateway, interface{}, error) {
 	gateway, err := zanzibar.CreateGateway(config, opts)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	dependencies := module.InitializeDependencies(gateway)
+	tree, dependencies := module.InitializeDependencies(gateway)
 	registerErr := registerEndpoints(gateway, dependencies)
 	if registerErr != nil {
-		return nil, registerErr
+		return nil, nil, registerErr
 	}
 
-	return gateway, nil
+	return gateway, (*DependenciesTree)(tree), nil
 }
 
 func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
@@ -1396,7 +1412,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1118, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1270, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

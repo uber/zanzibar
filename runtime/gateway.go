@@ -23,6 +23,7 @@ package zanzibar
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -31,8 +32,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	"io/ioutil"
 
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
@@ -54,28 +53,31 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort         int32
-	TChannelPort     int32
-	RealHTTPPort     int32
-	RealHTTPAddr     string
-	RealTChannelPort int32
-	RealTChannelAddr string
-	WaitGroup        *sync.WaitGroup
-	Channel          *tchannel.Channel
-	Logger           *zap.Logger
-	MetricScope      tally.Scope
-	ServiceName      string
-	Config           *StaticConfig
-	HTTPRouter       *HTTPRouter
-	TChannelRouter   *TChannelRouter
+	HTTPPort              int32
+	TChannelPort          int32
+	RealHTTPPort          int32
+	RealHTTPAddr          string
+	RealTChannelPort      int32
+	RealTChannelAddr      string
+	WaitGroup             *sync.WaitGroup
+	Channel               *tchannel.Channel
+	Logger                *zap.Logger
+	RootScope             tally.Scope
+	MetricsScope          tally.Scope
+	PerWorkerMetricsScope tally.Scope
+	ServiceName           string
+	Config                *StaticConfig
+	HTTPRouter            *HTTPRouter
+	TChannelRouter        *TChannelRouter
 
-	loggerFile        *os.File
-	metricScopeCloser io.Closer
-	metricsBackend    tally.CachedStatsReporter
-	logWriter         zapcore.WriteSyncer
-	httpServer        *HTTPServer
-	localHTTPServer   *HTTPServer
-	tchannelServer    *tchannel.Channel
+	loggerFile      *os.File
+	scopeCloser     io.Closer
+	metricsBackend  tally.CachedStatsReporter
+	runtimeMetrics  RuntimeMetricsCollector
+	logWriter       zapcore.WriteSyncer
+	httpServer      *HTTPServer
+	localHTTPServer *HTTPServer
+	tchannelServer  *tchannel.Channel
 	//	- panic ???
 	//	- process reporter ?
 }
@@ -234,7 +236,7 @@ func (gateway *Gateway) handleHealthRequest(
 // Close the http server
 func (gateway *Gateway) Close() {
 	gateway.metricsBackend.Flush()
-	_ = gateway.metricScopeCloser.Close()
+	_ = gateway.scopeCloser.Close()
 	if gateway.localHTTPServer != gateway.httpServer {
 		gateway.localHTTPServer.Close()
 	}
@@ -245,6 +247,11 @@ func (gateway *Gateway) Close() {
 	if gateway.loggerFile != nil {
 		_ = gateway.loggerFile.Sync()
 		_ = gateway.loggerFile.Close()
+	}
+
+	// stop collecting runtime metrics
+	if gateway.runtimeMetrics != nil {
+		gateway.runtimeMetrics.Stop()
 	}
 }
 
@@ -274,55 +281,63 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 	}
 }
 
-func (gateway *Gateway) setupMetrics(config *StaticConfig) error {
+func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
+	service := config.MustGetString("metrics.tally.service")
+	env := config.MustGetString("env")
 
-	var metricsBackend tally.CachedStatsReporter
 	if metricsType == "m3" {
 		if gateway.metricsBackend != nil {
 			panic("expected no metrics backend in gateway.")
 		}
 
-		env := config.MustGetString("env")
-
-		commonTags := map[string]string{"env": env}
-		m3Backend, err := m3.NewReporter(m3.Options{
+		// TODO: Why aren't common tags emitted?
+		// NewReporter adds 'env' and 'service' common tags; and no 'host' tag.
+		commonTags := map[string]string{}
+		opts := m3.Options{
 			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
-			Service:            config.MustGetString("metrics.tally.service"),
-			CommonTags:         commonTags,
+			Service:            service,
 			Env:                env,
+			CommonTags:         commonTags,
 			IncludeHost:        false,
 			MaxQueueSize:       defaultM3MaxQueueSize,
 			MaxPacketSizeBytes: defaultM3MaxPacketSize,
-		})
-		if err != nil {
+		}
+		if gateway.metricsBackend, err = m3.NewReporter(opts); err != nil {
 			return err
 		}
-
-		metricsBackend = m3Backend
-		gateway.metricsBackend = m3Backend
-	} else {
-		if gateway.metricsBackend == nil {
-			panic("expected gateway to have MetricsBackend in opts")
-		}
-		metricsBackend = gateway.metricsBackend
+	} else if gateway.metricsBackend == nil {
+		panic("expected gateway to have MetricsBackend in opts")
 	}
 
-	// TODO: decide what default tags we want...
-	defaultTags := map[string]string{}
+	// Adding 'env' and 'service' common tags, since they are not emitted by metrics backend.
+	defaultTags := map[string]string{
+		"env":     env,
+		"service": service,
+	}
+	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
+		tally.ScopeOptions{
+			Tags:           defaultTags,
+			Prefix:         service + ".production",
+			CachedReporter: gateway.metricsBackend,
+			Separator:      tally.DefaultSeparator,
+		},
+		time.Duration(config.MustGetInt("metrics.tally.flushInterval"))*time.Millisecond,
+	)
+	gateway.MetricsScope = gateway.RootScope.SubScope("all-workers")
+	gateway.PerWorkerMetricsScope = gateway.RootScope.SubScope("per-worker").Tagged(map[string]string{
+		"host": GetHostname(),
+	})
 
-	prefix := config.MustGetString("metrics.tally.service") +
-		".production.all-workers"
-	flushIntervalConfig := config.MustGetInt("metrics.tally.flushInterval")
-
-	scope, closer := tally.NewRootScope(tally.ScopeOptions{
-		Tags:           defaultTags,
-		Prefix:         prefix,
-		CachedReporter: metricsBackend,
-		Separator:      tally.DefaultSeparator,
-	}, time.Duration(flushIntervalConfig)*time.Millisecond)
-	gateway.MetricScope = scope
-	gateway.metricScopeCloser = closer
+	// start collecting runtime metrics
+	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
+	runtimeMetricsOpts := RuntimeMetricsOptions{
+		EnableCPUMetrics: config.MustGetBoolean("metrics.runtime.enableCPUMetrics"),
+		EnableMemMetrics: config.MustGetBoolean("metrics.runtime.enableMemMetrics"),
+		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
+		CollectInterval:  collectInterval,
+	}
+	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerWorkerMetricsScope)
 
 	return nil
 }
@@ -386,10 +401,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
-	host, err := os.Hostname()
-	if err != nil {
-		host = "unknown"
-	}
+	host := GetHostname()
 
 	datacenter := gateway.Config.MustGetString("datacenter")
 
@@ -429,7 +441,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
-	subScope := gateway.MetricScope.SubScope("tchannel")
+	subScope := gateway.MetricsScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
@@ -486,4 +498,13 @@ func GetDirnameFromRuntimeCaller(file string) string {
 
 	// If dirname is not absolute then its a package name...
 	return filepath.Join(os.Getenv("GOPATH"), "src", dirname)
+}
+
+// GetHostname returns hostname
+func GetHostname() string {
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+	return host
 }

@@ -18,50 +18,70 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package zanzibar
+package lib
 
 import (
-	"net/http"
-	"strconv"
-
-	"go.uber.org/zap"
+	"sync"
 )
 
-// HTTPClient defines a http client.
-type HTTPClient struct {
-	gateway *Gateway
-
-	Client  *http.Client
-	Logger  *zap.Logger
-	BaseURL string
+// WaitAtLeast wait group signals the wait channel when at least the added
+// count are done. This avoids sync.WaitGroup panic when count is negative.
+//
+// Usage:
+//     wg := WaitAtLeast{}
+//     wg.Add(1)
+//     wg.Wait()
+//     go func() {
+//         wg.Done()
+//     }()
+//
+type WaitAtLeast struct {
+	mutex sync.Mutex
+	wg    sync.WaitGroup
+	add   int
+	done  int
 }
 
-// UnexpectedHTTPError defines an error for HTTP
-type UnexpectedHTTPError struct {
-	StatusCode int
-	RawBody    []byte
-}
+// Add positive wait count.
+func (w *WaitAtLeast) Add(count int) {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
 
-func (rawErr *UnexpectedHTTPError) Error() string {
-	return "Unexpected http client response (" +
-		strconv.Itoa(rawErr.StatusCode) + ")"
-}
-
-// NewHTTPClient will allocate a http client.
-func NewHTTPClient(
-	gateway *Gateway, baseURL string,
-) *HTTPClient {
-	return &HTTPClient{
-		gateway: gateway,
-
-		Logger: gateway.Logger,
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-		},
-		BaseURL: baseURL,
+	if count <= 0 {
+		panic("non-positive count")
 	}
+
+	w.add += count
+	w.wg.Add(count)
+
+	// complete matching add/done
+	done := w.done
+	if w.add < w.done {
+		done = w.add
+	}
+	for i := 0; i < done; i++ {
+		w.done--
+		w.add--
+		w.wg.Done()
+	}
+}
+
+// Done subtracts one from the wait count.
+func (w *WaitAtLeast) Done() {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	// complete matching add/done
+	if w.add > 0 {
+		w.add--
+		w.wg.Done()
+		return
+	}
+
+	w.done++
+}
+
+// Wait for matching add/done.
+func (w *WaitAtLeast) Wait() {
+	w.wg.Wait()
 }

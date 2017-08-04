@@ -14,6 +14,11 @@
 	"metrics.m3.service": "my-gateway",
 	"metrics.m3.flushInterval": 500,
 
+	"metrics.runtime.enableCPUMetrics": true,
+	"metrics.runtime.enableMemMetrics": true,
+	"metrics.runtime.enableGCMetrics": true,
+	"metrics.runtime.collectInterval": 1000,
+
 	"tchannel.serviceName": "my-gateway",
 	"tchannel.processName": "my-gateway"
 }

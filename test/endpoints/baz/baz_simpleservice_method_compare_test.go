@@ -193,7 +193,8 @@ func TestCompareInvalidArgs(t *testing.T) {
 	)
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bazClient := bazClient.NewClient(bgateway.ActualGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bazClient := deps.Client.Baz
 
 	res, _, err := bazClient.Compare(
 		context.Background(),
