@@ -74,6 +74,7 @@ func (c *TypeConverter) assignWithOverride(
 	toIdentifier string,
 	typeName string,
 	fromIdentifier string,
+	overriddenTypeCast string,
 	overriddenIdentifier string,
 ) {
 	if overriddenIdentifier == "" {
@@ -82,7 +83,7 @@ func (c *TypeConverter) assignWithOverride(
 	}
 
 	// TODO: Verify all intermediate objects are not nil
-	c.append(indent, toIdentifier, " = ", typeName, "(", overriddenIdentifier, ")")
+	c.append(indent, toIdentifier, " = ", overriddenTypeCast, "(", overriddenIdentifier, ")")
 	c.append(indent, "if ", fromIdentifier, " != nil {")
 	c.append(indent, "\t", toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
 	c.append(indent, "}")
@@ -165,7 +166,9 @@ func (c *TypeConverter) genConverterForStruct(
 func (c *TypeConverter) genConverterForPrimitive(
 	toField *compile.FieldSpec,
 	toIdentifier string,
+	fromField *compile.FieldSpec,
 	fromIdentifier string,
+	overriddenField *compile.FieldSpec,
 	overriddenIdentifier string,
 	indent string,
 ) error {
@@ -174,19 +177,39 @@ func (c *TypeConverter) genConverterForPrimitive(
 		return err
 	}
 	if toField.Required {
+		overriddenType := typeName
+		if !fromField.Required {
+			// Dereference the pointer
+			typeName = "*"
+		}
+		if overriddenField != nil && !overriddenField.Required {
+			// Dereference the pointer
+			overriddenType = "*"
+		}
 		c.assignWithOverride(
 			indent,
 			toIdentifier,
 			typeName,
 			fromIdentifier,
+			overriddenType,
 			overriddenIdentifier,
 		)
 	} else {
+		fromType := fmt.Sprintf("(*%s)", typeName)
+		if fromField.Required {
+			fromType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+		}
+		overriddenType := fmt.Sprintf("(*%s)", typeName)
+		if overriddenField != nil && overriddenField.Required {
+			overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+		}
+
 		c.assignWithOverride(
 			indent,
 			toIdentifier,
-			fmt.Sprintf("ptr.*%s", pascalCase(typeName)),
+			fromType,
 			fromIdentifier,
+			overriddenType,
 			overriddenIdentifier,
 		)
 	}
@@ -513,7 +536,8 @@ func (c *TypeConverter) genStructConverter(
 			*compile.StringSpec:
 
 			err := c.genConverterForPrimitive(
-				toField, toIdentifier, fromIdentifier, overriddenIdentifier, indent,
+				toField, toIdentifier, fromField, fromIdentifier,
+				overriddenField, overriddenIdentifier, indent,
 			)
 			if err != nil {
 				return err
@@ -529,19 +553,39 @@ func (c *TypeConverter) genStructConverter(
 
 			// TODO: typedef for struct is invalid here ...
 			if toField.Required {
+				overriddenType := typeName
+				if !fromField.Required {
+					// Dereference the pointer
+					typeName = "*"
+				}
+				if overriddenField != nil && !overriddenField.Required {
+					// Dereference the pointer
+					overriddenType = "*"
+				}
 				c.assignWithOverride(
 					indent,
 					toIdentifier,
 					typeName,
 					fromIdentifier,
+					overriddenType,
 					overriddenIdentifier,
 				)
 			} else {
+				fromType := fmt.Sprintf("(*%s)", typeName)
+				if fromField.Required {
+					fromType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+				}
+				overriddenType := fmt.Sprintf("(*%s)", typeName)
+				if overriddenField != nil && overriddenField.Required {
+					overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+				}
+
 				c.assignWithOverride(
 					indent,
 					toIdentifier,
-					fmt.Sprintf("ptr.%s", pascalCase(typeName)),
+					fromType,
 					fromIdentifier,
+					overriddenType,
 					overriddenIdentifier,
 				)
 			}

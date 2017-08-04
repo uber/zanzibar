@@ -1174,12 +1174,12 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
-		out.Two = bool(in.Two)
+		out.Two = *(in.Two)
 		if in.One != nil {
-			out.Two = bool(in.One)
+			out.Two = *(in.One)
 		}
-		out.Three = (*bool)(in.Four)
-		out.Four = (*bool)(in.Four)
+		out.Three = ptr.Bool(in.Four)
+		out.Four = ptr.Bool(in.Four)
 		`), lines)
 }
 
@@ -1225,7 +1225,7 @@ func TestConverterMapStructWithSubFields(t *testing.T) {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
 			if in.Three.Two != nil {
-				out.Three.One = string(in.Three.Two)
+				out.Three.One = *(in.Three.Two)
 			}
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
@@ -1234,7 +1234,7 @@ func TestConverterMapStructWithSubFields(t *testing.T) {
 		if in.Four != nil {
 			out.Four = &structs.NestedBar{}
 			out.Four.One = string(in.Four.One)
-			out.Four.Two = (*string)(in.Four.One)
+			out.Four.Two = ptr.String(in.Four.One)
 		} else {
 			out.Four = nil
 		}
