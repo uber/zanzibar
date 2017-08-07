@@ -1,5 +1,5 @@
-hash: 5bd8f923639f0f7014bbf186ae4a4cf0028e87ec2f2fd01f00fca2406fd35682
-updated: 2017-08-03T16:20:53.117457421-07:00
+hash: 8b974ea79af048f0adeb34138373c6053d686bfe7c593eae46040109fdfd5416
+updated: 2017-08-07T14:46:20.064985446-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -76,7 +76,7 @@ imports:
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/thriftrw
   version: bbc73fe4e851cac67043d021242eb03920c2f1dd
-  repo: git@github.com:raynos/thriftrw-go
+  repo: https://github.com/raynos/thriftrw-go.git
   vcs: git
   subpackages:
   - ast
