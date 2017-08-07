@@ -374,6 +374,9 @@ type EndpointSpec struct {
 	// ReqTransforms, a map from client request fields to endpoint
 	// request fields that should override their values.
 	ReqTransforms map[string]FieldMapperEntry
+	// RespTransforms, a map from endpoint response fields to client
+	// response fields that should override their values.
+	RespTransforms map[string]FieldMapperEntry
 
 	// ReqHeaderMap, maps headers from server to client.
 	// Keeps keys in a sorted array so that golden files have
@@ -581,6 +584,7 @@ func augmentHTTPEndpointSpec(
 			)
 		}
 		// Check for middlewares that are fixed by the platform, i.e. transforms
+		// TODO(sindelar): Refactor into helper method.
 		if name == "transformRequest" {
 			// FieldMap's key is the target fields and
 			fieldMap := make(map[string]FieldMapperEntry)
@@ -619,7 +623,45 @@ func augmentHTTPEndpointSpec(
 			espec.ReqTransforms = fieldMap
 			continue
 		}
-
+		// Check for middlewares that are fixed by the platform, i.e. transforms
+		if name == "transformResponse" {
+			// FieldMap's key is the target fields and
+			fieldMap := make(map[string]FieldMapperEntry)
+			opts, ok := middlewareObj["options"].(map[string]interface{})
+			if !ok {
+				return nil, errors.Errorf(
+					"transform middleware found with no options.",
+				)
+			}
+			transforms := opts["transforms"].([]map[string]interface{})
+			for _, transform := range transforms {
+				fromField, ok := transform["from"].(string)
+				if !ok {
+					return nil, errors.Errorf(
+						"transform middleware found with no source field.",
+					)
+				}
+				toField, ok := transform["to"].(string)
+				if !ok {
+					return nil, errors.Errorf(
+						"transform middleware found with no destination field.",
+					)
+				}
+				overrideOpt, ok := transform["override"].(bool)
+				if ok {
+					fieldMap[toField] = FieldMapperEntry{
+						QualifiedName: fromField,
+						Override:      overrideOpt,
+					}
+				} else {
+					fieldMap[toField] = FieldMapperEntry{
+						QualifiedName: fromField,
+					}
+				}
+			}
+			espec.ReqTransforms = fieldMap
+			continue
+		}
 		// Verify the middleware name is defined.
 		if midSpecs[name] == nil {
 			return nil, errors.Errorf(
@@ -764,7 +806,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	return e.ModuleSpec.SetDownstream(
 		e.ThriftServiceName, e.ThriftMethodName,
-		clientSpec, e.ClientMethod, e.ReqTransforms, h,
+		clientSpec, e.ClientMethod, e.ReqTransforms, e.RespTransforms, h,
 	)
 }
 
