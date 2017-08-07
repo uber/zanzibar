@@ -198,6 +198,46 @@ func TestConvertBools(t *testing.T) {
 	`), lines)
 }
 
+func TestConvertBoolsOptionalToRequired(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: required bool one
+		}
+
+		struct Bar {
+			1: optional bool one
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = ptr.Bool(in.One)
+	`), lines)
+}
+
+func TestConvertBoolsRequiredToOptional(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: optional bool one
+		}
+
+		struct Bar {
+			1: required bool one
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = *(in.One)
+	`), lines)
+}
+
 func TestConvertInt8(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
@@ -381,6 +421,78 @@ func TestConvertStruct(t *testing.T) {
 	`), lines)
 }
 
+func TestConvertStructRequiredToOptional(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+			1: required string one
+			2: optional string two
+		}
+
+		struct NestedBar {
+			1: required string one
+			2: optional string two
+		}
+
+		struct Foo {
+			3: optional NestedFoo three
+		}
+
+		struct Bar {
+			3: required NestedBar three
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+	`), lines)
+}
+
+func TestConvertStructOptionalToRequired(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+			1: required string one
+			2: optional string two
+		}
+
+		struct NestedBar {
+			1: required string one
+			2: optional string two
+		}
+
+		struct Foo {
+			3: required NestedFoo three
+		}
+
+		struct Bar {
+			3: optional NestedBar three
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+	`), lines)
+}
+
 func TestHandlesMissingFields(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
@@ -463,6 +575,31 @@ func TestConvertTypeDef(t *testing.T) {
 	assert.Equal(t, trim(`
 		out.One = (*structs.UUID)(in.One)
 		out.Two = structs.UUID(in.Two)
+	`), lines)
+}
+
+func TestConvertTypeDefReqToOpt(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`typedef string UUID
+
+		struct Foo {
+			1: required UUID one
+			2: optional UUID two
+		}
+
+		struct Bar {
+			1: optional UUID one
+			2: required UUID two
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = ptr.StructsUUID(in.One)
+		out.Two = *(in.Two)
 	`), lines)
 }
 
@@ -1070,6 +1207,48 @@ func TestConverterMap(t *testing.T) {
 	`), lines)
 }
 
+func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "One",
+		Override:      false,
+	}
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three",
+		Override:      false,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`typedef string UUID
+
+		struct Foo {
+			1: optional UUID one
+			2: optional UUID two
+			3: required UUID three
+		}
+
+		struct Bar {
+			1: optional UUID one
+			2: required UUID two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = ptr.StructsUUID(in.Three)
+		if in.One != nil {
+			out.One = (*structs.UUID)(in.One)
+		}
+		out.Two = *(in.One)
+		if in.Two != nil {
+			out.Two = *(in.Two)
+		}
+	`), lines)
+}
+
 func TestConverterMapNewField(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["Two"] = codegen.FieldMapperEntry{
@@ -1183,6 +1362,38 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 		`), lines)
 }
 
+func TestConverterMapOverrideReqToOpt(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Two",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct Foo {
+			1: required bool one
+			2: optional bool two
+		}
+
+		struct Bar {
+			1: optional bool one
+			2: optional bool two
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = ptr.Bool(in.One)
+		if in.Two != nil {
+			out.One = (*bool)(in.Two)
+		}
+		out.Two = (*bool)(in.Two)	
+	`), lines)
+}
+
 func TestConverterMapStructWithSubFields(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["Three.One"] = codegen.FieldMapperEntry{
@@ -1214,6 +1425,64 @@ func TestConverterMapStructWithSubFields(t *testing.T) {
 		struct Bar {
 			3: optional NestedBar three
 			4: required NestedBar four
+		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			if in.Three.Two != nil {
+				out.Three.One = *(in.Three.Two)
+			}
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			out.Four.Two = ptr.String(in.Four.One)
+		} else {
+			out.Four = nil
+		}
+	`), lines)
+}
+
+func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Three.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three.Two",
+		Override:      true,
+	}
+	fieldMap["Four.Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four.One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+			1: required string one
+			2: optional string two
+		}
+
+		struct NestedBar {
+			1: required string one
+			2: optional string two
+		}
+
+		struct Foo {
+			3: optional NestedFoo three
+			4: required NestedFoo four
+		}
+
+		struct Bar {
+			3: required NestedBar three
+			4: optional NestedBar four
 		}`,
 		nil,
 		fieldMap,
