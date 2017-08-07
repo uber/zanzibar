@@ -36,7 +36,7 @@ import:
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - package: go.uber.org/thriftrw
   version: bbc73fe4e851cac67043d021242eb03920c2f1dd
-  repo:    git@github.com:Raynos/thriftrw-go
+  repo:    git@github.com:raynos/thriftrw-go
   vcs:     git
 - package: github.com/uber/tchannel-go
   version: v1.3.0
