@@ -321,7 +321,52 @@ func (c *barClient) ArgWithManyQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	queryValues := &url.Values{}
+	aStrQuery := r.AStr
+	queryValues.Set("aStr", aStrQuery)
+	if r.AnOptStr != nil {
+		anOptStrQuery := *r.AnOptStr
+		queryValues.Set("anOptStr", anOptStrQuery)
+	}
+	aBoolQuery := strconv.FormatBool(r.ABool)
+	queryValues.Set("aBool", aBoolQuery)
+	if r.AnOptBool != nil {
+		anOptBoolQuery := strconv.FormatBool(*r.AnOptBool)
+		queryValues.Set("anOptBool", anOptBoolQuery)
+	}
+	aInt8Query := strconv.Itoa(int(r.AInt8))
+	queryValues.Set("aInt8", aInt8Query)
+	if r.AnOptInt8 != nil {
+		anOptInt8Query := strconv.Itoa(int(*r.AnOptInt8))
+		queryValues.Set("anOptInt8", anOptInt8Query)
+	}
+	aInt16Query := strconv.Itoa(int(r.AInt16))
+	queryValues.Set("aInt16", aInt16Query)
+	if r.AnOptInt16 != nil {
+		anOptInt16Query := strconv.Itoa(int(*r.AnOptInt16))
+		queryValues.Set("anOptInt16", anOptInt16Query)
+	}
+	aInt32Query := strconv.Itoa(int(r.AInt32))
+	queryValues.Set("aInt32", aInt32Query)
+	if r.AnOptInt32 != nil {
+		anOptInt32Query := strconv.Itoa(int(*r.AnOptInt32))
+		queryValues.Set("anOptInt32", anOptInt32Query)
+	}
+	aInt64Query := strconv.FormatInt(r.AInt64, 10)
+	queryValues.Set("aInt64", aInt64Query)
+	if r.AnOptInt64 != nil {
+		anOptInt64Query := strconv.FormatInt(*r.AnOptInt64, 10)
+		queryValues.Set("anOptInt64", anOptInt64Query)
+	}
+	aFloat64Query := strconv.FormatFloat(r.AFloat64, 'E', -1, 64)
+	queryValues.Set("aFloat64", aFloat64Query)
+	if r.AnOptFloat64 != nil {
+		anOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'E', -1, 64)
+		queryValues.Set("anOptFloat64", anOptFloat64Query)
+	}
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -514,10 +559,10 @@ func (c *barClient) ArgWithQueryParams(
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
 
 	queryValues := &url.Values{}
-	nameQuery := string(r.Name)
+	nameQuery := r.Name
 	queryValues.Set("name", nameQuery)
 	if r.UserUUID != nil {
-		userUUIDQuery := string(*r.UserUUID)
+		userUUIDQuery := *r.UserUUID
 		queryValues.Set("userUUID", userUUIDQuery)
 	}
 	fullURL += "?" + queryValues.Encode()
