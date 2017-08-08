@@ -1,5 +1,5 @@
 hash: 8b974ea79af048f0adeb34138373c6053d686bfe7c593eae46040109fdfd5416
-updated: 2017-08-08T14:16:02.451881484-07:00
+updated: 2017-08-07T14:46:20.064985446-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -12,7 +12,7 @@ imports:
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/davecgh/go-spew
-  version: 782f4967f2dc4564575ca782fe2d04090b5faca8
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/facebookgo/clock
@@ -21,24 +21,12 @@ imports:
   version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-- name: github.com/golang/lint
-  version: c5fb716d6688a859aae56d26d3e6070808df29f7
-- name: github.com/golang/protobuf
-  version: 748d386b5c1ea99658fd69fe9f03991ce86a90c1
-  subpackages:
-  - proto
 - name: github.com/jessevdk/go-flags
   version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
-- name: github.com/kisielk/errcheck
-  version: 23699b7e2cbfdb89481023524954ba2aeff6be90
-  subpackages:
-  - internal/errcheck
-- name: github.com/kisielk/gotool
-  version: 0de1eaf82fa3f583ce21fde859f1e7e0c5e9b220
 - name: github.com/mailru/easyjson
   version: dffba8d13bbd998df17d8557570cdea0624b9d1d
   subpackages:
@@ -124,113 +112,8 @@ imports:
   - internal/multierror
   - zapcore
   - zaptest/observer
-- name: golang.org/x/crypto
-  version: c412588e259ef2d488e15762500456cd3b171bad
-  subpackages:
-  - acme
-  - acme/autocert
 - name: golang.org/x/net
   version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
   subpackages:
   - context
-  - html
-  - html/atom
-  - http2
-  - http2/hpack
-  - idna
-  - lex/httplex
-  - websocket
-- name: golang.org/x/text
-  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
-- name: golang.org/x/tools
-  version: c2d03f470b3e28d9e9eb89e22c8023f2642e802c
-  subpackages:
-  - benchmark/parse
-  - blog
-  - blog/atom
-  - cmd/guru
-  - cmd/guru/serial
-  - container/intsets
-  - cover
-  - go/ast/astutil
-  - go/buildutil
-  - go/callgraph
-  - go/callgraph/cha
-  - go/callgraph/rta
-  - go/callgraph/static
-  - go/gccgoexportdata
-  - go/gcexportdata
-  - go/gcimporter15
-  - go/internal/gccgoimporter
-  - go/loader
-  - go/pointer
-  - go/ssa
-  - go/ssa/interp
-  - go/ssa/ssautil
-  - go/types/typeutil
-  - godoc
-  - godoc/analysis
-  - godoc/dl
-  - godoc/proxy
-  - godoc/redirect
-  - godoc/short
-  - godoc/static
-  - godoc/util
-  - godoc/vfs
-  - godoc/vfs/gatefs
-  - godoc/vfs/httpfs
-  - godoc/vfs/mapfs
-  - godoc/vfs/zipfs
-  - imports
-  - playground
-  - playground/socket
-  - present
-  - refactor/eg
-  - refactor/importgraph
-  - refactor/rename
-  - refactor/satisfy
-- name: google.golang.org/appengine
-  version: c5a90ac045b779001847fec87403f5cba090deae
-  subpackages:
-  - datastore
-  - internal
-  - internal/app_identity
-  - internal/base
-  - internal/datastore
-  - internal/log
-  - internal/memcache
-  - internal/modules
-  - internal/remote_api
-  - internal/urlfetch
-  - internal/user
-  - log
-  - memcache
-  - urlfetch
-  - user
-- name: honnef.co/go/tools
-  version: ae0caf6437a82200bc1c349a4f761b4106409f0b
-  subpackages:
-  - callgraph
-  - callgraph/cha
-  - callgraph/rta
-  - callgraph/static
-  - errcheck
-  - functions
-  - gcsizes
-  - internal/sharedcheck
-  - lint
-  - lint/lintutil
-  - lint/testutil
-  - simple
-  - ssa
-  - ssa/ssautil
-  - staticcheck
-  - staticcheck/vrp
-  - structlayout
-  - unused
 testImports: []
