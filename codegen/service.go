@@ -166,6 +166,8 @@ func (ms *ModuleSpec) SetDownstream(
 	methodName string,
 	clientSpec *ClientSpec,
 	clientMethod string,
+	reqTransforms map[string]FieldMapperEntry,
+	respTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
 ) error {
 	var service *ServiceSpec
@@ -221,7 +223,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err = method.setTypeConverters(funcSpec, downstreamSpec, h)
+		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, respTransforms, h)
 		if err != nil {
 			return err
 		}
