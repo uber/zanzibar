@@ -1,5 +1,5 @@
 hash: 8b974ea79af048f0adeb34138373c6053d686bfe7c593eae46040109fdfd5416
-updated: 2017-08-07T14:46:20.064985446-07:00
+updated: 2017-08-08T14:16:02.451881484-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -84,8 +84,6 @@ imports:
   - tnet
   - trand
   - typed
-- name: github.com/wacul/ptr
-  version: 91632201dfc876021121963a76f103bbe1756b09
 - name: go.uber.org/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/thriftrw
