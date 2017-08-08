@@ -358,10 +358,10 @@ func (c *barClient) ArgWithManyQueryParams(
 		anOptInt64Query := strconv.FormatInt(*r.AnOptInt64, 10)
 		queryValues.Set("anOptInt64", anOptInt64Query)
 	}
-	aFloat64Query := strconv.FormatFloat(r.AFloat64, 'E', -1, 64)
+	aFloat64Query := strconv.FormatFloat(r.AFloat64, 'G', -1, 64)
 	queryValues.Set("aFloat64", aFloat64Query)
 	if r.AnOptFloat64 != nil {
-		anOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'E', -1, 64)
+		anOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'G', -1, 64)
 		queryValues.Set("anOptFloat64", anOptFloat64Query)
 	}
 	fullURL += "?" + queryValues.Encode()
