@@ -693,24 +693,26 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	return queryMethod
 }
 
-func getQueryEncodeExpression(typeSpec compile.TypeSpec) string {
+func getQueryEncodeExpression(
+	typeSpec compile.TypeSpec, valueName string,
+) string {
 	var encodeExpression string
 
 	switch typeSpec.(type) {
 	case *compile.BoolSpec:
-		encodeExpression = "strconv.FormatBool"
+		encodeExpression = "strconv.FormatBool(%s)"
 	case *compile.I8Spec:
-		encodeExpression = "strconv.Itoa"
+		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.I16Spec:
-		encodeExpression = "strconv.Itoa"
+		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.I32Spec:
-		encodeExpression = "strconv.Itoa"
+		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.I64Spec:
-		encodeExpression = "strconv.Itoa"
+		encodeExpression = "strconv.FormatInt(%s, 10)"
 	case *compile.DoubleSpec:
-		encodeExpression = "strconv.FormatFloat"
+		encodeExpression = "strconv.FormatFloat(%s, 'E', -1, 64)"
 	case *compile.StringSpec:
-		encodeExpression = "string"
+		encodeExpression = "%s"
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for query string parameter",
@@ -718,7 +720,7 @@ func getQueryEncodeExpression(typeSpec compile.TypeSpec) string {
 		))
 	}
 
-	return encodeExpression
+	return fmt.Sprintf(encodeExpression, valueName)
 }
 
 func (ms *MethodSpec) setWriteQueryParamStatements(
@@ -748,7 +750,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		longQueryName := getLongQueryName(field, thriftPrefix)
 		longFieldName := goPrefix + "." + pascalCase(field.Name)
 		identifierName := camelCase(longQueryName) + "Query"
-		encodeFunc := getQueryEncodeExpression(realType)
 
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
@@ -756,16 +757,24 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		if field.Required {
-			statements.appendf("%s := %s(r%s)",
-				identifierName, encodeFunc, longFieldName,
+			encodeExpr := getQueryEncodeExpression(
+				realType, "r"+longFieldName,
+			)
+
+			statements.appendf("%s := %s",
+				identifierName, encodeExpr,
 			)
 			statements.appendf("queryValues.Set(\"%s\", %s)",
 				longQueryName, identifierName,
 			)
 		} else {
+			encodeExpr := getQueryEncodeExpression(
+				realType, "*r"+longFieldName,
+			)
+
 			statements.appendf("if r%s != nil {", longFieldName)
-			statements.appendf("\t%s := %s(*r%s)",
-				identifierName, encodeFunc, longFieldName,
+			statements.appendf("\t%s := %s",
+				identifierName, encodeExpr,
 			)
 			statements.appendf("\tqueryValues.Set(\"%s\", %s)",
 				longQueryName, identifierName,
