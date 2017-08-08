@@ -78,7 +78,20 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r := httprouter.New()
 	// TODO(zw): Add more endpoints and tests.
 	r.GET("/gateways", h.GatewayAll)
+	r.GET("/gateway/:id", h.GatewayByID)
+	r.GET("/endpoint/:id", h.EndpointByID)
+	r.GET("/clients", h.ClientAll)
+	r.GET("/client/:name", h.ClientByName)
+	r.GET("/middlewares", h.MiddlewareAll)
+	r.GET("/idl-registry-list", h.IDLRegistryList)
+	r.GET("/idl-registry/*path", h.IDLRegistryFile)
+	r.GET("/idl-registry-service/*path", h.IDLRegistryThriftService)
+	r.GET("/thrift-services", h.ThriftServicesAll)
+	r.GET("/thrift-service/*path", h.ThriftServicesByPath)
+	r.GET("/thrift-list", h.ThriftList)
+	r.GET("/thrift-file/*path", h.ThriftFile)
 	r.POST("/create-diff", h.CreateDiff)
+	r.POST("/validate-updates", h.ValidateUpdates)
 	return r
 }
 
@@ -94,6 +107,194 @@ func (h *Handler) GatewayAll(w http.ResponseWriter, r *http.Request, ps httprout
 		cfgMap[cfg.ID] = cfg
 	}
 	h.WriteJSON(w, http.StatusOK, cfgMap)
+}
+
+// GatewayByID returns configurations of a edge gateway.
+func (h *Handler) GatewayByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := ps.ByName("id")
+	repo, ok := h.Manager.RepoMap[id]
+	if !ok {
+		h.WriteErrorResponse(w, http.StatusNotFound, errors.Errorf("Gateway %q is not found.", id))
+		return
+	}
+	cfg, err := repo.GatewayConfig()
+	if err != nil {
+		h.WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, cfg)
+}
+
+// EndpointByID returns the configuration of a given endpoint.
+func (h *Handler) EndpointByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	id := ps.ByName("id")
+	endpoint, ok := gatewayConfig.Endpoints[id]
+	if !ok {
+		h.WriteErrorResponse(w, http.StatusNotFound, errors.Errorf("Endpoint %q is not found.", id))
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, endpoint)
+}
+
+// ClientAll returns configurations for all clients.
+func (h *Handler) ClientAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, gatewayConfig.Clients)
+}
+
+// ClientByName returns the client configuration by name.
+func (h *Handler) ClientByName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	name := ps.ByName("name")
+	client, ok := gatewayConfig.Clients[name]
+	if !ok {
+		h.WriteErrorResponse(w, http.StatusNotFound, errors.Errorf("Client %q is not found.", name))
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, client)
+}
+
+// MiddlewareAll returns configurations for all middlewares.
+func (h *Handler) MiddlewareAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, gatewayConfig.Middlewares)
+}
+
+// ThriftServicesAll returns thrift services available in a gateway.
+func (h *Handler) ThriftServicesAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, gatewayConfig.ThriftServices)
+}
+
+// ThriftServicesByPath returns sevices in a thrift file of a gateway.
+func (h *Handler) ThriftServicesByPath(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	h.logger.Info("Thrift services by path.", zap.String("file", path))
+	thrift, ok := gatewayConfig.ThriftServices[path]
+	if ok {
+		h.WriteJSON(w, http.StatusOK, thrift)
+		return
+	}
+	// Thrift file not found in gateway. Try to find it in IDL-registry then.
+	thrift, err = h.Manager.IDLThriftService(path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, errors.Wrapf(err, "file %q is not found in gateway and IDL-registry", path))
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, thrift)
+}
+
+// IDLRegistryList returns the full list of files in IDL-registry.
+func (h *Handler) IDLRegistryList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	metaMap, err := h.Manager.IDLRegistry.ThriftAll()
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, metaMap)
+}
+
+// IDLRegistryFile returns the content and meta data of a file in IDL-registry.
+func (h *Handler) IDLRegistryFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	meta, err := h.Manager.IDLRegistry.ThriftMeta(path, true)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, meta)
+}
+
+// IDLRegistryThriftService returns the services in a thrift file in IDL-registry.
+func (h *Handler) IDLRegistryThriftService(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	thriftServices, err := h.Manager.IDLThriftService(path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, thriftServices)
+}
+
+// ThriftList returns the full list of thrift files in a gateway.
+func (h *Handler) ThriftList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := r.Header.Get(h.gatewayHeader)
+	list, err := h.Manager.ThriftList(id)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, list)
+}
+
+// ThriftFile returns the content and meta data of a file in a gateway.
+func (h *Handler) ThriftFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := r.Header.Get(h.gatewayHeader)
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	meta, err := h.Manager.ThriftFile(id, path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, meta)
+}
+
+// ValidateUpdates validates the update requests for thrift files, clients and endpoints.
+func (h *Handler) ValidateUpdates(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	req := &UpdateRequest{}
+	b, err := UnmarshalJSONBody(r, req)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for validating updates"))
+		return
+	}
+	h.logger.Info("Validating update request.", zap.String("request", string(b)))
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	repo, err := h.Manager.NewRuntimeRepository(gatewayConfig.ID)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, errors.Wrap(err, "failed to create temp runtime dir"))
+		return
+	}
+	if err := h.Manager.UpdateAll(repo, gatewayConfig.ClientConfigDir, gatewayConfig.EndpointConfigDir, req); err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, err)
+		return
+	}
+	if _, err := repo.LatestGatewayConfig(); err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, errors.Wrap(err, "invalid gateway config after upadte"))
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, map[string]string{
+		"Status": "OK",
+	})
 }
 
 type createDiffResponse struct {

@@ -44,7 +44,7 @@ type Manager struct {
 	localRootDir string
 
 	// IDL-registry repository.
-	idlRegistry IDLRegistry
+	IDLRegistry IDLRegistry
 
 	// TODO: Add a Middleware schema repository
 }
@@ -58,7 +58,7 @@ func NewManager(
 	manager := &Manager{
 		RepoMap:      repoMap,
 		localRootDir: localRoot,
-		idlRegistry:  idlRegistry,
+		IDLRegistry:  idlRegistry,
 	}
 	return manager
 }
@@ -78,12 +78,12 @@ func (m *Manager) NewRuntimeRepository(gatewayID string) (*Repository, error) {
 
 // IDLThriftService returns thrift services contained in a thrift file in IDL-registry.
 func (m *Manager) IDLThriftService(path string) (map[string]*ThriftService, error) {
-	if err := m.idlRegistry.Update(); err != nil {
+	if err := m.IDLRegistry.Update(); err != nil {
 		return nil, err
 	}
 
-	localRootDir := m.idlRegistry.RootDir()
-	thriftRootDir := m.idlRegistry.ThriftRootDir()
+	localRootDir := m.IDLRegistry.RootDir()
+	thriftRootDir := m.IDLRegistry.ThriftRootDir()
 	packageHelper, err := codegen.NewPackageHelper(
 		"idl-registry",          // packgeRoot
 		localRootDir,            // configDirName
@@ -239,7 +239,7 @@ func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, 
 // thriftMetaInIDLRegistry returns meta for a set of thrift file in IDL-registry.
 func (m *Manager) thriftMetaInIDLRegistry(paths []string) (map[string]*ThriftMeta, error) {
 	meta := make(map[string]*ThriftMeta, len(paths))
-	idlRootAbsPath := filepath.Join(m.idlRegistry.RootDir(), m.idlRegistry.ThriftRootDir())
+	idlRootAbsPath := filepath.Join(m.IDLRegistry.RootDir(), m.IDLRegistry.ThriftRootDir())
 	for _, path := range paths {
 		module, err := compile.Compile(filepath.Join(idlRootAbsPath, path))
 		if err != nil {
@@ -250,7 +250,7 @@ func (m *Manager) thriftMetaInIDLRegistry(paths []string) (map[string]*ThriftMet
 		}
 	}
 	for path := range meta {
-		tm, err := m.idlRegistry.ThriftMeta(path, true)
+		tm, err := m.IDLRegistry.ThriftMeta(path, true)
 		if err != nil {
 			return nil, err
 		}

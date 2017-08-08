@@ -38,6 +38,8 @@ type IDLRegistry interface {
 	Update() error
 	// Returns the file version or content of a thrift file.
 	ThriftMeta(path string, needFileContent bool) (*ThriftMeta, error)
+	// ThriftList returns a list of thrift files in the registry.
+	ThriftAll() (map[string]*ThriftMeta, error)
 }
 
 type idlRegistry struct {
@@ -74,6 +76,23 @@ func (reg *idlRegistry) RootDir() string {
 // ThriftRootDir returns the relative path of the thrift root directory.
 func (reg *idlRegistry) ThriftRootDir() string {
 	return reg.idlDir
+}
+
+func (reg *idlRegistry) ThriftAll() (map[string]*ThriftMeta, error) {
+
+	if err := reg.Update(); err != nil {
+		return nil, err
+	}
+	reg.lock.RLock()
+	defer reg.lock.RUnlock()
+	res := make(map[string]*ThriftMeta, len(reg.metaMap))
+	for key, v := range reg.metaMap {
+		res[key] = &ThriftMeta{
+			Path:    v.Path,
+			Version: v.Version,
+		}
+	}
+	return res, nil
 }
 
 // IDLRegistryFile returns the content and meta data of a file in IDL-registry.
