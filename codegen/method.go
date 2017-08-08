@@ -710,7 +710,7 @@ func getQueryEncodeExpression(
 	case *compile.I64Spec:
 		encodeExpression = "strconv.FormatInt(%s, 10)"
 	case *compile.DoubleSpec:
-		encodeExpression = "strconv.FormatFloat(%s, 'E', -1, 64)"
+		encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
 	case *compile.StringSpec:
 		encodeExpression = "%s"
 	default:
