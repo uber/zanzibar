@@ -151,7 +151,7 @@ service Bar {
         13: required double aFloat64
         14: optional double anOptFloat64
     ) (
-        zanzibar.http.method = "POST"
+        zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"
         zanzibar.http.status = "200"
     )
