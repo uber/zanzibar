@@ -522,47 +522,47 @@
 						"Methods": [
 							{
 								"Name": "argNotStruct",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithHeaders",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithManyQueryParams",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithNestedQueryParams",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithParams",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithQueryHeader",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "argWithQueryParams",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "missingArg",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "noRequest",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "normal",
-								"Type": "tchannel"
+								"Type": "http"
 							},
 							{
 								"Name": "tooManyArgs",
-								"Type": "tchannel"
+								"Type": "http"
 							}
 						],
 						"Name": "Bar",
@@ -1760,47 +1760,47 @@
 								"Methods": [
 									{
 										"Name": "argNotStruct",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithHeaders",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithManyQueryParams",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithNestedQueryParams",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithParams",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithQueryHeader",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "argWithQueryParams",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "missingArg",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "noRequest",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "normal",
-										"Type": "tchannel"
+										"Type": "http"
 									},
 									{
 										"Name": "tooManyArgs",
-										"Type": "tchannel"
+										"Type": "http"
 									}
 								],
 								"Name": "Bar",
@@ -2538,47 +2538,47 @@
 							"Methods": [
 								{
 									"Name": "argNotStruct",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithHeaders",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithManyQueryParams",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithNestedQueryParams",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithParams",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithQueryHeader",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "argWithQueryParams",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "missingArg",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "noRequest",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "normal",
-									"Type": "tchannel"
+									"Type": "http"
 								},
 								{
 									"Name": "tooManyArgs",
-									"Type": "tchannel"
+									"Type": "http"
 								}
 							],
 							"Name": "Bar",
