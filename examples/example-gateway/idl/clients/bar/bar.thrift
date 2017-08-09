@@ -91,6 +91,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    // TODO: support headers annotation
     BarResponse argWithHeaders (
         1: required string name
         2: optional string userUUID
@@ -118,6 +119,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    // TODO: support headers annotation
     BarResponse argWithQueryHeader(
         1: optional string userUUID
     ) (

@@ -124,6 +124,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    // TODO: support params annotation
     BarResponse argWithParams(
         1: required string uuid
         2: optional ParamsStruct params
