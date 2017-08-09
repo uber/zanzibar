@@ -747,20 +747,12 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithNestedQueryParams",
+		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"request":{
-						"name":"a-name",
-						"userUUID":"a-uuid",
-						"authUUID":"auth-uuid",
-						"authUUID2":"auth-uuid2"
-					}
-				}`),
-				string(bytes),
+				"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -809,20 +801,11 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithNestedQueryParams",
+		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"request":{
-						"name":"a-name",
-						"userUUID":"a-uuid",
-						"authUUID":"",
-						"authUUID2":""
-					}
-				}`),
-				string(bytes),
+				"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
