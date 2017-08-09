@@ -414,7 +414,22 @@ func (c *barClient) ArgWithNestedQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	queryValues := &url.Values{}
+	requestNameQuery := r.Request.Name
+	queryValues.Set("request.name", requestNameQuery)
+	if r.Request.UserUUID != nil {
+		requestUserUUIDQuery := *r.Request.UserUUID
+		queryValues.Set("request.userUUID", requestUserUUIDQuery)
+	}
+	if r.Request.AuthUUID != nil {
+		requestAuthUUIDQuery := *r.Request.AuthUUID
+		queryValues.Set("request.authUUID", requestAuthUUIDQuery)
+	}
+	requestAuthUUID2Query := r.Request.AuthUUID2
+	queryValues.Set("request.authUUID2", requestAuthUUID2Query)
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

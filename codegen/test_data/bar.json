@@ -238,7 +238,7 @@
 				},
 				{
 					"Name": "argWithNestedQueryParams",
-					"HTTPMethod": "POST",
+					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithNestedQueryParams",
 					"PathSegments": [
@@ -255,7 +255,22 @@
 					],
 					"IsEndpoint": false,
 					"ParseQueryParamGoStatements": null,
-					"WriteQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"queryValues := \u0026url.Values{}",
+						"requestNameQuery := r.Request.Name",
+						"queryValues.Set(\"request.name\", requestNameQuery)",
+						"if r.Request.UserUUID != nil {",
+						"\trequestUserUUIDQuery := *r.Request.UserUUID",
+						"\tqueryValues.Set(\"request.userUUID\", requestUserUUIDQuery)",
+						"}",
+						"if r.Request.AuthUUID != nil {",
+						"\trequestAuthUUIDQuery := *r.Request.AuthUUID",
+						"\tqueryValues.Set(\"request.authUUID\", requestAuthUUIDQuery)",
+						"}",
+						"requestAuthUUID2Query := r.Request.AuthUUID2",
+						"queryValues.Set(\"request.authUUID2\", requestAuthUUID2Query)",
+						"fullURL += \"?\" + queryValues.Encode()"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
