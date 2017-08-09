@@ -105,7 +105,7 @@ service Bar {
     BarResponse argWithNestedQueryParams(
         1: required QueryParamsStruct request
     ) (
-        zanzibar.http.method = "POST"
+        zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithNestedQueryParams"
         zanzibar.http.status = "200"
     )
