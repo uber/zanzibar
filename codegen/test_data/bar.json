@@ -267,8 +267,10 @@
 						"\trequestAuthUUIDQuery := *r.Request.AuthUUID",
 						"\tqueryValues.Set(\"request.authUUID\", requestAuthUUIDQuery)",
 						"}",
-						"requestAuthUUID2Query := r.Request.AuthUUID2",
-						"queryValues.Set(\"request.authUUID2\", requestAuthUUID2Query)",
+						"if r.Request.AuthUUID2 != nil {",
+						"\trequestAuthUUID2Query := *r.Request.AuthUUID2",
+						"\tqueryValues.Set(\"request.authUUID2\", requestAuthUUID2Query)",
+						"}",
 						"fullURL += \"?\" + queryValues.Encode()"
 					],
 					"ReqHeaderGoStatements": null,
