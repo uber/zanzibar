@@ -124,6 +124,10 @@ install-wrk:
 test: generate lint
 	@make test-only
 
+.PHONY: test-update
+test-update:
+	go test ./codegen/ ./backend/... -update
+
 .PHONY: test-only
 test-only:
 	@rm -f ./test/.cached_binary_test_info.json
