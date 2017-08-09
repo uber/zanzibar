@@ -480,18 +480,22 @@ func (ms *MethodSpec) setRequestHeaderFields(
 				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
 				variableName := camelCase(headerName) + "Value"
 
-				statements.appendf("%s, _ := req.Header.Get(%q)",
-					variableName, headerName,
-				)
-
-				if !field.Required {
-					statements.appendf("requestBody%s = ptr.String(%s)",
-						bodyIdentifier, variableName,
+				if field.Required {
+					statements.appendf("%s, _ := req.Header.Get(%q)",
+						variableName, headerName,
 					)
-				} else {
 					statements.appendf("requestBody%s = %s",
 						bodyIdentifier, variableName,
 					)
+				} else {
+					statements.appendf("%s, %sExists := req.Header.Get(%q)",
+						variableName, variableName, headerName,
+					)
+					statements.appendf("if %sExists {", variableName)
+					statements.appendf("\trequestBody%s = ptr.String(%s)",
+						bodyIdentifier, variableName,
+					)
+					statements.append("}")
 				}
 
 				seenHeaders = true
