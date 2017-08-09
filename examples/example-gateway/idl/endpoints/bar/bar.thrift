@@ -23,7 +23,8 @@ struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
     3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
-    4: required string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+    // TODO: validate required behaviour for headers
+    4: optional string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
 }
 
 struct ParamsStruct {

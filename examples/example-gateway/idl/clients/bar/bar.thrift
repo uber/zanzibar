@@ -31,8 +31,9 @@ struct BarResponse {
 struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
+    // TODO: support header annotation
     3: optional string authUUID
-    4: required string authUUID2
+    4: optional string authUUID2
 }
 
 struct ParamsStruct {
