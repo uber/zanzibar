@@ -732,16 +732,32 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 ) error {
 	var statements LineBuilder
 	var hasQueryFields bool
+	var stack = []string{}
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		// TODO: handle stack pop
 
 		if _, ok := realType.(*compile.StructSpec); ok {
 			// If a field is a struct then skip
 
-			// TODO nil checks here.
+			if field.Required {
+				statements.appendf("if r%s == nil {", longFieldName)
+				statements.append("\treturn nil, nil, errors.New(")
+				statements.appendf("\t\t\"The field %s is required\",",
+					longFieldName,
+				)
+				statements.append("\t)")
+				statements.appendf("}")
+			} else {
+				// TODO nil checks here.
+
+				stack = append(stack, longFieldName)
+			}
 
 			return false
 		}
@@ -752,7 +768,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		longQueryName := getLongQueryName(field, thriftPrefix)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
 		identifierName := camelCase(longQueryName) + "Query"
 
 		if !hasQueryFields {
