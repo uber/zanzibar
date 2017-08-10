@@ -12,11 +12,12 @@ import (
 
 type Bar_ArgWithNestedQueryParams_Args struct {
 	Request *QueryParamsStruct `json:"request,required"`
+	Opt     *QueryParamsStruct `json:"opt,omitempty"`
 }
 
 func (v *Bar_ArgWithNestedQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [2]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -30,6 +31,14 @@ func (v *Bar_ArgWithNestedQueryParams_Args) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 1, Value: w}
 	i++
+	if v.Opt != nil {
+		w, err = v.Opt.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
@@ -52,6 +61,13 @@ func (v *Bar_ArgWithNestedQueryParams_Args) FromWire(w wire.Value) error {
 				}
 				requestIsSet = true
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Opt, err = _QueryParamsStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	if !requestIsSet {
@@ -64,15 +80,22 @@ func (v *Bar_ArgWithNestedQueryParams_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
-	var fields [1]string
+	var fields [2]string
 	i := 0
 	fields[i] = fmt.Sprintf("Request: %v", v.Request)
 	i++
+	if v.Opt != nil {
+		fields[i] = fmt.Sprintf("Opt: %v", v.Opt)
+		i++
+	}
 	return fmt.Sprintf("Bar_ArgWithNestedQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
 func (v *Bar_ArgWithNestedQueryParams_Args) Equals(rhs *Bar_ArgWithNestedQueryParams_Args) bool {
 	if !v.Request.Equals(rhs.Request) {
+		return false
+	}
+	if !((v.Opt == nil && rhs.Opt == nil) || (v.Opt != nil && rhs.Opt != nil && v.Opt.Equals(rhs.Opt))) {
 		return false
 	}
 	return true
@@ -87,15 +110,15 @@ func (v *Bar_ArgWithNestedQueryParams_Args) EnvelopeType() wire.EnvelopeType {
 }
 
 var Bar_ArgWithNestedQueryParams_Helper = struct {
-	Args           func(request *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args
+	Args           func(request *QueryParamsStruct, opt *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args
 	IsException    func(error) bool
 	WrapResponse   func(*BarResponse, error) (*Bar_ArgWithNestedQueryParams_Result, error)
 	UnwrapResponse func(*Bar_ArgWithNestedQueryParams_Result) (*BarResponse, error)
 }{}
 
 func init() {
-	Bar_ArgWithNestedQueryParams_Helper.Args = func(request *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args {
-		return &Bar_ArgWithNestedQueryParams_Args{Request: request}
+	Bar_ArgWithNestedQueryParams_Helper.Args = func(request *QueryParamsStruct, opt *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args {
+		return &Bar_ArgWithNestedQueryParams_Args{Request: request, Opt: opt}
 	}
 	Bar_ArgWithNestedQueryParams_Helper.IsException = func(err error) bool {
 		switch err.(type) {

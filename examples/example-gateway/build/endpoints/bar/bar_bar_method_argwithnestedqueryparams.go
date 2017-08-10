@@ -85,6 +85,17 @@ func (handler *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	if xUUID2ValueExists {
 		requestBody.Request.AuthUUID2 = ptr.String(xUUID2Value)
 	}
+	if requestBody.Opt == nil {
+		requestBody.Opt = &endpointsBarBar.QueryParamsStruct{}
+	}
+	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
+	if xUUIDValueExists {
+		requestBody.Opt.AuthUUID = ptr.String(xUUIDValue)
+	}
+	xUUID2Value, xUUID2ValueExists := req.Header.Get("x-uuid2")
+	if xUUID2ValueExists {
+		requestBody.Opt.AuthUUID2 = ptr.String(xUUID2Value)
+	}
 
 	if requestBody.Request == nil {
 		requestBody.Request = &endpointsBarBar.QueryParamsStruct{}
@@ -106,6 +117,28 @@ func (handler *BarArgWithNestedQueryParamsHandler) HandleRequest(
 			return
 		}
 		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
+	}
+
+	if requestBody.Opt == nil {
+		requestBody.Opt = &endpointsBarBar.QueryParamsStruct{}
+	}
+	optNameOk := req.CheckQueryValue("opt.name")
+	if !optNameOk {
+		return
+	}
+	optNameQuery, ok := req.GetQueryValue("opt.name")
+	if !ok {
+		return
+	}
+	requestBody.Opt.Name = optNameQuery
+
+	optUserUUIDOk := req.HasQueryValue("opt.userUUID")
+	if optUserUUIDOk {
+		optUserUUIDQuery, ok := req.GetQueryValue("opt.userUUID")
+		if !ok {
+			return
+		}
+		requestBody.Opt.UserUUID = ptr.String(optUserUUIDQuery)
 	}
 
 	workflow := ArgWithNestedQueryParamsEndpoint{
@@ -186,6 +219,15 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
 	} else {
 		out.Request = nil
+	}
+	if in.Opt != nil {
+		out.Opt = &clientsBarBar.QueryParamsStruct{}
+		out.Opt.Name = string(in.Opt.Name)
+		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
+		out.Opt.AuthUUID = (*string)(in.Opt.AuthUUID)
+		out.Opt.AuthUUID2 = (*string)(in.Opt.AuthUUID2)
+	} else {
+		out.Opt = nil
 	}
 
 	return out
