@@ -838,3 +838,31 @@ func TestEchoStructMap(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
 }
+
+func TestNestedQueryParamCallWithNil(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions, exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	result, _, err := bar.ArgWithNestedQueryParams(
+		context.Background(), nil, &barGen.Bar_ArgWithNestedQueryParams_Args{
+			Request: nil,
+		},
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, &barGen.BarResponse{
+		StringField:        "stringValue",
+		IntWithRange:       0,
+		IntWithoutRange:    0,
+		MapIntWithRange:    nil,
+		MapIntWithoutRange: nil,
+	}, result)
+}
