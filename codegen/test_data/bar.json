@@ -256,6 +256,11 @@
 					"IsEndpoint": false,
 					"ParseQueryParamGoStatements": null,
 					"WriteQueryParamGoStatements": [
+						"if r.Request == nil {",
+						"\treturn nil, nil, errors.New(",
+						"\t\t\"The field .Request is required\",",
+						"\t)",
+						"}",
 						"queryValues := \u0026url.Values{}",
 						"requestNameQuery := r.Request.Name",
 						"queryValues.Set(\"request.name\", requestNameQuery)",

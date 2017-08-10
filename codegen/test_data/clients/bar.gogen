@@ -28,6 +28,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -414,6 +415,11 @@ func (c *barClient) ArgWithNestedQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
+	if r.Request == nil {
+		return nil, nil, errors.New(
+			"The field .Request is required",
+		)
+	}
 	queryValues := &url.Values{}
 	requestNameQuery := r.Request.Name
 	queryValues.Set("request.name", requestNameQuery)
