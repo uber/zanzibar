@@ -857,12 +857,7 @@ func TestNestedQueryParamCallWithNil(t *testing.T) {
 			Request: nil,
 		},
 	)
-	assert.NoError(t, err)
-	assert.Equal(t, &barGen.BarResponse{
-		StringField:        "stringValue",
-		IntWithRange:       0,
-		IntWithoutRange:    0,
-		MapIntWithRange:    nil,
-		MapIntWithoutRange: nil,
-	}, result)
+	assert.NotNil(t, err)
+	assert.Equal(t, "The field .Request is required", err.Error())
+	assert.Nil(t, result)
 }
