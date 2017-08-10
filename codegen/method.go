@@ -260,7 +260,7 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 	if isRequestBoxed(funcSpec) {
 		ms.RequestBoxed = true
 		ms.RequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
-		if err == nil && isStructType(funcSpec.ArgsSpec[0].Type) {
+		if err == nil && IsStructType(funcSpec.ArgsSpec[0].Type) {
 			ms.RequestType = "*" + ms.RequestType
 		}
 	} else {
@@ -284,7 +284,7 @@ func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.Re
 		return nil
 	}
 	typeName, err := packageHelper.TypeFullName(respSpec.ReturnType)
-	if isStructType(respSpec.ReturnType) {
+	if IsStructType(respSpec.ReturnType) {
 		typeName = "*" + typeName
 	}
 	if err != nil {
