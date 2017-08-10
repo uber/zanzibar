@@ -90,7 +90,7 @@ func goReferenceType(p PackageNameResolver, spec compile.TypeSpec) (string, erro
 		return "", err
 	}
 
-	if isStructType(spec) {
+	if IsStructType(spec) {
 		t = "*" + t
 	}
 
@@ -112,8 +112,8 @@ func goCustomType(p PackageNameResolver, spec compile.TypeSpec) (string, error) 
 	return pkg + "." + pascalCase(spec.ThriftName()), nil
 }
 
-// isStructType returns true if the given thrift type is struct, false otherwise.
-func isStructType(spec compile.TypeSpec) bool {
+// IsStructType returns true if the given thrift type is struct, false otherwise.
+func IsStructType(spec compile.TypeSpec) bool {
 	spec = compile.RootTypeSpec(spec)
 	_, isStruct := spec.(*compile.StructSpec)
 	return isStruct
