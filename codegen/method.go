@@ -892,8 +892,10 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			if !field.Required {
 				stack = append(stack, longFieldName)
 
-				statements.appendf("if req.HasQueryPrefix(%q) {",
+				statements.appendf(
+					"if req.HasQueryPrefix(%q) || requestBody%s != nil {",
 					longQueryName,
+					longFieldName,
 				)
 			}
 
