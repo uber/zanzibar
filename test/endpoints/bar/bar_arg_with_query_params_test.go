@@ -787,6 +787,65 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
 }
 
+func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary: filepath.Join(
+			getDirName(), "..", "..", "..",
+			"examples", "example-gateway", "build",
+			"services", "example-gateway", "main", "main.go",
+		),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/argWithNestedQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t,
+				"opt.name=b-name&opt.userUUID=b-uuid&"+
+					"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
+			)
+
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithNestedQueryParams?"+
+			"request.name=a-name&request.userUUID=a-uuid&"+
+			"opt.name=b-name&opt.userUUID=b-uuid",
+		map[string]string{
+			"x-uuid":  "auth-uuid",
+			"x-uuid2": "auth-uuid2",
+		}, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 1, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+}
+
 func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	var counter int = 0
 
