@@ -24,6 +24,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -37,6 +38,7 @@ import (
 var cachedServer *zanzibar.Gateway
 
 func TestMain(m *testing.M) {
+	flag.Parse()
 	if os.Getenv("GATEWAY_RUN_CHILD_PROCESS_TEST") != "" {
 		listenOnSignals()
 

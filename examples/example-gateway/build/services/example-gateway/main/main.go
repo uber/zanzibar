@@ -24,15 +24,23 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
+	"flag"
 	"runtime"
+	"strings"
 
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
+)
+
+var configFiles = flag.String(
+	"config",
+	"",
+	"an ordered, semi-colon separated list of configuration files to use",
 )
 
 func getDirName() string {
@@ -40,22 +48,16 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
-// TODO: remove this
-func getConfigDirName() string {
-	return filepath.Join(
-		getDirName(),
-		"../../../../",
-		"config",
-	)
-}
-
 func getConfig() *zanzibar.StaticConfig {
-	return zanzibar.NewStaticConfigOrDie([]string{
-		// TODO: zanzibar-defaults should be bundled in the binary
-		filepath.Join(getDirName(), "zanzibar-defaults.json"),
-		filepath.Join(getConfigDirName(), "production.json"),
-		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
-	}, nil)
+	var files []string
+
+	if configFiles == nil {
+		files = []string{}
+	} else {
+		files = strings.Split(*configFiles, ";")
+	}
+
+	return config.NewRuntimeConfigOrDie(files, nil)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
@@ -107,6 +109,7 @@ func logAndWait(server *zanzibar.Gateway) {
 }
 
 func main() {
+	flag.Parse()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)

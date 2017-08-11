@@ -26,11 +26,11 @@ package googlenowEndpoint
 import (
 	"bytes"
 	"net/http"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
@@ -38,9 +38,8 @@ func TestAddCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

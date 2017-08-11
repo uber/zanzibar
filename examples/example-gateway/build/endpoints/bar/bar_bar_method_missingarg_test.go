@@ -26,11 +26,11 @@ package barEndpoint
 import (
 	"bytes"
 	"net/http"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
@@ -38,9 +38,8 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

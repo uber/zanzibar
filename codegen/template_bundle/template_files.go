@@ -560,6 +560,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 {{- $clientID := .ClientID }}
@@ -579,9 +580,8 @@ func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
+		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -657,7 +657,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2559, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2628, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -680,6 +680,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -708,9 +709,8 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
+		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -815,7 +815,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3909, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3978, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1066,15 +1066,26 @@ var _mainTmpl = []byte(`{{- /* template to render gateway main.go */ -}}
 package main
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+
+var configFiles = flag.String(
+	"config",
+	"",
+	"an ordered, semi-colon separated list of configuration files to use",
 )
 
 func getDirName() string {
@@ -1082,22 +1093,17 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
-// TODO: remove this
-func getConfigDirName() string {
-	return filepath.Join(
-		getDirName(),
-		"../../../../",
-		"config",
-	)
-}
 
 func getConfig() *zanzibar.StaticConfig {
-	return zanzibar.NewStaticConfigOrDie([]string{
-		// TODO: zanzibar-defaults should be bundled in the binary
-		filepath.Join(getDirName(), "zanzibar-defaults.json"),
-		filepath.Join(getConfigDirName(), "production.json"),
-		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
-	}, nil)
+	var files []string
+
+	if configFiles == nil {
+		files = []string{}
+	} else {
+		files = strings.Split(*configFiles, ";")
+	}
+
+	return config.NewRuntimeConfigOrDie(files, nil)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
@@ -1135,6 +1141,7 @@ func logAndWait(server *zanzibar.Gateway) {
 }
 
 func main() {
+	flag.Parse()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
@@ -1159,7 +1166,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1974, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1173,6 +1180,7 @@ as a child process using the test coverage features etc.
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -1188,6 +1196,7 @@ import (
 var cachedServer *zanzibar.Gateway
 
 func TestMain(m *testing.M) {
+	flag.Parse()
 	if os.Getenv("GATEWAY_RUN_CHILD_PROCESS_TEST") != "" {
 		listenOnSignals()
 
@@ -1253,7 +1262,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1366, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1388, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
