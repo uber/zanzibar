@@ -782,7 +782,12 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + pascalCase(field.Name)
 
-		// TODO: handle stack pop
+		if len(stack) > 0 {
+			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
+				stack = stack[:len(stack)-1]
+				statements.append("}")
+			}
+		}
 
 		if _, ok := realType.(*compile.StructSpec); ok {
 			// If a field is a struct then skip
@@ -797,9 +802,9 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 				statements.append("\t)")
 				statements.appendf("}")
 			} else {
-				// TODO nil checks here.
-
 				stack = append(stack, longFieldName)
+
+				statements.appendf("if r%s != nil {", longFieldName)
 			}
 
 			return false
@@ -847,6 +852,10 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		return false
 	}
 	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
+
+	for i := 0; i < len(stack); i++ {
+		statements.append("}")
+	}
 
 	if hasQueryFields {
 		statements.append("fullURL += \"?\" + queryValues.Encode()")
