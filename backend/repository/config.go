@@ -177,8 +177,8 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 	r.RLock()
 	defer r.RUnlock()
 	configDir := r.absPath(r.LocalDir())
-	cfg := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(configDir, gatewayConfigFile),
+	cfg := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(filepath.Join(configDir, gatewayConfigFile)),
 	}, nil)
 	config := &Config{
 		ID:                  cfg.MustGetString("gatewayName"),
