@@ -831,12 +831,21 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	var statements LineBuilder
 
 	var finalError error
+	var stack = []string{}
 
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longQueryName := getLongQueryName(field, thriftPrefix)
+
+		if len(stack) > 0 {
+			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
+				stack = stack[:len(stack)-1]
+				statements.append("}")
+			}
+		}
 
 		// If the type is a struct then we cannot really do anything
 		if _, ok := realType.(*compile.StructSpec); ok {
@@ -848,6 +857,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 				return true
 			}
 
+			if !field.Required {
+				stack = append(stack, longFieldName)
+
+				statements.appendf("if req.HasQueryPrefix(%q) {",
+					longQueryName,
+				)
+			}
+
 			statements.appendf("if requestBody%s == nil {", longFieldName)
 			statements.appendf("\trequestBody%s = &%s{}",
 				longFieldName, typeName,
@@ -857,7 +874,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			return false
 		}
 
-		longQueryName := getLongQueryName(field, thriftPrefix)
 		identifierName := camelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
@@ -907,6 +923,10 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		return false
 	}
 	walkFieldGroups(compile.FieldGroup(funcSpec.ArgsSpec), visitor)
+
+	for i := 0; i < len(stack); i++ {
+		statements.append("}")
+	}
 
 	if finalError != nil {
 		return finalError
