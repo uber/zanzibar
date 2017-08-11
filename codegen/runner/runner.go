@@ -62,8 +62,8 @@ func main() {
 	}
 
 	configRoot := filepath.Dir(*configFile)
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		*configFile,
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(*configFile),
 	}, nil)
 
 	configRoot, err := filepath.Abs(configRoot)
