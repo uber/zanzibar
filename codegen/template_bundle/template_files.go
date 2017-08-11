@@ -1081,18 +1081,12 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-
-var configFiles = flag.String(
-	"config",
-	"",
-	"an ordered, semi-colon separated list of configuration files to use",
-)
+var configFiles *string
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
-
 
 func getConfig() *zanzibar.StaticConfig {
 	var files []string
@@ -1140,8 +1134,17 @@ func logAndWait(server *zanzibar.Gateway) {
 	// TODO: setup and configure tracing/jeager.
 }
 
-func main() {
+func readFlags() {
+	configFiles = flag.String(
+		"config",
+		"",
+		"an ordered, semi-colon separated list of configuration files to use",
+	)
 	flag.Parse()
+}
+
+func main() {
+	readFlags()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
@@ -1166,7 +1169,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1977, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1196,7 +1199,7 @@ import (
 var cachedServer *zanzibar.Gateway
 
 func TestMain(m *testing.M) {
-	flag.Parse()
+	readFlags()
 	if os.Getenv("GATEWAY_RUN_CHILD_PROCESS_TEST") != "" {
 		listenOnSignals()
 
@@ -1262,7 +1265,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1388, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1387, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

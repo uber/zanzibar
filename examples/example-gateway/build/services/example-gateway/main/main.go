@@ -37,11 +37,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
-var configFiles = flag.String(
-	"config",
-	"",
-	"an ordered, semi-colon separated list of configuration files to use",
-)
+var configFiles *string
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
@@ -108,8 +104,17 @@ func logAndWait(server *zanzibar.Gateway) {
 	// TODO: setup and configure tracing/jeager.
 }
 
-func main() {
+func readFlags() {
+	configFiles = flag.String(
+		"config",
+		"",
+		"an ordered, semi-colon separated list of configuration files to use",
+	)
 	flag.Parse()
+}
+
+func main() {
+	readFlags()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
