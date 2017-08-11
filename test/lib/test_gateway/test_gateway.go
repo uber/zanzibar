@@ -98,6 +98,7 @@ type ChildProcessGateway struct {
 // Options used to create TestGateway
 type Options struct {
 	TestBinary            string
+	ConfigFiles           []string
 	LogWhitelist          map[string]bool
 	KnownHTTPBackends     []string
 	KnownTChannelBackends []string
@@ -130,9 +131,12 @@ func CreateGateway(
 ) (TestGateway, error) {
 	startTime := time.Now()
 
-	if config == nil {
-		config = map[string]interface{}{}
+	composedConfig := map[string]interface{}{}
+
+	for k, v := range config {
+		composedConfig[k] = v
 	}
+
 	if opts == nil {
 		panic("opts in test.CreateGateway() mandatory")
 	}
@@ -140,12 +144,12 @@ func CreateGateway(
 		panic("opts.TestBinary in test.CreateGateway() mandatory")
 	}
 
-	backendsHTTP, err := testBackend.BuildHTTPBackends(config, opts.KnownHTTPBackends)
+	backendsHTTP, err := testBackend.BuildHTTPBackends(composedConfig, opts.KnownHTTPBackends)
 	if err != nil {
 		return nil, err
 	}
 
-	backendsTChannel, err := testBackend.BuildTChannelBackends(config, opts.KnownTChannelBackends)
+	backendsTChannel, err := testBackend.BuildTChannelBackends(composedConfig, opts.KnownTChannelBackends)
 	if err != nil {
 		return nil, err
 	}
@@ -189,28 +193,33 @@ func CreateGateway(
 
 	testGateway.setupMetrics(t, opts)
 
-	if _, contains := config["http.port"]; !contains {
-		config["http.port"] = 0
+	if _, contains := composedConfig["http.port"]; !contains {
+		composedConfig["http.port"] = 0
 	}
 
-	if _, contains := config["tchannel.port"]; !contains {
-		config["tchannel.port"] = 0
+	if _, contains := composedConfig["tchannel.port"]; !contains {
+		composedConfig["tchannel.port"] = 0
 	}
 
-	config["tchannel.serviceName"] = serviceName
-	config["tchannel.processName"] = serviceName
-	config["metrics.tally.service"] = serviceName
-	config["metrics.tally.flushInterval"] = 10
-	config["metrics.m3.hostPort"] = testGateway.m3Server.Addr
-	config["metrics.m3.flushInterval"] = 10
-	config["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
-	config["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
-	config["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
-	config["metrics.runtime.collectInterval"] = 10
-	config["logger.output"] = "stdout"
-	config["env"] = "test"
+	composedConfig["tchannel.serviceName"] = serviceName
+	composedConfig["tchannel.processName"] = serviceName
+	composedConfig["metrics.tally.service"] = serviceName
+	composedConfig["metrics.tally.flushInterval"] = 10
+	composedConfig["metrics.m3.hostPort"] = testGateway.m3Server.Addr
+	composedConfig["metrics.m3.flushInterval"] = 10
+	composedConfig["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
+	composedConfig["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
+	composedConfig["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics
+	composedConfig["metrics.runtime.collectInterval"] = 10
+	composedConfig["logger.output"] = "stdout"
+	composedConfig["env"] = "test"
 
-	err = testGateway.createAndSpawnChild(opts.TestBinary, config)
+	err = testGateway.createAndSpawnChild(
+		opts.TestBinary,
+		opts.ConfigFiles,
+		composedConfig,
+	)
+
 	if err != nil {
 		return nil, err
 	}

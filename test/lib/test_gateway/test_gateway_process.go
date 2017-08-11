@@ -64,9 +64,10 @@ func (err *MalformedStdoutError) Error() string {
 
 func (gateway *ChildProcessGateway) createAndSpawnChild(
 	mainFile string,
-	config map[string]interface{},
+	defaultConfigFiles []string,
+	testConfigOverrides map[string]interface{},
 ) error {
-	info, err := createTestBinaryFile(mainFile, config)
+	info, err := createTestBinaryFile(mainFile)
 	if err != nil {
 		return errors.Wrap(err, "Could not create test binary file: ")
 	}
@@ -83,15 +84,18 @@ func (gateway *ChildProcessGateway) createAndSpawnChild(
 		)
 	}
 
-	gateway.cmd = exec.Command(args[0], args[1:]...)
-	tempConfigDir, err := writeConfigToFile(config)
+	tempConfigFile, err := writeConfigToFile(testConfigOverrides)
 	if err != nil {
 		gateway.Close()
 		return errors.Wrap(err, "Could not exec test command")
 	}
+
+	configFiles := append(defaultConfigFiles, tempConfigFile)
+	args = append(args, "-config", strings.Join(configFiles, ";"))
+	gateway.cmd = exec.Command(args[0], args[1:]...)
+
 	gateway.cmd.Env = append(
 		[]string{
-			"CONFIG_DIR=" + tempConfigDir,
 			"GATEWAY_RUN_CHILD_PROCESS_TEST=1",
 		},
 		os.Environ()...,
