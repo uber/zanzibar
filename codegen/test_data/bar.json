@@ -276,6 +276,7 @@
 						"\trequestAuthUUID2Query := *r.Request.AuthUUID2",
 						"\tqueryValues.Set(\"request.authUUID2\", requestAuthUUID2Query)",
 						"}",
+						"if r.Opt != nil {",
 						"optNameQuery := r.Opt.Name",
 						"queryValues.Set(\"opt.name\", optNameQuery)",
 						"if r.Opt.UserUUID != nil {",
@@ -289,6 +290,7 @@
 						"if r.Opt.AuthUUID2 != nil {",
 						"\toptAuthUUID2Query := *r.Opt.AuthUUID2",
 						"\tqueryValues.Set(\"opt.authUUID2\", optAuthUUID2Query)",
+						"}",
 						"}",
 						"fullURL += \"?\" + queryValues.Encode()"
 					],
@@ -352,7 +354,10 @@
 					],
 					"IsEndpoint": false,
 					"ParseQueryParamGoStatements": null,
-					"WriteQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"if r.Params != nil {",
+						"}"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {

@@ -435,19 +435,21 @@ func (c *barClient) ArgWithNestedQueryParams(
 		requestAuthUUID2Query := *r.Request.AuthUUID2
 		queryValues.Set("request.authUUID2", requestAuthUUID2Query)
 	}
-	optNameQuery := r.Opt.Name
-	queryValues.Set("opt.name", optNameQuery)
-	if r.Opt.UserUUID != nil {
-		optUserUUIDQuery := *r.Opt.UserUUID
-		queryValues.Set("opt.userUUID", optUserUUIDQuery)
-	}
-	if r.Opt.AuthUUID != nil {
-		optAuthUUIDQuery := *r.Opt.AuthUUID
-		queryValues.Set("opt.authUUID", optAuthUUIDQuery)
-	}
-	if r.Opt.AuthUUID2 != nil {
-		optAuthUUID2Query := *r.Opt.AuthUUID2
-		queryValues.Set("opt.authUUID2", optAuthUUID2Query)
+	if r.Opt != nil {
+		optNameQuery := r.Opt.Name
+		queryValues.Set("opt.name", optNameQuery)
+		if r.Opt.UserUUID != nil {
+			optUserUUIDQuery := *r.Opt.UserUUID
+			queryValues.Set("opt.userUUID", optUserUUIDQuery)
+		}
+		if r.Opt.AuthUUID != nil {
+			optAuthUUIDQuery := *r.Opt.AuthUUID
+			queryValues.Set("opt.authUUID", optAuthUUIDQuery)
+		}
+		if r.Opt.AuthUUID2 != nil {
+			optAuthUUID2Query := *r.Opt.AuthUUID2
+			queryValues.Set("opt.authUUID2", optAuthUUID2Query)
+		}
 	}
 	fullURL += "?" + queryValues.Encode()
 
@@ -498,6 +500,9 @@ func (c *barClient) ArgWithParams(
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
+
+	if r.Params != nil {
+	}
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
