@@ -11,8 +11,8 @@ import (
 )
 
 type Bar_ArgWithNestedQueryParams_Args struct {
-	Request *QueryParamsStruct `json:"request,required"`
-	Opt     *QueryParamsStruct `json:"opt,omitempty"`
+	Request *QueryParamsStruct     `json:"request,required"`
+	Opt     *QueryParamsOptsStruct `json:"opt,omitempty"`
 }
 
 func (v *Bar_ArgWithNestedQueryParams_Args) ToWire() (wire.Value, error) {
@@ -48,6 +48,12 @@ func _QueryParamsStruct_Read(w wire.Value) (*QueryParamsStruct, error) {
 	return &v, err
 }
 
+func _QueryParamsOptsStruct_Read(w wire.Value) (*QueryParamsOptsStruct, error) {
+	var v QueryParamsOptsStruct
+	err := v.FromWire(w)
+	return &v, err
+}
+
 func (v *Bar_ArgWithNestedQueryParams_Args) FromWire(w wire.Value) error {
 	var err error
 	requestIsSet := false
@@ -63,7 +69,7 @@ func (v *Bar_ArgWithNestedQueryParams_Args) FromWire(w wire.Value) error {
 			}
 		case 2:
 			if field.Value.Type() == wire.TStruct {
-				v.Opt, err = _QueryParamsStruct_Read(field.Value)
+				v.Opt, err = _QueryParamsOptsStruct_Read(field.Value)
 				if err != nil {
 					return err
 				}
@@ -110,14 +116,14 @@ func (v *Bar_ArgWithNestedQueryParams_Args) EnvelopeType() wire.EnvelopeType {
 }
 
 var Bar_ArgWithNestedQueryParams_Helper = struct {
-	Args           func(request *QueryParamsStruct, opt *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args
+	Args           func(request *QueryParamsStruct, opt *QueryParamsOptsStruct) *Bar_ArgWithNestedQueryParams_Args
 	IsException    func(error) bool
 	WrapResponse   func(*BarResponse, error) (*Bar_ArgWithNestedQueryParams_Result, error)
 	UnwrapResponse func(*Bar_ArgWithNestedQueryParams_Result) (*BarResponse, error)
 }{}
 
 func init() {
-	Bar_ArgWithNestedQueryParams_Helper.Args = func(request *QueryParamsStruct, opt *QueryParamsStruct) *Bar_ArgWithNestedQueryParams_Args {
+	Bar_ArgWithNestedQueryParams_Helper.Args = func(request *QueryParamsStruct, opt *QueryParamsOptsStruct) *Bar_ArgWithNestedQueryParams_Args {
 		return &Bar_ArgWithNestedQueryParams_Args{Request: request, Opt: opt}
 	}
 	Bar_ArgWithNestedQueryParams_Helper.IsException = func(err error) bool {
