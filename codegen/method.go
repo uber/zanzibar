@@ -448,6 +448,7 @@ func (ms *MethodSpec) setRequestHeaderFields(
 	var finalError error
 	var seenHeaders bool
 	var headersMap = map[string]int{}
+	var seenOptStructs = map[string]string{}
 
 	// Scan for all annotations
 	visitor := func(
@@ -466,11 +467,15 @@ func (ms *MethodSpec) setRequestHeaderFields(
 				return true
 			}
 
-			statements.appendf("if requestBody%s == nil {", longFieldName)
-			statements.appendf("\trequestBody%s = &%s{}",
-				longFieldName, typeName,
-			)
-			statements.append("}")
+			if field.Required {
+				statements.appendf("if requestBody%s == nil {", longFieldName)
+				statements.appendf("\trequestBody%s = &%s{}",
+					longFieldName, typeName,
+				)
+				statements.append("}")
+			} else {
+				seenOptStructs[longFieldName] = typeName
+			}
 
 			return false
 		}
@@ -495,6 +500,19 @@ func (ms *MethodSpec) setRequestHeaderFields(
 					statements.appendf("%s, _ := req.Header.Get(%q)",
 						variableName, headerName,
 					)
+
+					for seenStruct, typeName := range seenOptStructs {
+						if strings.HasPrefix(longFieldName, seenStruct) {
+							statements.appendf("if requestBody%s == nil {",
+								seenStruct,
+							)
+							statements.appendf("\trequestBody%s = &%s{}",
+								seenStruct, typeName,
+							)
+							statements.append("}")
+						}
+					}
+
 					statements.appendf("requestBody%s = %s",
 						bodyIdentifier, variableName,
 					)
@@ -503,6 +521,19 @@ func (ms *MethodSpec) setRequestHeaderFields(
 						variableName, variableName, headerName,
 					)
 					statements.appendf("if %sExists {", variableName)
+
+					for seenStruct, typeName := range seenOptStructs {
+						if strings.HasPrefix(longFieldName, seenStruct) {
+							statements.appendf("\tif requestBody%s == nil {",
+								seenStruct,
+							)
+							statements.appendf("\t\trequestBody%s = &%s{}",
+								seenStruct, typeName,
+							)
+							statements.append("\t}")
+						}
+					}
+
 					statements.appendf("\trequestBody%s = ptr.String(%s)",
 						bodyIdentifier, variableName,
 					)
