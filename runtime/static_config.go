@@ -32,6 +32,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+type configType int
+
+const (
+	filePathConfigType     configType = 1
+	fileContentsConfigType configType = 2
+)
+
 // StaticConfigValue represents a json serialized string.
 type StaticConfigValue struct {
 	bytes    []byte
@@ -40,11 +47,35 @@ type StaticConfigValue struct {
 
 // StaticConfig allows accessing values of out of json config files
 type StaticConfig struct {
-	seedConfig   map[string]interface{}
-	files        []string
-	configValues map[string]StaticConfigValue
-	frozen       bool
-	destroyed    bool
+	seedConfig    map[string]interface{}
+	configOptions []*ConfigOption
+	configValues  map[string]StaticConfigValue
+	frozen        bool
+	destroyed     bool
+}
+
+// ConfigOption points to a collection of bytes representing a file. This is
+// either the full contents of the file as bytes, or a string poiting to a
+// file
+type ConfigOption struct {
+	configType configType
+	bytes      []byte
+}
+
+// ConfigFilePath creates a ConfigFile represented as a path
+func ConfigFilePath(path string) *ConfigOption {
+	return &ConfigOption{
+		configType: filePathConfigType,
+		bytes:      []byte(path),
+	}
+}
+
+// ConfigFileContents creates a ConfigFile representing the contents of the file
+func ConfigFileContents(fileBytes []byte) *ConfigOption {
+	return &ConfigOption{
+		configType: fileContentsConfigType,
+		bytes:      fileBytes,
+	}
 }
 
 // NewStaticConfigOrDie allocates a static config instance
@@ -55,6 +86,9 @@ type StaticConfig struct {
 //
 // The seedConfig is optional and will be used to overwrite
 // configuration json files if present.
+//
+// The defaultConfig is optional initial config that will be overwritten by
+// the config in the supplied files or the seed config
 //
 // The files must be a list of JSON files. Each file must be a flat object of
 // key, value pairs. It's recommended that you use keys like:
@@ -69,12 +103,13 @@ type StaticConfig struct {
 //
 // To organize your configuration file.
 func NewStaticConfigOrDie(
-	files []string, seedConfig map[string]interface{},
+	configOptions []*ConfigOption,
+	seedConfig map[string]interface{},
 ) *StaticConfig {
 	config := &StaticConfig{
-		files:        files,
-		seedConfig:   map[string]interface{}{},
-		configValues: map[string]StaticConfigValue{},
+		configOptions: configOptions,
+		seedConfig:    map[string]interface{}{},
+		configValues:  map[string]StaticConfigValue{},
 	}
 
 	for key, value := range seedConfig {
@@ -311,8 +346,8 @@ func (conf *StaticConfig) initializeConfigValues() {
 func (conf *StaticConfig) collectConfigMaps() []map[string]StaticConfigValue {
 	var maps = []map[string]StaticConfigValue{}
 
-	for i := 0; i < len(conf.files); i++ {
-		fileObject := conf.parseFile(conf.files[i])
+	for i := 0; i < len(conf.configOptions); i++ {
+		fileObject := conf.parseFile(conf.configOptions[i])
 		if fileObject != nil {
 			maps = append(maps, fileObject)
 		}
@@ -331,21 +366,36 @@ func (conf *StaticConfig) assignConfigValues(values []map[string]StaticConfigVal
 	}
 }
 
-func (conf *StaticConfig) parseFile(fileName string) map[string]StaticConfigValue {
-	bytes, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		if os.IsNotExist(err) {
-			// Ignore missing files
-			return nil
-		}
+func (conf *StaticConfig) parseFile(
+	configFile *ConfigOption,
+) map[string]StaticConfigValue {
+	var bytes []byte
 
-		// If the ReadFile() failed then just panic out.
-		panic(err)
+	switch configFile.configType {
+	case filePathConfigType:
+		var err error
+		bytes, err = ioutil.ReadFile(string(configFile.bytes))
+		if err != nil {
+			if os.IsNotExist(err) {
+				// Ignore missing files
+				return nil
+			}
+
+			// If the ReadFile() failed then just panic out.
+			panic(err)
+		}
+	case fileContentsConfigType:
+		bytes = configFile.bytes
+	default:
+		panic(errors.Errorf(
+			"Unknown config file type %d",
+			configFile.configType,
+		))
 	}
 
 	var object = map[string]StaticConfigValue{}
 
-	err = jsonparser.ObjectEach(bytes, func(
+	err := jsonparser.ObjectEach(bytes, func(
 		key []byte,
 		value []byte,
 		dataType jsonparser.ValueType,
