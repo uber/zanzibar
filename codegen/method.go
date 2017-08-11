@@ -484,7 +484,7 @@ func (ms *MethodSpec) setRequestHeaderFields(
 				seenCount := headersMap[camelHeaderName]
 				var variableName string
 				if seenCount > 0 {
-					variableName = camelHeaderName + "_" +
+					variableName = camelHeaderName + "No" +
 						strconv.Itoa(seenCount) + "Value"
 				} else {
 					variableName = camelHeaderName + "Value"
