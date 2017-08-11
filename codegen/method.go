@@ -447,6 +447,7 @@ func (ms *MethodSpec) setRequestHeaderFields(
 
 	var finalError error
 	var seenHeaders bool
+	var headersMap = map[string]int{}
 
 	// Scan for all annotations
 	visitor := func(
@@ -477,8 +478,18 @@ func (ms *MethodSpec) setRequestHeaderFields(
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
+				camelHeaderName := camelCase(headerName)
 				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
-				variableName := camelCase(headerName) + "Value"
+
+				seenCount := headersMap[camelHeaderName]
+				var variableName string
+				if seenCount > 0 {
+					variableName = camelHeaderName + "_" +
+						strconv.Itoa(seenCount) + "Value"
+				} else {
+					variableName = camelHeaderName + "Value"
+				}
+				headersMap[camelHeaderName] = seenCount + 1
 
 				if field.Required {
 					statements.appendf("%s, _ := req.Header.Get(%q)",
