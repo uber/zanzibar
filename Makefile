@@ -84,6 +84,7 @@ generate:
 	@go get -u github.com/jteeuwen/go-bindata/...
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl
+	@chmod 644 ./config/production.json
 	@go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.json.go config/production.json
 	@./node_modules/.bin/uber-licence --file "production.json.go" --dir "config" > /dev/null
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
