@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
@@ -63,6 +64,7 @@ func BenchmarkCompare(b *testing.B) {
 		&testGateway.Options{
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)
@@ -164,6 +166,7 @@ func TestCompareInvalidArgs(t *testing.T) {
 		&testGateway.Options{
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)

@@ -24,11 +24,11 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
-	"path/filepath"
 	"testing"
 
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -42,10 +42,8 @@ var testConfig = map[string]interface{}{
 }
 var testOptions = &testGateway.Options{
 	KnownTChannelBackends: []string{"baz"},
-	TestBinary: filepath.Join(
-		getDirName(), "..", "..", "..", "examples", "example-gateway",
-		"build", "services", "example-gateway", "main", "main.go",
-	),
+	TestBinary:            util.DefaultMainFile("example-gateway"),
+	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 }
 
 var testPingCounter int
@@ -70,6 +68,7 @@ func BenchmarkPing(b *testing.B) {
 		&testGateway.Options{
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)

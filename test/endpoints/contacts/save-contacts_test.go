@@ -24,8 +24,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,6 +31,7 @@ import (
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 var benchBytes = []byte("{\"userUUID\":\"foo\",\"contacts\":[{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[{\"type\":\"message\",\"text\":\"foobarbaz\"}],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}},{\"fragments\":[],\"attributes\":{\"firstName\":\"steve\",\"lastName\":\"stevenson\",\"hasPhoto\":true,\"numFields\":10,\"timesContacted\":5,\"lastTimeContacted\":0,\"isStarred\":false,\"hasCustomRingtone\":false,\"isSendToVoicemail\":false,\"hasThumbnail\":false,\"namePrefix\":\"\",\"nameSuffix\":\"\"}}],\"appType\":\"MY_APP\"}")
@@ -45,6 +44,7 @@ func BenchmarkSaveContacts(b *testing.B) {
 		&testGateway.Options{
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)
@@ -92,22 +92,13 @@ func BenchmarkSaveContacts(b *testing.B) {
 	b.StartTimer()
 }
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
-}
-
 func TestSaveContactsCall(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"contacts"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

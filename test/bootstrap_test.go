@@ -21,7 +21,6 @@
 package gateway_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"encoding/json"
@@ -29,11 +28,13 @@ import (
 	"github.com/pkg/errors"
 	assert "github.com/stretchr/testify/assert"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestBootstrapError(t *testing.T) {
 	gateway1, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		TestBinary: testBinary,
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
@@ -49,11 +50,8 @@ func TestBootstrapError(t *testing.T) {
 		LogWhitelist: map[string]bool{
 			"Error listening on port": true,
 		},
-		TestBinary: filepath.Join(
-			getDirName(), "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 
 	assert.Error(t, err, "expected err creating server")

@@ -30,6 +30,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
@@ -37,6 +38,7 @@ import (
 var defaultTestOptions *testGateway.Options = &testGateway.Options{
 	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 	KnownTChannelBackends: []string{"baz"},
+	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 }
 var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	"clients.baz.serviceName": "baz",

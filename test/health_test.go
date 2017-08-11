@@ -22,33 +22,23 @@ package gateway_test
 
 import (
 	"io/ioutil"
-	"path/filepath"
-	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
+
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
-
-var testBinary = filepath.Join(
-	getDirName(),
-	"..", "examples", "example-gateway", "build", "services", "example-gateway", "main", "main.go",
-)
-
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
-}
 
 func TestHealthCall(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
-		TestBinary: testBinary,
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
@@ -71,6 +61,8 @@ func BenchmarkHealthCall(b *testing.B) {
 			"clients.baz.serviceName": "baz",
 		},
 		&testGateway.Options{
+			TestBinary:            util.DefaultMainFile("example-gateway"),
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
 		},
@@ -113,7 +105,8 @@ func BenchmarkHealthCall(b *testing.B) {
 func TestHealthMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics: true,
-		TestBinary:   testBinary,
+		TestBinary:   util.DefaultMainFile("example-gateway"),
+		ConfigFiles:  util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
@@ -238,7 +231,8 @@ func TestRuntimeMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics:         true,
 		EnableRuntimeMetrics: true,
-		TestBinary:           testBinary,
+		TestBinary:           util.DefaultMainFile("example-gateway"),
+		ConfigFiles:          util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "must be able to create gateway") {
 		return
