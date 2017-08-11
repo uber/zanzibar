@@ -758,6 +758,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 			if field.Required {
 				statements.appendf("if r%s == nil {", longFieldName)
+				// TODO: generate correct number of nils...
 				statements.append("\treturn nil, nil, errors.New(")
 				statements.appendf("\t\t\"The field %s is required\",",
 					longFieldName,
