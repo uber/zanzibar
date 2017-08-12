@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -955,18 +954,6 @@ func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGe
 func (generator *GatewayServiceGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	// zanzibar-defaults.json is copied from ../config/production.json
-	configSrcFileName := path.Join(
-		getDirName(), "..", "config", "production.json",
-	)
-	productionConfig, err := ioutil.ReadFile(configSrcFileName)
-	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"Could not read config/production.json while generating main file",
-		)
-	}
-
 	// generate main.go
 	service, err := generator.templates.ExecTemplate(
 		"service.tmpl",
@@ -1035,11 +1022,10 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	files := map[string][]byte{
-		"service.go":                  service,
-		"main/main.go":                main,
-		"main/main_test.go":           mainTest,
-		"main/zanzibar-defaults.json": productionConfig,
-		"module/init.go":              initializer,
+		"service.go":        service,
+		"main/main.go":      main,
+		"main/main_test.go": mainTest,
+		"module/init.go":    initializer,
 	}
 
 	if dependencies != nil {

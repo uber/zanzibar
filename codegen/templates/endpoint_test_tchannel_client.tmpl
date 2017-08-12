@@ -16,6 +16,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -44,9 +45,8 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "{{.TestServiceName}}", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
+		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

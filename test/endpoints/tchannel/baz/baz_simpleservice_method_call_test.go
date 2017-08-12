@@ -22,23 +22,16 @@ package bazTchannel
 
 import (
 	"context"
-	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 )
-
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	testCallCounter := 0
@@ -47,10 +40,8 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..", "..", "examples", "example-gateway",
-			"build", "services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("example-gateway"),
+		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

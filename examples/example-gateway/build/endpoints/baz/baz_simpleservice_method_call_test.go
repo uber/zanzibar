@@ -26,11 +26,11 @@ package bazEndpoint
 import (
 	"bytes"
 	"context"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
@@ -43,9 +43,8 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		"clients.baz.serviceName": "bazService",
 	}, &testGateway.Options{
 		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("example-gateway"),
+		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

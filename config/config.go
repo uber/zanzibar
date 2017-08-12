@@ -18,15 +18,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package baz
+package config
 
 import (
-	"runtime"
-
-	"github.com/uber/zanzibar/runtime"
+	"github.com/pkg/errors"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
+// NewRuntimeConfigOrDie returns a static config struct that is pre-set with
+// the service configuration defaults
+func NewRuntimeConfigOrDie(
+	files []string,
+	seedConfig map[string]interface{},
+) *zanzibar.StaticConfig {
+	defaultConfig, err := defaultConfig()
+	if err != nil {
+		panic(errors.Wrap)
+	}
+	serviceConfig := make([]*zanzibar.ConfigOption, len(files)+1)
+	serviceConfig[0] = defaultConfig
+	for i, configFilePath := range files {
+		serviceConfig[i+1] = zanzibar.ConfigFilePath(configFilePath)
+	}
+
+	return zanzibar.NewStaticConfigOrDie(serviceConfig, seedConfig)
+}
+
+func defaultConfig() (*zanzibar.ConfigOption, error) {
+	bytes, err := Asset("production.json")
+	if err != nil {
+		return nil, err
+	}
+
+	return zanzibar.ConfigFileContents(bytes), nil
 }

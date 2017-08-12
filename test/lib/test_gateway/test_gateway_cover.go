@@ -86,7 +86,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	return tempConfigDir, nil
+	return jsonFile, nil
 }
 
 func makeRandStr() (string, error) {
@@ -149,10 +149,7 @@ func tryWriteCachedBinaryTestInfo() {
 	}
 }
 
-func createTestBinaryFile(
-	mainPath string,
-	config map[string]interface{},
-) (*testBinaryInfo, error) {
+func createTestBinaryFile(mainPath string) (*testBinaryInfo, error) {
 	if os.Getenv("ZANZIBAR_CACHE") == "1" && cachedBinaryFile == nil {
 		// Try to load cachedBinaryFile from disk
 		tryLoadCachedBinaryTestInfo(mainPath)

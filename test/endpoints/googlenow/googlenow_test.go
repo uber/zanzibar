@@ -25,8 +25,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"path/filepath"
-	"runtime"
 	"testing"
 	"time"
 
@@ -34,6 +32,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
@@ -53,6 +52,7 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 		&testGateway.Options{
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)
@@ -102,22 +102,13 @@ func BenchmarkGoogleNowAddCredentials(b *testing.B) {
 	b.StartTimer()
 }
 
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-
-	return filepath.Dir(file)
-}
-
 func TestAddCredentials(t *testing.T) {
 	var counter int = 0
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -166,11 +157,8 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 			"Could not ReadAll() body": true,
 		},
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -232,11 +220,8 @@ func TestGoogleNowFailJSONParsing(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -282,11 +267,8 @@ func TestAddCredentialsMissingAuthCode(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -349,11 +331,8 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 		LogWhitelist: map[string]bool{
 			"Could not make client request": true,
 		},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -399,11 +378,8 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -442,11 +418,8 @@ func TestAddCredentialsWrongStatusCode(t *testing.T) {
 func TestGoogleNowMissingHeaders(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -479,11 +452,8 @@ func TestAddCredentialsMissingOneHeader(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -530,11 +500,8 @@ func TestAddCredentialsHeaderMapping(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -594,11 +561,8 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 		LogWhitelist: map[string]bool{
 			"Could not make client request": true,
 		},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:  util.DefaultMainFile("example-gateway"),
+		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
 	})
 
 	if !assert.NoError(t, err, "got bootstrap err") {

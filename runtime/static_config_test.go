@@ -92,7 +92,7 @@ func TestPanicNonExistantKeys(t *testing.T) {
 
 func TestPanicGetWrongTypes(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		map[string]interface{}{
 			"a.b.c": "v",
 			"bool":  true,
@@ -120,7 +120,7 @@ func TestPanicGetWrongTypes(t *testing.T) {
 
 func TestSupportsSeedConfig(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		map[string]interface{}{
 			"a.b.c": "v",
 			"bool":  true,
@@ -137,7 +137,7 @@ func TestSupportsSeedConfig(t *testing.T) {
 
 func TestCannotSetExistingKeys(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		map[string]interface{}{
 			"a.b.c": "v",
 		},
@@ -150,7 +150,7 @@ func TestCannotSetExistingKeys(t *testing.T) {
 
 func TestCannotGetFromDestroyedConfig(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		map[string]interface{}{
 			"a.b.c": "v",
 			"bool":  true,
@@ -270,8 +270,10 @@ func TestCanReadFromFile(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	assert.Equal(t, config.MustGetString("a"), "b")
@@ -283,6 +285,26 @@ func TestCanReadFromFile(t *testing.T) {
 	closer.Close()
 }
 
+func TestCanReadFromFileContents(t *testing.T) {
+	bytes := mustMarshal(map[string]interface{}{
+		"a":     "b",
+		"a.b.c": "v",
+		"bool":  true,
+		"int":   int64(1),
+		"float": float64(1.0),
+	})
+
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFileContents(bytes),
+	}, nil)
+
+	assert.Equal(t, config.MustGetString("a"), "b")
+	assert.Equal(t, config.MustGetString("a.b.c"), "v")
+	assert.Equal(t, config.MustGetBoolean("bool"), true)
+	assert.Equal(t, config.MustGetInt("int"), int64(1))
+	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+}
+
 func TestCannotSetOverValueFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
 		"config/production.json": mustMarshal(map[string]interface{}{
@@ -291,8 +313,10 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	assert.Panics(t, func() {
@@ -300,6 +324,21 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 	})
 
 	closer.Close()
+}
+
+func TestCannotSetOverValueFromFileContents(t *testing.T) {
+	bytes := mustMarshal(map[string]interface{}{
+		"a":     "b",
+		"a.b.c": "v",
+	})
+
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFileContents(bytes),
+	}, nil)
+
+	assert.Panics(t, func() {
+		config.SetOrDie("a", "c")
+	})
 }
 
 func TestReadFromSeedConfigIntoNil(t *testing.T) {
@@ -320,8 +359,10 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, map[string]interface{}{
 		"a": "c",
 	})
@@ -343,9 +384,63 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
-		filepath.Join(testDir, "config", "local.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "local.json"),
+		),
+	}, nil)
+
+	assert.Equal(t, config.MustGetString("a"), "c")
+	assert.Equal(t, config.MustGetString("a.b.c"), "v")
+
+	closer.Close()
+}
+
+func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
+	closer := WriteFixture(testDir, map[string][]byte{
+		"config/production.json": mustMarshal(map[string]string{
+			"a":     "b",
+			"a.b.c": "v",
+		}),
+	})
+
+	bytes := mustMarshal(map[string]string{
+		"a": "c",
+	})
+
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
+		zanzibar.ConfigFileContents(bytes),
+	}, nil)
+
+	assert.Equal(t, config.MustGetString("a"), "c")
+	assert.Equal(t, config.MustGetString("a.b.c"), "v")
+
+	closer.Close()
+}
+
+func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
+	closer := WriteFixture(testDir, map[string][]byte{
+		"config/local.json": mustMarshal(map[string]string{
+			"a": "c",
+		}),
+	})
+
+	bytes := mustMarshal(map[string]string{
+		"a":     "b",
+		"a.b.c": "v",
+	})
+
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFileContents(bytes),
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "local.json"),
+		),
 	}, nil)
 
 	assert.Equal(t, config.MustGetString("a"), "c")
@@ -355,9 +450,13 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 }
 
 func TestSupportsNonExistantFiles(t *testing.T) {
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
-		filepath.Join(testDir, "config", "local.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "local.json"),
+		),
 	}, map[string]interface{}{
 		"a":     "d",
 		"a.b.c": "v2",
@@ -367,7 +466,7 @@ func TestSupportsNonExistantFiles(t *testing.T) {
 	assert.Equal(t, config.MustGetString("a.b.c"), "v2")
 }
 
-func TestThrowsForInvalidJSON(t *testing.T) {
+func TestThrowsForInvalidJSONFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
 		"config/production.json": mustMarshal(map[string]string{
 			"a":     "b",
@@ -377,9 +476,33 @@ func TestThrowsForInvalidJSON(t *testing.T) {
 	})
 
 	assert.Panics(t, func() {
-		_ = zanzibar.NewStaticConfigOrDie([]string{
-			filepath.Join(testDir, "config", "production.json"),
-			filepath.Join(testDir, "config", "local.json"),
+		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+			zanzibar.ConfigFilePath(
+				filepath.Join(testDir, "config", "production.json"),
+			),
+			zanzibar.ConfigFilePath(
+				filepath.Join(testDir, "config", "local.json"),
+			),
+		}, nil)
+	})
+
+	closer.Close()
+}
+
+func TestThrowsForInvalidJSONContents(t *testing.T) {
+	closer := WriteFixture(testDir, map[string][]byte{
+		"config/production.json": mustMarshal(map[string]string{
+			"a":     "b",
+			"a.b.c": "v",
+		}),
+	})
+
+	assert.Panics(t, func() {
+		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+			zanzibar.ConfigFilePath(
+				filepath.Join(testDir, "config", "production.json"),
+			),
+			zanzibar.ConfigFileContents([]byte("{...}")),
 		}, nil)
 	})
 
@@ -388,8 +511,8 @@ func TestThrowsForInvalidJSON(t *testing.T) {
 
 func TestThrowsForReadingBadFiles(t *testing.T) {
 	assert.Panics(t, func() {
-		_ = zanzibar.NewStaticConfigOrDie([]string{
-			filepath.Join(testDir),
+		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+			zanzibar.ConfigFilePath(filepath.Join(testDir)),
 		}, nil)
 	})
 }
@@ -404,8 +527,10 @@ func TestGetStructFromDisk(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	var m struct {
@@ -426,8 +551,10 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 		),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	assert.Panics(t, func() {
@@ -444,8 +571,10 @@ func TestReadStructIntoWrongType(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	var m struct {
@@ -469,8 +598,10 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, map[string]interface{}{
 		"a": struct {
 			Field string
@@ -507,8 +638,10 @@ func TestInspectFromFile(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	assert.Equal(t, config.InspectOrDie(), map[string]interface{}{
@@ -537,8 +670,10 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 		}),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(testDir, "config", "production.json"),
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(
+			filepath.Join(testDir, "config", "production.json"),
+		),
 	}, nil)
 
 	assert.Panics(t, func() {
@@ -569,11 +704,11 @@ func TestStaticConfigHasOwnState(t *testing.T) {
 	}
 
 	config1 := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		dict,
 	)
 	config2 := zanzibar.NewStaticConfigOrDie(
-		[]string{},
+		[]*zanzibar.ConfigOption{},
 		dict,
 	)
 
@@ -581,5 +716,13 @@ func TestStaticConfigHasOwnState(t *testing.T) {
 
 	assert.Panics(t, func() {
 		config2.MustGetString("a-key")
+	})
+}
+
+func TestStaticConfigPanicBadConfig(t *testing.T) {
+	assert.Panics(t, func() {
+		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+			{},
+		}, nil)
 	})
 }

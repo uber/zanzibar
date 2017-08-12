@@ -24,38 +24,36 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
+	"flag"
 	"runtime"
+	"strings"
 
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
+
+var configFiles *string
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
-// TODO: remove this
-func getConfigDirName() string {
-	return filepath.Join(
-		getDirName(),
-		"../../../../",
-		"config",
-	)
-}
-
 func getConfig() *zanzibar.StaticConfig {
-	return zanzibar.NewStaticConfigOrDie([]string{
-		// TODO: zanzibar-defaults should be bundled in the binary
-		filepath.Join(getDirName(), "zanzibar-defaults.json"),
-		filepath.Join(getConfigDirName(), "production.json"),
-		filepath.Join(os.Getenv("CONFIG_DIR"), "production.json"),
-	}, nil)
+	var files []string
+
+	if configFiles == nil {
+		files = []string{}
+	} else {
+		files = strings.Split(*configFiles, ";")
+	}
+
+	return config.NewRuntimeConfigOrDie(files, nil)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
@@ -106,7 +104,17 @@ func logAndWait(server *zanzibar.Gateway) {
 	// TODO: setup and configure tracing/jeager.
 }
 
+func readFlags() {
+	configFiles = flag.String(
+		"config",
+		"",
+		"an ordered, semi-colon separated list of configuration files to use",
+	)
+	flag.Parse()
+}
+
 func main() {
+	readFlags()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)

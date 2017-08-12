@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"github.com/kardianos/osext"
+	"github.com/uber/zanzibar/test/lib/util"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -84,7 +85,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	return tempConfigDir, nil
+	return jsonFile, nil
 }
 
 func spawnGateway(dirName string) *exec.Cmd {
@@ -107,11 +108,13 @@ func spawnGateway(dirName string) *exec.Cmd {
 		"clients.contacts.ip":     "127.0.0.1",
 	}
 
-	tempConfigDir, err := writeConfigToFile(config)
+	configFiles := util.DefaultConfigFiles("example-gateway")
+	tempConfigFile, err := writeConfigToFile(config)
 	if err != nil {
 		panic(err)
 	}
-	uberConfigDir := tempConfigDir
+	configFiles = append(configFiles, tempConfigFile)
+	configOption := strings.Join(configFiles, ";")
 
 	mainGatewayPath := path.Join(
 		dirName, "..", "..", "examples",
@@ -120,12 +123,12 @@ func spawnGateway(dirName string) *exec.Cmd {
 
 	var gatewayCmd *exec.Cmd
 	if runtime.GOOS == "linux" {
-		gatewayCmd = exec.Command("taskset", "-c", "0,3", mainGatewayPath)
+		gatewayCmd = exec.Command(
+			"taskset", "-c", "0,3", mainGatewayPath, "-config", configOption)
 	} else {
-		gatewayCmd = exec.Command(mainGatewayPath)
+		gatewayCmd = exec.Command(mainGatewayPath, "-config", configOption)
 	}
 
-	gatewayCmd.Env = append(os.Environ(), "CONFIG_DIR="+uberConfigDir)
 	gatewayCmd.Env = append(gatewayCmd.Env, "ENVIRONMENT=production")
 	gatewayCmd.Stderr = os.Stderr
 	gatewayCmd.Stdout = os.Stdout
@@ -136,7 +139,7 @@ func spawnGateway(dirName string) *exec.Cmd {
 	}
 
 	logger.Info("started main gateway",
-		zap.String("baseYamlFile", tempConfigDir),
+		zap.String("baseYamlFile", tempConfigFile),
 	)
 
 	return gatewayCmd

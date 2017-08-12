@@ -32,8 +32,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-var configFile = flag.String("config", "", "the config file path")
-
 const templateDir = "./codegen/templates/*.tmpl"
 
 type stackTracer interface {
@@ -54,7 +52,9 @@ func checkError(err error, message string) {
 }
 
 func main() {
+	configFile := flag.String("config", "", "the config file path")
 	flag.Parse()
+
 	if *configFile == "" {
 		flag.Usage()
 		os.Exit(1)
@@ -62,8 +62,8 @@ func main() {
 	}
 
 	configRoot := filepath.Dir(*configFile)
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		*configFile,
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFilePath(*configFile),
 	}, nil)
 
 	configRoot, err := filepath.Abs(configRoot)

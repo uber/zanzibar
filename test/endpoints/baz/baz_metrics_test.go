@@ -23,16 +23,18 @@ package baz
 import (
 	"bytes"
 	"context"
-	"path/filepath"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
+
+	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 func TestCallMetrics(t *testing.T) {
@@ -43,10 +45,8 @@ func TestCallMetrics(t *testing.T) {
 	}, &testGateway.Options{
 		CountMetrics:          true,
 		KnownTChannelBackends: []string{"baz"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..", "examples", "example-gateway",
-			"build", "services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:            util.DefaultMainFile("example-gateway"),
+		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

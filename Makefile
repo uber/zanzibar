@@ -8,7 +8,7 @@ COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "codegen/templates/" -e "codegen/template_bundle/"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "config/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
 # list all executables
 PROGS = benchmarks/benchserver/benchserver \
@@ -82,7 +82,11 @@ lint: check-licence eclint-check
 .PHONY: generate
 generate:
 	@go get -u github.com/jteeuwen/go-bindata/...
+	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl
+	@chmod 644 ./config/production.json
+	@go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.json.go config/production.json
+	@./node_modules/.bin/uber-licence --file "production.json.go" --dir "config" > /dev/null
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
 	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports

@@ -32,6 +32,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
@@ -126,9 +127,7 @@ func CreateGateway(
 		logMessages: map[string][]testGateway.LogMessage{},
 	}
 
-	config := zanzibar.NewStaticConfigOrDie([]string{
-		filepath.Join(getZanzibarDirName(), "config", "production.json"),
-	}, seedConfig)
+	config := config.NewRuntimeConfigOrDie(opts.ConfigFiles, seedConfig)
 
 	gateway, dependencies, err := createGateway(config, &zanzibar.Options{
 		LogWriter: zapcore.AddSync(benchGateway.logBytes),
