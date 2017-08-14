@@ -31,8 +31,16 @@ struct BarResponse {
 struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
+    // TODO: support header annotation
     3: optional string authUUID
-    4: required string authUUID2
+    4: optional string authUUID2
+}
+
+struct QueryParamsOptsStruct {
+    1: required string name
+    2: optional string userUUID
+    3: optional string authUUID
+    4: optional string authUUID2
 }
 
 struct ParamsStruct {
@@ -91,6 +99,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    // TODO: support headers annotation
     BarResponse argWithHeaders (
         1: required string name
         2: optional string userUUID
@@ -103,8 +112,9 @@ service Bar {
 
     BarResponse argWithNestedQueryParams(
         1: required QueryParamsStruct request
+        2: optional QueryParamsOptsStruct opt
     ) (
-        zanzibar.http.method = "POST"
+        zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithNestedQueryParams"
         zanzibar.http.status = "200"
     )
@@ -113,11 +123,12 @@ service Bar {
         1: required string name
         2: optional string userUUID
     ) (
-        zanzibar.http.method = "POST"
+        zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"
         zanzibar.http.status = "200"
     )
 
+    // TODO: support headers annotation
     BarResponse argWithQueryHeader(
         1: optional string userUUID
     ) (
@@ -151,7 +162,7 @@ service Bar {
         13: required double aFloat64
         14: optional double anOptFloat64
     ) (
-        zanzibar.http.method = "POST"
+        zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"
         zanzibar.http.status = "200"
     )

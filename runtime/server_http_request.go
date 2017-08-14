@@ -25,10 +25,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"time"
-
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber-go/tally"
@@ -348,6 +347,22 @@ func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
 	}
 
 	return req.queryValues[key], true
+}
+
+// HasQueryPrefix will check if any query param starts with key.
+func (req *ServerHTTPRequest) HasQueryPrefix(prefix string) bool {
+	success := req.parseQueryValues()
+	if !success {
+		return false
+	}
+
+	for key := range req.queryValues {
+		if strings.HasPrefix(key, prefix) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // CheckQueryValue will check for a required query param.

@@ -23,7 +23,15 @@ struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
     3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
-    4: required string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+    // TODO: validate required behaviour for headers
+    4: optional string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+}
+
+struct QueryParamsOptsStruct {
+    1: required string name
+    2: optional string userUUID
+    3: optional string authUUID
+    4: optional string authUUID2
 }
 
 struct ParamsStruct {
@@ -108,6 +116,7 @@ service Bar {
 
     BarResponse argWithNestedQueryParams(
         1: required QueryParamsStruct request
+        2: optional QueryParamsOptsStruct opt
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithNestedQueryParams"
@@ -124,6 +133,7 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
+    // TODO: support params annotation
     BarResponse argWithParams(
         1: required string uuid
         2: optional ParamsStruct params

@@ -34,7 +34,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": null,
@@ -104,7 +105,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -140,7 +142,7 @@
 				},
 				{
 					"Name": "argWithManyQueryParams",
-					"HTTPMethod": "POST",
+					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithManyQueryParams",
 					"PathSegments": [
@@ -156,7 +158,53 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"queryValues := \u0026url.Values{}",
+						"aStrQuery := r.AStr",
+						"queryValues.Set(\"aStr\", aStrQuery)",
+						"if r.AnOptStr != nil {",
+						"\tanOptStrQuery := *r.AnOptStr",
+						"\tqueryValues.Set(\"anOptStr\", anOptStrQuery)",
+						"}",
+						"aBoolQuery := strconv.FormatBool(r.ABool)",
+						"queryValues.Set(\"aBool\", aBoolQuery)",
+						"if r.AnOptBool != nil {",
+						"\tanOptBoolQuery := strconv.FormatBool(*r.AnOptBool)",
+						"\tqueryValues.Set(\"anOptBool\", anOptBoolQuery)",
+						"}",
+						"aInt8Query := strconv.Itoa(int(r.AInt8))",
+						"queryValues.Set(\"aInt8\", aInt8Query)",
+						"if r.AnOptInt8 != nil {",
+						"\tanOptInt8Query := strconv.Itoa(int(*r.AnOptInt8))",
+						"\tqueryValues.Set(\"anOptInt8\", anOptInt8Query)",
+						"}",
+						"aInt16Query := strconv.Itoa(int(r.AInt16))",
+						"queryValues.Set(\"aInt16\", aInt16Query)",
+						"if r.AnOptInt16 != nil {",
+						"\tanOptInt16Query := strconv.Itoa(int(*r.AnOptInt16))",
+						"\tqueryValues.Set(\"anOptInt16\", anOptInt16Query)",
+						"}",
+						"aInt32Query := strconv.Itoa(int(r.AInt32))",
+						"queryValues.Set(\"aInt32\", aInt32Query)",
+						"if r.AnOptInt32 != nil {",
+						"\tanOptInt32Query := strconv.Itoa(int(*r.AnOptInt32))",
+						"\tqueryValues.Set(\"anOptInt32\", anOptInt32Query)",
+						"}",
+						"aInt64Query := strconv.FormatInt(r.AInt64, 10)",
+						"queryValues.Set(\"aInt64\", aInt64Query)",
+						"if r.AnOptInt64 != nil {",
+						"\tanOptInt64Query := strconv.FormatInt(*r.AnOptInt64, 10)",
+						"\tqueryValues.Set(\"anOptInt64\", anOptInt64Query)",
+						"}",
+						"aFloat64Query := strconv.FormatFloat(r.AFloat64, 'G', -1, 64)",
+						"queryValues.Set(\"aFloat64\", aFloat64Query)",
+						"if r.AnOptFloat64 != nil {",
+						"\tanOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'G', -1, 64)",
+						"\tqueryValues.Set(\"anOptFloat64\", anOptFloat64Query)",
+						"}",
+						"fullURL += \"?\" + queryValues.Encode()"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -190,7 +238,7 @@
 				},
 				{
 					"Name": "argWithNestedQueryParams",
-					"HTTPMethod": "POST",
+					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithNestedQueryParams",
 					"PathSegments": [
@@ -206,7 +254,46 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"if r.Request == nil {",
+						"\treturn nil, nil, errors.New(",
+						"\t\t\"The field .Request is required\",",
+						"\t)",
+						"}",
+						"queryValues := \u0026url.Values{}",
+						"requestNameQuery := r.Request.Name",
+						"queryValues.Set(\"request.name\", requestNameQuery)",
+						"if r.Request.UserUUID != nil {",
+						"\trequestUserUUIDQuery := *r.Request.UserUUID",
+						"\tqueryValues.Set(\"request.userUUID\", requestUserUUIDQuery)",
+						"}",
+						"if r.Request.AuthUUID != nil {",
+						"\trequestAuthUUIDQuery := *r.Request.AuthUUID",
+						"\tqueryValues.Set(\"request.authUUID\", requestAuthUUIDQuery)",
+						"}",
+						"if r.Request.AuthUUID2 != nil {",
+						"\trequestAuthUUID2Query := *r.Request.AuthUUID2",
+						"\tqueryValues.Set(\"request.authUUID2\", requestAuthUUID2Query)",
+						"}",
+						"if r.Opt != nil {",
+						"optNameQuery := r.Opt.Name",
+						"queryValues.Set(\"opt.name\", optNameQuery)",
+						"if r.Opt.UserUUID != nil {",
+						"\toptUserUUIDQuery := *r.Opt.UserUUID",
+						"\tqueryValues.Set(\"opt.userUUID\", optUserUUIDQuery)",
+						"}",
+						"if r.Opt.AuthUUID != nil {",
+						"\toptAuthUUIDQuery := *r.Opt.AuthUUID",
+						"\tqueryValues.Set(\"opt.authUUID\", optAuthUUIDQuery)",
+						"}",
+						"if r.Opt.AuthUUID2 != nil {",
+						"\toptAuthUUID2Query := *r.Opt.AuthUUID2",
+						"\tqueryValues.Set(\"opt.authUUID2\", optAuthUUID2Query)",
+						"}",
+						"}",
+						"fullURL += \"?\" + queryValues.Encode()"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -266,9 +353,9 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": [
-						"if requestBody.Params == nil {",
-						"\trequestBody.Params = \u0026clientsBarBar.ParamsStruct{}",
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"if r.Params != nil {",
 						"}"
 					],
 					"ReqHeaderGoStatements": null,
@@ -320,7 +407,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -354,7 +442,7 @@
 				},
 				{
 					"Name": "argWithQueryParams",
-					"HTTPMethod": "POST",
+					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryParams",
 					"PathSegments": [
@@ -370,7 +458,17 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": [
+						"queryValues := \u0026url.Values{}",
+						"nameQuery := r.Name",
+						"queryValues.Set(\"name\", nameQuery)",
+						"if r.UserUUID != nil {",
+						"\tuserUUIDQuery := *r.UserUUID",
+						"\tqueryValues.Set(\"userUUID\", userUUIDQuery)",
+						"}",
+						"fullURL += \"?\" + queryValues.Encode()"
+					],
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -415,7 +513,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -485,7 +584,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -555,7 +655,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -625,7 +726,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": {
 						"some-header-field": {
@@ -709,7 +811,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -756,7 +859,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -803,7 +907,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -850,7 +955,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -897,7 +1003,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -944,7 +1051,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -991,7 +1099,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1038,7 +1147,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1085,7 +1195,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1132,7 +1243,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1179,7 +1291,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1226,7 +1339,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1273,7 +1387,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1320,7 +1435,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1367,7 +1483,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [
@@ -1414,7 +1531,8 @@
 						}
 					],
 					"IsEndpoint": false,
-					"QueryParamGoStatements": null,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": null,
 					"ResHeaderFields": null,
 					"ReqHeaders": [

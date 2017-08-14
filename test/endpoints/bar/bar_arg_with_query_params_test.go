@@ -52,13 +52,11 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithQueryParams",
+		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"name":"foo","userUUID":"bar"}`),
-				bytes,
+				"name=foo&userUUID=bar",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -103,13 +101,11 @@ func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithQueryParams",
+		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"name":"foo","userUUID":"bar"}`),
-				bytes,
+				"name=foo&userUUID=bar",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -162,28 +158,14 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"aStr":"foo",
-					"anOptStr":"bar",
-					"aBool":true,
-					"anOptBool":false,
-					"aInt8":24,
-					"anOptInt8":-50,
-					"aInt16":48,
-					"anOptInt16":-100,
-					"aInt32":12,
-					"anOptInt32":-10,
-					"aInt64":4,
-					"anOptInt64":-1,
-					"aFloat64":5.1,
-					"anOptFloat64":-0.4
-				}`),
-				string(bytes),
+				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
+					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&"+
+					"anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -232,7 +214,7 @@ func TestBarManyQueryParamsWithInvalidBool(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -293,7 +275,7 @@ func TestBarManyQueryParamsWithInvalidInt8(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -354,7 +336,7 @@ func TestBarManyQueryParamsWithInvalidInt16(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -415,7 +397,7 @@ func TestBarManyQueryParamsWithInvalidInt32(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -476,7 +458,7 @@ func TestBarManyQueryParamsWithInvalidInt64(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -537,7 +519,7 @@ func TestBarManyQueryParamsWithInvalidFloat64(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -711,24 +693,13 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithManyQueryParams",
+		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"aStr":"foo",
-					"anOptStr":"bar",
-					"aBool":true,
-					"anOptBool":false,
-					"aInt8":24,
-					"anOptInt8":-50,
-					"aInt16":48,
-					"aInt32":12,
-					"aInt64":4,
-					"aFloat64":5.1
-				}`),
-				string(bytes),
+				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
+					"anOptInt8=-50&anOptStr=bar",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -776,20 +747,12 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithNestedQueryParams",
+		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"request":{
-						"name":"a-name",
-						"userUUID":"a-uuid",
-						"authUUID":"auth-uuid",
-						"authUUID2":"auth-uuid2"
-					}
-				}`),
-				string(bytes),
+				"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)
@@ -824,6 +787,62 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
 }
 
+func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/argWithNestedQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t,
+				"opt.name=b-name&opt.userUUID=b-uuid&"+
+					"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
+			)
+
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithNestedQueryParams?"+
+			"request.name=a-name&request.userUUID=a-uuid&"+
+			"opt.name=b-name&opt.userUUID=b-uuid",
+		map[string]string{
+			"x-uuid":  "auth-uuid",
+			"x-uuid2": "auth-uuid2",
+		}, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 1, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+}
+
 func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	var counter int = 0
 
@@ -838,20 +857,11 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/bar/argWithNestedQueryParams",
+		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
-			bytes, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
 			assert.Equal(t,
-				compactStr(`{
-					"request":{
-						"name":"a-name",
-						"userUUID":"a-uuid",
-						"authUUID":"",
-						"authUUID2":""
-					}
-				}`),
-				string(bytes),
+				"request.name=a-name&request.userUUID=a-uuid",
+				r.URL.RawQuery,
 			)
 
 			w.WriteHeader(200)

@@ -25,8 +25,10 @@ package barClient
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
+	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -320,7 +322,52 @@ func (c *barClient) ArgWithManyQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithManyQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	queryValues := &url.Values{}
+	aStrQuery := r.AStr
+	queryValues.Set("aStr", aStrQuery)
+	if r.AnOptStr != nil {
+		anOptStrQuery := *r.AnOptStr
+		queryValues.Set("anOptStr", anOptStrQuery)
+	}
+	aBoolQuery := strconv.FormatBool(r.ABool)
+	queryValues.Set("aBool", aBoolQuery)
+	if r.AnOptBool != nil {
+		anOptBoolQuery := strconv.FormatBool(*r.AnOptBool)
+		queryValues.Set("anOptBool", anOptBoolQuery)
+	}
+	aInt8Query := strconv.Itoa(int(r.AInt8))
+	queryValues.Set("aInt8", aInt8Query)
+	if r.AnOptInt8 != nil {
+		anOptInt8Query := strconv.Itoa(int(*r.AnOptInt8))
+		queryValues.Set("anOptInt8", anOptInt8Query)
+	}
+	aInt16Query := strconv.Itoa(int(r.AInt16))
+	queryValues.Set("aInt16", aInt16Query)
+	if r.AnOptInt16 != nil {
+		anOptInt16Query := strconv.Itoa(int(*r.AnOptInt16))
+		queryValues.Set("anOptInt16", anOptInt16Query)
+	}
+	aInt32Query := strconv.Itoa(int(r.AInt32))
+	queryValues.Set("aInt32", aInt32Query)
+	if r.AnOptInt32 != nil {
+		anOptInt32Query := strconv.Itoa(int(*r.AnOptInt32))
+		queryValues.Set("anOptInt32", anOptInt32Query)
+	}
+	aInt64Query := strconv.FormatInt(r.AInt64, 10)
+	queryValues.Set("aInt64", aInt64Query)
+	if r.AnOptInt64 != nil {
+		anOptInt64Query := strconv.FormatInt(*r.AnOptInt64, 10)
+		queryValues.Set("anOptInt64", anOptInt64Query)
+	}
+	aFloat64Query := strconv.FormatFloat(r.AFloat64, 'G', -1, 64)
+	queryValues.Set("aFloat64", aFloat64Query)
+	if r.AnOptFloat64 != nil {
+		anOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'G', -1, 64)
+		queryValues.Set("anOptFloat64", anOptFloat64Query)
+	}
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -368,7 +415,45 @@ func (c *barClient) ArgWithNestedQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithNestedQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	if r.Request == nil {
+		return nil, nil, errors.New(
+			"The field .Request is required",
+		)
+	}
+	queryValues := &url.Values{}
+	requestNameQuery := r.Request.Name
+	queryValues.Set("request.name", requestNameQuery)
+	if r.Request.UserUUID != nil {
+		requestUserUUIDQuery := *r.Request.UserUUID
+		queryValues.Set("request.userUUID", requestUserUUIDQuery)
+	}
+	if r.Request.AuthUUID != nil {
+		requestAuthUUIDQuery := *r.Request.AuthUUID
+		queryValues.Set("request.authUUID", requestAuthUUIDQuery)
+	}
+	if r.Request.AuthUUID2 != nil {
+		requestAuthUUID2Query := *r.Request.AuthUUID2
+		queryValues.Set("request.authUUID2", requestAuthUUID2Query)
+	}
+	if r.Opt != nil {
+		optNameQuery := r.Opt.Name
+		queryValues.Set("opt.name", optNameQuery)
+		if r.Opt.UserUUID != nil {
+			optUserUUIDQuery := *r.Opt.UserUUID
+			queryValues.Set("opt.userUUID", optUserUUIDQuery)
+		}
+		if r.Opt.AuthUUID != nil {
+			optAuthUUIDQuery := *r.Opt.AuthUUID
+			queryValues.Set("opt.authUUID", optAuthUUIDQuery)
+		}
+		if r.Opt.AuthUUID2 != nil {
+			optAuthUUID2Query := *r.Opt.AuthUUID2
+			queryValues.Set("opt.authUUID2", optAuthUUID2Query)
+		}
+	}
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -415,6 +500,9 @@ func (c *barClient) ArgWithParams(
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
+
+	if r.Params != nil {
+	}
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
@@ -512,7 +600,16 @@ func (c *barClient) ArgWithQueryParams(
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithQueryParams"
 
-	err := req.WriteJSON("POST", fullURL, headers, r)
+	queryValues := &url.Values{}
+	nameQuery := r.Name
+	queryValues.Set("name", nameQuery)
+	if r.UserUUID != nil {
+		userUUIDQuery := *r.UserUUID
+		queryValues.Set("userUUID", userUUIDQuery)
+	}
+	fullURL += "?" + queryValues.Encode()
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

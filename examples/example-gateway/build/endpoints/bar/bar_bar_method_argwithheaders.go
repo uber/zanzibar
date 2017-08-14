@@ -80,8 +80,10 @@ func (handler *BarArgWithHeadersHandler) HandleRequest(
 		return
 	}
 
-	xUUIDValue, _ := req.Header.Get("x-uuid")
-	requestBody.UserUUID = ptr.String(xUUIDValue)
+	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
+	if xUUIDValueExists {
+		requestBody.UserUUID = ptr.String(xUUIDValue)
+	}
 
 	workflow := ArgWithHeadersEndpoint{
 		Clients: handler.Clients,

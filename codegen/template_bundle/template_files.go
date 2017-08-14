@@ -223,7 +223,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{$line}}
 	{{end}}
 
-	{{range $index, $line := .QueryParamGoStatements -}}
+	{{range $index, $line := .ParseQueryParamGoStatements -}}
 	{{$line}}
 	{{end}}
 
@@ -462,7 +462,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9558, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9563, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -923,6 +923,10 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end -}}
 	{{- end}}
 
+	{{range $index, $line := .WriteQueryParamGoStatements -}}
+	{{$line}}
+	{{end}}
+
 	{{$emptyBody := or (eq .HTTPMethod "GET") (eq .HTTPMethod "DELETE") -}}
 	{{if (and (ne .RequestType "") (not $emptyBody))}}
 	err := req.WriteJSON("{{.HTTPMethod}}", fullURL, headers, r)
@@ -1055,7 +1059,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6285, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

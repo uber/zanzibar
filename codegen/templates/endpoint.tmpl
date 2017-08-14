@@ -119,7 +119,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{$line}}
 	{{end}}
 
-	{{range $index, $line := .QueryParamGoStatements -}}
+	{{range $index, $line := .ParseQueryParamGoStatements -}}
 	{{$line}}
 	{{end}}
 
