@@ -792,11 +792,8 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
-		TestBinary: filepath.Join(
-			getDirName(), "..", "..", "..",
-			"examples", "example-gateway", "build",
-			"services", "example-gateway", "main", "main.go",
-		),
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
