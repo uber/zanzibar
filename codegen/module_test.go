@@ -104,6 +104,11 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
+	err = moduleSystem.RegisterClassDir("endpoint", "another")
+	if err == nil {
+		t.Error("Registering class dir for unknown class should have errored")
+	}
+
 	err = moduleSystem.RegisterClass(ModuleClass{
 		Name:        "endpoint",
 		ClassType:   MultiModule,
@@ -112,6 +117,11 @@ func TestExampleService(t *testing.T) {
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassDir("endpoint", "another")
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class dir: %s", err)
 	}
 
 	err = moduleSystem.RegisterClassType(
@@ -303,6 +313,49 @@ func TestExampleService(t *testing.T) {
 		},
 	}
 
+	expectedBarEndpointInstance := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "endpoint",
+		ClassType:     "http",
+		Directory:     "another/bar",
+		InstanceName:  "bar",
+		JSONFileName:  "endpoint-config.json",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewEndpoint",
+			ExportType:            "Endpoint",
+			GeneratedPackageAlias: "barEndpointGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
+			IsExportGenerated:     true,
+			PackageAlias:          "barEndpointStatic",
+			PackageName:           "barEndpoint",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
+		},
+		Dependencies: []ModuleDependency{
+			{
+				ClassName:    "client",
+				InstanceName: "example",
+			},
+		},
+		ResolvedDependencies: map[string][]*ModuleInstance{
+			"client": {
+				&expectedClientInstance,
+			},
+		},
+		RecursiveDependencies: map[string][]*ModuleInstance{
+			"client": {
+				// Note that the dependencies are ordered
+				&expectedClientDependency,
+				&expectedClientInstance,
+			},
+		},
+	}
+
+	expectedEndpoints := []*ModuleInstance{
+		&expectedHealthEndpointInstance,
+		&expectedFooEndpointInstance,
+		&expectedBarEndpointInstance,
+	}
+
 	for className, classInstances := range instances {
 		if className == "client" {
 			if len(classInstances) != 2 {
@@ -315,20 +368,16 @@ func TestExampleService(t *testing.T) {
 			compareInstances(t, classInstances[0], &expectedClientInstance)
 			compareInstances(t, classInstances[1], &expectedClientDependency)
 		} else if className == "endpoint" {
-			if len(classInstances) != 2 {
+			if len(classInstances) != len(expectedEndpoints) {
 				t.Errorf(
-					"Expected 2 endpoint class instance but found %d",
+					"Expected %d endpoint class instance but found %d",
+					len(expectedEndpoints),
 					len(classInstances),
 				)
 			}
 
-			expected := []*ModuleInstance{
-				&expectedHealthEndpointInstance,
-				&expectedFooEndpointInstance,
-			}
-
 			for i, instance := range classInstances {
-				compareInstances(t, instance, expected[i])
+				compareInstances(t, instance, expectedEndpoints[i])
 
 				clientDependency := instance.ResolvedDependencies["client"][0]
 				clientSpec := clientDependency.GeneratedSpec().(*TestClientSpec)

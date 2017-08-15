@@ -74,40 +74,93 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 	}
 
 	for i, dir := range class.Directories {
-		dir = filepath.Clean(dir)
+		class.Directories[i] = filepath.Clean(dir)
+	}
+	class.Directories = dedup(class.Directories)
 
-		if strings.HasPrefix(dir, "..") {
-			return errors.Errorf(
-				"Module class %q must map to internal directories but found %q",
-				name,
-				dir,
-			)
+	for _, dir := range class.Directories {
+		if err := system.validateClassDir(&class, dir); err != nil {
+			return err
 		}
-
-		// Validate the module class directories are unique
-		for registeredName, registered := range system.classes {
-			if class.ClassType != registered.ClassType {
-				continue
-			}
-			for _, claimedDir := range registered.Directories {
-				if dir == claimedDir {
-					return errors.Errorf(
-						"Module class %q conflicts with directory %q from class %q",
-						name,
-						dir,
-						registeredName,
-					)
-				}
-			}
-		}
-
-		class.Directories[i] = dir
 	}
 
 	class.types = map[string]BuildGenerator{}
 	system.classes[name] = &class
 
 	return nil
+}
+
+// dedup returns a slice containing unique sorted elements of the given slice
+func dedup(array []string) []string {
+	dict := map[string]bool{}
+	for _, elt := range array {
+		dict[elt] = true
+	}
+
+	i := 0
+	unique := make([]string, len(dict))
+	for key := range dict {
+		unique[i] = key
+		i++
+	}
+	sort.Strings(unique)
+	return unique
+}
+
+// validateDir checks if the module class can map to the given dir
+func (system *ModuleSystem) validateClassDir(class *ModuleClass, dir string) error {
+	dir = filepath.Clean(dir)
+
+	if strings.HasPrefix(dir, "..") {
+		return errors.Errorf(
+			"Module class %q must map to internal directories but found %q",
+			class.Name,
+			dir,
+		)
+	}
+
+	// Validate the module class directories are unique
+	for registeredName, registered := range system.classes {
+		if class.ClassType != registered.ClassType {
+			continue
+		}
+		for _, claimedDir := range registered.Directories {
+			if dir == claimedDir {
+				return errors.Errorf(
+					"Module class %q conflicts with directory %q from class %q",
+					class.Name,
+					dir,
+					registeredName,
+				)
+			}
+		}
+	}
+	return nil
+}
+
+// RegisterClassDir adds the given dir to the directories of the module class with given className.
+// This method allows projects built on zanzibar to have arbitrary directories to host module class
+// configs, therefore is mainly intended for external use.
+func (system *ModuleSystem) RegisterClassDir(className string, dir string) error {
+	dir = filepath.Clean(dir)
+	for _, class := range system.classes {
+		if className != class.Name {
+			continue
+		}
+
+		if err := system.validateClassDir(class, dir); err != nil {
+			return err
+		}
+
+		for _, registered := range class.Directories {
+			if dir == registered {
+				return nil
+			}
+		}
+		class.Directories = append(class.Directories, dir)
+		return nil
+	}
+	return errors.Errorf("Module class %q is not found", className)
 }
 
 // RegisterClassType registers a type generator for a specific module class
