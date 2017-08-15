@@ -118,9 +118,9 @@ func NewDefaultModuleSystem(
 
 	// Register client module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:      "client",
-		Directory: "clients",
-		ClassType: MultiModule,
+		Name:        "client",
+		Directories: []string{"clients"},
+		ClassType:   MultiModule,
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -157,10 +157,10 @@ func NewDefaultModuleSystem(
 
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:      "endpoint",
-		Directory: "endpoints",
-		ClassType: MultiModule,
-		DependsOn: []string{"client"},
+		Name:        "endpoint",
+		Directories: []string{"endpoints"},
+		ClassType:   MultiModule,
+		DependsOn:   []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -186,10 +186,10 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClass(ModuleClass{
-		Name:      "service",
-		Directory: "services",
-		ClassType: MultiModule,
-		DependsOn: []string{"endpoint"},
+		Name:        "service",
+		Directories: []string{"services"},
+		ClassType:   MultiModule,
+		DependsOn:   []string{"endpoint"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,

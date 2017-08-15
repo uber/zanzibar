@@ -70,32 +70,38 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 	}
 
 	if system.classes[name] != nil {
-		return errors.Errorf(
-			"The module class %q is already defined",
-			name,
-		)
+		return errors.Errorf("Module class %q is already defined", name)
 	}
 
-	class.Directory = filepath.Clean(class.Directory)
+	for i, dir := range class.Directories {
+		dir = filepath.Clean(dir)
 
-	if strings.HasPrefix(class.Directory, "..") {
-		return errors.Errorf(
-			"The module class %q must map to an internal directory but was %q",
-			name,
-			class.Directory,
-		)
-	}
-
-	// Validate the module class directory name is unique
-	for moduleClassName, moduleClass := range system.classes {
-		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
+		if strings.HasPrefix(dir, "..") {
 			return errors.Errorf(
-				"The module class %q conflicts with directory %q from class %q",
+				"Module class %q must map to internal directories but found %q",
 				name,
-				class.Directory,
-				moduleClassName,
+				dir,
 			)
 		}
+
+		// Validate the module class directories are unique
+		for registeredName, registered := range system.classes {
+			if class.ClassType != registered.ClassType {
+				continue
+			}
+			for _, claimedDir := range registered.Directories {
+				if dir == claimedDir {
+					return errors.Errorf(
+						"Module class %q conflicts with directory %q from class %q",
+						name,
+						dir,
+						registeredName,
+					)
+				}
+			}
+		}
+
+		class.Directories[i] = dir
 	}
 
 	class.types = map[string]BuildGenerator{}
@@ -501,45 +507,48 @@ func (system *ModuleSystem) ResolveModules(
 
 	for _, className := range system.classOrder {
 		class := system.classes[className]
-		fullInstanceDirectory := filepath.Join(baseDirectory, class.Directory)
-
 		classInstances := []*ModuleInstance{}
 
-		if class.ClassType == SingleModule {
-			instance, instanceErr := system.readInstance(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
-				className,
-				class.Directory,
-			)
-			if instanceErr != nil {
-				return nil, errors.Wrapf(
-					instanceErr,
-					"Error reading single instance %q in %q",
-					className,
-					class.Directory,
-				)
-			}
-			classInstances = append(classInstances, instance)
-		} else {
-			instances, err := system.resolveMultiModules(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
-				fullInstanceDirectory,
-				className,
-				class,
-			)
+		for _, dir := range class.Directories {
 
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Error reading resolving multi modules of %q",
-					className,
-				)
-			}
+			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
 
-			classInstances = append(classInstances, instances...)
+			if class.ClassType == SingleModule {
+				instance, instanceErr := system.readInstance(
+					packageRoot,
+					baseDirectory,
+					targetGenDir,
+					className,
+					dir,
+				)
+				if instanceErr != nil {
+					return nil, errors.Wrapf(
+						instanceErr,
+						"Error reading single instance %q in %q",
+						className,
+						dir,
+					)
+				}
+				classInstances = append(classInstances, instance)
+			} else {
+				instances, err := system.resolveMultiModules(
+					packageRoot,
+					baseDirectory,
+					targetGenDir,
+					fullInstanceDirectory,
+					className,
+					class,
+				)
+
+				if err != nil {
+					return nil, errors.Wrapf(err,
+						"Error reading resolving multi modules of %q",
+						className,
+					)
+				}
+
+				classInstances = append(classInstances, instances...)
+			}
 		}
 
 		resolvedModules[className] = classInstances
@@ -593,7 +602,7 @@ func (system *ModuleSystem) resolveMultiModules(
 				instanceErr,
 				"Error reading multi instance %q in %q",
 				className,
-				class.Directory,
+				relClassDir,
 			)
 		}
 		return []*ModuleInstance{instance}, nil
@@ -629,7 +638,7 @@ func (system *ModuleSystem) resolveMultiModules(
 			return nil, errors.Wrapf(err,
 				"Error reading subdir of multi instance %q in %q",
 				className,
-				filepath.Join(class.Directory, file.Name()),
+				filepath.Join(relClassDir, file.Name()),
 			)
 		}
 		classInstances = append(classInstances, instances...)
@@ -938,12 +947,12 @@ func formatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	Name       string
-	ClassType  moduleClassType
-	Directory  string
-	DependsOn  []string
-	DependedBy []string
-	types      map[string]BuildGenerator
+	Name        string
+	ClassType   moduleClassType
+	Directories []string
+	DependsOn   []string
+	DependedBy  []string
+	types       map[string]BuildGenerator
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass
