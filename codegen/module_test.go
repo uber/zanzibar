@@ -106,7 +106,7 @@ func TestExampleService(t *testing.T) {
 
 	err = moduleSystem.RegisterClassDir("endpoint", "another")
 	if err == nil {
-		t.Error("Registering class dir for unknown class should have errored")
+		t.Error("Registering class dir for endpoint class should have errored")
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
@@ -151,13 +151,9 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Expected double definition of client class to error")
 	}
 
-	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "newClient",
-		ClassType:   MultiModule,
-		Directories: []string{"./clients"},
-	})
-	if err == nil {
-		t.Errorf("Expected registering a module in the same directory to throw")
+	err = moduleSystem.RegisterClassDir("client", "endpoints")
+	if err != nil {
+		t.Error("Unexpected error registering dir for client class")
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
@@ -237,6 +233,28 @@ func TestExampleService(t *testing.T) {
 				&expectedClientDependency,
 			},
 		},
+	}
+
+	expectedEmbeddedClient := ModuleInstance{
+		BaseDirectory: testServiceDir,
+		ClassName:     "client",
+		ClassType:     "http",
+		Directory:     "endpoints/health/embedded-client",
+		InstanceName:  "embedded-client",
+		JSONFileName:  "client-config.json",
+		PackageInfo: &PackageInfo{
+			ExportName:            "NewClient",
+			ExportType:            "Client",
+			GeneratedPackageAlias: "embeddedClientGenerated",
+			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health/embedded-client",
+			IsExportGenerated:     true,
+			PackageAlias:          "embeddedClientStatic",
+			PackageName:           "embeddedClient",
+			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health/embedded-client",
+		},
+		Dependencies:          []ModuleDependency{},
+		ResolvedDependencies:  map[string][]*ModuleInstance{},
+		RecursiveDependencies: map[string][]*ModuleInstance{},
 	}
 
 	expectedHealthEndpointInstance := ModuleInstance{
@@ -350,6 +368,11 @@ func TestExampleService(t *testing.T) {
 		},
 	}
 
+	expectedClients := []*ModuleInstance{
+		&expectedClientInstance,
+		&expectedClientDependency,
+		&expectedEmbeddedClient,
+	}
 	expectedEndpoints := []*ModuleInstance{
 		&expectedHealthEndpointInstance,
 		&expectedFooEndpointInstance,
@@ -358,15 +381,17 @@ func TestExampleService(t *testing.T) {
 
 	for className, classInstances := range instances {
 		if className == "client" {
-			if len(classInstances) != 2 {
+			if len(classInstances) != len(expectedClients) {
 				t.Errorf(
-					"Expected 2 client class instance but found %d",
+					"Expected %d client class instance but found %d",
+					len(expectedClients),
 					len(classInstances),
 				)
 			}
 
-			compareInstances(t, classInstances[0], &expectedClientInstance)
-			compareInstances(t, classInstances[1], &expectedClientDependency)
+			for i, instance := range expectedClients {
+				compareInstances(t, instance, expectedClients[i])
+			}
 		} else if className == "endpoint" {
 			if len(classInstances) != len(expectedEndpoints) {
 				t.Errorf(

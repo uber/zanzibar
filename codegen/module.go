@@ -119,22 +119,6 @@ func (system *ModuleSystem) validateClassDir(class *ModuleClass, dir string) err
 		)
 	}
 
-	// Validate the module class directories are unique
-	for registeredName, registered := range system.classes {
-		if class.ClassType != registered.ClassType {
-			continue
-		}
-		for _, claimedDir := range registered.Directories {
-			if dir == claimedDir {
-				return errors.Errorf(
-					"Module class %q conflicts with directory %q from class %q",
-					class.Name,
-					dir,
-					registeredName,
-				)
-			}
-		}
-	}
 	return nil
 }
 

@@ -1,0 +1,9 @@
+{
+	"name": "embedded",
+	"type": "http",
+	"config": {
+		"headers": {
+				"x-service-name": "example"
+		}
+	}
+}
