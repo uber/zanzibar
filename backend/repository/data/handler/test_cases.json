@@ -157,7 +157,7 @@
 				},
 				"contacts": {
 					"exposedMethods": {
-						"SaveContacts": "Contacts::saveContacts"
+						"saveContacts": "Contacts::saveContacts"
 					},
 					"ip": "127.0.0.1",
 					"name": "contacts",
@@ -1206,7 +1206,7 @@
 						},
 						"contacts": {
 							"exposedMethods": {
-								"SaveContacts": "Contacts::saveContacts"
+								"saveContacts": "Contacts::saveContacts"
 							},
 							"ip": "127.0.0.1",
 							"name": "contacts",
@@ -1984,7 +1984,7 @@
 					},
 					"contacts": {
 						"exposedMethods": {
-							"SaveContacts": "Contacts::saveContacts"
+							"saveContacts": "Contacts::saveContacts"
 						},
 						"ip": "127.0.0.1",
 						"name": "contacts",

@@ -63,6 +63,18 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 		return err
 	}
 	cfgJSON := NewClientConfigJSON(req)
+	// Expose all methods in the thrift file by default.
+	if len(cfgJSON.Config.ExposedMethods) == 0 {
+		cfg, err := r.LatestGatewayConfig()
+		if err != nil {
+			return errors.Wrap(err, "invalid configuration before updating client")
+		}
+		exposedMethods, err := allExposedMethods(cfg.ThriftServices, req.ThriftFile)
+		if err != nil {
+			return errors.Wrapf(err, "failed to generate all methods in thrift file %s", req.ThriftFile)
+		}
+		cfgJSON.Config.ExposedMethods = exposedMethods
+	}
 	cfgJSON.Config.ThriftFileSha = thriftFileSha
 	clientPath := filepath.Join(r.absPath(clientCfgDir), cfgJSON.Name)
 	r.Lock()
@@ -82,10 +94,25 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	return nil
 }
 
-func validateClientUpdateRequest(req *ClientConfig) error {
-	if len(req.ExposedMethods) == 0 {
-		return errors.New("invalid request: no method is exposed for the client")
+func allExposedMethods(thriftServices map[string]map[string]*ThriftService, thriftFile string) (map[string]string, error) {
+	serviceMap, ok := thriftServices[thriftFile]
+	if !ok {
+		return nil, errors.Errorf("thrift file %q not found", thriftFile)
 	}
+	exposedMethods := map[string]string{}
+	for _, tservice := range serviceMap {
+		for _, method := range tservice.Methods {
+			exposedName := tservice.Name + "::" + method.Name
+			if pre, ok := exposedMethods[method.Name]; ok {
+				return nil, errors.Errorf("duplicated method name for %q and %q", pre, exposedName)
+			}
+			exposedMethods[method.Name] = exposedName
+		}
+	}
+	return exposedMethods, nil
+}
+
+func validateClientUpdateRequest(req *ClientConfig) error {
 	if req.Type == "tchannel" && req.ServiceName == "" {
 		return errors.New("invalid request: muttley name is required for tchannel client")
 	}

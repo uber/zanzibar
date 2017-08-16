@@ -5,7 +5,7 @@
 		"thriftFile": "clients/contacts/contacts.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"exposedMethods": {
-			"SaveContacts": "Contacts::saveContacts"
+			"saveContacts": "Contacts::saveContacts"
 		}
 	}
 }
