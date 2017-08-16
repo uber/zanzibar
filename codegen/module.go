@@ -70,31 +70,17 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 	}
 
 	if system.classes[name] != nil {
-		return errors.Errorf(
-			"The module class %q is already defined",
-			name,
-		)
+		return errors.Errorf("Module class %q is already defined", name)
 	}
 
-	class.Directory = filepath.Clean(class.Directory)
-
-	if strings.HasPrefix(class.Directory, "..") {
-		return errors.Errorf(
-			"The module class %q must map to an internal directory but was %q",
-			name,
-			class.Directory,
-		)
+	for i, dir := range class.Directories {
+		class.Directories[i] = filepath.Clean(dir)
 	}
+	class.Directories = dedup(class.Directories)
 
-	// Validate the module class directory name is unique
-	for moduleClassName, moduleClass := range system.classes {
-		if class.Directory == moduleClass.Directory && class.ClassType == moduleClass.ClassType {
-			return errors.Errorf(
-				"The module class %q conflicts with directory %q from class %q",
-				name,
-				class.Directory,
-				moduleClassName,
-			)
+	for _, dir := range class.Directories {
+		if err := system.validateClassDir(&class, dir); err != nil {
+			return err
 		}
 	}
 
@@ -102,6 +88,63 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 	system.classes[name] = &class
 
 	return nil
+}
+
+// dedup returns a slice containing unique sorted elements of the given slice
+func dedup(array []string) []string {
+	dict := map[string]bool{}
+	for _, elt := range array {
+		dict[elt] = true
+	}
+
+	i := 0
+	unique := make([]string, len(dict))
+	for key := range dict {
+		unique[i] = key
+		i++
+	}
+	sort.Strings(unique)
+	return unique
+}
+
+// validateDir checks if the module class can map to the given dir
+func (system *ModuleSystem) validateClassDir(class *ModuleClass, dir string) error {
+	dir = filepath.Clean(dir)
+
+	if strings.HasPrefix(dir, "..") {
+		return errors.Errorf(
+			"Module class %q must map to internal directories but found %q",
+			class.Name,
+			dir,
+		)
+	}
+
+	return nil
+}
+
+// RegisterClassDir adds the given dir to the directories of the module class with given className.
+// This method allows projects built on zanzibar to have arbitrary directories to host module class
+// configs, therefore is mainly intended for external use.
+func (system *ModuleSystem) RegisterClassDir(className string, dir string) error {
+	dir = filepath.Clean(dir)
+	for _, class := range system.classes {
+		if className != class.Name {
+			continue
+		}
+
+		if err := system.validateClassDir(class, dir); err != nil {
+			return err
+		}
+
+		for _, registered := range class.Directories {
+			if dir == registered {
+				return nil
+			}
+		}
+		class.Directories = append(class.Directories, dir)
+		return nil
+	}
+	return errors.Errorf("Module class %q is not found", className)
 }
 
 // RegisterClassType registers a type generator for a specific module class
@@ -501,45 +544,48 @@ func (system *ModuleSystem) ResolveModules(
 
 	for _, className := range system.classOrder {
 		class := system.classes[className]
-		fullInstanceDirectory := filepath.Join(baseDirectory, class.Directory)
-
 		classInstances := []*ModuleInstance{}
 
-		if class.ClassType == SingleModule {
-			instance, instanceErr := system.readInstance(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
-				className,
-				class.Directory,
-			)
-			if instanceErr != nil {
-				return nil, errors.Wrapf(
-					instanceErr,
-					"Error reading single instance %q in %q",
-					className,
-					class.Directory,
-				)
-			}
-			classInstances = append(classInstances, instance)
-		} else {
-			instances, err := system.resolveMultiModules(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
-				fullInstanceDirectory,
-				className,
-				class,
-			)
+		for _, dir := range class.Directories {
 
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"Error reading resolving multi modules of %q",
-					className,
-				)
-			}
+			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
 
-			classInstances = append(classInstances, instances...)
+			if class.ClassType == SingleModule {
+				instance, instanceErr := system.readInstance(
+					packageRoot,
+					baseDirectory,
+					targetGenDir,
+					className,
+					dir,
+				)
+				if instanceErr != nil {
+					return nil, errors.Wrapf(
+						instanceErr,
+						"Error reading single instance %q in %q",
+						className,
+						dir,
+					)
+				}
+				classInstances = append(classInstances, instance)
+			} else {
+				instances, err := system.resolveMultiModules(
+					packageRoot,
+					baseDirectory,
+					targetGenDir,
+					fullInstanceDirectory,
+					className,
+					class,
+				)
+
+				if err != nil {
+					return nil, errors.Wrapf(err,
+						"Error reading resolving multi modules of %q",
+						className,
+					)
+				}
+
+				classInstances = append(classInstances, instances...)
+			}
 		}
 
 		resolvedModules[className] = classInstances
@@ -593,7 +639,7 @@ func (system *ModuleSystem) resolveMultiModules(
 				instanceErr,
 				"Error reading multi instance %q in %q",
 				className,
-				class.Directory,
+				relClassDir,
 			)
 		}
 		return []*ModuleInstance{instance}, nil
@@ -629,7 +675,7 @@ func (system *ModuleSystem) resolveMultiModules(
 			return nil, errors.Wrapf(err,
 				"Error reading subdir of multi instance %q in %q",
 				className,
-				filepath.Join(class.Directory, file.Name()),
+				filepath.Join(relClassDir, file.Name()),
 			)
 		}
 		classInstances = append(classInstances, instances...)
@@ -938,12 +984,12 @@ func formatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	Name       string
-	ClassType  moduleClassType
-	Directory  string
-	DependsOn  []string
-	DependedBy []string
-	types      map[string]BuildGenerator
+	Name        string
+	ClassType   moduleClassType
+	Directories []string
+	DependsOn   []string
+	DependedBy  []string
+	types       map[string]BuildGenerator
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass
