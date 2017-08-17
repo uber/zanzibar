@@ -347,7 +347,7 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 func (r *Repository) thriftservices(thriftRootDir string, packageHelper *codegen.PackageHelper) (ThriftServiceMap, error) {
 	idlMap := make(ThriftServiceMap)
 	walkFn := func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
+		if info.IsDir() || filepath.Ext(path) != ".thrift" {
 			return nil
 		}
 		if err != nil {

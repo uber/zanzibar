@@ -90,8 +90,9 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.GET("/thrift-service/*path", h.ThriftServicesByPath)
 	r.GET("/thrift-list", h.ThriftList)
 	r.GET("/thrift-file/*path", h.ThriftFile)
-	r.POST("/create-diff", h.CreateDiff)
 	r.POST("/validate-updates", h.ValidateUpdates)
+	r.POST("/create-diff", h.CreateDiff)
+	r.POST("/land-diff", h.LandDiff)
 	return r
 }
 
@@ -345,6 +346,45 @@ func (h *Handler) CreateDiff(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	h.WriteJSON(w, http.StatusOK, &createDiffResponse{DiffURI: resp})
+}
+
+// LandDiff lands a diff.
+func (h *Handler) LandDiff(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	type LandDiffRequest struct {
+		DiffURL string `json:"diff_url"`
+	}
+	request := &LandDiffRequest{}
+	b, err := UnmarshalJSONBody(r, request)
+	h.logger.Info("Landing a diff.",
+		zap.String("request", string(b)),
+	)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for landing diff"))
+		return
+	}
+	gatewayConfig, err := h.GatewayConfig(r)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+	repo, err := h.Manager.NewRuntimeRepository(gatewayConfig.ID)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, errors.Wrap(err, "failed to create temp runtime dirs"))
+		return
+	}
+	h.logger.Info("Landing diff...",
+		zap.String("localDir", repo.LocalDir()),
+		zap.String("remote", repo.Remote()),
+		zap.String("diffURL", request.DiffURL),
+	)
+	err = h.DiffCreator.LandDiff(repo, request.DiffURL)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, map[string]string{
+		"Status": "OK",
+	})
 }
 
 // WriteJSON writes the JSON response.
