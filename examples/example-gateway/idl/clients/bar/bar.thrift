@@ -10,11 +10,10 @@ enum Fruit {
 }
 
 struct BarRequest {
-    1: required string stringField (
-        zanzibar.http.ref = "params.someParamsField"
-    )
+    1: required string stringField (zanzibar.http.ref = "params.someParamsField")
     2: required bool boolField (zanzibar.http.ref = "query.some-query-field")
 }
+
 struct BarResponse {
     1: required string stringField (
         zanzibar.http.ref = "headers.some-header-field"
@@ -26,6 +25,16 @@ struct BarResponse {
     5: required map<string, i32> mapIntWithoutRange (
         zanzibar.ignore.integer.range = "true"
     )
+}
+
+struct BarRequestRecur {
+    1: required string name
+    2: optional BarRequestRecur recur
+}
+
+struct BarResponseRecur {
+    1: required list<string> nodes
+    2: required i32 height
 }
 
 struct QueryParamsStruct {
@@ -48,9 +57,7 @@ struct ParamsStruct {
 }
 
 exception BarException {
-    1: required string stringField (
-        zanzibar.http.ref = "headers.another-header-field"
-    )
+    1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
 
 service Bar {
@@ -63,6 +70,17 @@ service Bar {
         zanzibar.http.path = "/bar-path"
         zanzibar.http.status = "200"
     )
+
+    BarResponseRecur normalRecur (
+        1: required BarRequestRecur request
+    ) throws (
+        1: BarException barException (zanzibar.http.status = "403")
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/recur"
+        zanzibar.http.status = "200"
+    )
+
     BarResponse noRequest (
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")

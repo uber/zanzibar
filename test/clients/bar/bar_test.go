@@ -861,3 +861,73 @@ func TestNestedQueryParamCallWithNil(t *testing.T) {
 	assert.Equal(t, "The field .Request is required", err.Error())
 	assert.Nil(t, result)
 }
+
+func TestNormalRecur(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig, defaultTestOptions, exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	arg := barGen.BarRequestRecur{
+		Name: "parent",
+		Recur: &barGen.BarRequestRecur{
+			Name: "child",
+			Recur: &barGen.BarRequestRecur{
+				Name:  "grandchild",
+				Recur: nil,
+			},
+		},
+	}
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar/recur",
+		func(w http.ResponseWriter, r *http.Request) {
+			body, err := ioutil.ReadAll(r.Body)
+			assert.NoError(t, err)
+
+			err = r.Body.Close()
+			assert.NoError(t, err)
+
+			var req barGen.Bar_NormalRecur_Args
+			err = json.Unmarshal(body, &req)
+			assert.NoError(t, err)
+			assert.Equal(t, *req.Request, arg)
+
+			res := barGen.BarResponseRecur{
+				Nodes:  make([]string, 0),
+				Height: 0,
+			}
+			for node := req.Request; node != nil; node = node.Recur {
+				res.Nodes = append(res.Nodes, node.Name)
+				res.Height++
+			}
+			marshaled, err := json.Marshal(res)
+			assert.NoError(t, err)
+
+			w.WriteHeader(200)
+			_, err = w.Write(marshaled)
+			assert.NoError(t, err)
+		},
+	)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	result, _, err := bar.NormalRecur(
+		context.Background(),
+		nil,
+		&barGen.Bar_NormalRecur_Args{
+			Request: &arg,
+		},
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, int32(3), result.Height)
+	assert.Len(t, result.Nodes, 3)
+	assert.Equal(t, "parent", result.Nodes[0])
+	assert.Equal(t, "child", result.Nodes[1])
+	assert.Equal(t, "grandchild", result.Nodes[2])
+}

@@ -14,33 +14,6 @@ type Echo_EchoStringList_Args struct {
 	Arg []string `json:"arg,required"`
 }
 
-type _List_String_ValueList []string
-
-func (v _List_String_ValueList) ForEach(f func(wire.Value) error) error {
-	for _, x := range v {
-		w, err := wire.NewValueString(x), error(nil)
-		if err != nil {
-			return err
-		}
-		err = f(w)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _List_String_ValueList) Size() int {
-	return len(v)
-}
-
-func (_List_String_ValueList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_List_String_ValueList) Close() {
-}
-
 func (v *Echo_EchoStringList_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
@@ -58,23 +31,6 @@ func (v *Echo_EchoStringList_Args) ToWire() (wire.Value, error) {
 	fields[i] = wire.Field{ID: 1, Value: w}
 	i++
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _List_String_Read(l wire.ValueList) ([]string, error) {
-	if l.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-	o := make([]string, 0, l.Size())
-	err := l.ForEach(func(x wire.Value) error {
-		i, err := x.GetString(), error(nil)
-		if err != nil {
-			return err
-		}
-		o = append(o, i)
-		return nil
-	})
-	l.Close()
-	return o, err
 }
 
 func (v *Echo_EchoStringList_Args) FromWire(w wire.Value) error {
@@ -107,19 +63,6 @@ func (v *Echo_EchoStringList_Args) String() string {
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
 	return fmt.Sprintf("Echo_EchoStringList_Args{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _List_String_Equals(lhs, rhs []string) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-	for i, lv := range lhs {
-		rv := rhs[i]
-		if !(lv == rv) {
-			return false
-		}
-	}
-	return true
 }
 
 func (v *Echo_EchoStringList_Args) Equals(rhs *Echo_EchoStringList_Args) bool {

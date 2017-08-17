@@ -172,7 +172,9 @@ func walkFieldGroups(
 	fields compile.FieldGroup,
 	visitField walkFieldVisitor,
 ) bool {
-	return walkFieldGroupsInternal("", "", fields, visitField)
+	seen := map[*compile.FieldSpec]bool{}
+
+	return walkFieldGroupsInternal("", "", fields, visitField, seen)
 }
 
 func walkFieldGroupsInternal(
@@ -180,9 +182,15 @@ func walkFieldGroupsInternal(
 	thriftPrefix string,
 	fields compile.FieldGroup,
 	visitField walkFieldVisitor,
+	seen map[*compile.FieldSpec]bool,
 ) bool {
 	for i := 0; i < len(fields); i++ {
 		field := fields[i]
+
+		if seen[field] {
+			return true
+		}
+		seen[field] = true
 
 		bail := visitField(goPrefix, thriftPrefix, field)
 		if bail {
@@ -206,6 +214,7 @@ func walkFieldGroupsInternal(
 				thriftPrefix+"."+field.Name,
 				t.Fields,
 				visitField,
+				seen,
 			)
 			if bail {
 				return true
