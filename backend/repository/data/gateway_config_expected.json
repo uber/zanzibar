@@ -352,7 +352,7 @@
 			"type": "http",
 			"thriftFile": "clients/contacts/contacts.thrift",
 			"exposedMethods": {
-				"saveContacts": "Contacts::saveContacts"
+				"SaveContacts": "Contacts::saveContacts"
 			},
 			"ip": "127.0.0.1",
 			"port": 4000

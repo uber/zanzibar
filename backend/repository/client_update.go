@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
@@ -106,7 +107,7 @@ func allExposedMethods(thriftServices map[string]map[string]*ThriftService, thri
 			if pre, ok := exposedMethods[method.Name]; ok {
 				return nil, errors.Errorf("duplicated method name for %q and %q", pre, exposedName)
 			}
-			exposedMethods[method.Name] = exposedName
+			exposedMethods[strings.Title(method.Name)] = exposedName
 		}
 	}
 	return exposedMethods, nil
