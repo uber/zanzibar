@@ -40,17 +40,28 @@ const (
 )
 
 func TestUpdateHTTPClient(t *testing.T) {
-	testUpdateClientConfig(t, httpClientUpdateRequestFile, "contacts")
+	req := &ClientConfig{}
+	err := readJSONFile(httpClientUpdateRequestFile, req)
+	assert.NoError(t, err, "Failed to unmarshal client config.")
+	testUpdateClientConfig(t, req, "contacts")
+}
+
+func TestUpdateHTTPClientWithoutExposedMethods(t *testing.T) {
+	req := &ClientConfig{}
+	err := readJSONFile(httpClientUpdateRequestFile, req)
+	assert.NoError(t, err, "Failed to unmarshal client config.")
+	req.ExposedMethods = nil
+	testUpdateClientConfig(t, req, "contacts")
 }
 
 func TestUpdateTchannelClient(t *testing.T) {
-	testUpdateClientConfig(t, tchannelClientUpdateRequestFile, "baz")
+	req := &ClientConfig{}
+	err := readJSONFile(tchannelClientUpdateRequestFile, req)
+	assert.NoError(t, err, "Failed to unmarshal client config.")
+	testUpdateClientConfig(t, req, "baz")
 }
 
-func testUpdateClientConfig(t *testing.T, requestFile string, clientName string) {
-	req := &ClientConfig{}
-	err := readJSONFile(requestFile, req)
-	assert.NoError(t, err, "Failed to unmarshal client config.")
+func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) {
 	tempDir, err := copyExample("")
 	t.Logf("Temp dir is created at %s\n", tempDir)
 	if !assert.NoError(t, err, "Failed to copy example.") {
