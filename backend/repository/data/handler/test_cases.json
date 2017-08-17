@@ -1125,6 +1125,25 @@
 		}
 	},
 	{
+		"name": "land-diff",
+		"request": {
+			"method": "POST",
+			"url": "/land-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"diff_uri": "https://some-diff-uri"
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"Status": "OK"
+			}
+		}
+	},
+	{
 		"name": "get-all-gateway-config",
 		"request": {
 			"method": "GET",
