@@ -1030,7 +1030,11 @@
 						"endpointId": "baz",
 						"endpointType": "http",
 						"handleId": "compare",
-						"middlewares": [],
+						"middlewares": [
+							{
+								"name": "example_reader"
+							}
+						],
 						"reqHeaderMap": {},
 						"resHeaderMap": {},
 						"testFixtures": [],
