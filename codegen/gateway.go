@@ -294,11 +294,11 @@ func newClientSpec(
 // level. The same mid
 type MiddlewareSpec struct {
 	// The middleware package name.
-	Name string
+	Name string `json:"name"`
 	// Go import path for the middleware.
-	Path string
+	Path string `json:"path,omitempty"`
 	// Middleware specific configuration options.
-	Options map[string]interface{}
+	Options map[string]interface{} `json:"options,omitempty"`
 }
 
 // NewMiddlewareSpec creates a middleware spec from a go file.

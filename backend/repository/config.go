@@ -56,25 +56,19 @@ type ThriftServiceMap map[string]map[string]*ThriftService
 
 // EndpointConfig stores configuration for an endpoint.
 type EndpointConfig struct {
-	ID               string            `json:"endpointId"`
-	Type             ProtocolType      `json:"endpointType"`
-	HandleID         string            `json:"handleId"`
-	ThriftFile       string            `json:"thriftFile"`
-	ThriftFileSha    string            `json:"thriftFileSha,omitempty"`
-	ThriftMethodName string            `json:"thriftMethodName"`
-	WorkflowType     string            `json:"workflowType"`
-	ClientID         string            `json:"clientID"`
-	ClientMethod     string            `json:"clientMethod"`
-	TestFixtures     []string          `json:"testFixtures"`
-	Middlewares      []*EndptMidConfig `json:"middlewares"`
-	ReqHeaderMap     map[string]string `json:"reqHeaderMap"`
-	ResHeaderMap     map[string]string `json:"resHeaderMap"`
-}
-
-// EndptMidConfig represents configuration for a middleware.
-type EndptMidConfig struct {
-	Name    string
-	Options map[string]interface{}
+	ID               string                    `json:"endpointId"`
+	Type             ProtocolType              `json:"endpointType"`
+	HandleID         string                    `json:"handleId"`
+	ThriftFile       string                    `json:"thriftFile"`
+	ThriftFileSha    string                    `json:"thriftFileSha,omitempty"`
+	ThriftMethodName string                    `json:"thriftMethodName"`
+	WorkflowType     string                    `json:"workflowType"`
+	ClientID         string                    `json:"clientID"`
+	ClientMethod     string                    `json:"clientMethod"`
+	TestFixtures     []string                  `json:"testFixtures"`
+	Middlewares      []*codegen.MiddlewareSpec `json:"middlewares"`
+	ReqHeaderMap     map[string]string         `json:"reqHeaderMap"`
+	ResHeaderMap     map[string]string         `json:"resHeaderMap"`
 }
 
 // ClientConfig stores configuration for an client.
