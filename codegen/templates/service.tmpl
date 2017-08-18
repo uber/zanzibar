@@ -29,7 +29,7 @@ func CreateGateway(
 	}
 
 	tree, dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerEndpoints(gateway, dependencies)
+	registerErr := registerDeps(gateway, dependencies)
 	if registerErr != nil {
 		return nil, nil, registerErr
 	}
@@ -37,12 +37,13 @@ func CreateGateway(
 	return gateway, (*DependenciesTree)(tree), nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
-	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
-	if err{{$idx}} != nil {
-		return err{{$idx}}
+func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	{{- range $class, $instances := $instance.ResolvedDependencies }}
+	{{- range $idx, $instance := $instances }}
+	if err := deps.{{title $class}}.{{$instance.PackageInfo.QualifiedInstanceName}}.Register(g); err != nil {
+		return err
 	}
+	{{- end}}
 	{{- end}}
 	return nil
 }

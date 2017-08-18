@@ -44,7 +44,7 @@ func CreateGateway(
 	}
 
 	tree, dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerEndpoints(gateway, dependencies)
+	registerErr := registerDeps(gateway, dependencies)
 	if registerErr != nil {
 		return nil, nil, registerErr
 	}
@@ -52,26 +52,21 @@ func CreateGateway(
 	return gateway, (*DependenciesTree)(tree), nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	err0 := deps.Endpoint.Bar.Register(g)
-	if err0 != nil {
-		return err0
+func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	if err := deps.Endpoint.Bar.Register(g); err != nil {
+		return err
 	}
-	err1 := deps.Endpoint.Baz.Register(g)
-	if err1 != nil {
-		return err1
+	if err := deps.Endpoint.Baz.Register(g); err != nil {
+		return err
 	}
-	err2 := deps.Endpoint.BazTChannel.Register(g)
-	if err2 != nil {
-		return err2
+	if err := deps.Endpoint.BazTChannel.Register(g); err != nil {
+		return err
 	}
-	err3 := deps.Endpoint.Contacts.Register(g)
-	if err3 != nil {
-		return err3
+	if err := deps.Endpoint.Contacts.Register(g); err != nil {
+		return err
 	}
-	err4 := deps.Endpoint.Googlenow.Register(g)
-	if err4 != nil {
-		return err4
+	if err := deps.Endpoint.Googlenow.Register(g); err != nil {
+		return err
 	}
 	return nil
 }
