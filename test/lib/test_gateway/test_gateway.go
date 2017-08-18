@@ -32,6 +32,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally/m3"
+	"github.com/uber/jaeger-client-go/testutils"
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
@@ -84,6 +85,7 @@ type ChildProcessGateway struct {
 	endTime          time.Time
 
 	HTTPClient       *http.Client
+	JaegerAgent      *testutils.MockAgent
 	TChannelClient   zanzibar.TChannelClient
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup lib.WaitAtLeast
@@ -104,6 +106,8 @@ type Options struct {
 	KnownTChannelBackends []string
 	CountMetrics          bool
 	EnableRuntimeMetrics  bool
+	JaegerDisable         bool
+	JaegerFlushMillis     int64
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -121,6 +125,14 @@ func (gateway *ChildProcessGateway) setupMetrics(
 	)
 	gateway.M3Service = gateway.m3Server.Service
 	go gateway.m3Server.Serve()
+}
+
+func (gateway *ChildProcessGateway) setupTracing() {
+	agent, err := testutils.StartMockAgent()
+	if err != nil {
+		panic("unable to start mock jaeger agent")
+	}
+	gateway.JaegerAgent = agent
 }
 
 // CreateGateway bootstrap gateway for testing
@@ -199,6 +211,25 @@ func CreateGateway(
 
 	if _, contains := composedConfig["tchannel.port"]; !contains {
 		composedConfig["tchannel.port"] = 0
+	}
+
+	if opts.JaegerFlushMillis >= 0 {
+		composedConfig["jaeger.reporter.flush.milliseconds"] = opts.JaegerFlushMillis
+	} else {
+		composedConfig["jaeger.reporter.flush.milliseconds"] = 10000
+	}
+	composedConfig["jaeger.sampler.type"] = "const"
+
+	if opts.JaegerDisable {
+		composedConfig["jaeger.disabled"] = true
+		composedConfig["jaeger.reporter.hostport"] = "localhost:6381"
+		composedConfig["jaeger.sampler.param"] = 0
+	} else {
+		testGateway.setupTracing()
+		composedConfig["jaeger.disabled"] = false
+		composedConfig["jaeger.reporter.hostport"] = testGateway.JaegerAgent.SpanServerAddr()
+		composedConfig["jaeger.sampler.type"] = "const"
+		composedConfig["jaeger.sampler.param"] = 1
 	}
 
 	composedConfig["tchannel.serviceName"] = serviceName

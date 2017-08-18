@@ -79,6 +79,7 @@ func TestCallMetrics(t *testing.T) {
 
 	numMetrics := 11
 	cg.MetricsWaitGroup.Add(numMetrics)
+
 	_, err = gateway.MakeRequest(
 		"POST",
 		"/baz/call",
@@ -160,11 +161,13 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	tags = jaegerSpanFinishedMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	expectedSpanFinishedTags := map[string]string{
-		"group": "lifecycle",
-		"state": "finished",
+		"service": "test-gateway",
+		"env":     "test",
+		"group":   "lifecycle",
+		"state":   "finished",
 	}
 	for tag := range tags {
 		assert.Equal(t, expectedSpanFinishedTags[tag.GetTagName()], tag.GetTagValue())
@@ -177,11 +180,13 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	tags = jaegerSpanStartedMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	expectedSpanStartedTags := map[string]string{
-		"group": "lifecycle",
-		"state": "started",
+		"group":   "lifecycle",
+		"state":   "started",
+		"service": "test-gateway",
+		"env":     "test",
 	}
 	for tag := range tags {
 		assert.Equal(t, expectedSpanStartedTags[tag.GetTagName()], tag.GetTagValue())
@@ -194,11 +199,13 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	tags = jaegerSpanSamplingMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	expectedSpanSamplingTags := map[string]string{
 		"group":   "sampling",
-		"sampled": "n",
+		"sampled": "y",
+		"service": "test-gateway",
+		"env":     "test",
 	}
 	for tag := range tags {
 		assert.Equal(t, expectedSpanSamplingTags[tag.GetTagName()], tag.GetTagValue())
@@ -211,11 +218,13 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	tags = jaegerTraceMetric.GetTags()
-	assert.Equal(t, 2, len(tags), "expected 2 tags")
+	assert.Equal(t, 4, len(tags), "expected 4 tags")
 
 	expectedTraceTags := map[string]string{
 		"state":   "started",
-		"sampled": "n",
+		"sampled": "y",
+		"service": "test-gateway",
+		"env":     "test",
 	}
 	for tag := range tags {
 		assert.Equal(t, expectedTraceTags[tag.GetTagName()], tag.GetTagValue())

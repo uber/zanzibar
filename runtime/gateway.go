@@ -42,6 +42,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
+	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
 )
 
 const defaultM3MaxQueueSize = 10000
@@ -425,21 +426,35 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	return nil
 }
 
+func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Configuration {
+	return &jaegerConfig.Configuration{
+		Disabled: config.MustGetBoolean("jaeger.disabled"),
+		Reporter: &jaegerConfig.ReporterConfig{
+			LocalAgentHostPort:  config.MustGetString("jaeger.reporter.hostport"),
+			BufferFlushInterval: time.Duration(config.MustGetInt("jaeger.reporter.flush.milliseconds")) * time.Millisecond,
+		},
+		Sampler: &jaegerConfig.SamplerConfig{
+			Type:  config.MustGetString("jaeger.sampler.type"),
+			Param: config.MustGetFloat("jaeger.sampler.param"),
+		},
+	}
+}
+
 func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	opts := []jaegerConfig.Option{
 		// TChannel logger implements jaeger logger interface
 		jaegerConfig.Logger(NewTChannelLogger(gateway.Logger)),
-		jaegerConfig.Metrics(NewJaegerMetricsFactory(gateway.MetricScope)),
+		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.MetricsScope)),
 	}
-	// TODO: using default tracing configurations here, we may want to set it from static config
-	jc := jaegerConfig.Configuration{}
+	jc := gateway.initJaegerConfig(config)
+
 	serviceName := config.MustGetString("serviceName")
-	closer, err := jc.InitGlobalTracer(serviceName, opts...)
+	tracer, closer, err := jc.New(serviceName, opts...)
 	if err != nil {
 		return errors.Wrapf(err, "error initializing Jaeger tracer client")
 	}
-
-	gateway.Tracer = opentracing.GlobalTracer()
+	// opentracing.SetGlobalTracer(tracer)
+	gateway.Tracer = tracer
 	gateway.tracerCloser = closer
 	return nil
 }

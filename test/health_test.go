@@ -246,7 +246,7 @@ func TestRuntimeMetrics(t *testing.T) {
 
 	cgateway.MetricsWaitGroup.Wait()
 	metrics := cgateway.M3Service.GetMetrics()
-	sort.Sort(lib.SortMetricsByName(metrics))
+	sort.Sort(lib.SortMetricsByNameAndTags(metrics))
 
 	assert.Equal(t, 30, len(metrics), "expected 30 metrics")
 

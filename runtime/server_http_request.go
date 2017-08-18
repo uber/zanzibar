@@ -59,8 +59,10 @@ type ServerHTTPRequest struct {
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
 func NewServerHTTPRequest(
-	w http.ResponseWriter, r *http.Request,
-	params httprouter.Params, endpoint *RouterEndpoint,
+	w http.ResponseWriter,
+	r *http.Request,
+	params httprouter.Params,
+	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
 		gateway:     endpoint.gateway,

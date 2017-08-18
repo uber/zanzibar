@@ -1,5 +1,5 @@
-hash: 80bfaf13e5f94e8e5fba4343584b3640a614d090e0f29575d3ef38a173217078
-updated: 2017-08-27T15:27:31.004223793-07:00
+hash: 3a130ff5c5b0af2e9f1ae7df45bb8ff4ce2c21f1d89242cb20c8d83997d7b06a
+updated: 2017-08-29T11:38:22.221600571-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -11,6 +11,8 @@ imports:
   - lib/go/thrift
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
+- name: github.com/codahale/hdrhistogram
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -63,6 +65,24 @@ imports:
   - m3/customtransports
   - m3/thrift
   - m3/thriftudp
+- name: github.com/uber/jaeger-client-go
+  version: d021e646f5187d77b55592c3efee1a2810e895d7
+  subpackages:
+  - config
+  - internal/spanlog
+  - log
+  - rpcmetrics
+  - testutils
+  - thrift-gen/agent
+  - thrift-gen/jaeger
+  - thrift-gen/sampling
+  - thrift-gen/zipkincore
+  - utils
+- name: github.com/uber/jaeger-lib
+  version: 575c678b2873b62aaadd0fa5817a2aeb3155dc4d
+  subpackages:
+  - metrics
+  - metrics/tally
 - name: github.com/uber/tchannel-go
   version: 79387824978f91318be3bfb43ae12e04c38cfe97
   subpackages:
@@ -114,7 +134,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 57efc9c3d9f91fb3277f8da1cff370539c4d3dc5
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
 testImports: []
