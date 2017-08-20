@@ -84,6 +84,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_Normal_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	NormalRecur(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_NormalRecur_Args,
+	) (*clientsBarBar.BarResponseRecur, map[string]string, error)
 	TooManyArgs(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -805,6 +810,68 @@ func (c *barClient) Normal(
 			return defaultRes, respHeaders, err
 		}
 		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return defaultRes, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// NormalRecur calls "/bar/recur" endpoint.
+func (c *barClient) NormalRecur(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_NormalRecur_Args,
+) (*clientsBarBar.BarResponseRecur, map[string]string, error) {
+	var defaultRes *clientsBarBar.BarResponseRecur
+	req := zanzibar.NewClientHTTPRequest(
+		c.clientID, "normalRecur", c.httpClient,
+	)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/recur"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200, 403})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponseRecur
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 
 		return &responseBody, respHeaders, nil
 

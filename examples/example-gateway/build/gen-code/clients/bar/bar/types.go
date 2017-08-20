@@ -160,6 +160,94 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 	return true
 }
 
+type BarRequestRecur struct {
+	Name  string           `json:"name,required"`
+	Recur *BarRequestRecur `json:"recur,omitempty"`
+}
+
+func (v *BarRequestRecur) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	w, err = wire.NewValueString(v.Name), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Recur != nil {
+		w, err = v.Recur.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _BarRequestRecur_Read(w wire.Value) (*BarRequestRecur, error) {
+	var v BarRequestRecur
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func (v *BarRequestRecur) FromWire(w wire.Value) error {
+	var err error
+	nameIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Name, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				nameIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Recur, err = _BarRequestRecur_Read(field.Value)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if !nameIsSet {
+		return errors.New("field Name of BarRequestRecur is required")
+	}
+	return nil
+}
+
+func (v *BarRequestRecur) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	i++
+	if v.Recur != nil {
+		fields[i] = fmt.Sprintf("Recur: %v", v.Recur)
+		i++
+	}
+	return fmt.Sprintf("BarRequestRecur{%v}", strings.Join(fields[:i], ", "))
+}
+
+func (v *BarRequestRecur) Equals(rhs *BarRequestRecur) bool {
+	if !(v.Name == rhs.Name) {
+		return false
+	}
+	if !((v.Recur == nil && rhs.Recur == nil) || (v.Recur != nil && rhs.Recur != nil && v.Recur.Equals(rhs.Recur))) {
+		return false
+	}
+	return true
+}
+
 type BarResponse struct {
 	StringField        string           `json:"stringField,required"`
 	IntWithRange       int32            `json:"intWithRange,required"`
@@ -391,6 +479,149 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 		return false
 	}
 	if !_Map_String_I32_Equals(v.MapIntWithoutRange, rhs.MapIntWithoutRange) {
+		return false
+	}
+	return true
+}
+
+type BarResponseRecur struct {
+	Nodes  []string `json:"nodes,required"`
+	Height int32    `json:"height,required"`
+}
+
+type _List_String_ValueList []string
+
+func (v _List_String_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := wire.NewValueString(x), error(nil)
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_String_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_String_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_List_String_ValueList) Close() {
+}
+
+func (v *BarResponseRecur) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+	if v.Nodes == nil {
+		return w, errors.New("field Nodes of BarResponseRecur is required")
+	}
+	w, err = wire.NewValueList(_List_String_ValueList(v.Nodes)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	w, err = wire.NewValueI32(v.Height), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 2, Value: w}
+	i++
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _List_String_Read(l wire.ValueList) ([]string, error) {
+	if l.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+	o := make([]string, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := x.GetString(), error(nil)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
+}
+
+func (v *BarResponseRecur) FromWire(w wire.Value) error {
+	var err error
+	nodesIsSet := false
+	heightIsSet := false
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TList {
+				v.Nodes, err = _List_String_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				nodesIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TI32 {
+				v.Height, err = field.Value.GetI32(), error(nil)
+				if err != nil {
+					return err
+				}
+				heightIsSet = true
+			}
+		}
+	}
+	if !nodesIsSet {
+		return errors.New("field Nodes of BarResponseRecur is required")
+	}
+	if !heightIsSet {
+		return errors.New("field Height of BarResponseRecur is required")
+	}
+	return nil
+}
+
+func (v *BarResponseRecur) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Nodes: %v", v.Nodes)
+	i++
+	fields[i] = fmt.Sprintf("Height: %v", v.Height)
+	i++
+	return fmt.Sprintf("BarResponseRecur{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_String_Equals(lhs, rhs []string) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !(lv == rv) {
+			return false
+		}
+	}
+	return true
+}
+
+func (v *BarResponseRecur) Equals(rhs *BarResponseRecur) bool {
+	if !_List_String_Equals(v.Nodes, rhs.Nodes) {
+		return false
+	}
+	if !(v.Height == rhs.Height) {
 		return false
 	}
 	return true

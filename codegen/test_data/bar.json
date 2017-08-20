@@ -714,6 +714,77 @@
 					"ConvertResponseGoStatements": null
 				},
 				{
+					"Name": "normalRecur",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/bar/recur",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": ""
+						},
+						{
+							"Type": "static",
+							"Text": "recur",
+							"BodyIdentifier": ""
+						}
+					],
+					"IsEndpoint": false,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
+					"ReqHeaderGoStatements": null,
+					"ResHeaderFields": {},
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_NormalRecur_Args",
+					"ResponseType": "*clientsBarBar.BarResponseRecur",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
+						{
+							"Type": "clientsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "clientsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
+					"ValidStatusCodes": [
+						200,
+						403
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null
+				},
+				{
 					"Name": "tooManyArgs",
 					"HTTPMethod": "POST",
 					"EndpointName": "",

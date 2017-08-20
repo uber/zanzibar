@@ -6,6 +6,7 @@
 		"thriftFileSha": "{{placeholder}}",
 		"exposedMethods": {
 			"Normal": "Bar::normal",
+			"NormalRecur": "Bar::normalRecur",
 			"NoRequest": "Bar::noRequest",
 			"MissingArg": "Bar::missingArg",
 			"TooManyArgs": "Bar::tooManyArgs",

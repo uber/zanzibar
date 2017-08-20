@@ -310,6 +310,7 @@
 				"MissingArg": "Bar::missingArg",
 				"NoRequest": "Bar::noRequest",
 				"Normal": "Bar::normal",
+				"NormalRecur": "Bar::normalRecur",
 				"TooManyArgs": "Bar::tooManyArgs"
 			},
 			"ip": "127.0.0.1",
@@ -417,6 +418,10 @@
 					},
 					{
 						"Name": "normal",
+						"Type": "http"
+					},
+					{
+						"Name": "normalRecur",
 						"Type": "http"
 					},
 					{

@@ -180,7 +180,7 @@ func NewMethod(
 	}
 
 	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
-		return nil, errors.Errorf("missing anotation '%s' for HTTP method", antHTTPMethod)
+		return nil, errors.Errorf("missing annotation '%s' for HTTP method", antHTTPMethod)
 	}
 
 	method.EndpointName = funcSpec.Annotations[antHandler]
@@ -209,7 +209,7 @@ func NewMethod(
 	var httpPath string
 	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
 		return nil, errors.Errorf(
-			"missing anotation '%s' for HTTP path", antHTTPPath,
+			"missing annotation '%s' for HTTP path", antHTTPPath,
 		)
 	}
 	method.setHTTPPath(httpPath, funcSpec)
