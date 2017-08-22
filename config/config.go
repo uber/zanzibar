@@ -44,14 +44,14 @@ func NewRuntimeConfigOrDie(
 		panic("error getting default config")
 	}
 
-	var serviceConfig []*zanzibar.ConfigOption
+	serviceConfig := make([]*zanzibar.ConfigOption, 0, len(files)+1)
 	serviceConfig = append(serviceConfig, defaultConfig)
 	for _, configFilePath := range files {
 		serviceConfig = append(serviceConfig, zanzibar.ConfigFilePath(configFilePath))
 	}
 
 	staticConfig := zanzibar.NewStaticConfigOrDie(serviceConfig, seedConfig)
-	getEnvConfig(staticConfig)
+	setEnvConfig(staticConfig)
 
 	return staticConfig
 }
@@ -64,12 +64,12 @@ func defaultConfig() (*zanzibar.ConfigOption, error) {
 	return zanzibar.ConfigFileContents(bytes), nil
 }
 
-func getEnvConfig(cfg *zanzibar.StaticConfig) {
+func setEnvConfig(cfg *zanzibar.StaticConfig) {
 	var envConfig EnvConfig
 	cfg.MustGetStruct("service.env.config", &envConfig)
 	for envVar, configKey := range envConfig {
 		if value, ok := os.LookupEnv(envVar); ok {
-			cfg.SetConfigValue(configKey.Key, []byte(value), configKey.DataType)
+			cfg.SetConfigValueOrDie(configKey.Key, []byte(value), configKey.DataType)
 		}
 	}
 }

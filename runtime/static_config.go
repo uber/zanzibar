@@ -265,10 +265,10 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// SetConfigValue sets the static config value.
+// SetConfigValueOrDie sets the static config value.
 // dataType can be a boolean, number or string.
-// SetConfigValue will panic if the config is frozen.
-func (conf *StaticConfig) SetConfigValue(key string, bytes []byte, dataType string) {
+// SetConfigValueOrDie will panic if the config is frozen.
+func (conf *StaticConfig) SetConfigValueOrDie(key string, bytes []byte, dataType string) {
 	if conf.frozen {
 		panic(errors.Errorf("Cannot set(%s) because frozen", key))
 	}
@@ -291,11 +291,11 @@ func (conf *StaticConfig) SetConfigValue(key string, bytes []byte, dataType stri
 	}
 }
 
-// SetOrDie a value in the config, useful for tests.
+// SetSeedOrDie a value in the config, useful for tests.
 // Keys you set must not exist in the JSON files.
 // Set() will panic if the key exists or if frozen.
 // Strongly recommended not to be used for production code.
-func (conf *StaticConfig) SetOrDie(key string, value interface{}) {
+func (conf *StaticConfig) SetSeedOrDie(key string, value interface{}) {
 	if conf.frozen {
 		panic(errors.Errorf("Cannot set(%s) because frozen", key))
 	}

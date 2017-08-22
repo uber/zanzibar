@@ -46,23 +46,23 @@ func getDirName() string {
 func TestEmptyConfig(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetOrDie("k", "v")
+	config.SetSeedOrDie("k", "v")
 	assert.Equal(t, config.MustGetString("k"), "v")
 
-	config.SetOrDie("k2", true)
+	config.SetSeedOrDie("k2", true)
 	assert.Equal(t, config.MustGetBoolean("k2"), true)
 
-	config.SetOrDie("k3", int64(4))
+	config.SetSeedOrDie("k3", int64(4))
 	assert.Equal(t, config.MustGetInt("k3"), int64(4))
 
-	config.SetOrDie("k4", float64(4.0))
+	config.SetSeedOrDie("k4", float64(4.0))
 	assert.Equal(t, config.MustGetFloat("k4"), float64(4.0))
 }
 
 func TestGetNamespace(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetOrDie("a.b.c", "v")
+	config.SetSeedOrDie("a.b.c", "v")
 	assert.Equal(t, config.MustGetString("a.b.c"), "v")
 }
 
@@ -144,7 +144,7 @@ func TestCannotSetExistingKeys(t *testing.T) {
 	)
 
 	assert.Panics(t, func() {
-		config.SetOrDie("a.b.c", "x")
+		config.SetSeedOrDie("a.b.c", "x")
 	})
 }
 
@@ -192,18 +192,42 @@ func TestCannotGetFromDestroyedConfig(t *testing.T) {
 func TestCannotSetOnFrozenConfig(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetOrDie("a", "a")
-	config.SetOrDie("b", "b")
+	config.SetSeedOrDie("a", "a")
+	config.SetSeedOrDie("b", "b")
 
 	config.Freeze()
 
 	assert.Panics(t, func() {
-		config.SetOrDie("c", "c")
+		config.SetSeedOrDie("c", "c")
 	})
 
 	assert.Equal(t, config.InspectOrDie(), map[string]interface{}{
 		"a": "a",
 		"b": "b",
+	})
+}
+
+func TestSetConfigValue(t *testing.T) {
+	config := zanzibar.NewStaticConfigOrDie(nil, nil)
+
+	config.SetConfigValueOrDie("a", []byte("a"), "string")
+	config.SetConfigValueOrDie("b", []byte("1"), "number")
+	config.SetConfigValueOrDie("c", []byte("true"), "boolean")
+
+	assert.Panics(t, func() {
+		config.SetConfigValueOrDie("d", []byte("unknown"), "unknown")
+	})
+
+	config.Freeze()
+
+	assert.Panics(t, func() {
+		config.SetConfigValueOrDie("d", []byte("d"), "string")
+	})
+
+	assert.Equal(t, config.InspectOrDie(), map[string]interface{}{
+		"a": "a",
+		"b": float64(1),
+		"c": true,
 	})
 }
 
@@ -320,7 +344,7 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 	}, nil)
 
 	assert.Panics(t, func() {
-		config.SetOrDie("a", "c")
+		config.SetSeedOrDie("a", "c")
 	})
 
 	closer.Close()
@@ -337,7 +361,7 @@ func TestCannotSetOverValueFromFileContents(t *testing.T) {
 	}, nil)
 
 	assert.Panics(t, func() {
-		config.SetOrDie("a", "c")
+		config.SetSeedOrDie("a", "c")
 	})
 }
 
@@ -712,7 +736,7 @@ func TestStaticConfigHasOwnState(t *testing.T) {
 		dict,
 	)
 
-	config1.SetOrDie("a-key", "a-value")
+	config1.SetSeedOrDie("a-key", "a-value")
 
 	assert.Panics(t, func() {
 		config2.MustGetString("a-key")

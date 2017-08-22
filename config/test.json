@@ -1,0 +1,15 @@
+{
+	"serviceName": "my-gateway",
+	"http.port": 1000,
+
+	"service.env.config": {
+		"UBER_PORT_HTTP": {
+			"key": "http.port",
+			"dataType": "number"
+		},
+		"UBER_PORT_TCHANNEL": {
+			"key": "tchannel.port",
+			"dataType": "number"
+		}
+	}
+}
