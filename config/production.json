@@ -1,6 +1,7 @@
 {
+	"service.env.config": {},
+
 	"serviceName": "my-gateway",
-	"port": 4000,
 	"env": "production",
 	"useDatacenter": false,
 
@@ -18,6 +19,8 @@
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
 	"metrics.runtime.collectInterval": 1000,
+
+	"http.port": 4000,
 
 	"tchannel.serviceName": "my-gateway",
 	"tchannel.processName": "my-gateway"

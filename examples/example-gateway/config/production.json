@@ -20,6 +20,7 @@
 	"logger.output": "disk",
 	"metrics.m3.service": "example-gateway",
 	"metrics.tally.service": "example-gateway",
+	"service.env.config": {},
 	"serviceName": "example-gateway",
 	"tchannel.port": 7784,
 	"tchannel.processName": "example-gateway",
