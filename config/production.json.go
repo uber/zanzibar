@@ -65,8 +65,9 @@ func (fi bindataFileInfo) Sys() interface{} {
 }
 
 var _productionJson = []byte(`{
+	"service.env.config": {},
+
 	"serviceName": "my-gateway",
-	"port": 4000,
 	"env": "production",
 	"useDatacenter": false,
 
@@ -85,6 +86,8 @@ var _productionJson = []byte(`{
 	"metrics.runtime.enableGCMetrics": true,
 	"metrics.runtime.collectInterval": 1000,
 
+	"http.port": 4000,
+
 	"tchannel.serviceName": "my-gateway",
 	"tchannel.processName": "my-gateway"
 }
@@ -100,7 +103,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 590, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 624, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -21,27 +21,39 @@
 package config
 
 import (
-	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"os"
+
+	"github.com/uber/zanzibar/runtime"
 )
 
-// NewRuntimeConfigOrDie returns a static config struct that is pre-set with
-// the service configuration defaults
+// EnvConfig map from environment variable to config key and data type
+type EnvConfig map[string]struct {
+	Key      string `json:"key"`
+	DataType string `json:"dataType"`
+}
+
+// NewRuntimeConfigOrDie returns a static config struct
+// that is pre-set with the service configuration defaults
+// and overridden by service.env.config
 func NewRuntimeConfigOrDie(
 	files []string,
 	seedConfig map[string]interface{},
 ) *zanzibar.StaticConfig {
 	defaultConfig, err := defaultConfig()
 	if err != nil {
-		panic(errors.Wrap)
-	}
-	serviceConfig := make([]*zanzibar.ConfigOption, len(files)+1)
-	serviceConfig[0] = defaultConfig
-	for i, configFilePath := range files {
-		serviceConfig[i+1] = zanzibar.ConfigFilePath(configFilePath)
+		panic("error getting default config")
 	}
 
-	return zanzibar.NewStaticConfigOrDie(serviceConfig, seedConfig)
+	serviceConfig := make([]*zanzibar.ConfigOption, 0, len(files)+1)
+	serviceConfig = append(serviceConfig, defaultConfig)
+	for _, configFilePath := range files {
+		serviceConfig = append(serviceConfig, zanzibar.ConfigFilePath(configFilePath))
+	}
+
+	staticConfig := zanzibar.NewStaticConfigOrDie(serviceConfig, seedConfig)
+	setEnvConfig(staticConfig)
+
+	return staticConfig
 }
 
 func defaultConfig() (*zanzibar.ConfigOption, error) {
@@ -49,6 +61,15 @@ func defaultConfig() (*zanzibar.ConfigOption, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return zanzibar.ConfigFileContents(bytes), nil
+}
+
+func setEnvConfig(cfg *zanzibar.StaticConfig) {
+	var envConfig EnvConfig
+	cfg.MustGetStruct("service.env.config", &envConfig)
+	for envVar, configKey := range envConfig {
+		if value, ok := os.LookupEnv(envVar); ok {
+			cfg.SetConfigValueOrDie(configKey.Key, []byte(value), configKey.DataType)
+		}
+	}
 }

@@ -275,9 +275,9 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 			panic("expected datacenterFile: " + dcFile + " to exist")
 		}
 
-		config.SetOrDie("datacenter", string(bytes))
+		config.SetSeedOrDie("datacenter", string(bytes))
 	} else {
-		config.SetOrDie("datacenter", "unknown")
+		config.SetSeedOrDie("datacenter", "unknown")
 	}
 }
 

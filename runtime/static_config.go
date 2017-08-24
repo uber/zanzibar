@@ -21,12 +21,10 @@
 package zanzibar
 
 import (
-	"io/ioutil"
-	"reflect"
-
 	"encoding/json"
-
+	"io/ioutil"
 	"os"
+	"reflect"
 
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
@@ -267,11 +265,37 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// SetOrDie a value in the config, useful for tests.
-// Keys you set must not exist in the JSON files
+// SetConfigValueOrDie sets the static config value.
+// dataType can be a boolean, number or string.
+// SetConfigValueOrDie will panic if the config is frozen.
+func (conf *StaticConfig) SetConfigValueOrDie(key string, bytes []byte, dataType string) {
+	if conf.frozen {
+		panic(errors.Errorf("Cannot set(%s) because frozen", key))
+	}
+
+	var dt jsonparser.ValueType
+	switch dataType {
+	case "boolean":
+		dt = jsonparser.Boolean
+	case "number":
+		dt = jsonparser.Number
+	case "string":
+		dt = jsonparser.String
+	default:
+		panic("unknown config data type")
+	}
+
+	conf.configValues[key] = StaticConfigValue{
+		dataType: dt,
+		bytes:    bytes,
+	}
+}
+
+// SetSeedOrDie a value in the config, useful for tests.
+// Keys you set must not exist in the JSON files.
 // Set() will panic if the key exists or if frozen.
 // Strongly recommended not to be used for production code.
-func (conf *StaticConfig) SetOrDie(key string, value interface{}) {
+func (conf *StaticConfig) SetSeedOrDie(key string, value interface{}) {
 	if conf.frozen {
 		panic(errors.Errorf("Cannot set(%s) because frozen", key))
 	}
