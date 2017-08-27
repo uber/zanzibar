@@ -27,11 +27,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	thrift "github.com/apache/thrift/lib/go/thrift"
-	require "github.com/stretchr/testify/require"
+	"github.com/apache/thrift/lib/go/thrift"
+	"github.com/stretchr/testify/require"
+	"github.com/uber-go/tally"
 	metrics "github.com/uber-go/tally/m3"
-	customtransport "github.com/uber-go/tally/m3/customtransports"
-	m3 "github.com/uber-go/tally/m3/thrift"
+	"github.com/uber-go/tally/m3/customtransports"
+	"github.com/uber-go/tally/m3/thrift"
 	"github.com/uber/zanzibar/test/lib"
 )
 
@@ -108,6 +109,7 @@ func NewFakeM3Service(
 	countMetrics bool,
 ) *FakeM3Service {
 	return &FakeM3Service{
+		metrics:      make(map[string]*m3.Metric),
 		wg:           wg,
 		countBatches: countBatches,
 		countMetrics: countMetrics,
@@ -118,7 +120,7 @@ func NewFakeM3Service(
 type FakeM3Service struct {
 	lock         sync.RWMutex
 	batches      []*m3.MetricBatch
-	metrics      []*m3.Metric
+	metrics      map[string]*m3.Metric
 	wg           *lib.WaitAtLeast
 	countBatches bool
 	countMetrics bool
@@ -132,7 +134,7 @@ func (m *FakeM3Service) GetBatches() []*m3.MetricBatch {
 }
 
 // GetMetrics gets the individual metrics
-func (m *FakeM3Service) GetMetrics() []*m3.Metric {
+func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	return m.metrics
@@ -141,18 +143,24 @@ func (m *FakeM3Service) GetMetrics() []*m3.Metric {
 // EmitMetricBatch is called by thrift message processor
 func (m *FakeM3Service) EmitMetricBatch(batch *m3.MetricBatch) (err error) {
 	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.batches = append(m.batches, batch)
 	if m.countBatches {
 		m.wg.Done()
 	}
 
 	for _, metric := range batch.Metrics {
-		m.metrics = append(m.metrics, metric)
+		mTags := metric.GetTags()
+		tags := make(map[string]string, len(mTags))
+		for tag := range mTags {
+			tags[tag.GetTagName()] = tag.GetTagValue()
+		}
+		m.metrics[tally.KeyForPrefixedStringMap(metric.GetName(), tags)] = metric
 		if m.countMetrics {
 			m.wg.Done()
 		}
 	}
 
-	m.lock.Unlock()
 	return thrift.NewTTransportException(thrift.END_OF_FILE, "complete")
 }

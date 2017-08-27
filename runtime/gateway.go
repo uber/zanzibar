@@ -33,21 +33,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
+	jaegerConfig "github.com/uber/jaeger-client-go/config"
+	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/opentracing/opentracing-go"
-	jaegerConfig "github.com/uber/jaeger-client-go/config"
-	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
 )
-
-const defaultM3MaxQueueSize = 10000
-const defaultM3MaxPacketSize = 1440 // 1440kb in UDP M3MaxPacketSize
-const defaultM3FlushInterval = 500 * time.Millisecond
 
 // Options configures the gateway
 type Options struct {
@@ -57,23 +52,23 @@ type Options struct {
 
 // Gateway type
 type Gateway struct {
-	HTTPPort              int32
-	TChannelPort          int32
-	RealHTTPPort          int32
-	RealHTTPAddr          string
-	RealTChannelPort      int32
-	RealTChannelAddr      string
-	WaitGroup             *sync.WaitGroup
-	Channel               *tchannel.Channel
-	Logger                *zap.Logger
-	RootScope             tally.Scope
-	MetricsScope          tally.Scope
-	PerWorkerMetricsScope tally.Scope
-	ServiceName           string
-	Config                *StaticConfig
-	HTTPRouter            *HTTPRouter
-	TChannelRouter        *TChannelRouter
-	Tracer                opentracing.Tracer
+	HTTPPort         int32
+	TChannelPort     int32
+	RealHTTPPort     int32
+	RealHTTPAddr     string
+	RealTChannelPort int32
+	RealTChannelAddr string
+	WaitGroup        *sync.WaitGroup
+	Channel          *tchannel.Channel
+	Logger           *zap.Logger
+	RootScope        tally.Scope
+	AllHostScope     tally.Scope
+	PerHostScope     tally.Scope
+	ServiceName      string
+	Config           *StaticConfig
+	HTTPRouter       *HTTPRouter
+	TChannelRouter   *TChannelRouter
+	Tracer           opentracing.Tracer
 
 	loggerFile      *os.File
 	scopeCloser     io.Closer
@@ -295,7 +290,7 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 
 func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	metricsType := config.MustGetString("metrics.type")
-	service := config.MustGetString("metrics.tally.service")
+	service := config.MustGetString("metrics.serviceName")
 	env := config.MustGetString("env")
 
 	if metricsType == "m3" {
@@ -312,8 +307,8 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 			Env:                env,
 			CommonTags:         commonTags,
 			IncludeHost:        false,
-			MaxQueueSize:       defaultM3MaxQueueSize,
-			MaxPacketSizeBytes: defaultM3MaxPacketSize,
+			MaxQueueSize:       int(config.MustGetInt("metrics.m3.maxQueueSize")),
+			MaxPacketSizeBytes: int32(config.MustGetInt("metrics.m3.maxPacketSizeBytes")),
 		}
 		if gateway.metricsBackend, err = m3.NewReporter(opts); err != nil {
 			return err
@@ -322,7 +317,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		panic("expected gateway to have MetricsBackend in opts")
 	}
 
-	// Adding 'env' and 'service' common tags, since they are not emitted by metrics backend.
+	// TODO: Remove 'env' and 'service' default tags once they are emitted by metrics backend.
 	defaultTags := map[string]string{
 		"env":     env,
 		"service": service,
@@ -330,16 +325,15 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
 		tally.ScopeOptions{
 			Tags:           defaultTags,
-			Prefix:         service + ".production",
 			CachedReporter: gateway.metricsBackend,
 			Separator:      tally.DefaultSeparator,
 		},
-		time.Duration(config.MustGetInt("metrics.tally.flushInterval"))*time.Millisecond,
+		time.Duration(config.MustGetInt("metrics.flushInterval"))*time.Millisecond,
 	)
-	gateway.MetricsScope = gateway.RootScope.SubScope("all-workers")
-	gateway.PerWorkerMetricsScope = gateway.RootScope.SubScope("per-worker").Tagged(map[string]string{
-		"host": GetHostname(),
-	})
+	// As per M3 best practices, creating separate all-host and per-host metrics
+	// to reduce metric cardinality when querying metrics for all hosts.
+	gateway.AllHostScope = gateway.RootScope.Tagged(map[string]string{"host": "all"})
+	gateway.PerHostScope = gateway.RootScope.Tagged(map[string]string{"host": GetHostname()})
 
 	// start collecting runtime metrics
 	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
@@ -349,7 +343,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
 		CollectInterval:  collectInterval,
 	}
-	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerWorkerMetricsScope)
+	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerHostScope)
 
 	return nil
 }
@@ -444,7 +438,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	opts := []jaegerConfig.Option{
 		// TChannel logger implements jaeger logger interface
 		jaegerConfig.Logger(NewTChannelLogger(gateway.Logger)),
-		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.MetricsScope)),
+		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.AllHostScope)),
 	}
 	jc := gateway.initJaegerConfig(config)
 
@@ -486,7 +480,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
-	subScope := gateway.MetricsScope.SubScope("tchannel")
+	subScope := gateway.AllHostScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
