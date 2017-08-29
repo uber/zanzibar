@@ -56,17 +56,20 @@ func TestNewTChannelStatsReporter(t *testing.T) {
 
 	snapshot := testScope.Snapshot()
 
-	counterSnapshot, ok := snapshot.Counters()[counterName]
+	snapshotCounterName := tally.KeyForPrefixedStringMap(counterName, tags)
+	counterSnapshot, ok := snapshot.Counters()[snapshotCounterName]
 	assert.True(t, ok)
 	assert.Equal(t, counterName, counterSnapshot.Name())
 	assert.Equal(t, int64(42), counterSnapshot.Value())
 
-	gaugeSnapshot, ok := snapshot.Gauges()[gaugeName]
+	snapshotGaugeName := tally.KeyForPrefixedStringMap(gaugeName, tags)
+	gaugeSnapshot, ok := snapshot.Gauges()[snapshotGaugeName]
 	assert.True(t, ok)
 	assert.Equal(t, gaugeName, gaugeSnapshot.Name())
 	assert.Equal(t, float64(13), gaugeSnapshot.Value())
 
-	timerSnapshot, ok := snapshot.Timers()[timerName]
+	snapshotTimerName := tally.KeyForPrefixedStringMap(timerName, tags)
+	timerSnapshot, ok := snapshot.Timers()[snapshotTimerName]
 	assert.True(t, ok)
 	assert.Equal(t, timerName, timerSnapshot.Name())
 	assert.Equal(t, []time.Duration{100, 200, 400}, timerSnapshot.Values())
