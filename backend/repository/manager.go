@@ -24,9 +24,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"go.uber.org/thriftrw/compile"
-
 	"github.com/pkg/errors"
+	"github.com/thriftrw/thriftrw-go/compile"
 	"github.com/uber/zanzibar/codegen"
 )
 
@@ -161,6 +160,29 @@ func (m *Manager) ThriftFile(gateway, path string) (*ThriftMeta, error) {
 		Version: version,
 		Content: string(content),
 	}, nil
+}
+
+// CompileThriftFile returns the content and meta data of a file in a gateway.
+func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
+	repo, ok := m.RepoMap[gateway]
+	if !ok {
+		return nil, errors.Errorf("gateway %s is not found", gateway)
+	}
+	cfg, err := repo.GatewayConfig()
+	if err != nil {
+		return nil, err
+	}
+	prefix := filepath.Join(repo.LocalDir(), cfg.ThriftRootDir)
+	absPath := filepath.Join(prefix, path)
+	compiledModule, err := compile.Compile(absPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to compile thrift file")
+	}
+	module, err := ConvertModule(compiledModule, prefix)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert module for serialization")
+	}
+	return module, nil
 }
 
 // UpdateThriftFiles update thrift files to their master version in the IDL-registry.

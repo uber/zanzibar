@@ -810,6 +810,507 @@
 		}
 	},
 	{
+		"name": "get the module structure of a thrift file in a gateway",
+		"request": {
+			"method": "GET",
+			"url": "/thrift-file-compiled/clients/baz/baz.thrift",
+			"header": {
+				"gateway-id": "example-gateway"
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"includes": {
+					"base": {
+						"module": {
+							"name": "base",
+							"thrift_path": "clients/baz/base.thrift",
+							"types": {
+								"BazResponse": {
+									"file": "clients/baz/base.thrift",
+									"name": "BazResponse"
+								},
+								"ServerErr": {
+									"file": "clients/baz/base.thrift",
+									"name": "ServerErr"
+								},
+								"UUID": {
+									"file": "clients/baz/base.thrift",
+									"name": "UUID"
+								}
+							}
+						},
+						"name": "base"
+					}
+				},
+				"name": "baz",
+				"services": {
+					"SecondService": {
+						"file": "clients/baz/baz.thrift",
+						"functions": {
+							"echoBinary": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "binary"
+										}
+									}
+								],
+								"name": "echoBinary",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "binary"
+									}
+								}
+							},
+							"echoBool": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "bool"
+										}
+									}
+								],
+								"name": "echoBool",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "bool"
+									}
+								}
+							},
+							"echoDouble": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "double"
+										}
+									}
+								],
+								"name": "echoDouble",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "double"
+									}
+								}
+							},
+							"echoEnum": {
+								"args_spec": [
+									{
+										"default": "Fruit.APPLE",
+										"id": 1,
+										"name": "arg",
+										"required": false,
+										"type": {
+											"file": "clients/baz/baz.thrift",
+											"name": "Fruit"
+										}
+									}
+								],
+								"name": "echoEnum",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"file": "clients/baz/baz.thrift",
+										"name": "Fruit"
+									}
+								}
+							},
+							"echoI16": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "i16"
+										}
+									}
+								],
+								"name": "echoI16",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "i16"
+									}
+								}
+							},
+							"echoI32": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "i32"
+										}
+									}
+								],
+								"name": "echoI32",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "i32"
+									}
+								}
+							},
+							"echoI64": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "i64"
+										}
+									}
+								],
+								"name": "echoI64",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "i64"
+									}
+								}
+							},
+							"echoI8": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "byte"
+										}
+									}
+								],
+								"name": "echoI8",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "byte"
+									}
+								}
+							},
+							"echoString": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "string"
+										}
+									}
+								],
+								"name": "echoString",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "string"
+									}
+								}
+							},
+							"echoStringList": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "list\u003cstring\u003e"
+										}
+									}
+								],
+								"name": "echoStringList",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "list\u003cstring\u003e"
+									}
+								}
+							},
+							"echoStringMap": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "map\u003cstring, BazResponse\u003e"
+										}
+									}
+								],
+								"name": "echoStringMap",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "map\u003cstring, BazResponse\u003e"
+									}
+								}
+							},
+							"echoStringSet": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "set\u003cstring\u003e"
+										}
+									}
+								],
+								"name": "echoStringSet",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "set\u003cstring\u003e"
+									}
+								}
+							},
+							"echoStructList": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "list\u003cBazResponse\u003e"
+										}
+									}
+								],
+								"name": "echoStructList",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "list\u003cBazResponse\u003e"
+									}
+								}
+							},
+							"echoStructMap": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "map\u003cBazResponse, string\u003e"
+										}
+									}
+								],
+								"name": "echoStructMap",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "map\u003cBazResponse, string\u003e"
+									}
+								}
+							},
+							"echoStructSet": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"name": "set\u003cBazResponse\u003e"
+										}
+									}
+								],
+								"name": "echoStructSet",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"name": "set\u003cBazResponse\u003e"
+									}
+								}
+							},
+							"echoTypedef": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"file": "clients/baz/base.thrift",
+											"name": "UUID"
+										}
+									}
+								],
+								"name": "echoTypedef",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"file": "clients/baz/base.thrift",
+										"name": "UUID"
+									}
+								}
+							}
+						},
+						"name": "SecondService"
+					},
+					"SimpleService": {
+						"file": "clients/baz/baz.thrift",
+						"functions": {
+							"call": {
+								"annotations": {
+									"zanzibar.http.reqHeaders": "x-uuid,x-token",
+									"zanzibar.http.resHeaders": "some-res-header"
+								},
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg",
+										"required": true,
+										"type": {
+											"file": "clients/baz/baz.thrift",
+											"name": "BazRequest"
+										}
+									}
+								],
+								"name": "call",
+								"one_way": false,
+								"result_spec": {
+									"exceptions": [
+										{
+											"id": 1,
+											"name": "authErr",
+											"required": false,
+											"type": {
+												"file": "clients/baz/baz.thrift",
+												"name": "AuthErr"
+											}
+										}
+									],
+									"return_type": null
+								}
+							},
+							"compare": {
+								"args_spec": [
+									{
+										"id": 1,
+										"name": "arg1",
+										"required": true,
+										"type": {
+											"file": "clients/baz/baz.thrift",
+											"name": "BazRequest"
+										}
+									},
+									{
+										"id": 2,
+										"name": "arg2",
+										"required": true,
+										"type": {
+											"file": "clients/baz/baz.thrift",
+											"name": "BazRequest"
+										}
+									}
+								],
+								"name": "compare",
+								"one_way": false,
+								"result_spec": {
+									"exceptions": [
+										{
+											"id": 1,
+											"name": "authErr",
+											"required": false,
+											"type": {
+												"file": "clients/baz/baz.thrift",
+												"name": "AuthErr"
+											}
+										},
+										{
+											"id": 2,
+											"name": "otherAuthErr",
+											"required": false,
+											"type": {
+												"file": "clients/baz/baz.thrift",
+												"name": "OtherAuthErr"
+											}
+										}
+									],
+									"return_type": {
+										"file": "clients/baz/base.thrift",
+										"name": "BazResponse"
+									}
+								}
+							},
+							"ping": {
+								"name": "ping",
+								"one_way": false,
+								"result_spec": {
+									"return_type": {
+										"file": "clients/baz/base.thrift",
+										"name": "BazResponse"
+									}
+								}
+							},
+							"sillyNoop": {
+								"name": "sillyNoop",
+								"one_way": false,
+								"result_spec": {
+									"exceptions": [
+										{
+											"id": 1,
+											"name": "authErr",
+											"required": false,
+											"type": {
+												"file": "clients/baz/baz.thrift",
+												"name": "AuthErr"
+											}
+										},
+										{
+											"id": 2,
+											"name": "serverErr",
+											"required": false,
+											"type": {
+												"file": "clients/baz/base.thrift",
+												"name": "ServerErr"
+											}
+										}
+									],
+									"return_type": null
+								}
+							}
+						},
+						"name": "SimpleService"
+					}
+				},
+				"thrift_path": "clients/baz/baz.thrift",
+				"types": {
+					"AuthErr": {
+						"file": "clients/baz/baz.thrift",
+						"name": "AuthErr"
+					},
+					"BazRequest": {
+						"file": "clients/baz/baz.thrift",
+						"name": "BazRequest"
+					},
+					"Fruit": {
+						"file": "clients/baz/baz.thrift",
+						"name": "Fruit"
+					},
+					"OtherAuthErr": {
+						"file": "clients/baz/baz.thrift",
+						"name": "OtherAuthErr"
+					}
+				}
+			}
+		}
+	},
+	{
 		"name": "get the list of all files in IDL registry",
 		"request": {
 			"method": "GET",

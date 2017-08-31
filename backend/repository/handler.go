@@ -90,6 +90,7 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.GET("/thrift-service/*path", h.ThriftServicesByPath)
 	r.GET("/thrift-list", h.ThriftList)
 	r.GET("/thrift-file/*path", h.ThriftFile)
+	r.GET("/thrift-file-compiled/*path", h.CompiledThrift)
 	r.POST("/validate-updates", h.ValidateUpdates)
 	r.POST("/create-diff", h.CreateDiff)
 	r.POST("/land-diff", h.LandDiff)
@@ -264,6 +265,18 @@ func (h *Handler) ThriftFile(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	h.WriteJSON(w, http.StatusOK, meta)
+}
+
+// CompiledThrift returns the content and meta data of a file in a gateway.
+func (h *Handler) CompiledThrift(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := r.Header.Get(h.gatewayHeader)
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	module, err := h.Manager.CompileThriftFile(id, path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, module)
 }
 
 // ValidateUpdates validates the update requests for thrift files, clients and endpoints.
