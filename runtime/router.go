@@ -138,7 +138,7 @@ func NewRouterEndpoint(
 		"endpoint": endpointName,
 		"handler":  handlerName,
 	}
-	endpointScope := gateway.MetricsScope.Tagged(endpointTags)
+	endpointScope := gateway.AllHostScope.Tagged(endpointTags)
 	requestRecvd := endpointScope.Counter("inbound.calls.recvd")
 	requestLatency := endpointScope.Timer("inbound.calls.latency")
 	statusCodes := make(map[int]tally.Counter, len(knownStatusCodes))

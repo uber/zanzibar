@@ -23,18 +23,15 @@ package baz
 import (
 	"bytes"
 	"context"
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
+	"github.com/uber-go/tally"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	"github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 func TestCallMetrics(t *testing.T) {
@@ -92,17 +89,45 @@ func TestCallMetrics(t *testing.T) {
 
 	cg.MetricsWaitGroup.Wait()
 	metrics := cg.M3Service.GetMetrics()
-	sort.Sort(lib.SortMetricsByNameAndTags(metrics))
 	assert.Equal(t, numMetrics, len(metrics))
 
-	expectedEndpoitTags := map[string]string{
+	endpointNames := []string{
+		"inbound.calls.latency",
+		"inbound.calls.recvd",
+		"inbound.calls.status.204",
+	}
+	endpointTags := map[string]string{
 		"endpoint": "baz",
 		"handler":  "call",
 		"service":  "test-gateway",
 		"env":      "test",
+		"host":     "all",
+	}
+	for _, name := range endpointNames {
+		key := tally.KeyForPrefixedStringMap(name, endpointTags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
-	expectedTchannelTags := map[string]string{
+	inboundLatency := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", endpointTags)]
+	value := *inboundLatency.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+
+	inboundRecvd := metrics[tally.KeyForPrefixedStringMap("inbound.calls.recvd", endpointTags)]
+	value = *inboundRecvd.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value)
+
+	inboundStatus := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.204", endpointTags)]
+	value = *inboundStatus.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	tchannelNames := []string{
+		"tchannel.outbound.calls.latency",
+		"tchannel.outbound.calls.per-attempt.latency",
+		"tchannel.outbound.calls.send",
+		"tchannel.outbound.calls.success",
+	}
+	tchannelTags := map[string]string{
 		"app":             "test-gateway",
 		"service":         "test-gateway",
 		"env":             "test",
@@ -110,189 +135,26 @@ func TestCallMetrics(t *testing.T) {
 		"target-endpoint": "SimpleService::call",
 		"host":            zanzibar.GetHostname(),
 	}
+	for _, name := range tchannelNames {
+		key := tally.KeyForPrefixedStringMap(name, tchannelTags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
+	}
 
-	latencyMetric := metrics[0]
-	assert.Equal(t, "test-gateway.production.all-workers.inbound.calls.latency", latencyMetric.GetName())
-
-	value := *latencyMetric.MetricValue.Timer.I64Value
+	outboundLatency := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.latency", tchannelTags)]
+	value = *outboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
-	tags := latencyMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	for tag := range tags {
-		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	recvdMetric := metrics[1]
-	assert.Equal(t, "test-gateway.production.all-workers.inbound.calls.recvd", recvdMetric.GetName())
-
-	value = *recvdMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	tags = recvdMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	for tag := range tags {
-		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	statusCodeMetric := metrics[2]
-	assert.Equal(t,
-		"test-gateway.production.all-workers.inbound.calls.status.204", statusCodeMetric.GetName(),
-	)
-
-	value = *statusCodeMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	tags = statusCodeMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-	for tag := range tags {
-		assert.Equal(t, expectedEndpoitTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	expectedJaegerSpanMetricName := "test-gateway.production.all-workers.jaeger.spans"
-
-	jaegerSpanFinishedMetric := metrics[3]
-	assert.Equal(t, expectedJaegerSpanMetricName, jaegerSpanFinishedMetric.GetName())
-
-	value = *jaegerSpanFinishedMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	tags = jaegerSpanFinishedMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	expectedSpanFinishedTags := map[string]string{
-		"service": "test-gateway",
-		"env":     "test",
-		"group":   "lifecycle",
-		"state":   "finished",
-	}
-	for tag := range tags {
-		assert.Equal(t, expectedSpanFinishedTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	jaegerSpanStartedMetric := metrics[4]
-	assert.Equal(t, expectedJaegerSpanMetricName, jaegerSpanStartedMetric.GetName())
-
-	value = *jaegerSpanStartedMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	tags = jaegerSpanStartedMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	expectedSpanStartedTags := map[string]string{
-		"group":   "lifecycle",
-		"state":   "started",
-		"service": "test-gateway",
-		"env":     "test",
-	}
-	for tag := range tags {
-		assert.Equal(t, expectedSpanStartedTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	jaegerSpanSamplingMetric := metrics[5]
-	assert.Equal(t, expectedJaegerSpanMetricName, jaegerSpanSamplingMetric.GetName())
-
-	value = *jaegerSpanSamplingMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	tags = jaegerSpanSamplingMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	expectedSpanSamplingTags := map[string]string{
-		"group":   "sampling",
-		"sampled": "y",
-		"service": "test-gateway",
-		"env":     "test",
-	}
-	for tag := range tags {
-		assert.Equal(t, expectedSpanSamplingTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	jaegerTraceMetric := metrics[6]
-	assert.Equal(t, "test-gateway.production.all-workers.jaeger.traces", jaegerTraceMetric.GetName())
-
-	value = *jaegerTraceMetric.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
-
-	tags = jaegerTraceMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-
-	expectedTraceTags := map[string]string{
-		"state":   "started",
-		"sampled": "y",
-		"service": "test-gateway",
-		"env":     "test",
-	}
-	for tag := range tags {
-		assert.Equal(t, expectedTraceTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	tchannelOutboundSuccessMetric := metrics[7]
-	assert.Equal(t,
-		"test-gateway.production.all-workers.tchannel.outbound.calls.latency",
-		tchannelOutboundSuccessMetric.GetName(),
-	)
-
-	value = *latencyMetric.MetricValue.Timer.I64Value
+	perAttemptOutboundLatency := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.per-attempt.latency", tchannelTags)]
+	value = *perAttemptOutboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
-	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 6, len(tags), "expected 6 tags")
-
-	for tag := range tags {
-		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	tchannelOutboundSuccessMetric = metrics[8]
-	assert.Equal(t,
-		"test-gateway.production.all-workers.tchannel.outbound.calls.per-attempt.latency",
-		tchannelOutboundSuccessMetric.GetName(),
-	)
-
-	value = *latencyMetric.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
-	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 6, len(tags), "expected 6 tags")
-	for tag := range tags {
-		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	tchannelOutboundSuccessMetric = metrics[9]
-	assert.Equal(t,
-		"test-gateway.production.all-workers.tchannel.outbound.calls.send",
-		tchannelOutboundSuccessMetric.GetName(),
-	)
-
-	value = *tchannelOutboundSuccessMetric.MetricValue.Count.I64Value
+	outboundSend := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.send", tchannelTags)]
+	value = *outboundSend.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 6, len(tags), "expected 6 tags")
-	for tag := range tags {
-		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
-	}
-
-	tchannelOutboundSuccessMetric = metrics[10]
-	assert.Equal(t,
-		"test-gateway.production.all-workers.tchannel.outbound.calls.success",
-		tchannelOutboundSuccessMetric.GetName(),
-	)
-
-	value = *tchannelOutboundSuccessMetric.MetricValue.Count.I64Value
+	outboundSuccess := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.success", tchannelTags)]
+	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	tags = tchannelOutboundSuccessMetric.GetTags()
-	assert.Equal(t, 6, len(tags), "expected 6 tags")
-	for tag := range tags {
-		if tag.GetTagName() == "host" {
-			continue
-		}
-		assert.Equal(t, expectedTchannelTags[tag.GetTagName()], tag.GetTagValue())
-	}
 }
