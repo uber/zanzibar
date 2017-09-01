@@ -66,13 +66,29 @@ type TypeSpec struct {
 	Annotations compile.Annotations `json:"annotations,omitempty"`
 	// The following fields defines specific types other than the
 	// built-in types. At most one of the field can not be nil.
-	StructType    []*FieldSpec      `json:"struct_type,omitempty"`
+	StructType    *StructTypeSpec   `json:"struct_type,omitempty"`
 	EnumType      *compile.EnumSpec `json:"enum_type,omitempty"`
 	MapType       *MapTypeSpec      `json:"map_type,omitempty"`
 	ListValueType *TypeSpec         `json:"list_value_type,omitempty"`
 	SetValueType  *TypeSpec         `json:"set_value_type,omitempty"`
 	TypeDefTarget *TypeSpec         `json:"type_def_target,omitempty"`
 }
+
+// StructTypeSpec defines the type information of a struct.
+type StructTypeSpec struct {
+	Kind   StructureType `json:"kind"`
+	Fields []*FieldSpec  `json:"fields"`
+}
+
+// StructureType indicates what type the struct is.
+type StructureType string
+
+const (
+	StructureTypeStruct    StructureType = "struct"
+	StructureTypeUnion     StructureType = "union"
+	StructureTypeException StructureType = "exception"
+	StructureTypeUnknown   StructureType = "unknown"
+)
 
 // MapTypeSpec defines TypeSpec for a map.
 type MapTypeSpec struct {
@@ -198,7 +214,11 @@ func typeSpec(t compile.TypeSpec, basePath string) *TypeSpec {
 	}
 	switch t := t.(type) {
 	case *compile.StructSpec:
-		ts.StructType = fieldSpecs(t.Fields, basePath)
+		ts.StructType = &StructTypeSpec{
+			Kind:   structureType(int(t.Type)),
+			Fields: fieldSpecs(t.Fields, basePath),
+		}
+
 		return ts
 	case *compile.EnumSpec:
 		t.File = relPath(basePath, t.File)
@@ -221,6 +241,18 @@ func typeSpec(t compile.TypeSpec, basePath string) *TypeSpec {
 		return ts
 	}
 	return ts
+}
+
+func structureType(i int) StructureType {
+	switch i {
+	case 1:
+		return StructureTypeStruct
+	case 2:
+		return StructureTypeUnion
+	case 3:
+		return StructureTypeException
+	}
+	return StructureTypeUnknown
 }
 
 func convertServiceSpec(services map[string]*compile.ServiceSpec, basePath string) map[string]*ServiceSpec {
