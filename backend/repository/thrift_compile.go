@@ -30,7 +30,7 @@ import (
 
 // Module represents a compiled Thrift module. In contrast to thriftrw-go's
 // compile.Module, all fields of this Module are struct and hence can be
-// serialized and deserailized.
+// serialized and deserialized.
 type Module struct {
 	Name       string `json:"name"`
 	ThriftPath string `json:"thrift_path"`

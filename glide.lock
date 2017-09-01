@@ -1,5 +1,5 @@
 hash: 80bfaf13e5f94e8e5fba4343584b3640a614d090e0f29575d3ef38a173217078
-updated: 2017-08-27T15:27:31.004223793-07:00
+updated: 2017-09-01T10:28:47.378112836-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
+  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -54,6 +54,10 @@ imports:
   subpackages:
   - assert
   - require
+- name: github.com/thriftrw/thriftrw-go
+  version: 8bbe12f61b982c30be95f88bfe62cade3d470e08
+  subpackages:
+  - compile
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
@@ -105,7 +109,7 @@ imports:
   - version
   - wire
 - name: go.uber.org/zap
-  version: 9d9d6135afe89b6fc4a05e9a8552526caba38048
+  version: 3216c4c73e8ebbafff73c456dd27143f4a7c1f94
   subpackages:
   - buffer
   - internal/bufferpool
@@ -114,7 +118,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 57efc9c3d9f91fb3277f8da1cff370539c4d3dc5
+  version: 66aacef3dd8a676686c7ae3716979581e8b03c47
   subpackages:
   - context
 testImports: []
