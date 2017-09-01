@@ -84,10 +84,14 @@ type StructTypeSpec struct {
 type StructureType string
 
 const (
-	StructureTypeStruct    StructureType = "struct"
-	StructureTypeUnion     StructureType = "union"
+	// StructureTypeStruct indicates a struct type.
+	StructureTypeStruct StructureType = "struct"
+	// StructureTypeUnion indicates an union type.
+	StructureTypeUnion StructureType = "union"
+	// StructureTypeException indicates an exception type.
 	StructureTypeException StructureType = "exception"
-	StructureTypeUnknown   StructureType = "unknown"
+	// StructureTypeUnknown indicates an unknown type.
+	StructureTypeUnknown StructureType = "unknown"
 )
 
 // MapTypeSpec defines TypeSpec for a map.
