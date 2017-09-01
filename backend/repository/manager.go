@@ -178,10 +178,7 @@ func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to compile thrift file")
 	}
-	module, err := ConvertModule(compiledModule, prefix)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert module for serialization")
-	}
+	module := ConvertModule(compiledModule, prefix)
 	return module, nil
 }
 

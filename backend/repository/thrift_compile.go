@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/thriftrw/thriftrw-go/compile"
 )
 
@@ -65,6 +64,20 @@ type TypeSpec struct {
 	// empty file for built-in types
 	File        string              `json:"file,omitempty"`
 	Annotations compile.Annotations `json:"annotations,omitempty"`
+	// The following fields defines specific types other than the
+	// built-in types. At most one of the field can not be nil.
+	StructType    []*FieldSpec      `json:"struct_type,omitempty"`
+	EnumType      *compile.EnumSpec `json:"enum_type,omitempty"`
+	MapType       *MapTypeSpec      `json:"map_type,omitempty"`
+	ListValueType *TypeSpec         `json:"list_value_type,omitempty"`
+	SetValueType  *TypeSpec         `json:"set_value_type,omitempty"`
+	TypeDefTarget *TypeSpec         `json:"type_def_target,omitempty"`
+}
+
+// MapTypeSpec defines TypeSpec for a map.
+type MapTypeSpec struct {
+	KeyType   *TypeSpec `json:"key_type"`
+	ValueType *TypeSpec `json:"value_type"`
 }
 
 // ServiceSpec is a collection of named functions.
@@ -102,26 +115,17 @@ type ResultSpec struct {
 }
 
 // ConvertModule converts a compile.Module into Module.
-func ConvertModule(module *compile.Module, basePath string) (*Module, error) {
-	incModules, err := includedModules(module.Includes, basePath)
-	if err != nil {
-		return nil, err
-	}
+func ConvertModule(module *compile.Module, basePath string) *Module {
+	incModules := includedModules(module.Includes, basePath)
 	constants := make(map[string]*Constant)
 	for name, c := range module.Constants {
-		constants[name], err = constant(c, basePath)
-		if err != nil {
-			return nil, err
-		}
+		constants[name] = constant(c, basePath)
 	}
 	types := make(map[string]*TypeSpec)
 	for name, t := range module.Types {
 		types[name] = typeSpec(t, basePath)
 	}
-	serviceSpecs, err := convertServiceSpec(module.Services, basePath)
-	if err != nil {
-		return nil, err
-	}
+	serviceSpecs := convertServiceSpec(module.Services, basePath)
 	return &Module{
 		Name:       module.Name,
 		ThriftPath: relPath(basePath, module.ThriftPath),
@@ -129,7 +133,7 @@ func ConvertModule(module *compile.Module, basePath string) (*Module, error) {
 		Constants:  constants,
 		Types:      types,
 		Services:   serviceSpecs,
-	}, nil
+	}
 }
 
 func relPath(basePath, targetPath string) string {
@@ -140,79 +144,91 @@ func relPath(basePath, targetPath string) string {
 	return rel
 }
 
-func includedModules(includes map[string]*compile.IncludedModule, basePath string) (map[string]*IncludedModule, error) {
+func includedModules(includes map[string]*compile.IncludedModule, basePath string) map[string]*IncludedModule {
 	includedModule := make(map[string]*IncludedModule)
 	for name, incModule := range includes {
-		m, err := ConvertModule(incModule.Module, basePath)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to convert included module %q", name)
-		}
 		includedModule[name] = &IncludedModule{
 			Name:   incModule.Name,
-			Module: m,
+			Module: ConvertModule(incModule.Module, basePath),
 		}
 	}
-	return includedModule, nil
+	return includedModule
 }
 
-func constant(c *compile.Constant, basePath string) (*Constant, error) {
+func constant(c *compile.Constant, basePath string) *Constant {
 	if c == nil {
-		return nil, nil
-	}
-	value, err := constantValue(c.Value)
-	if err != nil {
-		return nil, err
+		return nil
 	}
 	return &Constant{
 		Name:  c.Name,
 		File:  relPath(basePath, c.File),
 		Type:  typeSpec(c.Type, basePath),
-		Value: value,
-	}, nil
+		Value: constantValue(c.Value),
+	}
 }
 
-func constantValue(value compile.ConstantValue) (string, error) {
+func constantValue(value compile.ConstantValue) string {
 	if value == nil {
-		return "", nil
+		return ""
 	}
-	// TODO(zw): Add more type converstions.
 	switch t := value.(type) {
 	case compile.ConstantBool:
-		return fmt.Sprintf("%t", t), nil
+		return fmt.Sprintf("%t", t)
 	case compile.ConstantInt:
-		return fmt.Sprintf("%d", t), nil
+		return fmt.Sprintf("%d", t)
 	case compile.ConstantString:
-		return string(t), nil
+		return string(t)
 	case compile.ConstantDouble:
-		return fmt.Sprintf("%f", t), nil
+		return fmt.Sprintf("%f", t)
 	case compile.EnumItemReference:
-		return fmt.Sprintf("%s.%s", t.Enum.Name, t.Item.Name), nil
+		return fmt.Sprintf("%s.%s", t.Enum.Name, t.Item.Name)
 	}
-	return "", errors.Errorf("unknown constant value %v", value)
+	// TODO(zw): Add complete type converstions and make this message panic.
+	return fmt.Sprintf("unknown contantant value type: %v", value)
 }
 
 func typeSpec(t compile.TypeSpec, basePath string) *TypeSpec {
 	if t == nil {
 		return nil
 	}
-	return &TypeSpec{
+	ts := &TypeSpec{
 		Name:        t.ThriftName(),
 		File:        relPath(basePath, t.ThriftFile()),
 		Annotations: t.ThriftAnnotations(),
 	}
+	switch t := t.(type) {
+	case *compile.StructSpec:
+		ts.StructType = fieldSpecs(t.Fields, basePath)
+		return ts
+	case *compile.EnumSpec:
+		t.File = relPath(basePath, t.File)
+		ts.EnumType = t
+		return ts
+	case *compile.TypedefSpec:
+		ts.TypeDefTarget = typeSpec(t.Target, basePath)
+		return ts
+	case *compile.MapSpec:
+		ts.MapType = &MapTypeSpec{
+			KeyType:   typeSpec(t.KeySpec, basePath),
+			ValueType: typeSpec(t.ValueSpec, basePath),
+		}
+		return ts
+	case *compile.ListSpec:
+		ts.ListValueType = typeSpec(t.ValueSpec, basePath)
+		return ts
+	case *compile.SetSpec:
+		ts.SetValueType = typeSpec(t.ValueSpec, basePath)
+		return ts
+	}
+	return ts
 }
 
-func convertServiceSpec(services map[string]*compile.ServiceSpec, basePath string) (map[string]*ServiceSpec, error) {
+func convertServiceSpec(services map[string]*compile.ServiceSpec, basePath string) map[string]*ServiceSpec {
 	specs := make(map[string]*ServiceSpec)
 	for name, spec := range services {
 		functions := make(map[string]*FunctionSpec)
 		for fname, funcSpec := range spec.Functions {
-			f, err := functionSpec(funcSpec, basePath)
-			if err != nil {
-				return nil, errors.Wrapf(err,
-					"failed to convert function spec %q in service %q", fname, name)
-			}
-			functions[fname] = f
+			functions[fname] = functionSpec(funcSpec, basePath)
 		}
 		specs[name] = &ServiceSpec{
 			Name:        spec.Name,
@@ -221,61 +237,45 @@ func convertServiceSpec(services map[string]*compile.ServiceSpec, basePath strin
 			Annotations: spec.Annotations,
 		}
 	}
-	return specs, nil
+	return specs
 }
-func functionSpec(fs *compile.FunctionSpec, basePath string) (*FunctionSpec, error) {
+func functionSpec(fs *compile.FunctionSpec, basePath string) *FunctionSpec {
 	if fs == nil {
-		return nil, nil
+		return nil
 	}
 	funcSpec := &FunctionSpec{
 		Name:        fs.Name,
 		OneWay:      fs.OneWay,
 		Annotations: fs.Annotations,
 	}
-	argsSpec, err := fieldSpecs(compile.FieldGroup(fs.ArgsSpec), basePath)
-	if err != nil {
-		return nil, err
-	}
-	funcSpec.ArgsSpec = argsSpec
+	funcSpec.ArgsSpec = fieldSpecs(compile.FieldGroup(fs.ArgsSpec), basePath)
 	if fs.ResultSpec != nil {
-		exceptions, err := fieldSpecs(fs.ResultSpec.Exceptions, basePath)
-		if err != nil {
-			return nil, err
-		}
 		funcSpec.ResultSpec = &ResultSpec{
 			ReturnType: typeSpec(fs.ResultSpec.ReturnType, basePath),
-			Exceptions: exceptions,
+			Exceptions: fieldSpecs(fs.ResultSpec.Exceptions, basePath),
 		}
 	}
-	return funcSpec, nil
+	return funcSpec
 }
 
-func fieldSpecs(fieldSpecs compile.FieldGroup, basePath string) ([]*FieldSpec, error) {
+func fieldSpecs(fieldSpecs compile.FieldGroup, basePath string) []*FieldSpec {
 	if len(fieldSpecs) == 0 {
-		return nil, nil
+		return nil
 	}
 	specs := make([]*FieldSpec, len(fieldSpecs))
-	var err error
 	for i, fs := range fieldSpecs {
-		specs[i], err = fieldSpec(fs, basePath)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to convert fieldSpec %v", fs)
-		}
+		specs[i] = fieldSpec(fs, basePath)
 	}
-	return specs, nil
+	return specs
 }
 
-func fieldSpec(fs *compile.FieldSpec, basePath string) (*FieldSpec, error) {
-	defaultValue, err := constantValue(fs.Default)
-	if err != nil {
-		return nil, err
-	}
+func fieldSpec(fs *compile.FieldSpec, basePath string) *FieldSpec {
 	return &FieldSpec{
 		ID:          fs.ID,
 		Name:        fs.Name,
 		Type:        typeSpec(fs.Type, basePath),
 		Required:    fs.Required,
-		Default:     defaultValue,
+		Default:     constantValue(fs.Default),
 		Annotations: fs.Annotations,
-	}, nil
+	}
 }

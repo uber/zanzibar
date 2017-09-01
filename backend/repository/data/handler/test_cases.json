@@ -829,15 +829,38 @@
 							"types": {
 								"BazResponse": {
 									"file": "clients/baz/base.thrift",
-									"name": "BazResponse"
+									"name": "BazResponse",
+									"struct_type": [
+										{
+											"id": 1,
+											"name": "message",
+											"required": true,
+											"type": {
+												"name": "string"
+											}
+										}
+									]
 								},
 								"ServerErr": {
 									"file": "clients/baz/base.thrift",
-									"name": "ServerErr"
+									"name": "ServerErr",
+									"struct_type": [
+										{
+											"id": 1,
+											"name": "message",
+											"required": true,
+											"type": {
+												"name": "string"
+											}
+										}
+									]
 								},
 								"UUID": {
 									"file": "clients/baz/base.thrift",
-									"name": "UUID"
+									"name": "UUID",
+									"type_def_target": {
+										"name": "string"
+									}
 								}
 							}
 						},
@@ -914,6 +937,23 @@
 										"name": "arg",
 										"required": false,
 										"type": {
+											"enum_type": {
+												"Annotations": null,
+												"File": "clients/baz/baz.thrift",
+												"Items": [
+													{
+														"Annotations": null,
+														"Name": "APPLE",
+														"Value": 0
+													},
+													{
+														"Annotations": null,
+														"Name": "BANANA",
+														"Value": 1
+													}
+												],
+												"Name": "Fruit"
+											},
 											"file": "clients/baz/baz.thrift",
 											"name": "Fruit"
 										}
@@ -923,6 +963,23 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"enum_type": {
+											"Annotations": null,
+											"File": "clients/baz/baz.thrift",
+											"Items": [
+												{
+													"Annotations": null,
+													"Name": "APPLE",
+													"Value": 0
+												},
+												{
+													"Annotations": null,
+													"Name": "BANANA",
+													"Value": 1
+												}
+											],
+											"Name": "Fruit"
+										},
 										"file": "clients/baz/baz.thrift",
 										"name": "Fruit"
 									}
@@ -1030,6 +1087,9 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"list_value_type": {
+												"name": "string"
+											},
 											"name": "list\u003cstring\u003e"
 										}
 									}
@@ -1038,6 +1098,9 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"list_value_type": {
+											"name": "string"
+										},
 										"name": "list\u003cstring\u003e"
 									}
 								}
@@ -1049,6 +1112,25 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"map_type": {
+												"key_type": {
+													"name": "string"
+												},
+												"value_type": {
+													"file": "clients/baz/base.thrift",
+													"name": "BazResponse",
+													"struct_type": [
+														{
+															"id": 1,
+															"name": "message",
+															"required": true,
+															"type": {
+																"name": "string"
+															}
+														}
+													]
+												}
+											},
 											"name": "map\u003cstring, BazResponse\u003e"
 										}
 									}
@@ -1057,6 +1139,25 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"map_type": {
+											"key_type": {
+												"name": "string"
+											},
+											"value_type": {
+												"file": "clients/baz/base.thrift",
+												"name": "BazResponse",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
+											}
+										},
 										"name": "map\u003cstring, BazResponse\u003e"
 									}
 								}
@@ -1068,7 +1169,10 @@
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cstring\u003e"
+											"name": "set\u003cstring\u003e",
+											"set_value_type": {
+												"name": "string"
+											}
 										}
 									}
 								],
@@ -1076,7 +1180,10 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cstring\u003e"
+										"name": "set\u003cstring\u003e",
+										"set_value_type": {
+											"name": "string"
+										}
 									}
 								}
 							},
@@ -1087,6 +1194,20 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"list_value_type": {
+												"file": "clients/baz/base.thrift",
+												"name": "BazResponse",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
+											},
 											"name": "list\u003cBazResponse\u003e"
 										}
 									}
@@ -1095,6 +1216,20 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"list_value_type": {
+											"file": "clients/baz/base.thrift",
+											"name": "BazResponse",
+											"struct_type": [
+												{
+													"id": 1,
+													"name": "message",
+													"required": true,
+													"type": {
+														"name": "string"
+													}
+												}
+											]
+										},
 										"name": "list\u003cBazResponse\u003e"
 									}
 								}
@@ -1106,6 +1241,25 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"map_type": {
+												"key_type": {
+													"file": "clients/baz/base.thrift",
+													"name": "BazResponse",
+													"struct_type": [
+														{
+															"id": 1,
+															"name": "message",
+															"required": true,
+															"type": {
+																"name": "string"
+															}
+														}
+													]
+												},
+												"value_type": {
+													"name": "string"
+												}
+											},
 											"name": "map\u003cBazResponse, string\u003e"
 										}
 									}
@@ -1114,6 +1268,25 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"map_type": {
+											"key_type": {
+												"file": "clients/baz/base.thrift",
+												"name": "BazResponse",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
+											},
+											"value_type": {
+												"name": "string"
+											}
+										},
 										"name": "map\u003cBazResponse, string\u003e"
 									}
 								}
@@ -1125,7 +1298,21 @@
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cBazResponse\u003e"
+											"name": "set\u003cBazResponse\u003e",
+											"set_value_type": {
+												"file": "clients/baz/base.thrift",
+												"name": "BazResponse",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
+											}
 										}
 									}
 								],
@@ -1133,7 +1320,21 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cBazResponse\u003e"
+										"name": "set\u003cBazResponse\u003e",
+										"set_value_type": {
+											"file": "clients/baz/base.thrift",
+											"name": "BazResponse",
+											"struct_type": [
+												{
+													"id": 1,
+													"name": "message",
+													"required": true,
+													"type": {
+														"name": "string"
+													}
+												}
+											]
+										}
 									}
 								}
 							},
@@ -1145,7 +1346,10 @@
 										"required": true,
 										"type": {
 											"file": "clients/baz/base.thrift",
-											"name": "UUID"
+											"name": "UUID",
+											"type_def_target": {
+												"name": "string"
+											}
 										}
 									}
 								],
@@ -1154,7 +1358,10 @@
 								"result_spec": {
 									"return_type": {
 										"file": "clients/baz/base.thrift",
-										"name": "UUID"
+										"name": "UUID",
+										"type_def_target": {
+											"name": "string"
+										}
 									}
 								}
 							}
@@ -1176,7 +1383,33 @@
 										"required": true,
 										"type": {
 											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest"
+											"name": "BazRequest",
+											"struct_type": [
+												{
+													"id": 1,
+													"name": "b1",
+													"required": true,
+													"type": {
+														"name": "bool"
+													}
+												},
+												{
+													"id": 2,
+													"name": "s2",
+													"required": true,
+													"type": {
+														"name": "string"
+													}
+												},
+												{
+													"id": 3,
+													"name": "i3",
+													"required": true,
+													"type": {
+														"name": "i32"
+													}
+												}
+											]
 										}
 									}
 								],
@@ -1190,7 +1423,17 @@
 											"required": false,
 											"type": {
 												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr"
+												"name": "AuthErr",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
 											}
 										}
 									],
@@ -1205,7 +1448,33 @@
 										"required": true,
 										"type": {
 											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest"
+											"name": "BazRequest",
+											"struct_type": [
+												{
+													"id": 1,
+													"name": "b1",
+													"required": true,
+													"type": {
+														"name": "bool"
+													}
+												},
+												{
+													"id": 2,
+													"name": "s2",
+													"required": true,
+													"type": {
+														"name": "string"
+													}
+												},
+												{
+													"id": 3,
+													"name": "i3",
+													"required": true,
+													"type": {
+														"name": "i32"
+													}
+												}
+											]
 										}
 									},
 									{
@@ -1214,7 +1483,33 @@
 										"required": true,
 										"type": {
 											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest"
+											"name": "BazRequest",
+											"struct_type": [
+												{
+													"id": 1,
+													"name": "b1",
+													"required": true,
+													"type": {
+														"name": "bool"
+													}
+												},
+												{
+													"id": 2,
+													"name": "s2",
+													"required": true,
+													"type": {
+														"name": "string"
+													}
+												},
+												{
+													"id": 3,
+													"name": "i3",
+													"required": true,
+													"type": {
+														"name": "i32"
+													}
+												}
+											]
 										}
 									}
 								],
@@ -1228,7 +1523,17 @@
 											"required": false,
 											"type": {
 												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr"
+												"name": "AuthErr",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
 											}
 										},
 										{
@@ -1237,13 +1542,33 @@
 											"required": false,
 											"type": {
 												"file": "clients/baz/baz.thrift",
-												"name": "OtherAuthErr"
+												"name": "OtherAuthErr",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
 											}
 										}
 									],
 									"return_type": {
 										"file": "clients/baz/base.thrift",
-										"name": "BazResponse"
+										"name": "BazResponse",
+										"struct_type": [
+											{
+												"id": 1,
+												"name": "message",
+												"required": true,
+												"type": {
+													"name": "string"
+												}
+											}
+										]
 									}
 								}
 							},
@@ -1253,7 +1578,17 @@
 								"result_spec": {
 									"return_type": {
 										"file": "clients/baz/base.thrift",
-										"name": "BazResponse"
+										"name": "BazResponse",
+										"struct_type": [
+											{
+												"id": 1,
+												"name": "message",
+												"required": true,
+												"type": {
+													"name": "string"
+												}
+											}
+										]
 									}
 								}
 							},
@@ -1268,7 +1603,17 @@
 											"required": false,
 											"type": {
 												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr"
+												"name": "AuthErr",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
 											}
 										},
 										{
@@ -1277,7 +1622,17 @@
 											"required": false,
 											"type": {
 												"file": "clients/baz/base.thrift",
-												"name": "ServerErr"
+												"name": "ServerErr",
+												"struct_type": [
+													{
+														"id": 1,
+														"name": "message",
+														"required": true,
+														"type": {
+															"name": "string"
+														}
+													}
+												]
 											}
 										}
 									],
@@ -1292,19 +1647,82 @@
 				"types": {
 					"AuthErr": {
 						"file": "clients/baz/baz.thrift",
-						"name": "AuthErr"
+						"name": "AuthErr",
+						"struct_type": [
+							{
+								"id": 1,
+								"name": "message",
+								"required": true,
+								"type": {
+									"name": "string"
+								}
+							}
+						]
 					},
 					"BazRequest": {
 						"file": "clients/baz/baz.thrift",
-						"name": "BazRequest"
+						"name": "BazRequest",
+						"struct_type": [
+							{
+								"id": 1,
+								"name": "b1",
+								"required": true,
+								"type": {
+									"name": "bool"
+								}
+							},
+							{
+								"id": 2,
+								"name": "s2",
+								"required": true,
+								"type": {
+									"name": "string"
+								}
+							},
+							{
+								"id": 3,
+								"name": "i3",
+								"required": true,
+								"type": {
+									"name": "i32"
+								}
+							}
+						]
 					},
 					"Fruit": {
+						"enum_type": {
+							"Annotations": null,
+							"File": "clients/baz/baz.thrift",
+							"Items": [
+								{
+									"Annotations": null,
+									"Name": "APPLE",
+									"Value": 0
+								},
+								{
+									"Annotations": null,
+									"Name": "BANANA",
+									"Value": 1
+								}
+							],
+							"Name": "Fruit"
+						},
 						"file": "clients/baz/baz.thrift",
 						"name": "Fruit"
 					},
 					"OtherAuthErr": {
 						"file": "clients/baz/baz.thrift",
-						"name": "OtherAuthErr"
+						"name": "OtherAuthErr",
+						"struct_type": [
+							{
+								"id": 1,
+								"name": "message",
+								"required": true,
+								"type": {
+									"name": "string"
+								}
+							}
+						]
 					}
 				}
 			}
