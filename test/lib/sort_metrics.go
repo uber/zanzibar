@@ -21,23 +21,38 @@
 package lib
 
 import (
+	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3/thrift"
 )
 
-// SortMetricsByName ...
-type SortMetricsByName []*m3.Metric
+// SortMetricsByNameAndTags ...
+type SortMetricsByNameAndTags []*m3.Metric
 
 // Len ...
-func (a SortMetricsByName) Len() int {
+func (a SortMetricsByNameAndTags) Len() int {
 	return len(a)
 }
 
 // Swap ...
-func (a SortMetricsByName) Swap(i, j int) {
+func (a SortMetricsByNameAndTags) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
 // Less ...
-func (a SortMetricsByName) Less(i, j int) bool {
+func (a SortMetricsByNameAndTags) Less(i, j int) bool {
+	if a[i].GetName() == a[j].GetName() {
+		ti := tally.KeyForStringMap(tagsStringMap(a[i]))
+		tj := tally.KeyForStringMap(tagsStringMap(a[j]))
+		return ti < tj
+
+	}
 	return a[i].GetName() < a[j].GetName()
+}
+
+func tagsStringMap(m *m3.Metric) map[string]string {
+	out := make(map[string]string, len(m.Tags))
+	for tag := range m.Tags {
+		out[tag.GetTagName()+tag.GetTagValue()] = ""
+	}
+	return out
 }

@@ -22,17 +22,15 @@ package gateway_test
 
 import (
 	"io/ioutil"
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestHealthCall(t *testing.T) {
@@ -116,115 +114,48 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
 	// Expect three metrics
-	cgateway.MetricsWaitGroup.Add(3)
+	numMetrics := 3
+	cgateway.MetricsWaitGroup.Add(numMetrics)
 
 	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
-
 	assert.Equal(t, res.Status, "200 OK", "got http 200")
 
 	cgateway.MetricsWaitGroup.Wait()
+
 	metrics := cgateway.M3Service.GetMetrics()
-	sort.Sort(lib.SortMetricsByName(metrics))
+	assert.Equal(t, numMetrics, len(metrics), "expected 3 metrics")
+	names := []string{
+		"inbound.calls.latency",
+		"inbound.calls.recvd",
+		"inbound.calls.status.200",
+	}
+	tags := map[string]string{
+		"endpoint": "health",
+		"handler":  "health",
+		"service":  "test-gateway",
+		"env":      "test",
+		"host":     "all",
+	}
+	for _, name := range names {
+		key := tally.KeyForPrefixedStringMap(name, tags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
+	}
 
-	assert.Equal(t, 3, len(metrics), "expected 3 metrics")
-
-	latencyMetric := metrics[0]
-
-	assert.Equal(t,
-		"test-gateway.production.all-workers.inbound.calls.latency",
-		latencyMetric.GetName(),
-		"expected correct name",
-	)
-
+	latencyMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", tags)]
 	value := *latencyMetric.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
-	assert.True(t, value > 1000,
-		"expected timer to be >1000 nano seconds",
-	)
-	assert.True(t, value < 1000*1000*1000,
-		"expected timer to be <1 second",
-	)
-
-	tags := latencyMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-	expectedTags := map[string]string{
-		"endpoint": "health",
-		"handler":  "health",
-		"service":  "test-gateway",
-		"env":      "test",
-	}
-	for tag := range tags {
-		assert.Equal(t,
-			expectedTags[tag.GetTagName()],
-			tag.GetTagValue(),
-			"expected tag value to be correct",
-		)
-	}
-
-	recvdMetric := metrics[1]
-
-	assert.Equal(t,
-		"test-gateway.production.all-workers.inbound.calls.recvd",
-		recvdMetric.GetName(),
-		"expected correct name",
-	)
-
+	recvdMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.recvd", tags)]
 	value = *recvdMetric.MetricValue.Count.I64Value
-	assert.Equal(t,
-		int64(1),
-		value,
-		"expected counter to be 1",
-	)
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	tags = recvdMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-	expectedTags = map[string]string{
-		"endpoint": "health",
-		"handler":  "health",
-		"service":  "test-gateway",
-		"env":      "test",
-	}
-	for tag := range tags {
-		assert.Equal(t,
-			expectedTags[tag.GetTagName()],
-			tag.GetTagValue(),
-			"expected tag value to be correct",
-		)
-	}
-
-	statusCodeMetric := metrics[2]
-
-	assert.Equal(t,
-		"test-gateway.production.all-workers.inbound.calls.status.200",
-		statusCodeMetric.GetName(),
-		"expected correct name",
-	)
-
+	statusCodeMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.200", tags)]
 	value = *statusCodeMetric.MetricValue.Count.I64Value
-	assert.Equal(t,
-		int64(1),
-		value,
-		"expected counter to be 1",
-	)
-
-	tags = statusCodeMetric.GetTags()
-	assert.Equal(t, 4, len(tags), "expected 4 tags")
-	expectedTags = map[string]string{
-		"endpoint": "health",
-		"handler":  "health",
-		"service":  "test-gateway",
-		"env":      "test",
-	}
-	for tag := range tags {
-		assert.Equal(t,
-			expectedTags[tag.GetTagName()],
-			tag.GetTagValue(),
-			"expected tag value to be correct",
-		)
-	}
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
 }
 
 func TestRuntimeMetrics(t *testing.T) {
@@ -242,59 +173,51 @@ func TestRuntimeMetrics(t *testing.T) {
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
 	// Expect 30 runtime metrics
-	cgateway.MetricsWaitGroup.Add(30)
-
+	numMetrics := 30
+	cgateway.MetricsWaitGroup.Add(numMetrics)
 	cgateway.MetricsWaitGroup.Wait()
+
 	metrics := cgateway.M3Service.GetMetrics()
-	sort.Sort(lib.SortMetricsByName(metrics))
-
-	assert.Equal(t, 30, len(metrics), "expected 30 metrics")
-
-	testData := []string{
-		"test-gateway.production.per-worker.runtime.cpu.cgoCalls",
-		"test-gateway.production.per-worker.runtime.cpu.count",
-		"test-gateway.production.per-worker.runtime.cpu.goMaxProcs",
-		"test-gateway.production.per-worker.runtime.cpu.goroutines",
-		"test-gateway.production.per-worker.runtime.mem.alloc",
-		"test-gateway.production.per-worker.runtime.mem.frees",
-		"test-gateway.production.per-worker.runtime.mem.gc.count",
-		"test-gateway.production.per-worker.runtime.mem.gc.cpuFraction",
-		"test-gateway.production.per-worker.runtime.mem.gc.last",
-		"test-gateway.production.per-worker.runtime.mem.gc.next",
-		"test-gateway.production.per-worker.runtime.mem.gc.pause",
-		"test-gateway.production.per-worker.runtime.mem.gc.pauseTotal",
-		"test-gateway.production.per-worker.runtime.mem.gc.sys",
-		"test-gateway.production.per-worker.runtime.mem.heap.alloc",
-		"test-gateway.production.per-worker.runtime.mem.heap.idle",
-		"test-gateway.production.per-worker.runtime.mem.heap.inuse",
-		"test-gateway.production.per-worker.runtime.mem.heap.objects",
-		"test-gateway.production.per-worker.runtime.mem.heap.released",
-		"test-gateway.production.per-worker.runtime.mem.heap.sys",
-		"test-gateway.production.per-worker.runtime.mem.lookups",
-		"test-gateway.production.per-worker.runtime.mem.malloc",
-		"test-gateway.production.per-worker.runtime.mem.otherSys",
-		"test-gateway.production.per-worker.runtime.mem.stack.inuse",
-		"test-gateway.production.per-worker.runtime.mem.stack.mcacheInuse",
-		"test-gateway.production.per-worker.runtime.mem.stack.mcacheSys",
-		"test-gateway.production.per-worker.runtime.mem.stack.mspanInuse",
-		"test-gateway.production.per-worker.runtime.mem.stack.mspanSys",
-		"test-gateway.production.per-worker.runtime.mem.stack.sys",
-		"test-gateway.production.per-worker.runtime.mem.sys",
-		"test-gateway.production.per-worker.runtime.mem.total",
+	assert.Equal(t, numMetrics, len(metrics), "expected 30 metrics")
+	names := []string{
+		"runtime.cpu.cgoCalls",
+		"runtime.cpu.count",
+		"runtime.cpu.goMaxProcs",
+		"runtime.cpu.goroutines",
+		"runtime.mem.alloc",
+		"runtime.mem.frees",
+		"runtime.mem.gc.count",
+		"runtime.mem.gc.cpuFraction",
+		"runtime.mem.gc.last",
+		"runtime.mem.gc.next",
+		"runtime.mem.gc.pause",
+		"runtime.mem.gc.pauseTotal",
+		"runtime.mem.gc.sys",
+		"runtime.mem.heap.alloc",
+		"runtime.mem.heap.idle",
+		"runtime.mem.heap.inuse",
+		"runtime.mem.heap.objects",
+		"runtime.mem.heap.released",
+		"runtime.mem.heap.sys",
+		"runtime.mem.lookups",
+		"runtime.mem.malloc",
+		"runtime.mem.otherSys",
+		"runtime.mem.stack.inuse",
+		"runtime.mem.stack.mcacheInuse",
+		"runtime.mem.stack.mcacheSys",
+		"runtime.mem.stack.mspanInuse",
+		"runtime.mem.stack.mspanSys",
+		"runtime.mem.stack.sys",
+		"runtime.mem.sys",
+		"runtime.mem.total",
 	}
-
-	for i, m := range metrics {
-		assert.Equal(t, testData[i], m.Name, "expected correct name")
-
-		tags := m.Tags
-		assert.Equal(t, 3, len(tags), "expected 3 tags")
-		expectedTags := map[string]string{
-			"env":     "test",
-			"service": "test-gateway",
-			"host":    zanzibar.GetHostname(),
-		}
-		for tag := range tags {
-			assert.Equal(t, expectedTags[tag.GetTagName()], tag.GetTagValue(), "expected tag value to be correct")
-		}
+	tags := map[string]string{
+		"env":     "test",
+		"service": "test-gateway",
+		"host":    zanzibar.GetHostname(),
+	}
+	for _, name := range names {
+		key := tally.KeyForPrefixedStringMap(name, tags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 }

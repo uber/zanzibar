@@ -99,7 +99,7 @@ func CreateGateway(
 		seedConfig["tchannel.serviceName"] = "bench-gateway"
 	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
-	seedConfig["metrics.tally.service"] = "bench-gateway"
+	seedConfig["metrics.serviceName"] = "bench-gateway"
 	seedConfig["logger.output"] = "disk"
 	seedConfig["logger.fileName"] = "zanzibar.log"
 

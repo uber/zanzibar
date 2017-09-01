@@ -71,15 +71,21 @@ var _productionJson = []byte(`{
 	"env": "production",
 	"useDatacenter": false,
 
+	"jaeger.disabled": false,
+	"jaeger.reporter.hostport": "localhost:6831",
+	"jaeger.reporter.flush.milliseconds": 10000,
+	"jaeger.sampler.type": "remote",
+	"jaeger.sampler.param": 0.001,
+
 	"logger.output": "stdout",
 
 	"metrics.type": "m3",
-	"metrics.tally.flushInterval": 1000,
-	"metrics.tally.service": "my-gateway",
+	"metrics.flushInterval": 1000,
+	"metrics.serviceName": "my-gateway",
 
 	"metrics.m3.hostPort": "127.0.0.1:9052",
-	"metrics.m3.service": "my-gateway",
-	"metrics.m3.flushInterval": 500,
+	"metrics.m3.maxQueueSize": 10000,
+	"metrics.m3.maxPacketSizeBytes": 1440,
 
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
@@ -103,7 +109,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 624, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 807, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
