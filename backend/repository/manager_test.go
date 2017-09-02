@@ -28,10 +28,9 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/thriftrw/compile"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/thriftrw/thriftrw-go/compile"
 	"github.com/uber/zanzibar/codegen"
 	testlib "github.com/uber/zanzibar/test/lib"
 )
