@@ -65,10 +65,41 @@ type EndpointConfig struct {
 	WorkflowType     string                    `json:"workflowType"`
 	ClientID         string                    `json:"clientID"`
 	ClientMethod     string                    `json:"clientMethod"`
-	TestFixtures     []string                  `json:"testFixtures"`
+	TestFixtures     []*TestStub                  `json:"testFixtures"`
 	Middlewares      []*codegen.MiddlewareSpec `json:"middlewares"`
 	ReqHeaderMap     map[string]string         `json:"reqHeaderMap"`
 	ResHeaderMap     map[string]string         `json:"resHeaderMap"`
+}
+
+// TestStub saves stubbed requests/responses for an endpoint test.
+type TestStub struct {
+	TestName               string `json:"testName"`
+	EndpointID             string `json:"endpointId"`
+	HandlerID              string `json:"handlerId"`
+	EndpointRequest        map[string]interface{} `json:"endpointRequest"`
+	EndpointRequestString  string `json:"endpointRequestString"`
+	EndpointReqHeaders     map[string]string      `json:"endpointReqHeaders"`
+	EndpointReqHeaderKeys  []string               `json:"endpointReqHeaderKeys"`
+	EndpointResponse       map[string]interface{} `json:"endpointResponse"`
+	EndpointResponseString string `json:"endpointResponseString"`
+	EndpointResHeaders     map[string]string `json:"endpointResHeaders"`
+	EndpointResHeaderKeys  []string          `json:"endpointResHeaderKeys"`
+	ClientStubs []ClientStub `json:"clientStubs"`
+	TestServiceName string  `json:"testServiceName"`
+}
+
+// ClientStub saves stubbed client request/response for an endpoint test.
+type ClientStub struct {
+	ClientID             string `json:"clientId"`
+	ClientMethod         string `json:"clientMethod"`
+	ClientRequest        map[string]interface{} `json:"clientRequest"`
+	ClientRequestString  string `json:"clientRequestString"`
+	ClientReqHeaders     map[string]string      `json:"clientReqHeaders"`
+	ClientReqHeaderKeys  []string              `json:"clientReqHeaderKeys"`
+	ClientResponse       map[string]interface{} `json:"clientResponse"`
+	ClientResponseString string `json:"clientResponseString"`
+	ClientResHeaders     map[string]string `json:"clientResHeaders"`
+	ClientResHeaderKeys  []string          `json:"clientResHeaderKeys"`
 }
 
 // ClientConfig stores configuration for an client.

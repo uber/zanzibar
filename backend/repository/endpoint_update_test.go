@@ -63,8 +63,8 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	if !assert.NoError(t, err, "Failed to write endpoint config.") {
 		return
 	}
-
-	jsonFile := codegen.CamelToSnake(req.HandleID) + ".json"
+	baseName := codegen.CamelToSnake(req.HandleID)
+	jsonFile := baseName + ".json"
 	endpointConfigActFile := filepath.Join(tempDir, endpointCfgDir, req.ID, jsonFile)
 	actualendpointCfg, err := ioutil.ReadFile(endpointConfigActFile)
 	if !assert.NoError(t, err, "Failed to read endpoint config file.") {
@@ -72,6 +72,15 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	}
 	endpointConfigExpFile := filepath.Join(exampleGateway, endpointCfgDir, req.ID, jsonFile)
 	testlib.CompareGoldenFile(t, endpointConfigExpFile, actualendpointCfg)
+
+	testFile := baseName + "_test.json"
+	endpointTestConfigFile := filepath.Join(tempDir, endpointCfgDir, req.ID, testFile)
+	endpointTestConfig, err := ioutil.ReadFile(endpointTestConfigFile)
+	if !assert.NoError(t, err, "Failed to read endpoint test config file.") {
+		return
+	}
+	endpointTestConfigExpFile := filepath.Join(exampleGateway, endpointCfgDir, req.ID, testFile)
+	testlib.CompareGoldenFile(t, endpointTestConfigExpFile, endpointTestConfig)
 
 	endpointGroupCfg, err := ioutil.ReadFile(filepath.Join(tempDir, endpointCfgDir, req.ID, endpointConfigFileName))
 	if !assert.NoError(t, err, "Failed to read endpoint module config file.") {
