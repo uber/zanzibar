@@ -1,5 +1,5 @@
-hash: 3a130ff5c5b0af2e9f1ae7df45bb8ff4ce2c21f1d89242cb20c8d83997d7b06a
-updated: 2017-09-01T10:33:22.836445829-07:00
+hash: d6512ee48265f77a1c34516c5ffb73828ccb937533a56454568e6ed2211ba607
+updated: 2017-09-06T11:37:25.045834028-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -12,19 +12,21 @@ imports:
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/codahale/hdrhistogram
-  version: 3a0bb77429bd3a61596f5e8a3172445844342120
+  version: f8ad88b59a584afeee9d334eff879b104439117b
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
+- name: github.com/fatih/structtag
+  version: da3d9ab5b78fdc25d3a7614853b085200bd10da9
 - name: github.com/go-validator/validator
   version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
+  version: 5695738f733662da3e9afc2283bba6f3c879002d
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -63,7 +65,7 @@ imports:
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
-  version: 2605c407d7d219644d03a3680ad7df4779017782
+  version: be9e53c77349ae2dd4b8c03a6dc20ed9a88b9927
   subpackages:
   - m3
   - m3/customtransports
@@ -83,7 +85,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 575c678b2873b62aaadd0fa5817a2aeb3155dc4d
+  version: b9a0fa4923ad750facbd5a4b93fc6d450bc45ccc
   subpackages:
   - metrics
   - metrics/tally
@@ -101,16 +103,13 @@ imports:
 - name: go.uber.org/multierr
   version: a3d1fc1f1316d4132fc61f4ea1159ae0613fb474
 - name: go.uber.org/thriftrw
-  version: bbc73fe4e851cac67043d021242eb03920c2f1dd
-  repo: https://github.com/raynos/thriftrw-go.git
-  vcs: git
+  version: 8bbe12f61b982c30be95f88bfe62cade3d470e08
   subpackages:
   - ast
   - compile
   - gen
   - idl
   - idl/internal
-  - internal
   - internal/concurrent
   - internal/curry
   - internal/envelope
@@ -138,7 +137,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 66aacef3dd8a676686c7ae3716979581e8b03c47
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
 testImports: []
