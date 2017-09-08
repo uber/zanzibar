@@ -332,9 +332,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	)
 	// As per M3 best practices, creating separate all-host and per-host metrics
 	// to reduce metric cardinality when querying metrics for all hosts.
-	gateway.AllHostScope = gateway.RootScope.Tagged(
-		map[string]string{"host": "all"},
-	)
+	gateway.AllHostScope = gateway.RootScope
 	gateway.PerHostScope = gateway.RootScope.Tagged(
 		map[string]string{"host": GetHostname()},
 	).SubScope("per-worker")
