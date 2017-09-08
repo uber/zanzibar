@@ -137,7 +137,6 @@ func TestHealthMetrics(t *testing.T) {
 		"handler":  "health",
 		"service":  "test-gateway",
 		"env":      "test",
-		"host":     "all",
 	}
 	for _, name := range names {
 		key := tally.KeyForPrefixedStringMap(name, tags)

@@ -101,7 +101,6 @@ func TestCallMetrics(t *testing.T) {
 		"handler":  "call",
 		"service":  "test-gateway",
 		"env":      "test",
-		"host":     "all",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
