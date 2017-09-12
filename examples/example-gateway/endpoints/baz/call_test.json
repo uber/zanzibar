@@ -1,28 +1,39 @@
-[{
-	"testName": "successfulRequest",
-	"testServiceName": "example-gateway",
-	"endpointId": "baz",
-	"handlerId": "call",
-	"endpointRequest": {
-		"arg": {
-			"b1": true,
-			"s2": "hello",
-			"i3": 42
-		}
-	},
-	"endpointReqHeaders": {
-		"x-uuid": "uuid",
-		"x-token": "token"
-	},
-	"endpointResponse": {},
-	"endpointResHeaders": {},
-
-	"clientStubs": [{
-		"clientId": "baz",
-		"clientMethod": "call",
-		"clientRequest": {},
-		"clientReqHeaders": {},
-		"clientResponse": {},
-		"clientResHeaders": {}
-	}]
-}]
+[
+	{
+		"testName": "successfulRequest",
+		"endpointId": "baz",
+		"handlerId": "call",
+		"endpointRequest": {
+			"arg": {
+				"b1": true,
+				"i3": 42,
+				"s2": "hello"
+			}
+		},
+		"endpointRequestString": "",
+		"endpointReqHeaders": {
+			"x-token": "token",
+			"x-uuid": "uuid"
+		},
+		"endpointReqHeaderKeys": null,
+		"endpointResponse": {},
+		"endpointResponseString": "",
+		"endpointResHeaders": {},
+		"endpointResHeaderKeys": null,
+		"clientStubs": [
+			{
+				"clientId": "baz",
+				"clientMethod": "call",
+				"clientRequest": {},
+				"clientRequestString": "",
+				"clientReqHeaders": {},
+				"clientReqHeaderKeys": null,
+				"clientResponse": {},
+				"clientResponseString": "",
+				"clientResHeaders": {},
+				"clientResHeaderKeys": null
+			}
+		],
+		"testServiceName": "example-gateway"
+	}
+]

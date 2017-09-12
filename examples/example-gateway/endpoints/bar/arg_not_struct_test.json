@@ -1,23 +1,34 @@
-[{
-	"testName": "successfulRequest",
-	"testServiceName": "example-gateway",
-	"endpointId": "bar",
-	"handlerId": "argNotStruct",
-	"endpointRequest": {
-		"request": "foo"
-	},
-	"endpointReqHeaders": {},
-	"endpointResponse": {},
-	"endpointResHeaders": {},
-
-	"clientStubs": [{
-		"clientId": "bar",
-		"clientMethod": "argNotStruct",
-		"clientRequest": {
+[
+	{
+		"testName": "successfulRequest",
+		"endpointId": "bar",
+		"handlerId": "argNotStruct",
+		"endpointRequest": {
 			"request": "foo"
 		},
-		"clientReqHeaders": {},
-		"clientResponse": {},
-		"clientResHeaders": {}
-	}]
-}]
+		"endpointRequestString": "",
+		"endpointReqHeaders": {},
+		"endpointReqHeaderKeys": null,
+		"endpointResponse": {},
+		"endpointResponseString": "",
+		"endpointResHeaders": {},
+		"endpointResHeaderKeys": null,
+		"clientStubs": [
+			{
+				"clientId": "bar",
+				"clientMethod": "argNotStruct",
+				"clientRequest": {
+					"request": "foo"
+				},
+				"clientRequestString": "",
+				"clientReqHeaders": {},
+				"clientReqHeaderKeys": null,
+				"clientResponse": {},
+				"clientResponseString": "",
+				"clientResHeaders": {},
+				"clientResHeaderKeys": null
+			}
+		],
+		"testServiceName": "example-gateway"
+	}
+]
