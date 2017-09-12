@@ -112,9 +112,7 @@ func TestHealthMetrics(t *testing.T) {
 	defer gateway.Close()
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
-
-	// Expect three metrics
-	numMetrics := 3
+	numMetrics := 4
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
 	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
@@ -126,17 +124,18 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 3 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 4 metrics")
 	names := []string{
 		"inbound.calls.latency",
 		"inbound.calls.recvd",
+		"inbound.calls.success",
 		"inbound.calls.status.200",
 	}
 	tags := map[string]string{
+		"env":      "test",
+		"service":  "test-gateway",
 		"endpoint": "health",
 		"handler":  "health",
-		"service":  "test-gateway",
-		"env":      "test",
 	}
 	for _, name := range names {
 		key := tally.KeyForPrefixedStringMap(name, tags)
@@ -152,8 +151,12 @@ func TestHealthMetrics(t *testing.T) {
 	value = *recvdMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	statusCodeMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.200", tags)]
-	value = *statusCodeMetric.MetricValue.Count.I64Value
+	successMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.success", tags)]
+	value = *successMetric.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	statusMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.200", tags)]
+	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 }
 

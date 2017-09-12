@@ -74,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	numMetrics := 11
+	numMetrics := 12
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -94,30 +94,35 @@ func TestCallMetrics(t *testing.T) {
 	endpointNames := []string{
 		"inbound.calls.latency",
 		"inbound.calls.recvd",
+		"inbound.calls.success",
 		"inbound.calls.status.204",
 	}
 	endpointTags := map[string]string{
+		"env":      "test",
+		"service":  "test-gateway",
 		"endpoint": "baz",
 		"handler":  "call",
-		"service":  "test-gateway",
-		"env":      "test",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
-	inboundLatency := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", endpointTags)]
-	value := *inboundLatency.MetricValue.Timer.I64Value
+	latencyMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", endpointTags)]
+	value := *latencyMetric.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
-	inboundRecvd := metrics[tally.KeyForPrefixedStringMap("inbound.calls.recvd", endpointTags)]
-	value = *inboundRecvd.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
+	recvdMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.recvd", endpointTags)]
+	value = *recvdMetric.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	inboundStatus := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.204", endpointTags)]
-	value = *inboundStatus.MetricValue.Count.I64Value
+	successMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.success", endpointTags)]
+	value = *successMetric.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	statusMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.204", endpointTags)]
+	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	tchannelNames := []string{

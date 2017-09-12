@@ -30,31 +30,25 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/uber-go/tally"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ServerHTTPRequest struct manages request
 type ServerHTTPRequest struct {
 	httpRequest *http.Request
 	res         *ServerHTTPResponse
-	gateway     *Gateway
 	started     bool
 	startTime   time.Time
-	metrics     *EndpointMetrics
+	metrics     *InboundHTTPMetrics
 	queryValues url.Values
 	parseFailed bool
-
-	Logger *zap.Logger
-	Scope  tally.Scope
-
-	EndpointName string
-	HandlerName  string
-	URL          *url.URL
-	Method       string
-	Params       httprouter.Params
-	Header       Header
-	RawBody      []byte
+	Logger      *zap.Logger
+	URL         *url.URL
+	Method      string
+	Params      httprouter.Params
+	Header      Header
+	RawBody     []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -65,28 +59,22 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
-		gateway:     endpoint.gateway,
 		httpRequest: r,
 		queryValues: nil,
-
-		Logger: endpoint.gateway.Logger,
-		Scope:  endpoint.gateway.AllHostScope,
-
-		URL:     r.URL,
-		Method:  r.Method,
-		Params:  params,
-		Header:  NewServerHTTPHeader(r.Header),
-		metrics: &endpoint.metrics,
+		Logger:      endpoint.logger.With(logRequestFields(r)...),
+		metrics:     endpoint.metrics,
+		URL:         r.URL,
+		Method:      r.Method,
+		Params:      params,
+		Header:      NewServerHTTPHeader(r.Header),
 	}
 	req.res = NewServerHTTPResponse(w, req)
-
-	req.start(endpoint.EndpointName, endpoint.HandlerName)
-
+	req.start()
 	return req
 }
 
-// start the request, do some metrics etc
-func (req *ServerHTTPRequest) start(endpoint string, handler string) {
+// start the request, emit metrics etc
+func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
 		req.Logger.Error(
@@ -96,13 +84,32 @@ func (req *ServerHTTPRequest) start(endpoint string, handler string) {
 		/* coverage ignore next line */
 		return
 	}
-
-	req.EndpointName = endpoint
-	req.HandlerName = handler
 	req.started = true
 	req.startTime = time.Now()
 
-	req.metrics.requestRecvd.Inc(1)
+	// emit metrics
+	req.metrics.Recvd.Inc(1)
+}
+
+func logRequestFields(r *http.Request) []zapcore.Field {
+	// TODO: Allocating a fixed size array causes the zap logger to fail
+	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
+	// further to see if we can avoid reallocating underlying arrays for slices.
+	var fields []zapcore.Field
+	for k, v := range r.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
+		}
+	}
+
+	fields = append(fields, zap.String("method", r.Method))
+	fields = append(fields, zap.String("remoteAddr", r.RemoteAddr))
+	fields = append(fields, zap.String("pathname", r.URL.RequestURI()))
+	fields = append(fields, zap.String("host", r.Host))
+	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
+	// TODO log jaeger trace span
+
+	return fields
 }
 
 // CheckHeaders verifies that request contains required headers.
@@ -139,9 +146,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string",
-			zap.String("error", err.Error()),
-		)
+		req.Logger.Warn("Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -190,7 +195,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		zap.String("expected", "bool"),
 		zap.String("actual", value),
 		zap.String("key", key),
-		zap.String("error", err.Error()),
+		zap.Error(err),
 	)
 	if !req.parseFailed {
 		req.res.SendErrorString(
@@ -215,7 +220,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 			zap.String("expected", "int8"),
 			zap.String("actual", value),
 			zap.String("key", key),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -243,7 +248,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 			zap.String("expected", "int16"),
 			zap.String("actual", value),
 			zap.String("key", key),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -271,7 +276,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 			zap.String("expected", "int32"),
 			zap.String("actual", value),
 			zap.String("key", key),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -299,7 +304,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 			zap.String("expected", "int64"),
 			zap.String("actual", value),
 			zap.String("key", key),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -327,7 +332,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 			zap.String("expected", "float64"),
 			zap.String("actual", value),
 			zap.String("key", key),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -422,14 +427,11 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.Logger.Error("Could not ReadAll() body",
-			zap.String("error", err.Error()),
-		)
+		req.Logger.Error("Could not ReadAll() body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendErrorString(500, "Could not ReadAll() body")
 			req.parseFailed = true
 		}
-
 		return nil, false
 	}
 
@@ -442,9 +444,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.Logger.Warn("Could not parse json",
-			zap.String("error", err.Error()),
-		)
+		req.Logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendErrorString(400, "Could not parse json: "+err.Error())
 			req.parseFailed = true

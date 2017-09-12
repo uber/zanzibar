@@ -1,0 +1,252 @@
+// Copyright (c) 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+package zanzibar
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/uber-go/tally"
+)
+
+const (
+	inboundCallsRecvd        = "inbound.calls.recvd"
+	inboundCallsLatency      = "inbound.calls.latency"
+	inboundCallsSuccess      = "inbound.calls.success"
+	inboundCallsAppErrors    = "inbound.calls.app-errors"
+	inboundCallsSystemErrors = "inbound.calls.system-errors"
+	inboundCallsErrors       = "inbound.calls.errors"
+	inboundCallsStatus       = "inbound.calls.status"
+
+	outboundCallsSent         = "outbound.calls.sent"
+	outboundCallsLatency      = "outbound.calls.latency"
+	outboundCallsSuccess      = "outbound.calls.success"
+	outboundCallsAppErrors    = "outbound.calls.app-errors"
+	outboundCallsSystemErrors = "outbound.calls.system-errors"
+	outboundCallsErrors       = "outbound.calls.errors"
+	outboundCallsStatus       = "outbound.calls.status"
+)
+
+var knownStatusCodes = map[int]bool{
+	http.StatusContinue:                      true, // 100
+	http.StatusSwitchingProtocols:            true, // 101
+	http.StatusProcessing:                    true, // 102
+	http.StatusOK:                            true, // 200
+	http.StatusCreated:                       true, // 201
+	http.StatusAccepted:                      true, // 202
+	http.StatusNonAuthoritativeInfo:          true, // 203
+	http.StatusNoContent:                     true, // 204
+	http.StatusResetContent:                  true, // 205
+	http.StatusPartialContent:                true, // 206
+	http.StatusMultiStatus:                   true, // 207
+	http.StatusAlreadyReported:               true, // 208
+	http.StatusIMUsed:                        true, // 226
+	http.StatusMultipleChoices:               true, // 300
+	http.StatusMovedPermanently:              true, // 301
+	http.StatusFound:                         true, // 302
+	http.StatusSeeOther:                      true, // 303
+	http.StatusNotModified:                   true, // 304
+	http.StatusUseProxy:                      true, // 305
+	http.StatusTemporaryRedirect:             true, // 307
+	http.StatusPermanentRedirect:             true, // 308
+	http.StatusBadRequest:                    true, // 400
+	http.StatusUnauthorized:                  true, // 401
+	http.StatusPaymentRequired:               true, // 402
+	http.StatusForbidden:                     true, // 403
+	http.StatusNotFound:                      true, // 404
+	http.StatusMethodNotAllowed:              true, // 405
+	http.StatusNotAcceptable:                 true, // 406
+	http.StatusProxyAuthRequired:             true, // 407
+	http.StatusRequestTimeout:                true, // 408
+	http.StatusConflict:                      true, // 409
+	http.StatusGone:                          true, // 410
+	http.StatusLengthRequired:                true, // 411
+	http.StatusPreconditionFailed:            true, // 412
+	http.StatusRequestEntityTooLarge:         true, // 413
+	http.StatusRequestURITooLong:             true, // 414
+	http.StatusUnsupportedMediaType:          true, // 415
+	http.StatusRequestedRangeNotSatisfiable:  true, // 416
+	http.StatusExpectationFailed:             true, // 417
+	http.StatusTeapot:                        true, // 418
+	http.StatusUnprocessableEntity:           true, // 422
+	http.StatusLocked:                        true, // 423
+	http.StatusFailedDependency:              true, // 424
+	http.StatusUpgradeRequired:               true, // 426
+	http.StatusPreconditionRequired:          true, // 428
+	http.StatusTooManyRequests:               true, // 429
+	http.StatusRequestHeaderFieldsTooLarge:   true, // 431
+	http.StatusUnavailableForLegalReasons:    true, // 451
+	http.StatusInternalServerError:           true, // 500
+	http.StatusNotImplemented:                true, // 501
+	http.StatusBadGateway:                    true, // 502
+	http.StatusServiceUnavailable:            true, // 503
+	http.StatusGatewayTimeout:                true, // 504
+	http.StatusHTTPVersionNotSupported:       true, // 505
+	http.StatusVariantAlsoNegotiates:         true, // 506
+	http.StatusInsufficientStorage:           true, // 507
+	http.StatusLoopDetected:                  true, // 508
+	http.StatusNotExtended:                   true, // 510
+	http.StatusNetworkAuthenticationRequired: true, // 511
+}
+
+type inboundMetrics struct {
+	Recvd tally.Counter // inbound.calls.recvd
+}
+
+type outboundMetrics struct {
+	Sent tally.Counter // outbound.calls.sent
+}
+
+type commonMetrics struct {
+	Latency tally.Timer   // [inbound|outbound].calls.latency
+	Success tally.Counter // [inbound|outbound].calls.success
+}
+
+type tchannelMetrics struct {
+	commonMetrics
+	AppErrors    tally.Counter // [inbound|outbound].calls.app-errors
+	SystemErrors tally.Counter // [inbound|outbound].calls.system-errors
+}
+
+type httpMetrics struct {
+	commonMetrics
+	Errors tally.Counter         // [inbound|outbound].calls.errors
+	Status map[int]tally.Counter // [inbound|outbound].calls.status.XXX
+}
+
+// InboundHTTPMetrics ...
+type InboundHTTPMetrics struct {
+	inboundMetrics
+	httpMetrics
+}
+
+// InboundTChannelMetrics ...
+type InboundTChannelMetrics struct {
+	inboundMetrics
+	tchannelMetrics
+}
+
+// OutboundHTTPMetrics ...
+type OutboundHTTPMetrics struct {
+	outboundMetrics
+	httpMetrics
+}
+
+// OutboundTChannelMetrics ...
+type OutboundTChannelMetrics struct {
+	outboundMetrics
+	tchannelMetrics
+}
+
+// NewInboundHTTPMetrics returns inbound HTTP metrics
+func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
+	metrics := InboundHTTPMetrics{}
+	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+	metrics.Latency = scope.Timer(inboundCallsLatency)
+	metrics.Success = scope.Counter(inboundCallsSuccess)
+	metrics.Errors = scope.Counter(inboundCallsErrors)
+	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
+	for statusCode := range knownStatusCodes {
+		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", inboundCallsStatus, statusCode))
+	}
+	return &metrics
+}
+
+// TODO: Add remaining call metrics
+
+// NewInboundTChannelMetrics returns inbound TChannel metrics
+//func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
+//	metrics := InboundTChannelMetrics{}
+//	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+//	metrics.Latency = scope.Timer(inboundCallsLatency)
+//	metrics.Success = scope.Counter(inboundCallsSuccess)
+//	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
+//	metrics.SystemErrors = scope.Counter(inboundCallsSystemErrors)
+//	return &metrics
+//}
+
+// CollectMetrics for inbound TChannel calls
+//func (m *InboundTChannelMetrics) CollectMetrics(startTime time.Time, success bool, err error) {
+//	m.Recvd.Inc(1)
+//	if err != nil {
+//		m.SystemErrors.Inc(1)
+//	} else if !success {
+//		m.AppErrors.Inc(1)
+//	} else {
+//		m.Success.Inc(1)
+//	}
+//	m.Latency.Record(time.Now().Sub(startTime))
+//}
+
+// NewOutboundHTTPMetrics returns outbound HTTP metrics
+//func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
+//	metrics := OutboundHTTPMetrics{}
+//	metrics.Sent = scope.Counter(outboundCallsSent)
+//	metrics.Latency = scope.Timer(outboundCallsLatency)
+//	metrics.Success = scope.Counter(outboundCallsSuccess)
+//	metrics.Errors = scope.Counter(outboundCallsErrors)
+//	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
+//	for statusCode := range knownStatusCodes {
+//		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
+//	}
+//	return &metrics
+//}
+
+// CollectMetrics for outbound HTTP calls
+//func (m *OutboundHTTPMetrics) CollectMetrics(startTime time.Time, statusCode int) {
+//	m.Sent.Inc(1)
+//	_, known := knownStatusCodes[statusCode]
+//	if !known {
+//		m.logger.Error("Could not emit statusCode metric", zap.Int("UnknownStatusCode", statusCode))
+//	} else {
+//		m.Status[statusCode].Inc(1)
+//	}
+//	if !known || statusCode >= 400 && statusCode < 600 {
+//		m.Errors.Inc(1)
+//	} else {
+//		m.Success.Inc(1)
+//	}
+//	m.Latency.Record(time.Now().Sub(startTime))
+//}
+
+// NewOutboundTChannelMetrics returns outbound TChannel metrics
+//func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
+//	metrics := OutboundTChannelMetrics{}
+//	metrics.Sent = scope.Counter(outboundCallsSent)
+//	metrics.Latency = scope.Timer(outboundCallsLatency)
+//	metrics.Success = scope.Counter(outboundCallsSuccess)
+//	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
+//	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
+//	return &metrics
+//}
+
+// CollectMetrics for outbound TChannel calls
+//func (m *OutboundTChannelMetrics) CollectMetrics(startTime time.Time, success bool, err error) {
+//	m.Sent.Inc(1)
+//	if err != nil {
+//		m.SystemErrors.Inc(1)
+//	} else if !success {
+//		m.AppErrors.Inc(1)
+//	} else {
+//		m.Success.Inc(1)
+//	}
+//	m.Latency.Record(time.Now().Sub(startTime))
+//}

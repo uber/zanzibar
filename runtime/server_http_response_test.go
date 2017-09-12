@@ -82,7 +82,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	assert.Equal(t, 1, len(logLines))
 
 	lineStruct := logLines[0]
-	code := lineStruct["UnexpectedStatusCode"].(float64)
+	code := lineStruct["UnknownStatusCode"].(float64)
 	assert.Equal(t, 999.0, code)
 }
 
