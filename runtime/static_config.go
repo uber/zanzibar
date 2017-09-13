@@ -43,7 +43,7 @@ type StaticConfigValue struct {
 	dataType jsonparser.ValueType
 }
 
-// StaticConfig allows accessing values of out of json config files
+// StaticConfig allows accessing values out of json config files
 type StaticConfig struct {
 	seedConfig    map[string]interface{}
 	configOptions []*ConfigOption
