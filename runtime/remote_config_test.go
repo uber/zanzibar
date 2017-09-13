@@ -73,14 +73,18 @@ type testNestedStruct struct {
 	ValString  string
 }
 
-func setupRemoteConfigTestSuite(filePath string, configStr string) *testSuite {
+func setupRemoteConfigTestSuite(filePath string, configStr string, interval time.Duration) *testSuite {
 	configFileStr := defaultCfgJsonStr
 	configFilePath := tmpCfgPath
+	pollingInternal := refreshInterval
 	if len(filePath) > 0 {
 		configFilePath = filePath
 	}
 	if len(configStr) > 0 {
 		configFileStr = configStr
+	}
+	if interval > 0 {
+		pollingInternal = interval
 	}
 	err := ioutil.WriteFile(configFilePath, []byte(configFileStr), 0644)
 	if err != nil {
@@ -88,7 +92,7 @@ func setupRemoteConfigTestSuite(filePath string, configStr string) *testSuite {
 	}
 	cfg := &zanzibar.RemoteConfigOptions{
 		FilePath:        configFilePath,
-		PollingInterval: refreshInterval,
+		PollingInterval: pollingInternal,
 	}
 	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, nil, nil)
 	if err != nil {
@@ -139,7 +143,7 @@ func TestInvalidJSJONInitializeError(t *testing.T) {
 }
 
 func TestTypeMisMatch(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", `{"cfgboolean": true}`)
+	ts := setupRemoteConfigTestSuite("", `{"cfgboolean": true}`, 0)
 	defer ts.tearDown()
 	vf, err := ts.remoteConfig.GetFloat("cfgboolean", float64(0))
 	assert.NotNil(t, err)
@@ -147,7 +151,7 @@ func TestTypeMisMatch(t *testing.T) {
 }
 
 func TestConcurrentRW(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	defer ts.tearDown()
 	go ts.remoteConfig.Refresh()
 	go func() {
@@ -158,7 +162,7 @@ func TestConcurrentRW(t *testing.T) {
 }
 
 func TestConcurrentR(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	defer ts.tearDown()
 	f := func() {
 		v, err := ts.remoteConfig.GetFloat("cfgfloat", float64(0))
@@ -170,29 +174,29 @@ func TestConcurrentR(t *testing.T) {
 }
 
 func TestConcurrentW(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	defer ts.tearDown()
 	var wg sync.WaitGroup
 	wg.Add(2)
-	f := func(cfgStr string) {
-		err := ioutil.WriteFile(tmpCfgPath, []byte(cfgStr), 0644)
-		defer os.Remove(tmpCfgPath)
-		if err != nil {
-			panic("unable to setup remote config file in " + tmpCfgPath)
-		}
-		ts.remoteConfig.Refresh()
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"test": 1}`), 0644)
+	if err != nil {
+		panic("unable to setup remote config file in " + tmpCfgPath)
+	}
+	f := func() {
+		err = ts.remoteConfig.Refresh()
+		assert.Nil(t, err)
 		wg.Done()
 	}
-	go f(`{"test": 1}`)
-	go f(`{"test": 2}`)
+	go f()
+	go f()
 	wg.Wait()
 	res, err := ts.remoteConfig.GetInt("test", int64(0))
 	assert.Nil(t, err)
-	assert.True(t, res == int64(1) || res == int64(2))
+	assert.True(t, res == int64(1))
 }
 
 func TestRefresh(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	defer ts.tearDown()
 	vf, err := ts.remoteConfig.GetFloat("cfgfloat", float64(0))
 	assert.Equal(t, float64(1.5), vf)
@@ -210,7 +214,7 @@ func TestRefresh(t *testing.T) {
 }
 
 func TestTypeRemoteConfigAndDefaultFallback(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "{}")
+	ts := setupRemoteConfigTestSuite("", "{}", 0)
 	defer ts.tearDown()
 	vb, err := ts.remoteConfig.GetBoolean("cfgboolean")
 	assert.Equal(t, false, vb)
@@ -230,7 +234,7 @@ func TestTypeRemoteConfigAndDefaultFallback(t *testing.T) {
 }
 
 func TestTypeHappyRemoteConfig(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	defer ts.tearDown()
 
 	vb, err := ts.remoteConfig.GetBoolean("cfgboolean")
@@ -268,7 +272,7 @@ func TestTypeHappyRemoteConfig(t *testing.T) {
 }
 
 func TestSubscribe(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	ch := make(chan int, 2)
 	defer ts.tearDown()
 	var wg sync.WaitGroup
@@ -293,7 +297,7 @@ func TestSubscribe(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "")
+	ts := setupRemoteConfigTestSuite("", "", 0)
 	ch := make(chan int)
 	defer ts.tearDown()
 	fn := func() {
@@ -317,4 +321,24 @@ func TestUnsubscribe(t *testing.T) {
 	default:
 		return
 	}
+}
+
+func TestPolling(t *testing.T) {
+	ts := setupRemoteConfigTestSuite("", "", time.Millisecond)
+	defer ts.tearDown()
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"test": 1}`), 0644)
+	if err != nil {
+		panic("unable to setup remote config file in " + tmpCfgPath)
+	}
+	time.Sleep(2 * time.Millisecond)
+	res, err := ts.remoteConfig.GetInt("test", int64(0))
+	assert.Equal(t, int64(1), res)
+}
+
+func TestRefreshNilFile(t *testing.T) {
+	ts := setupRemoteConfigTestSuite("", "", 0)
+	defer ts.tearDown()
+	os.Remove(tmpCfgPath)
+	err := ts.remoteConfig.Refresh()
+	assert.NotNil(t, err)
 }
