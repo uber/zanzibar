@@ -97,19 +97,47 @@ func (res *ServerHTTPResponse) finish() {
 	}
 
 	// write logs
-	res.Request.Logger.Info("Finished an incoming server HTTP request", res.logResponseFields()...)
+	res.Request.Logger.Info(
+		"Finished an incoming server HTTP request",
+		logFields(res.Request, res)...,
+	)
 }
 
-func (res *ServerHTTPResponse) logResponseFields() []zapcore.Field {
-	var fields []zapcore.Field
-	fields = append(fields, zap.Int("statusCode", res.StatusCode))
-	// TODO: Do not log body by default because PII and bandwidth.
-	// Temporarily log during the developement cycle
-	// TODO: Add a gateway level configurable body unmarshaller
-	// to extract only non-PII info.
-	fields = append(fields, zap.ByteString("Request Body", res.Request.RawBody))
-	fields = append(fields, zap.ByteString("Response Body", res.pendingBodyBytes))
-	fields = append(fields, zap.Time("timestamp-finished", res.finishTime))
+func logFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
+	// TODO: Allocating a fixed size array causes the zap logger to fail
+	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
+	// further to see if we can avoid reallocating underlying arrays for slices.
+	fields := []zapcore.Field{
+		zap.String("method", req.httpRequest.Method),
+		zap.String("remoteAddr", req.httpRequest.RemoteAddr),
+		zap.String("pathname", req.httpRequest.URL.RequestURI()),
+		zap.String("host", req.httpRequest.Host),
+		zap.Time("timestamp-started", req.startTime),
+		zap.Time("timestamp-finished", res.finishTime),
+		zap.Int("statusCode", res.StatusCode),
+
+		// TODO: Do not log body by default because PII and bandwidth.
+		// Temporarily log during the developement cycle
+		// TODO: Add a gateway level configurable body unmarshaller
+		// to extract only non-PII info.
+		zap.ByteString("Request Body", req.RawBody),
+		zap.ByteString("Response Body", res.pendingBodyBytes),
+	}
+
+	for k, v := range req.httpRequest.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
+		}
+	}
+
+	for k, v := range req.res.responseWriter.Header() {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
+		}
+	}
+
+	// TODO: log jaeger trace span
+
 	return fields
 }
 
@@ -161,9 +189,7 @@ func (res *ServerHTTPResponse) WriteJSON(
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.Request.Logger.Error("Could not serialize json response",
-			zap.Error(err),
-		)
+		res.Request.Logger.Error("Could not serialize json response", zap.Error(err))
 		return
 	}
 

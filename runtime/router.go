@@ -43,9 +43,11 @@ type HandlerFn func(
 // RouterEndpoint struct represents an endpoint that can be registered
 // into the router itself.
 type RouterEndpoint struct {
-	handlerFn HandlerFn
-	logger    *zap.Logger
-	metrics   *InboundHTTPMetrics
+	EndpointName string
+	HandlerName  string
+	HandlerFn    HandlerFn
+	logger       *zap.Logger
+	metrics      *InboundHTTPMetrics
 }
 
 // NewRouterEndpoint creates an endpoint with all the necessary data
@@ -56,17 +58,19 @@ func NewRouterEndpoint(
 	handler HandlerFn,
 ) *RouterEndpoint {
 	logger := gateway.Logger.With(
-		zap.String("endpoint", endpointName),
-		zap.String("handler", handlerName),
+		zap.String("endpointID", endpointName),
+		zap.String("handlerID", handlerName),
 	)
 	scope := gateway.AllHostScope.Tagged(map[string]string{
 		"endpoint": endpointName,
 		"handler":  handlerName,
 	})
 	return &RouterEndpoint{
-		handlerFn: handler,
-		logger:    logger,
-		metrics:   NewInboundHTTPMetrics(scope),
+		EndpointName: endpointName,
+		HandlerName:  handlerName,
+		HandlerFn:    handler,
+		logger:       logger,
+		metrics:      NewInboundHTTPMetrics(scope),
 	}
 }
 
@@ -87,7 +91,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//}
 	ctx := r.Context()
 
-	endpoint.handlerFn(ctx, req, req.res)
+	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush()
 }
 
@@ -157,7 +161,7 @@ func (router *HTTPRouter) handleNotFound(
 	req := NewServerHTTPRequest(w, r, nil, router.notFoundEndpoint)
 	// TODO custom NotFound
 	http.NotFound(w, r)
-	req.res.writeHeader(http.StatusNotFound)
+	req.res.StatusCode = http.StatusNotFound
 	req.res.finish()
 }
 
@@ -172,6 +176,6 @@ func (router *HTTPRouter) handleMethodNotAllowed(
 		http.StatusText(http.StatusMethodNotAllowed),
 		http.StatusMethodNotAllowed,
 	)
-	req.res.writeHeader(http.StatusMethodNotAllowed)
+	req.res.StatusCode = http.StatusMethodNotAllowed
 	req.res.finish()
 }

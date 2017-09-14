@@ -31,24 +31,25 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // ServerHTTPRequest struct manages request
 type ServerHTTPRequest struct {
-	httpRequest *http.Request
-	res         *ServerHTTPResponse
-	started     bool
-	startTime   time.Time
-	metrics     *InboundHTTPMetrics
-	queryValues url.Values
-	parseFailed bool
-	Logger      *zap.Logger
-	URL         *url.URL
-	Method      string
-	Params      httprouter.Params
-	Header      Header
-	RawBody     []byte
+	httpRequest  *http.Request
+	res          *ServerHTTPResponse
+	started      bool
+	startTime    time.Time
+	metrics      *InboundHTTPMetrics
+	queryValues  url.Values
+	parseFailed  bool
+	Logger       *zap.Logger
+	EndpointName string
+	HandlerName  string
+	URL          *url.URL
+	Method       string
+	Params       httprouter.Params
+	Header       Header
+	RawBody      []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -59,14 +60,16 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
-		httpRequest: r,
-		queryValues: nil,
-		Logger:      endpoint.logger.With(logRequestFields(r)...),
-		metrics:     endpoint.metrics,
-		URL:         r.URL,
-		Method:      r.Method,
-		Params:      params,
-		Header:      NewServerHTTPHeader(r.Header),
+		httpRequest:  r,
+		queryValues:  nil,
+		Logger:       endpoint.logger,
+		metrics:      endpoint.metrics,
+		EndpointName: endpoint.HandlerName,
+		HandlerName:  endpoint.HandlerName,
+		URL:          r.URL,
+		Method:       r.Method,
+		Params:       params,
+		Header:       NewServerHTTPHeader(r.Header),
 	}
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
@@ -89,27 +92,6 @@ func (req *ServerHTTPRequest) start() {
 
 	// emit metrics
 	req.metrics.Recvd.Inc(1)
-}
-
-func logRequestFields(r *http.Request) []zapcore.Field {
-	// TODO: Allocating a fixed size array causes the zap logger to fail
-	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
-	// further to see if we can avoid reallocating underlying arrays for slices.
-	var fields []zapcore.Field
-	for k, v := range r.Header {
-		if len(v) > 0 {
-			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
-		}
-	}
-
-	fields = append(fields, zap.String("method", r.Method))
-	fields = append(fields, zap.String("remoteAddr", r.RemoteAddr))
-	fields = append(fields, zap.String("pathname", r.URL.RequestURI()))
-	fields = append(fields, zap.String("host", r.Host))
-	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
-	// TODO log jaeger trace span
-
-	return fields
 }
 
 // CheckHeaders verifies that request contains required headers.
