@@ -24,14 +24,14 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestReadAndUnmarshalNonStructBody(t *testing.T) {
@@ -39,7 +39,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		defaultTestConfig,
 		&testGateway.Options{
 			LogWhitelist: map[string]bool{
-				"Could not ReadAll() body": true,
+				"Could not read response body": true,
 			},
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
@@ -66,7 +66,13 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	addr := bgateway.HTTPBackends()["bar"].RealAddr
 	baseURL := "http://" + addr
 
-	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, baseURL)
+	client := zanzibar.NewHTTPClient(
+		bgateway.ActualGateway,
+		"bar",
+		[]string{"echo"},
+		baseURL,
+		time.Second,
+	)
 	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
@@ -84,10 +90,11 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		defaultTestConfig,
 		&testGateway.Options{
 			LogWhitelist: map[string]bool{
-				"Could not ReadAll() body": true,
+				"Could not read response body": true,
 			},
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)
@@ -110,7 +117,13 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	addr := bgateway.HTTPBackends()["bar"].RealAddr
 	baseURL := "http://" + addr
 
-	client := zanzibar.NewHTTPClient(bgateway.ActualGateway, baseURL)
+	client := zanzibar.NewHTTPClient(
+		bgateway.ActualGateway,
+		"bar",
+		[]string{"echo"},
+		baseURL,
+		time.Second,
+	)
 	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
@@ -121,6 +134,66 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	var resp string
 	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "", resp)
+}
+
+func TestUnknownStatusCode(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		&testGateway.Options{
+			LogWhitelist: map[string]bool{
+				"Could not emit statusCode metric": true,
+			},
+			KnownHTTPBackends: []string{"bar"},
+			ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+		},
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	fakeEcho := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(999)
+		_, err := w.Write([]byte(`false`))
+		assert.NoError(t, err)
+	}
+
+	bgateway.HTTPBackends()["bar"].HandleFunc("POST", "/bar/echo", fakeEcho)
+
+	addr := bgateway.HTTPBackends()["bar"].RealAddr
+	baseURL := "http://" + addr
+
+	client := zanzibar.NewHTTPClient(
+		bgateway.ActualGateway,
+		"bar",
+		[]string{"echo"},
+		baseURL,
+		time.Second,
+	)
+
+	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
+
+	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
+	assert.NoError(t, err)
+
+	res, err := req.Do(context.Background())
+	assert.NoError(t, err)
+
+	var resp string
+	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
+	assert.Equal(t, "", resp)
+	assert.Equal(t, 999, res.StatusCode)
+
+	logLines := bgateway.Logs("error", "Could not emit statusCode metric")
+	assert.NotNil(t, logLines)
+	assert.Equal(t, 1, len(logLines))
+
+	lineStruct := logLines[0]
+	code := lineStruct["UnknownStatusCode"].(float64)
+	assert.Equal(t, 999.0, code)
 }
 
 type myJson struct{}

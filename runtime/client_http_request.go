@@ -34,95 +34,87 @@ import (
 // ClientHTTPRequest is the struct for making client
 // requests using an outbound http client.
 type ClientHTTPRequest struct {
-	started     bool
-	startTime   time.Time
-	client      *HTTPClient
-	httpRequest *http.Request
-	res         *ClientHTTPResponse
-
 	ClientID   string
 	MethodName string
+	client     *HTTPClient
+	httpReq    *http.Request
+	res        *ClientHTTPResponse
+	started    bool
+	startTime  time.Time
 	Logger     *zap.Logger
+	metrics    *OutboundHTTPMetrics
+	rawBody    []byte
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest
 func NewClientHTTPRequest(
-	clientID string, methodName string,
+	clientID, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
 	req := &ClientHTTPRequest{
-		Logger: client.Logger,
-		client: client,
+		ClientID:   clientID,
+		MethodName: methodName,
+		client:     client,
+		Logger:     client.loggers[methodName],
+		metrics:    client.metrics[methodName],
 	}
-
 	req.res = NewClientHTTPResponse(req)
-
-	req.start(clientID, methodName)
+	req.start()
 	return req
 }
 
 // Start the request, do some metrics book keeping
-func (req *ClientHTTPRequest) start(
-	clientID string, methodName string,
-) {
+func (req *ClientHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.Logger.Error(
-			"Cannot start ClientHTTPRequest twice",
-			zap.String("methodName", methodName),
-			zap.String("clientID", clientID),
-		)
+		req.Logger.Error("Cannot start ClientHTTPRequest twice")
 		/* coverage ignore next line */
 		return
 	}
-
-	req.ClientID = clientID
-	req.MethodName = methodName
-
 	req.started = true
 	req.startTime = time.Now()
+
+	// emit metrics
+	req.metrics.Sent.Inc(1)
 }
 
 // WriteJSON will send a json http request out.
 func (req *ClientHTTPRequest) WriteJSON(
-	method string, url string, headers map[string]string, body json.Marshaler,
+	method, url string,
+	headers map[string]string,
+	body json.Marshaler,
 ) error {
 	var httpReq *http.Request
 	var httpErr error
 	if body != nil {
 		rawBody, err := body.MarshalJSON()
 		if err != nil {
-			req.Logger.Error("Could not serialize client json request",
-				zap.String("error", err.Error()),
-			)
-			return errors.Wrapf(err,
-				"Could not serialize json for client: %s", req.ClientID,
+			req.Logger.Error("Could not serialize request json", zap.Error(err))
+			return errors.Wrapf(
+				err, "Could not serialize %s.%s request json",
+				req.ClientID, req.MethodName,
 			)
 		}
-
-		httpReq, httpErr = http.NewRequest(
-			method, url, bytes.NewReader(rawBody),
-		)
+		req.rawBody = rawBody
+		httpReq, httpErr = http.NewRequest(method, url, bytes.NewReader(rawBody))
 	} else {
 		httpReq, httpErr = http.NewRequest(method, url, nil)
 	}
 
 	if httpErr != nil {
-		req.Logger.Error("Could not make outbound request",
-			zap.String("error", httpErr.Error()),
-		)
-		return errors.Wrapf(httpErr,
-			"Could not make outbound request for client: %s",
-			req.ClientID,
+		req.Logger.Error("Could not create outbound request", zap.Error(httpErr))
+		return errors.Wrapf(
+			httpErr, "Could not create outbound %s.%s request",
+			req.ClientID, req.MethodName,
 		)
 	}
 
 	for k := range headers {
 		httpReq.Header.Add(k, headers[k])
 	}
+	httpReq.Header.Set("Content-Type", "application/json")
 
-	req.httpRequest = httpReq
-	req.httpRequest.Header.Set("Content-Type", "application/json")
+	req.httpReq = httpReq
 	return nil
 }
 
@@ -130,11 +122,9 @@ func (req *ClientHTTPRequest) WriteJSON(
 func (req *ClientHTTPRequest) Do(
 	ctx context.Context,
 ) (*ClientHTTPResponse, error) {
-	res, err := req.client.Client.Do(
-		req.httpRequest.WithContext(ctx),
-	)
-
+	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	if err != nil {
+		req.Logger.Error("Could not make outbound request", zap.Error(err))
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 {
 	"clients.bar.ip": "127.0.0.1",
 	"clients.bar.port": 4001,
+	"clients.bar.timeout": 1000,
 	"clients.baz.ip": "127.0.0.1",
 	"clients.baz.port": 4002,
 	"clients.baz.serviceName": "Qux",
@@ -8,8 +9,10 @@
 	"clients.baz.timeoutPerAttempt": 1000,
 	"clients.contacts.ip": "127.0.0.1",
 	"clients.contacts.port": 4000,
+	"clients.contacts.timeout": 1000,
 	"clients.google-now.ip": "127.0.0.1",
 	"clients.google-now.port": 14120,
+	"clients.google-now.timeout": 1000,
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [
 		"127.0.0.1:4002"

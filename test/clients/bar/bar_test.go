@@ -841,7 +841,9 @@ func TestEchoStructMap(t *testing.T) {
 
 func TestNestedQueryParamCallWithNil(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions, exampleGateway.CreateGateway,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return
@@ -864,7 +866,9 @@ func TestNestedQueryParamCallWithNil(t *testing.T) {
 
 func TestNormalRecur(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig, defaultTestOptions, exampleGateway.CreateGateway,
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
 	)
 	if !assert.NoError(t, err) {
 		return

@@ -409,9 +409,9 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.Logger.Error("Could not ReadAll() body", zap.Error(err))
+		req.Logger.Error("Could not read request body", zap.Error(err))
 		if !req.parseFailed {
-			req.res.SendErrorString(500, "Could not ReadAll() body")
+			req.res.SendErrorString(500, "Could not read request body")
 			req.parseFailed = true
 		}
 		return nil, false

@@ -99,14 +99,11 @@ func (res *ServerHTTPResponse) finish() {
 	// write logs
 	res.Request.Logger.Info(
 		"Finished an incoming server HTTP request",
-		logFields(res.Request, res)...,
+		serverHTTPLogFields(res.Request, res)...,
 	)
 }
 
-func logFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
-	// TODO: Allocating a fixed size array causes the zap logger to fail
-	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
-	// further to see if we can avoid reallocating underlying arrays for slices.
+func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
 	fields := []zapcore.Field{
 		zap.String("method", req.httpRequest.Method),
 		zap.String("remoteAddr", req.httpRequest.RemoteAddr),
@@ -129,7 +126,6 @@ func logFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field 
 			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
 		}
 	}
-
 	for k, v := range req.res.responseWriter.Header() {
 		if len(v) > 0 {
 			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
