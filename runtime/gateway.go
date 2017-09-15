@@ -110,8 +110,6 @@ func CreateGateway(
 	gateway.setupConfig(config)
 	config.Freeze()
 
-	gateway.HTTPRouter = NewHTTPRouter(gateway)
-
 	// order matters for following setup method calls
 	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
@@ -124,6 +122,9 @@ func CreateGateway(
 	if err := gateway.setupTracer(config); err != nil {
 		return nil, err
 	}
+
+	// setup router after metrics and logs
+	gateway.HTTPRouter = NewHTTPRouter(gateway)
 
 	if err := gateway.setupHTTPServer(); err != nil {
 		return nil, err
@@ -143,17 +144,13 @@ func (gateway *Gateway) Bootstrap() error {
 	// start HTTP server
 	_, err := gateway.localHTTPServer.JustListen()
 	if err != nil {
-		gateway.Logger.Error("Error listening on port",
-			zap.String("error", err.Error()),
-		)
+		gateway.Logger.Error("Error listening on port", zap.Error(err))
 		return errors.Wrap(err, "error listening on port")
 	}
 	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP {
 		_, err := gateway.httpServer.JustListen()
 		if err != nil {
-			gateway.Logger.Error("Error listening on port",
-				zap.String("error", err.Error()),
-			)
+			gateway.Logger.Error("Error listening on port", zap.Error(err))
 			return errors.Wrap(err, "error listening on port")
 		}
 	} else {
@@ -179,10 +176,7 @@ func (gateway *Gateway) Bootstrap() error {
 	tchannelAddr := tchannelIP.String() + ":" + strconv.Itoa(int(gateway.TChannelPort))
 	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
-		gateway.Logger.Error(
-			"Error listening tchannel port",
-			zap.String("error", err.Error()),
-		)
+		gateway.Logger.Error("Error listening tchannel port", zap.Error(err))
 		return err
 	}
 	gateway.RealTChannelAddr = ln.Addr().String()
@@ -191,10 +185,7 @@ func (gateway *Gateway) Bootstrap() error {
 	// tchannel serve does not block, connection handling is done in different goroutine
 	err = gateway.tchannelServer.Serve(ln)
 	if err != nil {
-		gateway.Logger.Error(
-			"Error starting tchannel server",
-			zap.String("error", err.Error()),
-		)
+		gateway.Logger.Error("Error starting tchannel server", zap.Error(err))
 		return err
 	}
 
@@ -375,9 +366,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	} else {
 		err := os.MkdirAll(filepath.Dir(loggerFileName), 0777)
 		if err != nil {
-			tempLogger.Error("Error creating log directory",
-				zap.String("error", err.Error()),
-			)
+			tempLogger.Error("Error creating log directory", zap.Error(err))
 			return errors.Wrap(err, "Error creating log directory")
 		}
 
@@ -387,9 +376,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 			0644,
 		)
 		if err != nil {
-			tempLogger.Error("Error opening log file",
-				zap.String("error", err.Error()),
-			)
+			tempLogger.Error("Error opening log file", zap.Error(err))
 			return errors.Wrap(err, "Error opening log file")
 		}
 		gateway.loggerFile = loggerFile

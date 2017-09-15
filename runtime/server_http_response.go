@@ -23,42 +23,37 @@ package zanzibar
 import (
 	"encoding/json"
 	"net/http"
-
 	"time"
 
 	"github.com/buger/jsonparser"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
 	responseWriter    http.ResponseWriter
 	Request           *ServerHTTPRequest
-	gateway           *Gateway
-	finishTime        time.Time
-	finished          bool
-	metrics           *EndpointMetrics
 	flushed           bool
+	finished          bool
+	finishTime        time.Time
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
 	pendingStatusCode int
-
-	StatusCode int
+	StatusCode        int
+	logger            *zap.Logger
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
 func NewServerHTTPResponse(
-	w http.ResponseWriter, req *ServerHTTPRequest,
+	w http.ResponseWriter,
+	req *ServerHTTPRequest,
 ) *ServerHTTPResponse {
-	res := &ServerHTTPResponse{
-		gateway:        req.gateway,
+	return &ServerHTTPResponse{
 		Request:        req,
 		responseWriter: w,
 		StatusCode:     200,
-		metrics:        req.metrics,
 	}
-
-	return res
 }
 
 // finish will handle final logic, like metrics
@@ -81,23 +76,69 @@ func (res *ServerHTTPResponse) finish() {
 		/* coverage ignore next line */
 		return
 	}
-
 	res.finished = true
 	res.finishTime = time.Now()
 
-	counter := res.metrics.statusCodes[res.StatusCode]
-	if counter == nil {
+	// emit metrics
+	res.Request.metrics.Latency.Record(res.finishTime.Sub(res.Request.startTime))
+	_, known := knownStatusCodes[res.StatusCode]
+	if !known {
 		res.Request.Logger.Error(
 			"Could not emit statusCode metric",
-			zap.Int("UnexpectedStatusCode", res.StatusCode),
+			zap.Int("UnknownStatusCode", res.StatusCode),
 		)
 	} else {
-		counter.Inc(1)
+		res.Request.metrics.Status[res.StatusCode].Inc(1)
+	}
+	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
+		res.Request.metrics.Errors.Inc(1)
+	} else {
+		res.Request.metrics.Success.Inc(1)
 	}
 
-	res.metrics.requestLatency.Record(
-		res.finishTime.Sub(res.Request.startTime),
+	// write logs
+	res.Request.Logger.Info(
+		"Finished an incoming server HTTP request",
+		logFields(res.Request, res)...,
 	)
+}
+
+func logFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapcore.Field {
+	// TODO: Allocating a fixed size array causes the zap logger to fail
+	// with ``unknown field type: { 0 0  <nil>}'' errors. Investigate this
+	// further to see if we can avoid reallocating underlying arrays for slices.
+	fields := []zapcore.Field{
+		zap.String("method", req.httpRequest.Method),
+		zap.String("remoteAddr", req.httpRequest.RemoteAddr),
+		zap.String("pathname", req.httpRequest.URL.RequestURI()),
+		zap.String("host", req.httpRequest.Host),
+		zap.Time("timestamp-started", req.startTime),
+		zap.Time("timestamp-finished", res.finishTime),
+		zap.Int("statusCode", res.StatusCode),
+
+		// TODO: Do not log body by default because PII and bandwidth.
+		// Temporarily log during the developement cycle
+		// TODO: Add a gateway level configurable body unmarshaller
+		// to extract only non-PII info.
+		zap.ByteString("Request Body", req.RawBody),
+		zap.ByteString("Response Body", res.pendingBodyBytes),
+	}
+
+	for k, v := range req.httpRequest.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
+		}
+	}
+
+	for k, v := range req.res.responseWriter.Header() {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
+		}
+	}
+
+	// TODO: log jaeger trace span
+
+	return fields
 }
 
 // SendErrorString helper to send an error string
@@ -129,8 +170,7 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 	}
 
 	// TODO: mark header as pending ?
-	res.responseWriter.Header().
-		Set("content-type", "application/json")
+	res.responseWriter.Header().Set("content-type", "application/json")
 
 	res.pendingStatusCode = statusCode
 	res.pendingBodyBytes = bytes
@@ -149,9 +189,7 @@ func (res *ServerHTTPResponse) WriteJSON(
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendErrorString(500, "Could not serialize json response")
-		res.Request.Logger.Error("Could not serialize json response",
-			zap.String("error", err.Error()),
-		)
+		res.Request.Logger.Error("Could not serialize json response", zap.Error(err))
 		return
 	}
 
@@ -221,7 +259,7 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	if err != nil {
 		/* coverage ignore next line */
 		res.Request.Logger.Error("Could not write string to resp body",
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 	}
 }
