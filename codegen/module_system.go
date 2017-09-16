@@ -132,7 +132,7 @@ func NewDefaultModuleSystem(
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error registering http client class type",
+			"Error registering HTTP client class type",
 		)
 	}
 
@@ -182,7 +182,7 @@ func NewDefaultModuleSystem(
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error registering HTTP endpoint class type",
+			"Error registering TChannel endpoint class type",
 		)
 	}
 
@@ -557,7 +557,7 @@ func (g *CustomClientGenerator) Generate(
  * Endpoint Generator
  */
 
-// EndpointGenerator generates a group of zanzibar http endpoints that proxy corresponding clients
+// EndpointGenerator generates a group of zanzibar endpoints that proxy corresponding clients
 type EndpointGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper

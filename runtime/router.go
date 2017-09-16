@@ -53,21 +53,21 @@ type RouterEndpoint struct {
 // NewRouterEndpoint creates an endpoint with all the necessary data
 func NewRouterEndpoint(
 	gateway *Gateway,
-	endpointName string,
-	handlerName string,
+	endpointID string,
+	handlerID string,
 	handler HandlerFn,
 ) *RouterEndpoint {
 	logger := gateway.Logger.With(
-		zap.String("endpointID", endpointName),
-		zap.String("handlerID", handlerName),
+		zap.String("endpointID", endpointID),
+		zap.String("HandlerID", handlerID),
 	)
 	scope := gateway.AllHostScope.Tagged(map[string]string{
-		"endpoint": endpointName,
-		"handler":  handlerName,
+		"endpoint": endpointID,
+		"handler":  handlerID,
 	})
 	return &RouterEndpoint{
-		EndpointName: endpointName,
-		HandlerName:  handlerName,
+		EndpointName: endpointID,
+		HandlerName:  handlerID,
 		HandlerFn:    handler,
 		logger:       logger,
 		metrics:      NewInboundHTTPMetrics(scope),

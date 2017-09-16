@@ -42,18 +42,18 @@ type TChannelLogger struct {
 func (l TChannelLogger) Enabled(tlevel tchannel.LogLevel) bool {
 	var zlevel zapcore.Level
 
-	/*
-		Log level mapping:
-			  TChannel	Zap
-		all	  0		n/a
-		debug	  1		-1
-		info	  2		0
-		warn	  3		1
-		error	  4		2
-		dpanic	  n/a		3
-		panic	  n/a		4
-		fatal	  5		5
-	*/
+	// Log level mapping:
+	//
+	//         TChannel  Zap
+	// all         0     n/a
+	// debug       1     -1
+	// info        2      0
+	// warn        3      1
+	// error       4      2
+	// dpanic     n/a     3
+	// panic      n/a     4
+	// fatal       5      5
+	//
 	switch tlevel {
 	case tchannel.LogLevelAll:
 		// zap does not have a log all level, zap minimum log level is debug
