@@ -83,6 +83,9 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 	var resp string
 	assert.NoError(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "foo", resp)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
@@ -134,6 +137,10 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 	var resp string
 	assert.Error(t, res.ReadAndUnmarshalBody(&resp))
 	assert.Equal(t, "", resp)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Could not parse response json"], 1)
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestUnknownStatusCode(t *testing.T) {
@@ -194,6 +201,11 @@ func TestUnknownStatusCode(t *testing.T) {
 	lineStruct := logLines[0]
 	code := lineStruct["UnknownStatusCode"].(float64)
 	assert.Equal(t, 999.0, code)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Could not parse response json"], 1)
+	assert.Len(t, logs["Could not emit statusCode metric"], 1)
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 type myJson struct{}

@@ -24,6 +24,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
@@ -32,7 +33,6 @@ import (
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-	"time"
 )
 
 var defaultTestOptions *testGateway.Options = &testGateway.Options{
@@ -67,11 +67,13 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
-
 	assert.Equal(t,
 		"Could not serialize clientID.DoStuff request json: cannot serialize",
 		err.Error(),
 	)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Could not serialize request json"], 1)
 }
 
 func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
@@ -97,11 +99,13 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
-
 	assert.Equal(t,
 		"Could not create outbound clientID.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Could not create outbound request"], 1)
 }
 
 func TestMakingClientCalLWithHeaders(t *testing.T) {
@@ -143,13 +147,14 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 
 	res, err := req.Do(context.Background())
 	assert.NoError(t, err)
-
 	assert.Equal(t, 200, res.StatusCode)
 
 	bytes, err := res.ReadAll()
 	assert.NoError(t, err)
-
 	assert.Equal(t, []byte("Example-Value"), bytes)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingClientCallWithRespHeaders(t *testing.T) {
@@ -187,9 +192,11 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		context.Background(), nil, &clientsBarBar.Bar_Normal_Args{},
 	)
 	assert.NoError(t, err)
-
 	assert.NotNil(t, body)
 	assert.Equal(t, "Example-Value", headers["Example-Header"])
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingClientCallWithThriftException(t *testing.T) {
@@ -224,6 +231,9 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 
 	realError := err.(*clientsBarBar.BarException)
 	assert.Equal(t, realError.StringField, "test")
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingClientCallWithBadStatusCode(t *testing.T) {
@@ -255,8 +265,11 @@ func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
-
 	assert.Equal(t, "Unexpected http client response (402)", err.Error())
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Unknown response status code"], 1)
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingCallWithThriftException(t *testing.T) {
@@ -292,6 +305,9 @@ func TestMakingCallWithThriftException(t *testing.T) {
 
 	realError := err.(*clientsBarBar.BarException)
 	assert.Equal(t, realError.StringField, "test")
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
 func TestMakingClientCallWithServerError(t *testing.T) {
@@ -323,6 +339,9 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 	)
 	assert.Error(t, err)
 	assert.Nil(t, body)
-
 	assert.Equal(t, "Unexpected http client response (500)", err.Error())
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Unknown response status code"], 1)
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
