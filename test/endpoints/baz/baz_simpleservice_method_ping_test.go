@@ -78,8 +78,7 @@ func BenchmarkPing(b *testing.B) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"ping",
+		"baz", "ping", "SimpleService::ping",
 		bazClient.NewSimpleServicePingHandler(ping),
 	)
 
@@ -133,8 +132,7 @@ func TestPing(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"ping",
+		"baz", "ping", "SimpleService::ping",
 		bazClient.NewSimpleServicePingHandler(fakePing),
 	)
 
@@ -182,8 +180,7 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"ping",
+		"baz", "ping", "SimpleService::ping",
 		bazClient.NewSimpleServicePingHandler(fakePing),
 	)
 

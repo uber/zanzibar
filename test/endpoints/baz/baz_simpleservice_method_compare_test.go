@@ -74,8 +74,7 @@ func BenchmarkCompare(b *testing.B) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"compare",
+		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(compare),
 	)
 
@@ -130,8 +129,7 @@ func TestCompare(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"compare",
+		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 
@@ -190,8 +188,7 @@ func TestCompareInvalidArgs(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"compare",
+		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 

@@ -729,7 +729,9 @@ import (
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $.TestStubs}}
-func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+{{- $endpointID := .EndpointID }}
+{{- $handlerID := .HandlerID }}
+func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
@@ -785,8 +787,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$thriftService}}",
-		"{{$clientMethodName}}",
+		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
@@ -843,7 +844,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3978, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4077, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1822,6 +1823,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 
 var _tchannel_endpointTmpl = []byte(`{{- /* template to render edge gateway tchannel server code */ -}}
 {{- $instance := .Instance }}
+{{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
@@ -1864,8 +1866,7 @@ type {{$handlerName}} struct {
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.TChannelRouter.Register(
-		"{{.ThriftService}}",
-		"{{.Name}}",
+		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		h,
 	)
 	// TODO: Register should return an error for route conflicts
@@ -1962,7 +1963,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3434, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3498, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

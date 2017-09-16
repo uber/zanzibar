@@ -73,8 +73,7 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"compare",
+		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
 

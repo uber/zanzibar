@@ -42,6 +42,9 @@ import (
 type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 type handler struct {
+	EndpointID      string
+	HandlerID       string
+	Method          string
 	tchannelHandler TChannelHandler
 	postResponseCB  PostResponseCB
 }
@@ -74,29 +77,42 @@ func NewTChannelRouter(registrar tchannel.Registrar, logger *zap.Logger) *TChann
 
 // Register registers the given TChannelHandler to be called on an incoming call for its method.
 // "service" is the thrift service name as in the thrift definition.
-func (s *TChannelRouter) Register(service string, method string, h TChannelHandler) {
-	handler := &handler{tchannelHandler: h}
-	s.register(service, method, handler)
+func (s *TChannelRouter) Register(
+	endpointID, handlerID, method string,
+	h TChannelHandler,
+) {
+	handler := &handler{
+		EndpointID:      endpointID,
+		HandlerID:       handlerID,
+		Method:          method,
+		tchannelHandler: h,
+	}
+	s.register(handler)
 }
 
 // RegisterWithPostResponseCB registers the given TChannelHandler with a PostResponseCB function
-func (s *TChannelRouter) RegisterWithPostResponseCB(service string, method string, h TChannelHandler, cb PostResponseCB) {
+func (s *TChannelRouter) RegisterWithPostResponseCB(
+	endpointID, handlerID, method string,
+	h TChannelHandler,
+	cb PostResponseCB,
+) {
 	handler := &handler{
+		EndpointID:      endpointID,
+		HandlerID:       handlerID,
+		Method:          method,
 		tchannelHandler: h,
 		postResponseCB:  cb,
 	}
-	s.register(service, method, handler)
+	s.register(handler)
 }
 
-func (s *TChannelRouter) register(service string, method string, h *handler) {
-	key := service + "::" + method
-
+func (s *TChannelRouter) register(h *handler) {
 	s.Lock()
-	s.handlers[key] = *h
+	s.handlers[h.Method] = *h
 	s.Unlock()
 
 	ncr := netContextRouter{router: s}
-	s.registrar.Register(ncr, key)
+	s.registrar.Register(ncr, h.Method)
 }
 
 // Handle handles an incoming TChannel call and forwards it to the correct handler.

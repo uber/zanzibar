@@ -69,8 +69,7 @@ func TestEchoI8(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoI8",
+		"baz", "echoI8", "SecondService::echoI8",
 		bazClient.NewSecondServiceEchoI8Handler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -107,8 +106,7 @@ func TestEchoI16(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoI16",
+		"baz", "echoI16", "SecondService::echoI16",
 		bazClient.NewSecondServiceEchoI16Handler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -145,8 +143,7 @@ func TestEchoI32(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoI32",
+		"baz", "echoI32", "SecondService::echoI32",
 		bazClient.NewSecondServiceEchoI32Handler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -183,8 +180,7 @@ func TestEchoI64(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoI64",
+		"baz", "echoI64", "SecondService::echoI64",
 		bazClient.NewSecondServiceEchoI64Handler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -221,8 +217,7 @@ func TestEchoDouble(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoDouble",
+		"baz", "echoDouble", "SecondService::echoDouble",
 		bazClient.NewSecondServiceEchoDoubleHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -259,8 +254,7 @@ func TestEchoBool(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoBool",
+		"baz", "echoBool", "SecondService::echoBool",
 		bazClient.NewSecondServiceEchoBoolHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -297,8 +291,7 @@ func TestEchoString(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoString",
+		"baz", "echoString", "SecondService::echoString",
 		bazClient.NewSecondServiceEchoStringHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -335,8 +328,7 @@ func TestEchoBinary(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoBinary",
+		"baz", "echoBinary", "SecondService::echoBinary",
 		bazClient.NewSecondServiceEchoBinaryHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -374,8 +366,7 @@ func TestEchoEnum(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoEnum",
+		"baz", "echoEnum", "SecondService::echoEnum",
 		bazClient.NewSecondServiceEchoEnumHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -412,8 +403,7 @@ func TestEchoTypedef(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoTypedef",
+		"baz", "echoTypedef", "SecondService::echoTypedef",
 		bazClient.NewSecondServiceEchoTypedefHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -453,8 +443,7 @@ func TestEchoStringSet(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStringSet",
+		"baz", "echoStringSet", "SecondService::echoStringSet",
 		bazClient.NewSecondServiceEchoStringSetHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -494,8 +483,7 @@ func TestEchoStructSet(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStructSet",
+		"baz", "echoStructSet", "SecondService::echoStructSet",
 		bazClient.NewSecondServiceEchoStructSetHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -532,8 +520,7 @@ func TestEchoStringList(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStringList",
+		"baz", "echoStringList", "SecondService::echoStringList",
 		bazClient.NewSecondServiceEchoStringListHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -574,8 +561,7 @@ func TestEchoStructList(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStructList",
+		"baz", "echoStructList", "SecondService::echoStructList",
 		bazClient.NewSecondServiceEchoStructListHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -616,8 +602,7 @@ func TestEchoStringMap(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStringMap",
+		"baz", "echoStringMap", "SecondService::echoStringMap",
 		bazClient.NewSecondServiceEchoStringMapHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
@@ -666,8 +651,7 @@ func TestEchoStructMap(t *testing.T) {
 	}
 
 	bgateway.TChannelBackends()["baz"].Register(
-		"SecondService",
-		"echoStructMap",
+		"baz", "echoStructMap", "SecondService::echoStructMap",
 		bazClient.NewSecondServiceEchoStructMapHandler(fake),
 	)
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)

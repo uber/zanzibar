@@ -37,7 +37,9 @@ import (
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $.TestStubs}}
-func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+{{- $endpointID := .EndpointID }}
+{{- $handlerID := .HandlerID }}
+func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
@@ -93,8 +95,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$thriftService}}",
-		"{{$clientMethodName}}",
+		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}

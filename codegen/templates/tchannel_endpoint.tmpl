@@ -1,5 +1,6 @@
 {{- /* template to render edge gateway tchannel server code */ -}}
 {{- $instance := .Instance }}
+{{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
@@ -42,8 +43,7 @@ type {{$handlerName}} struct {
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.TChannelRouter.Register(
-		"{{.ThriftService}}",
-		"{{.Name}}",
+		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		h,
 	)
 	// TODO: Register should return an error for route conflicts
