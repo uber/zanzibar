@@ -170,18 +170,16 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	return &metrics
 }
 
-// TODO: Add remaining call metrics
-
 // NewInboundTChannelMetrics returns inbound TChannel metrics
-//func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
-//	metrics := InboundTChannelMetrics{}
-//	metrics.Recvd = scope.Counter(inboundCallsRecvd)
-//	metrics.Latency = scope.Timer(inboundCallsLatency)
-//	metrics.Success = scope.Counter(inboundCallsSuccess)
-//	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
-//	metrics.SystemErrors = scope.Counter(inboundCallsSystemErrors)
-//	return &metrics
-//}
+func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
+	metrics := InboundTChannelMetrics{}
+	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+	metrics.Latency = scope.Timer(inboundCallsLatency)
+	metrics.Success = scope.Counter(inboundCallsSuccess)
+	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
+	metrics.SystemErrors = scope.Counter(inboundCallsSystemErrors)
+	return &metrics
+}
 
 // NewOutboundHTTPMetrics returns outbound HTTP metrics
 func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {

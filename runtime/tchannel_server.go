@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/thriftrw/wire"
@@ -50,6 +51,7 @@ type TChannelEndpoint struct {
 	handler        TChannelHandler
 	postResponseCB PostResponseCB
 	Logger         *zap.Logger
+	metrics        *InboundTChannelMetrics
 }
 
 // TChannelRouter handles incoming TChannel calls and routes them to the matching TChannelHandler.
@@ -58,6 +60,7 @@ type TChannelRouter struct {
 	registrar tchannel.Registrar
 	endpoints map[string]*TChannelEndpoint
 	logger    *zap.Logger
+	scope     tally.Scope
 }
 
 // netContextRouter implements the Handler interface that consumes netContext instead of stdlib context
@@ -75,6 +78,7 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 		registrar: registrar,
 		endpoints: map[string]*TChannelEndpoint{},
 		logger:    g.Logger,
+		scope:     g.AllHostScope,
 	}
 }
 
@@ -98,6 +102,11 @@ func (s *TChannelRouter) RegisterWithPostResponseCB(
 		zap.String("handlerID", endpointID),
 		zap.String("method", method),
 	)
+	scope := s.scope.Tagged(map[string]string{
+		"endpoint": endpointID,
+		"handler":  handlerID,
+		"method":   method,
+	})
 	endpoint := TChannelEndpoint{
 		EndpointID:     endpointID,
 		HandlerID:      handlerID,
@@ -105,6 +114,7 @@ func (s *TChannelRouter) RegisterWithPostResponseCB(
 		handler:        h,
 		postResponseCB: cb,
 		Logger:         logger,
+		metrics:        NewInboundTChannelMetrics(scope),
 	}
 	s.register(&endpoint)
 	return &endpoint
@@ -152,7 +162,7 @@ func (s *TChannelRouter) handle(
 	ctx context.Context,
 	e *TChannelEndpoint,
 	call *tchannel.InboundCall,
-) error {
+) (err error) {
 	var success bool
 	var startTime, finishTime time.Time
 	var reqBody, resBody []byte
@@ -162,14 +172,26 @@ func (s *TChannelRouter) handle(
 		// finish
 		finishTime = time.Now()
 
+		// emit metrics
+		if err != nil {
+			e.metrics.SystemErrors.Inc(1)
+		} else if !success {
+			e.metrics.AppErrors.Inc(1)
+		} else {
+			e.metrics.Success.Inc(1)
+		}
+		e.metrics.Latency.Record(finishTime.Sub(startTime))
+
 		// write logs
-		e.Logger.Info("Finished an incoming server TChannel request",
+		e.Logger.Info(
+			"Finished an incoming server TChannel request",
 			serverTChannelLogFields(call, startTime, finishTime, reqBody, resBody, reqHeaders, resHeaders)...,
 		)
 	}()
 
 	// start
 	startTime = time.Now()
+	e.metrics.Recvd.Inc(1)
 
 	// read request headers
 	treader, err := call.Arg2Reader()
