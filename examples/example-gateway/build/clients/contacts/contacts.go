@@ -25,7 +25,8 @@ package contactsClient
 
 import (
 	"context"
-	"strconv"
+	"fmt"
+	"time"
 
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
@@ -51,11 +52,20 @@ type contactsClient struct {
 func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.contacts.ip")
 	port := gateway.Config.MustGetInt("clients.contacts.port")
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
+	timeout := time.Duration(gateway.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
 
-	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &contactsClient{
-		clientID:   "contacts",
-		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
+		clientID: "contacts",
+		httpClient: zanzibar.NewHTTPClient(
+			gateway,
+			"contacts",
+			[]string{
+				"SaveContacts",
+			},
+			baseURL,
+			timeout,
+		),
 	}
 }
 
@@ -72,9 +82,7 @@ func (c *contactsClient) SaveContacts(
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "saveContacts", c.httpClient,
-	)
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "SaveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"

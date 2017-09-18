@@ -154,7 +154,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		LogWhitelist: map[string]bool{
-			"Could not ReadAll() body": true,
+			"Could not read request body": true,
 		},
 		KnownHTTPBackends: []string{"google-now"},
 		TestBinary:        util.DefaultMainFile("example-gateway"),
@@ -206,7 +206,7 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	logLines := gateway.Logs("error", "Could not ReadAll() body")
+	logLines := gateway.Logs("error", "Could not read request body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 
@@ -329,7 +329,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
 		LogWhitelist: map[string]bool{
-			"Could not make client request": true,
+			"Could not make outbound request": true,
 		},
 		TestBinary:  util.DefaultMainFile("example-gateway"),
 		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
@@ -559,7 +559,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"google-now"},
 		LogWhitelist: map[string]bool{
-			"Could not make client request": true,
+			"Could not make outbound request": true,
 		},
 		TestBinary:  util.DefaultMainFile("example-gateway"),
 		ConfigFiles: util.DefaultConfigFiles("example-gateway"),

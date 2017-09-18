@@ -28,6 +28,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ClientHTTPResponse is the struct managing the client response
@@ -38,9 +39,8 @@ type ClientHTTPResponse struct {
 	finished         bool
 	rawResponse      *http.Response
 	rawResponseBytes []byte
-
-	StatusCode int
-	Header     http.Header
+	StatusCode       int
+	Header           http.Header
 }
 
 // NewClientHTTPResponse allocates a client http response object
@@ -48,11 +48,9 @@ type ClientHTTPResponse struct {
 func NewClientHTTPResponse(
 	req *ClientHTTPRequest,
 ) *ClientHTTPResponse {
-	res := &ClientHTTPResponse{
+	return &ClientHTTPResponse{
 		req: req,
 	}
-
-	return res
 }
 
 func (res *ClientHTTPResponse) setRawHTTPResponse(httpRes *http.Response) {
@@ -68,23 +66,20 @@ func (res *ClientHTTPResponse) ReadAll() ([]byte, error) {
 	cerr := res.rawResponse.Body.Close()
 	if cerr != nil {
 		/* coverage ignore next line */
-		res.req.Logger.Error("Could not close client resp body",
-			zap.String("error", err.Error()),
-		)
+		res.req.Logger.Error("Could not close response body", zap.Error(cerr))
 	}
 
 	if err != nil {
-		res.req.Logger.Error("Could not ReadAll() client body",
-			zap.String("error", err.Error()),
-		)
+		res.req.Logger.Error("Could not read response body", zap.Error(err))
+		res.finish()
 		return nil, errors.Wrapf(
-			err,
-			"Could not read client(%s) response body",
-			res.req.ClientID,
+			err, "Could not read %s.%s response body",
+			res.req.ClientID, res.req.MethodName,
 		)
 	}
 
 	res.rawResponseBytes = rawBody
+	res.finish()
 	return rawBody, nil
 }
 
@@ -103,13 +98,10 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 
 	err = json.Unmarshal(rawBody, v)
 	if err != nil {
-		res.req.Logger.Warn("Could not parse client json",
-			zap.String("error", err.Error()),
-		)
+		res.req.Logger.Warn("Could not parse response json", zap.Error(err))
 		return errors.Wrapf(
-			err,
-			"Could not parse client %q json",
-			res.req.ClientID,
+			err, "Could not parse %s.%s response json",
+			res.req.ClientID, res.req.MethodName,
 		)
 	}
 
@@ -125,8 +117,80 @@ func (res *ClientHTTPResponse) CheckOKResponse(okResponses []int) {
 	}
 
 	res.req.Logger.Warn("Unknown response status code",
-		zap.Int("status code", res.rawResponse.StatusCode),
+		zap.Int("UnknownStatusCode", res.rawResponse.StatusCode),
 	)
 }
 
-// finish()
+// finish will handle final logic, like metrics
+func (res *ClientHTTPResponse) finish() {
+	if !res.req.started {
+		/* coverage ignore next line */
+		res.req.Logger.Error("Forgot to start client request")
+		/* coverage ignore next line */
+		return
+	}
+	if res.finished {
+		/* coverage ignore next line */
+		res.req.Logger.Error("Finished a client response twice")
+		/* coverage ignore next line */
+		return
+	}
+	res.finished = true
+	res.finishTime = time.Now()
+
+	// emit metrics
+	res.req.metrics.Latency.Record(res.finishTime.Sub(res.req.startTime))
+	_, known := knownStatusCodes[res.StatusCode]
+	if !known {
+		res.req.Logger.Error(
+			"Could not emit statusCode metric",
+			zap.Int("UnknownStatusCode", res.StatusCode),
+		)
+	} else {
+		res.req.metrics.Status[res.StatusCode].Inc(1)
+	}
+	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
+		res.req.metrics.Errors.Inc(1)
+	} else {
+		res.req.metrics.Success.Inc(1)
+	}
+
+	// write logs
+	res.req.Logger.Info(
+		"Finished an outgoing client HTTP request",
+		clientHTTPLogFields(res.req, res)...,
+	)
+
+}
+
+func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapcore.Field {
+	fields := []zapcore.Field{
+		zap.String("method", req.httpReq.Method),
+		zap.String("url", req.httpReq.URL.String()),
+		zap.Time("timestamp-started", req.startTime),
+		zap.Time("timestamp-finished", res.finishTime),
+		zap.Int("statusCode", res.StatusCode),
+
+		// TODO: Do not log body by default because PII and bandwidth.
+		// Temporarily log during the developement cycle
+		// TODO: Add a gateway level configurable body unmarshaller
+		// to extract only non-PII info.
+		zap.ByteString("Request Body", req.rawBody),
+		zap.ByteString("Response Body", res.rawResponseBytes),
+	}
+
+	for k, v := range req.httpReq.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
+		}
+	}
+	for k, v := range req.res.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
+		}
+	}
+
+	// TODO: log jaeger trace span
+
+	return fields
+}

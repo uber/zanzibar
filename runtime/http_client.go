@@ -23,17 +23,17 @@ package zanzibar
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"go.uber.org/zap"
 )
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
-	gateway *Gateway
-
 	Client  *http.Client
-	Logger  *zap.Logger
 	BaseURL string
+	loggers map[string]*zap.Logger
+	metrics map[string]*OutboundHTTPMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -49,19 +49,35 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 
 // NewHTTPClient will allocate a http client.
 func NewHTTPClient(
-	gateway *Gateway, baseURL string,
+	gateway *Gateway,
+	clientID string,
+	methodNames []string,
+	baseURL string,
+	timeout time.Duration,
 ) *HTTPClient {
+	loggers := make(map[string]*zap.Logger, len(methodNames))
+	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
+	for _, methodName := range methodNames {
+		loggers[methodName] = gateway.Logger.With(
+			zap.String("clientID", clientID),
+			zap.String("methodName", methodName),
+		)
+		metrics[methodName] = NewOutboundHTTPMetrics(gateway.AllHostScope.Tagged(map[string]string{
+			"client": clientID,
+			"method": methodName,
+		}))
+	}
 	return &HTTPClient{
-		gateway: gateway,
-
-		Logger: gateway.Logger,
 		Client: &http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives:   false,
 				MaxIdleConns:        500,
 				MaxIdleConnsPerHost: 500,
 			},
+			Timeout: timeout,
 		},
 		BaseURL: baseURL,
+		loggers: loggers,
+		metrics: metrics,
 	}
 }

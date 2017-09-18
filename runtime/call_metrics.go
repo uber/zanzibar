@@ -197,35 +197,18 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 //}
 
 // NewOutboundHTTPMetrics returns outbound HTTP metrics
-//func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
-//	metrics := OutboundHTTPMetrics{}
-//	metrics.Sent = scope.Counter(outboundCallsSent)
-//	metrics.Latency = scope.Timer(outboundCallsLatency)
-//	metrics.Success = scope.Counter(outboundCallsSuccess)
-//	metrics.Errors = scope.Counter(outboundCallsErrors)
-//	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
-//	for statusCode := range knownStatusCodes {
-//		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
-//	}
-//	return &metrics
-//}
-
-// CollectMetrics for outbound HTTP calls
-//func (m *OutboundHTTPMetrics) CollectMetrics(startTime time.Time, statusCode int) {
-//	m.Sent.Inc(1)
-//	_, known := knownStatusCodes[statusCode]
-//	if !known {
-//		m.logger.Error("Could not emit statusCode metric", zap.Int("UnknownStatusCode", statusCode))
-//	} else {
-//		m.Status[statusCode].Inc(1)
-//	}
-//	if !known || statusCode >= 400 && statusCode < 600 {
-//		m.Errors.Inc(1)
-//	} else {
-//		m.Success.Inc(1)
-//	}
-//	m.Latency.Record(time.Now().Sub(startTime))
-//}
+func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
+	metrics := OutboundHTTPMetrics{}
+	metrics.Sent = scope.Counter(outboundCallsSent)
+	metrics.Latency = scope.Timer(outboundCallsLatency)
+	metrics.Success = scope.Counter(outboundCallsSuccess)
+	metrics.Errors = scope.Counter(outboundCallsErrors)
+	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
+	for statusCode := range knownStatusCodes {
+		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
+	}
+	return &metrics
+}
 
 // NewOutboundTChannelMetrics returns outbound TChannel metrics
 //func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {

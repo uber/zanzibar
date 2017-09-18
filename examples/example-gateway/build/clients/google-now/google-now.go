@@ -25,7 +25,8 @@ package googlenowClient
 
 import (
 	"context"
-	"strconv"
+	"fmt"
+	"time"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	"github.com/uber/zanzibar/runtime"
@@ -55,11 +56,21 @@ type googleNowClient struct {
 func NewClient(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.google-now.ip")
 	port := gateway.Config.MustGetInt("clients.google-now.port")
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
+	timeout := time.Duration(gateway.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
 
-	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &googleNowClient{
-		clientID:   "google-now",
-		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
+		clientID: "google-now",
+		httpClient: zanzibar.NewHTTPClient(
+			gateway,
+			"google-now",
+			[]string{
+				"AddCredentials",
+				"CheckCredentials",
+			},
+			baseURL,
+			timeout,
+		),
 	}
 }
 
@@ -75,9 +86,7 @@ func (c *googleNowClient) AddCredentials(
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "addCredentials", c.httpClient,
-	)
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "AddCredentials", c.httpClient)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
@@ -121,9 +130,7 @@ func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "checkCredentials", c.httpClient,
-	)
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "CheckCredentials", c.httpClient)
 	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.

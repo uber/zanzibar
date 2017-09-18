@@ -825,10 +825,10 @@ var _http_clientTmpl = []byte(`{{- /* template to render edge gateway http clien
 package {{$instance.PackageInfo.PackageName}}
 
 import (
-	"bytes"
 	"context"
-	"net/http"
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
@@ -872,11 +872,22 @@ type {{$clientName}} struct {
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
+	timeout := time.Duration(gateway.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
-	baseURL := "http://" + ip + ":" + strconv.Itoa(int(port))
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
-		httpClient: zanzibar.NewHTTPClient(gateway, baseURL),
+		httpClient: zanzibar.NewHTTPClient(
+			gateway,
+			"{{$clientID}}",
+			[]string{
+				{{range $serviceMethod, $methodName := $exposedMethods -}}
+				"{{$methodName}}",
+				{{end}}
+			},
+			baseURL,
+			timeout,
+		),
 	}
 }
 
@@ -903,9 +914,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(
-		c.clientID, "{{.Name}}", c.httpClient,
-	)
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "{{$methodName}}", c.httpClient)
 
 	{{- if .ReqHeaders }}
 	// TODO(jakev): Ensure we validate mandatory headers
@@ -1059,7 +1068,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6285, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6535, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

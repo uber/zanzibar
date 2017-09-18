@@ -29,13 +29,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	zanzibar "github.com/uber/zanzibar/runtime"
-
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
@@ -43,10 +41,11 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 		defaultTestConfig,
 		&testGateway.Options{
 			LogWhitelist: map[string]bool{
-				"Could not ReadAll() body": true,
+				"Could not read request body": true,
 			},
 			KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
 			KnownTChannelBackends: []string{"baz"},
+			ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
 		},
 		exampleGateway.CreateGateway,
 	)
@@ -85,7 +84,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	dJ := &dummyJson{}
 	assert.False(t, req.ReadAndUnmarshalBody(dJ))
 
-	logLines := gateway.Logs("error", "Could not ReadAll() body")
+	logLines := gateway.Logs("error", "Could not read request body")
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
 }
