@@ -25,8 +25,8 @@ package baztchannelEndpoint
 
 import (
 	"context"
-	"errors"
 
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
@@ -43,7 +43,6 @@ func NewSimpleServiceCallHandler(
 ) *SimpleServiceCallHandler {
 	return &SimpleServiceCallHandler{
 		Clients: deps.Client,
-		Logger:  gateway.Logger,
 	}
 }
 
@@ -51,7 +50,6 @@ func NewSimpleServiceCallHandler(
 type SimpleServiceCallHandler struct {
 	Clients  *module.ClientDependencies
 	endpoint *zanzibar.TChannelEndpoint
-	Logger   *zap.Logger
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -72,24 +70,41 @@ func (h *SimpleServiceCallHandler) Handle(
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}); err != nil {
-		return false, nil, nil, err
+		h.endpoint.Logger.Error("Request missing request headers",
+			zap.Error(err),
+			zap.Strings("headers", []string{"x-uuid", "x-token"}),
+		)
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) request missing request headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 
 	var res endpointsTchannelBazBaz.SimpleService_Call_Result
 
 	var req endpointsTchannelBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
+		h.endpoint.Logger.Error("Error converting request from wire", zap.Error(err))
+		return false, nil, nil, errors.Wrapf(
+			err, "Error converting %s.%s (%s) request from wire",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 	workflow := customBaz.CallEndpoint{
 		Clients: h.Clients,
-		Logger:  h.Logger,
+		Logger:  h.endpoint.Logger,
 	}
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	if err := wfResHeaders.Ensure([]string{"some-res-header"}); err != nil {
-		return false, nil, nil, err
+		h.endpoint.Logger.Error("Request missing response headers", zap.Error(err),
+			zap.Strings("headers", []string{"some-res-header"}),
+		)
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) request missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 
 	resHeaders := map[string]string{}
@@ -100,14 +115,23 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
+			h.endpoint.Logger.Error(
+				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+				zap.Error(err),
+			)
 			if v == nil {
-				return false, nil, resHeaders, errors.New(
-					"Handler for Call returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+				return false, nil, resHeaders, errors.Errorf(
+					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 				)
 			}
 			res.AuthErr = v
 		default:
-			return false, nil, resHeaders, err
+			h.endpoint.Logger.Error("Handler returned error", zap.Error(err))
+			return false, nil, resHeaders, errors.Wrapf(
+				err, "%s.%s (%s) handler returned error",
+				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+			)
 		}
 	}
 
