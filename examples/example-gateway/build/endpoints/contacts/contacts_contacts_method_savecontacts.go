@@ -76,6 +76,8 @@ func (handler *ContactsSaveContactsHandler) HandleRequest(
 		return
 	}
 
+	requestBody.UserUUID = req.Params.ByName("userUUID")
+
 	workflow := customContacts.SaveContactsEndpoint{
 		Clients: handler.Clients,
 		Logger:  req.Logger,
