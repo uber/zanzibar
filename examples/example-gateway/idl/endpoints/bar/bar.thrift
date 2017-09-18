@@ -139,7 +139,7 @@ service Bar {
         2: optional ParamsStruct params
     ) (
         zanzibar.http.method = "POST"
-        zanzibar.http.path = "/bar/:uuid/segment/:user-uuid"
+        zanzibar.http.path = "/bar/argWithParams/:uuid/segment/:user-uuid"
         zanzibar.http.status = "200"
     )
 

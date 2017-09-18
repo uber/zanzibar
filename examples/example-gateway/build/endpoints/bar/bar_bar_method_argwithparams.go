@@ -35,7 +35,7 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarArgWithParamsHandler is the handler for "/bar/argWithParams"
+// BarArgWithParamsHandler is the handler for "/bar/:uuid/segment/:user-uuid"
 type BarArgWithParamsHandler struct {
 	Clients *module.ClientDependencies
 }
@@ -53,7 +53,7 @@ func NewBarArgWithParamsHandler(
 // Register adds the http handler to the gateway's http router
 func (handler *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
-		"POST", "/bar/argWithParams",
+		"POST", "/bar/:uuid/segment/:user-uuid",
 		zanzibar.NewRouterEndpoint(
 			g,
 			"bar",
@@ -65,7 +65,7 @@ func (handler *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
 	return nil
 }
 
-// HandleRequest handles "/bar/argWithParams".
+// HandleRequest handles "/bar/:uuid/segment/:user-uuid".
 func (handler *BarArgWithParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
