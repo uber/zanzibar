@@ -10,8 +10,8 @@ enum Fruit {
 }
 
 struct BarRequest {
-    1: required string stringField (zanzibar.http.ref = "params.someParamsField")
-    2: required bool boolField (zanzibar.http.ref = "query.some-query-field")
+    1: required string stringField
+    2: required bool boolField
 }
 
 struct BarResponse {
