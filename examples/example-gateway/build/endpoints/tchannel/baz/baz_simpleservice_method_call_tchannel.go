@@ -49,13 +49,14 @@ func NewSimpleServiceCallHandler(
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".
 type SimpleServiceCallHandler struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.TChannelEndpoint
+	Logger   *zap.Logger
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(
+	h.endpoint = g.TChannelRouter.Register(
 		"bazTChannel", "call", "SimpleService::Call",
 		h,
 	)

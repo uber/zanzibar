@@ -1853,19 +1853,20 @@ func New{{$handlerName}}(
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
 		Clients: deps.Client,
-		Logger: gateway.Logger,
+		Logger:  gateway.Logger,
 	}
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
 type {{$handlerName}} struct {
-	Clients *module.ClientDependencies
-	Logger *zap.Logger
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.TChannelEndpoint
+	Logger   *zap.Logger
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(
+	h.endpoint = g.TChannelRouter.Register(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		h,
 	)
@@ -1963,7 +1964,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3498, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3552, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
