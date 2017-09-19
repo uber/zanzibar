@@ -54,6 +54,18 @@ type TChannelEndpoint struct {
 	metrics        *InboundTChannelMetrics
 }
 
+type tchannelCall struct {
+	endpoint   *TChannelEndpoint
+	call       *tchannel.InboundCall
+	success    bool
+	startTime  time.Time
+	finishTime time.Time
+	reqBody    []byte
+	resBody    []byte
+	reqHeaders map[string]string
+	resHeaders map[string]string
+}
+
 // TChannelRouter handles incoming TChannel calls and routes them to the matching TChannelHandler.
 type TChannelRouter struct {
 	sync.RWMutex
@@ -150,6 +162,15 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	}
 }
 
+func getServiceMethod(method string) (string, string, bool) {
+	s := string(method)
+	sep := strings.Index(s, "::")
+	if sep == -1 {
+		return "", "", false
+	}
+	return s[:sep], s[sep+2:], true
+}
+
 func (s *TChannelRouter) onError(err error) {
 	if tchannel.GetSystemErrorCode(err) == tchannel.ErrCodeTimeout {
 		s.logger.Warn("Thrift server timeout", zap.Error(err))
@@ -163,241 +184,246 @@ func (s *TChannelRouter) handle(
 	e *TChannelEndpoint,
 	call *tchannel.InboundCall,
 ) (err error) {
-	var success bool
-	var startTime, finishTime time.Time
-	var reqBody, resBody []byte
-	var reqHeaders, resHeaders map[string]string
+	c := tchannelCall{
+		endpoint: e,
+		call:     call,
+	}
+	defer c.finish(err)
+	c.start()
 
-	defer func() {
-		// finish
-		finishTime = time.Now()
-
-		// emit metrics
-		if err != nil {
-			e.metrics.SystemErrors.Inc(1)
-		} else if !success {
-			e.metrics.AppErrors.Inc(1)
-		} else {
-			e.metrics.Success.Inc(1)
-		}
-		e.metrics.Latency.Record(finishTime.Sub(startTime))
-
-		// write logs
-		e.Logger.Info(
-			"Finished an incoming server TChannel request",
-			serverTChannelLogFields(call, startTime, finishTime, reqBody, resBody, reqHeaders, resHeaders)...,
-		)
-	}()
-
-	// start
-	startTime = time.Now()
-	e.metrics.Recvd.Inc(1)
-
-	// read request headers
-	treader, err := call.Arg2Reader()
+	if err := c.readReqHeaders(); err != nil {
+		return err
+	}
+	wireValue, err := c.readReqBody()
 	if err != nil {
-		e.Logger.Error("Could not create arg2reader for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not create arg2reader for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	reqHeaders, err = ReadHeaders(treader)
-	if err != nil {
-		_ = treader.Close()
-		e.Logger.Error("Could not read headers for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not read headers for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := EnsureEmpty(treader, "reading request headers"); err != nil {
-		_ = treader.Close()
-		e.Logger.Error("Could not ensure arg2reader is empty for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not ensure arg2reader is empty for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := treader.Close(); err != nil {
-		e.Logger.Error("Could not close arg2reader for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not close arg2reader for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-
-	// read request body
-	treader, err = call.Arg3Reader()
-	if err != nil {
-		e.Logger.Error("Could not create arg3reader for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not create arg3reader for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	buf := GetBuffer()
-	defer PutBuffer(buf)
-	if _, err := buf.ReadFrom(treader); err != nil {
-		_ = treader.Close()
-		e.Logger.Error("Could not read from arg3reader for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not read from arg3reader for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	reqBody = buf.Bytes()
-	wireValue, err := protocol.Binary.Decode(bytes.NewReader(reqBody), wire.TStruct)
-	if err != nil {
-		e.Logger.Error("Could not decode arg3 for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not decode arg3 for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
+		return err
 	}
 
 	// trace request
 	tracer := tchannel.TracerFromRegistrar(s.registrar)
-	ctx = tchannel.ExtractInboundSpan(ctx, call, reqHeaders, tracer)
+	ctx = tchannel.ExtractInboundSpan(ctx, call, c.reqHeaders, tracer)
 
-	// handle request
-	var resp RWTStruct
-	success, resp, resHeaders, err = e.handler.Handle(ctx, reqHeaders, &wireValue)
-	if e.postResponseCB != nil {
-		defer e.postResponseCB(ctx, e.Method, resp)
-	}
+	resp, err := c.handle(ctx, &wireValue)
 	if err != nil {
-		_ = treader.Close()
-		e.Logger.Error("Unexpected tchannel system error", zap.Error(err))
-		return call.Response().SendSystemError(errors.New("Server Error"))
+		return err
 	}
-	if !success {
-		if err = call.Response().SetApplicationError(); err != nil {
-			_ = treader.Close()
-			e.Logger.Error("Could not set application error for inbound response", zap.Error(err))
-			return err
-		}
+	if err = c.writeResHeaders(); err != nil {
+		return err
 	}
-
-	// close request body
-	if err := EnsureEmpty(treader, "reading request body"); err != nil {
-		_ = treader.Close()
-		e.Logger.Error("Could not ensure arg3reader is empty for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not ensure arg3reader is empty for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := treader.Close(); err != nil {
-		e.Logger.Error("Could not close arg3reader for inbound request", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not close arg3reader for inbound %s.%s (%s) request",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-
-	// write response headers
-	twriter, err := call.Response().Arg2Writer()
-	if err != nil {
-		e.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not create arg2writer for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := WriteHeaders(twriter, resHeaders); err != nil {
-		_ = twriter.Close()
-		e.Logger.Error("Could not write headers for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not write headers for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := twriter.Close(); err != nil {
-		e.Logger.Error("Could not close arg2writer for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not close arg2writer for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-
-	// write response body
-	structWireValue, err := resp.ToWire()
-	if err != nil {
-		// If we could not write the body then we should do something else instead.
-		_ = call.Response().SendSystemError(errors.New("Server Error"))
-		e.Logger.Error("Could not serialize arg3 for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not serialize arg3 for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	resBody = structWireValue.GetBinary()
-	twriter, err = call.Response().Arg3Writer()
-	if err != nil {
-		e.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not create arg3writer for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	err = protocol.Binary.Encode(structWireValue, twriter)
-	if err != nil {
-		_ = twriter.Close()
-		e.Logger.Error("Could not write arg3 for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not write arg3 for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
-	}
-	if err := twriter.Close(); err != nil {
-		e.Logger.Error("Could not close arg3writer for inbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not close arg3writer for inbound %s.%s (%s) response",
-			e.EndpointID, e.HandlerID, e.Method,
-		)
+	if err = c.writeResBody(resp); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func getServiceMethod(method string) (string, string, bool) {
-	s := string(method)
-	sep := strings.Index(s, "::")
-	if sep == -1 {
-		return "", "", false
-	}
-	return s[:sep], s[sep+2:], true
+func (c *tchannelCall) start() {
+	c.startTime = time.Now()
+	c.endpoint.metrics.Recvd.Inc(1)
 }
 
-func serverTChannelLogFields(
-	call *tchannel.InboundCall,
-	startTime, finishTime time.Time,
-	reqBody, resBody []byte,
-	reqHeaders, resHeaders map[string]string,
-) []zapcore.Field {
+func (c *tchannelCall) finish(err error) {
+	c.finishTime = time.Now()
+
+	// emit metrics
+	if err != nil {
+		c.endpoint.metrics.SystemErrors.Inc(1)
+	} else if !c.success {
+		c.endpoint.metrics.AppErrors.Inc(1)
+	} else {
+		c.endpoint.metrics.Success.Inc(1)
+	}
+	c.endpoint.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
+
+	// write logs
+	c.endpoint.Logger.Info("Finished an incoming server TChannel request", c.logFields()...)
+
+}
+
+func (c *tchannelCall) logFields() []zapcore.Field {
 	fields := []zapcore.Field{
-		zap.String("remoteAddr", call.RemotePeer().HostPort),
-		zap.String("calling-service", call.CallerName()),
-		zap.Time("timestamp-started", startTime),
-		zap.Time("timestamp-finished", finishTime),
+		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
+		zap.String("calling-service", c.call.CallerName()),
+		zap.Time("timestamp-started", c.startTime),
+		zap.Time("timestamp-finished", c.finishTime),
 
 		// TODO: Do not log body by default because PII and bandwidth.
 		// Temporarily log during the developement cycle
 		// TODO: Add a gateway level configurable body unmarshaller
 		// to extract only non-PII info.
-		zap.ByteString("Request Body", reqBody),
-		zap.ByteString("Response Body", resBody),
+		zap.ByteString("Request Body", c.reqBody),
+		zap.ByteString("Response Body", c.resBody),
 	}
 
-	for k, v := range reqHeaders {
+	for k, v := range c.reqHeaders {
 		fields = append(fields, zap.String("Request-Header-"+k, v))
 	}
-	for k, v := range resHeaders {
+	for k, v := range c.resHeaders {
 		fields = append(fields, zap.String("Response-Header-"+k, v))
 	}
 
 	// TODO: log jaeger trace span
 
 	return fields
+}
+
+// readReqHeaders reads request headers from arg2
+func (c *tchannelCall) readReqHeaders() error {
+	treader, err := c.call.Arg2Reader()
+	if err != nil {
+		c.endpoint.Logger.Error("Could not create arg2reader for inbound request", zap.Error(err))
+		return errors.Wrapf(err, "Could not create arg2reader for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	c.reqHeaders, err = ReadHeaders(treader)
+	if err != nil {
+		_ = treader.Close()
+		c.endpoint.Logger.Error("Could not read headers for inbound request", zap.Error(err))
+		return errors.Wrapf(err, "Could not read headers for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	if err := EnsureEmpty(treader, "reading request headers"); err != nil {
+		_ = treader.Close()
+		c.endpoint.Logger.Error("Could not ensure arg2reader is empty for inbound request", zap.Error(err))
+		return errors.Wrapf(err, "Could not ensure arg2reader is empty for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	if err := treader.Close(); err != nil {
+		c.endpoint.Logger.Error("Could not close arg2reader for inbound request", zap.Error(err))
+		return errors.Wrapf(err, "Could not close arg2reader for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	return nil
+}
+
+// readReqBody reads request body from arg3
+func (c *tchannelCall) readReqBody() (wireValue wire.Value, err error) {
+	treader, err := c.call.Arg3Reader()
+	if err != nil {
+		c.endpoint.Logger.Error("Could not create arg3reader for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not create arg3reader for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
+	buf := GetBuffer()
+	defer PutBuffer(buf)
+	if _, err = buf.ReadFrom(treader); err != nil {
+		_ = treader.Close()
+		c.endpoint.Logger.Error("Could not read from arg3reader for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not read from arg3reader for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
+	c.reqBody = buf.Bytes()
+	wireValue, err = protocol.Binary.Decode(bytes.NewReader(c.reqBody), wire.TStruct)
+	if err != nil {
+		c.endpoint.Logger.Error("Could not decode arg3 for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
+	if err = EnsureEmpty(treader, "reading request body"); err != nil {
+		_ = treader.Close()
+		c.endpoint.Logger.Error("Could not ensure arg3reader is empty for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not ensure arg3reader is empty for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
+	if err = treader.Close(); err != nil {
+		c.endpoint.Logger.Error("Could not close arg3reader for inbound request", zap.Error(err))
+		err = errors.Wrapf(err, "Could not close arg3reader for inbound %s.%s (%s) request",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+		return
+	}
+	return
+}
+
+// handle tchannel server endpoint call
+func (c *tchannelCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
+	c.success, resp, c.resHeaders, err = c.endpoint.handler.Handle(ctx, c.reqHeaders, wireValue)
+	if c.endpoint.postResponseCB != nil {
+		defer c.endpoint.postResponseCB(ctx, c.endpoint.Method, resp)
+	}
+	if err != nil {
+		c.endpoint.Logger.Error("Unexpected tchannel system error", zap.Error(err))
+		err = c.call.Response().SendSystemError(errors.New("Server Error"))
+		return
+	}
+	if !c.success {
+		if err = c.call.Response().SetApplicationError(); err != nil {
+			c.endpoint.Logger.Error("Could not set application error for inbound response", zap.Error(err))
+			return
+		}
+	}
+	return
+}
+
+// writeResHeaders writes response headers to arg2
+func (c *tchannelCall) writeResHeaders() error {
+	twriter, err := c.call.Response().Arg2Writer()
+	if err != nil {
+		c.endpoint.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not create arg2writer for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	if err = WriteHeaders(twriter, c.resHeaders); err != nil {
+		_ = twriter.Close()
+		c.endpoint.Logger.Error("Could not write headers for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not write headers for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	if err = twriter.Close(); err != nil {
+		c.endpoint.Logger.Error("Could not close arg2writer for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not close arg2writer for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	return nil
+}
+
+// writeResBody writes response body to arg3
+func (c *tchannelCall) writeResBody(resp RWTStruct) error {
+	structWireValue, err := resp.ToWire()
+	if err != nil {
+		// If we could not write the body then we should do something else instead.
+		_ = c.call.Response().SendSystemError(errors.New("Server Error"))
+		c.endpoint.Logger.Error("Could not serialize arg3 for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not serialize arg3 for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	c.resBody = structWireValue.GetBinary()
+	twriter, err := c.call.Response().Arg3Writer()
+	if err != nil {
+		c.endpoint.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not create arg3writer for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	err = protocol.Binary.Encode(structWireValue, twriter)
+	if err != nil {
+		_ = twriter.Close()
+		c.endpoint.Logger.Error("Could not write arg3 for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not write arg3 for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	if err = twriter.Close(); err != nil {
+		c.endpoint.Logger.Error("Could not close arg3writer for inbound response", zap.Error(err))
+		return errors.Wrapf(err, "Could not close arg3writer for inbound %s.%s (%s) response",
+			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
+		)
+	}
+	return nil
 }
