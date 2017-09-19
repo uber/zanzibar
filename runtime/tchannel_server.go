@@ -214,7 +214,7 @@ func (s *TChannelRouter) handle(
 		return err
 	}
 
-	return nil
+	return err
 }
 
 func (c *tchannelCall) start() {
