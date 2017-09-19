@@ -1560,9 +1560,21 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
+	methodNames := map[string]string{
+		{{range $svc := .Services -}}
+		{{range .Methods -}}
+		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			"{{$serviceMethod}}": "{{$methodName}}",
+		{{ end -}}
+		{{ end -}}
+	}
+
 	client := zanzibar.NewTChannelClient(gateway.Channel,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
+			ClientID:          "{{$clientID}}",
+			MethodNames:       methodNames,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,

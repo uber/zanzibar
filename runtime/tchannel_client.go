@@ -33,6 +33,8 @@ import (
 // TChannelClientOption is used when creating a new tchannelClient
 type TChannelClientOption struct {
 	ServiceName       string
+	ClientID          string
+	MethodNames       map[string]string
 	Timeout           time.Duration
 	TimeoutPerAttempt time.Duration
 	RoutingKey        *string
@@ -43,6 +45,8 @@ type tchannelClient struct {
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	serviceName       string
+	clientID          string
+	methodNames       map[string]string
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
 	routingKey        *string
@@ -62,15 +66,16 @@ type tchannelCall struct {
 
 // NewTChannelClient returns a tchannelClient that makes calls over the given tchannel to the given thrift service.
 func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannelClient {
-	client := &tchannelClient{
+	return &tchannelClient{
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
 		serviceName:       opt.ServiceName,
+		clientID:          opt.ClientID,
+		methodNames:       opt.MethodNames,
 		timeout:           opt.Timeout,
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
 		routingKey:        opt.RoutingKey,
 	}
-	return client
 }
 
 // Call makes a RPC call to the given service.

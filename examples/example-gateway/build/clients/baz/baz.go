@@ -164,9 +164,34 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		gateway.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
 	)
 
+	methodNames := map[string]string{
+		"SecondService::echoBinary":     "EchoBinary",
+		"SecondService::echoBool":       "EchoBool",
+		"SecondService::echoDouble":     "EchoDouble",
+		"SecondService::echoEnum":       "EchoEnum",
+		"SecondService::echoI16":        "EchoI16",
+		"SecondService::echoI32":        "EchoI32",
+		"SecondService::echoI64":        "EchoI64",
+		"SecondService::echoI8":         "EchoI8",
+		"SecondService::echoString":     "EchoString",
+		"SecondService::echoStringList": "EchoStringList",
+		"SecondService::echoStringMap":  "EchoStringMap",
+		"SecondService::echoStringSet":  "EchoStringSet",
+		"SecondService::echoStructList": "EchoStructList",
+		"SecondService::echoStructMap":  "EchoStructMap",
+		"SecondService::echoStructSet":  "EchoStructSet",
+		"SecondService::echoTypedef":    "EchoTypedef",
+		"SimpleService::call":           "Call",
+		"SimpleService::compare":        "Compare",
+		"SimpleService::ping":           "Ping",
+		"SimpleService::sillyNoop":      "DeliberateDiffNoop",
+	}
+
 	client := zanzibar.NewTChannelClient(gateway.Channel,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
+			ClientID:          "baz",
+			MethodNames:       methodNames,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
