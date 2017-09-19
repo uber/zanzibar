@@ -34,6 +34,8 @@ type PathSegment struct {
 	Type           string
 	Text           string
 	BodyIdentifier string
+	ParamName      string
+	Required       bool
 }
 
 // ExceptionSpec contains information about thrift exceptions
@@ -107,6 +109,9 @@ type MethodSpec struct {
 
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
+
+	// Statements for reading data out of url params (server)
+	RequestParamGoStatements []string
 }
 
 // StructSpec specifies a Go struct to be generated.
@@ -213,6 +218,11 @@ func NewMethod(
 		)
 	}
 	method.setHTTPPath(httpPath, funcSpec)
+
+	err = method.setRequestParamFields(funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
 
 	err = method.setRequestHeaderFields(funcSpec, packageHelper)
 	if err != nil {
@@ -414,14 +424,16 @@ func (ms *MethodSpec) setExceptions(
 
 func findParamsAnnotation(
 	fields compile.FieldGroup, paramName string,
-) (string, bool) {
+) (string, bool, bool) {
 	var identifier string
+	var required bool
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		if param, ok := field.Annotations[antHTTPRef]; ok {
 			if param == "params."+paramName[1:] {
 				identifier = goPrefix + "." + pascalCase(field.Name)
+				required = field.Required
 				return true
 			}
 		}
@@ -431,10 +443,89 @@ func findParamsAnnotation(
 	walkFieldGroups(fields, visitor)
 
 	if identifier == "" {
-		return "", false
+		return "", required, false
 	}
 
-	return identifier, true
+	return identifier, required, true
+}
+
+func (ms *MethodSpec) setRequestParamFields(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) error {
+	statements := LineBuilder{}
+
+	seenStructs, err := findStructs(funcSpec, packageHelper)
+	if err != nil {
+		return err
+	}
+
+	for _, segment := range ms.PathSegments {
+		if segment.Type != "param" {
+			continue
+		}
+
+		for seenStruct, typeName := range seenStructs {
+			if strings.HasPrefix(segment.BodyIdentifier, seenStruct) {
+				statements.appendf("if requestBody%s == nil {",
+					seenStruct,
+				)
+				statements.appendf("\trequestBody%s = &%s{}",
+					seenStruct, typeName,
+				)
+				statements.append("}")
+			}
+		}
+
+		if segment.Required {
+			statements.appendf("requestBody%s = req.Params.ByName(%q)",
+				segment.BodyIdentifier, segment.ParamName,
+			)
+		} else {
+			statements.appendf(
+				"requestBody%s = ptr.String(req.Params.ByName(%q))",
+				segment.BodyIdentifier,
+				segment.ParamName,
+			)
+		}
+	}
+
+	ms.RequestParamGoStatements = statements.GetLines()
+
+	return nil
+}
+
+func findStructs(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) (map[string]string, error) {
+	fields := compile.FieldGroup(funcSpec.ArgsSpec)
+	var seenStructs = map[string]string{}
+	var finalError error
+
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		if _, ok := realType.(*compile.StructSpec); ok {
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+
+			seenStructs[longFieldName] = typeName
+		}
+
+		return false
+	}
+	walkFieldGroups(fields, visitor)
+
+	if finalError != nil {
+		return nil, finalError
+	}
+
+	return seenStructs, nil
 }
 
 func (ms *MethodSpec) setRequestHeaderFields(
@@ -603,15 +694,16 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 			ms.PathSegments[i].Type = "param"
 
 			var fieldSelect string
+			var required bool
 			var ok bool
 			if ms.RequestBoxed {
 				// Boxed requests mean first arg is struct
 				structType := funcSpec.ArgsSpec[0].Type.(*compile.StructSpec)
-				fieldSelect, ok = findParamsAnnotation(
+				fieldSelect, required, ok = findParamsAnnotation(
 					structType.Fields, segment,
 				)
 			} else {
-				fieldSelect, ok = findParamsAnnotation(
+				fieldSelect, required, ok = findParamsAnnotation(
 					compile.FieldGroup(funcSpec.ArgsSpec), segment,
 				)
 			}
@@ -620,6 +712,8 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 				panic("cannot find params: " + segment)
 			}
 			ms.PathSegments[i].BodyIdentifier = fieldSelect
+			ms.PathSegments[i].ParamName = segment[1:]
+			ms.PathSegments[i].Required = required
 		}
 	}
 }
