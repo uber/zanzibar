@@ -38,9 +38,11 @@ func CreateGateway(
 }
 
 func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	var err error
 	{{- range $class, $instances := $instance.ResolvedDependencies }}
 	{{- range $idx, $instance := $instances }}
-	if err := deps.{{title $class}}.{{$instance.PackageInfo.QualifiedInstanceName}}.Register(g); err != nil {
+	err = deps.{{title $class}}.{{$instance.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err != nil {
 		return err
 	}
 	{{- end}}
