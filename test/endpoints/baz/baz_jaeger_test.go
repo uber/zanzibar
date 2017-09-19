@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -87,6 +88,7 @@ func TestCallJaeger(t *testing.T) {
 	}
 
 	cg.MetricsWaitGroup.Wait()
+	time.Sleep(time.Second * 1)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
