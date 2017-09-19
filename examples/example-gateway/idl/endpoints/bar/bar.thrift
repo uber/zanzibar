@@ -35,7 +35,10 @@ struct QueryParamsOptsStruct {
 }
 
 struct ParamsStruct {
-    1: required string userUUID (zanzibar.http.ref = "params.user-uuid")
+    1: required string userUUID (
+        zanzibar.http.ref = "params.user-uuid"
+        go.tag = "json:\"-\""
+    )
 }
 
 exception BarException {
@@ -135,7 +138,10 @@ service Bar {
 
     // TODO: support params annotation
     BarResponse argWithParams(
-        1: required string uuid (zanzibar.http.ref = "params.uuid")
+        1: required string uuid (
+            zanzibar.http.ref = "params.uuid"
+            go.tag = "json:\"-\""
+        )
         2: optional ParamsStruct params
     ) (
         zanzibar.http.method = "POST"
