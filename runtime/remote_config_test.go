@@ -28,7 +28,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 const tmpCfgPath = "/tmp/zanzibar_remote_cfg.json"
@@ -94,7 +96,7 @@ func setupRemoteConfigTestSuite(filePath string, configStr string, interval time
 		FilePath:        configFilePath,
 		PollingInterval: pollingInternal,
 	}
-	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, nil, nil)
+	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, zap.NewNop(), tally.NoopScope)
 	if err != nil {
 		panic("unable to init new remote config")
 	}
@@ -111,7 +113,13 @@ func (ts *testSuite) tearDown() {
 }
 
 func TestNilFileInitializeError(t *testing.T) {
-	rc, err := zanzibar.NewRemoteConfig(&zanzibar.RemoteConfigOptions{}, nil, nil)
+	rc, err := zanzibar.NewRemoteConfig(&zanzibar.RemoteConfigOptions{}, zap.NewNop(), nil)
+	assert.Nil(t, rc)
+	assert.NotNil(t, err)
+	rc, err = zanzibar.NewRemoteConfig(&zanzibar.RemoteConfigOptions{}, nil, tally.NoopScope)
+	assert.Nil(t, rc)
+	assert.NotNil(t, err)
+	rc, err = zanzibar.NewRemoteConfig(&zanzibar.RemoteConfigOptions{}, zap.NewNop(), tally.NoopScope)
 	assert.Nil(t, rc)
 	assert.NotNil(t, err)
 }
@@ -119,8 +127,8 @@ func TestNilFileInitializeError(t *testing.T) {
 func TestInvalidPathInitializeError(t *testing.T) {
 	rc, err := zanzibar.NewRemoteConfig(
 		&zanzibar.RemoteConfigOptions{FilePath: "invalid_path", PollingInterval: time.Second},
-		nil,
-		nil,
+		zap.NewNop(),
+		tally.NoopScope,
 	)
 	assert.Nil(t, rc)
 	assert.NotNil(t, err)
@@ -137,7 +145,7 @@ func TestInvalidJSJONInitializeError(t *testing.T) {
 		FilePath:        tmpCfgPath,
 		PollingInterval: time.Second,
 	}
-	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, nil, nil)
+	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, zap.NewNop(), tally.NoopScope)
 	assert.Nil(t, remoteConfig)
 	assert.NotNil(t, err)
 }
@@ -279,17 +287,21 @@ func TestTypeHappyRemoteConfig(t *testing.T) {
 }
 
 func TestSubscribe(t *testing.T) {
+	var (
+		wg sync.WaitGroup
+		f1 zanzibar.Callback
+		f2 zanzibar.Callback
+	)
 	ts := setupRemoteConfigTestSuite("", "", 0)
 	ch := make(chan int, 2)
 	defer ts.tearDown()
-	var wg sync.WaitGroup
 	wg.Add(2)
-	concurrentSub := func(identifier, key string, fn *func()) {
+	concurrentSub := func(identifier, key string, fn *zanzibar.Callback) {
 		ts.remoteConfig.Subscribe(identifier, key, fn)
 		wg.Done()
 	}
-	f1 := func() { ch <- 1 }
-	f2 := func() { ch <- 2 }
+	f1 = func(map[string]bool) { ch <- 1 }
+	f2 = func(map[string]bool) { ch <- 2 }
 	go concurrentSub("subscriber1", "cfgstring", &f1)
 	go concurrentSub("subscriber2", "cfgint", &f2)
 	wg.Wait()
@@ -302,9 +314,10 @@ func TestSubscribe(t *testing.T) {
 
 func TestUnsubscribe(t *testing.T) {
 	ts := setupRemoteConfigTestSuite("", "", 0)
-	ch := make(chan int)
+	ch := make(chan int, 1)
 	defer ts.tearDown()
-	fn := func() {
+	var fn zanzibar.Callback
+	fn = func(map[string]bool) {
 		ch <- 1
 	}
 	updateNRefresh := func() {
@@ -324,6 +337,23 @@ func TestUnsubscribe(t *testing.T) {
 	default:
 		return
 	}
+}
+
+func TestSubscribeNoSpecificKey(t *testing.T) {
+	var fn zanzibar.Callback
+	ts := setupRemoteConfigTestSuite("", "", 0)
+	ch := make(chan int, 1)
+	defer ts.tearDown()
+	fn = func(diff map[string]bool) {
+		ch <- 1
+		assert.Equal(t, 4, len(diff))
+	}
+	ts.remoteConfig.Subscribe("subscriber", "", &fn)
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"cfgint": 20}`), 0644)
+	assert.Nil(t, err)
+	err = ts.remoteConfig.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, <-ch)
 }
 
 func TestPolling(t *testing.T) {

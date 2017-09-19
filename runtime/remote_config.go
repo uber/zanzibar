@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -43,7 +42,7 @@ type RemoteConfig interface {
 	GetInt(string, int64) int64
 	GetString(string, string) string
 	GetStruct(string, interface{}) bool
-	Subscribe(string, string, *func())
+	Subscribe(string, string, *Callback)
 	Unsubscribe(string)
 	Refresh() error
 	Close()
@@ -55,9 +54,12 @@ type RemoteConfigOptions struct {
 	PollingInterval time.Duration
 }
 
-// Subscriber is used to track subscribers' callbacks and keys they subscribe
+// Callback is registered to be triggered upon config change
+type Callback func(map[string]bool)
+
+// Subscriber is used to track subscribers' callbacks and keys subscribed
 type Subscriber struct {
-	Callback *func()
+	Callback *Callback
 	Key      string
 }
 
@@ -95,17 +97,16 @@ type remoteConfig struct {
 //		remoteConfig also provides pub/sub to allow caller act on specific key changes
 func NewRemoteConfig(cfg *RemoteConfigOptions, logger *zap.Logger, scope tally.Scope) (RemoteConfig, error) {
 	if logger == nil {
-		logger = zap.NewNop()
+		return nil, errors.Errorf("no logger is passed in")
+	}
+	if scope == nil {
+		return nil, errors.Errorf("no scope is passed in")
 	}
 	if len(cfg.FilePath) < 1 || cfg.PollingInterval == 0 {
 		return nil, errors.Errorf("invalid remote config options")
 	}
 	if _, err := os.Stat(cfg.FilePath); os.IsNotExist(err) {
 		return nil, errors.Errorf("invalid remote config file path")
-	}
-	if scope == nil {
-		logger.Warn("no valid metrics scope")
-		scope = tally.NoopScope
 	}
 	rc := &remoteConfig{
 		config:      cfg,
@@ -131,11 +132,15 @@ func (rc *remoteConfig) loadConfig() RemoteConfigMap {
 func (rc *remoteConfig) getValidatedValue(key string, vt jsonparser.ValueType) (*RemoteConfigValue, bool) {
 	ret, ok := rc.loadConfig()[key]
 	if !ok {
-		rc.logger.Warn(fmt.Sprintf("Key <%s> missing", key))
+		rc.logger.With(zap.String("key", key)).Warn("Key is missing")
 		return nil, false
 	}
 	if ret.dataType != vt {
-		rc.logger.Warn(fmt.Sprintf("Key <%s> type mismatch (expected %s actual %s)", key, vt, ret.dataType))
+		rc.logger.With(
+			zap.String("key", key),
+			zap.Any("expected_type", vt),
+			zap.Any("actual_type", ret.dataType),
+		).Warn("Key type mismatch")
 		return nil, false
 	}
 	return ret, true
@@ -168,7 +173,7 @@ func (rc *remoteConfig) GetInt(key string, fallback int64) int64 {
 	if v, err := jsonparser.ParseInt(ret.bytes); err == nil {
 		return v
 	}
-	rc.logger.Warn(fmt.Sprintf("Key <%s> is not int64", key))
+	rc.logger.With(zap.String("key", key)).Warn("key is not int64")
 	return fallback
 }
 
@@ -188,6 +193,10 @@ func (rc *remoteConfig) GetStruct(key string, ptr interface{}) bool {
 		return false
 	}
 	if err := json.Unmarshal(ret.bytes, ptr); err != nil {
+		rc.logger.With(
+			zap.ByteString("bytes", ret.bytes),
+			zap.String("error", err.Error()),
+		).Error("GetStruct unmarshal error")
 		return false
 	}
 	return true
@@ -237,7 +246,9 @@ func (rc *remoteConfig) Refresh() error {
 func (rc *remoteConfig) checkAndReturnStat() (os.FileInfo, bool) {
 	stat, err := os.Stat(rc.config.FilePath)
 	if err != nil {
-		rc.logger.Error("Error stat remote config file " + rc.config.FilePath)
+		rc.logger.With(
+			zap.String("configPath", rc.config.FilePath),
+		).Error("Error stat remote config file")
 		return nil, true
 	}
 	if rc.currStat != nil && rc.currStat.ModTime().Equal(stat.ModTime()) && rc.currStat.Size() == stat.Size() {
@@ -283,13 +294,18 @@ func (rc *remoteConfig) Close() {
 }
 
 // Subscribe adds a callback function to be executed when config refresh is complete
-// Subscribe takes a string identifier and a function pointer to be called after
-// a completed config refresh
-func (rc *remoteConfig) Subscribe(identifier, key string, fn *func()) {
+// Subscribe takes a string identifier, a key and a function pointer to be called after
+// a config change for a certain key
+// Params:
+// 		callback: callback function should be lightweight, ideally just reload the
+// 				  key subscribed.
+// 		key: if no specific key passed in (empty string), callback will be triggered on
+//			 *every* config update
+func (rc *remoteConfig) Subscribe(identifier, key string, callback *Callback) {
 	rc.mutex.Lock()
 	defer rc.mutex.Unlock()
 	rc.subscribers[identifier] = &Subscriber{
-		Callback: fn,
+		Callback: callback,
 		Key:      key,
 	}
 }
@@ -304,21 +320,26 @@ func (rc *remoteConfig) Unsubscribe(identifier string) {
 
 func (rc *remoteConfig) execCallbacks(changedMap map[string]bool) {
 	for _, s := range rc.subscribers {
-		if _, ok := changedMap[s.Key]; ok {
-			go (*s.Callback)()
+		if _, ok := changedMap[s.Key]; ok || len(s.Key) < 1 {
+			(*s.Callback)(changedMap)
 		}
 	}
 }
 
 func (rc *remoteConfig) poll() {
+	var (
+		key        = "remote_config.polling"
+		okCounter  = rc.scope.Tagged(map[string]string{"result": "ok"}).Counter(key)
+		errCounter = rc.scope.Tagged(map[string]string{"result": "err"}).Counter(key)
+	)
 	for {
 		select {
 		case <-rc.poller.C:
-			result := "ok"
 			if err := rc.Refresh(); err != nil {
-				result = "err"
+				okCounter.Inc(1)
+			} else {
+				errCounter.Inc(1)
 			}
-			rc.scope.Tagged(map[string]string{"result": result}).Counter("remote_config.polling")
 		case <-rc.close:
 			rc.wg.Done()
 			return
