@@ -85,7 +85,8 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
 		LogWhitelist: map[string]bool{
-			"Could not read response body": true,
+			"Could not read response body":    true,
+			"Could not make outbound request": true,
 		},
 		TestBinary:  util.DefaultMainFile("example-gateway"),
 		ConfigFiles: util.DefaultConfigFiles("example-gateway"),
