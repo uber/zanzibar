@@ -11,7 +11,7 @@ import (
 )
 
 type Bar_ArgWithParams_Args struct {
-	UUID   string        `json:"uuid,required"`
+	UUID   string        `json:"-"`
 	Params *ParamsStruct `json:"params,omitempty"`
 }
 

@@ -393,7 +393,7 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 }
 
 type ParamsStruct struct {
-	UserUUID string `json:"userUUID,required"`
+	UserUUID string `json:"-"`
 }
 
 func (v *ParamsStruct) ToWire() (wire.Value, error) {
