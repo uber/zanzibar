@@ -53,19 +53,25 @@ func CreateGateway(
 }
 
 func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	if err := deps.Endpoint.Bar.Register(g); err != nil {
+	var err error
+	err = deps.Endpoint.Bar.Register(g)
+	if err != nil {
 		return err
 	}
-	if err := deps.Endpoint.Baz.Register(g); err != nil {
+	err = deps.Endpoint.Baz.Register(g)
+	if err != nil {
 		return err
 	}
-	if err := deps.Endpoint.BazTChannel.Register(g); err != nil {
+	err = deps.Endpoint.BazTChannel.Register(g)
+	if err != nil {
 		return err
 	}
-	if err := deps.Endpoint.Contacts.Register(g); err != nil {
+	err = deps.Endpoint.Contacts.Register(g)
+	if err != nil {
 		return err
 	}
-	if err := deps.Endpoint.Googlenow.Register(g); err != nil {
+	err = deps.Endpoint.Googlenow.Register(g)
+	if err != nil {
 		return err
 	}
 	return nil
