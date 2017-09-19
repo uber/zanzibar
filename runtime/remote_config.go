@@ -132,15 +132,15 @@ func (rc *remoteConfig) loadConfig() RemoteConfigMap {
 func (rc *remoteConfig) getValidatedValue(key string, vt jsonparser.ValueType) (*RemoteConfigValue, bool) {
 	ret, ok := rc.loadConfig()[key]
 	if !ok {
-		rc.logger.With(zap.String("key", key)).Warn("Key is missing")
+		rc.logger.Warn("Key is missing", zap.String("key", key))
 		return nil, false
 	}
 	if ret.dataType != vt {
-		rc.logger.With(
+		rc.logger.Warn("Key type mismatch",
 			zap.String("key", key),
 			zap.Any("expected_type", vt),
 			zap.Any("actual_type", ret.dataType),
-		).Warn("Key type mismatch")
+		)
 		return nil, false
 	}
 	return ret, true
@@ -173,7 +173,7 @@ func (rc *remoteConfig) GetInt(key string, fallback int64) int64 {
 	if v, err := jsonparser.ParseInt(ret.bytes); err == nil {
 		return v
 	}
-	rc.logger.With(zap.String("key", key)).Warn("key is not int64")
+	rc.logger.Warn("key is not int64", zap.String("key", key))
 	return fallback
 }
 
@@ -193,10 +193,10 @@ func (rc *remoteConfig) GetStruct(key string, ptr interface{}) bool {
 		return false
 	}
 	if err := json.Unmarshal(ret.bytes, ptr); err != nil {
-		rc.logger.With(
+		rc.logger.Error("GetStruct unmarshal error",
 			zap.ByteString("bytes", ret.bytes),
 			zap.String("error", err.Error()),
-		).Error("GetStruct unmarshal error")
+		)
 		return false
 	}
 	return true
@@ -246,9 +246,7 @@ func (rc *remoteConfig) Refresh() error {
 func (rc *remoteConfig) checkAndReturnStat() (os.FileInfo, bool) {
 	stat, err := os.Stat(rc.config.FilePath)
 	if err != nil {
-		rc.logger.With(
-			zap.String("configPath", rc.config.FilePath),
-		).Error("Error stat remote config file")
+		rc.logger.Error("Error stat remote config file", zap.String("configPath", rc.config.FilePath))
 		return nil, true
 	}
 	if rc.currStat != nil && rc.currStat.ModTime().Equal(stat.ModTime()) && rc.currStat.Size() == stat.Size() {
@@ -256,6 +254,35 @@ func (rc *remoteConfig) checkAndReturnStat() (os.FileInfo, bool) {
 	}
 	return stat, true
 }
+
+//// reloadConfigAndReturnChanged atomically stores remote config properties
+//// and return keys been added/removed/updated
+//func (rc *remoteConfig) reloadConfigAndReturnChanged() (map[string]bool, error) {
+//	bytes, err := ioutil.ReadFile(rc.config.FilePath)
+//	changedMap := make(map[string]bool)
+//	if err != nil {
+//		return changedMap, err
+//	}
+//	currProps := make(RemoteConfigMap)
+//	err = jsonparser.ObjectEach(bytes, func(
+//		key []byte,
+//		value []byte,
+//		dataType jsonparser.ValueType,
+//		offset int,
+//	) error {
+//		currProps[string(key)] = &RemoteConfigValue{
+//			bytes:    value,
+//			dataType: dataType,
+//		}
+//		return nil
+//	})
+//	prevProps := rc.loadConfig()
+//	if err == nil {
+//		changedMap = changedKeys(prevProps, currProps)
+//		rc.props.Store(currProps)
+//	}
+//	return changedMap, err
+//}
 
 // reloadConfigAndReturnChanged atomically stores remote config properties
 // and return keys been added/removed/updated
@@ -266,18 +293,36 @@ func (rc *remoteConfig) reloadConfigAndReturnChanged() (map[string]bool, error) 
 		return changedMap, err
 	}
 	currProps := make(RemoteConfigMap)
-	err = jsonparser.ObjectEach(bytes, func(
-		key []byte,
+
+	_, err = jsonparser.ArrayEach(bytes, func(
 		value []byte,
 		dataType jsonparser.ValueType,
 		offset int,
-	) error {
-		currProps[string(key)] = &RemoteConfigValue{
-			bytes:    value,
-			dataType: dataType,
+		err error,
+	) {
+		if dataType != jsonparser.Object {
+			rc.logger.Error("invalid config value", zap.ByteString("value", value))
+			return
 		}
-		return nil
+		keyV, keyDT, _, keyErr := jsonparser.Get(value, "key")
+		if keyErr != nil || keyDT != jsonparser.String {
+			rc.logger.Error("invalid config value", zap.ByteString("value", value))
+			return
+		}
+		valV, valDT, _, valErr := jsonparser.Get(value, "value")
+		if valErr != nil {
+			rc.logger.Error("invalid config value",
+				zap.ByteString("value", value),
+				zap.String("key", string(keyV)),
+			)
+			return
+		}
+		currProps[string(keyV)] = &RemoteConfigValue{
+			bytes:    valV,
+			dataType: valDT,
+		}
 	})
+
 	prevProps := rc.loadConfig()
 	if err == nil {
 		changedMap = changedKeys(prevProps, currProps)

@@ -35,24 +35,38 @@ import (
 
 const tmpCfgPath = "/tmp/zanzibar_remote_cfg.json"
 const refreshInterval = time.Second * 10
-const defaultCfgJsonStr = `{
-		"cfgboolean": true,
-		"cfgint": 20,
-		"cfgfloat": 1.5,
-		"cfgstring": "testStr",
-		"cfgstruct": {
-			"NestedStruct":{
-				"ValBoolean": true,
-				"ValInt": 48,
-				"ValFloat": 3.1415926,
-				"ValString": "testNestedStructStr"
-			},
-			"ValBoolean":true,
-			"ValInt": 32,
-			"ValFloat": 3.14,
-			"ValString": "testStructStr"
-		}
-	}`
+const defaultCfgJsonStr = `[
+		{
+			"key": "cfgboolean",
+			"value": true,
+		},
+		{
+			"key": "cfgint",
+			"value": 20
+		},
+		{
+			"key": "cfgfloat",
+			"value": 1.5
+		},
+		{
+			"key": "cfgstring",
+			"value": "testStr"
+		},
+		{
+			"key": "cfgstruct",
+			"value": {
+				"NestedStruct":{
+					"ValBoolean": true,
+					"ValInt": 48,
+					"ValFloat": 3.1415926,
+					"ValString": "testNestedStructStr"
+				},
+				"ValBoolean":true,
+				"ValInt": 32,
+				"ValFloat": 3.14,
+				"ValString": "testStructStr"
+			}
+		}]`
 
 type testSuite struct {
 	configFilePath string
@@ -150,15 +164,35 @@ func TestInvalidJSJONInitializeError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestInvalidConfigItem(t *testing.T) {
+	configFileStr := `["not-object", {"missing-key": 1}, {"key":"test", "missing-value":1}]`
+	err := ioutil.WriteFile(tmpCfgPath, []byte(configFileStr), 0644)
+	assert.Nil(t, err)
+	defer func() {
+		_ = os.Remove(tmpCfgPath)
+	}()
+	cfg := &zanzibar.RemoteConfigOptions{
+		FilePath:        tmpCfgPath,
+		PollingInterval: time.Second,
+	}
+	remoteConfig, err := zanzibar.NewRemoteConfig(cfg, zap.NewNop(), tally.NoopScope)
+	assert.NotNil(t, remoteConfig)
+	assert.Nil(t, err)
+	res := remoteConfig.GetString("missing-key", "")
+	assert.Equal(t, "", res)
+	res = remoteConfig.GetString("test", "")
+	assert.Equal(t, "", res)
+}
+
 func TestTypeMisMatch(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", `{"cfgboolean": true}`, 0)
+	ts := setupRemoteConfigTestSuite("", `[{"key":"cfgboolean", "value":true}]`, 0)
 	defer ts.tearDown()
 	vf := ts.remoteConfig.GetFloat("cfgboolean", float64(0))
 	assert.Equal(t, float64(0), vf)
 }
 
 func TestUnmarshalErrStruct(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", `{"cfgstruct":{"NestedStruct":123}}`, 0)
+	ts := setupRemoteConfigTestSuite("", `[{"key":"cfgstruct","value":{"NestedStruct":123}}]`, 0)
 	defer ts.tearDown()
 	ns := &testStruct{}
 	ok := ts.remoteConfig.GetStruct("cfgstruct", ns)
@@ -202,7 +236,7 @@ func TestConcurrentW(t *testing.T) {
 	defer ts.tearDown()
 	var wg sync.WaitGroup
 	wg.Add(2)
-	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"test": 1}`), 0644)
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`[{"key":"test","value":1}]`), 0644)
 	if err != nil {
 		panic("unable to setup remote config file in " + tmpCfgPath)
 	}
@@ -223,7 +257,7 @@ func TestRefresh(t *testing.T) {
 	defer ts.tearDown()
 	vf := ts.remoteConfig.GetFloat("cfgfloat", float64(0))
 	assert.Equal(t, float64(1.5), vf)
-	configFileStr := `{"cfgfloat": 3.5}`
+	configFileStr := `[{"key":"cfgfloat", "value": 3.5}]`
 	err := ioutil.WriteFile(tmpCfgPath, []byte(configFileStr), 0644)
 	assert.Nil(t, err)
 	err = ts.remoteConfig.Refresh()
@@ -233,7 +267,7 @@ func TestRefresh(t *testing.T) {
 }
 
 func TestTypeRemoteConfigAndDefaultFallback(t *testing.T) {
-	ts := setupRemoteConfigTestSuite("", "{}", 0)
+	ts := setupRemoteConfigTestSuite("", "[]", 0)
 	defer ts.tearDown()
 	vb := ts.remoteConfig.GetBoolean("cfgboolean", false)
 	assert.Equal(t, false, vb)
@@ -305,7 +339,7 @@ func TestSubscribe(t *testing.T) {
 	go concurrentSub("subscriber1", "cfgstring", &f1)
 	go concurrentSub("subscriber2", "cfgint", &f2)
 	wg.Wait()
-	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"cfgint": 20}`), 0644)
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`[{"key":"cfgint","value":20}]`), 0644)
 	assert.Nil(t, err)
 	err = ts.remoteConfig.Refresh()
 	assert.Nil(t, err)
@@ -321,7 +355,7 @@ func TestUnsubscribe(t *testing.T) {
 		ch <- 1
 	}
 	updateNRefresh := func() {
-		err := ioutil.WriteFile(tmpCfgPath, []byte("{}"), 0644)
+		err := ioutil.WriteFile(tmpCfgPath, []byte("[]"), 0644)
 		assert.Nil(t, err)
 		err = ts.remoteConfig.Refresh()
 		assert.Nil(t, err)
@@ -349,7 +383,7 @@ func TestSubscribeNoSpecificKey(t *testing.T) {
 		assert.Equal(t, 4, len(diff))
 	}
 	ts.remoteConfig.Subscribe("subscriber", "", &fn)
-	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"cfgint": 20}`), 0644)
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`[{"key":"cfgint","value":20}]`), 0644)
 	assert.Nil(t, err)
 	err = ts.remoteConfig.Refresh()
 	assert.Nil(t, err)
@@ -359,7 +393,7 @@ func TestSubscribeNoSpecificKey(t *testing.T) {
 func TestPolling(t *testing.T) {
 	ts := setupRemoteConfigTestSuite("", "", time.Millisecond)
 	defer ts.tearDown()
-	err := ioutil.WriteFile(tmpCfgPath, []byte(`{"test": 1}`), 0644)
+	err := ioutil.WriteFile(tmpCfgPath, []byte(`[{"key":"test", "value":1}]`), 0644)
 	assert.Nil(t, err)
 	time.Sleep(2 * time.Millisecond)
 	res := ts.remoteConfig.GetInt("test", int64(0))
