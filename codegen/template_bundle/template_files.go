@@ -1417,9 +1417,11 @@ func CreateGateway(
 }
 
 func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	var err error
 	{{- range $class, $instances := $instance.ResolvedDependencies }}
 	{{- range $idx, $instance := $instances }}
-	if err := deps.{{title $class}}.{{$instance.PackageInfo.QualifiedInstanceName}}.Register(g); err != nil {
+	err = deps.{{title $class}}.{{$instance.PackageInfo.QualifiedInstanceName}}.Register(g)
+	if err != nil {
 		return err
 	}
 	{{- end}}
@@ -1438,7 +1440,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1283, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1297, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
