@@ -778,7 +778,7 @@ func (lhs ContactFragmentType) Equals(rhs ContactFragmentType) bool {
 }
 
 type SaveContactsRequest struct {
-	UserUUID UUID       `json:"userUUID,required"`
+	UserUUID string     `json:"userUUID,required"`
 	Contacts []*Contact `json:"contacts,required"`
 }
 
@@ -819,7 +819,7 @@ func (v *SaveContactsRequest) ToWire() (wire.Value, error) {
 		w      wire.Value
 		err    error
 	)
-	w, err = v.UserUUID.ToWire()
+	w, err = wire.NewValueString(v.UserUUID), error(nil)
 	if err != nil {
 		return w, err
 	}
@@ -835,12 +835,6 @@ func (v *SaveContactsRequest) ToWire() (wire.Value, error) {
 	fields[i] = wire.Field{ID: 2, Value: w}
 	i++
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
 }
 
 func _Contact_Read(w wire.Value) (*Contact, error) {
@@ -874,7 +868,7 @@ func (v *SaveContactsRequest) FromWire(w wire.Value) error {
 		switch field.ID {
 		case 1:
 			if field.Value.Type() == wire.TBinary {
-				v.UserUUID, err = _UUID_Read(field.Value)
+				v.UserUUID, err = field.Value.GetString(), error(nil)
 				if err != nil {
 					return err
 				}

@@ -27,8 +27,6 @@ func (w SaveContactsEndpoint) Handle(
 	// TODO AuthenticatedRequest()
 	// TODO MatchedIdRequest({paramName: 'userUUID'})
 
-	r.UserUUID = endpointContacts.UUID(w.Request.Params[0].Value)
-
 	clientBody := convertToClient(r)
 	cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
@@ -54,7 +52,7 @@ func convertToClient(
 	body *endpointContacts.SaveContactsRequest,
 ) *contactsClientStructs.SaveContactsRequest {
 	clientBody := &contactsClientStructs.SaveContactsRequest{}
-	clientBody.UserUUID = contactsClientStructs.UUID(body.UserUUID)
+	clientBody.UserUUID = body.UserUUID
 
 	for _, contact := range body.Contacts {
 		clientContact := &contactsClientStructs.Contact{}

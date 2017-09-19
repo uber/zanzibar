@@ -30,7 +30,7 @@ struct Contact {
 }
 
 struct SaveContactsRequest {
-    1: required UUID userUUID (zanzibar.http.ref = "params.userUUID");
+    1: required string userUUID (zanzibar.http.ref = "params.userUUID");
     2: required list<Contact> contacts
 }
 

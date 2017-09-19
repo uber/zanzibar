@@ -522,7 +522,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	}
 }
 
-// ArgWithParams calls "/bar/:uuid/segment/:user-uuid" endpoint.
+// ArgWithParams calls "/bar/argWithParams/:uuid/segment/:user-uuid" endpoint.
 func (c *barClient) ArgWithParams(
 	ctx context.Context,
 	headers map[string]string,
@@ -532,7 +532,7 @@ func (c *barClient) ArgWithParams(
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "ArgWithParams", c.httpClient)
 
 	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/bar" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParams" + "/" + string(r.UUID) + "/segment" + "/" + string(r.Params.UserUUID)
 
 	if r.Params != nil {
 	}

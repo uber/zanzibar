@@ -113,6 +113,11 @@ func (handler *{{$handlerName}}) HandleRequest(
 		return
 	}
 	{{end}}
+
+	{{range $index, $line := .RequestParamGoStatements -}}
+	{{$line}}
+	{{end}}
+
 	{{end}}
 
 	{{range $index, $line := .ReqHeaderGoStatements -}}

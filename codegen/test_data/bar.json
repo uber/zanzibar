@@ -30,7 +30,9 @@
 						{
 							"Type": "static",
 							"Text": "arg-not-struct-path",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -85,7 +87,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "argWithHeaders",
@@ -96,12 +99,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "argWithHeaders",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -138,7 +145,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "argWithManyQueryParams",
@@ -149,12 +157,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "argWithManyQueryParams",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -234,7 +246,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "argWithNestedQueryParams",
@@ -245,12 +258,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "argWithNestedQueryParams",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -323,33 +340,49 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "argWithParams",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
-					"HTTPPath": "/bar/:uuid/segment/:user-uuid",
+					"HTTPPath": "/bar/argWithParams/:uuid/segment/:user-uuid",
 					"PathSegments": [
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						},
+						{
+							"Type": "static",
+							"Text": "argWithParams",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "param",
 							"Text": "",
-							"BodyIdentifier": ".UUID"
+							"BodyIdentifier": ".UUID",
+							"ParamName": "uuid",
+							"Required": true
 						},
 						{
 							"Type": "static",
 							"Text": "segment",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "param",
 							"Text": "",
-							"BodyIdentifier": ".Params.UserUUID"
+							"BodyIdentifier": ".Params.UserUUID",
+							"ParamName": "user-uuid",
+							"Required": true
 						}
 					],
 					"IsEndpoint": false,
@@ -387,7 +420,14 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": [
+						"requestBody.UUID = req.Params.ByName(\"uuid\")",
+						"if requestBody.Params == nil {",
+						"\trequestBody.Params = \u0026clientsBarBar.ParamsStruct{}",
+						"}",
+						"requestBody.Params.UserUUID = req.Params.ByName(\"user-uuid\")"
+					]
 				},
 				{
 					"Name": "argWithQueryHeader",
@@ -398,12 +438,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "argWithQueryHeader",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -438,7 +482,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "argWithQueryParams",
@@ -449,12 +494,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "argWithQueryParams",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -498,7 +547,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "missingArg",
@@ -509,7 +559,9 @@
 						{
 							"Type": "static",
 							"Text": "missing-arg-path",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -569,7 +621,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "noRequest",
@@ -580,7 +633,9 @@
 						{
 							"Type": "static",
 							"Text": "no-request-path",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -640,7 +695,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "normal",
@@ -651,7 +707,9 @@
 						{
 							"Type": "static",
 							"Text": "bar-path",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -711,7 +769,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "normalRecur",
@@ -722,12 +781,16 @@
 						{
 							"Type": "static",
 							"Text": "bar",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "recur",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -782,7 +845,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "tooManyArgs",
@@ -793,7 +857,9 @@
 						{
 							"Type": "static",
 							"Text": "too-many-args-path",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -853,7 +919,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				}
 			],
 			"CompileSpec": null
@@ -873,12 +940,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "binary",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -910,7 +981,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoBool",
@@ -921,12 +993,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "bool",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -958,7 +1034,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoDouble",
@@ -969,12 +1046,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "double",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1006,7 +1087,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoEnum",
@@ -1017,12 +1099,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "enum",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1054,7 +1140,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoI16",
@@ -1065,12 +1152,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "i16",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1102,7 +1193,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoI32",
@@ -1113,12 +1205,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "i32",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1150,7 +1246,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoI64",
@@ -1161,12 +1258,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "i64",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1198,7 +1299,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoI8",
@@ -1209,12 +1311,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "i8",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1246,7 +1352,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoString",
@@ -1257,12 +1364,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "string",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1294,7 +1405,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStringList",
@@ -1305,12 +1417,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "string-list",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1342,7 +1458,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStringMap",
@@ -1353,12 +1470,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "string-map",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1390,7 +1511,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStringSet",
@@ -1401,12 +1523,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "string-set",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1438,7 +1564,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStructList",
@@ -1449,12 +1576,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "struct-list",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1486,7 +1617,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStructMap",
@@ -1497,12 +1629,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "struct-map",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1534,7 +1670,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoStructSet",
@@ -1545,12 +1682,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "struct-set",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1582,7 +1723,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				},
 				{
 					"Name": "echoTypedef",
@@ -1593,12 +1735,16 @@
 						{
 							"Type": "static",
 							"Text": "echo",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						},
 						{
 							"Type": "static",
 							"Text": "typedef",
-							"BodyIdentifier": ""
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
 						}
 					],
 					"IsEndpoint": false,
@@ -1630,7 +1776,8 @@
 					"DownstreamService": "",
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
-					"ConvertResponseGoStatements": null
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
 				}
 			],
 			"CompileSpec": null

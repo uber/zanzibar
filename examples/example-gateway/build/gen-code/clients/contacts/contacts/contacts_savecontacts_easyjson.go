@@ -243,7 +243,7 @@ func easyjsonE3457510DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 		switch key {
 		case "userUUID":
-			out.UserUUID = UUID(in.String())
+			out.UserUUID = string(in.String())
 			UserUUIDSet = true
 		case "contacts":
 			if in.IsNull() {

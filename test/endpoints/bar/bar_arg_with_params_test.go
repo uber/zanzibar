@@ -46,12 +46,14 @@ func TestBarCallWithParams(t *testing.T) {
 	defer gateway.Close()
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"GET", "/bar/:uuid/segment/:user-uuid",
+		"GET", "/bar/argWithParams/:uuid/segment/:user-uuid",
 		func(w http.ResponseWriter, r *http.Request) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t, 0, len(bytes))
-			assert.Equal(t, "/bar/a-uuid/segment/b-uuid", r.URL.Path)
+			assert.Equal(
+				t, "/bar/argWithParams/a-uuid/segment/b-uuid", r.URL.Path,
+			)
 
 			w.WriteHeader(200)
 			if _, err := w.Write([]byte(barResponseBytes)); err != nil {
@@ -63,13 +65,8 @@ func TestBarCallWithParams(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST",
-		"/bar/argWithParams",
-		nil, bytes.NewReader([]byte(`{
-			"uuid":"a-uuid",
-			"params":{
-				"userUUID": "b-uuid"
-			}
-		}`)),
+		"/bar/argWithParams/a-uuid/segment/b-uuid",
+		nil, bytes.NewReader([]byte(`{}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

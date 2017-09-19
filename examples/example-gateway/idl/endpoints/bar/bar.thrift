@@ -3,8 +3,8 @@ namespace java com.uber.zanzibar.clients.bar
 include "../foo/foo.thrift"
 
 struct BarRequest {
-    1: required string stringField (zanzibar.http.ref = "params.someParamsField")
-    2: required bool boolField (zanzibar.http.ref = "query.some-query-field")
+    1: required string stringField
+    2: required bool boolField
 }
 struct BarResponse {
     1: required string stringField (
@@ -35,7 +35,10 @@ struct QueryParamsOptsStruct {
 }
 
 struct ParamsStruct {
-    1: required string userUUID
+    1: required string userUUID (
+        zanzibar.http.ref = "params.user-uuid"
+        go.tag = "json:\"-\""
+    )
 }
 
 exception BarException {
@@ -135,11 +138,14 @@ service Bar {
 
     // TODO: support params annotation
     BarResponse argWithParams(
-        1: required string uuid
+        1: required string uuid (
+            zanzibar.http.ref = "params.uuid"
+            go.tag = "json:\"-\""
+        )
         2: optional ParamsStruct params
     ) (
         zanzibar.http.method = "POST"
-        zanzibar.http.path = "/bar/argWithParams"
+        zanzibar.http.path = "/bar/argWithParams/:uuid/segment/:user-uuid"
         zanzibar.http.status = "200"
     )
 
