@@ -25,8 +25,9 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/thriftrw/thriftrw-go/compile"
 	"github.com/uber/zanzibar/codegen"
+	"go.uber.org/thriftrw/compile"
+	"go.uber.org/thriftrw/idl"
 )
 
 const (
@@ -178,7 +179,15 @@ func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to compile thrift file")
 	}
-	module := ConvertModule(compiledModule, prefix)
+	b, err := ioutil.ReadFile(absPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read file %q", absPath)
+	}
+	ast, err := idl.Parse(b)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse thrift ast")
+	}
+	module := ConvertModule(compiledModule, ast, prefix)
 	return module, nil
 }
 

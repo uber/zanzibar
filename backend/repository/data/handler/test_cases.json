@@ -823,6 +823,7 @@
 			"body": {
 				"includes": {
 					"base": {
+						"line": 2,
 						"module": {
 							"name": "base",
 							"thrift_path": "clients/baz/base.thrift",
@@ -874,6 +875,13 @@
 					}
 				},
 				"name": "baz",
+				"namespace": [
+					{
+						"line": 1,
+						"name": "com.uber.zanzibar.clients.baz",
+						"scope": "java"
+					}
+				],
 				"services": {
 					"SecondService": {
 						"file": "clients/baz/baz.thrift",
@@ -944,21 +952,17 @@
 										"required": false,
 										"type": {
 											"enum_type": {
-												"Annotations": null,
-												"File": "clients/baz/baz.thrift",
-												"Items": [
+												"file": "clients/baz/baz.thrift",
+												"items": [
 													{
-														"Annotations": null,
-														"Name": "APPLE",
-														"Value": 0
+														"name": "APPLE"
 													},
 													{
-														"Annotations": null,
-														"Name": "BANANA",
-														"Value": 1
+														"name": "BANANA",
+														"value": 1
 													}
 												],
-												"Name": "Fruit"
+												"name": "Fruit"
 											},
 											"file": "clients/baz/baz.thrift",
 											"name": "Fruit"
@@ -970,21 +974,17 @@
 								"result_spec": {
 									"return_type": {
 										"enum_type": {
-											"Annotations": null,
-											"File": "clients/baz/baz.thrift",
-											"Items": [
+											"file": "clients/baz/baz.thrift",
+											"items": [
 												{
-													"Annotations": null,
-													"Name": "APPLE",
-													"Value": 0
+													"name": "APPLE"
 												},
 												{
-													"Annotations": null,
-													"Name": "BANANA",
-													"Value": 1
+													"name": "BANANA",
+													"value": 1
 												}
 											],
-											"Name": "Fruit"
+											"name": "Fruit"
 										},
 										"file": "clients/baz/baz.thrift",
 										"name": "Fruit"
@@ -1396,6 +1396,7 @@
 								}
 							}
 						},
+						"line": 49,
 						"name": "SecondService"
 					},
 					"SimpleService": {
@@ -1700,6 +1701,7 @@
 								}
 							}
 						},
+						"line": 23,
 						"name": "SimpleService"
 					}
 				},
@@ -1707,6 +1709,7 @@
 				"types": {
 					"AuthErr": {
 						"file": "clients/baz/baz.thrift",
+						"line": 15,
 						"name": "AuthErr",
 						"struct_type": {
 							"fields": [
@@ -1724,6 +1727,7 @@
 					},
 					"BazRequest": {
 						"file": "clients/baz/baz.thrift",
+						"line": 9,
 						"name": "BazRequest",
 						"struct_type": {
 							"fields": [
@@ -1757,27 +1761,25 @@
 					},
 					"Fruit": {
 						"enum_type": {
-							"Annotations": null,
-							"File": "clients/baz/baz.thrift",
-							"Items": [
+							"file": "clients/baz/baz.thrift",
+							"items": [
 								{
-									"Annotations": null,
-									"Name": "APPLE",
-									"Value": 0
+									"name": "APPLE"
 								},
 								{
-									"Annotations": null,
-									"Name": "BANANA",
-									"Value": 1
+									"name": "BANANA",
+									"value": 1
 								}
 							],
-							"Name": "Fruit"
+							"name": "Fruit"
 						},
 						"file": "clients/baz/baz.thrift",
+						"line": 4,
 						"name": "Fruit"
 					},
 					"OtherAuthErr": {
 						"file": "clients/baz/baz.thrift",
+						"line": 19,
 						"name": "OtherAuthErr",
 						"struct_type": {
 							"fields": [
