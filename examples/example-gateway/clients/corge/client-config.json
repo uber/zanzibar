@@ -4,7 +4,7 @@
 	"config": {
 		"thriftFile": "clients/corge/corge.thrift",
 		"thriftFileSha": "{{placeholder}}",
-		"useSidecarRouter": true,
+		"sidecarRouter": "default",
 		"exposedMethods": {
 			"EchoString": "Corge::echoString"
 		}

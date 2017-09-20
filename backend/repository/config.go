@@ -301,8 +301,8 @@ func clientConfig(spec *codegen.ClientSpec, productionCfgJSON map[string]interfa
 	}
 
 	var prefix string
-	if spec.UseSidecarRouter {
-		prefix = "sidecarRouter." + string(clientConfig.Type) + "."
+	if spec.SidecarRouter != "" {
+		prefix = "sidecarRouter." + spec.SidecarRouter + "." + string(clientConfig.Type) + "."
 	} else {
 		prefix = "clients." + spec.ClientID + "."
 	}

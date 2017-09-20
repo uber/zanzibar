@@ -284,7 +284,7 @@ func (g *HTTPClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
 		// TODO: http client integration with sidecar router
-		UseSidecarRouter: clientSpec.UseSidecarRouter,
+		SidecarRouter: clientSpec.SidecarRouter,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -386,7 +386,7 @@ func (g *TChannelClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
 		LogDownstream:    true,
-		UseSidecarRouter: clientSpec.UseSidecarRouter,
+		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -1099,7 +1099,7 @@ type ClientMeta struct {
 	Services         []*ServiceSpec
 	ExposedMethods   map[string]string
 	LogDownstream    bool
-	UseSidecarRouter bool
+	SidecarRouter    string
 }
 
 func findMethod(

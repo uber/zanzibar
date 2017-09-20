@@ -52,8 +52,8 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.corge.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	ip := gateway.Config.MustGetString("sidecarRouter.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.tchannel.port")
+	ip := gateway.Config.MustGetString("sidecarRouter.default.tchannel.ip")
+	port := gateway.Config.MustGetInt("sidecarRouter.default.tchannel.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	timeout := time.Millisecond * time.Duration(

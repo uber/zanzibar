@@ -1512,7 +1512,7 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $logDownstream := .LogDownstream}}
-{{- $useSidecarRouter := .UseSidecarRouter}}
+{{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -1539,9 +1539,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	{{if $useSidecarRouter -}}
-	ip := gateway.Config.MustGetString("sidecarRouter.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.tchannel.port")
+	{{if $sidecarRouter -}}
+	ip := gateway.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+	port := gateway.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
@@ -1664,7 +1664,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5056, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5085, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
