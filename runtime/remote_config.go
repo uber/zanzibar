@@ -255,35 +255,6 @@ func (rc *remoteConfig) checkAndReturnStat() (os.FileInfo, bool) {
 	return stat, true
 }
 
-//// reloadConfigAndReturnChanged atomically stores remote config properties
-//// and return keys been added/removed/updated
-//func (rc *remoteConfig) reloadConfigAndReturnChanged() (map[string]bool, error) {
-//	bytes, err := ioutil.ReadFile(rc.config.FilePath)
-//	changedMap := make(map[string]bool)
-//	if err != nil {
-//		return changedMap, err
-//	}
-//	currProps := make(RemoteConfigMap)
-//	err = jsonparser.ObjectEach(bytes, func(
-//		key []byte,
-//		value []byte,
-//		dataType jsonparser.ValueType,
-//		offset int,
-//	) error {
-//		currProps[string(key)] = &RemoteConfigValue{
-//			bytes:    value,
-//			dataType: dataType,
-//		}
-//		return nil
-//	})
-//	prevProps := rc.loadConfig()
-//	if err == nil {
-//		changedMap = changedKeys(prevProps, currProps)
-//		rc.props.Store(currProps)
-//	}
-//	return changedMap, err
-//}
-
 // reloadConfigAndReturnChanged atomically stores remote config properties
 // and return keys been added/removed/updated
 func (rc *remoteConfig) reloadConfigAndReturnChanged() (map[string]bool, error) {
