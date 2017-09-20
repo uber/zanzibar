@@ -167,6 +167,19 @@
 					"thriftFile": "clients/contacts/contacts.thrift",
 					"type": "http"
 				},
+				"corge": {
+					"clientTimeout": 1000,
+					"clientTimeoutPerAttempt": 1000,
+					"exposedMethods": {
+						"EchoString": "Corge::echoString"
+					},
+					"ip": "127.0.0.1",
+					"name": "corge",
+					"port": 5000,
+					"serviceName": "Corge",
+					"thriftFile": "clients/corge/corge.thrift",
+					"type": "tchannel"
+				},
 				"google-now": {
 					"exposedMethods": {
 						"AddCredentials": "GoogleNowService::addCredentials",
@@ -224,6 +237,10 @@
 				},
 				"clients/contacts/contacts.thrift": {
 					"path": "clients/contacts/contacts.thrift",
+					"version": "v1"
+				},
+				"clients/corge/corge.thrift": {
+					"path": "clients/corge/corge.thrift",
 					"version": "v1"
 				},
 				"clients/foo/foo.thrift": {
@@ -504,6 +521,18 @@
 						],
 						"Name": "Contacts",
 						"Path": "clients/contacts/contacts.thrift"
+					}
+				},
+				"clients/corge/corge.thrift": {
+					"Corge": {
+						"Methods": [
+							{
+								"Name": "echoString",
+								"Type": "tchannel"
+							}
+						],
+						"Name": "Corge",
+						"Path": "clients/corge/corge.thrift"
 					}
 				},
 				"clients/foo/foo.thrift": {},
@@ -2234,6 +2263,19 @@
 							"thriftFile": "clients/contacts/contacts.thrift",
 							"type": "http"
 						},
+						"corge": {
+							"clientTimeout": 1000,
+							"clientTimeoutPerAttempt": 1000,
+							"exposedMethods": {
+								"EchoString": "Corge::echoString"
+							},
+							"ip": "127.0.0.1",
+							"name": "corge",
+							"port": 5000,
+							"serviceName": "Corge",
+							"thriftFile": "clients/corge/corge.thrift",
+							"type": "tchannel"
+						},
 						"google-now": {
 							"exposedMethods": {
 								"AddCredentials": "GoogleNowService::addCredentials",
@@ -2762,6 +2804,18 @@
 								"Path": "clients/contacts/contacts.thrift"
 							}
 						},
+						"clients/corge/corge.thrift": {
+							"Corge": {
+								"Methods": [
+									{
+										"Name": "echoString",
+										"Type": "tchannel"
+									}
+								],
+								"Name": "Corge",
+								"Path": "clients/corge/corge.thrift"
+							}
+						},
 						"clients/foo/foo.thrift": {},
 						"clients/googlenow/googlenow.thrift": {
 							"GoogleNowService": {
@@ -3016,6 +3070,19 @@
 						"port": 4000,
 						"thriftFile": "clients/contacts/contacts.thrift",
 						"type": "http"
+					},
+					"corge": {
+						"clientTimeout": 1000,
+						"clientTimeoutPerAttempt": 1000,
+						"exposedMethods": {
+							"EchoString": "Corge::echoString"
+						},
+						"ip": "127.0.0.1",
+						"name": "corge",
+						"port": 5000,
+						"serviceName": "Corge",
+						"thriftFile": "clients/corge/corge.thrift",
+						"type": "tchannel"
 					},
 					"google-now": {
 						"exposedMethods": {
@@ -3543,6 +3610,18 @@
 							],
 							"Name": "Contacts",
 							"Path": "clients/contacts/contacts.thrift"
+						}
+					},
+					"clients/corge/corge.thrift": {
+						"Corge": {
+							"Methods": [
+								{
+									"Name": "echoString",
+									"Type": "tchannel"
+								}
+							],
+							"Name": "Corge",
+							"Path": "clients/corge/corge.thrift"
 						}
 					},
 					"clients/foo/foo.thrift": {},

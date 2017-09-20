@@ -15,6 +15,10 @@
 		"path": "clients/contacts/contacts.thrift",
 		"version": "v1"
 	},
+	"clients/corge/corge.thrift": {
+		"path": "clients/corge/corge.thrift",
+		"version": "v1"
+	},
 	"clients/foo/foo.thrift": {
 		"path": "clients/foo/foo.thrift",
 		"version": "v1"

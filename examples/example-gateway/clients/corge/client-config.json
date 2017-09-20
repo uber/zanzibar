@@ -1,0 +1,12 @@
+{
+	"name": "corge",
+	"type": "tchannel",
+	"config": {
+		"thriftFile": "clients/corge/corge.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"sidecarRouter": "default",
+		"exposedMethods": {
+			"EchoString": "Corge::echoString"
+		}
+	}
+}
