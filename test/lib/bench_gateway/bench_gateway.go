@@ -144,6 +144,7 @@ func CreateGateway(
 		gateway.Logger,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
+			MethodNames:       opts.TChannelClientMethods,
 			Timeout:           time.Duration(1000) * time.Millisecond,
 			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
 		})

@@ -109,6 +109,7 @@ type Options struct {
 	EnableRuntimeMetrics  bool
 	JaegerDisable         bool
 	JaegerFlushMillis     int64
+	TChannelClientMethods map[string]string
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -182,6 +183,7 @@ func CreateGateway(
 		zap.NewNop(),
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
+			MethodNames:       opts.TChannelClientMethods,
 			Timeout:           time.Duration(1000) * time.Millisecond,
 			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
 		},

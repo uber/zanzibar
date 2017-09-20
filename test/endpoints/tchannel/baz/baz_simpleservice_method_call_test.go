@@ -42,6 +42,9 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
 		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		TChannelClientMethods: map[string]string{
+			"SimpleService::Call": "Call",
+		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return

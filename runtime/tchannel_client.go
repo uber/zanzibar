@@ -28,6 +28,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	netContext "golang.org/x/net/context"
 )
 
@@ -186,6 +187,35 @@ func (c *tchannelCall) start() {
 
 func (c *tchannelCall) finish() {
 	c.finishTime = time.Now()
+
+	// write logs
+	c.logger.Info("Finished an outgoing client TChannel request", c.logFields()...)
+}
+
+func (c *tchannelCall) logFields() []zapcore.Field {
+	fields := []zapcore.Field{
+		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
+		zap.Time("timestamp-started", c.startTime),
+		zap.Time("timestamp-finished", c.finishTime),
+
+		// TODO: Do not log body by default because PII and bandwidth.
+		// Temporarily log during the development cycle
+		// TODO: Add a gateway level configurable body unmarshaller
+		// to extract only non-PII info.
+		zap.ByteString("Request Body", c.reqBody),
+		zap.ByteString("Response Body", c.resBody),
+	}
+
+	for k, v := range c.reqHeaders {
+		fields = append(fields, zap.String("Request-Header-"+k, v))
+	}
+	for k, v := range c.resHeaders {
+		fields = append(fields, zap.String("Response-Header-"+k, v))
+	}
+
+	// TODO: log jaeger trace span
+
+	return fields
 }
 
 // writeReqHeaders writes request headers to arg2

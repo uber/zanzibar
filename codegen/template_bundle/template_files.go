@@ -1511,7 +1511,6 @@ import (
 {{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
-{{- $logDownstream := .LogDownstream}}
 {{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
@@ -1617,31 +1616,9 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		{{if $logDownstream -}}
-			var fields []zapcore.Field
-			fields = append(fields, zap.String("Downstream-Client", "{{$clientName}}"))
-			fields = append(fields, zap.String("Downstream-Method", "{{$methodName}}"))
-			fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
-			for k, v := range reqHeaders {
-				fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
-			}
-			fields = append(fields, zap.Any("Downstream-Request-Body", args))
-		{{end -}}
-
 		success, respHeaders, err := c.client.Call(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
-
-		{{if $logDownstream -}}
-			for k, v := range respHeaders {
-				fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
-			}
-			fields = append(fields, zap.Any("Downstream-Response-Body", result))
-			fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
-			c.logger.Info(
-				"Finished a downstream TChannel request",
-				fields...)
-		{{end -}}
 
 		if err == nil && !success {
 			switch {
@@ -1683,7 +1660,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5267, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4367, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
