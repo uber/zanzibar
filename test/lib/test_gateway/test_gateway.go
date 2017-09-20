@@ -38,6 +38,7 @@ import (
 	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
+	"go.uber.org/zap"
 )
 
 // TestGateway interface
@@ -176,11 +177,15 @@ func CreateGateway(
 		return nil, err
 	}
 
-	tchannelClient := zanzibar.NewTChannelClient(channel, &zanzibar.TChannelClientOption{
-		ServiceName:       serviceName,
-		Timeout:           time.Duration(1000) * time.Millisecond,
-		TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
-	})
+	tchannelClient := zanzibar.NewTChannelClient(
+		channel,
+		zap.NewNop(),
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			Timeout:           time.Duration(1000) * time.Millisecond,
+			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
+		},
+	)
 
 	testGateway := &ChildProcessGateway{
 		channel:     channel,

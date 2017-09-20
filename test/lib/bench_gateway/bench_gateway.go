@@ -141,6 +141,7 @@ func CreateGateway(
 
 	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
 		gateway.Channel,
+		gateway.Logger,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
 			Timeout:           time.Duration(1000) * time.Millisecond,

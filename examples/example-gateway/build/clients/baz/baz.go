@@ -187,7 +187,9 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		"SimpleService::sillyNoop":      "DeliberateDiffNoop",
 	}
 
-	client := zanzibar.NewTChannelClient(gateway.Channel,
+	client := zanzibar.NewTChannelClient(
+		gateway.Channel,
+		gateway.Logger,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "baz",

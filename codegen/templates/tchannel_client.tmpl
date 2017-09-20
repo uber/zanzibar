@@ -82,7 +82,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 		{{ end -}}
 	}
 
-	client := zanzibar.NewTChannelClient(gateway.Channel,
+	client := zanzibar.NewTChannelClient(
+		gateway.Channel,
+		gateway.Logger,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",
