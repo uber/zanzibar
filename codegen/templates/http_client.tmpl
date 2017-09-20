@@ -94,11 +94,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "{{$methodName}}", c.httpClient)
 
-	{{- if .ReqHeaders }}
-	// TODO(jakev): Ensure we validate mandatory headers
+	{{if .ReqHeaders }}
+	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}}, headers)
+	if headerErr != nil {
+		return {{ if eq .ResponseType "" -}}
+			nil, headerErr
+			{{- else -}}
+			defaultRes, nil, headerErr
+			{{- end}}
+	}
 	{{- end}}
 
-	{{- if .ReqHeaderGoStatements }}
+	{{if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
