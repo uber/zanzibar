@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
 	"github.com/uber/tchannel-go"
@@ -181,6 +182,7 @@ func CreateGateway(
 	tchannelClient := zanzibar.NewTChannelClient(
 		channel,
 		zap.NewNop(),
+		tally.NoopScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			MethodNames:       opts.TChannelClientMethods,

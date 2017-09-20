@@ -74,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	numMetrics := 12
+	numMetrics := 15
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -132,9 +132,9 @@ func TestCallMetrics(t *testing.T) {
 		"tchannel.outbound.calls.success",
 	}
 	tchannelTags := map[string]string{
+		"env":             "test",
 		"app":             "test-gateway",
 		"service":         "test-gateway",
-		"env":             "test",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService::call",
 		"host":            zanzibar.GetHostname(),
@@ -159,6 +159,37 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	outboundSuccess := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.success", tchannelTags)]
+	value = *outboundSuccess.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	clientNames := []string{
+		"outbound.calls.latency",
+		"outbound.calls.sent",
+		"outbound.calls.success",
+	}
+	clientTags := map[string]string{
+		"env":             "test",
+		"service":         "test-gateway",
+		"client":          "baz",
+		"method":          "Call",
+		"target-service":  "bazService",
+		"target-endpoint": "SimpleService::call",
+	}
+	for _, name := range clientNames {
+		key := tally.KeyForPrefixedStringMap(name, clientTags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
+	}
+
+	outboundLatency = metrics[tally.KeyForPrefixedStringMap("outbound.calls.latency", clientTags)]
+	value = *outboundLatency.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+
+	outboundSend = metrics[tally.KeyForPrefixedStringMap("outbound.calls.sent", clientTags)]
+	value = *outboundSend.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	outboundSuccess = metrics[tally.KeyForPrefixedStringMap("outbound.calls.success", clientTags)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 }

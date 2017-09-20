@@ -1572,6 +1572,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	client := zanzibar.NewTChannelClient(
 		gateway.Channel,
 		gateway.Logger,
+		gateway.AllHostScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",
@@ -1660,7 +1661,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4367, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4391, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

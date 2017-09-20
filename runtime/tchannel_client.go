@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/zap"
@@ -53,6 +54,7 @@ type tchannelClient struct {
 	timeoutPerAttempt time.Duration
 	routingKey        *string
 	loggers           map[string]*zap.Logger
+	metrics           map[string]*OutboundTChannelMetrics
 }
 
 type tchannelCall struct {
@@ -68,22 +70,31 @@ type tchannelCall struct {
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
 	logger        *zap.Logger
+	metrics       *OutboundTChannelMetrics
 }
 
 // NewTChannelClient returns a tchannelClient that makes calls over the given tchannel to the given thrift service.
 func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
+	scope tally.Scope,
 	opt *TChannelClientOption,
 ) TChannelClient {
 	loggers := make(map[string]*zap.Logger, len(opt.MethodNames))
+	metrics := make(map[string]*OutboundTChannelMetrics, len(opt.MethodNames))
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String("clientID", opt.ClientID),
 			zap.String("methodName", methodName),
-			zap.String("target-service", opt.ServiceName),
-			zap.String("target-endpoint", serviceMethod),
+			zap.String("serviceName", opt.ServiceName),
+			zap.String("serviceMethod", serviceMethod),
 		)
+		metrics[serviceMethod] = NewOutboundTChannelMetrics(scope.Tagged(map[string]string{
+			"client":          opt.ClientID,
+			"method":          methodName,
+			"target-service":  opt.ServiceName,
+			"target-endpoint": serviceMethod,
+		}))
 	}
 
 	return &tchannelClient{
@@ -96,6 +107,7 @@ func NewTChannelClient(
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
 		routingKey:        opt.RoutingKey,
 		loggers:           loggers,
+		metrics:           metrics,
 	}
 }
 
@@ -126,8 +138,9 @@ func (c *tchannelClient) Call(
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
 		logger:        c.loggers[serviceMethod],
+		metrics:       c.metrics[serviceMethod],
 	}
-	defer call.finish()
+	defer func() { call.finish(err) }()
 	call.start()
 
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
@@ -183,10 +196,21 @@ func (c *tchannelClient) Call(
 
 func (c *tchannelCall) start() {
 	c.startTime = time.Now()
+	c.metrics.Sent.Inc(1)
 }
 
-func (c *tchannelCall) finish() {
+func (c *tchannelCall) finish(err error) {
 	c.finishTime = time.Now()
+
+	// emit metrics
+	if err != nil {
+		c.metrics.SystemErrors.Inc(1)
+	} else if !c.success {
+		c.metrics.AppErrors.Inc(1)
+	} else {
+		c.metrics.Success.Inc(1)
+	}
+	c.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
 
 	// write logs
 	c.logger.Info("Finished an outgoing client TChannel request", c.logFields()...)

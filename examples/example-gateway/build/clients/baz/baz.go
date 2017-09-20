@@ -189,6 +189,7 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 	client := zanzibar.NewTChannelClient(
 		gateway.Channel,
 		gateway.Logger,
+		gateway.AllHostScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "baz",
