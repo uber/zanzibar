@@ -73,7 +73,7 @@ type ClientSpec struct {
 	CustomImportPath string
 	// The path to the client package import
 	ImportPackagePath string
-	// The globally unique pacakge alias for the import
+	// The globally unique package alias for the import
 	ImportPackageAlias string
 	// ExportName is the name that should be used when initializing the module
 	// on a dependency struct.
@@ -91,6 +91,9 @@ type ClientSpec struct {
 	// ExposedMethods is a map of exposed method name to thrift "$service::$method"
 	// only the method values in this map are generated for the client
 	ExposedMethods map[string]string
+	// SidecarRouter indicates the client uses the given sidecar router to
+	// to communicate with downstream service, it's not relevant to custom clients.
+	SidecarRouter string
 }
 
 // ModuleClassConfig represents the generic JSON config for
@@ -276,7 +279,7 @@ func newClientSpec(
 	}
 	mspec.PackageName = mspec.PackageName + "Client"
 
-	return &ClientSpec{
+	cspec := &ClientSpec{
 		ModuleSpec:         mspec,
 		JSONFile:           instance.JSONFileName,
 		ClientType:         clientConfig.Type,
@@ -287,7 +290,14 @@ func newClientSpec(
 		ThriftFile:         thriftFile,
 		ClientID:           instance.InstanceName,
 		ClientName:         instance.PackageInfo.QualifiedInstanceName,
-	}, nil
+	}
+
+	sidecarRouter, ok := config["sidecarRouter"].(string)
+	if ok {
+		cspec.SidecarRouter = sidecarRouter
+	}
+
+	return cspec, nil
 }
 
 // MiddlewareSpec holds information about each middleware at the endpoint

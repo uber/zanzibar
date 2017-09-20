@@ -24,6 +24,7 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $logDownstream := .LogDownstream}}
+{{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -50,9 +51,13 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	{{/* TODO: (lu) support multiple host port */ -}}
+	{{if $sidecarRouter -}}
+	ip := gateway.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+	port := gateway.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	{{else -}}
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}

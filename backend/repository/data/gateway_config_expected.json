@@ -358,6 +358,19 @@
 			"ip": "127.0.0.1",
 			"port": 4000
 		},
+		"corge": {
+			"name": "corge",
+			"type": "tchannel",
+			"thriftFile": "clients/corge/corge.thrift",
+			"serviceName": "Corge",
+			"exposedMethods": {
+				"EchoString": "Corge::echoString"
+			},
+			"ip": "127.0.0.1",
+			"port": 5000,
+			"clientTimeout": 1000,
+			"clientTimeoutPerAttempt": 1000
+		},
 		"google-now": {
 			"name": "google-now",
 			"type": "http",
@@ -604,6 +617,18 @@
 					{
 						"Name": "saveContacts",
 						"Type": "http"
+					}
+				]
+			}
+		},
+		"clients/corge/corge.thrift": {
+			"Corge": {
+				"Name": "Corge",
+				"Path": "clients/corge/corge.thrift",
+				"Methods": [
+					{
+						"Name": "echoString",
+						"Type": "tchannel"
 					}
 				]
 			}
