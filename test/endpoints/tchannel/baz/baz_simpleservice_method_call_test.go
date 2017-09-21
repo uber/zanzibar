@@ -25,12 +25,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
-
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
@@ -97,4 +96,24 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Equal(t, expectedHeaders, resHeaders)
 	assert.True(t, success)
 
+	allLogs := gateway.AllLogs()
+	assert.Equal(t, 4, len(allLogs))
+	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
+	assert.Equal(t, 1, len(allLogs["Inbound connection is active."]))
+	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
+	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
+
+	tags := allLogs["Finished an outgoing client TChannel request"][0]
+	assert.Equal(t, "info", tags["level"])
+	assert.Equal(t, "Finished an outgoing client TChannel request", tags["msg"])
+	assert.Equal(t, "baz", tags["clientID"])
+	assert.Equal(t, "bazService", tags["serviceName"])
+	assert.Equal(t, "Call", tags["methodName"])
+	assert.Equal(t, "SimpleService::call", tags["serviceMethod"])
+	assert.Equal(t, "token", tags["Request-Header-x-token"])
+	assert.Equal(t, "uuid", tags["Request-Header-x-uuid"])
+	assert.Equal(t, "something", tags["Response-Header-some-res-header"])
+	assert.Contains(t, tags["remoteAddr"], "127.0.0.1")
+	assert.NotNil(t, tags["timestamp-started"])
+	assert.NotNil(t, tags["timestamp-finished"])
 }
