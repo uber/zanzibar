@@ -78,6 +78,31 @@ func (req *ClientHTTPRequest) start() {
 	req.metrics.Sent.Inc(1)
 }
 
+// CheckHeaders verifies that the outbound request contaisn required headers
+func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
+	if req.httpReq == nil {
+		panic("must call `req.WriteJSON()` before `req.CheckHeaders()`")
+	}
+
+	actualHeaders := req.httpReq.Header
+
+	for _, headerName := range expected {
+		// TODO: case sensitivity ?
+		headerValue := actualHeaders.Get(headerName)
+		if headerValue == "" {
+			req.Logger.Warn("Got outbound request without mandatory header",
+				zap.String("headerName", headerName),
+				zap.String("clientId", req.ClientID),
+				zap.String("methodName", req.MethodName),
+			)
+
+			return errors.New("Missing mandatory header: " + headerName)
+		}
+	}
+
+	return nil
+}
+
 // WriteJSON will send a json http request out.
 func (req *ClientHTTPRequest) WriteJSON(
 	method, url string,
