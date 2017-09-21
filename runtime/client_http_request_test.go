@@ -157,6 +157,30 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
+func TestBarClientWithoutHeaders(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	_, _, err = bar.EchoI8(
+		context.Background(), nil, &clientsBarBar.Echo_EchoI8_Args{Arg: 42},
+	)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, "Missing mandatory header: x-uuid", err.Error())
+}
+
 func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

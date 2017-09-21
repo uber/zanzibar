@@ -81,6 +81,7 @@ func (req *ClientHTTPRequest) start() {
 // CheckHeaders verifies that the outbound request contaisn required headers
 func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 	if req.httpReq == nil {
+		/* coverage ignore next line */
 		panic("must call `req.WriteJSON()` before `req.CheckHeaders()`")
 	}
 
