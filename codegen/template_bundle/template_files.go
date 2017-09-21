@@ -1537,7 +1537,10 @@ type Client interface {
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	routingKey := gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
@@ -1562,7 +1565,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 			ServiceName:       serviceName,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        routingKey,
+			RoutingKey:        &routingKey,
 		},
 	)
 
@@ -1666,7 +1669,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5199, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5296, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

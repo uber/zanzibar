@@ -147,11 +147,10 @@ type Client interface {
 // NewClient returns a new TChannel client for service baz.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
-	routingKey := ""
-	if gateway.Config.MustGetBoolean("clients.baz.useRoutingKey") {
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.baz.routingKey") {
 		routingKey = gateway.Config.MustGetString("clients.baz.routingKey")
 	}
-	gateway.Config.MustGetString()
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := gateway.Config.MustGetString("clients.baz.ip")
