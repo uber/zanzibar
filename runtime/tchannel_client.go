@@ -36,6 +36,7 @@ type TChannelClientOption struct {
 	ServiceName       string
 	Timeout           time.Duration
 	TimeoutPerAttempt time.Duration
+	RoutingKey        *string
 }
 
 // tchannelClient implements TChannelClient and makes outgoing Thrift calls.
@@ -45,6 +46,7 @@ type tchannelClient struct {
 	serviceName       string
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
+	routingKey        *string
 }
 
 // NewTChannelClient returns a tchannelClient that makes calls over the given tchannel to the given thrift service.
@@ -55,6 +57,7 @@ func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannel
 		serviceName:       opt.ServiceName,
 		timeout:           opt.Timeout,
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
+		routingKey: opt.RoutingKey,
 	}
 	return client
 }
@@ -154,10 +157,13 @@ func (c *tchannelClient) Call(ctx context.Context, thriftService, methodName str
 	retryOpts := &tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
-	ctx, cancel := tchannel.NewContextBuilder(c.timeout).
+	ctxBuilder := tchannel.NewContextBuilder(c.timeout).
 		SetParentContext(ctx).
-		SetRetryOptions(retryOpts).
-		Build()
+		SetRetryOptions(retryOpts)
+	if c.routingKey != nil {
+		ctxBuilder.SetRoutingKey(*c.routingKey)
+	}
+	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 
 	arg1 := thriftService + "::" + methodName
