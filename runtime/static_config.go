@@ -209,7 +209,7 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 // ContainsKey returns the value as a string or panics.
 func (conf *StaticConfig) ContainsKey(key string) bool {
 	if conf.destroyed {
-		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
+		panic(errors.Errorf("Cannot ContainsKey(%s) because destroyed", key))
 	}
 	if _, contains := conf.seedConfig[key]; contains {
 		return true

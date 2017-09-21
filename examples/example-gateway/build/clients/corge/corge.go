@@ -52,7 +52,7 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.corge.serviceName")
 	var routingKey string
 	if gateway.Config.ContainsKey("clients.corge.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.baz.routingKey")
+		routingKey = gateway.Config.MustGetString("clients.corge.routingKey")
 	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
