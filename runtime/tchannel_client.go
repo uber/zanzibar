@@ -57,7 +57,7 @@ func NewTChannelClient(ch *tchannel.Channel, opt *TChannelClientOption) TChannel
 		serviceName:       opt.ServiceName,
 		timeout:           opt.Timeout,
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
-		routingKey: opt.RoutingKey,
+		routingKey:        opt.RoutingKey,
 	}
 	return client
 }
