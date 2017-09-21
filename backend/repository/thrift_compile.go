@@ -395,15 +395,15 @@ func fillInDefinitions(module *Module, program *ast.Program) {
 
 func newEnumSpec(enum *compile.EnumSpec) *EnumSpec {
 	e := &EnumSpec{
-		Name: enum.Name,
-		File: enum.File,
-		Items: make([]EnumItem, len(enum.Items)),
+		Name:        enum.Name,
+		File:        enum.File,
+		Items:       make([]EnumItem, len(enum.Items)),
 		Annotations: enum.Annotations,
 	}
-	for i, item := range enum.Items{
+	for i, item := range enum.Items {
 		e.Items[i].Name = item.Name
 		e.Items[i].Value = item.Value
-		e.Items[i].Annotations  = item.Annotations
+		e.Items[i].Annotations = item.Annotations
 	}
 	return e
 }
