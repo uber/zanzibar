@@ -91,6 +91,7 @@ func (c *contactsClient) SaveContacts(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
