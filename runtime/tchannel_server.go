@@ -188,7 +188,7 @@ func (s *TChannelRouter) handle(
 		endpoint: e,
 		call:     call,
 	}
-	defer c.finish(err)
+	defer func() { c.finish(err) }()
 	c.start()
 
 	if err := c.readReqHeaders(); err != nil {
@@ -219,7 +219,6 @@ func (s *TChannelRouter) handle(
 
 func (c *tchannelCall) start() {
 	c.startTime = time.Now()
-	c.endpoint.metrics.Recvd.Inc(1)
 }
 
 func (c *tchannelCall) finish(err error) {
@@ -344,6 +343,9 @@ func (c *tchannelCall) readReqBody() (wireValue wire.Value, err error) {
 		)
 		return
 	}
+
+	// request received when arg3reader is closed
+	c.endpoint.metrics.Recvd.Inc(1)
 	return
 }
 
