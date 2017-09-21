@@ -49,9 +49,9 @@ type Client interface {
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	routingKey := ""
-	if gateway.Config.MustGetBoolean("clients.{{$clientID}}.useRoutingKey") {
-		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = gateway.Config.MustGetString("clients.baz.routingKey")
 	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
