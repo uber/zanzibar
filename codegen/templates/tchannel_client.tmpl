@@ -51,7 +51,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
 	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.baz.routingKey")
+		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
