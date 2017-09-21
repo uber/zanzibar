@@ -60,8 +60,6 @@ type tchannelCall struct {
 	success    bool
 	startTime  time.Time
 	finishTime time.Time
-	reqBody    []byte
-	resBody    []byte
 	reqHeaders map[string]string
 	resHeaders map[string]string
 }
@@ -245,13 +243,6 @@ func (c *tchannelCall) logFields() []zapcore.Field {
 		zap.String("calling-service", c.call.CallerName()),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
-
-		// TODO: Do not log body by default because PII and bandwidth.
-		// Temporarily log during the developement cycle
-		// TODO: Add a gateway level configurable body unmarshaller
-		// to extract only non-PII info.
-		zap.ByteString("Request Body", c.reqBody),
-		zap.ByteString("Response Body", c.resBody),
 	}
 
 	for k, v := range c.reqHeaders {
@@ -319,8 +310,7 @@ func (c *tchannelCall) readReqBody() (wireValue wire.Value, err error) {
 		)
 		return
 	}
-	c.reqBody = buf.Bytes()
-	wireValue, err = protocol.Binary.Decode(bytes.NewReader(c.reqBody), wire.TStruct)
+	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
 		c.endpoint.Logger.Error("Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
@@ -405,7 +395,7 @@ func (c *tchannelCall) writeResBody(resp RWTStruct) error {
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
-	c.resBody = structWireValue.GetBinary()
+
 	twriter, err := c.call.Response().Arg3Writer()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
