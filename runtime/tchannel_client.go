@@ -196,7 +196,6 @@ func (c *tchannelClient) Call(
 
 func (c *tchannelCall) start() {
 	c.startTime = time.Now()
-	c.metrics.Sent.Inc(1)
 }
 
 func (c *tchannelCall) finish(err error) {
@@ -309,6 +308,8 @@ func (c *tchannelCall) writeReqBody(req RWTStruct) error {
 		)
 	}
 
+	// request sent when arg3writer is closed
+	c.metrics.Sent.Inc(1)
 	return nil
 }
 
