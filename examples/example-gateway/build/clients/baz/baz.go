@@ -147,6 +147,7 @@ type Client interface {
 // NewClient returns a new TChannel client for service baz.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
+	routingKey := gateway.Config.MustGetString("clients.baz.routingKey")
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := gateway.Config.MustGetString("clients.baz.ip")
@@ -165,6 +166,7 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 			ServiceName:       serviceName,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        routingKey,
 		},
 	)
 
