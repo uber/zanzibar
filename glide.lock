@@ -1,5 +1,5 @@
 hash: d6512ee48265f77a1c34516c5ffb73828ccb937533a56454568e6ed2211ba607
-updated: 2017-09-06T11:37:25.045834028-07:00
+updated: 2017-09-20T11:55:50.9196227-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -12,7 +12,7 @@ imports:
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/codahale/hdrhistogram
-  version: f8ad88b59a584afeee9d334eff879b104439117b
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -26,7 +26,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 5695738f733662da3e9afc2283bba6f3c879002d
+  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -58,10 +58,6 @@ imports:
   subpackages:
   - assert
   - require
-- name: github.com/thriftrw/thriftrw-go
-  version: 8bbe12f61b982c30be95f88bfe62cade3d470e08
-  subpackages:
-  - compile
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
@@ -85,7 +81,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: b9a0fa4923ad750facbd5a4b93fc6d450bc45ccc
+  version: 5b29ee594f76a8f6a822c18b02ef985d68ddd991
   subpackages:
   - metrics
   - metrics/tally
@@ -137,7 +133,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
+  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
   subpackages:
   - context
 testImports: []
