@@ -73,9 +73,6 @@ func (req *ClientHTTPRequest) start() {
 	}
 	req.started = true
 	req.startTime = time.Now()
-
-	// emit metrics
-	req.metrics.Sent.Inc(1)
 }
 
 // WriteJSON will send a json http request out.
@@ -127,6 +124,9 @@ func (req *ClientHTTPRequest) Do(
 		req.Logger.Error("Could not make outbound request", zap.Error(err))
 		return nil, err
 	}
+
+	// emit metrics
+	req.metrics.Sent.Inc(1)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil
