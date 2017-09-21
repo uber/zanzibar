@@ -65,8 +65,6 @@ type tchannelCall struct {
 	success       bool
 	startTime     time.Time
 	finishTime    time.Time
-	reqBody       []byte
-	resBody       []byte
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
 	logger        *zap.Logger
@@ -220,13 +218,6 @@ func (c *tchannelCall) logFields() []zapcore.Field {
 		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
-
-		// TODO: Do not log body by default because PII and bandwidth.
-		// Temporarily log during the development cycle
-		// TODO: Add a gateway level configurable body unmarshaller
-		// to extract only non-PII info.
-		zap.ByteString("Request Body", c.reqBody),
-		zap.ByteString("Response Body", c.resBody),
 	}
 
 	for k, v := range c.reqHeaders {
@@ -282,7 +273,6 @@ func (c *tchannelCall) writeReqBody(req RWTStruct) error {
 			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
-	c.reqBody = structWireValue.GetBinary()
 
 	twriter, err := c.call.Arg3Writer()
 	if err != nil {
@@ -374,17 +364,6 @@ func (c *tchannelCall) readResBody(response *tchannel.OutboundCallResponse, resp
 			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
-
-	structWireValue, err := resp.ToWire()
-	if err != nil {
-		c.logger.Error("Could not serialize response for outbound response", zap.Error(err))
-		return errors.Wrapf(
-			err, "Could not serialize response for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
-		)
-	}
-	c.resBody = structWireValue.GetBinary()
-
 	if err := EnsureEmpty(treader, "reading response body"); err != nil {
 		_ = treader.Close()
 		c.logger.Error("Could not ensure arg3reader is empty for outbound response", zap.Error(err))
