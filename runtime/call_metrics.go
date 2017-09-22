@@ -183,19 +183,6 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 //	return &metrics
 //}
 
-// CollectMetrics for inbound TChannel calls
-//func (m *InboundTChannelMetrics) CollectMetrics(startTime time.Time, success bool, err error) {
-//	m.Recvd.Inc(1)
-//	if err != nil {
-//		m.SystemErrors.Inc(1)
-//	} else if !success {
-//		m.AppErrors.Inc(1)
-//	} else {
-//		m.Success.Inc(1)
-//	}
-//	m.Latency.Record(time.Now().Sub(startTime))
-//}
-
 // NewOutboundHTTPMetrics returns outbound HTTP metrics
 func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
 	metrics := OutboundHTTPMetrics{}
@@ -211,25 +198,12 @@ func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
 }
 
 // NewOutboundTChannelMetrics returns outbound TChannel metrics
-//func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
-//	metrics := OutboundTChannelMetrics{}
-//	metrics.Sent = scope.Counter(outboundCallsSent)
-//	metrics.Latency = scope.Timer(outboundCallsLatency)
-//	metrics.Success = scope.Counter(outboundCallsSuccess)
-//	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
-//	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
-//	return &metrics
-//}
-
-// CollectMetrics for outbound TChannel calls
-//func (m *OutboundTChannelMetrics) CollectMetrics(startTime time.Time, success bool, err error) {
-//	m.Sent.Inc(1)
-//	if err != nil {
-//		m.SystemErrors.Inc(1)
-//	} else if !success {
-//		m.AppErrors.Inc(1)
-//	} else {
-//		m.Success.Inc(1)
-//	}
-//	m.Latency.Record(time.Now().Sub(startTime))
-//}
+func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
+	metrics := OutboundTChannelMetrics{}
+	metrics.Sent = scope.Counter(outboundCallsSent)
+	metrics.Latency = scope.Timer(outboundCallsLatency)
+	metrics.Success = scope.Counter(outboundCallsSuccess)
+	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
+	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
+	return &metrics
+}

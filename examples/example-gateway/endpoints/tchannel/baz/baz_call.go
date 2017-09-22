@@ -44,7 +44,13 @@ func (w CallEndpoint) Handle(
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_Call_Args,
 ) (zanzibar.Header, error) {
-	var clientReqHeaders map[string]string
+	clientReqHeaders := make(map[string]string)
+	// passing endpoint reqHeaders to downstream client
+	for _, k := range reqHeaders.Keys() {
+		if v, ok := reqHeaders.Get(k); ok {
+			clientReqHeaders[k] = v
+		}
+	}
 
 	clientReq := &clientBaz.SimpleService_Call_Args{
 		Arg: (*clientBaz.BazRequest)(req.Arg),

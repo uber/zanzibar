@@ -385,7 +385,6 @@ func (g *TChannelClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
-		LogDownstream:    true,
 		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
@@ -1098,7 +1097,6 @@ type ClientMeta struct {
 	IncludedPackages []GoPackageImport
 	Services         []*ServiceSpec
 	ExposedMethods   map[string]string
-	LogDownstream    bool
 	SidecarRouter    string
 }
 
