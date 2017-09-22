@@ -57,7 +57,7 @@ type tchannelClient struct {
 	metrics           map[string]*OutboundTChannelMetrics
 }
 
-type tchannelCall struct {
+type tchannelOutboundCall struct {
 	client        *tchannelClient
 	call          *tchannel.OutboundCall
 	methodName    string
@@ -130,7 +130,7 @@ func (c *tchannelClient) Call(
 
 	serviceMethod := thriftService + "::" + methodName
 
-	call := &tchannelCall{
+	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
@@ -192,11 +192,11 @@ func (c *tchannelClient) Call(
 	return call.success, call.resHeaders, err
 }
 
-func (c *tchannelCall) start() {
+func (c *tchannelOutboundCall) start() {
 	c.startTime = time.Now()
 }
 
-func (c *tchannelCall) finish(err error) {
+func (c *tchannelOutboundCall) finish(err error) {
 	c.finishTime = time.Now()
 
 	// emit metrics
@@ -213,7 +213,7 @@ func (c *tchannelCall) finish(err error) {
 	c.logger.Info("Finished an outgoing client TChannel request", c.logFields()...)
 }
 
-func (c *tchannelCall) logFields() []zapcore.Field {
+func (c *tchannelOutboundCall) logFields() []zapcore.Field {
 	fields := []zapcore.Field{
 		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
 		zap.Time("timestamp-started", c.startTime),
@@ -233,7 +233,7 @@ func (c *tchannelCall) logFields() []zapcore.Field {
 }
 
 // writeReqHeaders writes request headers to arg2
-func (c *tchannelCall) writeReqHeaders(reqHeaders map[string]string) error {
+func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) error {
 	c.reqHeaders = reqHeaders
 
 	twriter, err := c.call.Arg2Writer()
@@ -264,7 +264,7 @@ func (c *tchannelCall) writeReqHeaders(reqHeaders map[string]string) error {
 }
 
 // writeReqBody writes request body to arg3
-func (c *tchannelCall) writeReqBody(req RWTStruct) error {
+func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
 	structWireValue, err := req.ToWire()
 	if err != nil {
 		c.logger.Error("Could not write request for outbound request", zap.Error(err))
@@ -304,7 +304,7 @@ func (c *tchannelCall) writeReqBody(req RWTStruct) error {
 }
 
 // readResHeaders read response headers from arg2
-func (c *tchannelCall) readResHeaders(response *tchannel.OutboundCallResponse) error {
+func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallResponse) error {
 	treader, err := response.Arg2Reader()
 	if err != nil {
 		c.logger.Error("Could not create arg2reader for outbound response", zap.Error(err))
@@ -347,7 +347,7 @@ func (c *tchannelCall) readResHeaders(response *tchannel.OutboundCallResponse) e
 }
 
 // readResHeaders read response headers from arg2
-func (c *tchannelCall) readResBody(response *tchannel.OutboundCallResponse, resp RWTStruct) error {
+func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallResponse, resp RWTStruct) error {
 	treader, err := response.Arg3Reader()
 	if err != nil {
 		c.logger.Error("Could not create arg3Reader for outbound response", zap.Error(err))

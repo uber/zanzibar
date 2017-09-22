@@ -26,9 +26,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
-
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
@@ -104,7 +101,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
 	assert.Equal(t, 1, len(allLogs["Inbound connection is active."]))
 	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
-	assert.Equal(t, 1, len(allLogs["Finished a downstream TChannel request"]))
+	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
 
 	tags := allLogs["Finished an incoming server TChannel request"][0]

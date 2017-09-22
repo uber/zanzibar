@@ -25,14 +25,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
-
 	"github.com/uber-go/tally"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	"github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
 
 func TestCallMetrics(t *testing.T) {
@@ -45,6 +44,9 @@ func TestCallMetrics(t *testing.T) {
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
 		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		TChannelClientMethods: map[string]string{
+			"SimpleService::Call": "Call",
+		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -70,7 +72,7 @@ func TestCallMetrics(t *testing.T) {
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
-	numMetrics := 14
+	numMetrics := 17
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
@@ -118,6 +120,7 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint":        "SimpleService::Call",
 		"calling-service": "test-gateway",
 	}
+
 	for _, name := range tchannelInboundNames {
 		key := tally.KeyForPrefixedStringMap(name, tchannelInboundTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
@@ -181,6 +184,7 @@ func TestCallMetrics(t *testing.T) {
 		"target-endpoint": "SimpleService::call",
 		"target-service":  "bazService",
 	}
+
 	for _, name := range tchannelOutboundNames {
 		key := tally.KeyForPrefixedStringMap(name, tchannelOutboundTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
@@ -201,6 +205,38 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	outboundSuccess := metrics[tally.KeyForPrefixedStringMap("tchannel.outbound.calls.success", tchannelOutboundTags)]
+	value = *outboundSuccess.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	clientNames := []string{
+		"outbound.calls.latency",
+		"outbound.calls.sent",
+		"outbound.calls.success",
+	}
+	clientTags := map[string]string{
+		"env":             "test",
+		"service":         "test-gateway",
+		"client":          "baz",
+		"method":          "Call",
+		"target-service":  "bazService",
+		"target-endpoint": "SimpleService::call",
+	}
+
+	for _, name := range clientNames {
+		key := tally.KeyForPrefixedStringMap(name, clientTags)
+		assert.Contains(t, metrics, key, "expected metric: %s", key)
+	}
+
+	outboundLatency = metrics[tally.KeyForPrefixedStringMap("outbound.calls.latency", clientTags)]
+	value = *outboundLatency.MetricValue.Timer.I64Value
+	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
+	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
+
+	outboundSent := metrics[tally.KeyForPrefixedStringMap("outbound.calls.sent", clientTags)]
+	value = *outboundSent.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value)
+
+	outboundSuccess = metrics[tally.KeyForPrefixedStringMap("outbound.calls.success", clientTags)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 }

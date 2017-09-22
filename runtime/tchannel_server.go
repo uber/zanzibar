@@ -54,7 +54,7 @@ type TChannelEndpoint struct {
 	metrics        *InboundTChannelMetrics
 }
 
-type tchannelCall struct {
+type tchannelInboundCall struct {
 	endpoint   *TChannelEndpoint
 	call       *tchannel.InboundCall
 	success    bool
@@ -182,7 +182,7 @@ func (s *TChannelRouter) handle(
 	e *TChannelEndpoint,
 	call *tchannel.InboundCall,
 ) (err error) {
-	c := tchannelCall{
+	c := tchannelInboundCall{
 		endpoint: e,
 		call:     call,
 	}
@@ -215,11 +215,11 @@ func (s *TChannelRouter) handle(
 	return err
 }
 
-func (c *tchannelCall) start() {
+func (c *tchannelInboundCall) start() {
 	c.startTime = time.Now()
 }
 
-func (c *tchannelCall) finish(err error) {
+func (c *tchannelInboundCall) finish(err error) {
 	c.finishTime = time.Now()
 
 	// emit metrics
@@ -237,7 +237,7 @@ func (c *tchannelCall) finish(err error) {
 
 }
 
-func (c *tchannelCall) logFields() []zapcore.Field {
+func (c *tchannelInboundCall) logFields() []zapcore.Field {
 	fields := []zapcore.Field{
 		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
 		zap.String("calling-service", c.call.CallerName()),
@@ -258,7 +258,7 @@ func (c *tchannelCall) logFields() []zapcore.Field {
 }
 
 // readReqHeaders reads request headers from arg2
-func (c *tchannelCall) readReqHeaders() error {
+func (c *tchannelInboundCall) readReqHeaders() error {
 	treader, err := c.call.Arg2Reader()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg2reader for inbound request", zap.Error(err))
@@ -291,7 +291,7 @@ func (c *tchannelCall) readReqHeaders() error {
 }
 
 // readReqBody reads request body from arg3
-func (c *tchannelCall) readReqBody() (wireValue wire.Value, err error) {
+func (c *tchannelInboundCall) readReqBody() (wireValue wire.Value, err error) {
 	treader, err := c.call.Arg3Reader()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg3reader for inbound request", zap.Error(err))
@@ -340,7 +340,7 @@ func (c *tchannelCall) readReqBody() (wireValue wire.Value, err error) {
 }
 
 // handle tchannel server endpoint call
-func (c *tchannelCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
+func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
 	c.success, resp, c.resHeaders, err = c.endpoint.handler.Handle(ctx, c.reqHeaders, wireValue)
 	if c.endpoint.postResponseCB != nil {
 		defer c.endpoint.postResponseCB(ctx, c.endpoint.Method, resp)
@@ -360,7 +360,7 @@ func (c *tchannelCall) handle(ctx context.Context, wireValue *wire.Value) (resp 
 }
 
 // writeResHeaders writes response headers to arg2
-func (c *tchannelCall) writeResHeaders() error {
+func (c *tchannelInboundCall) writeResHeaders() error {
 	twriter, err := c.call.Response().Arg2Writer()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
@@ -385,7 +385,7 @@ func (c *tchannelCall) writeResHeaders() error {
 }
 
 // writeResBody writes response body to arg3
-func (c *tchannelCall) writeResBody(resp RWTStruct) error {
+func (c *tchannelInboundCall) writeResBody(resp RWTStruct) error {
 	structWireValue, err := resp.ToWire()
 	if err != nil {
 		// If we could not write the body then we should do something else instead.
