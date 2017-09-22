@@ -302,7 +302,6 @@ func TestCanReadFromFile(t *testing.T) {
 			"bool":  true,
 			"int":   int64(1),
 			"float": float64(1.0),
-			"exist": "xyz",
 		}),
 	})
 
@@ -317,7 +316,6 @@ func TestCanReadFromFile(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
-	assert.Equal(t, config.ContainsKey("exist"), true)
 
 	closer.Close()
 }
@@ -329,7 +327,6 @@ func TestCanReadFromFileContents(t *testing.T) {
 		"bool":  true,
 		"int":   int64(1),
 		"float": float64(1.0),
-		"exist": "xyz",
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
@@ -341,7 +338,6 @@ func TestCanReadFromFileContents(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
-	assert.Equal(t, config.ContainsKey("exist"), true)
 }
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
