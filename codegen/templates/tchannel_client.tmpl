@@ -49,6 +49,10 @@ type Client interface {
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
@@ -73,6 +77,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 			ServiceName:       serviceName,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
 		},
 	)
 

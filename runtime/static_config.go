@@ -206,6 +206,21 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
+// ContainsKey returns the value as a string or panics.
+func (conf *StaticConfig) ContainsKey(key string) bool {
+	if conf.destroyed {
+		panic(errors.Errorf("Cannot ContainsKey(%s) because destroyed", key))
+	}
+	if _, contains := conf.seedConfig[key]; contains {
+		return true
+	}
+
+	if _, contains := conf.configValues[key]; contains {
+		return true
+	}
+	return false
+}
+
 // MustGetString returns the value as a string or panics.
 func (conf *StaticConfig) MustGetString(key string) string {
 	if conf.destroyed {
