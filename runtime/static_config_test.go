@@ -57,6 +57,10 @@ func TestEmptyConfig(t *testing.T) {
 
 	config.SetSeedOrDie("k4", float64(4.0))
 	assert.Equal(t, config.MustGetFloat("k4"), float64(4.0))
+
+	assert.Equal(t, config.ContainsKey("k5"), false)
+	config.SetSeedOrDie("k5", "xyz")
+	assert.Equal(t, config.ContainsKey("k5"), true)
 }
 
 func TestGetNamespace(t *testing.T) {
@@ -126,6 +130,7 @@ func TestSupportsSeedConfig(t *testing.T) {
 			"bool":  true,
 			"int":   int64(1),
 			"float": float64(1.0),
+			"exist": "xyz",
 		},
 	)
 
@@ -133,6 +138,7 @@ func TestSupportsSeedConfig(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.ContainsKey("exist"), true)
 }
 
 func TestCannotSetExistingKeys(t *testing.T) {
@@ -156,6 +162,7 @@ func TestCannotGetFromDestroyedConfig(t *testing.T) {
 			"bool":  true,
 			"int":   int64(1),
 			"float": float64(1.0),
+			"exist": "xyz",
 		},
 	)
 
@@ -186,6 +193,10 @@ func TestCannotGetFromDestroyedConfig(t *testing.T) {
 		var x bool
 		config.MustGetStruct("bool", &x)
 		assert.Equal(t, x, true)
+	})
+
+	assert.Panics(t, func() {
+		assert.Equal(t, config.ContainsKey("exist"), true)
 	})
 }
 
@@ -291,6 +302,7 @@ func TestCanReadFromFile(t *testing.T) {
 			"bool":  true,
 			"int":   int64(1),
 			"float": float64(1.0),
+			"exist": "xyz",
 		}),
 	})
 
@@ -305,6 +317,7 @@ func TestCanReadFromFile(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.ContainsKey("xyz"), true)
 
 	closer.Close()
 }
@@ -316,6 +329,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 		"bool":  true,
 		"int":   int64(1),
 		"float": float64(1.0),
+		"exist": "xyz",
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
@@ -327,6 +341,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.ContainsKey("xyz"), true)
 }
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
