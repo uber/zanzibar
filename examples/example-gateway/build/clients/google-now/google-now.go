@@ -87,7 +87,6 @@ func (c *googleNowClient) AddCredentials(
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "AddCredentials", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/add-credentials"
@@ -96,6 +95,12 @@ func (c *googleNowClient) AddCredentials(
 	if err != nil {
 		return nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return nil, err
@@ -131,7 +136,6 @@ func (c *googleNowClient) CheckCredentials(
 	headers map[string]string,
 ) (map[string]string, error) {
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "CheckCredentials", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/check-credentials"
@@ -140,6 +144,12 @@ func (c *googleNowClient) CheckCredentials(
 	if err != nil {
 		return nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return nil, err

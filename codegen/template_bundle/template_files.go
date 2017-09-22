@@ -921,11 +921,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "{{$methodName}}", c.httpClient)
 
-	{{- if .ReqHeaders }}
-	// TODO(jakev): Ensure we validate mandatory headers
-	{{- end}}
-
-	{{- if .ReqHeaderGoStatements }}
+	{{if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
@@ -950,6 +946,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
+
+	{{if .ReqHeaders }}
+	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
+	if headerErr != nil {
+		return {{ if eq .ResponseType "" -}}
+			nil, headerErr
+			{{- else -}}
+			defaultRes, nil, headerErr
+			{{- end}}
+	}
+	{{- end}}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
@@ -1073,7 +1081,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6535, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6683, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

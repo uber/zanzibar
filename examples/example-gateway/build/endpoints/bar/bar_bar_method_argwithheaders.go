@@ -125,6 +125,13 @@ func (w ArgWithHeadersEndpoint) Handle(
 
 	clientHeaders := map[string]string{}
 
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
+
 	clientRespBody, _, err := w.Clients.Bar.ArgWithHeaders(
 		ctx, clientHeaders, clientRequest,
 	)

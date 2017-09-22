@@ -256,6 +256,7 @@ func (c *barClient) ArgNotStruct(
 	if err != nil {
 		return nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return nil, err
@@ -308,7 +309,6 @@ func (c *barClient) ArgWithHeaders(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "ArgWithHeaders", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithHeaders"
@@ -317,6 +317,12 @@ func (c *barClient) ArgWithHeaders(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -408,6 +414,7 @@ func (c *barClient) ArgWithManyQueryParams(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -492,6 +499,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -541,6 +549,7 @@ func (c *barClient) ArgWithParams(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -587,6 +596,7 @@ func (c *barClient) ArgWithQueryHeader(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -642,6 +652,7 @@ func (c *barClient) ArgWithQueryParams(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -687,6 +698,7 @@ func (c *barClient) MissingArg(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -747,6 +759,7 @@ func (c *barClient) NoRequest(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -808,6 +821,7 @@ func (c *barClient) Normal(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -869,6 +883,7 @@ func (c *barClient) NormalRecur(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -929,6 +944,7 @@ func (c *barClient) TooManyArgs(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -982,7 +998,6 @@ func (c *barClient) EchoBinary(
 ) ([]byte, map[string]string, error) {
 	var defaultRes []byte
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoBinary", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/binary"
@@ -991,6 +1006,12 @@ func (c *barClient) EchoBinary(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1028,7 +1049,6 @@ func (c *barClient) EchoBool(
 ) (bool, map[string]string, error) {
 	var defaultRes bool
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoBool", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/bool"
@@ -1037,6 +1057,12 @@ func (c *barClient) EchoBool(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1074,7 +1100,6 @@ func (c *barClient) EchoDouble(
 ) (float64, map[string]string, error) {
 	var defaultRes float64
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoDouble", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/double"
@@ -1083,6 +1108,12 @@ func (c *barClient) EchoDouble(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1120,7 +1151,6 @@ func (c *barClient) EchoEnum(
 ) (clientsBarBar.Fruit, map[string]string, error) {
 	var defaultRes clientsBarBar.Fruit
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoEnum", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/enum"
@@ -1129,6 +1159,12 @@ func (c *barClient) EchoEnum(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1166,7 +1202,6 @@ func (c *barClient) EchoI16(
 ) (int16, map[string]string, error) {
 	var defaultRes int16
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoI16", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i16"
@@ -1175,6 +1210,12 @@ func (c *barClient) EchoI16(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1212,7 +1253,6 @@ func (c *barClient) EchoI32(
 ) (int32, map[string]string, error) {
 	var defaultRes int32
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoI32", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i32"
@@ -1221,6 +1261,12 @@ func (c *barClient) EchoI32(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1258,7 +1304,6 @@ func (c *barClient) EchoI64(
 ) (int64, map[string]string, error) {
 	var defaultRes int64
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoI64", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i64"
@@ -1267,6 +1312,12 @@ func (c *barClient) EchoI64(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1304,7 +1355,6 @@ func (c *barClient) EchoI8(
 ) (int8, map[string]string, error) {
 	var defaultRes int8
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoI8", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/i8"
@@ -1313,6 +1363,12 @@ func (c *barClient) EchoI8(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1350,7 +1406,6 @@ func (c *barClient) EchoString(
 ) (string, map[string]string, error) {
 	var defaultRes string
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoString", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string"
@@ -1359,6 +1414,12 @@ func (c *barClient) EchoString(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1396,7 +1457,6 @@ func (c *barClient) EchoStringList(
 ) ([]string, map[string]string, error) {
 	var defaultRes []string
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStringList", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-list"
@@ -1405,6 +1465,12 @@ func (c *barClient) EchoStringList(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1442,7 +1508,6 @@ func (c *barClient) EchoStringMap(
 ) (map[string]*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes map[string]*clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStringMap", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-map"
@@ -1451,6 +1516,12 @@ func (c *barClient) EchoStringMap(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1488,7 +1559,6 @@ func (c *barClient) EchoStringSet(
 ) (map[string]struct{}, map[string]string, error) {
 	var defaultRes map[string]struct{}
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStringSet", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/string-set"
@@ -1497,6 +1567,12 @@ func (c *barClient) EchoStringSet(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1534,7 +1610,6 @@ func (c *barClient) EchoStructList(
 ) ([]*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes []*clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStructList", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-list"
@@ -1543,6 +1618,12 @@ func (c *barClient) EchoStructList(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1586,7 +1667,6 @@ func (c *barClient) EchoStructMap(
 		Value string
 	}
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStructMap", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-map"
@@ -1595,6 +1675,12 @@ func (c *barClient) EchoStructMap(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1635,7 +1721,6 @@ func (c *barClient) EchoStructSet(
 ) ([]*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes []*clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStructSet", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-set"
@@ -1644,6 +1729,12 @@ func (c *barClient) EchoStructSet(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
@@ -1681,7 +1772,6 @@ func (c *barClient) EchoTypedef(
 ) (clientsBarBar.UUID, map[string]string, error) {
 	var defaultRes clientsBarBar.UUID
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoTypedef", c.httpClient)
-	// TODO(jakev): Ensure we validate mandatory headers
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/echo" + "/typedef"
@@ -1690,6 +1780,12 @@ func (c *barClient) EchoTypedef(
 	if err != nil {
 		return defaultRes, nil, err
 	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return defaultRes, nil, err
