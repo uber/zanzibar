@@ -64,7 +64,7 @@ func NewServerHTTPRequest(
 		queryValues:  nil,
 		Logger:       endpoint.logger,
 		metrics:      endpoint.metrics,
-		EndpointName: endpoint.HandlerName,
+		EndpointName: endpoint.EndpointName,
 		HandlerName:  endpoint.HandlerName,
 		URL:          r.URL,
 		Method:       r.Method,
