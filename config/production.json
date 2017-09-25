@@ -12,6 +12,7 @@
 	"jaeger.sampler.param": 0.001,
 
 	"logger.output": "stdout",
+	"logger.fileName": "",
 
 	"metrics.type": "m3",
 	"metrics.flushInterval": 1000,
