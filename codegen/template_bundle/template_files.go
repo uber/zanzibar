@@ -560,15 +560,16 @@ import (
 	"path/filepath"
 	"net/http"
 	"testing"
+	"runtime"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
 )
 
 {{- $clientID := .ClientID }}
+{{- $relativePathToRoot := .RelativePathToRoot}}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
@@ -580,13 +581,35 @@ import (
 
 {{range $.TestStubs}}
 
+func getDirName{{.HandlerID | title}}{{.TestName | title}}() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
-		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
+		TestBinary: filepath.Join(
+			getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+			"{{$relativePathToRoot}}",
+			"build", "services", "{{.TestServiceName}}",
+			"main", "main.go",
+		),
+		ConfigFiles: []string{
+			filepath.Join(
+				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				"{{$relativePathToRoot}}",
+				"config", "production.json",
+			),
+			filepath.Join(
+				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				"{{$relativePathToRoot}}",
+				"config", "{{.TestServiceName}}", "production.json",
+			),
+		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -662,7 +685,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2628, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

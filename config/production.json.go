@@ -78,6 +78,7 @@ var _productionJson = []byte(`{
 	"jaeger.sampler.param": 0.001,
 
 	"logger.output": "stdout",
+	"logger.fileName": "",
 
 	"metrics.type": "m3",
 	"metrics.flushInterval": 1000,
@@ -109,7 +110,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 807, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
