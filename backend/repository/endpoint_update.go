@@ -89,10 +89,13 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfg *EndpointConfig) error {
 	metaFilePath := filepath.Join(configDir, metaFile)
 	fileContent := new(codegen.EndpointClassConfig)
-	err := readJSONFile(metaFilePath, fileContent)
-	if err != nil {
-		return err
+	if _, err := os.Stat(metaFilePath); !os.IsNotExist(err) {
+		err := readJSONFile(metaFilePath, fileContent)
+		if err != nil {
+			return err
+		}
 	}
+	var err error
 	fileContent.Config.Endpoints, err = addToEndpointList(fileContent.Config.Endpoints, newFile, configDir)
 	if err != nil {
 		return err
