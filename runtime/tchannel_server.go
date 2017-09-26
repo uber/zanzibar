@@ -312,7 +312,7 @@ func (c *tchannelInboundCall) readReqBody() (wireValue wire.Value, err error) {
 	}
 	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
-		c.endpoint.Logger.Error("Could not decode arg3 for inbound request", zap.Error(err))
+		c.endpoint.Logger.Warn("Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)

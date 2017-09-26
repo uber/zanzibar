@@ -1893,7 +1893,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.endpoint.Logger.Error("Error converting request from wire", zap.Error(err))
+		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -1932,7 +1932,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Logger.Error("Handler returned error", zap.Error(err))
+			h.Logger.Warn("Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = r
@@ -1942,7 +1942,7 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					h.endpoint.Logger.Error(
+					h.endpoint.Logger.Warn(
 						"Handler returned non-nil error type *{{.Type}} but nil value",
 						zap.Error(err),
 					)
@@ -1955,7 +1955,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					h.endpoint.Logger.Error("Handler returned error", zap.Error(err))
+					h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -1982,7 +1982,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4499, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

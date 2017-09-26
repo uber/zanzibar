@@ -80,7 +80,7 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	var req endpointsTchannelBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.endpoint.Logger.Error("Error converting request from wire", zap.Error(err))
+		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -108,7 +108,7 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
-			h.endpoint.Logger.Error(
+			h.endpoint.Logger.Warn(
 				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
 				zap.Error(err),
 			)
@@ -120,7 +120,7 @@ func (h *SimpleServiceCallHandler) Handle(
 			}
 			res.AuthErr = v
 		default:
-			h.endpoint.Logger.Error("Handler returned error", zap.Error(err))
+			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, errors.Wrapf(
 				err, "%s.%s (%s) handler returned error",
 				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
