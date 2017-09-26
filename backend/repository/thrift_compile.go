@@ -25,6 +25,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"bytes"
+
+	"sort"
+
 	"go.uber.org/thriftrw/ast"
 	"go.uber.org/thriftrw/compile"
 )
@@ -358,8 +362,7 @@ func fillInHeaders(module *Module, program *ast.Program) {
 	for _, header := range program.Headers {
 		switch header := header.(type) {
 		case *ast.Include:
-			name := strings.TrimSuffix(filepath.Base(header.Path), filepath.Ext(header.Path))
-			if inc, ok := module.Includes[name]; ok {
+			if inc, ok := module.Includes[includedName(header.Path)]; ok {
 				inc.Line = header.Line
 			}
 		case *ast.Namespace:
@@ -371,6 +374,10 @@ func fillInHeaders(module *Module, program *ast.Program) {
 				})
 		}
 	}
+}
+
+func includedName(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
 
 func fillInDefinitions(module *Module, program *ast.Program) {
@@ -406,4 +413,129 @@ func newEnumSpec(enum *compile.EnumSpec) *EnumSpec {
 		e.Items[i].Annotations = item.Annotations
 	}
 	return e
+}
+
+func (m *Module) ToCode() string {
+	codeBlocks := make([]*CodeBlock, 0, 100)
+	for _, ns := range m.Namespace {
+		codeBlocks = append(codeBlocks, ns.ToCode())
+	}
+	for _, im := range m.Includes {
+		codeBlocks = append(codeBlocks, im.ToCode(m.ThriftPath))
+	}
+	for _, c := range m.Constants {
+		codeBlocks = append(codeBlocks, c.ToCode())
+	}
+	for _, t := range m.Types {
+		codeBlocks = append(codeBlocks, t.ToCode(m.ThriftPath))
+	}
+	for _, service := range m.Services {
+		codeBlocks = append(codeBlocks, service.ToCode())
+	}
+	sort.Slice(codeBlocks, func(i, j int) bool {
+		return codeBlocks[i].Order < codeBlocks[j].Order
+	})
+	result := bytes.NewBuffer(nil)
+	for i := range codeBlocks {
+		result.WriteString(codeBlocks[i].Code)
+		result.WriteString("\n\n")
+	}
+	return result.String()
+}
+
+// CodeBlock defines a code block of a thrift file.
+type CodeBlock struct {
+	Code  string
+	Order int
+}
+
+func (ns *Namespace) ToCode() *CodeBlock {
+	return &CodeBlock{
+		Code:  fmt.Sprintf("namespace %s %s", ns.Scope, ns.Name),
+		Order: ns.Line,
+	}
+}
+
+func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
+	relPath, err := filepath.Rel(curFilePath, im.Module.ThriftPath)
+	if err != nil {
+		relPath = curFilePath
+	}
+	return &CodeBlock{
+		Code:  fmt.Sprintf("include \"%s\"", relPath),
+		Order: im.Line,
+	}
+}
+
+func (c *Constant) ToCode() *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("enum %s {\n", c.Name))
+	items := c.Type.EnumType.Items
+	for i := 0; i < len(items)-1; i++ {
+		result.WriteString(fmt.Sprintf("\t%s,\n", items[i].Name))
+	}
+	if len(items) > 0 {
+		result.WriteString(fmt.Sprintf("\t%s\n", items[len(items)-1]))
+	}
+	result.WriteString("}")
+	return &CodeBlock{
+		Code:  "",
+		Order: c.Line,
+	}
+}
+
+func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
+	// Typedef statement
+	if ts.TypeDefTarget != nil {
+		return &CodeBlock{
+			Code: fmt.Sprintf("typedef %s %s", ts.Name,
+				ts.TypeDefTarget.FullTypeName(curFilePath)),
+			Order: ts.Line,
+		}
+	}
+	// New struct definition
+	if ts.StructType == nil {
+		panic(fmt.Sprintf(
+			"No typedef and struct and definition found: typespec %+v", ts))
+	}
+	st := ts.StructType
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), ts.Name))
+	sort.Slice(st.Fields, func(i, j int) bool {
+		return st.Fields[i].Line < st.Fields[j].Line ||
+			st.Fields[i].ID < st.Fields[j].ID
+	})
+	for _, field := range st.Fields {
+		var required string
+		if field.Required {
+			required = "required"
+		} else {
+			required = "optional"
+		}
+		// TODO(zw): handle annotations and default
+		result.WriteString(fmt.Sprintf("\t%d: %s %s %s",
+			field.ID, required, field.Type.FullTypeName(curFilePath), field.Name))
+	}
+	result.WriteString("}")
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: ts.Line,
+	}
+}
+
+// fullTypeName defines the full name referred in current thrift file,
+// such as "string", "int", "base.abc".
+func (ts *TypeSpec) FullTypeName(curFilePath string) string {
+	// Built-in type or type defined in current file.
+	if ts.File == "" || ts.File == curFilePath {
+		return ts.Name
+	}
+	return includedName(ts.File) + "." + ts.Name
+}
+
+func (ss *ServiceSpec) ToCode() *CodeBlock {
+	return &CodeBlock{
+		Code:  "",
+		Order: ss.Line,
+	}
 }
