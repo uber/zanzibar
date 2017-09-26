@@ -63,12 +63,13 @@ type StructMeta struct {
 
 // EndpointTestMeta saves meta data used to render an endpoint test.
 type EndpointTestMeta struct {
-	Instance         *ModuleInstance
-	Method           *MethodSpec
-	TestStubs        []TestStub
-	ClientName       string
-	ClientID         string
-	IncludedPackages []GoPackageImport
+	Instance           *ModuleInstance
+	Method             *MethodSpec
+	TestStubs          []TestStub
+	ClientName         string
+	ClientID           string
+	RelativePathToRoot string
+	IncludedPackages   []GoPackageImport
 }
 
 // TestStub saves stubbed requests/responses for an endpoint test.
@@ -892,12 +893,33 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		sort.Strings(testStub.EndpointResHeaderKeys)
 	}
 
+	endpointDirectory := filepath.Join(
+		g.packageHelper.CodeGenTargetPath(),
+		instance.Directory,
+	)
+	targetPath := e.TargetEndpointTestPath(serviceName, methodName)
+	endpointTestFilePath, err := filepath.Rel(endpointDirectory, targetPath)
+	if err != nil {
+		endpointTestFilePath = targetPath
+	}
+
 	meta := &EndpointTestMeta{
 		Instance:  instance,
 		Method:    method,
 		TestStubs: testStubs,
 		ClientID:  e.ClientSpec.ClientID,
 	}
+
+	relativePath, err := filepath.Rel(
+		targetPath, g.packageHelper.CodeGenTargetPath(),
+	)
+	if err != nil {
+		return errors.Wrap(err,
+			"Error computing relative path for endpoint test template",
+		)
+	}
+
+	meta.RelativePathToRoot = relativePath
 
 	tempName := "endpoint_test.tmpl"
 	if e.WorkflowType == "tchannelClient" {
@@ -916,15 +938,6 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	endpointTest, err := g.templates.ExecTemplate(tempName, meta, g.packageHelper)
 	if err != nil {
 		return errors.Wrap(err, "Error executing endpoint test template")
-	}
-	endpointDirectory := filepath.Join(
-		g.packageHelper.CodeGenTargetPath(),
-		instance.Directory,
-	)
-	targetPath := e.TargetEndpointTestPath(serviceName, methodName)
-	endpointTestFilePath, err := filepath.Rel(endpointDirectory, targetPath)
-	if err != nil {
-		endpointTestFilePath = targetPath
 	}
 
 	out[endpointTestFilePath] = endpointTest
