@@ -69,13 +69,9 @@ func (h *SimpleServiceCallHandler) Handle(
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
-	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}); err != nil {
-		h.endpoint.Logger.Error("Request missing request headers",
-			zap.Error(err),
-			zap.Strings("headers", []string{"x-uuid", "x-token"}),
-		)
+	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}, h.endpoint.Logger); err != nil {
 		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) request missing request headers",
+			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
@@ -97,12 +93,9 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
-	if err := wfResHeaders.Ensure([]string{"some-res-header"}); err != nil {
-		h.endpoint.Logger.Error("Request missing response headers", zap.Error(err),
-			zap.Strings("headers", []string{"some-res-header"}),
-		)
+	if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
 		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) request missing response headers",
+			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}

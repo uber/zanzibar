@@ -23,8 +23,10 @@ package zanzibar
 import (
 	"net/http"
 	"net/textproto"
+	"strings"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // Header defines methods on ServerHeaders
@@ -33,7 +35,7 @@ type Header interface {
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
-	Ensure(keys []string) error
+	Ensure(keys []string, logger *zap.Logger) error
 }
 
 // ServerHTTPHeader wrapper to implement zanzibar Header interface
@@ -97,15 +99,28 @@ func (zh ServerHTTPHeader) Keys() []string {
 }
 
 // Ensure returns error if the headers do not have the given keys
-func (zh ServerHTTPHeader) Ensure(keys []string) error {
-	for _, headerName := range keys {
-		httpHeaderName := textproto.CanonicalMIMEHeaderKey(headerName)
-		_, ok := zh[httpHeaderName]
-		if !ok {
-			return errors.New("Missing manditory header: " + headerName)
+func (zh ServerHTTPHeader) Ensure(keys []string, logger *zap.Logger) error {
+	missing := make([]string, 0, len(keys))
+	for _, header := range keys {
+		h := textproto.CanonicalMIMEHeaderKey(header)
+		if _, ok := zh[h]; !ok {
+			missing = append(missing, header)
 		}
 	}
-	return nil
+
+	if len(missing) == 0 {
+		return nil
+	}
+
+	err := errors.Errorf(
+		"Missing mandatory headers: %s",
+		strings.Join(missing, ", "),
+	)
+	logger.Warn("Missing mandatory headers",
+		zap.Error(err),
+		zap.Strings("headers", missing),
+	)
+	return err
 }
 
 // ServerTChannelHeader wrapper to implement zanzibar Header interface
@@ -144,12 +159,25 @@ func (th ServerTChannelHeader) Keys() []string {
 }
 
 // Ensure returns error if the headers do not have the given keys
-func (th ServerTChannelHeader) Ensure(keys []string) error {
-	for _, headerName := range keys {
-		_, ok := th[headerName]
-		if !ok {
-			return errors.New("Missing manditory header: " + headerName)
+func (th ServerTChannelHeader) Ensure(keys []string, logger *zap.Logger) error {
+	missing := make([]string, 0, len(keys))
+	for _, header := range keys {
+		if _, ok := th[header]; !ok {
+			missing = append(missing, header)
 		}
 	}
-	return nil
+
+	if len(missing) == 0 {
+		return nil
+	}
+
+	err := errors.Errorf(
+		"Missing mandatory headers: %s",
+		strings.Join(missing, ", "),
+	)
+	logger.Warn("Missing mandatory headers",
+		zap.Error(err),
+		zap.Strings("headers", missing),
+	)
+	return err
 }

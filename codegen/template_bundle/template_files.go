@@ -1880,13 +1880,9 @@ func (h *{{$handlerName}}) Handle(
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
-	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}); err != nil {
-		h.endpoint.Logger.Error("Request missing request headers",
-			zap.Error(err),
-			zap.Strings("headers", []string{"x-uuid", "x-token"}),
-		)
+	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
 		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) request missing request headers",
+			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
@@ -1921,12 +1917,9 @@ func (h *{{$handlerName}}) Handle(
 	{{end}}
 
 	{{- if .ResHeaders}}
-	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}); err != nil {
-		h.endpoint.Logger.Error("Request missing response headers", zap.Error(err),
-			zap.Strings("headers", []string{"some-res-header"}),
-		)
+	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
 		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) request missing response headers",
+			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
@@ -1989,7 +1982,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4761, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4503, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
