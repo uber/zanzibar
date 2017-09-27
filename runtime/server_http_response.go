@@ -97,7 +97,7 @@ func (res *ServerHTTPResponse) finish() {
 	}
 
 	// write logs
-	res.Request.Logger.Info(
+	res.Request.Logger.Debug(
 		"Finished an incoming server HTTP request",
 		serverHTTPLogFields(res.Request, res)...,
 	)

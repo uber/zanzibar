@@ -210,7 +210,7 @@ func (c *tchannelCall) finish(err error) {
 	c.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
 
 	// write logs
-	c.logger.Info("Finished an outgoing client TChannel request", c.logFields()...)
+	c.logger.Debug("Finished an outgoing client TChannel request", c.logFields()...)
 }
 
 func (c *tchannelCall) logFields() []zapcore.Field {
