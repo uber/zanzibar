@@ -161,7 +161,7 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
 					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
 					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&"+
 					"anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
@@ -696,7 +696,7 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
 					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
 					"anOptInt8=-50&anOptStr=bar",
 				r.URL.RawQuery,

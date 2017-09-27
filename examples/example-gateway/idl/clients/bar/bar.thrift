@@ -167,7 +167,9 @@ service Bar {
     BarResponse argWithManyQueryParams(
         1: required string aStr
         2: optional string anOptStr
-        3: required bool aBool
+        3: required bool aBool (
+            zanzibar.http.ref = "query.aBoolean"
+        )
         4: optional bool anOptBool
         5: required i8 aInt8
         6: optional i8 anOptInt8

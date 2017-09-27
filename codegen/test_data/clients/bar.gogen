@@ -372,8 +372,8 @@ func (c *barClient) ArgWithManyQueryParams(
 		anOptStrQuery := *r.AnOptStr
 		queryValues.Set("anOptStr", anOptStrQuery)
 	}
-	aBoolQuery := strconv.FormatBool(r.ABool)
-	queryValues.Set("aBool", aBoolQuery)
+	aBooleanQuery := strconv.FormatBool(r.ABool)
+	queryValues.Set("aBoolean", aBooleanQuery)
 	if r.AnOptBool != nil {
 		anOptBoolQuery := strconv.FormatBool(*r.AnOptBool)
 		queryValues.Set("anOptBool", anOptBoolQuery)
