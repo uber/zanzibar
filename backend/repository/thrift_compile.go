@@ -537,11 +537,20 @@ func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
 func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
-	sort.Slice(st.Fields, func(i, j int) bool {
-		return st.Fields[i].Line < st.Fields[j].Line ||
-			st.Fields[i].ID < st.Fields[j].ID
+	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t"))
+	result.WriteString("}")
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: line,
+	}
+}
+
+func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string) string {
+	sort.Slice(fields, func(i, j int) bool {
+		return fields[i].Line < fields[j].Line || fields[i].ID < fields[j].ID
 	})
-	for _, field := range st.Fields {
+	result := bytes.NewBuffer(nil)
+	for _, field := range fields {
 		var required string
 		if field.Required {
 			required = "required"
@@ -549,14 +558,10 @@ func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath strin
 			required = "optional"
 		}
 		// TODO(zw): handle annotations and default
-		result.WriteString(fmt.Sprintf("\t%d: %s %s %s\n",
-			field.ID, required, field.Type.FullTypeName(curFilePath), field.Name))
+		result.WriteString(fmt.Sprintf("%s%d: %s %s %s\n",
+			lineIndent, field.ID, required, field.Type.FullTypeName(curFilePath), field.Name))
 	}
-	result.WriteString("}")
-	return &CodeBlock{
-		Code:  result.String(),
-		Order: line,
-	}
+	return result.String()
 }
 
 // fullTypeName defines the full name referred in current thrift file,
@@ -569,9 +574,60 @@ func (ts *TypeSpec) FullTypeName(curFilePath string) string {
 	return includedName(ts.File) + "." + ts.Name
 }
 
-func (ss *ServiceSpec) ToCode() *CodeBlock {
+func (ss *ServiceSpec) ToCode(curFilePath string) *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("service %s {\n", ss.Name))
+	functions := make([]*FunctionSpec, 0, len(ss.Functions))
+	for _, f := range ss.Functions {
+		functions = append(functions, f)
+	}
+	result.WriteString(functionsCode(functions, curFilePath))
+	result.WriteString("}")
 	return &CodeBlock{
-		Code:  "service " + ss.Name + " TBD",
+		Code:  result.String(),
 		Order: ss.Line,
+	}
+}
+
+func functionsCode(functions []*FunctionSpec, curFilePath string) string {
+	sort.Slice(functions, func(i, j int) bool {
+		return functions[i].Line < functions[j].Line ||
+			(functions[i].Line == functions[j].Line &&
+				functions[i].Name < functions[j].Name)
+	})
+	result := bytes.NewBuffer(nil)
+	for i, f := range functions {
+		var returnType string
+		if f.OneWay {
+			returnType = "void"
+		} else {
+			returnType = f.ResultSpec.ReturnType.FullTypeName(curFilePath)
+		}
+		result.WriteString(fmt.Sprintf("\t%s %s (", returnType, f.Name))
+		// Input parameters
+		if len(f.ArgsSpec) != 0 {
+			result.WriteString(fmt.Sprintf("\n%s\t)",
+				fieldsCode(f.ArgsSpec, curFilePath, "\t\t")))
+		} else {
+			result.WriteString(")")
+		}
+		// Exceptions
+		if exceptions := f.ResultSpec.Exceptions; len(exceptions) != 0 {
+			result.WriteString(" throws (\n")
+			result.WriteString(fieldsCode(exceptions, curFilePath, "\t\t"))
+			result.WriteString("\t)")
+		}
+		// Annotations
+		if f.Annotations != nil {
+			result.WriteString(" (\n")
+			result.WriteString(annotationCode(f.Annotations))
+			result.WriteString("\t)")
+		}
+
+		if i == len(functions)-1 {
+			result.WriteString("\n")
+		} else {
+			result.WriteString("\n\n")
+		}
 	}
 }
