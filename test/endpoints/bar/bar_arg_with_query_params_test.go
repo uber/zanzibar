@@ -750,7 +750,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+				"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
@@ -805,7 +805,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
 				"opt.name=b-name&opt.userUUID=b-uuid&"+
-					"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
