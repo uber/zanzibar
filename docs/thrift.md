@@ -150,6 +150,18 @@ how its serialized for the client ).
  - `query.{{$queryName}}` means that this field is not 
 	in the JSON body and is instead read/written to a query
 	parameter in the URL.
+	
+	For a method that is annotated by `zanzibar.http.method = "GET"`,
+	its arguments are by default implicitly read/written into query
+	parameters in the URL. Also, the query annotation currently only
+	works for methods with `zanzibar.http.method = "GET"` annotation.
+	It is useful to rename the field name in the URL query, e.g.,
+	`1. required string latitude (zanzibar.http.ref = "query.lat")`.
+    
+	If the annotation is on a field of a struct and that struct is
+	a method argument, the URL query name will be prefixed with the
+	struct's field name plus ".".
+    
  - `body.{{$fieldName}}` means that this field comes from 
 	a different field in the body. The fieldName is absolute
 	from the root of the body JSON object.
