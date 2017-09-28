@@ -310,6 +310,10 @@ func (c *barClient) ArgWithHeaders(
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "ArgWithHeaders", c.httpClient)
 
+	// TODO(jakev): populate request headers from thrift body
+	headers["name"] = r.Name
+	headers["x-uuid"] = *r.UserUUID
+
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithHeaders"
 

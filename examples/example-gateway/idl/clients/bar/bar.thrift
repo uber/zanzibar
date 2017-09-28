@@ -119,8 +119,14 @@ service Bar {
 
     // TODO: support headers annotation
     BarResponse argWithHeaders (
-        1: required string name
-        2: optional string userUUID
+        1: required string name (
+        zanzibar.http.ref = "headers.name"
+            go.tag = "json:\"-\""
+        )
+        2: optional string userUUID (
+        zanzibar.http.ref = "headers.x-uuid"
+            go.tag = "json:\"-\""
+        )
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.reqHeaders = "x-uuid"

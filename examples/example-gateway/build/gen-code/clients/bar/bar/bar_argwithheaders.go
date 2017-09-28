@@ -11,8 +11,8 @@ import (
 )
 
 type Bar_ArgWithHeaders_Args struct {
-	Name     string  `json:"name,required"`
-	UserUUID *string `json:"userUUID,omitempty"`
+	Name     string  `json:"-"`
+	UserUUID *string `json:"-"`
 }
 
 func (v *Bar_ArgWithHeaders_Args) ToWire() (wire.Value, error) {

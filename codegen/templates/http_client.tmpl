@@ -96,6 +96,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 	{{if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
+	{{range $index, $line := .ReqClientHeaderGoStatements -}}
+	{{$line}}
+	{{end -}}
 	{{- end}}
 
 	// Generate full URL.
