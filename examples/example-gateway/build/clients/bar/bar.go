@@ -372,8 +372,8 @@ func (c *barClient) ArgWithManyQueryParams(
 		anOptStrQuery := *r.AnOptStr
 		queryValues.Set("anOptStr", anOptStrQuery)
 	}
-	aBoolQuery := strconv.FormatBool(r.ABool)
-	queryValues.Set("aBool", aBoolQuery)
+	aBooleanQuery := strconv.FormatBool(r.ABool)
+	queryValues.Set("aBoolean", aBooleanQuery)
 	if r.AnOptBool != nil {
 		anOptBoolQuery := strconv.FormatBool(*r.AnOptBool)
 		queryValues.Set("anOptBool", anOptBoolQuery)
@@ -474,8 +474,8 @@ func (c *barClient) ArgWithNestedQueryParams(
 		queryValues.Set("request.authUUID", requestAuthUUIDQuery)
 	}
 	if r.Request.AuthUUID2 != nil {
-		requestAuthUUID2Query := *r.Request.AuthUUID2
-		queryValues.Set("request.authUUID2", requestAuthUUID2Query)
+		requestMyuuidQuery := *r.Request.AuthUUID2
+		queryValues.Set("request.myuuid", requestMyuuidQuery)
 	}
 	if r.Opt != nil {
 		optNameQuery := r.Opt.Name

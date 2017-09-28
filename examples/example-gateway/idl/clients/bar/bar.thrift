@@ -42,7 +42,9 @@ struct QueryParamsStruct {
     2: optional string userUUID
     // TODO: support header annotation
     3: optional string authUUID
-    4: optional string authUUID2
+    4: optional string authUUID2 (
+        zanzibar.http.ref = "query.myuuid"
+    )
 }
 
 struct QueryParamsOptsStruct {
@@ -167,7 +169,9 @@ service Bar {
     BarResponse argWithManyQueryParams(
         1: required string aStr
         2: optional string anOptStr
-        3: required bool aBool
+        3: required bool aBool (
+            zanzibar.http.ref = "query.aBoolean"
+        )
         4: optional bool anOptBool
         5: required i8 aInt8
         6: optional i8 anOptInt8
