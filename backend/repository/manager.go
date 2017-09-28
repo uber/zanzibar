@@ -27,7 +27,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
-	"go.uber.org/thriftrw/idl"
 )
 
 const (
@@ -175,20 +174,7 @@ func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
 	}
 	prefix := filepath.Join(repo.LocalDir(), cfg.ThriftRootDir)
 	absPath := filepath.Join(prefix, path)
-	compiledModule, err := compile.Compile(absPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to compile thrift file")
-	}
-	b, err := ioutil.ReadFile(absPath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read file %q", absPath)
-	}
-	ast, err := idl.Parse(b)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse thrift ast")
-	}
-	module := ConvertModule(compiledModule, ast, prefix)
-	return module, nil
+	return CompileThriftFile(absPath, prefix)
 }
 
 // UpdateThriftFiles update thrift files to their master version in the IDL-registry.

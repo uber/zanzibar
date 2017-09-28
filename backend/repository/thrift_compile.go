@@ -22,6 +22,7 @@ package repository
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -29,8 +30,10 @@ import (
 
 	"sort"
 
+	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ast"
 	"go.uber.org/thriftrw/compile"
+	"go.uber.org/thriftrw/idl"
 )
 
 // Module represents a compiled Thrift module. In contrast to thriftrw-go's
@@ -169,6 +172,23 @@ type FieldSpec struct {
 type ResultSpec struct {
 	ReturnType *TypeSpec    `json:"return_type"`
 	Exceptions []*FieldSpec `json:"exceptions,omitempty"`
+}
+
+// CompileThriftFile compiles a thrift file in a structured module.
+func CompileThriftFile(thriftAbsPath string, thriftRootPath string) (*Module, error) {
+	compiledModule, err := compile.Compile(thriftAbsPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to compile thrift file")
+	}
+	b, err := ioutil.ReadFile(thriftAbsPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read file %q", thriftAbsPath)
+	}
+	ast, err := idl.Parse(b)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse thrift ast")
+	}
+	return ConvertModule(compiledModule, ast, thriftRootPath), nil
 }
 
 // ConvertModule converts a compile.Module into Module.
@@ -461,6 +481,7 @@ func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
 	if err != nil {
 		relPath = curFilePath
 	}
+	relPath = filepath.Clean(strings.TrimPrefix(relPath, "../"))
 	return &CodeBlock{
 		Code:  fmt.Sprintf("include \"%s\"", relPath),
 		Order: im.Line,
@@ -468,24 +489,15 @@ func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
 }
 
 func (c *Constant) ToCode() *CodeBlock {
-	result := bytes.NewBuffer(nil)
-	result.WriteString(fmt.Sprintf("enum %s {\n", c.Name))
-	items := c.Type.EnumType.Items
-	for i := 0; i < len(items)-1; i++ {
-		result.WriteString(fmt.Sprintf("\t%s,\n", items[i].Name))
-	}
-	if len(items) > 0 {
-		result.WriteString(fmt.Sprintf("\t%s\n", items[len(items)-1]))
-	}
-	result.WriteString("}")
+	// TODO(zw): finish this function.
 	return &CodeBlock{
 		Code:  "",
-		Order: c.Line,
+		Order: 0,
 	}
 }
 
 func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
-	// Typedef statement
+	// Typedef definition
 	if ts.TypeDefTarget != nil {
 		return &CodeBlock{
 			Code: fmt.Sprintf("typedef %s %s", ts.Name,
@@ -493,14 +505,38 @@ func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
 			Order: ts.Line,
 		}
 	}
-	// New struct definition
-	if ts.StructType == nil {
-		panic(fmt.Sprintf(
-			"No typedef and struct and definition found: typespec %+v", ts))
+	// Enum definition
+	if ts.EnumType != nil {
+		return enumTypeCode(ts.EnumType, ts.Line)
 	}
-	st := ts.StructType
+	// Struct definition
+	if ts.StructType != nil {
+		return structTypeCode(ts.StructType, ts.Name, ts.Line, curFilePath)
+	}
+	panic(fmt.Sprintf(
+		"No typedef, enum, nor struct definition found: typespec %+v", ts))
+}
+
+func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
 	result := bytes.NewBuffer(nil)
-	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), ts.Name))
+	result.WriteString(fmt.Sprintf("enum %s {\n", e.Name))
+	items := e.Items
+	for i := 0; i < len(items)-1; i++ {
+		result.WriteString(fmt.Sprintf("\t%s,\n", items[i].Name))
+	}
+	if len(items) > 0 {
+		result.WriteString(fmt.Sprintf("\t%s\n", items[len(items)-1].Name))
+	}
+	result.WriteString("}")
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: line,
+	}
+}
+
+func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
 	sort.Slice(st.Fields, func(i, j int) bool {
 		return st.Fields[i].Line < st.Fields[j].Line ||
 			st.Fields[i].ID < st.Fields[j].ID
@@ -513,13 +549,13 @@ func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
 			required = "optional"
 		}
 		// TODO(zw): handle annotations and default
-		result.WriteString(fmt.Sprintf("\t%d: %s %s %s",
+		result.WriteString(fmt.Sprintf("\t%d: %s %s %s\n",
 			field.ID, required, field.Type.FullTypeName(curFilePath), field.Name))
 	}
 	result.WriteString("}")
 	return &CodeBlock{
 		Code:  result.String(),
-		Order: ts.Line,
+		Order: line,
 	}
 }
 
@@ -535,7 +571,7 @@ func (ts *TypeSpec) FullTypeName(curFilePath string) string {
 
 func (ss *ServiceSpec) ToCode() *CodeBlock {
 	return &CodeBlock{
-		Code:  "",
+		Code:  "service " + ss.Name + " TBD",
 		Order: ss.Line,
 	}
 }
