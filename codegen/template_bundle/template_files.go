@@ -1916,15 +1916,6 @@ func (h *{{$handlerName}}) Handle(
 	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
-	{{- if .ResHeaders}}
-	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
-		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) missing response headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
-	}
-	{{- end}}
-
 	resHeaders := map[string]string{}
 	for _, key := range wfResHeaders.Keys() {
 		resHeaders[key], _ = wfResHeaders.Get(key)
@@ -1965,6 +1956,15 @@ func (h *{{$handlerName}}) Handle(
 			res.Success = r
 		} {{end -}}
 	{{end}}
+
+	{{- if .ResHeaders}}
+	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
+	}
+	{{- end}}
 
 	return err == nil, &res, resHeaders, nil
 }
