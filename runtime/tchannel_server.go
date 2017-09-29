@@ -184,10 +184,10 @@ func (s *TChannelRouter) handle(
 	c *tchannelInboundCall,
 ) (err error) {
 	// read request
-	if err = c.readReqHeaders(); err != nil {
+	if err = c.readReqHeaders(ctx); err != nil {
 		return err
 	}
-	wireValue, err := c.readReqBody()
+	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
 	}
@@ -203,10 +203,10 @@ func (s *TChannelRouter) handle(
 	}
 
 	// write response
-	if err = c.writeResHeaders(); err != nil {
+	if err = c.writeResHeaders(ctx); err != nil {
 		return err
 	}
-	if err = c.writeResBody(resp); err != nil {
+	if err = c.writeResBody(ctx, resp); err != nil {
 		return err
 	}
 
@@ -267,7 +267,12 @@ func (c *tchannelInboundCall) logFields() []zapcore.Field {
 }
 
 // readReqHeaders reads request headers from arg2
-func (c *tchannelInboundCall) readReqHeaders() error {
+func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
+	// fail fast if timed out
+	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+		return context.DeadlineExceeded
+	}
+
 	treader, err := c.call.Arg2Reader()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg2reader for inbound request", zap.Error(err))
@@ -300,7 +305,13 @@ func (c *tchannelInboundCall) readReqHeaders() error {
 }
 
 // readReqBody reads request body from arg3
-func (c *tchannelInboundCall) readReqBody() (wireValue wire.Value, err error) {
+func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.Value, err error) {
+	// fail fast if timed out
+	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+		err = context.DeadlineExceeded
+		return
+	}
+
 	treader, err := c.call.Arg3Reader()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg3reader for inbound request", zap.Error(err))
@@ -350,6 +361,12 @@ func (c *tchannelInboundCall) readReqBody() (wireValue wire.Value, err error) {
 
 // handle tchannel server endpoint call
 func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
+	// fail fast if timed out
+	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+		err = context.DeadlineExceeded
+		return
+	}
+
 	c.success, resp, c.resHeaders, err = c.endpoint.handler.Handle(ctx, c.reqHeaders, wireValue)
 	if c.endpoint.postResponseCB != nil {
 		defer c.endpoint.postResponseCB(ctx, c.endpoint.Method, resp)
@@ -369,7 +386,12 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 }
 
 // writeResHeaders writes response headers to arg2
-func (c *tchannelInboundCall) writeResHeaders() error {
+func (c *tchannelInboundCall) writeResHeaders(ctx context.Context) error {
+	// fail fast if timed out
+	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+		return context.DeadlineExceeded
+	}
+
 	twriter, err := c.call.Response().Arg2Writer()
 	if err != nil {
 		c.endpoint.Logger.Error("Could not create arg3writer for inbound response", zap.Error(err))
@@ -394,7 +416,12 @@ func (c *tchannelInboundCall) writeResHeaders() error {
 }
 
 // writeResBody writes response body to arg3
-func (c *tchannelInboundCall) writeResBody(resp RWTStruct) error {
+func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) error {
+	// fail fast if timed out
+	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+		return context.DeadlineExceeded
+	}
+
 	structWireValue, err := resp.ToWire()
 	if err != nil {
 		// If we could not write the body then we should do something else instead.
