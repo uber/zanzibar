@@ -58,6 +58,7 @@ type tchannelInboundCall struct {
 	endpoint   *TChannelEndpoint
 	call       *tchannel.InboundCall
 	success    bool
+	responded  bool
 	startTime  time.Time
 	finishTime time.Time
 	reqHeaders map[string]string
@@ -142,7 +143,7 @@ func (s *TChannelRouter) register(e *TChannelEndpoint) {
 // Handle handles an incoming TChannel call and forwards it to the correct handler.
 func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall) {
 	method := call.MethodString()
-	if _, _, ok := getServiceMethod(method); !ok {
+	if sep := strings.Index(method, "::"); sep == -1 {
 		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", method))
 		return
 	}
@@ -155,41 +156,35 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
-	if err := s.handle(ctx, e, call); err != nil {
-		s.onError(err)
+	var err error
+	errc := make(chan error, 1)
+	c := tchannelInboundCall{
+		endpoint: e,
+		call:     call,
 	}
-}
-
-func getServiceMethod(method string) (string, string, bool) {
-	s := string(method)
-	sep := strings.Index(s, "::")
-	if sep == -1 {
-		return "", "", false
+	c.start()
+	go func() { errc <- s.handle(ctx, e, &c) }()
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+		if err == context.Canceled {
+			// check if context was Canceled due to handle response
+			if c.responded {
+				err = <-errc
+			}
+		}
+	case err = <-errc:
 	}
-	return s[:sep], s[sep+2:], true
-}
-
-func (s *TChannelRouter) onError(err error) {
-	if tchannel.GetSystemErrorCode(err) == tchannel.ErrCodeTimeout {
-		s.logger.Warn("Thrift server timeout", zap.Error(err))
-	} else {
-		s.logger.Error("Thrift server error.", zap.Error(err))
-	}
+	c.finish(err)
 }
 
 func (s *TChannelRouter) handle(
 	ctx context.Context,
 	e *TChannelEndpoint,
-	call *tchannel.InboundCall,
+	c *tchannelInboundCall,
 ) (err error) {
-	c := tchannelInboundCall{
-		endpoint: e,
-		call:     call,
-	}
-	defer func() { c.finish(err) }()
-	c.start()
-
-	if err := c.readReqHeaders(); err != nil {
+	// read request
+	if err = c.readReqHeaders(); err != nil {
 		return err
 	}
 	wireValue, err := c.readReqBody()
@@ -199,12 +194,15 @@ func (s *TChannelRouter) handle(
 
 	// trace request
 	tracer := tchannel.TracerFromRegistrar(s.registrar)
-	ctx = tchannel.ExtractInboundSpan(ctx, call, c.reqHeaders, tracer)
+	ctx = tchannel.ExtractInboundSpan(ctx, c.call, c.reqHeaders, tracer)
 
+	// handle request
 	resp, err := c.handle(ctx, &wireValue)
 	if err != nil {
 		return err
 	}
+
+	// write response
 	if err = c.writeResHeaders(); err != nil {
 		return err
 	}
@@ -233,8 +231,19 @@ func (c *tchannelInboundCall) finish(err error) {
 	c.endpoint.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
 
 	// write logs
+	c.onError(err)
 	c.endpoint.Logger.Info("Finished an incoming server TChannel request", c.logFields()...)
+}
 
+func (c *tchannelInboundCall) onError(err error) {
+	if err != nil {
+		if err == context.Canceled || err == context.DeadlineExceeded ||
+			tchannel.GetSystemErrorCode(err) == tchannel.ErrCodeTimeout {
+			c.endpoint.Logger.Warn("Thrift server timeout", zap.Error(err))
+		} else {
+			c.endpoint.Logger.Error("Thrift server error", zap.Error(err))
+		}
+	}
 }
 
 func (c *tchannelInboundCall) logFields() []zapcore.Field {
@@ -411,6 +420,7 @@ func (c *tchannelInboundCall) writeResBody(resp RWTStruct) error {
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
+	c.responded = true
 	if err = twriter.Close(); err != nil {
 		c.endpoint.Logger.Error("Could not close arg3writer for inbound response", zap.Error(err))
 		return errors.Wrapf(err, "Could not close arg3writer for inbound %s.%s (%s) response",
