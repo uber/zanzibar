@@ -450,7 +450,7 @@ func (m *Module) ToCode() string {
 		codeBlocks = append(codeBlocks, t.ToCode(m.ThriftPath))
 	}
 	for _, service := range m.Services {
-		codeBlocks = append(codeBlocks, service.ToCode())
+		codeBlocks = append(codeBlocks, service.ToCode(m.ThriftPath))
 	}
 	sort.Slice(codeBlocks, func(i, j int) bool {
 		return codeBlocks[i].Order < codeBlocks[j].Order
@@ -514,7 +514,7 @@ func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
 		return structTypeCode(ts.StructType, ts.Name, ts.Line, curFilePath)
 	}
 	panic(fmt.Sprintf(
-		"No typedef, enum, nor struct definition found: typespec %+v", ts))
+		"No typedef, enum, nor struct definition foGund: typespec %+v", ts))
 }
 
 func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
@@ -537,7 +537,7 @@ func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
 func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
-	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t"))
+	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t", true))
 	result.WriteString("}")
 	return &CodeBlock{
 		Code:  result.String(),
@@ -545,7 +545,7 @@ func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath strin
 	}
 }
 
-func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string) string {
+func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptional bool) string {
 	sort.Slice(fields, func(i, j int) bool {
 		return fields[i].Line < fields[j].Line || fields[i].ID < fields[j].ID
 	})
@@ -553,13 +553,20 @@ func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string) string {
 	for _, field := range fields {
 		var required string
 		if field.Required {
-			required = "required"
-		} else {
-			required = "optional"
+			required = " required"
+		} else if showOptional {
+			required = " optional"
 		}
-		// TODO(zw): handle annotations and default
-		result.WriteString(fmt.Sprintf("%s%d: %s %s %s\n",
-			lineIndent, field.ID, required, field.Type.FullTypeName(curFilePath), field.Name))
+		line := fmt.Sprintf("%s%d:%s %s %s",
+			lineIndent, field.ID, required, field.Type.FullTypeName(curFilePath), field.Name)
+		if field.Default != "" {
+			line += " = " + field.Default
+		}
+		if field.Annotations != nil {
+			line = fmt.Sprintf("%s (\n%s%s)",
+				line, annotationsCode(field.Annotations, lineIndent+"\t"), lineIndent)
+		}
+		result.WriteString(line + "\n")
 	}
 	return result.String()
 }
@@ -598,7 +605,7 @@ func functionsCode(functions []*FunctionSpec, curFilePath string) string {
 	result := bytes.NewBuffer(nil)
 	for i, f := range functions {
 		var returnType string
-		if f.OneWay {
+		if f.ResultSpec.ReturnType == nil {
 			returnType = "void"
 		} else {
 			returnType = f.ResultSpec.ReturnType.FullTypeName(curFilePath)
@@ -607,20 +614,20 @@ func functionsCode(functions []*FunctionSpec, curFilePath string) string {
 		// Input parameters
 		if len(f.ArgsSpec) != 0 {
 			result.WriteString(fmt.Sprintf("\n%s\t)",
-				fieldsCode(f.ArgsSpec, curFilePath, "\t\t")))
+				fieldsCode(f.ArgsSpec, curFilePath, "\t\t", true)))
 		} else {
 			result.WriteString(")")
 		}
 		// Exceptions
 		if exceptions := f.ResultSpec.Exceptions; len(exceptions) != 0 {
 			result.WriteString(" throws (\n")
-			result.WriteString(fieldsCode(exceptions, curFilePath, "\t\t"))
+			result.WriteString(fieldsCode(exceptions, curFilePath, "\t\t", false))
 			result.WriteString("\t)")
 		}
 		// Annotations
 		if f.Annotations != nil {
 			result.WriteString(" (\n")
-			result.WriteString(annotationCode(f.Annotations))
+			result.WriteString(annotationsCode(f.Annotations, "\t\t"))
 			result.WriteString("\t)")
 		}
 
@@ -630,4 +637,18 @@ func functionsCode(functions []*FunctionSpec, curFilePath string) string {
 			result.WriteString("\n\n")
 		}
 	}
+	return result.String()
+}
+
+func annotationsCode(annotations compile.Annotations, lineIndent string) string {
+	keys := make([]string, 0, len(annotations))
+	for key := range annotations {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	result := bytes.NewBuffer(nil)
+	for _, key := range keys {
+		result.WriteString(fmt.Sprintf("%s%s = \"%s\"\n", lineIndent, key, annotations[key]))
+	}
+	return result.String()
 }
