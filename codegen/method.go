@@ -729,15 +729,17 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 						headerName, bodyIdentifier,
 					)
 				} else {
+					closeFunction := ""
 					for seenStruct := range seenOptStructs {
 						if strings.HasPrefix(longFieldName, seenStruct) {
 							statements.appendf("if r%s != nil {", seenStruct)
-							statements.appendf(headerNameValuePair,
-								headerName, bodyIdentifier,
-							)
-							statements.append("}")
+							closeFunction = closeFunction + "}"
 						}
 					}
+					statements.appendf(headerNameValuePair,
+						headerName, bodyIdentifier,
+					)
+					statements.append(closeFunction)
 				}
 			}
 		}
