@@ -23,13 +23,11 @@ package bazHandler
 import (
 	"context"
 
-	"github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
-
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 // CallEndpoint ...
@@ -63,9 +61,10 @@ func (w CallEndpoint) Handle(
 		case *clientBaz.AuthErr:
 			return respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			w.Logger.Error(
+			zanzibar.OnError(
+				w.Logger, err,
+				"baz.Call timed out",
 				"baz.Call returned unexpected error",
-				zap.String("error", err.Error()),
 			)
 			return respHeaders, err
 		}

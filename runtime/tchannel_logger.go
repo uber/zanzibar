@@ -21,8 +21,10 @@
 package zanzibar
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -118,4 +120,21 @@ func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger 
 		zfields = append(zfields, zf)
 	}
 	return TChannelLogger{logger: l.logger.With(zfields...)}
+}
+
+// LogError logs warnings for timeout errors
+func LogError(logger *zap.Logger, err error, msg string) {
+	OnError(logger, err, msg, msg)
+}
+
+// OnError logs warnings for timeout errors
+func OnError(logger *zap.Logger, err error, warnMsg, errMsg string) {
+	if err != nil {
+		if errors.Cause(err) == context.Canceled || errors.Cause(err) == context.DeadlineExceeded ||
+			tchannel.GetSystemErrorCode(errors.Cause(err)) == tchannel.ErrCodeTimeout {
+			logger.Warn(warnMsg, zap.Error(err))
+		} else {
+			logger.Error(errMsg, zap.Error(err))
+		}
+	}
 }
