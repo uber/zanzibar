@@ -38,6 +38,6 @@ func TestFromCompiledThriftToCode(t *testing.T) {
 	if !assert.NoError(t, err, "Failed to compile thrift module.") {
 		return
 	}
-	thriftCode := module.ToCode()
+	thriftCode := module.Code()
 	testlib.CompareGoldenFile(t, "data/expected_baz.thrift", []byte(thriftCode))
 }

@@ -2,6 +2,10 @@ namespace java com.uber.zanzibar.clients.baz
 
 include "base.thrift"
 
+const i32 INT_CONST = 1234
+
+const string STR_CONST = "hello"
+
 enum Fruit {
 	APPLE,
 	BANANA

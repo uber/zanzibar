@@ -184,11 +184,11 @@ func CompileThriftFile(thriftAbsPath string, thriftRootPath string) (*Module, er
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read file %q", thriftAbsPath)
 	}
-	ast, err := idl.Parse(b)
+	program, err := idl.Parse(b)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse thrift ast")
+		return nil, errors.Wrap(err, "failed to parse thrift program")
 	}
-	return ConvertModule(compiledModule, ast, thriftRootPath), nil
+	return ConvertModule(compiledModule, program, thriftRootPath), nil
 }
 
 // ConvertModule converts a compile.Module into Module.
@@ -257,7 +257,7 @@ func constantValue(value compile.ConstantValue) string {
 	case compile.ConstantInt:
 		return fmt.Sprintf("%d", t)
 	case compile.ConstantString:
-		return string(t)
+		return fmt.Sprintf("%q", string(t))
 	case compile.ConstantDouble:
 		return fmt.Sprintf("%f", t)
 	case compile.EnumItemReference:
@@ -435,22 +435,23 @@ func newEnumSpec(enum *compile.EnumSpec) *EnumSpec {
 	return e
 }
 
-func (m *Module) ToCode() string {
+// Code converts the module as normal thrift code.
+func (m *Module) Code() string {
 	codeBlocks := make([]*CodeBlock, 0, 100)
 	for _, ns := range m.Namespace {
-		codeBlocks = append(codeBlocks, ns.ToCode())
+		codeBlocks = append(codeBlocks, ns.CodeBlock())
 	}
 	for _, im := range m.Includes {
-		codeBlocks = append(codeBlocks, im.ToCode(m.ThriftPath))
+		codeBlocks = append(codeBlocks, im.CodeBlock(m.ThriftPath))
 	}
 	for _, c := range m.Constants {
-		codeBlocks = append(codeBlocks, c.ToCode(m.ThriftPath))
+		codeBlocks = append(codeBlocks, c.CodeBlock(m.ThriftPath))
 	}
 	for _, t := range m.Types {
-		codeBlocks = append(codeBlocks, t.ToCode(m.ThriftPath))
+		codeBlocks = append(codeBlocks, t.CodeBlock(m.ThriftPath))
 	}
 	for _, service := range m.Services {
-		codeBlocks = append(codeBlocks, service.ToCode(m.ThriftPath))
+		codeBlocks = append(codeBlocks, service.CodeBlock(m.ThriftPath))
 	}
 	sort.Slice(codeBlocks, func(i, j int) bool {
 		return codeBlocks[i].Order < codeBlocks[j].Order
@@ -469,14 +470,16 @@ type CodeBlock struct {
 	Order int
 }
 
-func (ns *Namespace) ToCode() *CodeBlock {
+// CodeBlock converts a namespace to a CodeBlock.
+func (ns *Namespace) CodeBlock() *CodeBlock {
 	return &CodeBlock{
 		Code:  fmt.Sprintf("namespace %s %s", ns.Scope, ns.Name),
 		Order: ns.Line,
 	}
 }
 
-func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
+// CodeBlock converts a included module to a CodeBlock.
+func (im *IncludedModule) CodeBlock(curFilePath string) *CodeBlock {
 	relPath, err := filepath.Rel(curFilePath, im.Module.ThriftPath)
 	if err != nil {
 		relPath = curFilePath
@@ -488,14 +491,16 @@ func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
 	}
 }
 
-func (c *Constant) ToCode(curFilePath string) *CodeBlock {
+// CodeBlock converts a constant to a CodeBlock.
+func (c *Constant) CodeBlock(curFilePath string) *CodeBlock {
 	return &CodeBlock{
 		Code:  fmt.Sprintf("const %s %s = %s", c.Type.FullTypeName(curFilePath), c.Name, c.Value),
 		Order: c.Line,
 	}
 }
 
-func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
+// CodeBlock converts a typeSpec to a CodeBlock.
+func (ts *TypeSpec) CodeBlock(curFilePath string) *CodeBlock {
 	// Typedef definition
 	if ts.TypeDefTarget != nil {
 		return &CodeBlock{
@@ -506,17 +511,17 @@ func (ts *TypeSpec) ToCode(curFilePath string) *CodeBlock {
 	}
 	// Enum definition
 	if ts.EnumType != nil {
-		return enumTypeCode(ts.EnumType, ts.Line)
+		return enumTypeCodeBlock(ts.EnumType, ts.Line)
 	}
 	// Struct definition
 	if ts.StructType != nil {
-		return structTypeCode(ts.StructType, ts.Name, ts.Line, curFilePath)
+		return structTypeCodeBlock(ts.StructType, ts.Name, ts.Line, curFilePath)
 	}
 	panic(fmt.Sprintf(
-		"No typedef, enum, nor struct definition foGund: typespec %+v", ts))
+		"No typedef, enum, nor struct definition found: typespec %+v", ts))
 }
 
-func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
+func enumTypeCodeBlock(e *EnumSpec, line int) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("enum %s {\n", e.Name))
 	items := e.Items
@@ -533,7 +538,7 @@ func enumTypeCode(e *EnumSpec, line int) *CodeBlock {
 	}
 }
 
-func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
+func structTypeCodeBlock(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
 	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t", true))
@@ -571,7 +576,7 @@ func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptiona
 	return result.String()
 }
 
-// fullTypeName defines the full name referred in current thrift file,
+// FullTypeName defines the full name referred in current thrift file,
 // such as "string", "int", "base.abc".
 func (ts *TypeSpec) FullTypeName(curFilePath string) string {
 	name := ts.Name
@@ -590,7 +595,8 @@ func (ts *TypeSpec) FullTypeName(curFilePath string) string {
 	return includedName(ts.File) + "." + name
 }
 
-func (ss *ServiceSpec) ToCode(curFilePath string) *CodeBlock {
+// CodeBlock converts a serviceSpec to a CodeBlock.
+func (ss *ServiceSpec) CodeBlock(curFilePath string) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("service %s {\n", ss.Name))
 	functions := make([]*FunctionSpec, 0, len(ss.Functions))
