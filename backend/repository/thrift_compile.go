@@ -453,9 +453,7 @@ func (m *Module) Code() string {
 	for _, service := range m.Services {
 		codeBlocks = append(codeBlocks, service.CodeBlock(m.ThriftPath))
 	}
-	sort.Slice(codeBlocks, func(i, j int) bool {
-		return codeBlocks[i].Order < codeBlocks[j].Order
-	})
+	sort.Sort(codeBlockSlice(codeBlocks))
 	result := bytes.NewBuffer(nil)
 	for i := range codeBlocks {
 		result.WriteString(codeBlocks[i].Code)
@@ -550,10 +548,7 @@ func structTypeCodeBlock(st *StructTypeSpec, name string, line int, curFilePath 
 }
 
 func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptional bool) string {
-	sort.Slice(fields, func(i, j int) bool {
-		return fields[i].Line < fields[j].Line ||
-			fields[i].Line == fields[j].Line && fields[i].ID < fields[j].ID
-	})
+	sort.Sort(fieldSlice(fields))
 	result := bytes.NewBuffer(nil)
 	for _, field := range fields {
 		var required string
@@ -612,11 +607,7 @@ func (ss *ServiceSpec) CodeBlock(curFilePath string) *CodeBlock {
 }
 
 func functionsCode(functions []*FunctionSpec, curFilePath string) string {
-	sort.Slice(functions, func(i, j int) bool {
-		return functions[i].Line < functions[j].Line ||
-			(functions[i].Line == functions[j].Line &&
-				functions[i].Name < functions[j].Name)
-	})
+	sort.Sort(functionSlice(functions))
 	result := bytes.NewBuffer(nil)
 	for i, f := range functions {
 		var returnType string
@@ -666,4 +657,55 @@ func annotationsCode(annotations compile.Annotations, lineIndent string) string 
 		result.WriteString(fmt.Sprintf("%s%s = \"%s\"\n", lineIndent, key, annotations[key]))
 	}
 	return result.String()
+}
+
+type codeBlockSlice []*CodeBlock
+
+// Len returns length.
+func (c codeBlockSlice) Len() int {
+	return len(c)
+}
+
+// Swap swaps two elements.
+func (c codeBlockSlice) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
+// Less determines the order.
+func (c codeBlockSlice) Less(i, j int) bool {
+	return c[i].Order < c[j].Order
+}
+
+type fieldSlice []*FieldSpec
+
+// Len returns length.
+func (f fieldSlice) Len() int {
+	return len(f)
+}
+
+// Swap swaps two elements.
+func (f fieldSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
+// Less determines the order.
+func (f fieldSlice) Less(i, j int) bool {
+	return f[i].Line < f[j].Line || f[i].Line == f[j].Line && f[i].ID < f[j].ID
+}
+
+type functionSlice []*FunctionSpec
+
+// Len returns length.
+func (f functionSlice) Len() int {
+	return len(f)
+}
+
+// Swap swaps two elements.
+func (f functionSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
+// Less determines the order.
+func (f functionSlice) Less(i, j int) bool {
+	return f[i].Line < f[j].Line || f[i].Line == f[j].Line && f[i].Name < f[j].Name
 }
