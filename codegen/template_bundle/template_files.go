@@ -1595,7 +1595,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 		{{range .Methods -}}
 		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			{{if $methodName -}}
 			"{{$serviceMethod}}": "{{$methodName}}",
+			{{end -}}
 		{{ end -}}
 		{{ end -}}
 	}
@@ -1692,7 +1694,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4806, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4843, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
