@@ -62,7 +62,9 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		var resHeaders map[string]string
 
 		var res clientsBazBase.BazResponse
-		err := json.Unmarshal([]byte(`{"message":"pong"}`), &res)
+
+		clientResponse := []byte(`{"message":"pong"}`)
+		err := json.Unmarshal(clientResponse, &res)
 		if err != nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
 			return nil, resHeaders, err
@@ -77,11 +79,13 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
+	endpointRequest := []byte(`{}`)
+
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/baz/ping",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -95,5 +99,5 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 	assert.Equal(t, 1, testpingCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.Equal(t, `{"message":"pong"}`, string(data))
+	assert.Equal(t, []byte(`{"message":"pong"}`), data)
 }

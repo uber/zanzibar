@@ -82,7 +82,7 @@ func NewTChannelClient(
 	metrics := make(map[string]*OutboundTChannelMetrics, len(opt.MethodNames))
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
-			zap.String("clientID", opt.ClientID),
+			zap.String("clientId", opt.ClientID),
 			zap.String("methodName", methodName),
 			zap.String("serviceName", opt.ServiceName),
 			zap.String("serviceMethod", serviceMethod),

@@ -59,7 +59,7 @@ func NewHTTPClient(
 	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
 	for _, methodName := range methodNames {
 		loggers[methodName] = gateway.Logger.With(
-			zap.String("clientID", clientID),
+			zap.String("clientId", clientID),
 			zap.String("methodName", methodName),
 		)
 		metrics[methodName] = NewOutboundHTTPMetrics(gateway.AllHostScope.Tagged(map[string]string{

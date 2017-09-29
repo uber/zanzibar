@@ -6,42 +6,56 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::argNotStruct",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "ArgNotStruct",
-	"testFixtures": [
-		{
+	"testFixtures": {
+		"successfulRequest": {
 			"testName": "successfulRequest",
 			"endpointId": "bar",
-			"handlerId": "argNotStruct",
+			"handleId": "argNotStruct",
 			"endpointRequest": {
-				"request": "foo"
+				"requestType": "http",
+				"httpRequest": {
+					"method": "POST",
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"request": "foo"
+						}
+					}
+				}
 			},
-			"endpointRequestString": "",
 			"endpointReqHeaders": {},
-			"endpointReqHeaderKeys": null,
-			"endpointResponse": {},
-			"endpointResponseString": "",
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200
+				}
+			},
 			"endpointResHeaders": {},
-			"endpointResHeaderKeys": null,
-			"clientStubs": [
-				{
+			"clientTestFixtures": {
+				"bar::argNotStruct": {
 					"clientId": "bar",
 					"clientMethod": "argNotStruct",
 					"clientRequest": {
-						"request": "foo"
+						"requestType": "tchannel",
+						"tchannelRequest": {
+							"requestType": "tchannel",
+							"tchannelRequest": {
+								"request": "foo"
+							}
+						}
 					},
-					"clientRequestString": "",
 					"clientReqHeaders": {},
-					"clientReqHeaderKeys": null,
-					"clientResponse": {},
-					"clientResponseString": "",
-					"clientResHeaders": {},
-					"clientResHeaderKeys": null
+					"clientResponse": {
+						"responseType": "tchannel"
+					},
+					"clientResHeaders": {}
 				}
-			],
+			},
 			"testServiceName": "example-gateway"
 		}
-	],
+	},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

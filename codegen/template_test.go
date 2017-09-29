@@ -86,17 +86,6 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	/* TODO: delete this
-	gateway, err := codegen.NewGatewaySpec(
-		moduleInstances,
-		packageHelper,
-		absGatewayPath,
-		"./endpoints",
-		"./middlewares/middleware-config.json",
-		"example-gateway",
-	)
-	*/
-
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
 	}

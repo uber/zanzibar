@@ -6,9 +6,46 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::sillyNoop",
 	"workflowType": "tchannelClient",
-	"clientID": "baz",
+	"clientId": "baz",
 	"clientMethod": "DeliberateDiffNoop",
-	"testFixtures": [],
+	"testFixtures": {
+		"successfulRequest": {
+			"testName": "successfulRequest",
+			"testServiceName": "example-gateway",
+			"endpointId": "baz",
+			"handleId": "sillyNoop",
+			"endpointRequest": {
+				"requestType": "http",
+				"httpRequest": {
+					"method": "GET"
+				}
+			},
+			"endpointReqHeaders": {},
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200
+				}
+			},
+			"endpointResHeaders": {},
+			"clientTestFixtures": {
+				"baz::DeliberateDiffNoop": {
+					"clientId": "baz",
+					"clientMethod": "DeliberateDiffNoop",
+					"clientRequest": {
+						"requestType": "tchannel",
+						"tchannelRequest": {}
+					},
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {}
+					},
+					"clientResHeaders": {}
+				}
+			}
+		}
+	},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

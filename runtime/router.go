@@ -58,8 +58,8 @@ func NewRouterEndpoint(
 	handler HandlerFn,
 ) *RouterEndpoint {
 	logger := gateway.Logger.With(
-		zap.String("endpointID", endpointID),
-		zap.String("handlerID", handlerID),
+		zap.String("endpointId", endpointID),
+		zap.String("handlerId", handlerID),
 	)
 	scope := gateway.AllHostScope.Tagged(map[string]string{
 		"endpoint": endpointID,
