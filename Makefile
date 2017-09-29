@@ -121,7 +121,7 @@ install-wrk:
 	cd ./vendor/wrk ; (ls ./wrk 2>/dev/null || make >install_wrk.log)
 
 .PHONY: test
-test: check-generate lint
+test: generate lint
 	@make test-only
 
 .PHONY: test-update
