@@ -29,11 +29,11 @@ import (
 )
 
 func TestFromCompiledThriftToCode(t *testing.T) {
-	thriftRootPath, err := filepath.Abs("../../examples/example-gateway")
+	thriftRootPath, err := filepath.Abs("data")
 	if !assert.NoError(t, err, "Failed to get thrift root directory.") {
 		return
 	}
-	thriftFilePath := filepath.Join(thriftRootPath, "idl/clients/baz/baz.thrift")
+	thriftFilePath := filepath.Join(thriftRootPath, "expected_baz.thrift")
 	module, err := CompileThriftFile(thriftFilePath, thriftRootPath)
 	if !assert.NoError(t, err, "Failed to compile thrift module.") {
 		return

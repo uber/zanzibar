@@ -444,7 +444,7 @@ func (m *Module) ToCode() string {
 		codeBlocks = append(codeBlocks, im.ToCode(m.ThriftPath))
 	}
 	for _, c := range m.Constants {
-		codeBlocks = append(codeBlocks, c.ToCode())
+		codeBlocks = append(codeBlocks, c.ToCode(m.ThriftPath))
 	}
 	for _, t := range m.Types {
 		codeBlocks = append(codeBlocks, t.ToCode(m.ThriftPath))
@@ -488,11 +488,10 @@ func (im *IncludedModule) ToCode(curFilePath string) *CodeBlock {
 	}
 }
 
-func (c *Constant) ToCode() *CodeBlock {
-	// TODO(zw): finish this function.
+func (c *Constant) ToCode(curFilePath string) *CodeBlock {
 	return &CodeBlock{
-		Code:  "",
-		Order: 0,
+		Code:  fmt.Sprintf("const %s %s = %s", c.Type.FullTypeName(curFilePath), c.Name, c.Value),
+		Order: c.Line,
 	}
 }
 
@@ -547,7 +546,8 @@ func structTypeCode(st *StructTypeSpec, name string, line int, curFilePath strin
 
 func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptional bool) string {
 	sort.Slice(fields, func(i, j int) bool {
-		return fields[i].Line < fields[j].Line || fields[i].ID < fields[j].ID
+		return fields[i].Line < fields[j].Line ||
+			fields[i].Line == fields[j].Line && fields[i].ID < fields[j].ID
 	})
 	result := bytes.NewBuffer(nil)
 	for _, field := range fields {
@@ -574,11 +574,20 @@ func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptiona
 // fullTypeName defines the full name referred in current thrift file,
 // such as "string", "int", "base.abc".
 func (ts *TypeSpec) FullTypeName(curFilePath string) string {
+	name := ts.Name
+	if ts.ListValueType != nil {
+		name = fmt.Sprintf("list<%s>", ts.ListValueType.FullTypeName(curFilePath))
+	} else if ts.MapType != nil {
+		name = fmt.Sprintf("map<%s, %s>",
+			ts.MapType.KeyType.FullTypeName(curFilePath), ts.MapType.ValueType.FullTypeName(curFilePath))
+	} else if ts.SetValueType != nil {
+		name = fmt.Sprintf("set<%s>", ts.SetValueType.FullTypeName(curFilePath))
+	}
 	// Built-in type or type defined in current file.
 	if ts.File == "" || ts.File == curFilePath {
-		return ts.Name
+		return name
 	}
-	return includedName(ts.File) + "." + ts.Name
+	return includedName(ts.File) + "." + name
 }
 
 func (ss *ServiceSpec) ToCode(curFilePath string) *CodeBlock {
