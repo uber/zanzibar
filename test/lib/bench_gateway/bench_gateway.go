@@ -139,6 +139,15 @@ func CreateGateway(
 	benchGateway.Dependencies = dependencies
 	benchGateway.ActualGateway = gateway
 
+	timeout := time.Duration(10000) * time.Millisecond
+	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
+	if t, ok := seedConfig["tchannel.client.timeout"]; ok {
+		timeout = time.Duration(t.(int)) * time.Millisecond
+	}
+	if t, ok := seedConfig["tchannel.client.timeoutPerAttempt"]; ok {
+		timeoutPerAttempt = time.Duration(t.(int)) * time.Millisecond
+	}
+
 	benchGateway.tchannelClient = zanzibar.NewTChannelClient(
 		gateway.Channel,
 		gateway.Logger,
@@ -146,8 +155,8 @@ func CreateGateway(
 		&zanzibar.TChannelClientOption{
 			ServiceName:       gateway.ServiceName,
 			MethodNames:       opts.TChannelClientMethods,
-			Timeout:           time.Duration(1000) * time.Millisecond,
-			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
 		})
 
 	err = gateway.Bootstrap()

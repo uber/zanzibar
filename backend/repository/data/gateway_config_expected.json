@@ -345,8 +345,8 @@
 			},
 			"ip": "127.0.0.1",
 			"port": 4002,
-			"clientTimeout": 1000,
-			"clientTimeoutPerAttempt": 1000
+			"clientTimeout": 10000,
+			"clientTimeoutPerAttempt": 2000
 		},
 		"contacts": {
 			"name": "contacts",
@@ -368,8 +368,8 @@
 			},
 			"ip": "127.0.0.1",
 			"port": 5000,
-			"clientTimeout": 1000,
-			"clientTimeoutPerAttempt": 1000
+			"clientTimeout": 10000,
+			"clientTimeoutPerAttempt": 2000
 		},
 		"google-now": {
 			"name": "google-now",
