@@ -905,7 +905,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
-		if httpRefAnnotation != "" {
+		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
 
@@ -1014,7 +1014,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		identifierName := camelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[antHTTPRef]
-		if httpRefAnnotation != "" {
+		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
 
@@ -1075,12 +1075,20 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 func getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
 	var longQueryName string
+
+	queryName := field.Name
+	queryAnnotation := field.Annotations[antHTTPRef]
+	if strings.HasPrefix(queryAnnotation, "query.") {
+		// len("query.") == 6
+		queryName = queryAnnotation[6:]
+	}
+
 	if thriftPrefix == "" {
-		longQueryName = field.Name
+		longQueryName = queryName
 	} else if thriftPrefix[0] == '.' {
-		longQueryName = thriftPrefix[1:] + "." + field.Name
+		longQueryName = thriftPrefix[1:] + "." + queryName
 	} else {
-		longQueryName = thriftPrefix + "." + field.Name
+		longQueryName = thriftPrefix + "." + queryName
 	}
 
 	return longQueryName

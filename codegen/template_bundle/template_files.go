@@ -560,15 +560,16 @@ import (
 	"path/filepath"
 	"net/http"
 	"testing"
+	"runtime"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
-	"github.com/uber/zanzibar/test/lib/util"
 )
 
 {{- $clientID := .ClientID }}
+{{- $relativePathToRoot := .RelativePathToRoot}}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
@@ -580,13 +581,35 @@ import (
 
 {{range $.TestStubs}}
 
+func getDirName{{.HandlerID | title}}{{.TestName | title}}() string {
+	_, file, _, _ := runtime.Caller(0)
+
+	return filepath.Dir(file)
+}
+
 func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
-		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
+		TestBinary: filepath.Join(
+			getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+			"{{$relativePathToRoot}}",
+			"build", "services", "{{.TestServiceName}}",
+			"main", "main.go",
+		),
+		ConfigFiles: []string{
+			filepath.Join(
+				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				"{{$relativePathToRoot}}",
+				"config", "production.json",
+			),
+			filepath.Join(
+				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				"{{$relativePathToRoot}}",
+				"config", "{{.TestServiceName}}", "production.json",
+			),
+		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -662,7 +685,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 2628, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -921,11 +944,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{end -}}
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "{{$methodName}}", c.httpClient)
 
-	{{- if .ReqHeaders }}
-	// TODO(jakev): Ensure we validate mandatory headers
-	{{- end}}
-
-	{{- if .ReqHeaderGoStatements }}
+	{{if .ReqHeaderGoStatements }}
 	// TODO(jakev): populate request headers from thrift body
 	{{- end}}
 
@@ -950,6 +969,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
+
+	{{if .ReqHeaders }}
+	headerErr := req.CheckHeaders({{.ReqHeaders | printf "%#v"}})
+	if headerErr != nil {
+		return {{ if eq .ResponseType "" -}}
+			nil, headerErr
+			{{- else -}}
+			defaultRes, nil, headerErr
+			{{- end}}
+	}
+	{{- end}}
+
 	res, err := req.Do(ctx)
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
@@ -1073,7 +1104,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6535, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6683, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1511,7 +1542,6 @@ import (
 {{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
-{{- $logDownstream := .LogDownstream}}
 {{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
@@ -1537,6 +1567,10 @@ type Client interface {
 func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
@@ -1556,11 +1590,29 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
-	client := zanzibar.NewTChannelClient(gateway.Channel,
+	methodNames := map[string]string{
+		{{range $svc := .Services -}}
+		{{range .Methods -}}
+		{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+		{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+			{{if $methodName -}}
+			"{{$serviceMethod}}": "{{$methodName}}",
+			{{end -}}
+		{{ end -}}
+		{{ end -}}
+	}
+
+	client := zanzibar.NewTChannelClient(
+		gateway.Channel,
+		gateway.Logger,
+		gateway.AllHostScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
+			ClientID:          "{{$clientID}}",
+			MethodNames:       methodNames,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
 		},
 	)
 
@@ -1598,31 +1650,9 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		{{if $logDownstream -}}
-			var fields []zapcore.Field
-			fields = append(fields, zap.String("Downstream-Client", "{{$clientName}}"))
-			fields = append(fields, zap.String("Downstream-Method", "{{$methodName}}"))
-			fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
-			for k, v := range reqHeaders {
-				fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
-			}
-			fields = append(fields, zap.Any("Downstream-Request-Body", args))
-		{{end -}}
-
 		success, respHeaders, err := c.client.Call(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
-
-		{{if $logDownstream -}}
-			for k, v := range respHeaders {
-				fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
-			}
-			fields = append(fields, zap.Any("Downstream-Response-Body", result))
-			fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
-			c.logger.Info(
-				"Finished a downstream TChannel request",
-				fields...)
-		{{end -}}
 
 		if err == nil && !success {
 			switch {
@@ -1664,7 +1694,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5085, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4843, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

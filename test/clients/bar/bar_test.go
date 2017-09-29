@@ -86,7 +86,9 @@ func TestEchoI8(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoI8(
-		context.Background(), nil, &barGen.Echo_EchoI8_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoI8_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -132,7 +134,9 @@ func TestEchoI16(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoI16(
-		context.Background(), nil, &barGen.Echo_EchoI16_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoI16_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -178,7 +182,9 @@ func TestEchoI32(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoI32(
-		context.Background(), nil, &barGen.Echo_EchoI32_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoI32_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -224,7 +230,9 @@ func TestEchoI64(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoI64(
-		context.Background(), nil, &barGen.Echo_EchoI64_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoI64_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -270,7 +278,9 @@ func TestEchoDouble(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoDouble(
-		context.Background(), nil, &barGen.Echo_EchoDouble_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoDouble_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -316,7 +326,9 @@ func TestEchoBool(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoBool(
-		context.Background(), nil, &barGen.Echo_EchoBool_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoBool_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -362,7 +374,9 @@ func TestEchoString(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoString(
-		context.Background(), nil, &barGen.Echo_EchoString_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoString_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -408,7 +422,9 @@ func TestEchoBinary(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoBinary(
-		context.Background(), nil, &barGen.Echo_EchoBinary_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoBinary_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -455,7 +471,9 @@ func TestEchoEnum(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoEnum(
-		context.Background(), nil, &barGen.Echo_EchoEnum_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoEnum_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, barGen.FruitApple, result)
@@ -501,7 +519,9 @@ func TestEchoTypedef(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoTypedef(
-		context.Background(), nil, &barGen.Echo_EchoTypedef_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoTypedef_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -550,7 +570,9 @@ func TestEchoStringSet(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStringSet(
-		context.Background(), nil, &barGen.Echo_EchoStringSet_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStringSet_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -608,7 +630,9 @@ func TestEchoStructSet(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStructSet(
-		context.Background(), nil, &barGen.Echo_EchoStructSet_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStructSet_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -654,7 +678,9 @@ func TestEchoStringList(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStringList(
-		context.Background(), nil, &barGen.Echo_EchoStringList_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStringList_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -712,7 +738,9 @@ func TestEchoStructList(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStructList(
-		context.Background(), nil, &barGen.Echo_EchoStructList_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStructList_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -770,7 +798,9 @@ func TestEchoStringMap(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStringMap(
-		context.Background(), nil, &barGen.Echo_EchoStringMap_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStringMap_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)
@@ -833,7 +863,9 @@ func TestEchoStructMap(t *testing.T) {
 	bar := deps.Client.Bar
 
 	result, _, err := bar.EchoStructMap(
-		context.Background(), nil, &barGen.Echo_EchoStructMap_Args{Arg: arg},
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoStructMap_Args{Arg: arg},
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, arg, result)

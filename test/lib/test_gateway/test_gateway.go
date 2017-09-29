@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
 	"github.com/uber/tchannel-go"
@@ -38,6 +39,7 @@ import (
 	"github.com/uber/zanzibar/test/lib"
 	"github.com/uber/zanzibar/test/lib/test_backend"
 	"github.com/uber/zanzibar/test/lib/test_m3_server"
+	"go.uber.org/zap"
 )
 
 // TestGateway interface
@@ -108,6 +110,7 @@ type Options struct {
 	EnableRuntimeMetrics  bool
 	JaegerDisable         bool
 	JaegerFlushMillis     int64
+	TChannelClientMethods map[string]string
 }
 
 func (gateway *ChildProcessGateway) setupMetrics(
@@ -176,11 +179,17 @@ func CreateGateway(
 		return nil, err
 	}
 
-	tchannelClient := zanzibar.NewTChannelClient(channel, &zanzibar.TChannelClientOption{
-		ServiceName:       serviceName,
-		Timeout:           time.Duration(1000) * time.Millisecond,
-		TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
-	})
+	tchannelClient := zanzibar.NewTChannelClient(
+		channel,
+		zap.NewNop(),
+		tally.NoopScope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			MethodNames:       opts.TChannelClientMethods,
+			Timeout:           time.Duration(1000) * time.Millisecond,
+			TimeoutPerAttempt: time.Duration(100) * time.Millisecond,
+		},
+	)
 
 	testGateway := &ChildProcessGateway{
 		channel:     channel,

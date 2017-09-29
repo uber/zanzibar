@@ -161,7 +161,7 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
 					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
 					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&"+
 					"anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
@@ -696,7 +696,7 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBool=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
 					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
 					"anOptInt8=-50&anOptStr=bar",
 				r.URL.RawQuery,
@@ -750,7 +750,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+				"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
@@ -805,7 +805,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
 				"opt.name=b-name&opt.userUUID=b-uuid&"+
-					"request.authUUID=auth-uuid&request.authUUID2=auth-uuid2&"+
+					"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)

@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
@@ -50,6 +49,10 @@ type Client interface {
 // NewClient returns a new TChannel client for service corge.
 func NewClient(gateway *zanzibar.Gateway) Client {
 	serviceName := gateway.Config.MustGetString("clients.corge.serviceName")
+	var routingKey string
+	if gateway.Config.ContainsKey("clients.corge.routingKey") {
+		routingKey = gateway.Config.MustGetString("clients.corge.routingKey")
+	}
 	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := gateway.Config.MustGetString("sidecarRouter.default.tchannel.ip")
@@ -63,11 +66,21 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 		gateway.Config.MustGetInt("clients.corge.timeoutPerAttempt"),
 	)
 
-	client := zanzibar.NewTChannelClient(gateway.Channel,
+	methodNames := map[string]string{
+		"Corge::echoString": "EchoString",
+	}
+
+	client := zanzibar.NewTChannelClient(
+		gateway.Channel,
+		gateway.Logger,
+		gateway.AllHostScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
+			ClientID:          "corge",
+			MethodNames:       methodNames,
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
 		},
 	)
 
@@ -92,26 +105,10 @@ func (c *corgeClient) EchoString(
 	var result clientsCorgeCorge.Corge_EchoString_Result
 	var resp string
 
-	var fields []zapcore.Field
-	fields = append(fields, zap.String("Downstream-Client", "corgeClient"))
-	fields = append(fields, zap.String("Downstream-Method", "EchoString"))
-	fields = append(fields, zap.Time("timestamp", time.Now().UTC()))
-	for k, v := range reqHeaders {
-		fields = append(fields, zap.String("Downstream-Request-Header-"+k, v))
-	}
-	fields = append(fields, zap.Any("Downstream-Request-Body", args))
 	success, respHeaders, err := c.client.Call(
 		ctx, "Corge", "echoString", reqHeaders, args, &result,
 	)
 
-	for k, v := range respHeaders {
-		fields = append(fields, zap.String("Downstream-Response-Header-"+k, v))
-	}
-	fields = append(fields, zap.Any("Downstream-Response-Body", result))
-	fields = append(fields, zap.Time("timestamp-finished", time.Now().UTC()))
-	c.logger.Info(
-		"Finished a downstream TChannel request",
-		fields...)
 	if err == nil && !success {
 		switch {
 		default:

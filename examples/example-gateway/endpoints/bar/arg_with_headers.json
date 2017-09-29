@@ -10,6 +10,8 @@
 	"clientMethod": "ArgWithHeaders",
 	"testFixtures": [],
 	"middlewares": [],
-	"reqHeaderMap": {},
+	"reqHeaderMap": {
+		"X-Uuid": "X-Uuid"
+	},
 	"resHeaderMap": {}
 }

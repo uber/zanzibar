@@ -627,6 +627,10 @@
 				"Path": "clients/corge/corge.thrift",
 				"Methods": [
 					{
+						"Name": "echoBool",
+						"Type": "tchannel"
+					},
+					{
 						"Name": "echoString",
 						"Type": "tchannel"
 					}
