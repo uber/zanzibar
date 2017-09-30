@@ -71,6 +71,9 @@ type MethodSpec struct {
 	// Statements for reading request headers
 	ReqHeaderGoStatements []string
 
+	// Statements for reading request headers for clients
+	ReqClientHeaderGoStatements []string
+
 	// ResHeaderFields is a map of header name to a golang
 	// field accessor expression used to read fields out
 	// of the response body and place them into response headers
@@ -224,7 +227,11 @@ func NewMethod(
 		return nil, err
 	}
 
-	err = method.setRequestHeaderFields(funcSpec, packageHelper)
+	err = method.setEndpointRequestHeaderFields(funcSpec, packageHelper)
+	if err != nil {
+		return nil, err
+	}
+	err = method.setClientRequestHeaderFields(funcSpec, packageHelper)
 	if err != nil {
 		return nil, err
 	}
@@ -528,7 +535,7 @@ func findStructs(
 	return seenStructs, nil
 }
 
-func (ms *MethodSpec) setRequestHeaderFields(
+func (ms *MethodSpec) setEndpointRequestHeaderFields(
 	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
 ) error {
 	fields := compile.FieldGroup(funcSpec.ArgsSpec)
@@ -677,6 +684,74 @@ func (ms *MethodSpec) setResponseHeaderFields(
 		return false
 	}
 	walkFieldGroups(fields, visitor)
+}
+
+func (ms *MethodSpec) setClientRequestHeaderFields(
+	funcSpec *compile.FunctionSpec, packageHelper *PackageHelper,
+) error {
+	fields := compile.FieldGroup(funcSpec.ArgsSpec)
+
+	statements := LineBuilder{}
+	var finalError error
+	var seenOptStructs = map[string]string{}
+
+	// Scan for all annotations
+	visitor := func(
+		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
+	) bool {
+		realType := compile.RootTypeSpec(field.Type)
+		longFieldName := goPrefix + "." + pascalCase(field.Name)
+
+		// If the type is a struct then we cannot really do anything
+		if _, ok := realType.(*compile.StructSpec); ok {
+			// if a field is a struct then we must do a nil check
+			typeName, err := GoType(packageHelper, realType)
+			if err != nil {
+				finalError = err
+				return true
+			}
+			seenOptStructs[longFieldName] = typeName
+			return false
+		}
+
+		if param, ok := field.Annotations[antHTTPRef]; ok {
+			if param[0:8] == "headers." {
+				headerName := param[8:]
+				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
+				var headerNameValuePair string
+				if field.Required {
+					headerNameValuePair = "headers[%q]= r%s"
+				} else {
+					headerNameValuePair = "headers[%q]= *r%s"
+				}
+				if len(seenOptStructs) == 0 {
+					statements.appendf(headerNameValuePair,
+						headerName, bodyIdentifier,
+					)
+				} else {
+					closeFunction := ""
+					for seenStruct := range seenOptStructs {
+						if strings.HasPrefix(longFieldName, seenStruct) {
+							statements.appendf("if r%s != nil {", seenStruct)
+							closeFunction = closeFunction + "}"
+						}
+					}
+					statements.appendf(headerNameValuePair,
+						headerName, bodyIdentifier,
+					)
+					statements.append(closeFunction)
+				}
+			}
+		}
+		return false
+	}
+	walkFieldGroups(fields, visitor)
+	if finalError != nil {
+		return finalError
+	}
+
+	ms.ReqClientHeaderGoStatements = statements.GetLines()
+	return nil
 }
 
 func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpec) {

@@ -52,7 +52,7 @@ func TestBarWithHeadersTransformCall(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"name":"foo","userUUID":"a-uuid"}`),
+				[]byte(`{}`),
 				bytes,
 			)
 
