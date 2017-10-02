@@ -395,7 +395,7 @@ func TestPolling(t *testing.T) {
 	defer ts.tearDown()
 	err := ioutil.WriteFile(tmpCfgPath, []byte(`[{"key":"test", "value":1}]`), 0644)
 	assert.Nil(t, err)
-	time.Sleep(2 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	res := ts.remoteConfig.GetInt("test", int64(0))
 	assert.Equal(t, int64(1), res)
 }
@@ -404,7 +404,7 @@ func TestPollingNilFile(t *testing.T) {
 	ts := setupRemoteConfigTestSuite("", "", time.Millisecond)
 	defer ts.tearDown()
 	_ = os.Remove(tmpCfgPath)
-	time.Sleep(2 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	res := ts.remoteConfig.GetInt("test", int64(0))
 	assert.Equal(t, int64(0), res)
 }
