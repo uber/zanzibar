@@ -7,8 +7,8 @@ const i32 INT_CONST = 1234
 const string STR_CONST = "hello"
 
 enum Fruit {
-	APPLE,
-	BANANA
+	APPLE = 0,
+	BANANA = 1
 }
 
 struct BazRequest {

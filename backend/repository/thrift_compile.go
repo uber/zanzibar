@@ -492,7 +492,8 @@ func (im *IncludedModule) CodeBlock(curFilePath string) *CodeBlock {
 // CodeBlock converts a constant to a CodeBlock.
 func (c *Constant) CodeBlock(curFilePath string) *CodeBlock {
 	return &CodeBlock{
-		Code:  fmt.Sprintf("const %s %s = %s", c.Type.FullTypeName(curFilePath), c.Name, c.Value),
+		Code: fmt.Sprintf("const %s %s = %s%s", c.Type.FullTypeName(curFilePath), c.Name, c.Value,
+			annotationsCode(c.Type.Annotations, "\t", "")),
 		Order: c.Line,
 	}
 }
@@ -502,8 +503,9 @@ func (ts *TypeSpec) CodeBlock(curFilePath string) *CodeBlock {
 	// Typedef definition
 	if ts.TypeDefTarget != nil {
 		return &CodeBlock{
-			Code: fmt.Sprintf("typedef %s %s", ts.Name,
-				ts.TypeDefTarget.FullTypeName(curFilePath)),
+			Code: fmt.Sprintf("typedef %s %s%s", ts.Name,
+				ts.TypeDefTarget.FullTypeName(curFilePath),
+				annotationsCode(ts.TypeDefTarget.Annotations, "/t", "")),
 			Order: ts.Line,
 		}
 	}
@@ -524,10 +526,12 @@ func enumTypeCodeBlock(e *EnumSpec, line int) *CodeBlock {
 	result.WriteString(fmt.Sprintf("enum %s {\n", e.Name))
 	items := e.Items
 	for i := 0; i < len(items)-1; i++ {
-		result.WriteString(fmt.Sprintf("\t%s,\n", items[i].Name))
+		result.WriteString(fmt.Sprintf("\t%s = %d%s,\n", items[i].Name, items[i].Value,
+			annotationsCode(items[i].Annotations, "\t\t", "\t")))
 	}
-	if len(items) > 0 {
-		result.WriteString(fmt.Sprintf("\t%s\n", items[len(items)-1].Name))
+	if l := len(items); l > 0 {
+		result.WriteString(fmt.Sprintf("\t%s = %d\n%s", items[l-1].Name, items[l-1].Value,
+			annotationsCode(items[l-1].Annotations, "\t\t", "\t")))
 	}
 	result.WriteString("}")
 	return &CodeBlock{
@@ -562,11 +566,8 @@ func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptiona
 		if field.Default != "" {
 			line += " = " + field.Default
 		}
-		if field.Annotations != nil {
-			line = fmt.Sprintf("%s (\n%s%s)",
-				line, annotationsCode(field.Annotations, lineIndent+"\t"), lineIndent)
-		}
-		result.WriteString(line + "\n")
+		line += annotationsCode(field.Annotations, lineIndent+"\t", lineIndent) + "\n"
+		result.WriteString(line)
 	}
 	return result.String()
 }
@@ -631,11 +632,7 @@ func functionsCode(functions []*FunctionSpec, curFilePath string) string {
 			result.WriteString("\t)")
 		}
 		// Annotations
-		if f.Annotations != nil {
-			result.WriteString(" (\n")
-			result.WriteString(annotationsCode(f.Annotations, "\t\t"))
-			result.WriteString("\t)")
-		}
+		result.WriteString(annotationsCode(f.Annotations, "\t\t", "\t"))
 
 		if i == len(functions)-1 {
 			result.WriteString("\n")
@@ -646,16 +643,26 @@ func functionsCode(functions []*FunctionSpec, curFilePath string) string {
 	return result.String()
 }
 
-func annotationsCode(annotations compile.Annotations, lineIndent string) string {
+func annotationsCode(annotations compile.Annotations, lineIndent, rightParenthesesIndent string) string {
+	if len(annotations) == 0 {
+		return ""
+	}
+	if len(annotations) == 1 {
+		for k, v := range annotations {
+			return fmt.Sprintf(" ( %s = %s )", k, v)
+		}
+	}
 	keys := make([]string, 0, len(annotations))
 	for key := range annotations {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 	result := bytes.NewBuffer(nil)
+	result.WriteString(" (\n")
 	for _, key := range keys {
 		result.WriteString(fmt.Sprintf("%s%s = \"%s\"\n", lineIndent, key, annotations[key]))
 	}
+	result.WriteString(rightParenthesesIndent + ")")
 	return result.String()
 }
 
