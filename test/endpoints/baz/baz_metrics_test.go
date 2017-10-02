@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
@@ -73,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	numMetrics := 15
+	numMetrics := 16
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -87,6 +88,9 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	cg.MetricsWaitGroup.Wait()
+
+	// Wait for all the metrics to settle (non deterministic).
+	time.Sleep(100 * time.Millisecond)
 	metrics := cg.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics))
 
@@ -191,4 +195,13 @@ func TestCallMetrics(t *testing.T) {
 	outboundSuccess = metrics[tally.KeyForPrefixedStringMap("outbound.calls.success", clientTags)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	defaultTags := map[string]string{
+		"env":     "test",
+		"service": "test-gateway",
+	}
+
+	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
+	value = *loggedMetrics.MetricValue.Count.I64Value
+	assert.Equal(t, int64(4), value, "expected counter to be 4")
 }
