@@ -59,7 +59,7 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 8
+	numMetrics := 9
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
@@ -140,4 +140,13 @@ func TestCallMetrics(t *testing.T) {
 	statusSuccess := metrics[tally.KeyForPrefixedStringMap("outbound.calls.status.200", httpClientTags)]
 	value = *statusSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	defaultTags := map[string]string{
+		"env":     "test",
+		"service": "test-gateway",
+	}
+
+	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
+	value = *loggedMetrics.MetricValue.Count.I64Value
+	assert.Equal(t, int64(5), value, "expected counter to be 4")
 }
