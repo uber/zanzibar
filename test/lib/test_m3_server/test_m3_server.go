@@ -171,13 +171,11 @@ func (m *FakeM3Service) EmitMetricBatch(batch *m3.MetricBatch) (err error) {
 				m.seenMetricsCount++
 			}
 			if !seen && m.countMetrics {
-				// fmt.Fprintf(os.Stdout, "got a metric %s \n", metric.GetName())
 				m.wg.Done()
 			}
 		} else {
 			m.storeMetric(metric)
 			if m.countMetrics {
-				// fmt.Fprintf(os.Stdout, "got a metric %s \n", metric.GetName())
 				m.wg.Done()
 			}
 		}
