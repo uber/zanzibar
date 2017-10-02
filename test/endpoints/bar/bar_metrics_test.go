@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
@@ -74,6 +75,7 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	cg.MetricsWaitGroup.Wait()
+	time.Sleep(100 * time.Millisecond)
 	metrics := cg.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics))
 
@@ -148,5 +150,5 @@ func TestCallMetrics(t *testing.T) {
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
-	assert.Equal(t, int64(5), value, "expected counter to be 4")
+	assert.Equal(t, int64(5), value, "expected counter to be 5")
 }
