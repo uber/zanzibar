@@ -27,6 +27,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"go.uber.org/thriftrw/ptr"
+
 	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/stretchr/testify/require"
 	"github.com/uber-go/tally"
@@ -118,12 +120,14 @@ func NewFakeM3Service(
 
 // FakeM3Service tracks the metrics the server has received
 type FakeM3Service struct {
-	lock         sync.RWMutex
-	batches      []*m3.MetricBatch
-	metrics      map[string]*m3.Metric
-	wg           *lib.WaitAtLeast
-	countBatches bool
-	countMetrics bool
+	MaxMetrics       int
+	seenMetricsCount int
+	lock             sync.RWMutex
+	batches          []*m3.MetricBatch
+	metrics          map[string]*m3.Metric
+	wg               *lib.WaitAtLeast
+	countBatches     bool
+	countMetrics     bool
 }
 
 // GetBatches gets the batches
@@ -137,7 +141,13 @@ func (m *FakeM3Service) GetBatches() []*m3.MetricBatch {
 func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-	return m.metrics
+
+	cloneMap := map[string]*m3.Metric{}
+	for key, metric := range m.metrics {
+		cloneMap[key] = metric
+	}
+
+	return cloneMap
 }
 
 // EmitMetricBatch is called by thrift message processor
@@ -151,16 +161,51 @@ func (m *FakeM3Service) EmitMetricBatch(batch *m3.MetricBatch) (err error) {
 	}
 
 	for _, metric := range batch.Metrics {
-		mTags := metric.GetTags()
-		tags := make(map[string]string, len(mTags))
-		for tag := range mTags {
-			tags[tag.GetTagName()] = tag.GetTagValue()
+		if m.countMetrics && m.MaxMetrics != 0 {
+			if m.seenMetricsCount == m.MaxMetrics {
+				continue
+			}
+
+			seen := m.storeMetric(metric)
+			if !seen {
+				m.seenMetricsCount++
+			}
+			if !seen && m.countMetrics {
+				// fmt.Fprintf(os.Stdout, "got a metric %s \n", metric.GetName())
+				m.wg.Done()
+			}
+		} else {
+			m.storeMetric(metric)
+			if m.countMetrics {
+				// fmt.Fprintf(os.Stdout, "got a metric %s \n", metric.GetName())
+				m.wg.Done()
+			}
 		}
-		m.metrics[tally.KeyForPrefixedStringMap(metric.GetName(), tags)] = metric
-		if m.countMetrics {
-			m.wg.Done()
-		}
+
 	}
 
 	return thrift.NewTTransportException(thrift.END_OF_FILE, "complete")
+}
+
+func (m *FakeM3Service) storeMetric(metric *m3.Metric) bool {
+	mTags := metric.GetTags()
+	tags := make(map[string]string, len(mTags))
+	for tag := range mTags {
+		tags[tag.GetTagName()] = tag.GetTagValue()
+	}
+
+	key := tally.KeyForPrefixedStringMap(metric.GetName(), tags)
+
+	i64Value := metric.GetMetricValue().GetCount().I64Value
+	seen := m.metrics[key] != nil
+
+	if m.metrics[key] != nil && i64Value != nil {
+		newValue := *m.metrics[key].MetricValue.Count.I64Value +
+			*metric.MetricValue.Count.I64Value
+		m.metrics[key].MetricValue.Count.I64Value = ptr.Int64(newValue)
+	} else {
+		m.metrics[key] = metric
+	}
+
+	return seen
 }
