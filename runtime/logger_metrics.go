@@ -45,8 +45,6 @@ func NewLoggingZapCore(
 	core zapcore.Core,
 	allHostsScope tally.Scope,
 ) zapcore.Core {
-	// fmt.Fprintf(os.Stdout, "allocating a logging zap core\n")
-
 	return &loggingZapCore{
 		Core:          core,
 		allHostsScope: allHostsScope,
