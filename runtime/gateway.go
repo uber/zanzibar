@@ -111,11 +111,11 @@ func CreateGateway(
 	config.Freeze()
 
 	// order matters for following setup method calls
-	if err := gateway.setupLogger(config); err != nil {
+	if err := gateway.setupMetrics(config); err != nil {
 		return nil, err
 	}
 
-	if err := gateway.setupMetrics(config); err != nil {
+	if err := gateway.setupLogger(config); err != nil {
 		return nil, err
 	}
 
@@ -389,10 +389,13 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	}
 
 	zapLogger := zap.New(
-		zapcore.NewCore(
-			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-			output,
-			zap.InfoLevel,
+		NewLoggingZapCore(
+			zapcore.NewCore(
+				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+				output,
+				zap.InfoLevel,
+			),
+			gateway.AllHostScope,
 		),
 	)
 
