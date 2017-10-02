@@ -1,5 +1,5 @@
-hash: e366f9396641da4ac4004240705229287a40b9aca78aa08800e53ea847d1a8ee
-updated: 2017-09-28T14:20:09.140905199-07:00
+hash: fbdcb4f002ab8988bc67d7cb4c23e229105dedd734612f2194117543ac170827
+updated: 2017-10-02T15:39:18.990686513-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -61,7 +61,7 @@ imports:
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
-  version: be9e53c77349ae2dd4b8c03a6dc20ed9a88b9927
+  version: 95078a8f10668bd1fa73ae46761cdc58d25436b8
   subpackages:
   - m3
   - m3/customtransports
@@ -81,7 +81,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 5b29ee594f76a8f6a822c18b02ef985d68ddd991
+  version: 3b2a9ad2a045881ab7a0f81d465be54c8292ee4f
   subpackages:
   - metrics
   - metrics/tally

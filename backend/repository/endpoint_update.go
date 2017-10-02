@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 )
@@ -87,17 +86,9 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	for _, mid := range req.Middlewares {
 		for _, midCfg := range r.gatewayConfig.Middlewares {
 			if mid.Name == midCfg.Name {
-				result, err := r.validator.ValidateGo(midCfg.SchemaFile, mid.Options)
-				if err != nil && result != nil {
-					resultErrors, _ := json.Marshal(result.Errors())
-					return errors.Wrap(err, "schema validation error\nErrors:\n"+string(resultErrors))
-				}
-				if err != nil {
-					return errors.Wrap(err, "schema validation error unknown")
-				}
-				if !result.Valid() {
-					resultErrors, _ := json.Marshal(result.Errors())
-					return errors.New("schema validation error :\n" + string(resultErrors))
+				err := codegen.SchemaValidateGo(midCfg.SchemaFile, mid.Options)
+				if err != nil  {
+					return err
 				}
 			}
 		}

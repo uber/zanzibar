@@ -20,59 +20,40 @@
 
 package codegen
 
-import "github.com/xeipuuv/gojsonschema"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/pkg/errors"
+	"github.com/xeipuuv/gojsonschema"
+)
 
-// ResultError abstracts a subset of interface in gojsonschema
-type ResultError interface {
-	Field() string
-	Type() string
-	Description() string
-	Value() interface{}
-	String() string
-}
-
-// Result interface type subset of gojsonschema
-type Result interface {
-	Valid() bool
-	Errors() []ResultError
-}
-
-type resultStruct struct {
-	valid  bool
-	errors []ResultError
-}
-
-func (r *resultStruct) Valid() bool {
-	return r.valid
-}
-
-func (r *resultStruct) Errors() []ResultError {
-	return r.errors
-}
-
-// SchemaValidator abstracts undlerlying schema validation library
-type SchemaValidator struct{}
-
-// ValidateGo performs JSON schema validation from schema file on to arbitrary Go object
-func (s *SchemaValidator) ValidateGo(schemaFile string, arbitraryObj map[string]interface{}) (Result, error) {
+// SchemaValidateGo performs JSON schema validation from schema file on to arbitrary Go object
+func SchemaValidateGo(schemaFile string, arbitraryObj map[string]interface{}) error {
 	// gojsonschmea caches schema validators
 	schemaLoader := gojsonschema.NewReferenceLoader(schemaFile)
 	jsonLoader := gojsonschema.NewGoLoader(arbitraryObj)
-	res, err := gojsonschema.Validate(schemaLoader, jsonLoader)
+	result, err := gojsonschema.Validate(schemaLoader, jsonLoader)
 
-	if res == nil {
-		return nil, err
+	if err != nil && result != nil {
+		resultErrors, _ := json.Marshal(result.Errors())
+		return errors.Wrap(err, "schema validation error\nErrors:\n"+string(resultErrors))
 	}
+	if err != nil {
+		return errors.Wrap(err, "schema validation error unknown")
+	}
+	if !result.Valid() {
+		msg := "schema validation error :"
+		for _, resErr := range result.Errors() {
 
-	// convert gojsonschema to our result type
-	resultErrors := res.Errors()
-	myResult := &resultStruct{
-		res.Valid(),
-		make([]ResultError, len(res.Errors())),
+			details, _ := json.Marshal(resErr.Details())
+			msg += fmt.Sprintf("\nType: %s\nField: %s\nDescription: %s\nDetails: %s\n",
+				resErr.Type(),
+				resErr.Field(),
+				resErr.Description(),
+				string(details),
+			)
+		}
+		return errors.New(msg)
 	}
-	for i, resultError := range resultErrors {
-		myResult.errors[i] = resultError.(ResultError)
-	}
-
-	return myResult, err
+	return nil
 }

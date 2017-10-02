@@ -28,9 +28,6 @@ import (
 )
 
 func TestSchemaValidatorSuccess(t *testing.T) {
-
-	validator := &codegen.SchemaValidator{}
-
 	var obj map[string]interface{}
 	obj = make(map[string]interface{})
 	obj["foo"] = true
@@ -39,18 +36,11 @@ func TestSchemaValidatorSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	canonFileRef := "file://" + absPath
 
-	res, err := validator.ValidateGo(canonFileRef, obj)
-	assert.NoError(t, err)
-	if res != nil {
-		assert.True(t, res.Valid())
-	} else {
-		assert.Fail(t, "res was nil")
-	}
-
+	vErr := codegen.SchemaValidateGo(canonFileRef, obj)
+	assert.NoError(t, vErr)
 }
 
 func TestSchemaValidatorFail(t *testing.T) {
-	validator := &codegen.SchemaValidator{}
 
 	var obj map[string]interface{}
 	obj = make(map[string]interface{})
@@ -60,13 +50,6 @@ func TestSchemaValidatorFail(t *testing.T) {
 	assert.NoError(t, err)
 	canonFileRef := "file://" + absPath
 
-	res, err := validator.ValidateGo(canonFileRef, obj)
-	assert.NoError(t, err)
-	if res != nil {
-		assert.False(t, res.Valid())
-		assert.Equal(t, res.Errors()[0].Description(), "Invalid type. Expected: boolean, given: integer")
-	} else {
-		assert.Fail(t, "res was nil")
-	}
-
+	vErr := codegen.SchemaValidateGo(canonFileRef, obj)
+	assert.Error(t, vErr)
 }
