@@ -7,15 +7,20 @@ const i32 INT_CONST = 1234
 const string STR_CONST = "hello"
 
 enum Fruit {
-	APPLE = 0,
+	APPLE = 0 ( inline_enum_annotation = "true" ),
 	BANANA = 1
 }
 
+typedef string UUID ( inline_typedef_annotation = "true" )
+
 struct BazRequest {
-	1: required bool b1
+	1: required bool b1 (
+		field_annotation_one = "one"
+		field_annotation_two = "two"
+	)
 	2: required string s2
 	3: required i32 i3
-}
+} ( inline_struct_annotation = "struct_annotation" )
 
 exception AuthErr {
 	1: required string message
@@ -27,7 +32,7 @@ exception OtherAuthErr {
 
 service SimpleService {
 	void call (
-		1: required BazRequest arg
+		1: required BazRequest arg ( annotation_key = "key" )
 	) throws (
 		1: AuthErr authErr
 	) (

@@ -503,25 +503,25 @@ func (ts *TypeSpec) CodeBlock(curFilePath string) *CodeBlock {
 	// Typedef definition
 	if ts.TypeDefTarget != nil {
 		return &CodeBlock{
-			Code: fmt.Sprintf("typedef %s %s%s", ts.Name,
-				ts.TypeDefTarget.FullTypeName(curFilePath),
-				annotationsCode(ts.TypeDefTarget.Annotations, "/t", "")),
+			Code: fmt.Sprintf("typedef %s %s%s",
+				ts.TypeDefTarget.FullTypeName(curFilePath), ts.Name,
+				annotationsCode(ts.Annotations, "/t", "")),
 			Order: ts.Line,
 		}
 	}
 	// Enum definition
 	if ts.EnumType != nil {
-		return enumTypeCodeBlock(ts.EnumType, ts.Line)
+		return enumTypeCodeBlock(ts.EnumType, ts.Line, ts.Annotations)
 	}
 	// Struct definition
 	if ts.StructType != nil {
-		return structTypeCodeBlock(ts.StructType, ts.Name, ts.Line, curFilePath)
+		return structTypeCodeBlock(ts.StructType, ts.Name, ts.Line, curFilePath, ts.Annotations)
 	}
 	panic(fmt.Sprintf(
 		"No typedef, enum, nor struct definition found: typespec %+v", ts))
 }
 
-func enumTypeCodeBlock(e *EnumSpec, line int) *CodeBlock {
+func enumTypeCodeBlock(e *EnumSpec, line int, annotations compile.Annotations) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("enum %s {\n", e.Name))
 	items := e.Items
@@ -533,18 +533,18 @@ func enumTypeCodeBlock(e *EnumSpec, line int) *CodeBlock {
 		result.WriteString(fmt.Sprintf("\t%s = %d\n%s", items[l-1].Name, items[l-1].Value,
 			annotationsCode(items[l-1].Annotations, "\t\t", "\t")))
 	}
-	result.WriteString("}")
+	result.WriteString("}" + annotationsCode(annotations, "\t", ""))
 	return &CodeBlock{
 		Code:  result.String(),
 		Order: line,
 	}
 }
 
-func structTypeCodeBlock(st *StructTypeSpec, name string, line int, curFilePath string) *CodeBlock {
+func structTypeCodeBlock(st *StructTypeSpec, name string, line int, curFilePath string, annotations compile.Annotations) *CodeBlock {
 	result := bytes.NewBuffer(nil)
 	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
 	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t", true))
-	result.WriteString("}")
+	result.WriteString("}" + annotationsCode(annotations, "\t", ""))
 	return &CodeBlock{
 		Code:  result.String(),
 		Order: line,
@@ -649,7 +649,7 @@ func annotationsCode(annotations compile.Annotations, lineIndent, rightParenthes
 	}
 	if len(annotations) == 1 {
 		for k, v := range annotations {
-			return fmt.Sprintf(" ( %s = %s )", k, v)
+			return fmt.Sprintf(" ( %s = \"%s\" )", k, v)
 		}
 	}
 	keys := make([]string, 0, len(annotations))
