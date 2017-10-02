@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/codegen"
 )
 
 // Repository operates one local repository:
@@ -44,6 +45,7 @@ type Repository struct {
 	// Cached error when getting gateway config.
 	gatewayConfigError error
 	sync.RWMutex
+	validator *codegen.SchemaValidator
 }
 
 // Fetcher fetches remote repository to local repository.
@@ -78,6 +80,7 @@ func NewRepository(localRoot, remote string, fetcher Fetcher,
 		fetcher:         fetcher,
 		lastUpdateTime:  time.Now(),
 		refreshInterval: refreshInterval,
+		validator:       &codegen.SchemaValidator{},
 	}, nil
 }
 

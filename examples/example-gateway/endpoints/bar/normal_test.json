@@ -1,35 +1,46 @@
-[{
-	"testName": "successfulRequest",
-	"testServiceName": "example-gateway",
-	"endpointId": "bar",
-	"handlerId": "normal",
-	"endpointRequest": {
-		"request": {
-			"stringField": "foo",
-			"boolField": true
-		}
-	},
-	"endpointReqHeaders": {},
-	"endpointResponse": {},
-	"endpointResHeaders": {},
-
-	"clientStubs": [{
-		"clientId": "bar",
-		"clientMethod": "normal",
-		"clientRequest": {
+[
+	{
+		"testName": "successfulRequest",
+		"endpointId": "bar",
+		"handlerId": "normal",
+		"endpointRequest": {
 			"request": {
-				"stringField": "foo",
-				"boolField": true
+				"boolField": true,
+				"stringField": "foo"
 			}
 		},
-		"clientReqHeaders": {},
-		"clientResponse": {
-			"stringField": "foo",
-			"intWithRange": 0,
-			"intWithoutRange": 1,
-			"mapIntWithRange": {},
-			"mapIntWithoutRange": {}
-		},
-		"clientResHeaders": {}
-	}]
-}]
+		"endpointRequestString": "",
+		"endpointReqHeaders": {},
+		"endpointReqHeaderKeys": null,
+		"endpointResponse": {},
+		"endpointResponseString": "",
+		"endpointResHeaders": {},
+		"endpointResHeaderKeys": null,
+		"clientStubs": [
+			{
+				"clientId": "bar",
+				"clientMethod": "normal",
+				"clientRequest": {
+					"request": {
+						"boolField": true,
+						"stringField": "foo"
+					}
+				},
+				"clientRequestString": "",
+				"clientReqHeaders": {},
+				"clientReqHeaderKeys": null,
+				"clientResponse": {
+					"intWithRange": 0,
+					"intWithoutRange": 1,
+					"mapIntWithRange": {},
+					"mapIntWithoutRange": {},
+					"stringField": "foo"
+				},
+				"clientResponseString": "",
+				"clientResHeaders": {},
+				"clientResHeaderKeys": null
+			}
+		],
+		"testServiceName": "example-gateway"
+	}
+]

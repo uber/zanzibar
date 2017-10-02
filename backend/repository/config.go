@@ -48,7 +48,7 @@ type Config struct {
 	// Maps clientID to configuration.
 	Clients        map[string]*ClientConfig
 	ThriftServices ThriftServiceMap
-	Middlewares    map[string]*MiddlewareConfig
+	Middlewares    map[string]*codegen.MiddlewareConfig
 }
 
 // ThriftServiceMap maps thrift file -> service name -> *ThriftService
@@ -113,12 +113,6 @@ type ClientConfig struct {
 	Port              int64             `json:"port,omitempty"`
 	Timeout           int64             `json:"clientTimeout,omitempty"`
 	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`
-}
-
-// MiddlewareConfig represents configuration for a middleware.
-type MiddlewareConfig struct {
-	ID     string
-	Schema map[string]string
 }
 
 // ThriftService is a service defined in Thrift file.

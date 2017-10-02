@@ -44,6 +44,7 @@ func TestUpdateEndpoint(t *testing.T) {
 		"bar/arg_not_struct.json",
 		"baz/call.json",
 		"baz/compare.json",
+		"bar/normal.json",
 	}
 	for _, file := range requestFiles {
 		t.Logf("Test request in %q\n", file)
@@ -89,3 +90,21 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	endpointGroupExpFile := filepath.Join(exampleGateway, endpointCfgDir, req.ID, endpointConfigFileName)
 	testlib.CompareGoldenFile(t, endpointGroupExpFile, endpointGroupCfg)
 }
+
+
+func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example.") {
+		return
+	}
+	requestFiles := []string{
+		"bar/normal.json",
+	}
+	for _, file := range requestFiles {
+		t.Logf("Test request in %q\n", file)
+		testUpdateEndpointConfig(t, tempDir, filepath.Join(endpointUpdateRequestDir, file))
+	}
+}
+
+
