@@ -1,5 +1,5 @@
-hash: d6512ee48265f77a1c34516c5ffb73828ccb937533a56454568e6ed2211ba607
-updated: 2017-09-20T11:55:50.9196227-07:00
+hash: fbdcb4f002ab8988bc67d7cb4c23e229105dedd734612f2194117543ac170827
+updated: 2017-10-02T15:39:18.990686513-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -61,7 +61,7 @@ imports:
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
-  version: be9e53c77349ae2dd4b8c03a6dc20ed9a88b9927
+  version: 95078a8f10668bd1fa73ae46761cdc58d25436b8
   subpackages:
   - m3
   - m3/customtransports
@@ -81,7 +81,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 5b29ee594f76a8f6a822c18b02ef985d68ddd991
+  version: 3b2a9ad2a045881ab7a0f81d465be54c8292ee4f
   subpackages:
   - metrics
   - metrics/tally
@@ -94,6 +94,12 @@ imports:
   - tnet
   - trand
   - typed
+- name: github.com/xeipuuv/gojsonpointer
+  version: 6fe8760cad3569743d51ddbb243b26f8456742dc
+- name: github.com/xeipuuv/gojsonreference
+  version: e02fc20de94c78484cd5ffb007f8af96be030a45
+- name: github.com/xeipuuv/gojsonschema
+  version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: go.uber.org/multierr
@@ -124,7 +130,7 @@ imports:
   - version
   - wire
 - name: go.uber.org/zap
-  version: 3216c4c73e8ebbafff73c456dd27143f4a7c1f94
+  version: 35aad584952c3e7020db7b839f6b102de6271f89
   subpackages:
   - buffer
   - internal/bufferpool
@@ -133,7 +139,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
+  version: 0a9397675ba34b2845f758fe3cd68828369c6517
   subpackages:
   - context
 testImports: []

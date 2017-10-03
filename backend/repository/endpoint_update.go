@@ -82,6 +82,17 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	} else {
 		return errors.Errorf("client type %q is not supported", clientCfg.Type)
 	}
+
+	for _, mid := range req.Middlewares {
+		for _, midCfg := range r.gatewayConfig.Middlewares {
+			if mid.Name == midCfg.Name {
+				err := codegen.SchemaValidateGo(midCfg.SchemaFile, mid.Options)
+				if err != nil  {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 

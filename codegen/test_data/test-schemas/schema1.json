@@ -1,0 +1,10 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "http://example.com/example.json/foo",
+	"properties": {
+		"foo": {
+			"type": "boolean"
+		}
+	},
+	"type": "object"
+}

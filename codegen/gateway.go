@@ -118,6 +118,18 @@ type ClientDependencies struct {
 	Client []string `json:"client"`
 }
 
+// MiddlewareConfig represents configuration for a middleware.
+type MiddlewareConfig struct {
+	Name       string `json:"name"`
+	SchemaFile string `json:"schema"`
+	ImportPath string `json:"importPath"`
+}
+
+// MiddlewareConfigsAll is a collection of MiddlewareConfig
+type MiddlewareConfigsAll struct {
+	Middlewares []MiddlewareConfig `json:"middlewares"`
+}
+
 // NewClientSpec creates a client spec from a json file.
 func NewClientSpec(
 	instance *ModuleInstance,
@@ -315,12 +327,12 @@ type MiddlewareSpec struct {
 func NewMiddlewareSpec(
 	name string,
 	goFile string,
-	jsonFile string,
+	jsonSchemaFile string,
 	configDirName string,
 ) (*MiddlewareSpec, error) {
 	schPath := filepath.Join(
 		configDirName,
-		jsonFile,
+		jsonSchemaFile,
 	)
 
 	bytes, err := ioutil.ReadFile(schPath)
@@ -883,10 +895,9 @@ func parseMiddlewareConfig(
 		)
 	}
 
-	// TODO(sindelar): Use a struct
-	var configJSON map[string]interface{}
+	var midConfigs MiddlewareConfigsAll
 
-	err = json.Unmarshal(bytes, &configJSON)
+	err = json.Unmarshal(bytes, &midConfigs)
 
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -895,36 +906,24 @@ func parseMiddlewareConfig(
 		)
 	}
 
-	midList, ok := configJSON["middlewares"].([]interface{})
-	if !ok {
-		return nil, errors.Wrapf(
-			err, "Cannot parse json for middleware config json: %s",
-			config,
-		)
-	}
+	for _, mid := range midConfigs.Middlewares {
 
-	for _, mid := range midList {
-		mid, ok := mid.(map[string]interface{})
-		if !ok {
-			return nil, errors.Wrapf(
-				err, "Cannot parse json for middleware config json: %s",
-				config,
-			)
-		}
-		name, okOne := mid["name"].(string)
-		schema, okTwo := mid["schema"].(string)
-		importPath, okThree := mid["importPath"].(string)
-		if !okOne || !okTwo || !okThree {
-			return nil, errors.Wrapf(
-				err, "Cannot parse json for middleware config json: %s",
-				config,
-			)
+		if mid.Name == "" {
+			return nil, errors.New("middleware config had empty name")
 		}
 
-		specMap[name], err = NewMiddlewareSpec(
-			name,
-			importPath,
-			schema,
+		if mid.ImportPath == "" {
+			return nil, errors.New("middleware config had empty importPath")
+		}
+
+		if mid.SchemaFile == "" {
+			return nil, errors.New("middleware config had empty schema")
+		}
+
+		specMap[mid.Name], err = NewMiddlewareSpec(
+			mid.Name,
+			mid.ImportPath,
+			mid.SchemaFile,
 			configDirName,
 		)
 		if err != nil {
