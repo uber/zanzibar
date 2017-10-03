@@ -21,14 +21,12 @@
 package repository
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
-
-	"bytes"
-
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ast"
