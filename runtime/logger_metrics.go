@@ -107,6 +107,7 @@ func (lcore *loggingZapCore) Write(
 	case zapcore.PanicLevel:
 		lcore.panicCounter.Inc(1)
 	case zapcore.FatalLevel:
+		/* coverage ignore next line */
 		lcore.fatalCounter.Inc(1)
 	default:
 		// noop

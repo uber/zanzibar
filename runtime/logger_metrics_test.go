@@ -40,7 +40,7 @@ func TestLoggingZapCore(t *testing.T) {
 			zapcore.NewCore(
 				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 				zapcore.AddSync(ioutil.Discard),
-				zap.InfoLevel,
+				zap.DebugLevel,
 			),
 			metricsScope,
 		),
@@ -50,11 +50,10 @@ func TestLoggingZapCore(t *testing.T) {
 	tempLogger.Info("info msg")
 	tempLogger.Warn("warn msg")
 	tempLogger.Error("error msg")
+	tempLogger.DPanic("dpanic msg")
 
 	assert.Panics(t, func() {
-		tempLogger.DPanic("dpanic msg")
 		tempLogger.Panic("panic msg")
-		tempLogger.Fatal("fatal msg")
 	})
 
 	snapshot := metricsScope.Snapshot()
