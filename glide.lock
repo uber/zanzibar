@@ -1,5 +1,5 @@
-hash: fbdcb4f002ab8988bc67d7cb4c23e229105dedd734612f2194117543ac170827
-updated: 2017-10-02T15:39:18.990686513-07:00
+hash: d56fe7e20f1073c0eb26832409312c725e5277b869c682fc9e03a4f5126d843d
+updated: 2017-10-03T02:22:44.720922676-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -105,7 +105,7 @@ imports:
 - name: go.uber.org/multierr
   version: a3d1fc1f1316d4132fc61f4ea1159ae0613fb474
 - name: go.uber.org/thriftrw
-  version: 8bbe12f61b982c30be95f88bfe62cade3d470e08
+  version: bce7fd589d505915f56a7901d8c143e1625e085c
   subpackages:
   - ast
   - compile
