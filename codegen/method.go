@@ -131,15 +131,19 @@ type StatusCode struct {
 }
 
 const (
-	antHTTPMethod      = "zanzibar.http.method"
-	antHTTPPath        = "zanzibar.http.path"
-	antHTTPStatus      = "zanzibar.http.status"
-	antHTTPReqDefBoxed = "zanzibar.http.req.def"
-	antHTTPReqHeaders  = "zanzibar.http.reqHeaders"
-	antHTTPResHeaders  = "zanzibar.http.resHeaders"
-	antHTTPRef         = "zanzibar.http.ref"
-	antMeta            = "zanzibar.meta"
-	antHandler         = "zanzibar.handler"
+	antHTTPMethod     = "zanzibar.http.method"
+	antHTTPPath       = "zanzibar.http.path"
+	antHTTPStatus     = "zanzibar.http.status"
+	antHTTPReqHeaders = "zanzibar.http.reqHeaders"
+	antHTTPResHeaders = "zanzibar.http.resHeaders"
+	antHTTPRef        = "zanzibar.http.ref"
+	antMeta           = "zanzibar.meta"
+	antHandler        = "zanzibar.handler"
+
+	// AntHTTPReqDefBoxed annotates a method so that the genereted method takes
+	// generated argument directly instead of a struct that warps the argument.
+	// The annotated method should have one and only one argument.
+	AntHTTPReqDefBoxed = "zanzibar.http.req.def"
 )
 
 // NewMethod creates new method specification.
@@ -1170,7 +1174,7 @@ func getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
 }
 
 func isRequestBoxed(f *compile.FunctionSpec) bool {
-	boxed, ok := f.Annotations[antHTTPReqDefBoxed]
+	boxed, ok := f.Annotations[AntHTTPReqDefBoxed]
 	if ok && boxed == "true" {
 		return true
 	}
