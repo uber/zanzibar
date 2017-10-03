@@ -131,5 +131,5 @@ func TestGoCustomTypeError(t *testing.T) {
 	spec := &compile.StructSpec{}
 	_, err := h.TypeFullName(spec)
 	assert.Error(t, err)
-	assert.Equal(t, "goCustomType called with native type (*compile.StructSpec) &{false   0 [] map[]}", err.Error())
+	assert.Equal(t, "goCustomType called with native type (*compile.StructSpec) &{false   0 []  map[]}", err.Error())
 }
