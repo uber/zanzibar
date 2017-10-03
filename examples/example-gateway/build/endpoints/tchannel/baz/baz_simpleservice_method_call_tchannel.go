@@ -56,7 +56,7 @@ type SimpleServiceCallHandler struct {
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
 	h.endpoint = g.TChannelRouter.Register(
 		"bazTChannel", "call", "SimpleService::Call",
-		h,
+		h, nil, nil,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil

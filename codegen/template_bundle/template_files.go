@@ -1866,7 +1866,7 @@ type {{$handlerName}} struct {
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	h.endpoint = g.TChannelRouter.Register(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		h,
+		h, nil, nil,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil
@@ -1982,7 +1982,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4499, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4509, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

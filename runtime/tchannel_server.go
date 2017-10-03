@@ -98,34 +98,42 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 func (s *TChannelRouter) Register(
 	endpointID, handlerID, method string,
 	h TChannelHandler,
+	fields []zapcore.Field,
+	tags map[string]string,
 ) *TChannelEndpoint {
-	return s.RegisterWithPostResponseCB(endpointID, handlerID, method, h, nil)
+	return s.RegisterWithPostResponseCB(endpointID, handlerID, method, h, fields, tags, nil)
 }
 
 // RegisterWithPostResponseCB registers the given TChannelHandler with a PostResponseCB function
 func (s *TChannelRouter) RegisterWithPostResponseCB(
 	endpointID, handlerID, method string,
 	h TChannelHandler,
+	fields []zapcore.Field,
+	tags map[string]string,
 	cb PostResponseCB,
 ) *TChannelEndpoint {
-	logger := s.logger.With(
-		zap.String("endpointID", endpointID),
-		zap.String("handlerID", endpointID),
-		zap.String("method", method),
-	)
-	scope := s.scope.Tagged(map[string]string{
-		"endpoint": endpointID,
-		"handler":  handlerID,
-		"method":   method,
-	})
+	if fields == nil {
+		fields = make([]zapcore.Field, 0, 3)
+	}
+	fields = append(fields, zap.String("endpointID", endpointID))
+	fields = append(fields, zap.String("handlerID", handlerID))
+	fields = append(fields, zap.String("method", method))
+
+	if tags == nil {
+		tags = make(map[string]string, 3)
+	}
+	tags["endpoint"] = endpointID
+	tags["handler"] = handlerID
+	tags["method"] = method
+
 	endpoint := TChannelEndpoint{
 		EndpointID:     endpointID,
 		HandlerID:      handlerID,
 		Method:         method,
 		handler:        h,
 		postResponseCB: cb,
-		Logger:         logger,
-		metrics:        NewInboundTChannelMetrics(scope),
+		Logger:         s.logger.With(fields...),
+		metrics:        NewInboundTChannelMetrics(s.scope.Tagged(tags)),
 	}
 	s.register(&endpoint)
 	return &endpoint
