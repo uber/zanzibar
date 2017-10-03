@@ -21,12 +21,17 @@
 package repository
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ast"
 	"go.uber.org/thriftrw/compile"
+	"go.uber.org/thriftrw/idl"
 )
 
 // Module represents a compiled Thrift module. In contrast to thriftrw-go's
@@ -167,6 +172,23 @@ type ResultSpec struct {
 	Exceptions []*FieldSpec `json:"exceptions,omitempty"`
 }
 
+// CompileThriftFile compiles a thrift file in a structured module.
+func CompileThriftFile(thriftAbsPath string, thriftRootPath string) (*Module, error) {
+	compiledModule, err := compile.Compile(thriftAbsPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to compile thrift file")
+	}
+	b, err := ioutil.ReadFile(thriftAbsPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read file %q", thriftAbsPath)
+	}
+	program, err := idl.Parse(b)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse thrift program")
+	}
+	return ConvertModule(compiledModule, program, thriftRootPath), nil
+}
+
 // ConvertModule converts a compile.Module into Module.
 func ConvertModule(module *compile.Module, ast *ast.Program, basePath string) *Module {
 	incModules := includedModules(module.Includes, basePath)
@@ -233,7 +255,7 @@ func constantValue(value compile.ConstantValue) string {
 	case compile.ConstantInt:
 		return fmt.Sprintf("%d", t)
 	case compile.ConstantString:
-		return string(t)
+		return fmt.Sprintf("%q", string(t))
 	case compile.ConstantDouble:
 		return fmt.Sprintf("%f", t)
 	case compile.EnumItemReference:
@@ -358,8 +380,7 @@ func fillInHeaders(module *Module, program *ast.Program) {
 	for _, header := range program.Headers {
 		switch header := header.(type) {
 		case *ast.Include:
-			name := strings.TrimSuffix(filepath.Base(header.Path), filepath.Ext(header.Path))
-			if inc, ok := module.Includes[name]; ok {
+			if inc, ok := module.Includes[includedName(header.Path)]; ok {
 				inc.Line = header.Line
 			}
 		case *ast.Namespace:
@@ -371,6 +392,10 @@ func fillInHeaders(module *Module, program *ast.Program) {
 				})
 		}
 	}
+}
+
+func includedName(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
 
 func fillInDefinitions(module *Module, program *ast.Program) {
@@ -406,4 +431,286 @@ func newEnumSpec(enum *compile.EnumSpec) *EnumSpec {
 		e.Items[i].Annotations = item.Annotations
 	}
 	return e
+}
+
+// Code converts the module as normal thrift code.
+func (m *Module) Code() string {
+	codeBlocks := make([]*CodeBlock, 0, 100)
+	for _, ns := range m.Namespace {
+		codeBlocks = append(codeBlocks, ns.CodeBlock())
+	}
+	for _, im := range m.Includes {
+		codeBlocks = append(codeBlocks, im.CodeBlock(m.ThriftPath))
+	}
+	for _, c := range m.Constants {
+		codeBlocks = append(codeBlocks, c.CodeBlock(m.ThriftPath))
+	}
+	for _, t := range m.Types {
+		codeBlocks = append(codeBlocks, t.CodeBlock(m.ThriftPath))
+	}
+	for _, service := range m.Services {
+		codeBlocks = append(codeBlocks, service.CodeBlock(m.ThriftPath))
+	}
+	sort.Sort(codeBlockSlice(codeBlocks))
+	result := bytes.NewBuffer(nil)
+	for i := range codeBlocks {
+		result.WriteString(codeBlocks[i].Code)
+		result.WriteString("\n\n")
+	}
+	return result.String()
+}
+
+// CodeBlock defines a code block of a thrift file.
+type CodeBlock struct {
+	Code  string
+	Order int
+}
+
+// CodeBlock converts a namespace to a CodeBlock.
+func (ns *Namespace) CodeBlock() *CodeBlock {
+	return &CodeBlock{
+		Code:  fmt.Sprintf("namespace %s %s", ns.Scope, ns.Name),
+		Order: ns.Line,
+	}
+}
+
+// CodeBlock converts a included module to a CodeBlock.
+func (im *IncludedModule) CodeBlock(curFilePath string) *CodeBlock {
+	relPath, err := filepath.Rel(curFilePath, im.Module.ThriftPath)
+	if err != nil {
+		relPath = curFilePath
+	}
+	relPath = filepath.Clean(strings.TrimPrefix(relPath, "../"))
+	return &CodeBlock{
+		Code:  fmt.Sprintf("include \"%s\"", relPath),
+		Order: im.Line,
+	}
+}
+
+// CodeBlock converts a constant to a CodeBlock.
+func (c *Constant) CodeBlock(curFilePath string) *CodeBlock {
+	return &CodeBlock{
+		Code: fmt.Sprintf("const %s %s = %s%s", c.Type.FullTypeName(curFilePath), c.Name, c.Value,
+			annotationsCode(c.Type.Annotations, "\t", "")),
+		Order: c.Line,
+	}
+}
+
+// CodeBlock converts a typeSpec to a CodeBlock.
+func (ts *TypeSpec) CodeBlock(curFilePath string) *CodeBlock {
+	// Typedef definition
+	if ts.TypeDefTarget != nil {
+		return &CodeBlock{
+			Code: fmt.Sprintf("typedef %s %s%s",
+				ts.TypeDefTarget.FullTypeName(curFilePath), ts.Name,
+				annotationsCode(ts.Annotations, "/t", "")),
+			Order: ts.Line,
+		}
+	}
+	// Enum definition
+	if ts.EnumType != nil {
+		return enumTypeCodeBlock(ts.EnumType, ts.Line, ts.Annotations)
+	}
+	// Struct definition
+	if ts.StructType != nil {
+		return structTypeCodeBlock(ts.StructType, ts.Name, ts.Line, curFilePath, ts.Annotations)
+	}
+	panic(fmt.Sprintf(
+		"No typedef, enum, nor struct definition found: typespec %+v", ts))
+}
+
+func enumTypeCodeBlock(e *EnumSpec, line int, annotations compile.Annotations) *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("enum %s {\n", e.Name))
+	items := e.Items
+	for i := 0; i < len(items)-1; i++ {
+		result.WriteString(fmt.Sprintf("\t%s = %d%s,\n", items[i].Name, items[i].Value,
+			annotationsCode(items[i].Annotations, "\t\t", "\t")))
+	}
+	if l := len(items); l > 0 {
+		result.WriteString(fmt.Sprintf("\t%s = %d\n%s", items[l-1].Name, items[l-1].Value,
+			annotationsCode(items[l-1].Annotations, "\t\t", "\t")))
+	}
+	result.WriteString("}" + annotationsCode(annotations, "\t", ""))
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: line,
+	}
+}
+
+func structTypeCodeBlock(st *StructTypeSpec, name string, line int, curFilePath string, annotations compile.Annotations) *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("%s %s {\n", string(st.Kind), name))
+	result.WriteString(fieldsCode(st.Fields, curFilePath, "\t", true))
+	result.WriteString("}" + annotationsCode(annotations, "\t", ""))
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: line,
+	}
+}
+
+func fieldsCode(fields []*FieldSpec, curFilePath, lineIndent string, showOptional bool) string {
+	sort.Sort(fieldSlice(fields))
+	result := bytes.NewBuffer(nil)
+	for _, field := range fields {
+		var required string
+		if field.Required {
+			required = " required"
+		} else if showOptional {
+			required = " optional"
+		}
+		line := fmt.Sprintf("%s%d:%s %s %s",
+			lineIndent, field.ID, required, field.Type.FullTypeName(curFilePath), field.Name)
+		if field.Default != "" {
+			line += " = " + field.Default
+		}
+		line += annotationsCode(field.Annotations, lineIndent+"\t", lineIndent) + "\n"
+		result.WriteString(line)
+	}
+	return result.String()
+}
+
+// FullTypeName defines the full name referred in current thrift file,
+// such as "string", "int", "base.abc".
+func (ts *TypeSpec) FullTypeName(curFilePath string) string {
+	name := ts.Name
+	if ts.ListValueType != nil {
+		name = fmt.Sprintf("list<%s>", ts.ListValueType.FullTypeName(curFilePath))
+	} else if ts.MapType != nil {
+		name = fmt.Sprintf("map<%s, %s>",
+			ts.MapType.KeyType.FullTypeName(curFilePath), ts.MapType.ValueType.FullTypeName(curFilePath))
+	} else if ts.SetValueType != nil {
+		name = fmt.Sprintf("set<%s>", ts.SetValueType.FullTypeName(curFilePath))
+	}
+	// Built-in type or type defined in current file.
+	if ts.File == "" || ts.File == curFilePath {
+		return name
+	}
+	return includedName(ts.File) + "." + name
+}
+
+// CodeBlock converts a serviceSpec to a CodeBlock.
+func (ss *ServiceSpec) CodeBlock(curFilePath string) *CodeBlock {
+	result := bytes.NewBuffer(nil)
+	result.WriteString(fmt.Sprintf("service %s {\n", ss.Name))
+	functions := make([]*FunctionSpec, 0, len(ss.Functions))
+	for _, f := range ss.Functions {
+		functions = append(functions, f)
+	}
+	result.WriteString(functionsCode(functions, curFilePath))
+	result.WriteString("}")
+	return &CodeBlock{
+		Code:  result.String(),
+		Order: ss.Line,
+	}
+}
+
+func functionsCode(functions []*FunctionSpec, curFilePath string) string {
+	sort.Sort(functionSlice(functions))
+	result := bytes.NewBuffer(nil)
+	for i, f := range functions {
+		var returnType string
+		if f.ResultSpec.ReturnType == nil {
+			returnType = "void"
+		} else {
+			returnType = f.ResultSpec.ReturnType.FullTypeName(curFilePath)
+		}
+		result.WriteString(fmt.Sprintf("\t%s %s (", returnType, f.Name))
+		// Input parameters
+		if len(f.ArgsSpec) != 0 {
+			result.WriteString(fmt.Sprintf("\n%s\t)",
+				fieldsCode(f.ArgsSpec, curFilePath, "\t\t", true)))
+		} else {
+			result.WriteString(")")
+		}
+		// Exceptions
+		if exceptions := f.ResultSpec.Exceptions; len(exceptions) != 0 {
+			result.WriteString(" throws (\n")
+			result.WriteString(fieldsCode(exceptions, curFilePath, "\t\t", false))
+			result.WriteString("\t)")
+		}
+		// Annotations
+		result.WriteString(annotationsCode(f.Annotations, "\t\t", "\t"))
+
+		if i == len(functions)-1 {
+			result.WriteString("\n")
+		} else {
+			result.WriteString("\n\n")
+		}
+	}
+	return result.String()
+}
+
+func annotationsCode(annotations compile.Annotations, lineIndent, rightParenthesesIndent string) string {
+	if len(annotations) == 0 {
+		return ""
+	}
+	if len(annotations) == 1 {
+		for k, v := range annotations {
+			return fmt.Sprintf(" ( %s = \"%s\" )", k, v)
+		}
+	}
+	keys := make([]string, 0, len(annotations))
+	for key := range annotations {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	result := bytes.NewBuffer(nil)
+	result.WriteString(" (\n")
+	for _, key := range keys {
+		result.WriteString(fmt.Sprintf("%s%s = \"%s\"\n", lineIndent, key, annotations[key]))
+	}
+	result.WriteString(rightParenthesesIndent + ")")
+	return result.String()
+}
+
+type codeBlockSlice []*CodeBlock
+
+// Len returns length.
+func (c codeBlockSlice) Len() int {
+	return len(c)
+}
+
+// Swap swaps two elements.
+func (c codeBlockSlice) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
+// Less determines the order.
+func (c codeBlockSlice) Less(i, j int) bool {
+	return c[i].Order < c[j].Order
+}
+
+type fieldSlice []*FieldSpec
+
+// Len returns length.
+func (f fieldSlice) Len() int {
+	return len(f)
+}
+
+// Swap swaps two elements.
+func (f fieldSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
+// Less determines the order.
+func (f fieldSlice) Less(i, j int) bool {
+	return f[i].Line < f[j].Line || f[i].Line == f[j].Line && f[i].ID < f[j].ID
+}
+
+type functionSlice []*FunctionSpec
+
+// Len returns length.
+func (f functionSlice) Len() int {
+	return len(f)
+}
+
+// Swap swaps two elements.
+func (f functionSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
+// Less determines the order.
+func (f functionSlice) Less(i, j int) bool {
+	return f[i].Line < f[j].Line || f[i].Line == f[j].Line && f[i].Name < f[j].Name
 }
