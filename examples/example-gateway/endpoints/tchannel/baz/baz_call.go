@@ -61,10 +61,9 @@ func (w CallEndpoint) Handle(
 		case *clientBaz.AuthErr:
 			return respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			zanzibar.OnError(
+			zanzibar.LogErrorWarnTimeout(
 				w.Logger, err,
-				"baz.Call timed out",
-				"baz.Call returned unexpected error",
+				"baz.Call returned error",
 			)
 			return respHeaders, err
 		}

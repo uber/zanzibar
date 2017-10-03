@@ -122,19 +122,16 @@ func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger 
 	return TChannelLogger{logger: l.logger.With(zfields...)}
 }
 
-// LogError logs warnings for timeout errors
-func LogError(logger *zap.Logger, err error, msg string) {
-	OnError(logger, err, msg, msg)
-}
-
-// OnError logs warnings for timeout errors
-func OnError(logger *zap.Logger, err error, warnMsg, errMsg string) {
+// LogErrorWarnTimeout logs warnings for timeout errors, otherwise logs errors
+// TODO: We want to improve the classification of errors, similar to:
+// https://github.com/uber/tchannel-node/blob/master/errors.js#L907-L930
+func LogErrorWarnTimeout(logger *zap.Logger, err error, msg string) {
 	if err != nil {
 		if errors.Cause(err) == context.Canceled || errors.Cause(err) == context.DeadlineExceeded ||
 			tchannel.GetSystemErrorCode(errors.Cause(err)) == tchannel.ErrCodeTimeout {
-			logger.Warn(warnMsg, zap.Error(err))
+			logger.Warn(msg, zap.Error(err))
 		} else {
-			logger.Error(errMsg, zap.Error(err))
+			logger.Error(msg, zap.Error(err))
 		}
 	}
 }
