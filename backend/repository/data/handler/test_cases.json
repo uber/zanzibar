@@ -126,8 +126,8 @@
 					"type": "http"
 				},
 				"baz": {
-					"clientTimeout": 1000,
-					"clientTimeoutPerAttempt": 1000,
+					"clientTimeout": 10000,
+					"clientTimeoutPerAttempt": 2000,
 					"exposedMethods": {
 						"Call": "SimpleService::call",
 						"Compare": "SimpleService::compare",
@@ -168,8 +168,8 @@
 					"type": "http"
 				},
 				"corge": {
-					"clientTimeout": 1000,
-					"clientTimeoutPerAttempt": 1000,
+					"clientTimeout": 10000,
+					"clientTimeoutPerAttempt": 2000,
 					"exposedMethods": {
 						"EchoString": "Corge::echoString"
 					},
@@ -2020,8 +2020,8 @@
 			"body": {
 				"client_updates": [
 					{
-						"clientTimeout": 1000,
-						"clientTimeoutPerAttempt": 1000,
+						"clientTimeout": 10000,
+						"clientTimeoutPerAttempt": 2000,
 						"exposedMethods": {
 							"Call": "SimpleService::call",
 							"Compare": "SimpleService::compare",
@@ -2096,8 +2096,8 @@
 			"body": {
 				"client_updates": [
 					{
-						"clientTimeout": 1000,
-						"clientTimeoutPerAttempt": 1000,
+						"clientTimeout": 10000,
+						"clientTimeoutPerAttempt": 2000,
 						"exposedMethods": {
 							"Call": "SimpleService::call",
 							"Compare": "SimpleService::compare",
@@ -2226,8 +2226,8 @@
 							"type": "http"
 						},
 						"baz": {
-							"clientTimeout": 1000,
-							"clientTimeoutPerAttempt": 1000,
+							"clientTimeout": 10000,
+							"clientTimeoutPerAttempt": 2000,
 							"exposedMethods": {
 								"Call": "SimpleService::call",
 								"Compare": "SimpleService::compare",
@@ -2268,8 +2268,8 @@
 							"type": "http"
 						},
 						"corge": {
-							"clientTimeout": 1000,
-							"clientTimeoutPerAttempt": 1000,
+							"clientTimeout": 10000,
+							"clientTimeoutPerAttempt": 2000,
 							"exposedMethods": {
 								"EchoString": "Corge::echoString"
 							},
@@ -3038,8 +3038,8 @@
 						"type": "http"
 					},
 					"baz": {
-						"clientTimeout": 1000,
-						"clientTimeoutPerAttempt": 1000,
+						"clientTimeout": 10000,
+						"clientTimeoutPerAttempt": 2000,
 						"exposedMethods": {
 							"Call": "SimpleService::call",
 							"Compare": "SimpleService::compare",
@@ -3080,8 +3080,8 @@
 						"type": "http"
 					},
 					"corge": {
-						"clientTimeout": 1000,
-						"clientTimeoutPerAttempt": 1000,
+						"clientTimeout": 10000,
+						"clientTimeoutPerAttempt": 2000,
 						"exposedMethods": {
 							"EchoString": "Corge::echoString"
 						},

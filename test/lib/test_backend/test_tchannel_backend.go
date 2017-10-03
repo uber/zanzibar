@@ -25,11 +25,11 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/uber/zanzibar/runtime"
 )
 
 // TestTChannelBackend will pretend to be a http backend
@@ -99,8 +99,11 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 }
 
 // Register registers tchannel server handler
-func (backend *TestTChannelBackend) Register(service string, method string, handler zanzibar.TChannelHandler) {
-	backend.Router.Register(service, method, handler)
+func (backend *TestTChannelBackend) Register(
+	endpointID, handlerID, method string,
+	handler zanzibar.TChannelHandler,
+) {
+	backend.Router.Register(endpointID, handlerID, method, handler)
 }
 
 // Close closes the underlying channel
@@ -137,8 +140,13 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		return nil, err
 	}
 
+	gateway := zanzibar.Gateway{
+		Logger:       testLogger,
+		AllHostScope: tally.NoopScope,
+	}
+
 	backend.Channel = channel
-	backend.Router = zanzibar.NewTChannelRouter(channel, testLogger)
+	backend.Router = zanzibar.NewTChannelRouter(channel, &gateway)
 
 	return backend, nil
 }

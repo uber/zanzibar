@@ -71,8 +71,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"ping",
+		"baz", "ping", "SimpleService::ping",
 		bazClient.NewSimpleServicePingHandler(fakePing),
 	)
 

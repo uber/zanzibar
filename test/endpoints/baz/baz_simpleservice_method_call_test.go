@@ -67,8 +67,7 @@ func BenchmarkCall(b *testing.B) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"call",
+		"baz", "call", "SimpleService::call",
 		bazServer.NewSimpleServiceCallHandler(call),
 	)
 

@@ -22,7 +22,9 @@ package bazTchannel
 
 import (
 	"context"
+	"net"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -63,8 +65,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"call",
+		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
@@ -97,13 +98,28 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.True(t, success)
 
 	allLogs := gateway.AllLogs()
-	assert.Equal(t, 4, len(allLogs))
+	assert.Equal(t, 5, len(allLogs))
 	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
 	assert.Equal(t, 1, len(allLogs["Inbound connection is active."]))
 	assert.Equal(t, 1, len(allLogs["Outbound connection is active."]))
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
+	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
 
-	tags := allLogs["Finished an outgoing client TChannel request"][0]
+	tags := allLogs["Finished an incoming server TChannel request"][0]
+	assert.Equal(t, "info", tags["level"])
+	assert.Equal(t, "Finished an incoming server TChannel request", tags["msg"])
+	assert.Equal(t, "bazTChannel", tags["endpointID"])
+	assert.Equal(t, "bazTChannel", tags["handlerID"])
+	assert.Equal(t, "SimpleService::Call", tags["method"])
+	assert.Equal(t, "token", tags["Request-Header-x-token"])
+	assert.Equal(t, "uuid", tags["Request-Header-x-uuid"])
+	assert.Equal(t, "something", tags["Response-Header-some-res-header"])
+	assert.Equal(t, "test-gateway", tags["calling-service"])
+	assert.Contains(t, tags["remoteAddr"], getLocalAddr(t))
+	assert.NotNil(t, tags["timestamp-started"])
+	assert.NotNil(t, tags["timestamp-finished"])
+
+	tags = allLogs["Finished an outgoing client TChannel request"][0]
 	assert.Equal(t, "info", tags["level"])
 	assert.Equal(t, "Finished an outgoing client TChannel request", tags["msg"])
 	assert.Equal(t, "baz", tags["clientID"])
@@ -116,4 +132,88 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Contains(t, tags["remoteAddr"], "127.0.0.1")
 	assert.NotNil(t, tags["timestamp-started"])
 	assert.NotNil(t, tags["timestamp-finished"])
+}
+
+func getLocalAddr(t *testing.T) string {
+	addrs, err := net.InterfaceAddrs()
+	assert.NoError(t, err)
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			return ipnet.IP.String()
+		}
+	}
+	return "unknown"
+}
+
+func TestCallTChannelTimeout(t *testing.T) {
+	testCallCounter := 0
+
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		"clients.baz.serviceName": "bazService",
+		"tchannel.client.timeout": 200,
+	}, &testGateway.Options{
+		KnownTChannelBackends: []string{"baz"},
+		TestBinary:            util.DefaultMainFile("example-gateway"),
+		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		TChannelClientMethods: map[string]string{
+			"SimpleService::Call": "Call",
+		},
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	fakeCall := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBaz.SimpleService_Call_Args,
+	) (map[string]string, error) {
+		testCallCounter++
+		time.Sleep(400 * time.Millisecond)
+
+		return map[string]string{
+			"some-res-header": "something",
+		}, nil
+	}
+	gateway.TChannelBackends()["baz"].Register(
+		"baz", "call", "SimpleService::call",
+		bazClient.NewSimpleServiceCallHandler(fakeCall),
+	)
+
+	ctx := context.Background()
+	reqHeaders := map[string]string{
+		"x-token": "token",
+		"x-uuid":  "uuid",
+	}
+	args := &endpointsBaz.SimpleService_Call_Args{
+		Arg: &endpointsBaz.BazRequest{
+			B1: true,
+			S2: "hello",
+			I3: 42,
+		},
+	}
+	var result endpointsBaz.SimpleService_Call_Result
+
+	success, resHeaders, err := gateway.MakeTChannelRequest(
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+	)
+	assert.Error(t, err, "excepting tchannel error")
+	assert.Nil(t, resHeaders)
+	assert.False(t, success)
+
+	allLogs := gateway.AllLogs()
+	assert.Len(t, allLogs, 12)
+	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
+	assert.Len(t, gateway.Logs("info", "Inbound connection is active."), 1)
+	assert.Len(t, gateway.Logs("info", "Outbound connection is active."), 1)
+	assert.Len(t, gateway.Logs("warn", "baz.Call returned error"), 1)
+	assert.Len(t, gateway.Logs("warn", "Could not create arg2reader for outbound response"), 1)
+	assert.Len(t, gateway.Logs("warn", "Could not make outbound request"), 1)
+	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
+	assert.Len(t, gateway.Logs("info", "Finished an outgoing client TChannel request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Handler returned error"), 1)
+	assert.Len(t, gateway.Logs("warn", "Unexpected tchannel system error"), 1)
+	assert.Len(t, gateway.Logs("warn", "Thrift server error"), 1)
+	assert.Len(t, gateway.Logs("info", "Finished an incoming server TChannel request"), 1)
 }

@@ -729,7 +729,9 @@ import (
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $.TestStubs}}
-func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+{{- $endpointID := .EndpointID }}
+{{- $handlerID := .HandlerID }}
+func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
@@ -785,8 +787,7 @@ func Test{{title .HandlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$thriftService}}",
-		"{{$clientMethodName}}",
+		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
@@ -843,7 +844,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 3978, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4077, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1822,12 +1823,13 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 
 var _tchannel_endpointTmpl = []byte(`{{- /* template to render edge gateway tchannel server code */ -}}
 {{- $instance := .Instance }}
+{{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
-	"errors"
 
+	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -1851,21 +1853,19 @@ func New{{$handlerName}}(
 ) *{{$handlerName}} {
 	return &{{$handlerName}}{
 		Clients: deps.Client,
-		Logger: gateway.Logger,
 	}
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
 type {{$handlerName}} struct {
-	Clients *module.ClientDependencies
-	Logger *zap.Logger
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.TChannelEndpoint
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(
-		"{{.ThriftService}}",
-		"{{.Name}}",
+	h.endpoint = g.TChannelRouter.Register(
+		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		h,
 	)
 	// TODO: Register should return an error for route conflicts
@@ -1880,8 +1880,11 @@ func (h *{{$handlerName}}) Handle(
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
-	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}); err != nil {
-		return false, nil, nil, err
+	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing request headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 	{{- end}}
 
@@ -1890,13 +1893,17 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
+		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
+		return false, nil, nil, errors.Wrapf(
+			err, "Error converting %s.%s (%s) request from wire",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 	{{end -}}
 
 	workflow := {{$workflow}}{
 		Clients: h.Clients,
-		Logger: h.Logger,
+		Logger:  h.endpoint.Logger,
 	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
@@ -1909,12 +1916,6 @@ func (h *{{$handlerName}}) Handle(
 	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 	{{end}}
 
-	{{- if .ResHeaders}}
-	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}); err != nil {
-		return false, nil, nil, err
-	}
-	{{- end}}
-
 	resHeaders := map[string]string{}
 	for _, key := range wfResHeaders.Keys() {
 		resHeaders[key], _ = wfResHeaders.Get(key)
@@ -1922,6 +1923,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
+			h.Logger.Warn("Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = r
@@ -1931,20 +1933,38 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
+					h.endpoint.Logger.Warn(
+						"Handler returned non-nil error type *{{.Type}} but nil value",
+						zap.Error(err),
+					)
 					if v == nil {
-						return false, nil, resHeaders, errors.New(
-							"Handler for {{$method}} returned non-nil error type *{{.Type}} but nil value",
+						return false, nil, resHeaders, errors.Errorf(
+							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
+							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 						)
 					}
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					return false, nil, resHeaders, err
+					h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
+					return false, nil, resHeaders, errors.Wrapf(
+						err, "%s.%s (%s) handler returned error",
+						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+					)
 			}
 		} {{if ne .ResponseType "" -}} else {
 			res.Success = r
 		} {{end -}}
 	{{end}}
+
+	{{- if .ResHeaders}}
+	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
+	}
+	{{- end}}
 
 	return err == nil, &res, resHeaders, nil
 }
@@ -1962,7 +1982,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 3434, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4499, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

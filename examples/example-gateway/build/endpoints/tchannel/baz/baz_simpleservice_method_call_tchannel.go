@@ -25,8 +25,8 @@ package baztchannelEndpoint
 
 import (
 	"context"
-	"errors"
 
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
@@ -43,21 +43,19 @@ func NewSimpleServiceCallHandler(
 ) *SimpleServiceCallHandler {
 	return &SimpleServiceCallHandler{
 		Clients: deps.Client,
-		Logger:  gateway.Logger,
 	}
 }
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".
 type SimpleServiceCallHandler struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.TChannelEndpoint
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(
-		"SimpleService",
-		"Call",
+	h.endpoint = g.TChannelRouter.Register(
+		"bazTChannel", "call", "SimpleService::Call",
 		h,
 	)
 	// TODO: Register should return an error for route conflicts
@@ -71,26 +69,29 @@ func (h *SimpleServiceCallHandler) Handle(
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
-	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}); err != nil {
-		return false, nil, nil, err
+	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing request headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 
 	var res endpointsTchannelBazBaz.SimpleService_Call_Result
 
 	var req endpointsTchannelBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
+		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
+		return false, nil, nil, errors.Wrapf(
+			err, "Error converting %s.%s (%s) request from wire",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 	workflow := customBaz.CallEndpoint{
 		Clients: h.Clients,
-		Logger:  h.Logger,
+		Logger:  h.endpoint.Logger,
 	}
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
-
-	if err := wfResHeaders.Ensure([]string{"some-res-header"}); err != nil {
-		return false, nil, nil, err
-	}
 
 	resHeaders := map[string]string{}
 	for _, key := range wfResHeaders.Keys() {
@@ -100,15 +101,30 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
+			h.endpoint.Logger.Warn(
+				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+				zap.Error(err),
+			)
 			if v == nil {
-				return false, nil, resHeaders, errors.New(
-					"Handler for Call returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+				return false, nil, resHeaders, errors.Errorf(
+					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 				)
 			}
 			res.AuthErr = v
 		default:
-			return false, nil, resHeaders, err
+			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
+			return false, nil, resHeaders, errors.Wrapf(
+				err, "%s.%s (%s) handler returned error",
+				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+			)
 		}
+	}
+	if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 
 	return err == nil, &res, resHeaders, nil

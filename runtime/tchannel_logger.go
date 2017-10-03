@@ -21,8 +21,10 @@
 package zanzibar
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -42,18 +44,18 @@ type TChannelLogger struct {
 func (l TChannelLogger) Enabled(tlevel tchannel.LogLevel) bool {
 	var zlevel zapcore.Level
 
-	/*
-		Log level mapping:
-			  TChannel	Zap
-		all	  0		n/a
-		debug	  1		-1
-		info	  2		0
-		warn	  3		1
-		error	  4		2
-		dpanic	  n/a		3
-		panic	  n/a		4
-		fatal	  5		5
-	*/
+	// Log level mapping:
+	//
+	//         TChannel  Zap
+	// all         0     n/a
+	// debug       1     -1
+	// info        2      0
+	// warn        3      1
+	// error       4      2
+	// dpanic     n/a     3
+	// panic      n/a     4
+	// fatal       5      5
+	//
 	switch tlevel {
 	case tchannel.LogLevelAll:
 		// zap does not have a log all level, zap minimum log level is debug
@@ -118,4 +120,18 @@ func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger 
 		zfields = append(zfields, zf)
 	}
 	return TChannelLogger{logger: l.logger.With(zfields...)}
+}
+
+// LogErrorWarnTimeout logs warnings for timeout errors, otherwise logs errors
+// TODO: We want to improve the classification of errors, similar to:
+// https://github.com/uber/tchannel-node/blob/master/errors.js#L907-L930
+func LogErrorWarnTimeout(logger *zap.Logger, err error, msg string) {
+	if err != nil {
+		if errors.Cause(err) == context.Canceled || errors.Cause(err) == context.DeadlineExceeded ||
+			tchannel.GetSystemErrorCode(errors.Cause(err)) == tchannel.ErrCodeTimeout {
+			logger.Warn(msg, zap.Error(err))
+		} else {
+			logger.Error(msg, zap.Error(err))
+		}
+	}
 }

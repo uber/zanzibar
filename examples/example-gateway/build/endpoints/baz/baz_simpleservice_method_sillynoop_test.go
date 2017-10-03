@@ -62,8 +62,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"SimpleService",
-		"sillyNoop",
+		"baz", "sillyNoop", "SimpleService::sillyNoop",
 		bazClient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 	)
 

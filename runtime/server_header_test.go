@@ -26,6 +26,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 func TestGet(t *testing.T) {
@@ -142,8 +143,8 @@ func TestEnsure(t *testing.T) {
 	zh.Set("foo", "headOne")
 	zh.Set("bar", "otherHeader")
 
-	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
-	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
+	assert.Equal(t, nil, zh.Ensure([]string{"foo"}, zap.NewNop()))
+	assert.Error(t, zh.Ensure([]string{"foo", "baz"}, zap.NewNop()))
 }
 
 func TestSTHGet(t *testing.T) {
@@ -207,6 +208,6 @@ func TestSTHEnsure(t *testing.T) {
 	zh.Set("foo", "headOne")
 	zh.Set("bar", "otherHeader")
 
-	assert.Equal(t, nil, zh.Ensure([]string{"foo"}))
-	assert.Error(t, zh.Ensure([]string{"foo", "baz"}))
+	assert.Equal(t, nil, zh.Ensure([]string{"foo"}, zap.NewNop()))
+	assert.Error(t, zh.Ensure([]string{"foo", "baz"}, zap.NewNop()))
 }

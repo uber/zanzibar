@@ -493,7 +493,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 
 	gateway.Channel = channel
 	gateway.tchannelServer = channel
-	gateway.TChannelRouter = NewTChannelRouter(channel, gateway.Logger)
+	gateway.TChannelRouter = NewTChannelRouter(channel, gateway)
 
 	return nil
 }
