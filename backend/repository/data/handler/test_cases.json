@@ -2158,6 +2158,79 @@
 		}
 	},
 	{
+		"name": "invalid create-diff request with unknown client ID",
+		"request": {
+			"method": "POST",
+			"url": "/create-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"client_updates": [
+					{
+						"clientTimeout": 10000,
+						"clientTimeoutPerAttempt": 2000,
+						"exposedMethods": {
+							"Call": "SimpleService::call",
+							"Compare": "SimpleService::compare",
+							"DeliberateDiffNoop": "SimpleService::sillyNoop",
+							"EchoBinary": "SecondService::echoBinary",
+							"EchoBool": "SecondService::echoBool",
+							"EchoDouble": "SecondService::echoDouble",
+							"EchoEnum": "SecondService::echoEnum",
+							"EchoI16": "SecondService::echoI16",
+							"EchoI32": "SecondService::echoI32",
+							"EchoI64": "SecondService::echoI64",
+							"EchoI8": "SecondService::echoI8",
+							"EchoString": "SecondService::echoString",
+							"EchoStringList": "SecondService::echoStringList",
+							"EchoStringMap": "SecondService::echoStringMap",
+							"EchoStringSet": "SecondService::echoStringSet",
+							"EchoStructList": "SecondService::echoStructList",
+							"EchoStructMap": "SecondService::echoStructMap",
+							"EchoStructSet": "SecondService::echoStructSet",
+							"EchoTypedef": "SecondService::echoTypedef",
+							"Ping": "SimpleService::ping"
+						},
+						"ip": "127.0.0.1",
+						"name": "baz",
+						"port": 4002,
+						"serviceName": "Qux",
+						"thriftFile": "clients/baz/baz.thrift",
+						"type": "tchannel"
+					}
+				],
+				"endpoint_updates": [
+					{
+						"clientID": "bazzzzzzzz",
+						"clientMethod": "Compare",
+						"endpointId": "baz",
+						"endpointType": "http",
+						"handleId": "compare",
+						"middlewares": [],
+						"reqHeaderMap": {},
+						"resHeaderMap": {},
+						"testFixtures": [],
+						"thriftFile": "endpoints/baz/baz.thrift",
+						"thriftFileSha": "{{placeholder}}",
+						"thriftMethodName": "SimpleService::compare",
+						"workflowType": "tchannelClient"
+					}
+				],
+				"thrift_files": [
+					"clients/baz/baz.thrift"
+				]
+			}
+		},
+		"response": {
+			"code": 400,
+			"body": {
+				"cause": "can't find client \"bazzzzzzzz\"",
+				"field_name": "client_id"
+			}
+		}
+	},
+	{
 		"name": "land-diff",
 		"request": {
 			"method": "POST",

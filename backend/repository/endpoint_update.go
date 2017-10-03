@@ -73,21 +73,23 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	}
 	clientCfg, ok := gatewayConfig.Clients[req.ClientID]
 	if !ok {
-		return errors.Errorf("can't find client %q", req.ClientID)
+		return NewRequestError(
+			ClientID, errors.Errorf("can't find client %q", req.ClientID))
 	}
 	if clientCfg.Type == HTTP {
 		req.WorkflowType = "httpClient"
 	} else if clientCfg.Type == TCHANNEL {
 		req.WorkflowType = "tchannelClient"
 	} else {
-		return errors.Errorf("client type %q is not supported", clientCfg.Type)
+		return NewRequestError(ClientType,
+			errors.Errorf("client type %q is not supported", clientCfg.Type))
 	}
 
 	for _, mid := range req.Middlewares {
 		for _, midCfg := range r.gatewayConfig.Middlewares {
 			if mid.Name == midCfg.Name {
 				err := codegen.SchemaValidateGo(midCfg.SchemaFile, mid.Options)
-				if err != nil  {
+				if err != nil {
 					return err
 				}
 			}
