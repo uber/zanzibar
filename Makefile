@@ -18,6 +18,14 @@ EXAMPLE_BASE_DIR = examples/example-gateway/
 EXAMPLE_SERVICES_DIR = $(EXAMPLE_BASE_DIR)build/services/
 EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 
+.PHONY: install
+install:
+	@echo "Mounting git pre-push hook"
+	cp .git-pre-push-hook .git/hooks/pre-push
+	@echo "Installing Glide and locked dependencies..."
+	glide --version || go get -u -f github.com/Masterminds/glide
+	glide install
+
 .PHONY: check-licence
 check-licence:
 	@echo "Checking uber-licence..."
@@ -28,14 +36,6 @@ check-licence:
 fix-licence:
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	./node_modules/.bin/uber-licence --file '*.go' --dir '!vendor' --dir '!workspace' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
-
-.PHONY: install
-install:
-	@echo "Mounting git pre-push hook"
-	cp .git-pre-push-hook .git/hooks/pre-push
-	@echo "Installing Glide and locked dependencies..."
-	glide --version || go get -u -f github.com/Masterminds/glide
-	glide install
 
 .PHONY: eclint-check
 eclint-check:
@@ -57,6 +57,11 @@ spell-check:
 spell-fix:
 	@go get github.com/client9/misspell/cmd/misspell
 	@misspell -w $(PKG_FILES)
+
+.PHONY: cyclo-check
+cyclo-check:
+	@go get github.com/fzipp/gocyclo
+	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
 lint: check-licence eclint-check
