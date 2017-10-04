@@ -637,6 +637,7 @@
 				]
 			}
 		},
+		"clients/foo/base/base.thrift": {},
 		"clients/foo/foo.thrift": {},
 		"clients/googlenow/googlenow.thrift": {
 			"GoogleNowService": {
@@ -742,6 +743,7 @@
 				]
 			}
 		},
+		"endpoints/foo/base/base.thrift": {},
 		"endpoints/foo/foo.thrift": {},
 		"endpoints/googlenow/googlenow.thrift": {
 			"GoogleNow": {
