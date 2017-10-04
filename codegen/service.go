@@ -96,10 +96,14 @@ func NewModuleSpec(
 
 // AddImports adds imported Go packages in ModuleSpec in alphabetical order.
 func (ms *ModuleSpec) AddImports(module *compile.Module, packageHelper *PackageHelper) error {
-	for _, pkg := range module.Includes {
-		if err := ms.addTypeImport(pkg.Module.ThriftPath, packageHelper); err != nil {
-			return errors.Wrapf(err, "can't add import %s", pkg.Module.ThriftPath)
+	err := module.Walk(func(dep *compile.Module) error {
+		if err := ms.addTypeImport(dep.ThriftPath, packageHelper); err != nil {
+			return errors.Wrapf(err, "can't add import %s", dep.ThriftPath)
 		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	if err := ms.addTypeImport(ms.ThriftFile, packageHelper); err != nil {
