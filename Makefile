@@ -48,6 +48,16 @@ eclint-fix:
 	@ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
 	./node_modules/.bin/eclint fix "./{codegen,examples}/**/*.{json,tmpl}"
 
+.PHONY: spell-check
+spell-check:
+	@go get github.com/client9/misspell/cmd/misspell
+	@misspell $(PKG_FILES)
+
+.PHONY: spell-fix
+spell-fix:
+	@go get github.com/client9/misspell/cmd/misspell
+	@misspell -w $(PKG_FILES)
+
 .PHONY: lint
 lint: check-licence eclint-check
 	@rm -f lint.log
