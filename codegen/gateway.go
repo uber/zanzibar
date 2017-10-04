@@ -113,7 +113,7 @@ type ClientClassConfig struct {
 	Dependencies ClientDependencies     `json:"dependencies"`
 }
 
-// ClientDependencies lists all depedencies of a client.
+// ClientDependencies lists all dependencies of a client.
 type ClientDependencies struct {
 	Client []string `json:"client"`
 }

@@ -54,7 +54,7 @@ type Fetcher interface {
 	// Update syncs local repository with remote repository and returns whether
 	// there is update or an error.
 	Update(localDir, remote string) (bool, error)
-	// Version returns current version of local respository or an error.
+	// Version returns current version of local repository or an error.
 	Version(localDir string) (string, error)
 }
 
@@ -69,7 +69,7 @@ func NewRepository(localRoot, remote string, fetcher Fetcher,
 	version, err := fetcher.Version(localDir)
 	if err != nil {
 		return nil, errors.Wrapf(err,
-			"failed to get the version of local respository for %s", remote)
+			"failed to get the version of local repository for %s", remote)
 	}
 	return &Repository{
 		remote:          remote,
@@ -81,12 +81,12 @@ func NewRepository(localRoot, remote string, fetcher Fetcher,
 	}, nil
 }
 
-// Remote returns the remote for the respository.
+// Remote returns the remote for the repository.
 func (r *Repository) Remote() string {
 	return r.remote
 }
 
-// LocalDir returns the local directory for the respository.
+// LocalDir returns the local directory for the repository.
 func (r *Repository) LocalDir() string {
 	return r.localDir
 }

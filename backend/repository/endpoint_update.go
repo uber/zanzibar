@@ -96,7 +96,7 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	return nil
 }
 
-// updateEndpointMetaJSON adds an endpoint in the meta json file or updates the config for an exsiting endpoint.
+// updateEndpointMetaJSON adds an endpoint in the meta json file or updates the config for an existing endpoint.
 func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfg *EndpointConfig) error {
 	metaFilePath := filepath.Join(configDir, metaFile)
 	fileContent := new(codegen.EndpointClassConfig)

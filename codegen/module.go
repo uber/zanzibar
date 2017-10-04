@@ -1044,7 +1044,7 @@ type PackageInfo struct {
 	// module and its dependencies
 	InitializerName string
 	// IsExportGenerated is true if the export type is provided by the
-	// generated pacakge, otherwise it is assumed that the export type resides
+	// generated package, otherwise it is assumed that the export type resides
 	// in the non-generated package
 	IsExportGenerated bool
 }
