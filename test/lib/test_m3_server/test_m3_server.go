@@ -26,6 +26,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"go.uber.org/thriftrw/ptr"
 
@@ -139,6 +140,11 @@ func (m *FakeM3Service) GetBatches() []*m3.MetricBatch {
 
 // GetMetrics gets the individual metrics
 func (m *FakeM3Service) GetMetrics() map[string]*m3.Metric {
+	// sleep to avoid race conditions with m3.Client
+	// Basically m3.Client can still be emitting and we might not
+	// yet have all metrics in `m.metrics`
+	time.Sleep(100 * time.Millisecond)
+
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 

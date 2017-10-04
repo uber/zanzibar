@@ -23,7 +23,6 @@ package gateway_test
 import (
 	"io/ioutil"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
@@ -124,8 +123,6 @@ func TestHealthMetrics(t *testing.T) {
 
 	cgateway.MetricsWaitGroup.Wait()
 
-	// sleep to avoid race conditions with m3.Client
-	time.Sleep(100 * time.Millisecond)
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics), "expected 5 metrics")
 	names := []string{

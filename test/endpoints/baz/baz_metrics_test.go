@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
@@ -89,8 +88,6 @@ func TestCallMetrics(t *testing.T) {
 
 	cg.MetricsWaitGroup.Wait()
 
-	// Wait for all the metrics to settle (non deterministic).
-	time.Sleep(100 * time.Millisecond)
 	metrics := cg.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics))
 
