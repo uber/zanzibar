@@ -36,7 +36,7 @@ func TestLoggingZapCore(t *testing.T) {
 	metricsScope := tally.NewTestScope("test", nil)
 
 	tempLogger := zap.New(
-		zanzibar.NewLoggingZapCore(
+		zanzibar.NewInstrumentedZapCore(
 			zapcore.NewCore(
 				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 				zapcore.AddSync(ioutil.Discard),
