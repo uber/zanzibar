@@ -833,7 +833,7 @@
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_NormalRecur_Args",
 					"ResponseType": "*clientsBarBar.BarResponseRecur",
-					"ShortResponseType": "clientsBarBar.BarResponse",
+					"ShortResponseType": "clientsBarBar.BarResponseRecur",
 					"OKStatusCode": {
 						"Code": 200,
 						"Message": ""
