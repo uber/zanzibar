@@ -106,7 +106,6 @@ func (handler *SimpleServiceCallHandler) HandleRequest(
 	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
-
 }
 
 // CallEndpoint calls thrift client Baz.Call
