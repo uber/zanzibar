@@ -388,14 +388,14 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		}
 	}
 
+	prodCore := zapcore.NewCore(
+		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+		output,
+		zap.InfoLevel,
+	)
 	zapLogger := zap.New(
-		NewLoggingZapCore(
-			zapcore.NewCore(
-				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-				output,
-				zap.InfoLevel,
-			),
-			gateway.AllHostScope,
+		NewInstrumentedZapCore(
+			prodCore, gateway.AllHostScope,
 		),
 	)
 

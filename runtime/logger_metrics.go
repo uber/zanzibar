@@ -39,9 +39,9 @@ type loggingZapCore struct {
 	fatalCounter  tally.Counter
 }
 
-// NewLoggingZapCore will return a zapcore.Core that emits
+// NewInstrumentedZapCore will return a zapcore.Core that emits
 // "logged" metrics, one counter for each level.
-func NewLoggingZapCore(
+func NewInstrumentedZapCore(
 	core zapcore.Core,
 	allHostsScope tally.Scope,
 ) zapcore.Core {
