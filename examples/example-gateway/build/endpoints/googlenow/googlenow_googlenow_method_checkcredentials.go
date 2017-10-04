@@ -93,6 +93,7 @@ func (handler *GoogleNowCheckCredentialsHandler) HandleRequest(
 	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
+
 }
 
 // CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials

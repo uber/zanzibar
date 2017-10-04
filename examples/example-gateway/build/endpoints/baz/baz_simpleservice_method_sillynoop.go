@@ -105,6 +105,7 @@ func (handler *SimpleServiceSillyNoopHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
+
 }
 
 // SillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop

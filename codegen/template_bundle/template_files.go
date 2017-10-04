@@ -275,6 +275,8 @@ func (handler *{{$handlerName}}) HandleRequest(
 
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
+	{{else if eq .ResponseType "string" }}
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, []byte(response))
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
 	{{- end }}
@@ -316,7 +318,7 @@ func (w {{$workflow}}) Handle(
 ) (zanzibar.Header, error) {
 {{else}}
 	ctx context.Context,
-	reqHeaders zanzibar.Header,	
+	reqHeaders zanzibar.Header,
 	r {{.RequestType}},
 ) ({{.ResponseType}}, zanzibar.Header, error) {
 {{- end}}
@@ -383,6 +385,8 @@ func (w {{$workflow}}) Handle(
 				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, serverErr
+				{{else if eq $responseType "string" }}
+				return "", nil, serverErr
 				{{else}}
 				return nil, nil, serverErr
 				{{end}}
@@ -394,6 +398,8 @@ func (w {{$workflow}}) Handle(
 				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
+				{{else if eq $responseType "string" }}
+				return "", nil, err
 				{{else}}
 				return nil, nil, err
 				{{end}}
@@ -442,15 +448,10 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{end}}
 
 {{if and (ne .ResponseType "") (ne $clientResType "") -}}
-func convert{{title .Name}}ClientResponse(in {{$clientResType}}) {{.ResponseType}} {
-	out := &{{unref .ResponseType}}{}
+{{ range $key, $line := $method.ConvertResponseGoStatements -}}
+{{$line}}
+{{ end }}
 
-	{{ range $key, $line := $method.ConvertResponseGoStatements -}}
-	{{$line}}
-	{{ end }}
-
-	return out
-}
 {{end -}}
 
 {{end -}}
@@ -467,7 +468,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9641, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9760, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

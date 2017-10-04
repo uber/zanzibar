@@ -102,6 +102,7 @@ func (handler *BarArgNotStructHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(200, cliRespHeaders, nil)
+
 }
 
 // ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
