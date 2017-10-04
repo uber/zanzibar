@@ -1,5 +1,5 @@
 PKGS = $(shell glide novendor | grep -v "workspace/...")
-PKG_FILES = benchmarks codegen examples runtime test
+PKG_FILES = benchmarks codegen examples runtime test backend
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
