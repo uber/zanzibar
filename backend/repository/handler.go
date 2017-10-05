@@ -424,22 +424,32 @@ func (h *Handler) WriteErrorResponse(w http.ResponseWriter, code int, err error)
 	type stackTracer interface {
 		StackTrace() errors.StackTrace
 	}
+	errJSON := fmt.Sprintf("{\"error\": %q}", err.Error())
+	causeErr := errors.Cause(err)
+	// In case we know the real cause of the error.
+	if e, ok := causeErr.(*RequestError); ok {
+		code = http.StatusBadRequest
+		errJSON = e.JSON()
+		causeErr = e.Cause
+	}
+
 	var errStack string
-	if causeErr, ok := errors.Cause(err).(stackTracer); ok {
-		errStack = fmt.Sprintf("%+v", causeErr.StackTrace())
+	if e, ok := causeErr.(stackTracer); ok {
+		errStack = fmt.Sprintf("%+v", e.StackTrace())
 	} else {
 		errStack = "unknown error stack"
 	}
 	h.logger.Error("Error Response.",
 		zap.Int("Status", code),
-		zap.String("errorString", fmt.Sprintf("%s", err)),
+		zap.String("errorJSON", fmt.Sprintf("%s", errJSON)),
+		zap.String("errorRaw", fmt.Sprintf("%s", err)),
 		zap.String("errorStack", errStack),
 	)
 	w.WriteHeader(code)
-	if _, e := w.Write([]byte(fmt.Sprintf("{\"error\": %q}", err.Error()))); e != nil {
+	if _, e := w.Write([]byte(errJSON)); e != nil {
 		h.logger.Error("Failed to write error response.",
 			zap.Int("statusCode", code),
-			zap.String("errorString", fmt.Sprintf("%s", err)),
+			zap.String("errorString", fmt.Sprintf("%s", errJSON)),
 			zap.String("errorStack", errStack),
 			zap.String("writeError", fmt.Sprintf("%+v", e)),
 		)

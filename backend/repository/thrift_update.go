@@ -79,7 +79,7 @@ func (r *Repository) writeThriftFile(idlRoot string, meta *ThriftMeta) error {
 	path := r.absPath(filepath.Join(idlRoot, meta.Path))
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return errors.Wrapf(err, "faile to creat dir %s", dir)
+		return errors.Wrapf(err, "failed to create dir %s", dir)
 	}
 	if err := ioutil.WriteFile(path, []byte(meta.Content), os.ModePerm); err != nil {
 		return errors.Wrap(err, "failed to write thrift file")
