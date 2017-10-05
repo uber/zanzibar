@@ -101,7 +101,7 @@ func TestWriteThriftFileAndConfig(t *testing.T) {
 	path := "a/new/file/name.thrift"
 	version := "new version"
 	newMeta := map[string]*ThriftMeta{
-		path: &ThriftMeta{
+		path: {
 			Path:    path,
 			Version: version,
 			Content: "filecontent",

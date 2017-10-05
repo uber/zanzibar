@@ -132,13 +132,13 @@ type ThriftMethod struct {
 type ThriftMeta struct {
 	// relative path under thrift root directory.
 	Path string `json:"path"`
-	// commited version
+	// committed version
 	Version string `json:"version"`
 	// content of the thrift file
 	Content string `json:"content,omitempty"`
 }
 
-// ProtocolType represents tranportation protocal type.
+// ProtocolType represents tranportation protocol type.
 type ProtocolType string
 
 const (

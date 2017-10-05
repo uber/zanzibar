@@ -197,7 +197,7 @@ func (m *Manager) UpdateThriftFiles(r *Repository, paths []string) error {
 func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientConfig) error {
 	for i := range req {
 		thrift := req[i].ThriftFile
-		// Adds non-exsiting file into the repository.
+		// Adds non-existing file into the repository.
 		version, versionErr := r.ThriftFileVersion(thrift)
 		if versionErr != nil {
 			if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {
@@ -215,7 +215,7 @@ func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []Client
 func (m *Manager) UpdateEndpoints(r *Repository, endpointCfgDir string, req []EndpointConfig) error {
 	for i := range req {
 		thrift := req[i].ThriftFile
-		// Adds non-exsiting file into the repository.
+		// Adds non-existing file into the repository.
 		version, versionErr := r.ThriftFileVersion(thrift)
 		if versionErr != nil {
 			if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {

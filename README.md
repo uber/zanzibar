@@ -1,4 +1,4 @@
-## zanzibar [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov]
+## zanzibar [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov] [![Go Report Card][go-report-img]][go-report]
 
 A build system & runtime component to generate configuration driven gateways.
 
@@ -85,6 +85,8 @@ If you want to update a dependency:
 [ci]: https://travis-ci.org/uber/zanzibar
 [cov-img]: https://coveralls.io/repos/github/uber/zanzibar/badge.svg?branch=master
 [cov]: https://coveralls.io/github/uber/zanzibar?branch=master
+[go-report-img]: https://goreportcard.com/badge/github.com/uber/zanzibar
+[go-report]: https://goreportcard.com/report/github.com/uber/zanzibar
 
 ## Update golden files
 

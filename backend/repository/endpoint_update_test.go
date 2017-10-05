@@ -91,7 +91,6 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	testlib.CompareGoldenFile(t, endpointGroupExpFile, endpointGroupCfg)
 }
 
-
 func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
 	tempDir, err := copyExample("")
 	t.Logf("Temp dir is created at %s\n", tempDir)
@@ -106,5 +105,3 @@ func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
 		testUpdateEndpointConfig(t, tempDir, filepath.Join(endpointUpdateRequestDir, file))
 	}
 }
-
-
