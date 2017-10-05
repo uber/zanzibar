@@ -43,7 +43,7 @@ type {{$handlerName}} struct {
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	h.endpoint = g.TChannelRouter.Register(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		h,
+		h, nil, nil,
 	)
 	// TODO: Register should return an error for route conflicts
 	return nil

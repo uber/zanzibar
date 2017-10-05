@@ -103,7 +103,7 @@ func (backend *TestTChannelBackend) Register(
 	endpointID, handlerID, method string,
 	handler zanzibar.TChannelHandler,
 ) {
-	backend.Router.Register(endpointID, handlerID, method, handler)
+	backend.Router.Register(endpointID, handlerID, method, handler, nil, nil)
 }
 
 // Close closes the underlying channel

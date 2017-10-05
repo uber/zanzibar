@@ -109,7 +109,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Equal(t, "info", tags["level"])
 	assert.Equal(t, "Finished an incoming server TChannel request", tags["msg"])
 	assert.Equal(t, "bazTChannel", tags["endpointID"])
-	assert.Equal(t, "bazTChannel", tags["handlerID"])
+	assert.Equal(t, "call", tags["handlerID"])
 	assert.Equal(t, "SimpleService::Call", tags["method"])
 	assert.Equal(t, "token", tags["Request-Header-x-token"])
 	assert.Equal(t, "uuid", tags["Request-Header-x-uuid"])
