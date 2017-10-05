@@ -8,6 +8,9 @@ COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
+JSON_FILES := $(shell \
+	find . '(' -path '*/.*' -o -path './vendor' -o -path './node_modules' -o -path './benchmarks' ')' -prune -o -name '*.json' -print | cut -b3-)
+
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "config/" -e "codegen/templates/" -e "codegen/template_bundle/"
 
 # list all executables
@@ -31,6 +34,11 @@ check-licence:
 	@echo "Checking uber-licence..."
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
+
+.PHONY: format-json
+format-json:
+	@echo "Formatting *.json"
+	@$(foreach jf,$(JSON_FILES),jq . $(jf) | awk 'BEGIN{RS="";getline<"-";print>ARGV[1]}' $(jf);)
 
 .PHONY: fix-licence
 fix-licence:
