@@ -69,24 +69,24 @@ for config_file in ${config_files}; do
 	if [[ $config_file == "./vendor"* ]]; then
 		continue
 	fi
-    module_type=$(jq -r .type ${config_file})
-    [[ ${module_type} != "http" ]] && continue
-    dir=$(dirname ${config_file})
-    json_files=$(find ${dir} -name "*.json")
-    for json_file in ${json_files}; do
-        thrift_file=$(jq -r '.. | .thriftFile? | select(type != "null")' ${json_file})
-        [[ -z ${thrift_file} ]] && continue
-        [[ ${found_thrifts} == *${thrift_file}* ]] && continue
-        found_thrifts+=" $thrift_file"
+	module_type=$(jq -r .type ${config_file})
+	[[ ${module_type} != "http" ]] && continue
+	dir=$(dirname ${config_file})
+	json_files=$(find ${dir} -name "*.json")
+	for json_file in ${json_files}; do
+		thrift_file=$(jq -r '.. | .thriftFile? | select(type != "null")' ${json_file})
+		[[ -z ${thrift_file} ]] && continue
+		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
+		found_thrifts+=" $thrift_file"
 
-        thrift_file="$CONFIG_DIR/idl/$thrift_file"
-        gen_code_dir=$(
-            "$RESOLVE_THRIFT_BINARY" $thrift_file | \
-            sed "s|.*idl\/\(.*\)\/.*.thrift|$BUILD_DIR/gen-code/\1|" | \
-            sort | uniq | xargs
-        )
-        target_dirs+=" $gen_code_dir"
-    done
+		thrift_file="$CONFIG_DIR/idl/$thrift_file"
+		gen_code_dir=$(
+			"$RESOLVE_THRIFT_BINARY" $thrift_file | \
+			sed "s|.*idl\/\(.*\)\/.*.thrift|$BUILD_DIR/gen-code/\1|" | \
+			sort | uniq | xargs
+		)
+		target_dirs+=" $gen_code_dir"
+	done
 done
 target_dirs=$(echo ${target_dirs} | tr ' ' '\n' | sort | uniq)
 
