@@ -72,7 +72,7 @@ func TestCallMetrics(t *testing.T) {
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
-	numMetrics := 17
+	numMetrics := 18
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()

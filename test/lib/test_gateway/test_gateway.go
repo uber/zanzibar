@@ -107,6 +107,9 @@ type Options struct {
 	KnownHTTPBackends     []string
 	KnownTChannelBackends []string
 	CountMetrics          bool
+	// If MaxMetrics is set we only collect the first N metrics upto
+	// the max metrics amount.
+	MaxMetrics            int
 	EnableRuntimeMetrics  bool
 	JaegerDisable         bool
 	JaegerFlushMillis     int64
@@ -127,6 +130,7 @@ func (gateway *ChildProcessGateway) setupMetrics(
 		false, countMetrics, m3.Compact,
 	)
 	gateway.M3Service = gateway.m3Server.Service
+	gateway.M3Service.MaxMetrics = opts.MaxMetrics
 	go gateway.m3Server.Serve()
 }
 

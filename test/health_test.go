@@ -112,7 +112,7 @@ func TestHealthMetrics(t *testing.T) {
 	defer gateway.Close()
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
-	numMetrics := 4
+	numMetrics := 5
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
 	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
@@ -124,7 +124,7 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 4 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 5 metrics")
 	names := []string{
 		"inbound.calls.latency",
 		"inbound.calls.recvd",
@@ -137,10 +137,18 @@ func TestHealthMetrics(t *testing.T) {
 		"endpoint": "health",
 		"handler":  "health",
 	}
+	defaultTags := map[string]string{
+		"env":     "test",
+		"service": "test-gateway",
+	}
+
 	for _, name := range names {
 		key := tally.KeyForPrefixedStringMap(name, tags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
+
+	loggedKey := tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)
+	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", tags)]
 	value := *latencyMetric.MetricValue.Timer.I64Value
@@ -158,12 +166,17 @@ func TestHealthMetrics(t *testing.T) {
 	statusMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.200", tags)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
+	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
+	value = *loggedMetrics.MetricValue.Count.I64Value
+	assert.Equal(t, int64(2), value, "expected counter to be 2")
 }
 
 func TestRuntimeMetrics(t *testing.T) {
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		CountMetrics:         true,
 		EnableRuntimeMetrics: true,
+		MaxMetrics:           31,
 		TestBinary:           util.DefaultMainFile("example-gateway"),
 		ConfigFiles:          util.DefaultConfigFiles("example-gateway"),
 	})
@@ -174,13 +187,13 @@ func TestRuntimeMetrics(t *testing.T) {
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
-	// Expect 30 runtime metrics
-	numMetrics := 30
+	// Expect 30 runtime metrics + 1 logged metric
+	numMetrics := 31
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 30 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 31 metrics")
 	names := []string{
 		"per-worker.runtime.cpu.cgoCalls",
 		"per-worker.runtime.cpu.count",
