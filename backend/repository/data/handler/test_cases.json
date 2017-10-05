@@ -539,6 +539,7 @@
 						"Path": "clients/corge/corge.thrift"
 					}
 				},
+				"clients/foo/base/base.thrift": {},
 				"clients/foo/foo.thrift": {},
 				"clients/googlenow/googlenow.thrift": {
 					"GoogleNowService": {
@@ -644,6 +645,7 @@
 						"Path": "endpoints/contacts/contacts.thrift"
 					}
 				},
+				"endpoints/foo/base/base.thrift": {},
 				"endpoints/foo/foo.thrift": {},
 				"endpoints/googlenow/googlenow.thrift": {
 					"GoogleNow": {
@@ -2824,6 +2826,7 @@
 								"Path": "clients/corge/corge.thrift"
 							}
 						},
+						"clients/foo/base/base.thrift": {},
 						"clients/foo/foo.thrift": {},
 						"clients/googlenow/googlenow.thrift": {
 							"GoogleNowService": {
@@ -2929,6 +2932,7 @@
 								"Path": "endpoints/contacts/contacts.thrift"
 							}
 						},
+						"endpoints/foo/base/base.thrift": {},
 						"endpoints/foo/foo.thrift": {},
 						"endpoints/googlenow/googlenow.thrift": {
 							"GoogleNow": {
@@ -3636,6 +3640,7 @@
 							"Path": "clients/corge/corge.thrift"
 						}
 					},
+					"clients/foo/base/base.thrift": {},
 					"clients/foo/foo.thrift": {},
 					"clients/googlenow/googlenow.thrift": {
 						"GoogleNowService": {
@@ -3741,6 +3746,7 @@
 							"Path": "endpoints/contacts/contacts.thrift"
 						}
 					},
+					"endpoints/foo/base/base.thrift": {},
 					"endpoints/foo/foo.thrift": {},
 					"endpoints/googlenow/googlenow.thrift": {
 						"GoogleNow": {

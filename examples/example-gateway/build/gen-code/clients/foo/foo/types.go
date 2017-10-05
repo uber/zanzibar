@@ -6,6 +6,7 @@ package foo
 import (
 	"errors"
 	"fmt"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	"go.uber.org/thriftrw/wire"
 	"strings"
 )
@@ -143,6 +144,7 @@ type FooStruct struct {
 	FooDouble *float64          `json:"fooDouble,omitempty"`
 	FooBool   *bool             `json:"fooBool,omitempty"`
 	FooMap    map[string]string `json:"fooMap,omitempty"`
+	Message   *base.Message     `json:"message,omitempty"`
 }
 
 type _Map_String_String_MapItemList map[string]string
@@ -197,7 +199,7 @@ func (_Map_String_String_MapItemList) Close() {}
 //   }
 func (v *FooStruct) ToWire() (wire.Value, error) {
 	var (
-		fields [6]wire.Field
+		fields [7]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -249,6 +251,14 @@ func (v *FooStruct) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 6, Value: w}
 		i++
 	}
+	if v.Message != nil {
+		w, err = v.Message.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 7, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -279,6 +289,12 @@ func _Map_String_String_Read(m wire.MapItemList) (map[string]string, error) {
 	})
 	m.Close()
 	return o, err
+}
+
+func _Message_Read(w wire.Value) (*base.Message, error) {
+	var v base.Message
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a FooStruct struct from its Thrift-level
@@ -361,6 +377,14 @@ func (v *FooStruct) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 7:
+			if field.Value.Type() == wire.TStruct {
+				v.Message, err = _Message_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -378,7 +402,7 @@ func (v *FooStruct) String() string {
 		return "<nil>"
 	}
 
-	var fields [6]string
+	var fields [7]string
 	i := 0
 	fields[i] = fmt.Sprintf("FooString: %v", v.FooString)
 	i++
@@ -400,6 +424,10 @@ func (v *FooStruct) String() string {
 	}
 	if v.FooMap != nil {
 		fields[i] = fmt.Sprintf("FooMap: %v", v.FooMap)
+		i++
+	}
+	if v.Message != nil {
+		fields[i] = fmt.Sprintf("Message: %v", v.Message)
 		i++
 	}
 
@@ -484,6 +512,9 @@ func (v *FooStruct) Equals(rhs *FooStruct) bool {
 		return false
 	}
 	if !((v.FooMap == nil && rhs.FooMap == nil) || (v.FooMap != nil && rhs.FooMap != nil && _Map_String_String_Equals(v.FooMap, rhs.FooMap))) {
+		return false
+	}
+	if !((v.Message == nil && rhs.Message == nil) || (v.Message != nil && rhs.Message != nil && v.Message.Equals(rhs.Message))) {
 		return false
 	}
 

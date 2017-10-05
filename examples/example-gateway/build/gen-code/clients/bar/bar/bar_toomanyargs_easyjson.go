@@ -11,6 +11,7 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 )
 
@@ -528,6 +529,16 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				}
 				in.Delim('}')
 			}
+		case "message":
+			if in.IsNull() {
+				in.Skip()
+				out.Message = nil
+			} else {
+				if out.Message == nil {
+					out.Message = new(base.Message)
+				}
+				easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(in, &*out.Message)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -622,6 +633,66 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			out.RawByte('}')
 		}
 	}
+	if in.Message != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"message\":")
+		if in.Message == nil {
+			out.RawString("null")
+		} else {
+			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(out, *in.Message)
+		}
+	}
+	out.RawByte('}')
+}
+func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(in *jlexer.Lexer, out *base.Message) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var BodySet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "body":
+			out.Body = string(in.String())
+			BodySet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !BodySet {
+		in.AddError(fmt.Errorf("key 'body' is required"))
+	}
+}
+func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsFooBaseBase(out *jwriter.Writer, in base.Message) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"body\":")
+	out.String(string(in.Body))
 	out.RawByte('}')
 }
 func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(in *jlexer.Lexer, out *BarRequest) {

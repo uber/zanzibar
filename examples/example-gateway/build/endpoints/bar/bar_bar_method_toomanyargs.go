@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
@@ -196,6 +197,12 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 		out.Foo.FooMap = make(map[string]string, len(in.Foo.FooMap))
 		for key, value := range in.Foo.FooMap {
 			out.Foo.FooMap[key] = string(value)
+		}
+		if in.Foo.Message != nil {
+			out.Foo.Message = &clientsFooBaseBase.Message{}
+			out.Foo.Message.Body = string(in.Foo.Message.Body)
+		} else {
+			out.Foo.Message = nil
 		}
 	} else {
 		out.Foo = nil

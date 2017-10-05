@@ -18,7 +18,8 @@ EASY_JSON_RAW_DIR="$DIRNAME/../../scripts/easy_json"
 EASY_JSON_DIR="`cd "${EASY_JSON_RAW_DIR}";pwd`"
 EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
-
+RESOLVE_THRIFT_FILE="$DIRNAME/../../scripts/resolve_thrift/main.go"
+RESOLVE_THRIFT_BINARY="$DIRNAME/../../scripts/resolve_thrift/resolve_thrift"
 
 if [ -d "$DIRNAME/../../vendor" ]; then
 	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
@@ -58,9 +59,37 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Compiled easyjson : +$runtime"
 
+go build -o $RESOLVE_THRIFT_BINARY $RESOLVE_THRIFT_FILE
+
+# find the modules that actually need JSON (un)marshallers
+target_dirs=""
+found_thrifts=""
+config_files=$(find ${CONFIG_DIR} -name "*-config.json" | sort)
+for config_file in ${config_files}; do
+    module_type=$(jq -r .type ${config_file})
+    [[ ${module_type} != "http" ]] && continue
+    dir=$(dirname ${config_file})
+    json_files=$(find ${dir} -name "*.json")
+    for json_file in ${json_files}; do
+        thrift_file=$(jq -r '.. | .thriftFile? | select(type != "null")' ${json_file})
+        [[ -z ${thrift_file} ]] && continue
+        [[ ${found_thrifts} == *${thrift_file}* ]] && continue
+        found_thrifts+=" $thrift_file"
+
+        thrift_file="$CONFIG_DIR/idl/$thrift_file"
+        gen_code_dir=$(
+            "$RESOLVE_THRIFT_BINARY" $thrift_file | \
+            sed "s|.*idl\/\(.*\)\/.*.thrift|$BUILD_DIR/gen-code/\1|" | \
+            sort | uniq | xargs
+        )
+        target_dirs+=" $gen_code_dir"
+    done
+done
+target_dirs=$(echo ${target_dirs} | tr ' ' '\n' | sort | uniq)
+
 echo "Generating JSON Marshal/Unmarshal"
 thriftrw_gofiles=(
-	$(find "$BUILD_DIR/gen-code" -name "*.go" | \
+	$(find ${target_dirs} -name "*.go" | \
 		grep -v "versioncheck.go" | \
 		grep -v "easyjson.go" | sort)
 )

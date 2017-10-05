@@ -6,12 +6,16 @@
 	"GoThriftTypesFilePath": "",
 	"IncludedPackages": [
 		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar",
+			"AliasName": "clientsBarBar"
+		},
+		{
 			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo",
 			"AliasName": "clientsFooFoo"
 		},
 		{
-			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar",
-			"AliasName": "clientsBarBar"
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base",
+			"AliasName": "clientsFooBaseBase"
 		}
 	],
 	"Services": [
