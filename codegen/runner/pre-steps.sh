@@ -66,6 +66,9 @@ target_dirs=""
 found_thrifts=""
 config_files=$(find ${CONFIG_DIR} -name "*-config.json" | sort)
 for config_file in ${config_files}; do
+	if [[ $config_file == "./vendor"* ]]; then
+		continue
+	fi
     module_type=$(jq -r .type ${config_file})
     [[ ${module_type} != "http" ]] && continue
     dir=$(dirname ${config_file})
