@@ -100,7 +100,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Logger.Warn("Handler returned error", zap.Error(err))
+			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = r

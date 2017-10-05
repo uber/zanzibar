@@ -110,7 +110,7 @@ func (s *TChannelRouter) RegisterWithPostResponseCB(
 ) *TChannelEndpoint {
 	logger := s.logger.With(
 		zap.String("endpointID", endpointID),
-		zap.String("handlerID", endpointID),
+		zap.String("handlerID", handlerID),
 		zap.String("method", method),
 	)
 	scope := s.scope.Tagged(map[string]string{
