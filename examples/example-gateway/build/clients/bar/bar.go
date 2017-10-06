@@ -32,6 +32,7 @@ import (
 
 	"github.com/pkg/errors"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -958,7 +959,7 @@ func (c *barClient) TooManyArgs(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403})
+	res.CheckOKResponse([]int{200, 403, 418})
 
 	switch res.StatusCode {
 	case 200:
@@ -973,6 +974,14 @@ func (c *barClient) TooManyArgs(
 
 	case 403:
 		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return defaultRes, respHeaders, &exception
+
+	case 418:
+		var exception clientsFooFoo.FooException
 		err = res.ReadAndUnmarshalBody(&exception)
 		if err != nil {
 			return defaultRes, respHeaders, err

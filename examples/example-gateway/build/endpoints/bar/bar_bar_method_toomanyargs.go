@@ -33,6 +33,7 @@ import (
 	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -97,6 +98,12 @@ func (handler *BarTooManyArgsHandler) HandleRequest(
 			)
 			return
 
+		case *endpointsFooFoo.FooException:
+			res.WriteJSON(
+				418, cliRespHeaders, errValue,
+			)
+			return
+
 		default:
 			req.Logger.Warn("Workflow for endpoint returned error",
 				zap.String("error", errValue.Error()),
@@ -148,6 +155,14 @@ func (w TooManyArgsEndpoint) Handle(
 
 		case *clientsBarBar.BarException:
 			serverErr := convertTooManyArgsBarException(
+				errValue,
+			)
+			// TODO(sindelar): Consider returning partial headers
+
+			return nil, nil, serverErr
+
+		case *clientsFooFoo.FooException:
+			serverErr := convertTooManyArgsFooException(
 				errValue,
 			)
 			// TODO(sindelar): Consider returning partial headers
@@ -216,6 +231,13 @@ func convertTooManyArgsBarException(
 ) *endpointsBarBar.BarException {
 	// TODO: Add error fields mapping here.
 	serverError := &endpointsBarBar.BarException{}
+	return serverError
+}
+func convertTooManyArgsFooException(
+	clientError *clientsFooFoo.FooException,
+) *endpointsFooFoo.FooException {
+	// TODO: Add error fields mapping here.
+	serverError := &endpointsFooFoo.FooException{}
 	return serverError
 }
 
