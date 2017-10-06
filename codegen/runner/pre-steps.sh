@@ -68,7 +68,7 @@ target_dirs=""
 found_thrifts=""
 config_files=$(find ${CONFIG_DIR} -name "*-config.json" | sort)
 for config_file in ${config_files}; do
-	if [[ $config_file == "./vendor"* ]]; then
+	if [[ ${config_file} == "./vendor"* ]]; then
 		continue
 	fi
 	module_type=$(jq -r .type ${config_file})
@@ -83,8 +83,8 @@ for config_file in ${config_files}; do
 
 		thrift_file="$CONFIG_DIR/idl/$thrift_file"
 		gen_code_dir=$(
-			"$RESOLVE_THRIFT_BINARY" $thrift_file | \
-			sed "s|.*idl\/\(.*\)\/.*.thrift|$BUILD_DIR/gen-code/\1|" | \
+			"$RESOLVE_THRIFT_BINARY" ${thrift_file} | \
+			sed "s|${ABS_IDL_DIR}\/\(.*\)\/.*.thrift|${ABS_GENCODE_DIR}/\1|" | \
 			sort | uniq | xargs
 		)
 		target_dirs+=" $gen_code_dir"
