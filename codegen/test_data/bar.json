@@ -917,6 +917,17 @@
 								"Code": 403,
 								"Message": "barException"
 							}
+						},
+						{
+							"Type": "clientsFooFoo.FooException",
+							"Name": "fooException",
+							"Annotations": {
+								"zanzibar.http.status": "418"
+							},
+							"StatusCode": {
+								"Code": 418,
+								"Message": "fooException"
+							}
 						}
 					],
 					"ExceptionsIndex": {
@@ -930,11 +941,23 @@
 								"Code": 403,
 								"Message": "barException"
 							}
+						},
+						"fooException": {
+							"Type": "clientsFooFoo.FooException",
+							"Name": "fooException",
+							"Annotations": {
+								"zanzibar.http.status": "418"
+							},
+							"StatusCode": {
+								"Code": 418,
+								"Message": "fooException"
+							}
 						}
 					},
 					"ValidStatusCodes": [
 						200,
-						403
+						403,
+						418
 					],
 					"RequestBoxed": false,
 					"ThriftService": "Bar",

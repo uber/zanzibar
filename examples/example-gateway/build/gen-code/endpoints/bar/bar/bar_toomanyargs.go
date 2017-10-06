@@ -229,6 +229,8 @@ func init() {
 		switch err.(type) {
 		case *BarException:
 			return true
+		case *foo.FooException:
+			return true
 		default:
 			return false
 		}
@@ -245,6 +247,11 @@ func init() {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for Bar_TooManyArgs_Result.BarException")
 			}
 			return &Bar_TooManyArgs_Result{BarException: e}, nil
+		case *foo.FooException:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for Bar_TooManyArgs_Result.FooException")
+			}
+			return &Bar_TooManyArgs_Result{FooException: e}, nil
 		}
 
 		return nil, err
@@ -252,6 +259,10 @@ func init() {
 	Bar_TooManyArgs_Helper.UnwrapResponse = func(result *Bar_TooManyArgs_Result) (success *BarResponse, err error) {
 		if result.BarException != nil {
 			err = result.BarException
+			return
+		}
+		if result.FooException != nil {
+			err = result.FooException
 			return
 		}
 
@@ -273,8 +284,9 @@ func init() {
 // Success is set only if the function did not throw an exception.
 type Bar_TooManyArgs_Result struct {
 	// Value returned by tooManyArgs after a successful execution.
-	Success      *BarResponse  `json:"success,omitempty"`
-	BarException *BarException `json:"barException,omitempty"`
+	Success      *BarResponse      `json:"success,omitempty"`
+	BarException *BarException     `json:"barException,omitempty"`
+	FooException *foo.FooException `json:"fooException,omitempty"`
 }
 
 // ToWire translates a Bar_TooManyArgs_Result struct into a Thrift-level intermediate
@@ -294,7 +306,7 @@ type Bar_TooManyArgs_Result struct {
 //   }
 func (v *Bar_TooManyArgs_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -316,12 +328,26 @@ func (v *Bar_TooManyArgs_Result) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 1, Value: w}
 		i++
 	}
+	if v.FooException != nil {
+		w, err = v.FooException.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 
 	if i != 1 {
 		return wire.Value{}, fmt.Errorf("Bar_TooManyArgs_Result should have exactly one field: got %v fields", i)
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _FooException_Read(w wire.Value) (*foo.FooException, error) {
+	var v foo.FooException
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a Bar_TooManyArgs_Result struct from its Thrift-level
@@ -362,6 +388,14 @@ func (v *Bar_TooManyArgs_Result) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.FooException, err = _FooException_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -370,6 +404,9 @@ func (v *Bar_TooManyArgs_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if v.BarException != nil {
+		count++
+	}
+	if v.FooException != nil {
 		count++
 	}
 	if count != 1 {
@@ -386,7 +423,7 @@ func (v *Bar_TooManyArgs_Result) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	if v.Success != nil {
 		fields[i] = fmt.Sprintf("Success: %v", v.Success)
@@ -394,6 +431,10 @@ func (v *Bar_TooManyArgs_Result) String() string {
 	}
 	if v.BarException != nil {
 		fields[i] = fmt.Sprintf("BarException: %v", v.BarException)
+		i++
+	}
+	if v.FooException != nil {
+		fields[i] = fmt.Sprintf("FooException: %v", v.FooException)
 		i++
 	}
 
@@ -409,6 +450,9 @@ func (v *Bar_TooManyArgs_Result) Equals(rhs *Bar_TooManyArgs_Result) bool {
 		return false
 	}
 	if !((v.BarException == nil && rhs.BarException == nil) || (v.BarException != nil && rhs.BarException != nil && v.BarException.Equals(rhs.BarException))) {
+		return false
+	}
+	if !((v.FooException == nil && rhs.FooException == nil) || (v.FooException != nil && rhs.FooException != nil && v.FooException.Equals(rhs.FooException))) {
 		return false
 	}
 

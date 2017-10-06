@@ -11,6 +11,116 @@ import (
 	"strings"
 )
 
+type FooException struct {
+	Teapot string `json:"teapot,required"`
+}
+
+// ToWire translates a FooException struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *FooException) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Teapot), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a FooException struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a FooException struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v FooException
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *FooException) FromWire(w wire.Value) error {
+	var err error
+
+	teapotIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Teapot, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				teapotIsSet = true
+			}
+		}
+	}
+
+	if !teapotIsSet {
+		return errors.New("field Teapot of FooException is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a FooException
+// struct.
+func (v *FooException) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Teapot: %v", v.Teapot)
+	i++
+
+	return fmt.Sprintf("FooException{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this FooException match the
+// provided FooException.
+//
+// This function performs a deep comparison.
+func (v *FooException) Equals(rhs *FooException) bool {
+	if !(v.Teapot == rhs.Teapot) {
+		return false
+	}
+
+	return true
+}
+
+func (v *FooException) Error() string {
+	return v.String()
+}
+
 type FooName struct {
 	Name *string `json:"name,omitempty"`
 }

@@ -104,6 +104,7 @@ service Bar {
         2: optional foo.FooStruct foo
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
+        2: foo.FooException fooException (zanzibar.http.status = "418")
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/too-many-args-path"
