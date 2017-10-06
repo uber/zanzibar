@@ -41,9 +41,16 @@ func NewSimpleServiceCallHandler(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServiceCallHandler {
-	return &SimpleServiceCallHandler{
+	handler := &SimpleServiceCallHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewTChannelEndpoint(
+		gateway.Logger, gateway.AllHostScope,
+		"bazTChannel", "call", "SimpleService::Call",
+		handler,
+	)
+	return handler
+
 }
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".
@@ -54,10 +61,7 @@ type SimpleServiceCallHandler struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	h.endpoint = g.TChannelRouter.Register(
-		"bazTChannel", "call", "SimpleService::Call",
-		h,
-	)
+	g.TChannelRouter.Register(h.endpoint)
 	// TODO: Register should return an error for route conflicts
 	return nil
 }

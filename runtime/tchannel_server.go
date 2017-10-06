@@ -45,13 +45,14 @@ type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 // TChannelEndpoint handles tchannel requests
 type TChannelEndpoint struct {
-	EndpointID     string
-	HandlerID      string
-	Method         string
-	handler        TChannelHandler
-	postResponseCB PostResponseCB
-	Logger         *zap.Logger
-	metrics        *InboundTChannelMetrics
+	EndpointID string
+	HandlerID  string
+	Method     string
+	handler    TChannelHandler
+	callback   PostResponseCB
+	Logger     *zap.Logger
+	Scope      tally.Scope
+	metrics    *InboundTChannelMetrics
 }
 
 type tchannelInboundCall struct {
@@ -71,7 +72,6 @@ type TChannelRouter struct {
 	registrar tchannel.Registrar
 	endpoints map[string]*TChannelEndpoint
 	logger    *zap.Logger
-	scope     tally.Scope
 }
 
 // netContextRouter implements the Handler interface that consumes netContext instead of stdlib context
@@ -83,55 +83,63 @@ func (ncr netContextRouter) Handle(ctx netContext.Context, call *tchannel.Inboun
 	ncr.router.Handle(ctx, call)
 }
 
+// NewTChannelEndpoint creates a new tchannel endpoint to handle an incoming
+// call for its method.
+func NewTChannelEndpoint(
+	logger *zap.Logger,
+	scope tally.Scope,
+	endpointID, handlerID, method string,
+	handler TChannelHandler,
+) *TChannelEndpoint {
+	return NewTChannelEndpointWithPostResponseCB(
+		logger, scope,
+		endpointID, handlerID, method,
+		handler, nil,
+	)
+}
+
+// NewTChannelEndpointWithPostResponseCB creates a new tchannel endpoint,
+// with or without a post response callback function.
+func NewTChannelEndpointWithPostResponseCB(
+	logger *zap.Logger,
+	scope tally.Scope,
+	endpointID, handlerID, method string,
+	handler TChannelHandler,
+	callback PostResponseCB,
+) *TChannelEndpoint {
+	logger = logger.With(
+		zap.String("endpointID", endpointID),
+		zap.String("handlerID", handlerID),
+		zap.String("method", method),
+	)
+	scope = scope.Tagged(map[string]string{
+		"endpoint": endpointID,
+		"handler":  handlerID,
+		"method":   method,
+	})
+	return &TChannelEndpoint{
+		EndpointID: endpointID,
+		HandlerID:  handlerID,
+		Method:     method,
+		handler:    handler,
+		callback:   callback,
+		Logger:     logger,
+		Scope:      scope,
+		metrics:    NewInboundTChannelMetrics(scope),
+	}
+}
+
 // NewTChannelRouter returns a TChannel router that can serve thrift services over TChannel.
 func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter {
 	return &TChannelRouter{
 		registrar: registrar,
 		endpoints: map[string]*TChannelEndpoint{},
 		logger:    g.Logger,
-		scope:     g.AllHostScope,
 	}
 }
 
-// Register registers the given TChannelHandler to be called on an incoming call for its method.
-// "service" is the thrift service name as in the thrift definition.
-func (s *TChannelRouter) Register(
-	endpointID, handlerID, method string,
-	h TChannelHandler,
-) *TChannelEndpoint {
-	return s.RegisterWithPostResponseCB(endpointID, handlerID, method, h, nil)
-}
-
-// RegisterWithPostResponseCB registers the given TChannelHandler with a PostResponseCB function
-func (s *TChannelRouter) RegisterWithPostResponseCB(
-	endpointID, handlerID, method string,
-	h TChannelHandler,
-	cb PostResponseCB,
-) *TChannelEndpoint {
-	logger := s.logger.With(
-		zap.String("endpointID", endpointID),
-		zap.String("handlerID", endpointID),
-		zap.String("method", method),
-	)
-	scope := s.scope.Tagged(map[string]string{
-		"endpoint": endpointID,
-		"handler":  handlerID,
-		"method":   method,
-	})
-	endpoint := TChannelEndpoint{
-		EndpointID:     endpointID,
-		HandlerID:      handlerID,
-		Method:         method,
-		handler:        h,
-		postResponseCB: cb,
-		Logger:         logger,
-		metrics:        NewInboundTChannelMetrics(scope),
-	}
-	s.register(&endpoint)
-	return &endpoint
-}
-
-func (s *TChannelRouter) register(e *TChannelEndpoint) {
+// Register registers the given TChannelEndpoint.
+func (s *TChannelRouter) Register(e *TChannelEndpoint) {
 	s.Lock()
 	s.endpoints[e.Method] = e
 	s.Unlock()
@@ -356,8 +364,8 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 	}
 
 	c.success, resp, c.resHeaders, err = c.endpoint.handler.Handle(ctx, c.reqHeaders, wireValue)
-	if c.endpoint.postResponseCB != nil {
-		defer c.endpoint.postResponseCB(ctx, c.endpoint.Method, resp)
+	if c.endpoint.callback != nil {
+		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}
 	if err != nil {
 		LogErrorWarnTimeout(c.endpoint.Logger, err, "Unexpected tchannel system error")

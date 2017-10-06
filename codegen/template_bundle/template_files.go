@@ -1851,9 +1851,16 @@ func New{{$handlerName}}(
 	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
-	return &{{$handlerName}}{
+	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewTChannelEndpoint(
+		gateway.Logger, gateway.AllHostScope,
+		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
+		handler,
+	)
+	return handler
+
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
@@ -1864,10 +1871,7 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	h.endpoint = g.TChannelRouter.Register(
-		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		h,
-	)
+	g.TChannelRouter.Register(h.endpoint)
 	// TODO: Register should return an error for route conflicts
 	return nil
 }
@@ -1923,7 +1927,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Logger.Warn("Handler returned error", zap.Error(err))
+			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = r
@@ -1982,7 +1986,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4499, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4623, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
