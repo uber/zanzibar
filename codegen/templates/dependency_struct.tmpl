@@ -6,14 +6,24 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{end -}}
-	{{end -}}
+	{{end}}
+
+	"github.com/uber-go/tally"
+	"go.uber.org/zap"
 )
 
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
+	Default *DefaultDependencies
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
 	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}
+}
+
+// DefaultDependencies contains default dependencies, such as logger and scope.
+type DefaultDependencies struct {
+	Logger *zap.Logger
+	Scope  tally.Scope
 }
 
 {{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}

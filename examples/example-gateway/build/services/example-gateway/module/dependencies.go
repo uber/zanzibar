@@ -29,11 +29,21 @@ import (
 	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
+
+	"github.com/uber-go/tally"
+	"go.uber.org/zap"
 )
 
 // Dependencies contains dependencies for the example-gateway service module
 type Dependencies struct {
+	Default  *DefaultDependencies
 	Endpoint *EndpointDependencies
+}
+
+// DefaultDependencies contains default dependencies, such as logger and scope.
+type DefaultDependencies struct {
+	Logger *zap.Logger
+	Scope  tally.Scope
 }
 
 // EndpointDependencies contains endpoint dependencies

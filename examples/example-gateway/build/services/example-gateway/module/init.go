@@ -38,6 +38,7 @@ import (
 	googlenowEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+
 	"github.com/uber/zanzibar/runtime"
 )
 
@@ -70,6 +71,7 @@ func InitializeDependencies(
 	gateway *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
 	tree := &DependenciesTree{}
+
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
 	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
@@ -80,32 +82,56 @@ func InitializeDependencies(
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
+		Default: &barEndpointModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
+		Default: &bazEndpointModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
 	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(gateway, &baztchannelEndpointModule.Dependencies{
+		Default: &baztchannelEndpointModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Client: &baztchannelEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
 	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(gateway, &contactsEndpointModule.Dependencies{
+		Default: &contactsEndpointModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
 	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
+		Default: &googlenowEndpointModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
 
 	return tree, &Dependencies{
+		Default: &DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		Endpoint: &EndpointDependencies{
 			Bar:         initializedEndpointDependencies.Bar,
 			Baz:         initializedEndpointDependencies.Baz,

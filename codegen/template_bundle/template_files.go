@@ -66,14 +66,24 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{end -}}
-	{{end -}}
+	{{end}}
+
+	"github.com/uber-go/tally"
+	"go.uber.org/zap"
 )
 
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
+	Default *DefaultDependencies
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
 	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}
+}
+
+// DefaultDependencies contains default dependencies, such as logger and scope.
+type DefaultDependencies struct {
+	Logger *zap.Logger
+	Scope  tally.Scope
 }
 
 {{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
@@ -97,7 +107,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1097, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1330, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1343,7 +1353,7 @@ import (
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
-	{{end -}}
+	{{end}}
 
 	"github.com/uber/zanzibar/runtime"
 )
@@ -1375,7 +1385,7 @@ func InitializeDependencies(
 	{{- else}}
 	tree := &DependenciesTree{}
 
-	{{- range $idx, $className := $instance.DependencyOrder}}
+	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
 	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
@@ -1383,6 +1393,10 @@ func InitializeDependencies(
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- if $dependency.HasDependencies}}
 	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+		Default: &{{$dependency.PackageInfo.ModulePackageAlias}}.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1398,6 +1412,10 @@ func InitializeDependencies(
 	{{end}}
 
 	return tree, &Dependencies{
+		Default: &DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1420,7 +1438,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3350, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3589, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
