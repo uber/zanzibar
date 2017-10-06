@@ -62,6 +62,8 @@ echo "Compiled easyjson : +$runtime"
 go build -o $RESOLVE_THRIFT_BINARY $RESOLVE_THRIFT_FILE
 
 # find the modules that actually need JSON (un)marshallers
+ABS_IDL_DIR="$(cd ${CONFIG_DIR} && pwd)/$(basename "${CONFIG_DIR}/idl")"
+ABS_GENCODE_DIR="$(cd ${BUILD_DIR} && pwd)/$(basename "${BUILD_DIR}/gen-code")"
 target_dirs=""
 found_thrifts=""
 config_files=$(find ${CONFIG_DIR} -name "*-config.json" | sort)

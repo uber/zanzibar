@@ -28,7 +28,12 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
-// Given a thrift file, prints the thrift files that need to have json marshallers
+// Given a thrift file, prints the thrift files that need to have json (un)marshallers
+// The thrift-generated Go structs that need json (un)marshallers are:
+// 1. the wrapper struct that wraps method arguments, generated from given thrift;
+// 2. the argument struct for a method with unwrap annotation, generated from given thrift or its includes;
+// 3. the return struct, generated from given thrift or its includes;
+// 4. the exception struct, generated from given thrift or its includes;
 func main() {
 	thriftFile := os.Args[1]
 	module, err := compile.Compile(thriftFile)
@@ -50,8 +55,27 @@ func main() {
 				}
 
 				argThriftPath := method.ArgsSpec[0].Type.ThriftFile()
-				if argThriftPath != thisThriftPath {
+				if argThriftPath != "" && argThriftPath != thisThriftPath {
 					fmt.Println(argThriftPath)
+				}
+
+			}
+
+			if method.ResultSpec == nil {
+				continue
+			}
+
+			if method.ResultSpec.ReturnType != nil {
+				returnThriftPath := method.ResultSpec.ReturnType.ThriftFile()
+				if returnThriftPath != "" && returnThriftPath != thisThriftPath {
+					fmt.Println(returnThriftPath)
+				}
+			}
+
+			for _, exp := range method.ResultSpec.Exceptions {
+				exceptionThriftPath := exp.Type.ThriftFile()
+				if exceptionThriftPath != thisThriftPath {
+					fmt.Println(exceptionThriftPath)
 				}
 			}
 		}
