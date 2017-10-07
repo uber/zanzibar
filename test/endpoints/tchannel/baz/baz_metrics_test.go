@@ -29,7 +29,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -72,7 +72,7 @@ func TestCallMetrics(t *testing.T) {
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
-	numMetrics := 18
+	numMetrics := 11
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
