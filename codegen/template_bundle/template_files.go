@@ -508,7 +508,6 @@ type Endpoint interface{
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-{{- if $instance.HasDependencies}}
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
@@ -518,17 +517,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		{{- end}}
 	}
 }
-{{- else}}
-func NewEndpoint(g *zanzibar.Gateway) Endpoint {
-	return &EndpointHandlers{
-		{{- range $idx, $meta := $endpointMeta }}
-		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
-		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-		{{$handlerName}}: New{{$handlerName}}(g),
-		{{- end}}
-	}
-}
-{{- end}}
+
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
@@ -565,7 +554,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 2001, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1615, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -880,6 +869,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -917,7 +908,7 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(gateway *zanzibar.Gateway) Client {
+func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
@@ -1126,7 +1117,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6705, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6787, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1349,9 +1340,7 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if $moduleInstance.HasDependencies -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
-	{{end -}}
 	{{end -}}
 	{{end}}
 
@@ -1380,9 +1369,6 @@ type {{$className | title}}DependenciesNodes struct {
 func InitializeDependencies(
 	gateway *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
-	{{- if not $instance.HasDependencies}}
-	return nil, {{$instance.PackageInfo.ExportName}}(gateway)
-	{{- else}}
 	tree := &DependenciesTree{}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -1391,7 +1377,6 @@ func InitializeDependencies(
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
-	{{- if $dependency.HasDependencies}}
 	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
 		Default: &{{$dependency.PackageInfo.ModulePackageAlias}}.DefaultDependencies{
 			Logger: gateway.Logger,
@@ -1405,9 +1390,6 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	})
-	{{- else}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
-	{{- end}}
 	{{- end}}
 	{{end}}
 
@@ -1424,7 +1406,6 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	}
-	{{- end}}
 }
 `)
 
@@ -1438,7 +1419,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3589, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3158, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1563,6 +1544,7 @@ import (
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
 
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -1594,7 +1576,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway) Client {
+func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
@@ -1724,7 +1706,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4843, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4924, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

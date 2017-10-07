@@ -31,9 +31,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/runtime"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
-	"github.com/uber/zanzibar/runtime"
 )
 
 // Client defines bar client interface.
@@ -193,7 +195,7 @@ type barClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway) Client {
+func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	ip := gateway.Config.MustGetString("clients.bar.ip")
 	port := gateway.Config.MustGetInt("clients.bar.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

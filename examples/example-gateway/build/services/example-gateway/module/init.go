@@ -25,9 +25,13 @@ package module
 
 import (
 	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	barClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
+	contactsClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+	googlenowClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -74,10 +78,30 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
-	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway)
-	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway, &barClientModule.Dependencies{
+		Default: &barClientModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
+	})
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway, &bazClientModule.Dependencies{
+		Default: &bazClientModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
+	})
+	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway, &contactsClientModule.Dependencies{
+		Default: &contactsClientModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
+	})
+	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway, &googlenowClientModule.Dependencies{
+		Default: &googlenowClientModule.DefaultDependencies{
+			Logger: gateway.Logger,
+			Scope:  gateway.AllHostScope,
+		},
+	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies

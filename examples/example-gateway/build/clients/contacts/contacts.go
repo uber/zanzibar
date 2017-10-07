@@ -28,8 +28,10 @@ import (
 	"fmt"
 	"time"
 
-	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	"github.com/uber/zanzibar/runtime"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
+	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 )
 
 // Client defines contacts client interface.
@@ -49,7 +51,7 @@ type contactsClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway) Client {
+func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	ip := gateway.Config.MustGetString("clients.contacts.ip")
 	port := gateway.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

@@ -34,6 +34,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
@@ -47,7 +48,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service corge.
-func NewClient(gateway *zanzibar.Gateway) Client {
+func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	serviceName := gateway.Config.MustGetString("clients.corge.serviceName")
 	var routingKey string
 	if gateway.Config.ContainsKey("clients.corge.routingKey") {
