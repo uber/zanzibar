@@ -27,19 +27,20 @@ import (
 
 	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	"go.uber.org/zap"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
 	ex := example.NewMiddleWare(
-		nil, // *zanzibar.Gateway
+		zap.NewNop(),
+		tally.NoopScope,
 		example.Options{
 			Foo: "foo",
 			Bar: 2,
@@ -235,14 +236,16 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
 	ex := example.NewMiddleWare(
-		nil, // nil Gateway
+		zap.NewNop(),
+		tally.NoopScope,
 		example.Options{
 			Foo: "test_state",
 			Bar: 2,
 		},
 	)
 	exReader := exampleReader.NewMiddleWare(
-		nil, // *zanzibar.Gateway
+		zap.NewNop(),
+		tally.NoopScope,
 		exampleReader.Options{
 			Foo: "foo",
 		},

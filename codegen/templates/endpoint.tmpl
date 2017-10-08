@@ -69,12 +69,12 @@ func New{{$handlerName}}(
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			{{$middleware.Name}}.NewMiddleWare(
-				g,
-					{{$middleware.Name}}.Options{
-					{{range $key, $value := $middleware.Options -}}
-							{{$key}} : {{$value}},
-					{{end -}}
-					},
+				g.Logger, g.AllHostScope,
+				{{$middleware.Name}}.Options{
+				{{range $key, $value := $middleware.Options -}}
+					{{$key}} : {{$value}},
+				{{end -}}
+				},
 			),
 			{{end -}}
 		}, handler.HandleRequest).Handle,

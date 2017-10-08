@@ -176,12 +176,12 @@ func New{{$handlerName}}(
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			{{$middleware.Name}}.NewMiddleWare(
-				g,
-					{{$middleware.Name}}.Options{
-					{{range $key, $value := $middleware.Options -}}
-							{{$key}} : {{$value}},
-					{{end -}}
-					},
+				g.Logger, g.AllHostScope,
+				{{$middleware.Name}}.Options{
+				{{range $key, $value := $middleware.Options -}}
+					{{$key}} : {{$value}},
+				{{end -}}
+				},
 			),
 			{{end -}}
 		}, handler.HandleRequest).Handle,
@@ -481,7 +481,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9706, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9723, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

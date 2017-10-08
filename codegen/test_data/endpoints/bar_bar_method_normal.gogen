@@ -57,13 +57,13 @@ func NewBarNormalHandler(
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			example.NewMiddleWare(
-				g,
+				g.Logger, g.AllHostScope,
 				example.Options{
 					Foo: "test",
 				},
 			),
 			logger.NewMiddleWare(
-				g,
+				g.Logger, g.AllHostScope,
 				logger.Options{},
 			),
 		}, handler.HandleRequest).Handle,
