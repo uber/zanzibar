@@ -83,6 +83,14 @@ type Gateway struct {
 	//	- process reporter ?
 }
 
+// DefaultDependencies type
+type DefaultDependencies struct {
+	Logger  *zap.Logger
+	Scope   tally.Scope
+	Config  *StaticConfig
+	Channel *tchannel.Channel
+}
+
 // CreateGateway func
 func CreateGateway(
 	config *StaticConfig, opts *Options,

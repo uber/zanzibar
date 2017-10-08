@@ -26,20 +26,13 @@ package module
 import (
 	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 
-	"github.com/uber-go/tally"
-	"go.uber.org/zap"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the quux client module
 type Dependencies struct {
-	Default *DefaultDependencies
+	Default *zanzibar.DefaultDependencies
 	Client  *ClientDependencies
-}
-
-// DefaultDependencies contains default dependencies, such as logger and scope.
-type DefaultDependencies struct {
-	Logger *zap.Logger
-	Scope  tally.Scope
 }
 
 // ClientDependencies contains client dependencies

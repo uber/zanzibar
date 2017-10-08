@@ -24,17 +24,10 @@
 package module
 
 import (
-	"github.com/uber-go/tally"
-	"go.uber.org/zap"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the contacts client module
 type Dependencies struct {
-	Default *DefaultDependencies
-}
-
-// DefaultDependencies contains default dependencies, such as logger and scope.
-type DefaultDependencies struct {
-	Logger *zap.Logger
-	Scope  tally.Scope
+	Default *zanzibar.DefaultDependencies
 }

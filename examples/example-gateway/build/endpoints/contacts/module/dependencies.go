@@ -26,20 +26,13 @@ package module
 import (
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 
-	"github.com/uber-go/tally"
-	"go.uber.org/zap"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the contacts endpoint module
 type Dependencies struct {
-	Default *DefaultDependencies
+	Default *zanzibar.DefaultDependencies
 	Client  *ClientDependencies
-}
-
-// DefaultDependencies contains default dependencies, such as logger and scope.
-type DefaultDependencies struct {
-	Logger *zap.Logger
-	Scope  tally.Scope
 }
 
 // ClientDependencies contains client dependencies

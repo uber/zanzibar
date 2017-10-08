@@ -30,20 +30,13 @@ import (
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 
-	"github.com/uber-go/tally"
-	"go.uber.org/zap"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the example-gateway service module
 type Dependencies struct {
-	Default  *DefaultDependencies
+	Default  *zanzibar.DefaultDependencies
 	Endpoint *EndpointDependencies
-}
-
-// DefaultDependencies contains default dependencies, such as logger and scope.
-type DefaultDependencies struct {
-	Logger *zap.Logger
-	Scope  tally.Scope
 }
 
 // EndpointDependencies contains endpoint dependencies
