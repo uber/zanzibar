@@ -51,16 +51,16 @@ type contactsClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := gateway.Config.MustGetString("clients.contacts.ip")
-	port := gateway.Config.MustGetInt("clients.contacts.port")
+func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
+	ip := g.Config.MustGetString("clients.contacts.ip")
+	port := g.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
+	timeout := time.Duration(g.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
 
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			g.Logger, g.AllHostScope,
 			"contacts",
 			[]string{
 				"SaveContacts",

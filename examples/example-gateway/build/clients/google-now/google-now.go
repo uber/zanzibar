@@ -55,16 +55,16 @@ type googleNowClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := gateway.Config.MustGetString("clients.google-now.ip")
-	port := gateway.Config.MustGetInt("clients.google-now.port")
+func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
+	ip := g.Config.MustGetString("clients.google-now.ip")
+	port := g.Config.MustGetInt("clients.google-now.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
+	timeout := time.Duration(g.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
 
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			g.Logger, g.AllHostScope,
 			"google-now",
 			[]string{
 				"AddCredentials",

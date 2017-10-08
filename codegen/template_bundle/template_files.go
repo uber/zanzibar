@@ -903,16 +903,16 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+func {{$exportName}}(g *zanzibar.Gateway, deps *module.Dependencies) Client {
+	ip := g.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := g.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	timeout := time.Duration(g.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			g.Logger, g.AllHostScope,
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1112,7 +1112,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6787, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6780, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
