@@ -42,15 +42,12 @@ type SimpleServiceCallHandler struct {
 }
 
 // NewSimpleServiceCallHandler creates a handler
-func NewSimpleServiceCallHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServiceCallHandler {
+func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHandler {
 	handler := &SimpleServiceCallHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"baz", "call",
 		handler.HandleRequest,
 	)

@@ -43,15 +43,12 @@ type BarArgWithQueryHeaderHandler struct {
 }
 
 // NewBarArgWithQueryHeaderHandler creates a handler
-func NewBarArgWithQueryHeaderHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithQueryHeaderHandler {
+func NewBarArgWithQueryHeaderHandler(deps *module.Dependencies) *BarArgWithQueryHeaderHandler {
 	handler := &BarArgWithQueryHeaderHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argWithQueryHeader",
 		handler.HandleRequest,
 	)

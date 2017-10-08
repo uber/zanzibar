@@ -42,15 +42,12 @@ type BarNoRequestHandler struct {
 }
 
 // NewBarNoRequestHandler creates a handler
-func NewBarNoRequestHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarNoRequestHandler {
+func NewBarNoRequestHandler(deps *module.Dependencies) *BarNoRequestHandler {
 	handler := &BarNoRequestHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "noRequest",
 		handler.HandleRequest,
 	)

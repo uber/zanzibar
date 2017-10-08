@@ -49,16 +49,16 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(g *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := g.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := g.Config.MustGetInt("clients.{{$clientID}}.port")
+func {{$exportName}}(deps *module.Dependencies) Client {
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(g.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		httpClient: zanzibar.NewHTTPClient(
-			g.Logger, g.AllHostScope,
+			deps.Default.Logger, deps.Default.Scope,
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}

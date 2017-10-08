@@ -55,21 +55,18 @@ type {{$handlerName}} struct {
 }
 
 // New{{$handlerName}} creates a handler
-func New{{$handlerName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *{{$handlerName}} {
+func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			{{$middleware.Name}}.NewMiddleWare(
-				g.Logger, g.AllHostScope,
+				deps.Default.Logger, deps.Default.Scope,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.Options -}}
 					{{$key}} : {{$value}},

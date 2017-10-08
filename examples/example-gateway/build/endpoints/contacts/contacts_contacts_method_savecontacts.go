@@ -42,15 +42,12 @@ type ContactsSaveContactsHandler struct {
 }
 
 // NewContactsSaveContactsHandler creates a handler
-func NewContactsSaveContactsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *ContactsSaveContactsHandler {
+func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveContactsHandler {
 	handler := &ContactsSaveContactsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"contacts", "saveContacts",
 		handler.HandleRequest,
 	)

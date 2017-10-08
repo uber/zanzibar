@@ -45,15 +45,12 @@ type BarTooManyArgsHandler struct {
 }
 
 // NewBarTooManyArgsHandler creates a handler
-func NewBarTooManyArgsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarTooManyArgsHandler {
+func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler {
 	handler := &BarTooManyArgsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "tooManyArgs",
 		handler.HandleRequest,
 	)

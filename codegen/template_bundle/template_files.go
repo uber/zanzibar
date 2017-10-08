@@ -162,21 +162,18 @@ type {{$handlerName}} struct {
 }
 
 // New{{$handlerName}} creates a handler
-func New{{$handlerName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *{{$handlerName}} {
+func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			{{$middleware.Name}}.NewMiddleWare(
-				g.Logger, g.AllHostScope,
+				deps.Default.Logger, deps.Default.Scope,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.Options -}}
 					{{$key}} : {{$value}},
@@ -481,7 +478,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9723, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9727, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -503,12 +500,12 @@ type Endpoint interface{
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
 		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-		{{$handlerName}}: New{{$handlerName}}(g, deps),
+		{{$handlerName}}: New{{$handlerName}}(deps),
 		{{- end}}
 	}
 }
@@ -549,7 +546,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1615, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1591, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -903,16 +900,16 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(g *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := g.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := g.Config.MustGetInt("clients.{{$clientID}}.port")
+func {{$exportName}}(deps *module.Dependencies) Client {
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(g.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		httpClient: zanzibar.NewHTTPClient(
-			g.Logger, g.AllHostScope,
+			deps.Default.Logger, deps.Default.Scope,
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1112,7 +1109,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6780, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6807, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1362,15 +1359,15 @@ type {{$className | title}}DependenciesNodes struct {
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the {{$instance.InstanceName}} {{$instance.ClassName}}
 func InitializeDependencies(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:  gateway.Logger,
-		Scope:   gateway.AllHostScope,
-		Config:  gateway.Config,
-		Channel: gateway.Channel,
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -1379,7 +1376,7 @@ func InitializeDependencies(
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(&{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
@@ -1415,7 +1412,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3195, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3156, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1572,30 +1569,30 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	{{- /* this is the service discovery service name */}}
-	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
-	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
-	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
-	ip := gateway.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	methodNames := map[string]string{
@@ -1611,9 +1608,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Clien
 	}
 
 	client := zanzibar.NewTChannelClient(
-		gateway.Channel,
-		gateway.Logger,
-		gateway.AllHostScope,
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",
@@ -1626,7 +1623,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Clien
 
 	return &{{$clientName}}{
 		client: client,
-		logger: gateway.Logger,
+		logger: deps.Default.Logger,
 	}
 }
 
@@ -1702,7 +1699,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4924, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4960, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1853,19 +1850,17 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(
-	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		gateway.Logger, gateway.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		handler,
 	)
 	return handler
-
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
@@ -1991,7 +1986,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4623, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4597, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

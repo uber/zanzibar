@@ -45,25 +45,22 @@ type BarNormalHandler struct {
 }
 
 // NewBarNormalHandler creates a handler
-func NewBarNormalHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarNormalHandler {
+func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 	handler := &BarNormalHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			example.NewMiddleWare(
-				g.Logger, g.AllHostScope,
+				deps.Default.Logger, deps.Default.Scope,
 				example.Options{
 					Foo: "test",
 				},
 			),
 			logger.NewMiddleWare(
-				g.Logger, g.AllHostScope,
+				deps.Default.Logger, deps.Default.Scope,
 				logger.Options{},
 			),
 		}, handler.HandleRequest).Handle,

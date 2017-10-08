@@ -43,15 +43,12 @@ type SimpleServiceCompareHandler struct {
 }
 
 // NewSimpleServiceCompareHandler creates a handler
-func NewSimpleServiceCompareHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServiceCompareHandler {
+func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCompareHandler {
 	handler := &SimpleServiceCompareHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"baz", "compare",
 		handler.HandleRequest,
 	)

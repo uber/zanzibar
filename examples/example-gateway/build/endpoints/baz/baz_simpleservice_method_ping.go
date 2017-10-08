@@ -42,15 +42,12 @@ type SimpleServicePingHandler struct {
 }
 
 // NewSimpleServicePingHandler creates a handler
-func NewSimpleServicePingHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServicePingHandler {
+func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHandler {
 	handler := &SimpleServicePingHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"baz", "ping",
 		handler.HandleRequest,
 	)

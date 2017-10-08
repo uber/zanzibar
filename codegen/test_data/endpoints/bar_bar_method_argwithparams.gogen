@@ -42,15 +42,12 @@ type BarArgWithParamsHandler struct {
 }
 
 // NewBarArgWithParamsHandler creates a handler
-func NewBarArgWithParamsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithParamsHandler {
+func NewBarArgWithParamsHandler(deps *module.Dependencies) *BarArgWithParamsHandler {
 	handler := &BarArgWithParamsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argWithParams",
 		handler.HandleRequest,
 	)

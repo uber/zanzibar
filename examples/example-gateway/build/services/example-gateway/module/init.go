@@ -72,59 +72,59 @@ type EndpointDependenciesNodes struct {
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the example-gateway service
 func InitializeDependencies(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:  gateway.Logger,
-		Scope:   gateway.AllHostScope,
-		Config:  gateway.Config,
-		Channel: gateway.Channel,
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway, &barClientModule.Dependencies{
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(&barClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway, &bazClientModule.Dependencies{
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(&bazClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway, &contactsClientModule.Dependencies{
+	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(&contactsClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway, &googlenowClientModule.Dependencies{
+	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(&googlenowClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
-	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
+	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(&barEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
 	})
-	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
+	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(&bazEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(gateway, &baztchannelEndpointModule.Dependencies{
+	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(&baztchannelEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(gateway, &contactsEndpointModule.Dependencies{
+	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(&contactsEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(&googlenowEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,

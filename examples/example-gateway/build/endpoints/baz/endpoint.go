@@ -35,12 +35,12 @@ type Endpoint interface {
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SimpleServiceCallHandler:      NewSimpleServiceCallHandler(g, deps),
-		SimpleServiceCompareHandler:   NewSimpleServiceCompareHandler(g, deps),
-		SimpleServicePingHandler:      NewSimpleServicePingHandler(g, deps),
-		SimpleServiceSillyNoopHandler: NewSimpleServiceSillyNoopHandler(g, deps),
+		SimpleServiceCallHandler:      NewSimpleServiceCallHandler(deps),
+		SimpleServiceCompareHandler:   NewSimpleServiceCompareHandler(deps),
+		SimpleServicePingHandler:      NewSimpleServicePingHandler(deps),
+		SimpleServiceSillyNoopHandler: NewSimpleServiceSillyNoopHandler(deps),
 	}
 }
 

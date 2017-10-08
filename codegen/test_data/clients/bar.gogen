@@ -195,16 +195,16 @@ type barClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
-	ip := g.Config.MustGetString("clients.bar.ip")
-	port := g.Config.MustGetInt("clients.bar.port")
+func NewClient(deps *module.Dependencies) Client {
+	ip := deps.Default.Config.MustGetString("clients.bar.ip")
+	port := deps.Default.Config.MustGetInt("clients.bar.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(g.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
 
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClient(
-			g.Logger, g.AllHostScope,
+			deps.Default.Logger, deps.Default.Scope,
 			"bar",
 			[]string{
 				"ArgNotStruct",

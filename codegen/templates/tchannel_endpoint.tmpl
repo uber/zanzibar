@@ -25,19 +25,17 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(
-	gateway *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		gateway.Logger, gateway.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		handler,
 	)
 	return handler
-
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".

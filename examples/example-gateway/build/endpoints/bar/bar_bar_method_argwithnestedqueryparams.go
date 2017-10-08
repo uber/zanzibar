@@ -43,15 +43,12 @@ type BarArgWithNestedQueryParamsHandler struct {
 }
 
 // NewBarArgWithNestedQueryParamsHandler creates a handler
-func NewBarArgWithNestedQueryParamsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithNestedQueryParamsHandler {
+func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWithNestedQueryParamsHandler {
 	handler := &BarArgWithNestedQueryParamsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argWithNestedQueryParams",
 		handler.HandleRequest,
 	)

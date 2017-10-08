@@ -46,30 +46,30 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	{{- /* this is the service discovery service name */}}
-	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
-	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
-	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
-	ip := gateway.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	methodNames := map[string]string{
@@ -85,9 +85,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Clien
 	}
 
 	client := zanzibar.NewTChannelClient(
-		gateway.Channel,
-		gateway.Logger,
-		gateway.AllHostScope,
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",
@@ -100,7 +100,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway, deps *module.Dependencies) Clien
 
 	return &{{$clientName}}{
 		client: client,
-		logger: gateway.Logger,
+		logger: deps.Default.Logger,
 	}
 }
 

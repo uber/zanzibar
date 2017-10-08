@@ -42,15 +42,12 @@ type BarMissingArgHandler struct {
 }
 
 // NewBarMissingArgHandler creates a handler
-func NewBarMissingArgHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarMissingArgHandler {
+func NewBarMissingArgHandler(deps *module.Dependencies) *BarMissingArgHandler {
 	handler := &BarMissingArgHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "missingArg",
 		handler.HandleRequest,
 	)

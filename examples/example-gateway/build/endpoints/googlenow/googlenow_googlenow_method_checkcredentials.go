@@ -39,15 +39,12 @@ type GoogleNowCheckCredentialsHandler struct {
 }
 
 // NewGoogleNowCheckCredentialsHandler creates a handler
-func NewGoogleNowCheckCredentialsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *GoogleNowCheckCredentialsHandler {
+func NewGoogleNowCheckCredentialsHandler(deps *module.Dependencies) *GoogleNowCheckCredentialsHandler {
 	handler := &GoogleNowCheckCredentialsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"googlenow", "checkCredentials",
 		handler.HandleRequest,
 	)

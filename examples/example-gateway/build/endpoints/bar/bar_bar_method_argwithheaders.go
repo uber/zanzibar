@@ -43,15 +43,12 @@ type BarArgWithHeadersHandler struct {
 }
 
 // NewBarArgWithHeadersHandler creates a handler
-func NewBarArgWithHeadersHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithHeadersHandler {
+func NewBarArgWithHeadersHandler(deps *module.Dependencies) *BarArgWithHeadersHandler {
 	handler := &BarArgWithHeadersHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argWithHeaders",
 		handler.HandleRequest,
 	)

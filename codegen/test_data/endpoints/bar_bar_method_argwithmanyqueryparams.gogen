@@ -43,15 +43,12 @@ type BarArgWithManyQueryParamsHandler struct {
 }
 
 // NewBarArgWithManyQueryParamsHandler creates a handler
-func NewBarArgWithManyQueryParamsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithManyQueryParamsHandler {
+func NewBarArgWithManyQueryParamsHandler(deps *module.Dependencies) *BarArgWithManyQueryParamsHandler {
 	handler := &BarArgWithManyQueryParamsHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argWithManyQueryParams",
 		handler.HandleRequest,
 	)

@@ -42,15 +42,12 @@ type BarArgNotStructHandler struct {
 }
 
 // NewBarArgNotStructHandler creates a handler
-func NewBarArgNotStructHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgNotStructHandler {
+func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandler {
 	handler := &BarArgNotStructHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bar", "argNotStruct",
 		handler.HandleRequest,
 	)

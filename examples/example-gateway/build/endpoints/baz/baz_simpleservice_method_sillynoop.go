@@ -43,15 +43,12 @@ type SimpleServiceSillyNoopHandler struct {
 }
 
 // NewSimpleServiceSillyNoopHandler creates a handler
-func NewSimpleServiceSillyNoopHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServiceSillyNoopHandler {
+func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceSillyNoopHandler {
 	handler := &SimpleServiceSillyNoopHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		g.Logger, g.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"baz", "sillyNoop",
 		handler.HandleRequest,
 	)

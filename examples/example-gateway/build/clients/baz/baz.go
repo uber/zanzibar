@@ -145,23 +145,23 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service baz.
-func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
-	serviceName := gateway.Config.MustGetString("clients.baz.serviceName")
+func NewClient(deps *module.Dependencies) Client {
+	serviceName := deps.Default.Config.MustGetString("clients.baz.serviceName")
 	var routingKey string
-	if gateway.Config.ContainsKey("clients.baz.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.baz.routingKey")
+	if deps.Default.Config.ContainsKey("clients.baz.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.baz.routingKey")
 	}
-	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	ip := gateway.Config.MustGetString("clients.baz.ip")
-	port := gateway.Config.MustGetInt("clients.baz.port")
+	ip := deps.Default.Config.MustGetString("clients.baz.ip")
+	port := deps.Default.Config.MustGetInt("clients.baz.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	timeout := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.baz.timeout"),
+		deps.Default.Config.MustGetInt("clients.baz.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
+		deps.Default.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
 	)
 
 	methodNames := map[string]string{
@@ -188,9 +188,9 @@ func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 	}
 
 	client := zanzibar.NewTChannelClient(
-		gateway.Channel,
-		gateway.Logger,
-		gateway.AllHostScope,
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "baz",
@@ -203,7 +203,7 @@ func NewClient(gateway *zanzibar.Gateway, deps *module.Dependencies) Client {
 
 	return &bazClient{
 		client: client,
-		logger: gateway.Logger,
+		logger: deps.Default.Logger,
 	}
 }
 
