@@ -37,36 +37,38 @@ import (
 
 // SimpleServiceCallHandler is the handler for "/baz/call"
 type SimpleServiceCallHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceCallHandler creates a handler
 func NewSimpleServiceCallHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServiceCallHandler {
-	return &SimpleServiceCallHandler{
+	handler := &SimpleServiceCallHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"baz", "call",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/baz/call",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"baz",
-			"call",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/baz/call".
-func (handler *SimpleServiceCallHandler) HandleRequest(
+func (h *SimpleServiceCallHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -80,7 +82,7 @@ func (handler *SimpleServiceCallHandler) HandleRequest(
 	}
 
 	workflow := CallEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

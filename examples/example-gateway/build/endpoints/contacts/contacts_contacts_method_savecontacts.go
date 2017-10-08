@@ -37,36 +37,38 @@ import (
 
 // ContactsSaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
 type ContactsSaveContactsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewContactsSaveContactsHandler creates a handler
 func NewContactsSaveContactsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *ContactsSaveContactsHandler {
-	return &ContactsSaveContactsHandler{
+	handler := &ContactsSaveContactsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"contacts", "saveContacts",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *ContactsSaveContactsHandler) Register(g *zanzibar.Gateway) error {
+func (h *ContactsSaveContactsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/contacts/:userUUID/contacts",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"contacts",
-			"saveContacts",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/contacts/:userUUID/contacts".
-func (handler *ContactsSaveContactsHandler) HandleRequest(
+func (h *ContactsSaveContactsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -79,7 +81,7 @@ func (handler *ContactsSaveContactsHandler) HandleRequest(
 	requestBody.UserUUID = req.Params.ByName("userUUID")
 
 	workflow := customContacts.SaveContactsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

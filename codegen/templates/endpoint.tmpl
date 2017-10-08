@@ -50,51 +50,53 @@ import (
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
 type {{$handlerName}} struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // New{{$handlerName}} creates a handler
 func New{{$handlerName}}(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
-	return &{{$handlerName}}{
+	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"{{$endpointId}}", "{{$handleId}}",
+		{{ if len $middlewares | ne 0 -}}
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			{{range $idx, $middleware := $middlewares -}}
+			{{$middleware.Name}}.NewMiddleWare(
+				g,
+					{{$middleware.Name}}.Options{
+					{{range $key, $value := $middleware.Options -}}
+							{{$key}} : {{$value}},
+					{{end -}}
+					},
+			),
+			{{end -}}
+		}, handler.HandleRequest).Handle,
+		{{- else -}}
+		handler.HandleRequest,
+		{{- end}}
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"{{$endpointId}}",
-			"{{$handleId}}",
-			{{ if len $middlewares | ne 0 -}}
-			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				{{range $idx, $middleware := $middlewares -}}
-				{{$middleware.Name}}.NewMiddleWare(
-					g,
-						{{$middleware.Name}}.Options{
-						{{range $key, $value := $middleware.Options -}}
-								{{$key}} : {{$value}},
-						{{end -}}
-						},
-				),
-				{{end -}}
-			}, handler.HandleRequest).Handle,
-			{{- else -}}
-			handler.HandleRequest,
-			{{- end}}
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
-func (handler *{{$handlerName}}) HandleRequest(
+func (h *{{$handlerName}}) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -129,8 +131,8 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{end}}
 
 	workflow := {{$workflow}}{
-		Clients: handler.Clients,
-		Logger: req.Logger,
+		Clients: h.Clients,
+		Logger:  req.Logger,
 		Request: req,
 	}
 

@@ -37,43 +37,45 @@ import (
 
 // SimpleServicePingHandler is the handler for "/baz/ping"
 type SimpleServicePingHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServicePingHandler creates a handler
 func NewSimpleServicePingHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServicePingHandler {
-	return &SimpleServicePingHandler{
+	handler := &SimpleServicePingHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"baz", "ping",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SimpleServicePingHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServicePingHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/baz/ping",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"baz",
-			"ping",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/baz/ping".
-func (handler *SimpleServicePingHandler) HandleRequest(
+func (h *SimpleServicePingHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
 	workflow := PingEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

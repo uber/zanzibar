@@ -37,43 +37,45 @@ import (
 
 // BarMissingArgHandler is the handler for "/bar/missing-arg-path"
 type BarMissingArgHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarMissingArgHandler creates a handler
 func NewBarMissingArgHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarMissingArgHandler {
-	return &BarMissingArgHandler{
+	handler := &BarMissingArgHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"bar", "missingArg",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarMissingArgHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarMissingArgHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/missing-arg-path",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"missingArg",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/missing-arg-path".
-func (handler *BarMissingArgHandler) HandleRequest(
+func (h *BarMissingArgHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
 	workflow := MissingArgEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

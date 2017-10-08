@@ -38,36 +38,38 @@ import (
 
 // BarArgWithQueryParamsHandler is the handler for "/bar/argWithQueryParams"
 type BarArgWithQueryParamsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithQueryParamsHandler creates a handler
 func NewBarArgWithQueryParamsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarArgWithQueryParamsHandler {
-	return &BarArgWithQueryParamsHandler{
+	handler := &BarArgWithQueryParamsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"bar", "argWithQueryParams",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/argWithQueryParams",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"argWithQueryParams",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/argWithQueryParams".
-func (handler *BarArgWithQueryParamsHandler) HandleRequest(
+func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -94,7 +96,7 @@ func (handler *BarArgWithQueryParamsHandler) HandleRequest(
 	}
 
 	workflow := ArgWithQueryParamsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

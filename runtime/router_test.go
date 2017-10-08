@@ -50,9 +50,9 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -65,9 +65,9 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/bar/",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"bar",
-			"bar",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"bar", "bar",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,

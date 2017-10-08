@@ -37,36 +37,38 @@ import (
 
 // GoogleNowAddCredentialsHandler is the handler for "/googlenow/add-credentials"
 type GoogleNowAddCredentialsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewGoogleNowAddCredentialsHandler creates a handler
 func NewGoogleNowAddCredentialsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *GoogleNowAddCredentialsHandler {
-	return &GoogleNowAddCredentialsHandler{
+	handler := &GoogleNowAddCredentialsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"googlenow", "addCredentials",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
+func (h *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/googlenow/add-credentials",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"googlenow",
-			"addCredentials",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/googlenow/add-credentials".
-func (handler *GoogleNowAddCredentialsHandler) HandleRequest(
+func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -80,7 +82,7 @@ func (handler *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 
 	workflow := AddCredentialsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

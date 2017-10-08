@@ -57,9 +57,9 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	endpoint := zanzibar.NewRouterEndpoint(
-		bgateway.ActualGateway,
-		"foo",
-		"foo",
+		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.AllHostScope,
+		"foo", "foo",
 		func(
 			ctx context.Context,
 			req *zanzibar.ServerHTTPRequest,
@@ -118,9 +118,9 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -178,9 +178,9 @@ func TestFailingGetQueryBool(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -235,9 +235,9 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -292,9 +292,9 @@ func TestFailingHasQueryValue(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -349,9 +349,9 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -406,9 +406,9 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -463,9 +463,9 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -520,9 +520,9 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -577,9 +577,9 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -634,9 +634,9 @@ func TestFailingGetQueryValues(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -693,9 +693,9 @@ func TestGetQueryValues(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,

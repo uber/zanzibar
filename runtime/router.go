@@ -25,6 +25,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
@@ -52,16 +53,17 @@ type RouterEndpoint struct {
 
 // NewRouterEndpoint creates an endpoint with all the necessary data
 func NewRouterEndpoint(
-	gateway *Gateway,
+	logger *zap.Logger,
+	scope tally.Scope,
 	endpointID string,
 	handlerID string,
 	handler HandlerFn,
 ) *RouterEndpoint {
-	logger := gateway.Logger.With(
+	logger = logger.With(
 		zap.String("endpointID", endpointID),
 		zap.String("handlerID", handlerID),
 	)
-	scope := gateway.AllHostScope.Tagged(map[string]string{
+	scope = scope.Tagged(map[string]string{
 		"endpoint": endpointID,
 		"handler":  handlerID,
 	})
@@ -105,8 +107,14 @@ type HTTPRouter struct {
 // NewHTTPRouter allocates a HTTP router
 func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	router := &HTTPRouter{
-		notFoundEndpoint:         NewRouterEndpoint(gateway, notFound, notFound, nil),
-		methodNotAllowedEndpoint: NewRouterEndpoint(gateway, methodNotAllowed, methodNotAllowed, nil),
+		notFoundEndpoint: NewRouterEndpoint(
+			gateway.Logger, gateway.AllHostScope,
+			notFound, notFound, nil,
+		),
+		methodNotAllowedEndpoint: NewRouterEndpoint(
+			gateway.Logger, gateway.AllHostScope,
+			methodNotAllowed, methodNotAllowed, nil,
+		),
 	}
 	router.httpRouter = &httprouter.Router{
 		// We handle trailing slash in Register() without redirect

@@ -38,36 +38,38 @@ import (
 
 // SimpleServiceCompareHandler is the handler for "/baz/compare"
 type SimpleServiceCompareHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceCompareHandler creates a handler
 func NewSimpleServiceCompareHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServiceCompareHandler {
-	return &SimpleServiceCompareHandler{
+	handler := &SimpleServiceCompareHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"baz", "compare",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SimpleServiceCompareHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceCompareHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/baz/compare",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"baz",
-			"compare",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/baz/compare".
-func (handler *SimpleServiceCompareHandler) HandleRequest(
+func (h *SimpleServiceCompareHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -78,7 +80,7 @@ func (handler *SimpleServiceCompareHandler) HandleRequest(
 	}
 
 	workflow := CompareEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

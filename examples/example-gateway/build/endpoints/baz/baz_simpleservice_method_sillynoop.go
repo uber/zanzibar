@@ -38,43 +38,45 @@ import (
 
 // SimpleServiceSillyNoopHandler is the handler for "/baz/silly-noop"
 type SimpleServiceSillyNoopHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceSillyNoopHandler creates a handler
 func NewSimpleServiceSillyNoopHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServiceSillyNoopHandler {
-	return &SimpleServiceSillyNoopHandler{
+	handler := &SimpleServiceSillyNoopHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		g.Logger, g.AllHostScope,
+		"baz", "sillyNoop",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *SimpleServiceSillyNoopHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceSillyNoopHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/baz/silly-noop",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"baz",
-			"sillyNoop",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/baz/silly-noop".
-func (handler *SimpleServiceSillyNoopHandler) HandleRequest(
+func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
 	workflow := SillyNoopEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
