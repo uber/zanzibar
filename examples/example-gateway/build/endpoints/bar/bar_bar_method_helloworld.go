@@ -97,7 +97,7 @@ func (handler *BarHelloWorldHandler) HandleRequest(
 		}
 	}
 
-	res.WriteJSONBytes(200, cliRespHeaders, []byte(response))
+	res.WriteJSONBytes(200, cliRespHeaders, []byte("\""+response+"\""))
 }
 
 // HelloWorldEndpoint calls thrift client Bar.Hello

@@ -172,7 +172,7 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else if eq .ResponseType "string" -}}
-	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, []byte(response))
+	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, []byte("\"" + response + "\""))
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
 	{{- end }}

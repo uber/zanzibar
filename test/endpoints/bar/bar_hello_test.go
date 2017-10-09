@@ -71,5 +71,5 @@ func TestBarHello(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, string(respBytes), "hello")
+	assert.Equal(t, `"hello"`, string(respBytes))
 }
