@@ -33,7 +33,6 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
-	"github.com/uber/zanzibar/runtime/middlewares/logger"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -61,10 +60,6 @@ func NewBarNormalHandler(
 				example.Options{
 					Foo: "test",
 				},
-			),
-			logger.NewMiddleWare(
-				g,
-				logger.Options{},
 			),
 		}, handler.HandleRequest).Handle,
 	)
