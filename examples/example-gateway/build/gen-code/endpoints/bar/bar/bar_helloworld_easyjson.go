@@ -7,6 +7,7 @@ package bar
 
 import (
 	json "encoding/json"
+	fmt "fmt"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -57,7 +58,7 @@ func easyjson687c569aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.BarException == nil {
 					out.BarException = new(BarException)
 				}
-				(*out.BarException).UnmarshalEasyJSON(in)
+				easyjson687c569aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(in, &*out.BarException)
 			}
 		default:
 			in.SkipRecursive()
@@ -94,7 +95,7 @@ func easyjson687c569aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.BarException == nil {
 			out.RawString("null")
 		} else {
-			(*in.BarException).MarshalEasyJSON(out)
+			easyjson687c569aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.BarException)
 		}
 	}
 	out.RawByte('}')
@@ -122,6 +123,54 @@ func (v *Bar_HelloWorld_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Bar_HelloWorld_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson687c569aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarHelloWorld(l, v)
+}
+func easyjson687c569aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(in *jlexer.Lexer, out *BarException) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var StringFieldSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "stringField":
+			out.StringField = string(in.String())
+			StringFieldSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !StringFieldSet {
+		in.AddError(fmt.Errorf("key 'stringField' is required"))
+	}
+}
+func easyjson687c569aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out *jwriter.Writer, in BarException) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"stringField\":")
+	out.String(string(in.StringField))
+	out.RawByte('}')
 }
 func easyjson687c569aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarHelloWorld1(in *jlexer.Lexer, out *Bar_HelloWorld_Args) {
 	isTopLevel := in.IsStart()
