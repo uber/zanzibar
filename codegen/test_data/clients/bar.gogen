@@ -74,6 +74,10 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_ArgWithQueryParams_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	Hello(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (string, map[string]string, error)
 	MissingArg(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -208,6 +212,7 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 				"ArgWithParams",
 				"ArgWithQueryHeader",
 				"ArgWithQueryParams",
+				"Hello",
 				"MissingArg",
 				"NoRequest",
 				"Normal",
@@ -679,6 +684,66 @@ func (c *barClient) ArgWithQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// Hello calls "/bar/hello" endpoint.
+func (c *barClient) Hello(
+	ctx context.Context,
+	headers map[string]string,
+) (string, map[string]string, error) {
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "Hello", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/hello"
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200, 403})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return defaultRes, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{

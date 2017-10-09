@@ -84,12 +84,13 @@ type MethodSpec struct {
 	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
 	ResHeaders []string
 
-	RequestType      string
-	ResponseType     string
-	OKStatusCode     StatusCode
-	Exceptions       []ExceptionSpec
-	ExceptionsIndex  map[string]ExceptionSpec
-	ValidStatusCodes []int
+	RequestType       string
+	ResponseType      string
+	ShortResponseType string
+	OKStatusCode      StatusCode
+	Exceptions        []ExceptionSpec
+	ExceptionsIndex   map[string]ExceptionSpec
+	ValidStatusCodes  []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed bool
 	// Thrift service name the method belongs to.
@@ -305,6 +306,7 @@ func (ms *MethodSpec) setResponseType(curThriftFile string, respSpec *compile.Re
 		return nil
 	}
 	typeName, err := packageHelper.TypeFullName(respSpec.ReturnType)
+	ms.ShortResponseType = typeName
 	if IsStructType(respSpec.ReturnType) {
 		typeName = "*" + typeName
 	}
@@ -839,6 +841,7 @@ func (ms *MethodSpec) setTypeConverters(
 	reqTransforms map[string]FieldMapperEntry,
 	respTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
+	downstreamMethod *MethodSpec,
 ) error {
 	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
 
@@ -866,19 +869,39 @@ func (ms *MethodSpec) setTypeConverters(
 		return nil
 	}
 
-	respFields := respType.(*compile.StructSpec).Fields
-	downstreamRespFields := downstreamRespType.(*compile.StructSpec).Fields
-
 	respConverter := &TypeConverter{
 		LineBuilder: LineBuilder{},
 		Helper:      h,
 	}
 
-	err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms)
-	if err != nil {
-		return err
-	}
+	respConverter.append(
+		"func convert",
+		pascalCase(ms.Name),
+		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
+	var respFields, downstreamRespFields []*compile.FieldSpec
+	switch respType.(type) {
+	case
+		*compile.BoolSpec,
+		*compile.I8Spec,
+		*compile.I16Spec,
+		*compile.I32Spec,
+		*compile.EnumSpec,
+		*compile.I64Spec,
+		*compile.DoubleSpec,
+		*compile.StringSpec:
 
+		respConverter.append("out", " := in\t\n")
+	default:
+		// default as struct
+		respFields = respType.(*compile.StructSpec).Fields
+		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
+		respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
+		err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms)
+		if err != nil {
+			return err
+		}
+	}
+	respConverter.append("\nreturn out \t}")
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
 
 	return nil

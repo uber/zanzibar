@@ -227,7 +227,7 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, respTransforms, h)
+		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, respTransforms, h, downstreamMethod)
 		if err != nil {
 			return err
 		}

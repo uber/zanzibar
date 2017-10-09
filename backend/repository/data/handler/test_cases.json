@@ -62,6 +62,7 @@
 					"EchoStructMap": "Echo::echoStructMap",
 					"EchoStructSet": "Echo::echoStructSet",
 					"EchoTypedef": "Echo::echoTypedef",
+					"Hello": "Bar::helloWorld",
 					"MissingArg": "Bar::missingArg",
 					"NoRequest": "Bar::noRequest",
 					"Normal": "Bar::normal",
@@ -113,6 +114,7 @@
 						"EchoStructMap": "Echo::echoStructMap",
 						"EchoStructSet": "Echo::echoStructSet",
 						"EchoTypedef": "Echo::echoTypedef",
+						"Hello": "Bar::helloWorld",
 						"MissingArg": "Bar::missingArg",
 						"NoRequest": "Bar::noRequest",
 						"Normal": "Bar::normal",
@@ -319,6 +321,10 @@
 							},
 							{
 								"Name": "argWithQueryParams",
+								"Type": "http"
+							},
+							{
+								"Name": "helloWorld",
 								"Type": "http"
 							},
 							{
@@ -586,6 +592,10 @@
 							},
 							{
 								"Name": "argWithQueryParams",
+								"Type": "http"
+							},
+							{
+								"Name": "helloWorld",
 								"Type": "http"
 							},
 							{
@@ -2288,6 +2298,7 @@
 								"EchoStructMap": "Echo::echoStructMap",
 								"EchoStructSet": "Echo::echoStructSet",
 								"EchoTypedef": "Echo::echoTypedef",
+								"Hello": "Bar::helloWorld",
 								"MissingArg": "Bar::missingArg",
 								"NoRequest": "Bar::noRequest",
 								"Normal": "Bar::normal",
@@ -2469,6 +2480,20 @@
 							"testFixtures": null,
 							"thriftFile": "endpoints/bar/bar.thrift",
 							"thriftMethodName": "Bar::argWithQueryParams",
+							"workflowType": "httpClient"
+						},
+						"bar.helloWorld": {
+							"clientID": "bar",
+							"clientMethod": "Hello",
+							"endpointId": "bar",
+							"endpointType": "http",
+							"handleId": "helloWorld",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/bar/bar.thrift",
+							"thriftMethodName": "Bar::helloWorld",
 							"workflowType": "httpClient"
 						},
 						"bar.missingArg": {
@@ -2679,6 +2704,10 @@
 									},
 									{
 										"Name": "argWithQueryParams",
+										"Type": "http"
+									},
+									{
+										"Name": "helloWorld",
 										"Type": "http"
 									},
 									{
@@ -2949,6 +2978,10 @@
 										"Type": "http"
 									},
 									{
+										"Name": "helloWorld",
+										"Type": "http"
+									},
+									{
 										"Name": "missingArg",
 										"Type": "http"
 									},
@@ -3102,6 +3135,7 @@
 							"EchoStructMap": "Echo::echoStructMap",
 							"EchoStructSet": "Echo::echoStructSet",
 							"EchoTypedef": "Echo::echoTypedef",
+							"Hello": "Bar::helloWorld",
 							"MissingArg": "Bar::missingArg",
 							"NoRequest": "Bar::noRequest",
 							"Normal": "Bar::normal",
@@ -3283,6 +3317,20 @@
 						"testFixtures": null,
 						"thriftFile": "endpoints/bar/bar.thrift",
 						"thriftMethodName": "Bar::argWithQueryParams",
+						"workflowType": "httpClient"
+					},
+					"bar.helloWorld": {
+						"clientID": "bar",
+						"clientMethod": "Hello",
+						"endpointId": "bar",
+						"endpointType": "http",
+						"handleId": "helloWorld",
+						"middlewares": null,
+						"reqHeaderMap": null,
+						"resHeaderMap": null,
+						"testFixtures": null,
+						"thriftFile": "endpoints/bar/bar.thrift",
+						"thriftMethodName": "Bar::helloWorld",
 						"workflowType": "httpClient"
 					},
 					"bar.missingArg": {
@@ -3493,6 +3541,10 @@
 								},
 								{
 									"Name": "argWithQueryParams",
+									"Type": "http"
+								},
+								{
+									"Name": "helloWorld",
 									"Type": "http"
 								},
 								{
@@ -3760,6 +3812,10 @@
 								},
 								{
 									"Name": "argWithQueryParams",
+									"Type": "http"
+								},
+								{
+									"Name": "helloWorld",
 									"Type": "http"
 								},
 								{

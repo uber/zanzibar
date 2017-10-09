@@ -48,6 +48,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		BarNoRequestHandler:                NewBarNoRequestHandler(g, deps),
 		BarNormalHandler:                   NewBarNormalHandler(g, deps),
 		BarTooManyArgsHandler:              NewBarTooManyArgsHandler(g, deps),
+		BarHelloWorldHandler:               NewBarHelloWorldHandler(g, deps),
 	}
 }
 
@@ -64,6 +65,7 @@ type EndpointHandlers struct {
 	BarNoRequestHandler                *BarNoRequestHandler
 	BarNormalHandler                   *BarNormalHandler
 	BarTooManyArgsHandler              *BarTooManyArgsHandler
+	BarHelloWorldHandler               *BarHelloWorldHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -111,6 +113,10 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	err10 := handlers.BarTooManyArgsHandler.Register(gateway)
 	if err10 != nil {
 		return err10
+	}
+	err11 := handlers.BarHelloWorldHandler.Register(gateway)
+	if err11 != nil {
+		return err11
 	}
 	return nil
 }
