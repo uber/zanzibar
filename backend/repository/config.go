@@ -56,19 +56,19 @@ type ThriftServiceMap map[string]map[string]*ThriftService
 
 // EndpointConfig stores configuration for an endpoint.
 type EndpointConfig struct {
-	ID               string                       `json:"endpointId"`
-	Type             ProtocolType                 `json:"endpointType"`
-	HandleID         string                       `json:"handleId"`
-	ThriftFile       string                       `json:"thriftFile"`
-	ThriftFileSha    string                       `json:"thriftFileSha,omitempty"`
-	ThriftMethodName string                       `json:"thriftMethodName"`
-	WorkflowType     string                       `json:"workflowType"`
-	ClientID         string                       `json:"clientId"`
-	ClientMethod     string                       `json:"clientMethod"`
+	ID               string                                  `json:"endpointId"`
+	Type             ProtocolType                            `json:"endpointType"`
+	HandleID         string                                  `json:"handleId"`
+	ThriftFile       string                                  `json:"thriftFile"`
+	ThriftFileSha    string                                  `json:"thriftFileSha,omitempty"`
+	ThriftMethodName string                                  `json:"thriftMethodName"`
+	WorkflowType     string                                  `json:"workflowType"`
+	ClientID         string                                  `json:"clientId"`
+	ClientMethod     string                                  `json:"clientMethod"`
 	TestFixtures     map[string]*codegen.EndpointTestFixture `json:"testFixtures"`
-	Middlewares      []*codegen.MiddlewareSpec    `json:"middlewares"`
-	ReqHeaderMap     map[string]string            `json:"reqHeaderMap"`
-	ResHeaderMap     map[string]string            `json:"resHeaderMap"`
+	Middlewares      []*codegen.MiddlewareSpec               `json:"middlewares"`
+	ReqHeaderMap     map[string]string                       `json:"reqHeaderMap"`
+	ResHeaderMap     map[string]string                       `json:"resHeaderMap"`
 }
 
 // ClientConfig stores configuration for an client.

@@ -11,7 +11,6 @@
 	"testFixtures": {
 		"successfulRequest": {
 			"testName": "successfulRequest",
-			"testServiceName": "example-gateway",
 			"endpointId": "bar",
 			"handleId": "normal",
 			"endpointRequest": {
@@ -22,8 +21,8 @@
 						"bodyType": "json",
 						"bodyJson": {
 							"request": {
-								"stringField": "foo",
-								"boolField": true
+								"boolField": true,
+								"stringField": "foo"
 							}
 						}
 					}
@@ -47,8 +46,8 @@
 							"requestType": "tchannel",
 							"tchannelRequest": {
 								"request": {
-									"stringField": "foo",
-									"boolField": true
+									"boolField": true,
+									"stringField": "foo"
 								}
 							}
 						}
@@ -57,16 +56,17 @@
 					"clientResponse": {
 						"responseType": "tchannel",
 						"tchannelResponse": {
-							"stringField": "foo",
 							"intWithRange": 0,
 							"intWithoutRange": 1,
 							"mapIntWithRange": {},
-							"mapIntWithoutRange": {}
+							"mapIntWithoutRange": {},
+							"stringField": "foo"
 						}
 					},
 					"clientResHeaders": {}
 				}
-			}
+			},
+			"testServiceName": "example-gateway"
 		}
 	},
 	"middlewares": [

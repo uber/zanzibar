@@ -575,18 +575,18 @@ func NewEndpointSpec(
 	return augmentHTTPEndpointSpec(espec, endpointConfigObj, midSpecs)
 }
 
-func testFixtures(endpointConfigObj map[string]interface{}) (ret map[string]*EndpointTestFixture, rErr error) {
+func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
 	field, ok := endpointConfigObj["testFixtures"]
 	if !ok {
-		rErr = errors.Errorf("missing testFixtures field")
-		return
+		return nil, errors.Errorf("missing testFixtures field")
 	}
-	var testFixturesRaw []byte
-	if testFixturesRaw, rErr = json.Marshal(field); rErr != nil {
-		return
+	testFixturesRaw, err := json.Marshal(field)
+	if err != nil {
+		return nil, err
 	}
-	rErr = json.Unmarshal(testFixturesRaw, &ret)
-	return
+	var ret map[string]*EndpointTestFixture
+	err = json.Unmarshal(testFixturesRaw, &ret)
+	return ret, err
 }
 
 func augmentHTTPEndpointSpec(

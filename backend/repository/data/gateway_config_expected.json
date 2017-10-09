@@ -116,7 +116,7 @@
 			"thriftFile": "endpoints/bar/bar.thrift",
 			"thriftMethodName": "Bar::helloWorld",
 			"workflowType": "httpClient",
-			"clientID": "bar",
+			"clientId": "bar",
 			"clientMethod": "Hello",
 			"testFixtures": null,
 			"middlewares": null,

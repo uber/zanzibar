@@ -100,6 +100,8 @@ type FixtureBody struct {
 }
 
 // String convert FixtureBody to string
+// This String() panics inside if type and value mismatch during unmarshal
+// because template cannot handle errors
 func (fb *FixtureBody) String() string {
 	switch fb.BodyType {
 	case "string":

@@ -111,6 +111,7 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	for _, file := range endpoints {
+		// TODO: if test fixtures not present do not generate golden file
 		if file.IsDir() || isTestFile(file.Name()) {
 			continue
 		}

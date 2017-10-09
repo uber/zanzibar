@@ -95,7 +95,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
+		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
