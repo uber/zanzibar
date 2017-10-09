@@ -109,6 +109,20 @@
 			"reqHeaderMap": null,
 			"resHeaderMap": null
 		},
+		"bar.helloWorld": {
+			"endpointId": "bar",
+			"endpointType": "http",
+			"handleId": "helloWorld",
+			"thriftFile": "endpoints/bar/bar.thrift",
+			"thriftMethodName": "Bar::helloWorld",
+			"workflowType": "httpClient",
+			"clientID": "bar",
+			"clientMethod": "Hello",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
+		},
 		"bar.missingArg": {
 			"endpointId": "bar",
 			"endpointType": "http",
@@ -307,6 +321,7 @@
 				"EchoStructMap": "Echo::echoStructMap",
 				"EchoStructSet": "Echo::echoStructSet",
 				"EchoTypedef": "Echo::echoTypedef",
+				"Hello": "Bar::helloWorld",
 				"MissingArg": "Bar::missingArg",
 				"NoRequest": "Bar::noRequest",
 				"Normal": "Bar::normal",
@@ -419,6 +434,10 @@
 					},
 					{
 						"Name": "argWithQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "helloWorld",
 						"Type": "http"
 					},
 					{
@@ -685,6 +704,10 @@
 					},
 					{
 						"Name": "argWithQueryParams",
+						"Type": "http"
+					},
+					{
+						"Name": "helloWorld",
 						"Type": "http"
 					},
 					{

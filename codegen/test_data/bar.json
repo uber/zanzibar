@@ -575,6 +575,84 @@
 					"RequestParamGoStatements": null
 				},
 				{
+					"Name": "helloWorld",
+					"HTTPMethod": "GET",
+					"EndpointName": "",
+					"HTTPPath": "/bar/hello",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						},
+						{
+							"Type": "static",
+							"Text": "hello",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						}
+					],
+					"IsEndpoint": false,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
+					"ReqHeaderGoStatements": null,
+					"ReqClientHeaderGoStatements": null,
+					"ResHeaderFields": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "",
+					"ResponseType": "string",
+					"ShortResponseType": "string",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [
+						{
+							"Type": "clientsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					],
+					"ExceptionsIndex": {
+						"barException": {
+							"Type": "clientsBarBar.BarException",
+							"Name": "barException",
+							"Annotations": {
+								"zanzibar.http.status": "403"
+							},
+							"StatusCode": {
+								"Code": 403,
+								"Message": "barException"
+							}
+						}
+					},
+					"ValidStatusCodes": [
+						200,
+						403
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
+				},
+				{
 					"Name": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
