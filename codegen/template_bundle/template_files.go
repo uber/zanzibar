@@ -276,7 +276,14 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else if eq .ResponseType "string" -}}
-	bytes, _ := json.Marshal(response)
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		req.Logger.Warn("Unable to marshal response into json",
+				zap.String("error", err.Error()),
+			)
+			res.SendErrorString(500, "Unexpected server error")
+			return
+	}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, bytes)
 	{{- else -}}
 	res.WriteJSON({{.OKStatusCode.Code}}, cliRespHeaders, response)
@@ -469,7 +476,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9788, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9976, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

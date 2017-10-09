@@ -98,7 +98,14 @@ func (handler *BarHelloWorldHandler) HandleRequest(
 		}
 	}
 
-	bytes, _ := json.Marshal(response)
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		req.Logger.Warn("Unable to marshal response into json",
+			zap.String("error", err.Error()),
+		)
+		res.SendErrorString(500, "Unexpected server error")
+		return
+	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
 }
 
