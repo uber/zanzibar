@@ -25,6 +25,7 @@ package barEndpoint
 
 import (
 	"context"
+	"encoding/json"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -97,7 +98,8 @@ func (handler *BarHelloWorldHandler) HandleRequest(
 		}
 	}
 
-	res.WriteJSONBytes(200, cliRespHeaders, []byte("\""+response+"\""))
+	bytes, _ := json.Marshal(response)
+	res.WriteJSONBytes(200, cliRespHeaders, bytes)
 }
 
 // HelloWorldEndpoint calls thrift client Bar.Hello
