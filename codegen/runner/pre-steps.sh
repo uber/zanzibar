@@ -16,9 +16,9 @@ BUILD_DIR="$1"
 CONFIG_DIR="$2"
 
 if [ -z "$3" ]; then
-    THRIFTRW_SRCS="$(find "$CONFIG_DIR/idl" -name '*.thrift')"
+	THRIFTRW_SRCS="$(find "$CONFIG_DIR/idl" -name '*.thrift')"
 else
-    THRIFTRW_SRCS="$3"
+	THRIFTRW_SRCS="$3"
 fi
 THRIFTRW_SRCS="$(echo "$THRIFTRW_SRCS" | xargs -n1 | sort | uniq)"
 
@@ -32,12 +32,12 @@ RESOLVE_THRIFT_BINARY="$DIRNAME/../../scripts/resolve_thrift/resolve_thrift"
 
 if [ -d "$DIRNAME/../../vendor" ]; then
 	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
-    THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
+	THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
 	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
 	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
 else
 	THRIFTRW_RAW_DIR="$DIRNAME/../../../../../go.uber.org/thriftrw"
-    THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
+	THRIFTRW_DIR="$(cd "$THRIFTRW_RAW_DIR";pwd)"
 	THRIFTRW_MAIN_FILE="$THRIFTRW_DIR/main.go"
 	THRIFTRW_BINARY="$THRIFTRW_DIR/thriftrw"
 fi
@@ -85,14 +85,14 @@ for config_file in ${config_files}; do
 	dir=$(dirname "$config_file")
 	json_files=$(find "$dir" -name "*.json")
 	for json_file in ${json_files}; do
-	    thrift_file=$(jq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$json_file")
+		thrift_file=$(jq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$json_file")
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"
 
 		thrift_file="$CONFIG_DIR/idl/$thrift_file"
 		gen_code_dir=$(
-			"$RESOLVE_THRIFT_BINARY" "$thrift_file" | \
+		"$RESOLVE_THRIFT_BINARY" "$thrift_file" | \
 			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
 			sort | uniq | xargs
 		)
@@ -103,9 +103,9 @@ target_dirs=($(echo "$target_dirs" | tr ' ' '\n' | sort | uniq))
 
 echo "Generating JSON Marshal/Unmarshal"
 thriftrw_gofiles=(
-	$(find "${target_dirs[@]}" -name "*.go" | \
-		grep -v "versioncheck.go" | \
-		grep -v "easyjson.go" | sort)
+$(find "${target_dirs[@]}" -name "*.go" | \
+	grep -v "versioncheck.go" | \
+	grep -v "easyjson.go" | sort)
 )
 "$EASY_JSON_BINARY" -all -- "${thriftrw_gofiles[@]}"
 
