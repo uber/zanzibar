@@ -42,7 +42,10 @@ type BarArgNotStructHandler struct {
 }
 
 // NewBarArgNotStructHandler creates a handler
-func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandler {
+func NewBarArgNotStructHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *BarArgNotStructHandler {
 	handler := &BarArgNotStructHandler{
 		Clients: deps.Client,
 	}

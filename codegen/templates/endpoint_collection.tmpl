@@ -15,12 +15,12 @@ type Endpoint interface{
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(deps *module.Dependencies) Endpoint {
+func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
 		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-		{{$handlerName}}: New{{$handlerName}}(deps),
+		{{$handlerName}}: New{{$handlerName}}(g, deps),
 		{{- end}}
 	}
 }

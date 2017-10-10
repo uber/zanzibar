@@ -45,7 +45,10 @@ type BarTooManyArgsHandler struct {
 }
 
 // NewBarTooManyArgsHandler creates a handler
-func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler {
+func NewBarTooManyArgsHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *BarTooManyArgsHandler {
 	handler := &BarTooManyArgsHandler{
 		Clients: deps.Client,
 	}

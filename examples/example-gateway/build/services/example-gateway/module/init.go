@@ -85,46 +85,46 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(&barClientModule.Dependencies{
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(g, &barClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(&bazClientModule.Dependencies{
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(g, &bazClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(&contactsClientModule.Dependencies{
+	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(g, &contactsClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(&googlenowClientModule.Dependencies{
+	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(g, &googlenowClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
-	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(&barEndpointModule.Dependencies{
+	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(g, &barEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
 	})
-	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(&bazEndpointModule.Dependencies{
+	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(g, &bazEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(&baztchannelEndpointModule.Dependencies{
+	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(g, &baztchannelEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(&contactsEndpointModule.Dependencies{
+	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(g, &contactsEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(&googlenowEndpointModule.Dependencies{
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(g, &googlenowEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,

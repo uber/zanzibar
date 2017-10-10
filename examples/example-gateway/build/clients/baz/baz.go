@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
@@ -145,7 +145,10 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service baz.
-func NewClient(deps *module.Dependencies) Client {
+func NewClient(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
 	serviceName := deps.Default.Config.MustGetString("clients.baz.serviceName")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.baz.routingKey") {

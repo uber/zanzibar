@@ -43,7 +43,10 @@ type SimpleServiceSillyNoopHandler struct {
 }
 
 // NewSimpleServiceSillyNoopHandler creates a handler
-func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceSillyNoopHandler {
+func NewSimpleServiceSillyNoopHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *SimpleServiceSillyNoopHandler {
 	handler := &SimpleServiceSillyNoopHandler{
 		Clients: deps.Client,
 	}

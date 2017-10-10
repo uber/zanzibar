@@ -42,7 +42,10 @@ type GoogleNowAddCredentialsHandler struct {
 }
 
 // NewGoogleNowAddCredentialsHandler creates a handler
-func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddCredentialsHandler {
+func NewGoogleNowAddCredentialsHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *GoogleNowAddCredentialsHandler {
 	handler := &GoogleNowAddCredentialsHandler{
 		Clients: deps.Client,
 	}

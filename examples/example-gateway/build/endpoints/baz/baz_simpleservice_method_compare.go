@@ -43,7 +43,10 @@ type SimpleServiceCompareHandler struct {
 }
 
 // NewSimpleServiceCompareHandler creates a handler
-func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCompareHandler {
+func NewSimpleServiceCompareHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *SimpleServiceCompareHandler {
 	handler := &SimpleServiceCompareHandler{
 		Clients: deps.Client,
 	}

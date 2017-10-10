@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"	
 	"go.uber.org/zap/zapcore"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
@@ -46,7 +46,10 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(deps *module.Dependencies) Client {
+func {{$exportName}}(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string

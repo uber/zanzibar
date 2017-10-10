@@ -28,7 +28,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
@@ -55,7 +55,10 @@ type googleNowClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(deps *module.Dependencies) Client {
+func NewClient(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
 	ip := deps.Default.Config.MustGetString("clients.google-now.ip")
 	port := deps.Default.Config.MustGetInt("clients.google-now.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

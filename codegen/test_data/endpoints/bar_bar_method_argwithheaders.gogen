@@ -43,7 +43,10 @@ type BarArgWithHeadersHandler struct {
 }
 
 // NewBarArgWithHeadersHandler creates a handler
-func NewBarArgWithHeadersHandler(deps *module.Dependencies) *BarArgWithHeadersHandler {
+func NewBarArgWithHeadersHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *BarArgWithHeadersHandler {
 	handler := &BarArgWithHeadersHandler{
 		Clients: deps.Client,
 	}

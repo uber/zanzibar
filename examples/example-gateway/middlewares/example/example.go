@@ -24,14 +24,10 @@ import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
+	"github.com/uber/zanzibar/runtime"
 )
 
 type exampleMiddleware struct {
-	logger  *zap.Logger
-	scope   tally.Scope
 	options Options
 }
 
@@ -50,13 +46,10 @@ type MiddlewareState struct {
 // NewMiddleWare creates a new middleware that executes the next middleware
 // after performing it's operations.
 func NewMiddleWare(
-	logger *zap.Logger,
-	scope tally.Scope,
+	g *zanzibar.Gateway,
 	options Options,
 ) zanzibar.MiddlewareHandle {
 	return &exampleMiddleware{
-		logger:  logger,
-		scope:   scope,
 		options: options,
 	}
 }

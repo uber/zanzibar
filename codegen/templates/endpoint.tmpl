@@ -55,7 +55,10 @@ type {{$handlerName}} struct {
 }
 
 // New{{$handlerName}} creates a handler
-func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
+func New{{$handlerName}}(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
@@ -66,7 +69,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			{{$middleware.Name}}.NewMiddleWare(
-				deps.Default.Logger, deps.Default.Scope,
+				g,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.Options -}}
 					{{$key}} : {{$value}},

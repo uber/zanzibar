@@ -25,6 +25,7 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	handler := &{{$handlerName}}{

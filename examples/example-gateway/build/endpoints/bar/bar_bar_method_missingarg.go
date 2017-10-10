@@ -42,7 +42,10 @@ type BarMissingArgHandler struct {
 }
 
 // NewBarMissingArgHandler creates a handler
-func NewBarMissingArgHandler(deps *module.Dependencies) *BarMissingArgHandler {
+func NewBarMissingArgHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *BarMissingArgHandler {
 	handler := &BarMissingArgHandler{
 		Clients: deps.Client,
 	}

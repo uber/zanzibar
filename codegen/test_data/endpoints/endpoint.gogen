@@ -35,19 +35,19 @@ type Endpoint interface {
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(deps *module.Dependencies) Endpoint {
+func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		BarArgNotStructHandler:             NewBarArgNotStructHandler(deps),
-		BarArgWithHeadersHandler:           NewBarArgWithHeadersHandler(deps),
-		BarArgWithQueryParamsHandler:       NewBarArgWithQueryParamsHandler(deps),
-		BarArgWithNestedQueryParamsHandler: NewBarArgWithNestedQueryParamsHandler(deps),
-		BarArgWithQueryHeaderHandler:       NewBarArgWithQueryHeaderHandler(deps),
-		BarArgWithParamsHandler:            NewBarArgWithParamsHandler(deps),
-		BarArgWithManyQueryParamsHandler:   NewBarArgWithManyQueryParamsHandler(deps),
-		BarMissingArgHandler:               NewBarMissingArgHandler(deps),
-		BarNoRequestHandler:                NewBarNoRequestHandler(deps),
-		BarNormalHandler:                   NewBarNormalHandler(deps),
-		BarTooManyArgsHandler:              NewBarTooManyArgsHandler(deps),
+		BarArgNotStructHandler:             NewBarArgNotStructHandler(g, deps),
+		BarArgWithHeadersHandler:           NewBarArgWithHeadersHandler(g, deps),
+		BarArgWithQueryParamsHandler:       NewBarArgWithQueryParamsHandler(g, deps),
+		BarArgWithNestedQueryParamsHandler: NewBarArgWithNestedQueryParamsHandler(g, deps),
+		BarArgWithQueryHeaderHandler:       NewBarArgWithQueryHeaderHandler(g, deps),
+		BarArgWithParamsHandler:            NewBarArgWithParamsHandler(g, deps),
+		BarArgWithManyQueryParamsHandler:   NewBarArgWithManyQueryParamsHandler(g, deps),
+		BarMissingArgHandler:               NewBarMissingArgHandler(g, deps),
+		BarNoRequestHandler:                NewBarNoRequestHandler(g, deps),
+		BarNormalHandler:                   NewBarNormalHandler(g, deps),
+		BarTooManyArgsHandler:              NewBarTooManyArgsHandler(g, deps),
 	}
 }
 

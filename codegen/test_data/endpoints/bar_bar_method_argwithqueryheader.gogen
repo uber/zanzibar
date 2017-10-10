@@ -43,7 +43,10 @@ type BarArgWithQueryHeaderHandler struct {
 }
 
 // NewBarArgWithQueryHeaderHandler creates a handler
-func NewBarArgWithQueryHeaderHandler(deps *module.Dependencies) *BarArgWithQueryHeaderHandler {
+func NewBarArgWithQueryHeaderHandler(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) *BarArgWithQueryHeaderHandler {
 	handler := &BarArgWithQueryHeaderHandler{
 		Clients: deps.Client,
 	}
