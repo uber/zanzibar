@@ -72,11 +72,13 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
+	endpointRequest := []byte(`{"arg":{"b1":true,"i3":42,"s2":"hello"}}`)
+
 	res, err := gateway.MakeRequest(
 		"POST",
 		"/baz/call",
 		headers,
-		bytes.NewReader([]byte(`{"arg":{"b1":true,"i3":42,"s2":"hello"}}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

@@ -73,8 +73,10 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 
 		w.WriteHeader(200)
 
+		payload := []byte(`{"intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)
+
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte(`{"intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)); err != nil {
+		if _, err := w.Write(payload); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
@@ -86,11 +88,13 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
+	endpointRequest := []byte(`{"request":{"boolField":true,"stringField":"foo"}}`)
+
 	res, err := gateway.MakeRequest(
 		"POST",
 		"/bar/bar-path",
 		headers,
-		bytes.NewReader([]byte(`{"request":{"boolField":true,"stringField":"foo"}}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

@@ -6,9 +6,54 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::ping",
 	"workflowType": "tchannelClient",
-	"clientID": "baz",
+	"clientId": "baz",
 	"clientMethod": "Ping",
-	"testFixtures": [],
+	"testFixtures": {
+		"successfulRequest": {
+			"testName": "successfulRequest",
+			"testServiceName": "example-gateway",
+			"endpointId": "baz",
+			"handleId": "ping",
+			"endpointRequest": {
+				"requestType": "http",
+				"httpRequest": {
+					"method": "GET"
+				}
+			},
+			"endpointReqHeaders": {},
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200,
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"message": "pong"
+						}
+					}
+				}
+			},
+			"endpointResHeaders": {},
+			"clientTestFixtures": {
+				"baz::ping": {
+					"clientId": "baz",
+					"clientMethod": "ping",
+					"clientRequest": {
+						"requestType":"tchannel",
+						"tchannelRequest":{}
+					},
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"message": "pong"
+						}
+					},
+					"clientResHeaders": {}
+				}
+			}
+		}
+	},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

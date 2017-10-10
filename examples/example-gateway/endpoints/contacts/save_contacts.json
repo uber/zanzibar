@@ -7,8 +7,8 @@
 	"thriftMethodName": "Contacts::saveContacts",
 	"workflowType": "custom",
 	"workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts",
-	"testFixtures": [],
+	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {},
-	"resHeaderMap": {}	
+	"resHeaderMap": {}
 }

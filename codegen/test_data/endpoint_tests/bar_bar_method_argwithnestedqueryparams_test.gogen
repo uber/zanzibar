@@ -34,31 +34,31 @@ import (
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
-func getDirNameTooManyArgsSuccessfulRequest() string {
+func getDirNameArgWithNestedQueryParamsJsonPanic() string {
 	_, file, _, _ := runtime.Caller(0)
 
 	return filepath.Dir(file)
 }
 
-func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
+func TestArgWithNestedQueryParamsJsonPanicOKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"bar"},
 		TestBinary: filepath.Join(
-			getDirNameTooManyArgsSuccessfulRequest(),
+			getDirNameArgWithNestedQueryParamsJsonPanic(),
 			"../../..",
 			"build", "services", "example-gateway",
 			"main", "main.go",
 		),
 		ConfigFiles: []string{
 			filepath.Join(
-				getDirNameTooManyArgsSuccessfulRequest(),
+				getDirNameArgWithNestedQueryParamsJsonPanic(),
 				"../../..",
 				"config", "production.json",
 			),
 			filepath.Join(
-				getDirNameTooManyArgsSuccessfulRequest(),
+				getDirNameArgWithNestedQueryParamsJsonPanic(),
 				"../../..",
 				"config", "example-gateway", "production.json",
 			),
@@ -69,23 +69,11 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakeTooManyArgs := func(w http.ResponseWriter, r *http.Request) {
-
-		assert.Equal(
-			t,
-			"test-token",
-			r.Header.Get("X-Token"))
-		assert.Equal(
-			t,
-			"test-uuid",
-			r.Header.Get("X-Uuid"))
-
-		w.Header().Set("X-Token", "test-token")
-		w.Header().Set("X-Uuid", "test-uuid")
+	fakeArgWithNestedQueryParams := func(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(200)
 
-		payload := []byte(`{"intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)
+		payload := []byte(`{}`)
 
 		// TODO(zw): generate client response.
 		if _, err := w.Write(payload); err != nil {
@@ -95,18 +83,16 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/too-many-args-path", fakeTooManyArgs,
+		"GET", "/bar/argWithNestedQueryParams", fakeArgWithNestedQueryParams,
 	)
 
 	headers := map[string]string{}
-	headers["X-Token"] = "test-token"
-	headers["X-Uuid"] = "test-uuid"
 
-	endpointRequest := []byte(`{"request":{"boolField":true,"stringField":"foo"}}`)
+	endpointRequest := []byte(`{"request":"foo"}`)
 
 	res, err := gateway.MakeRequest(
-		"POST",
-		"/bar/too-many-args-path",
+		"GET",
+		"/bar/argWithNestedQueryParams",
 		headers,
 		bytes.NewReader(endpointRequest),
 	)
@@ -115,14 +101,6 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	assert.Equal(t, 200, res.StatusCode)
-	assert.Equal(
-		t,
-		"test-token",
-		res.Header.Get("X-Token"))
-	assert.Equal(
-		t,
-		"test-uuid",
-		res.Header.Get("X-Uuid"))
 
 	assert.Equal(t, 1, counter)
 }

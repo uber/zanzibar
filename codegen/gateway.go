@@ -389,8 +389,7 @@ type EndpointSpec struct {
 	// ThriftServiceName, which thrift service to use.
 	ThriftServiceName string
 	// TestFixtures, meta data to generate tests,
-	// TODO figure out struct type
-	TestFixtures []interface{}
+	TestFixtures map[string]*EndpointTestFixture
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec
 	// ReqTransforms, a map from client request fields to endpoint
@@ -497,7 +496,7 @@ func NewEndpointSpec(
 
 	workflowType := endpointConfigObj["workflowType"].(string)
 	if workflowType == "httpClient" || workflowType == "tchannelClient" {
-		iclientID, ok := endpointConfigObj["clientID"]
+		iclientID, ok := endpointConfigObj["clientId"]
 		if !ok {
 			return nil, errors.Errorf(
 				"endpoint config %q must have clientName field", jsonFile,
@@ -576,12 +575,31 @@ func NewEndpointSpec(
 	return augmentHTTPEndpointSpec(espec, endpointConfigObj, midSpecs)
 }
 
+func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
+	field, ok := endpointConfigObj["testFixtures"]
+	if !ok {
+		return nil, errors.Errorf("missing testFixtures field")
+	}
+	testFixturesRaw, err := json.Marshal(field)
+	if err != nil {
+		return nil, err
+	}
+	var ret map[string]*EndpointTestFixture
+	err = json.Unmarshal(testFixturesRaw, &ret)
+	return ret, err
+}
+
 func augmentHTTPEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
-	espec.TestFixtures = endpointConfigObj["testFixtures"].([]interface{})
+
+	testFixtures, err := testFixtures(endpointConfigObj)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to parse test cases")
+	}
+	espec.TestFixtures = testFixtures
 
 	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 	if !ok {

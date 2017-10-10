@@ -86,17 +86,6 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	/* TODO: delete this
-	gateway, err := codegen.NewGatewaySpec(
-		moduleInstances,
-		packageHelper,
-		absGatewayPath,
-		"./endpoints",
-		"./middlewares/middleware-config.json",
-		"example-gateway",
-	)
-	*/
-
 	if !assert.NoError(t, err, "failed to create gateway spec %s", err) {
 		return
 	}
@@ -122,6 +111,7 @@ func TestGenerateBar(t *testing.T) {
 	}
 
 	for _, file := range endpoints {
+		// TODO: if test fixtures not present do not generate golden file
 		if file.IsDir() || isTestFile(file.Name()) {
 			continue
 		}

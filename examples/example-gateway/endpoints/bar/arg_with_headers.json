@@ -6,9 +6,9 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::argWithHeaders",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "ArgWithHeaders",
-	"testFixtures": [],
+	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {
 		"X-Uuid": "X-Uuid"

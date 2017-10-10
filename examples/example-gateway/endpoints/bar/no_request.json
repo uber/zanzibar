@@ -6,9 +6,52 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::noRequest",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "NoRequest",
-	"testFixtures": [],
+	"testFixtures": {
+		"successfulRequest": {
+			"testName": "successfulRequest",
+			"testServiceName": "example-gateway",
+			"endpointId": "bar",
+			"handleId": "noRequest",
+			"endpointRequest": {
+				"requestType": "http",
+				"httpRequest": {
+					"method": "GET"
+				}
+			},
+			"endpointReqHeaders": {},
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200
+				}
+			},
+			"endpointResHeaders": {},
+			"clientTestFixtures": {
+				"bar::noRequest": {
+					"clientId": "bar",
+					"clientMethod": "noRequest",
+					"clientRequest": {
+						"requestType": "tchannel",
+						"tchannelRequest": {}
+					},
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"stringField": "foo",
+							"intWithRange": 0,
+							"intWithoutRange": 1,
+							"mapIntWithRange": {},
+							"mapIntWithoutRange": {}
+						}
+					},
+					"clientResHeaders": {}
+				}
+			}
+		}
+	},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

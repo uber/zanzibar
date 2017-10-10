@@ -64,12 +64,12 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		"/",
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest("clientId", "DoStuff", client)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not serialize clientID.DoStuff request json: cannot serialize",
+		"Could not serialize clientId.DoStuff request json: cannot serialize",
 		err.Error(),
 	)
 
@@ -97,12 +97,12 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		"/",
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest("clientId", "DoStuff", client)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not create outbound clientID.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
+		"Could not create outbound clientId.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
 
