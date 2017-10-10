@@ -94,6 +94,7 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.POST("/validate-updates", h.ValidateUpdates)
 	r.POST("/create-diff", h.CreateDiff)
 	r.POST("/land-diff", h.LandDiff)
+	r.POST("/thrift-file-parsed", h.ThriftModuleToCode)
 	return r
 }
 
@@ -309,6 +310,26 @@ func (h *Handler) ValidateUpdates(w http.ResponseWriter, r *http.Request, ps htt
 	h.WriteJSON(w, http.StatusOK, map[string]string{
 		"Status": "OK",
 	})
+}
+
+type thriftToCodeResponse struct {
+	Content string `json:"content"`
+}
+
+// ThriftModuleToCode takes a module structure and converts it to code
+func (h *Handler) ThriftModuleToCode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	req := &Module{}
+	b, err := UnmarshalJSONBody(r, req)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for converting a thrift module"))
+		return
+	}
+	h.logger.Info("converting to a thrift module.",
+		zap.String("request", string(b)),
+	)
+
+	code := req.Code()
+	h.WriteJSON(w, http.StatusOK, &thriftToCodeResponse{Content: code})
 }
 
 type createDiffResponse struct {
