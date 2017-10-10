@@ -38,19 +38,18 @@ import (
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceCallHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *SimpleServiceCallHandler {
 	handler := &SimpleServiceCallHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		gateway.Logger, gateway.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"bazTChannel", "call", "SimpleService::Call",
 		handler,
 	)
 	return handler
-
 }
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".

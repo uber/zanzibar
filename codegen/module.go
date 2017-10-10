@@ -227,7 +227,6 @@ func (system *ModuleSystem) populateResolvedDependencies(
 			}
 
 			dependencyClassNames[classDependency.ClassName] = true
-			classInstance.HasDependencies = true
 			classInstance.ResolvedDependencies[classDependency.ClassName] =
 				appendUniqueModule(resolvedDependencies, dependencyInstance)
 		}
@@ -745,7 +744,6 @@ func (system *ModuleSystem) readInstance(
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
 		DependencyOrder:       []string{},
-		HasDependencies:       false,
 		JSONFileName:          jsonFileName,
 		JSONFileRaw:           raw,
 	}, nil
@@ -1111,8 +1109,6 @@ type ModuleInstance struct {
 	// DependencyOrder is the bottom to top order in which the recursively
 	// resolved dependency class names can depend on each other
 	DependencyOrder []string
-	// HasDependencies is true if the instance has one or more dependencies
-	HasDependencies bool
 	// The JSONFileName is file name of the instance json file
 	JSONFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing

@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
@@ -49,7 +50,8 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 
 // NewHTTPClient will allocate a http client.
 func NewHTTPClient(
-	gateway *Gateway,
+	logger *zap.Logger,
+	scope tally.Scope,
 	clientID string,
 	methodNames []string,
 	baseURL string,
@@ -58,11 +60,11 @@ func NewHTTPClient(
 	loggers := make(map[string]*zap.Logger, len(methodNames))
 	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
 	for _, methodName := range methodNames {
-		loggers[methodName] = gateway.Logger.With(
-			zap.String("clientId", clientID),
+		loggers[methodName] = logger.With(
+			zap.String("clientID", clientID),
 			zap.String("methodName", methodName),
 		)
-		metrics[methodName] = NewOutboundHTTPMetrics(gateway.AllHostScope.Tagged(map[string]string{
+		metrics[methodName] = NewOutboundHTTPMetrics(scope.Tagged(map[string]string{
 			"client": clientID,
 			"method": methodName,
 		}))

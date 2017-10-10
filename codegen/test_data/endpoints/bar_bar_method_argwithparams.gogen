@@ -37,36 +37,38 @@ import (
 
 // BarArgWithParamsHandler is the handler for "/bar/argWithParams/:uuid/segment/:user-uuid"
 type BarArgWithParamsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithParamsHandler creates a handler
 func NewBarArgWithParamsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarArgWithParamsHandler {
-	return &BarArgWithParamsHandler{
+	handler := &BarArgWithParamsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "argWithParams",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/argWithParams/:uuid/segment/:user-uuid",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"argWithParams",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/argWithParams/:uuid/segment/:user-uuid".
-func (handler *BarArgWithParamsHandler) HandleRequest(
+func (h *BarArgWithParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -83,7 +85,7 @@ func (handler *BarArgWithParamsHandler) HandleRequest(
 	requestBody.Params.UserUUID = req.Params.ByName("user-uuid")
 
 	workflow := ArgWithParamsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

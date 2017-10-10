@@ -25,9 +25,13 @@ package module
 
 import (
 	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	barClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
+	contactsClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+	googlenowClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -38,7 +42,8 @@ import (
 	googlenowEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
-	"github.com/uber/zanzibar/runtime"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
@@ -67,45 +72,67 @@ type EndpointDependenciesNodes struct {
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the example-gateway service
 func InitializeDependencies(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
 	tree := &DependenciesTree{}
+
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
+	}
+
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(gateway)
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(gateway)
-	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(gateway)
-	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(gateway)
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(g, &barClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(g, &bazClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(g, &contactsClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(g, &googlenowClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
-	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(gateway, &barEndpointModule.Dependencies{
+	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(g, &barEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
 	})
-	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(gateway, &bazEndpointModule.Dependencies{
+	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(g, &bazEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
 		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(gateway, &baztchannelEndpointModule.Dependencies{
+	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(g, &baztchannelEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(gateway, &contactsEndpointModule.Dependencies{
+	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(g, &contactsEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(gateway, &googlenowEndpointModule.Dependencies{
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(g, &googlenowEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
 
 	return tree, &Dependencies{
+		Default: initializedDefaultDependencies,
 		Endpoint: &EndpointDependencies{
 			Bar:         initializedEndpointDependencies.Bar,
 			Baz:         initializedEndpointDependencies.Baz,

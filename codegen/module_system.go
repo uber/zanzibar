@@ -1073,10 +1073,6 @@ func GenerateDependencyStruct(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
-	if !instance.HasDependencies {
-		return nil, nil
-	}
-
 	return template.ExecTemplate(
 		"dependency_struct.tmpl",
 		instance,

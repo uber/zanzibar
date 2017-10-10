@@ -28,8 +28,10 @@ import (
 	"fmt"
 	"time"
 
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
-	"github.com/uber/zanzibar/runtime"
 )
 
 // Client defines google-now client interface.
@@ -53,16 +55,19 @@ type googleNowClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway) Client {
-	ip := gateway.Config.MustGetString("clients.google-now.ip")
-	port := gateway.Config.MustGetInt("clients.google-now.port")
+func NewClient(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
+	ip := deps.Default.Config.MustGetString("clients.google-now.ip")
+	port := deps.Default.Config.MustGetInt("clients.google-now.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
 
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			deps.Default.Logger, deps.Default.Scope,
 			"google-now",
 			[]string{
 				"AddCredentials",

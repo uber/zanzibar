@@ -57,8 +57,9 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClient(
-		bgateway.ActualGateway,
-		"clientId",
+		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.AllHostScope,
+		"clientID",
 		[]string{"DoStuff"},
 		"/",
 		time.Second,
@@ -89,8 +90,9 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	client := zanzibar.NewHTTPClient(
-		bgateway.ActualGateway,
-		"clientId",
+		bgateway.ActualGateway.Logger,
+		bgateway.ActualGateway.AllHostScope,
+		"clientID",
 		[]string{"DoStuff"},
 		"/",
 		time.Second,

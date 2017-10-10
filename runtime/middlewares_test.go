@@ -25,15 +25,13 @@ import (
 	"net/http"
 	"testing"
 
-	jsonschema "github.com/mcuadros/go-jsonschema-generator"
+	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
@@ -72,9 +70,9 @@ func TestHandlers(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			middlewareStack.Handle,
 		),
 	)
@@ -158,9 +156,9 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			middlewareStack.Handle,
 		),
 	)
@@ -212,9 +210,9 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			middlewareStack.Handle,
 		),
 	)
@@ -235,7 +233,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
 	ex := example.NewMiddleWare(
-		nil, // nil Gateway
+		nil, // *zanzibar.Gateway
 		example.Options{
 			Foo: "test_state",
 			Bar: 2,
@@ -274,9 +272,9 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway,
-			"foo",
-			"foo",
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
 			middlewareStack.Handle,
 		),
 	)

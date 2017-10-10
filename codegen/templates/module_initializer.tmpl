@@ -6,13 +6,11 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if $moduleInstance.HasDependencies -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
-	{{end -}}
-	{{end -}}
+	{{end}}
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
@@ -35,21 +33,25 @@ type {{$className | title}}DependenciesNodes struct {
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the {{$instance.InstanceName}} {{$instance.ClassName}}
 func InitializeDependencies(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
-	{{- if not $instance.HasDependencies}}
-	return nil, {{$instance.PackageInfo.ExportName}}(gateway)
-	{{- else}}
 	tree := &DependenciesTree{}
 
-	{{- range $idx, $className := $instance.DependencyOrder}}
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
+	}
+
+	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
 	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
-	{{- if $dependency.HasDependencies}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(g, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -58,13 +60,11 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	})
-	{{- else}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
-	{{- end}}
 	{{- end}}
 	{{end}}
 
 	return tree, &Dependencies{
+		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -73,5 +73,4 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	}
-	{{- end}}
 }

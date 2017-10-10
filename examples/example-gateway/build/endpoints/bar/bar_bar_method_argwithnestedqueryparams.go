@@ -38,36 +38,38 @@ import (
 
 // BarArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
 type BarArgWithNestedQueryParamsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithNestedQueryParamsHandler creates a handler
 func NewBarArgWithNestedQueryParamsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarArgWithNestedQueryParamsHandler {
-	return &BarArgWithNestedQueryParamsHandler{
+	handler := &BarArgWithNestedQueryParamsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "argWithNestedQueryParams",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/argWithNestedQueryParams",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"argWithNestedQueryParams",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/argWithNestedQueryParams".
-func (handler *BarArgWithNestedQueryParamsHandler) HandleRequest(
+func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -152,7 +154,7 @@ func (handler *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 
 	workflow := ArgWithNestedQueryParamsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

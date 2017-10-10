@@ -38,36 +38,38 @@ import (
 
 // BarArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
 type BarArgWithHeadersHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithHeadersHandler creates a handler
 func NewBarArgWithHeadersHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarArgWithHeadersHandler {
-	return &BarArgWithHeadersHandler{
+	handler := &BarArgWithHeadersHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "argWithHeaders",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/argWithHeaders",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"argWithHeaders",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/argWithHeaders".
-func (handler *BarArgWithHeadersHandler) HandleRequest(
+func (h *BarArgWithHeadersHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -86,7 +88,7 @@ func (handler *BarArgWithHeadersHandler) HandleRequest(
 	}
 
 	workflow := ArgWithHeadersEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

@@ -83,6 +83,14 @@ type Gateway struct {
 	//	- process reporter ?
 }
 
+// DefaultDependencies type
+type DefaultDependencies struct {
+	Logger  *zap.Logger
+	Scope   tally.Scope
+	Config  *StaticConfig
+	Channel *tchannel.Channel
+}
+
 // CreateGateway func
 func CreateGateway(
 	config *StaticConfig, opts *Options,
@@ -213,7 +221,9 @@ func (gateway *Gateway) registerPredefined() {
 	)
 
 	gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
-		gateway, "health", "health", gateway.handleHealthRequest,
+		gateway.Logger, gateway.AllHostScope,
+		"health", "health",
+		gateway.handleHealthRequest,
 	))
 }
 

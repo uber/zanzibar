@@ -40,47 +40,49 @@ import (
 
 // BarNormalHandler is the handler for "/bar/bar-path"
 type BarNormalHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarNormalHandler creates a handler
 func NewBarNormalHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarNormalHandler {
-	return &BarNormalHandler{
+	handler := &BarNormalHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "normal",
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			example.NewMiddleWare(
+				g,
+				example.Options{
+					Foo: "test",
+				},
+			),
+			logger.NewMiddleWare(
+				g,
+				logger.Options{},
+			),
+		}, handler.HandleRequest).Handle,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarNormalHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarNormalHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/bar-path",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"normal",
-			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				example.NewMiddleWare(
-					g,
-					example.Options{
-						Foo: "test",
-					},
-				),
-				logger.NewMiddleWare(
-					g,
-					logger.Options{},
-				),
-			}, handler.HandleRequest).Handle,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/bar-path".
-func (handler *BarNormalHandler) HandleRequest(
+func (h *BarNormalHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -91,7 +93,7 @@ func (handler *BarNormalHandler) HandleRequest(
 	}
 
 	workflow := NormalEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

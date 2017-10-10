@@ -40,36 +40,38 @@ import (
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
 type BarTooManyArgsHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarTooManyArgsHandler creates a handler
 func NewBarTooManyArgsHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarTooManyArgsHandler {
-	return &BarTooManyArgsHandler{
+	handler := &BarTooManyArgsHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "tooManyArgs",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarTooManyArgsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarTooManyArgsHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/too-many-args-path",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"tooManyArgs",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/too-many-args-path".
-func (handler *BarTooManyArgsHandler) HandleRequest(
+func (h *BarTooManyArgsHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -83,7 +85,7 @@ func (handler *BarTooManyArgsHandler) HandleRequest(
 	}
 
 	workflow := TooManyArgsEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

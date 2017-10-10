@@ -6,11 +6,14 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{end -}}
-	{{end -}}
+	{{end}}
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
+	Default *zanzibar.DefaultDependencies
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
 	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}

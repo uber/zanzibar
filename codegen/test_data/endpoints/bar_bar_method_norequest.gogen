@@ -37,43 +37,45 @@ import (
 
 // BarNoRequestHandler is the handler for "/bar/no-request-path"
 type BarNoRequestHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarNoRequestHandler creates a handler
 func NewBarNoRequestHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarNoRequestHandler {
-	return &BarNoRequestHandler{
+	handler := &BarNoRequestHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "noRequest",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarNoRequestHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarNoRequestHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/no-request-path",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"noRequest",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/no-request-path".
-func (handler *BarNoRequestHandler) HandleRequest(
+func (h *BarNoRequestHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
 	workflow := NoRequestEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

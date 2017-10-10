@@ -66,11 +66,14 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{end -}}
-	{{end -}}
+	{{end}}
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type Dependencies struct {
+	Default *zanzibar.DefaultDependencies
 	{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
 	{{$classType | pascal}} *{{$classType | pascal}}Dependencies
 	{{end -}}
@@ -97,7 +100,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1097, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1180, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -154,51 +157,53 @@ import (
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
 type {{$handlerName}} struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // New{{$handlerName}} creates a handler
 func New{{$handlerName}}(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
-	return &{{$handlerName}}{
+	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"{{$endpointId}}", "{{$handleId}}",
+		{{ if len $middlewares | ne 0 -}}
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			{{range $idx, $middleware := $middlewares -}}
+			{{$middleware.Name}}.NewMiddleWare(
+				g,
+				{{$middleware.Name}}.Options{
+				{{range $key, $value := $middleware.Options -}}
+					{{$key}} : {{$value}},
+				{{end -}}
+				},
+			),
+			{{end -}}
+		}, handler.HandleRequest).Handle,
+		{{- else -}}
+		handler.HandleRequest,
+		{{- end}}
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
+func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"{{$endpointId}}",
-			"{{$handleId}}",
-			{{ if len $middlewares | ne 0 -}}
-			zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-				{{range $idx, $middleware := $middlewares -}}
-				{{$middleware.Name}}.NewMiddleWare(
-					g,
-						{{$middleware.Name}}.Options{
-						{{range $key, $value := $middleware.Options -}}
-								{{$key}} : {{$value}},
-						{{end -}}
-						},
-				),
-				{{end -}}
-			}, handler.HandleRequest).Handle,
-			{{- else -}}
-			handler.HandleRequest,
-			{{- end}}
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
-func (handler *{{$handlerName}}) HandleRequest(
+func (h *{{$handlerName}}) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -233,8 +238,8 @@ func (handler *{{$handlerName}}) HandleRequest(
 	{{end}}
 
 	workflow := {{$workflow}}{
-		Clients: handler.Clients,
-		Logger: req.Logger,
+		Clients: h.Clients,
+		Logger:  req.Logger,
 		Request: req,
 	}
 
@@ -476,7 +481,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9976, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -498,7 +503,6 @@ type Endpoint interface{
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-{{- if $instance.HasDependencies}}
 func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
@@ -508,17 +512,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		{{- end}}
 	}
 }
-{{- else}}
-func NewEndpoint(g *zanzibar.Gateway) Endpoint {
-	return &EndpointHandlers{
-		{{- range $idx, $meta := $endpointMeta }}
-		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
-		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-		{{$handlerName}}: New{{$handlerName}}(g),
-		{{- end}}
-	}
-}
-{{- end}}
+
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
@@ -555,7 +549,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 2001, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1615, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -887,7 +881,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -925,16 +921,19 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(gateway *zanzibar.Gateway) Client {
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+func {{$exportName}}(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			deps.Default.Logger, deps.Default.Scope,
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
@@ -1134,7 +1133,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6705, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 6842, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1357,13 +1356,11 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if $moduleInstance.HasDependencies -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
-	{{end -}}
-	{{end -}}
+	{{end}}
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
@@ -1386,21 +1383,25 @@ type {{$className | title}}DependenciesNodes struct {
 // InitializeDependencies fully initializes all dependencies in the dep tree
 // for the {{$instance.InstanceName}} {{$instance.ClassName}}
 func InitializeDependencies(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 ) (*DependenciesTree, *Dependencies) {
-	{{- if not $instance.HasDependencies}}
-	return nil, {{$instance.PackageInfo.ExportName}}(gateway)
-	{{- else}}
 	tree := &DependenciesTree{}
 
-	{{- range $idx, $className := $instance.DependencyOrder}}
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
+	}
+
+	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
 	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
-	{{- if $dependency.HasDependencies}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(g, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1409,13 +1410,11 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	})
-	{{- else}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(gateway)
-	{{- end}}
 	{{- end}}
 	{{end}}
 
 	return tree, &Dependencies{
+		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
@@ -1424,7 +1423,6 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	}
-	{{- end}}
 }
 `)
 
@@ -1438,7 +1436,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3350, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1560,9 +1558,10 @@ import (
 	"go.uber.org/zap"	
 	"go.uber.org/zap/zapcore"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/tchannel-go"
 
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -1594,30 +1593,33 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(gateway *zanzibar.Gateway) Client {
+func {{$exportName}}(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
 	{{- /* this is the service discovery service name */}}
-	serviceName := gateway.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
-	if gateway.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
-	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
-	ip := gateway.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
 	{{else -}}
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeout"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
+		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
 	)
 
 	methodNames := map[string]string{
@@ -1633,9 +1635,9 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 	}
 
 	client := zanzibar.NewTChannelClient(
-		gateway.Channel,
-		gateway.Logger,
-		gateway.AllHostScope,
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",
@@ -1648,7 +1650,7 @@ func {{$exportName}}(gateway *zanzibar.Gateway) Client {
 
 	return &{{$clientName}}{
 		client: client,
-		logger: gateway.Logger,
+		logger: deps.Default.Logger,
 	}
 }
 
@@ -1724,7 +1726,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4843, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4995, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1875,19 +1877,18 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		gateway.Logger, gateway.AllHostScope,
+		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		handler,
 	)
 	return handler
-
 }
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
@@ -2013,7 +2014,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4623, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4619, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

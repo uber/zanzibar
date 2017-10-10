@@ -28,8 +28,10 @@ import (
 	"fmt"
 	"time"
 
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
-	"github.com/uber/zanzibar/runtime"
 )
 
 // Client defines contacts client interface.
@@ -49,16 +51,19 @@ type contactsClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(gateway *zanzibar.Gateway) Client {
-	ip := gateway.Config.MustGetString("clients.contacts.ip")
-	port := gateway.Config.MustGetInt("clients.contacts.port")
+func NewClient(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
+	ip := deps.Default.Config.MustGetString("clients.contacts.ip")
+	port := deps.Default.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
 
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			deps.Default.Logger, deps.Default.Scope,
 			"contacts",
 			[]string{
 				"SaveContacts",

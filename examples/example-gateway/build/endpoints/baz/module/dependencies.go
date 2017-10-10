@@ -25,11 +25,14 @@ package module
 
 import (
 	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the baz endpoint module
 type Dependencies struct {
-	Client *ClientDependencies
+	Default *zanzibar.DefaultDependencies
+	Client  *ClientDependencies
 }
 
 // ClientDependencies contains client dependencies

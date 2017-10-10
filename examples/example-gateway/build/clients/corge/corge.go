@@ -32,8 +32,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
@@ -47,23 +48,26 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service corge.
-func NewClient(gateway *zanzibar.Gateway) Client {
-	serviceName := gateway.Config.MustGetString("clients.corge.serviceName")
+func NewClient(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
+	serviceName := deps.Default.Config.MustGetString("clients.corge.serviceName")
 	var routingKey string
-	if gateway.Config.ContainsKey("clients.corge.routingKey") {
-		routingKey = gateway.Config.MustGetString("clients.corge.routingKey")
+	if deps.Default.Config.ContainsKey("clients.corge.routingKey") {
+		routingKey = deps.Default.Config.MustGetString("clients.corge.routingKey")
 	}
-	sc := gateway.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	ip := gateway.Config.MustGetString("sidecarRouter.default.tchannel.ip")
-	port := gateway.Config.MustGetInt("sidecarRouter.default.tchannel.port")
+	ip := deps.Default.Config.MustGetString("sidecarRouter.default.tchannel.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	timeout := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.corge.timeout"),
+		deps.Default.Config.MustGetInt("clients.corge.timeout"),
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
-		gateway.Config.MustGetInt("clients.corge.timeoutPerAttempt"),
+		deps.Default.Config.MustGetInt("clients.corge.timeoutPerAttempt"),
 	)
 
 	methodNames := map[string]string{
@@ -71,9 +75,9 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 	}
 
 	client := zanzibar.NewTChannelClient(
-		gateway.Channel,
-		gateway.Logger,
-		gateway.AllHostScope,
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "corge",
@@ -86,7 +90,7 @@ func NewClient(gateway *zanzibar.Gateway) Client {
 
 	return &corgeClient{
 		client: client,
-		logger: gateway.Logger,
+		logger: deps.Default.Logger,
 	}
 }
 

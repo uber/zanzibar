@@ -37,36 +37,38 @@ import (
 
 // BarArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
 type BarArgNotStructHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarArgNotStructHandler creates a handler
 func NewBarArgNotStructHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarArgNotStructHandler {
-	return &BarArgNotStructHandler{
+	handler := &BarArgNotStructHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "argNotStruct",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarArgNotStructHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarArgNotStructHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"argNotStruct",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".
-func (handler *BarArgNotStructHandler) HandleRequest(
+func (h *BarArgNotStructHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -77,7 +79,7 @@ func (handler *BarArgNotStructHandler) HandleRequest(
 	}
 
 	workflow := ArgNotStructEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

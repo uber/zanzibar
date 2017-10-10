@@ -38,43 +38,45 @@ import (
 
 // BarHelloWorldHandler is the handler for "/bar/hello"
 type BarHelloWorldHandler struct {
-	Clients *module.ClientDependencies
+	Clients  *module.ClientDependencies
+	endpoint *zanzibar.RouterEndpoint
 }
 
 // NewBarHelloWorldHandler creates a handler
 func NewBarHelloWorldHandler(
-	gateway *zanzibar.Gateway,
+	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 ) *BarHelloWorldHandler {
-	return &BarHelloWorldHandler{
+	handler := &BarHelloWorldHandler{
 		Clients: deps.Client,
 	}
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.Logger, deps.Default.Scope,
+		"bar", "helloWorld",
+		handler.HandleRequest,
+	)
+	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (handler *BarHelloWorldHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarHelloWorldHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
 		"GET", "/bar/hello",
-		zanzibar.NewRouterEndpoint(
-			g,
-			"bar",
-			"helloWorld",
-			handler.HandleRequest,
-		),
+		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
 // HandleRequest handles "/bar/hello".
-func (handler *BarHelloWorldHandler) HandleRequest(
+func (h *BarHelloWorldHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
 	workflow := HelloWorldEndpoint{
-		Clients: handler.Clients,
+		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}

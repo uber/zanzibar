@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
@@ -47,16 +49,19 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(gateway *zanzibar.Gateway) Client {
-	ip := gateway.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := gateway.Config.MustGetInt("clients.{{$clientID}}.port")
+func {{$exportName}}(
+	g *zanzibar.Gateway,
+	deps *module.Dependencies,
+) Client {
+	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
+	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(gateway.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		httpClient: zanzibar.NewHTTPClient(
-			gateway,
+			deps.Default.Logger, deps.Default.Scope,
 			"{{$clientID}}",
 			[]string{
 				{{range $serviceMethod, $methodName := $exposedMethods -}}
