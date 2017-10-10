@@ -84,7 +84,7 @@ for config_file in ${config_files}; do
 	dir=$(dirname "$config_file")
 	json_files=$(find "$dir" -name "*.json")
 	for json_file in ${json_files}; do
-		thrift_file=$(jq -r '.. | .thriftFile? | select(type != "null")' "$json_file")
+	    thrift_file=$(jq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$json_file")
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"
