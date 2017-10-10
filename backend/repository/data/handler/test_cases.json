@@ -11,7 +11,7 @@
 		"response": {
 			"code": 200,
 			"body": {
-				"clientID": "google-now",
+				"clientId": "google-now",
 				"clientMethod": "AddCredentials",
 				"endpointId": "googlenow",
 				"endpointType": "http",
@@ -2066,7 +2066,7 @@
 				],
 				"endpoint_updates": [
 					{
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "Compare",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -2078,7 +2078,7 @@
 						],
 						"reqHeaderMap": {},
 						"resHeaderMap": {},
-						"testFixtures": [],
+						"testFixtures": {},
 						"thriftFile": "endpoints/baz/baz.thrift",
 						"thriftFileSha": "{{placeholder}}",
 						"thriftMethodName": "SimpleService::compare",
@@ -2142,7 +2142,7 @@
 				],
 				"endpoint_updates": [
 					{
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "Compare",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -2150,7 +2150,55 @@
 						"middlewares": [],
 						"reqHeaderMap": {},
 						"resHeaderMap": {},
-						"testFixtures": [],
+						"testFixtures": {
+							"successfulRequest": {
+								"clientTestFixtures": {
+									"baz::compare": {
+										"clientId": "baz",
+										"clientMethod": "compare",
+										"clientReqHeaders": {},
+										"clientRequest": {},
+										"clientResHeaders": {},
+										"clientResponse": {
+											"httpResponse": {
+												"body": {
+													"bodyJson": {
+														"message": "different"
+													},
+													"bodyType": "json"
+												},
+												"statusCode": 200
+											},
+											"responseType": "http"
+										}
+									}
+								},
+								"endpointId": "baz",
+								"endpointReqHeaders": {},
+								"endpointRequest": {
+									"arg1": {
+										"b1": true,
+										"i3": 42,
+										"s2": "hello"
+									},
+									"arg2": {
+										"b1": true,
+										"i3": 42,
+										"s2": "hola"
+									}
+								},
+								"endpointResHeaders": {},
+								"endpointResponse": {
+									"responseType": "tchannel",
+									"tchannelResponse": {
+										"message": "different"
+									}
+								},
+								"handleId": "compare",
+								"testName": "successfulRequest",
+								"testServiceName": "example-gateway"
+							}
+						},
 						"thriftFile": "endpoints/baz/baz.thrift",
 						"thriftFileSha": "{{placeholder}}",
 						"thriftMethodName": "SimpleService::compare",
@@ -2214,7 +2262,7 @@
 				],
 				"endpoint_updates": [
 					{
-						"clientID": "bazzzzzzzz",
+						"clientId": "bazzzzzzzz",
 						"clientMethod": "Compare",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -2222,7 +2270,7 @@
 						"middlewares": [],
 						"reqHeaderMap": {},
 						"resHeaderMap": {},
-						"testFixtures": [],
+						"testFixtures": {},
 						"thriftFile": "endpoints/baz/baz.thrift",
 						"thriftFileSha": "{{placeholder}}",
 						"thriftMethodName": "SimpleService::compare",
@@ -2385,7 +2433,7 @@
 					"EndpointConfigDir": "./endpoints",
 					"Endpoints": {
 						"bar.argNotStruct": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgNotStruct",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2399,7 +2447,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithHeaders": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithHeaders",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2413,7 +2461,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithManyQueryParams": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithManyQueryParams",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2427,7 +2475,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithNestedQueryParams": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithNestedQueryParams",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2441,7 +2489,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithParams": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithParams",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2455,7 +2503,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithQueryHeader": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithQueryHeader",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2469,7 +2517,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.argWithQueryParams": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "ArgWithQueryParams",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2483,7 +2531,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.helloWorld": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "Hello",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2497,7 +2545,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.missingArg": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "MissingArg",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2511,7 +2559,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.noRequest": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "NoRequest",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2525,7 +2573,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.normal": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "Normal",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2539,7 +2587,7 @@
 							"workflowType": "httpClient"
 						},
 						"bar.tooManyArgs": {
-							"clientID": "bar",
+							"clientId": "bar",
 							"clientMethod": "TooManyArgs",
 							"endpointId": "bar",
 							"endpointType": "http",
@@ -2553,7 +2601,7 @@
 							"workflowType": "httpClient"
 						},
 						"baz.call": {
-							"clientID": "baz",
+							"clientId": "baz",
 							"clientMethod": "Call",
 							"endpointId": "baz",
 							"endpointType": "http",
@@ -2567,7 +2615,7 @@
 							"workflowType": "tchannelClient"
 						},
 						"baz.compare": {
-							"clientID": "baz",
+							"clientId": "baz",
 							"clientMethod": "Compare",
 							"endpointId": "baz",
 							"endpointType": "http",
@@ -2581,7 +2629,7 @@
 							"workflowType": "tchannelClient"
 						},
 						"baz.ping": {
-							"clientID": "baz",
+							"clientId": "baz",
 							"clientMethod": "Ping",
 							"endpointId": "baz",
 							"endpointType": "http",
@@ -2595,7 +2643,7 @@
 							"workflowType": "tchannelClient"
 						},
 						"baz.sillyNoop": {
-							"clientID": "baz",
+							"clientId": "baz",
 							"clientMethod": "DeliberateDiffNoop",
 							"endpointId": "baz",
 							"endpointType": "http",
@@ -2609,7 +2657,7 @@
 							"workflowType": "tchannelClient"
 						},
 						"bazTChannel.call": {
-							"clientID": "",
+							"clientId": "",
 							"clientMethod": "",
 							"endpointId": "bazTChannel",
 							"endpointType": "tchannel",
@@ -2623,7 +2671,7 @@
 							"workflowType": "custom"
 						},
 						"contacts.saveContacts": {
-							"clientID": "",
+							"clientId": "",
 							"clientMethod": "",
 							"endpointId": "contacts",
 							"endpointType": "http",
@@ -2637,7 +2685,7 @@
 							"workflowType": "custom"
 						},
 						"googlenow.addCredentials": {
-							"clientID": "google-now",
+							"clientId": "google-now",
 							"clientMethod": "AddCredentials",
 							"endpointId": "googlenow",
 							"endpointType": "http",
@@ -2651,7 +2699,7 @@
 							"workflowType": "httpClient"
 						},
 						"googlenow.checkCredentials": {
-							"clientID": "google-now",
+							"clientId": "google-now",
 							"clientMethod": "CheckCredentials",
 							"endpointId": "googlenow",
 							"endpointType": "http",
@@ -3222,7 +3270,7 @@
 				"EndpointConfigDir": "./endpoints",
 				"Endpoints": {
 					"bar.argNotStruct": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgNotStruct",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3236,7 +3284,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithHeaders": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithHeaders",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3250,7 +3298,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithManyQueryParams": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithManyQueryParams",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3264,7 +3312,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithNestedQueryParams": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithNestedQueryParams",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3278,7 +3326,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithParams": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithParams",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3292,7 +3340,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithQueryHeader": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithQueryHeader",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3306,7 +3354,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.argWithQueryParams": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "ArgWithQueryParams",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3320,7 +3368,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.helloWorld": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "Hello",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3334,7 +3382,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.missingArg": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "MissingArg",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3348,7 +3396,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.noRequest": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "NoRequest",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3362,7 +3410,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.normal": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "Normal",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3376,7 +3424,7 @@
 						"workflowType": "httpClient"
 					},
 					"bar.tooManyArgs": {
-						"clientID": "bar",
+						"clientId": "bar",
 						"clientMethod": "TooManyArgs",
 						"endpointId": "bar",
 						"endpointType": "http",
@@ -3390,7 +3438,7 @@
 						"workflowType": "httpClient"
 					},
 					"baz.call": {
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "Call",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -3404,7 +3452,7 @@
 						"workflowType": "tchannelClient"
 					},
 					"baz.compare": {
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "Compare",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -3418,7 +3466,7 @@
 						"workflowType": "tchannelClient"
 					},
 					"baz.ping": {
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "Ping",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -3432,7 +3480,7 @@
 						"workflowType": "tchannelClient"
 					},
 					"baz.sillyNoop": {
-						"clientID": "baz",
+						"clientId": "baz",
 						"clientMethod": "DeliberateDiffNoop",
 						"endpointId": "baz",
 						"endpointType": "http",
@@ -3446,7 +3494,7 @@
 						"workflowType": "tchannelClient"
 					},
 					"bazTChannel.call": {
-						"clientID": "",
+						"clientId": "",
 						"clientMethod": "",
 						"endpointId": "bazTChannel",
 						"endpointType": "tchannel",
@@ -3460,7 +3508,7 @@
 						"workflowType": "custom"
 					},
 					"contacts.saveContacts": {
-						"clientID": "",
+						"clientId": "",
 						"clientMethod": "",
 						"endpointId": "contacts",
 						"endpointType": "http",
@@ -3474,7 +3522,7 @@
 						"workflowType": "custom"
 					},
 					"googlenow.addCredentials": {
-						"clientID": "google-now",
+						"clientId": "google-now",
 						"clientMethod": "AddCredentials",
 						"endpointId": "googlenow",
 						"endpointType": "http",
@@ -3488,7 +3536,7 @@
 						"workflowType": "httpClient"
 					},
 					"googlenow.checkCredentials": {
-						"clientID": "google-now",
+						"clientId": "google-now",
 						"clientMethod": "CheckCredentials",
 						"endpointId": "googlenow",
 						"endpointType": "http",

@@ -22,8 +22,6 @@ package codegen
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -65,44 +63,138 @@ type StructMeta struct {
 type EndpointTestMeta struct {
 	Instance           *ModuleInstance
 	Method             *MethodSpec
-	TestStubs          []TestStub
+	TestFixtures       map[string]*EndpointTestFixture `json:"testFixtures"`
 	ClientName         string
 	ClientID           string
 	RelativePathToRoot string
 	IncludedPackages   []GoPackageImport
 }
 
-// TestStub saves stubbed requests/responses for an endpoint test.
-type TestStub struct {
-	TestName               string
-	EndpointID             string
-	HandlerID              string
-	EndpointRequest        map[string]interface{} // Json blob
-	EndpointRequestString  string
-	EndpointReqHeaders     map[string]string      // Json blob
-	EndpointReqHeaderKeys  []string               // To keep in canonical order
-	EndpointResponse       map[string]interface{} // Json blob
-	EndpointResponseString string
-	EndpointResHeaders     map[string]string // Json blob
-	EndpointResHeaderKeys  []string          // To keep in canonical order
+// FixtureBlob is map[string]interface{} that implements default string
+// used for headers and (http | tchannel) request/response
+type FixtureBlob map[string]interface{}
 
-	ClientStubs []ClientStub
-
-	TestServiceName string // The service module that mounts the endpoint
+// String convert FixtureBlob to string
+func (fb *FixtureBlob) String() string {
+	str, err := json.Marshal(fb)
+	if err != nil {
+		panic(err)
+	}
+	return string(str)
 }
 
-// ClientStub saves stubbed client request/response for an endpoint test.
-type ClientStub struct {
-	ClientID             string
-	ClientMethod         string
-	ClientRequest        map[string]interface{} // Json blob
-	ClientRequestString  string
-	ClientReqHeaders     map[string]string      // Json blob
-	ClientReqHeaderKeys  []string               // To keep in canonical order
-	ClientResponse       map[string]interface{} // Json blob
-	ClientResponseString string
-	ClientResHeaders     map[string]string // Json blob
-	ClientResHeaderKeys  []string          // To keep in canonical order
+// BodyType can either be `json` or `string`
+type BodyType string
+
+// ProtocalType can either be `http` or `tchannel`
+type ProtocalType string
+
+// HTTPMethodType can only be valid http method
+type HTTPMethodType string
+
+// FixtureBody is used to create http body in test fixtures
+type FixtureBody struct {
+	BodyType   BodyType     `json:"bodyType,omitempty"`
+	BodyString string       `json:"bodyString,omitempty"` // set BodyString if response body is string
+	BodyJSON   *FixtureBlob `json:"bodyJson,omitempty"`   // set BodyJSON if response body is object
+}
+
+// String convert FixtureBody to string
+// This String() panics inside if type and value mismatch during unmarshal
+// because template cannot handle errors
+func (fb *FixtureBody) String() string {
+	switch fb.BodyType {
+	case "string":
+		return fb.BodyString
+	case "json":
+		if fb.BodyJSON == nil {
+			panic(errors.New("invalid http body type"))
+		}
+		return fb.BodyJSON.String()
+	default:
+		panic(errors.New("invalid http body type"))
+	}
+}
+
+// FixtureHTTPResponse is test fixture for http response
+type FixtureHTTPResponse struct {
+	StatusCode int          `json:"statusCode"`
+	Body       *FixtureBody `json:"body,omitempty"`
+}
+
+// FixtureResponse is test fixture for client/endpoint response
+type FixtureResponse struct {
+	ResponseType     ProtocalType         `json:"responseType"`
+	HTTPResponse     *FixtureHTTPResponse `json:"httpResponse,omitempty"`
+	TChannelResponse FixtureBlob          `json:"tchannelResponse,omitempty"`
+}
+
+// Body returns the string representation of FixtureResponse
+func (fr *FixtureResponse) Body() string {
+	switch fr.ResponseType {
+	case "tchannel":
+		return fr.TChannelResponse.String()
+	case "http":
+		res := ""
+		if fr.HTTPResponse.Body != nil {
+			res = fr.HTTPResponse.Body.String()
+		}
+		return res
+	default:
+		panic(errors.New("invalid response type"))
+	}
+}
+
+// FixtureHTTPRequest is test fixture for client/endpoint request
+type FixtureHTTPRequest struct {
+	Method HTTPMethodType `json:"method,omitempty"`
+	Body   *FixtureBody   `json:"body,omitempty"`
+}
+
+// FixtureRequest is test fixture for client/endpoint request
+type FixtureRequest struct {
+	RequestType     ProtocalType        `json:"requestType"`
+	HTTPRequest     *FixtureHTTPRequest `json:"httpRequest,omitempty"`
+	TChannelRequest FixtureBlob         `json:"tchannelRequest,omitempty"`
+}
+
+// Body returns the string representation of FixtureRequest
+func (fr *FixtureRequest) Body() string {
+	switch fr.RequestType {
+	case "tchannel":
+		return fr.TChannelRequest.String()
+	case "http":
+		res := ""
+		if fr.HTTPRequest.Body != nil {
+			res = fr.HTTPRequest.Body.String()
+		}
+		return res
+	default:
+		panic(errors.New("invalid request type"))
+	}
+}
+
+// EndpointTestFixture saves mocked requests/responses for an endpoint test.
+type EndpointTestFixture struct {
+	TestName           string                        `json:"testName"`
+	EndpointID         string                        `json:"endpointId"`
+	HandleID           string                        `json:"handleId"`
+	EndpointRequest    FixtureRequest                `json:"endpointRequest"` // there's no difference between http or tchannel request
+	EndpointReqHeaders FixtureBlob                   `json:"endpointReqHeaders"`
+	EndpointResponse   FixtureResponse               `json:"endpointResponse"`
+	EndpointResHeaders FixtureBlob                   `json:"endpointResHeaders"`
+	ClientTestFixtures map[string]*ClientTestFixture `json:"clientTestFixtures"`
+	TestServiceName    string                        `json:"testServiceName"` // The service module that mounts the endpoint
+}
+
+// ClientTestFixture saves mocked client request/response for an endpoint test.
+type ClientTestFixture struct {
+	ClientID         string          `json:"clientId"`
+	ClientMethod     string          `json:"clientMethod"`
+	ClientRequest    FixtureRequest  `json:"clientRequest"` // there's no difference between http or tchannel request
+	ClientReqHeaders FixtureBlob     `json:"clientReqHeaders"`
+	ClientResponse   FixtureResponse `json:"clientResponse"`
+	ClientResHeaders FixtureBlob     `json:"clientResHeaders"`
 }
 
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
@@ -784,6 +876,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 func (g *EndpointGenerator) generateEndpointTestFile(
 	e *EndpointSpec, instance *ModuleInstance, out map[string][]byte,
 ) error {
+	if len(e.TestFixtures) < 1 { // skip tests if testFixtures is missing
+		return nil
+	}
 	m := e.ModuleSpec
 	methodName := e.ThriftMethodName
 	serviceName := e.ThriftServiceName
@@ -800,99 +895,6 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		)
 	}
 
-	// Read test configurations
-	testConfigPath := e.EndpointTestConfigPath()
-
-	var testStubs []TestStub
-	file, err := ioutil.ReadFile(testConfigPath)
-	if err != nil {
-		// If the test file does not exist then skip test generation.
-		if os.IsNotExist(err) {
-			return nil
-		}
-
-		return errors.Wrapf(err,
-			"Error reading endpoint test config for service %q, method %q",
-			serviceName, method.Name)
-	}
-	err = json.Unmarshal(file, &testStubs)
-	if err != nil {
-		return errors.Wrapf(err,
-			"Error parsing test config file.")
-	}
-
-	for i := 0; i < len(testStubs); i++ {
-		testStub := &testStubs[i]
-		testStub.EndpointRequestString, err = jsonMarshal(
-			testStub.EndpointRequest)
-		if err != nil {
-			return errors.Wrapf(err,
-				"Error parsing JSON in test config.")
-		}
-		testStub.EndpointResponseString, err = jsonMarshal(
-			testStub.EndpointResponse)
-		if err != nil {
-			return errors.Wrapf(err,
-				"Error parsing JSON in test config.")
-		}
-		for j := 0; j < len(testStub.ClientStubs); j++ {
-			clientStub := &testStub.ClientStubs[j]
-			clientStub.ClientRequestString, err = jsonMarshal(
-				clientStub.ClientRequest)
-			if err != nil {
-				return errors.Wrapf(err,
-					"Error parsing JSON in test config.")
-			}
-			clientStub.ClientResponseString, err = jsonMarshal(
-				clientStub.ClientResponse)
-			if err != nil {
-				return errors.Wrapf(err,
-					"Error parsing JSON in test config.")
-			}
-			// Build canonical key list to keep templates in order
-			// when comparing to golden files.
-			clientStub.ClientReqHeaderKeys = make(
-				[]string,
-				len(clientStub.ClientReqHeaders))
-			i := 0
-			for k := range clientStub.ClientReqHeaders {
-				clientStub.ClientReqHeaderKeys[i] = k
-				i++
-			}
-			sort.Strings(clientStub.ClientReqHeaderKeys)
-			clientStub.ClientResHeaderKeys = make(
-				[]string,
-				len(clientStub.ClientResHeaders))
-			i = 0
-			for k := range clientStub.ClientResHeaders {
-				clientStub.ClientResHeaderKeys[i] = k
-				i++
-			}
-			sort.Strings(clientStub.ClientResHeaderKeys)
-
-		}
-		// Build canonical key list to keep templates in order
-		// when comparing to golden files.
-		testStub.EndpointReqHeaderKeys = make(
-			[]string,
-			len(testStub.EndpointReqHeaders))
-		i := 0
-		for k := range testStub.EndpointReqHeaders {
-			testStub.EndpointReqHeaderKeys[i] = k
-			i++
-		}
-		sort.Strings(testStub.EndpointReqHeaderKeys)
-		testStub.EndpointResHeaderKeys = make(
-			[]string,
-			len(testStub.EndpointResHeaders))
-		i = 0
-		for k := range testStub.EndpointResHeaders {
-			testStub.EndpointResHeaderKeys[i] = k
-			i++
-		}
-		sort.Strings(testStub.EndpointResHeaderKeys)
-	}
-
 	endpointDirectory := filepath.Join(
 		g.packageHelper.CodeGenTargetPath(),
 		instance.Directory,
@@ -904,10 +906,10 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 	}
 
 	meta := &EndpointTestMeta{
-		Instance:  instance,
-		Method:    method,
-		TestStubs: testStubs,
-		ClientID:  e.ClientSpec.ClientID,
+		Instance:     instance,
+		Method:       method,
+		TestFixtures: e.TestFixtures,
+		ClientID:     e.ClientSpec.ClientID,
 	}
 
 	relativePath, err := filepath.Rel(

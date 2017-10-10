@@ -68,11 +68,13 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
+	endpointRequest := []byte(`{}`)
+
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/baz/silly-noop",
 		headers,
-		bytes.NewReader([]byte(`{}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

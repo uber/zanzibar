@@ -6,53 +6,68 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "SimpleService::compare",
 	"workflowType": "tchannelClient",
-	"clientID": "baz",
+	"clientId": "baz",
 	"clientMethod": "Compare",
-	"testFixtures": [
-		{
+	"testFixtures": {
+		"successfulRequest": {
 			"testName": "successfulRequest",
 			"endpointId": "baz",
-			"handlerId": "compare",
+			"handleId": "compare",
 			"endpointRequest": {
-				"arg1": {
-					"b1": true,
-					"i3": 42,
-					"s2": "hello"
-				},
-				"arg2": {
-					"b1": true,
-					"i3": 42,
-					"s2": "hola"
+				"requestType": "http",
+				"httpRequest": {
+					"method": "POST",
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"arg1": {
+								"b1": true,
+								"i3": 42,
+								"s2": "hello"
+							},
+							"arg2": {
+								"b1": true,
+								"i3": 42,
+								"s2": "hola"
+							}
+						}
+					}
 				}
 			},
-			"endpointRequestString": "",
 			"endpointReqHeaders": {},
-			"endpointReqHeaderKeys": null,
 			"endpointResponse": {
-				"message": "different"
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200,
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"message": "different"
+						}
+					}
+				}
 			},
-			"endpointResponseString": "",
 			"endpointResHeaders": {},
-			"endpointResHeaderKeys": null,
-			"clientStubs": [
-				{
+			"clientTestFixtures": {
+				"baz::compare": {
 					"clientId": "baz",
 					"clientMethod": "compare",
-					"clientRequest": {},
-					"clientRequestString": "",
-					"clientReqHeaders": {},
-					"clientReqHeaderKeys": null,
-					"clientResponse": {
-						"message": "different"
+					"clientRequest": {
+						"requestType": "tchannel"
 					},
-					"clientResponseString": "",
-					"clientResHeaders": {},
-					"clientResHeaderKeys": null
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"message": "different"
+						}
+					},
+					"clientResHeaders": {}
 				}
-			],
+			},
 			"testServiceName": "example-gateway"
 		}
-	],
+	},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

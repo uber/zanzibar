@@ -73,8 +73,10 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 
 		w.WriteHeader(200)
 
+		payload := []byte(`null`)
+
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte(`{}`)); err != nil {
+		if _, err := w.Write(payload); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
@@ -86,11 +88,13 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
+	endpointRequest := []byte(`{"request":"foo"}`)
+
 	res, err := gateway.MakeRequest(
 		"POST",
 		"/bar/arg-not-struct-path",
 		headers,
-		bytes.NewReader([]byte(`{"request":"foo"}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

@@ -6,9 +6,9 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::argWithQueryParams",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "ArgWithQueryParams",
-	"testFixtures": [],
+	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {}

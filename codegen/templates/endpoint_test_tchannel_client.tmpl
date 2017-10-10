@@ -36,10 +36,8 @@ import (
 {{- $headers := .ReqHeaders -}}
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
-{{range $.TestStubs}}
-{{- $endpointID := .EndpointID }}
-{{- $handlerID := .HandlerID }}
-func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+{{range $testName, $testFixture := $.TestFixtures}}
+func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKResponse(t *testing.T) {
 	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
@@ -47,16 +45,16 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
-		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
+		TestBinary:            util.DefaultMainFile("{{$testFixture.TestServiceName}}"),
+		ConfigFiles:           util.DefaultConfigFiles("{{$testFixture.TestServiceName}}"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	{{range .ClientStubs}}
-	{{$clientFunc := printf "fake%s" (title .ClientMethod) -}}
+	{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
+	{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
 	{{$clientFunc}} := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -66,7 +64,7 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 		{{$counter}}++
 
-		{{range $k, $v := .ClientReqHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
 		assert.Equal(
 			t,
 			"{{$v}}",
@@ -74,16 +72,18 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		{{end -}}
 
 		var resHeaders map[string]string
-		{{if (len .ClientResHeaders) -}}
+		{{if (len $clientCallFixture.ClientResHeaders) -}}
 		resHeaders = map[string]string{}
 		{{end -}}
-		{{range $k, $v := .ClientResHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
 		resHeaders["{{$k}}"] = "{{$v}}"
 		{{end}}
 
 		{{if $clientMethod.ResponseType -}}
 		var res {{unref $clientMethod.ResponseType}}
-		err := json.Unmarshal([]byte(`{{.ClientResponseString}}`), &res)
+
+		clientResponse := []byte({{printf "`%s`" $clientCallFixture.ClientResponse.Body}})
+		err := json.Unmarshal(clientResponse, &res)
 		if err!= nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
 			return nil, resHeaders, err
@@ -95,23 +95,29 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
+		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
 
 	headers := map[string]string{}
 	{{ if $headers -}}
-	{{range $k, $v := .EndpointReqHeaders -}}
+	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
 	{{end}}
+	{{- end}}
+
+	{{ if $testFixture.EndpointRequest.Body -}}
+	endpointRequest := []byte({{printf "`%s`" $testFixture.EndpointRequest.Body}})
+	{{else}}
+	endpointRequest := []byte(`{}`)
 	{{- end}}
 
 	res, err := gateway.MakeRequest(
 		"{{$.Method.HTTPMethod}}",
 		"{{$.Method.HTTPPath}}",
 		headers,
-		bytes.NewReader([]byte(`{{.EndpointRequestString}}`)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -127,14 +133,14 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 
 	assert.Equal(t, 1, {{$counter}})
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
-	{{range $k, $v := .EndpointResHeaders -}}
+	{{range $k, $v := $testFixture.EndpointResHeaders -}}
 	assert.Equal(
 		t,
 		"{{$v}}",
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.Equal(t, `{{.EndpointResponseString}}`, string(data))
+		assert.Equal(t, []byte(`{{$testFixture.EndpointResponse.Body}}`), data)
 	{{end -}}
 }
 

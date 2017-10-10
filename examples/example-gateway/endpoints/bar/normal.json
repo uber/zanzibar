@@ -6,54 +6,69 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::normal",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "Normal",
-	"testFixtures": [
-		{
+	"testFixtures": {
+		"successfulRequest": {
 			"testName": "successfulRequest",
 			"endpointId": "bar",
-			"handlerId": "normal",
+			"handleId": "normal",
 			"endpointRequest": {
-				"request": {
-					"boolField": true,
-					"stringField": "foo"
+				"requestType": "http",
+				"httpRequest": {
+					"method": "POST",
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"request": {
+								"boolField": true,
+								"stringField": "foo"
+							}
+						}
+					}
 				}
 			},
-			"endpointRequestString": "",
 			"endpointReqHeaders": {},
-			"endpointReqHeaderKeys": null,
-			"endpointResponse": {},
-			"endpointResponseString": "",
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200
+				}
+			},
 			"endpointResHeaders": {},
-			"endpointResHeaderKeys": null,
-			"clientStubs": [
-				{
+			"clientTestFixtures": {
+				"bar::normal": {
 					"clientId": "bar",
 					"clientMethod": "normal",
 					"clientRequest": {
-						"request": {
-							"boolField": true,
+						"requestType": "tchannel",
+						"tchannelRequest": {
+							"requestType": "tchannel",
+							"tchannelRequest": {
+								"request": {
+									"boolField": true,
+									"stringField": "foo"
+								}
+							}
+						}
+					},
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"intWithRange": 0,
+							"intWithoutRange": 1,
+							"mapIntWithRange": {},
+							"mapIntWithoutRange": {},
 							"stringField": "foo"
 						}
 					},
-					"clientRequestString": "",
-					"clientReqHeaders": {},
-					"clientReqHeaderKeys": null,
-					"clientResponse": {
-						"intWithRange": 0,
-						"intWithoutRange": 1,
-						"mapIntWithRange": {},
-						"mapIntWithoutRange": {},
-						"stringField": "foo"
-					},
-					"clientResponseString": "",
-					"clientResHeaders": {},
-					"clientResHeaderKeys": null
+					"clientResHeaders": {}
 				}
-			],
+			},
 			"testServiceName": "example-gateway"
 		}
-	],
+	},
 	"middlewares": [
 		{
 			"name": "example",

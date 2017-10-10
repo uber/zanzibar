@@ -588,35 +588,35 @@ import (
 {{- $headers := .ReqHeaders }}
 
 
-{{range $.TestStubs}}
+{{range $testName, $testFixture := $.TestFixtures}}
 
-func getDirName{{.HandlerID | title}}{{.TestName | title}}() string {
+func getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}() string {
 	_, file, _, _ := runtime.Caller(0)
 
 	return filepath.Dir(file)
 }
 
-func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
+func Test{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}OKResponse(t *testing.T) {
 	var counter int
 
 	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
 		KnownHTTPBackends: []string{"{{$clientID}}"},
 		TestBinary: filepath.Join(
-			getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+			getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 			"{{$relativePathToRoot}}",
-			"build", "services", "{{.TestServiceName}}",
+			"build", "services", "{{$testFixture.TestServiceName}}",
 			"main", "main.go",
 		),
 		ConfigFiles: []string{
 			filepath.Join(
-				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
 				"config", "production.json",
 			),
 			filepath.Join(
-				getDirName{{.HandlerID | title}}{{.TestName | title}}(),
+				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "{{.TestServiceName}}", "production.json",
+				"config", "{{$testFixture.TestServiceName}}", "production.json",
 			),
 		},
 	})
@@ -625,53 +625,65 @@ func Test{{.HandlerID | title}}{{.TestName | title}}OKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	{{range .ClientStubs}}
-	fake{{.ClientMethod | title}} := func(w http.ResponseWriter, r *http.Request) {
+	{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
+	fake{{$clientCallFixture.ClientMethod | title}} := func(w http.ResponseWriter, r *http.Request) {
 
-		{{range $k, $v := .ClientReqHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
 		assert.Equal(
 			t,
 			"{{$v}}",
 			r.Header.Get("{{$k}}"))
 		{{end}}
 
-		{{range $k, $v := .ClientResHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
 		w.Header().Set("{{$k}}", "{{$v}}")
 		{{end}}
 		w.WriteHeader({{$.Method.OKStatusCode.Code}})
-		
+
+		{{ if $clientCallFixture.ClientResponse.Body -}}
+		payload := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
+		{{else}}
+		var payload []byte
+		{{- end}}
+
 		// TODO(zw): generate client response.
-		if _, err := w.Write([]byte( ` + "`" + `{{.ClientResponseString}}` + "`" + `)); err != nil {
+		if _, err := w.Write(payload); err != nil {
 			t.Fatal("can't write fake response")
 		}
 		counter++
 	}
 
 	gateway.HTTPBackends()["{{$clientID}}"].HandleFunc(
-		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{.ClientMethod | title}},
+		"{{$clientMethod.HTTPMethod}}", "{{$clientMethod.HTTPPath}}", fake{{$clientCallFixture.ClientMethod | title}},
 	)
 
 	{{end -}}
 
 	headers := map[string]string{}
 	{{ if $headers -}}
-	{{range $k, $v := .EndpointReqHeaders -}}
+	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
 	{{end}}
+	{{- end}}
+
+	{{ if $testFixture.EndpointRequest.Body -}}
+	endpointRequest := []byte({{printf "` + "`" + `%s` + "`" + `" $testFixture.EndpointRequest.Body}})
+	{{else}}
+	endpointRequest := []byte(` + "`" + `{}` + "`" + `)
 	{{- end}}
 
 	res, err := gateway.MakeRequest(
 		"{{$.Method.HTTPMethod}}",
 		"{{$.Method.HTTPPath}}",
 		headers,
-		bytes.NewReader([]byte(` + "`" + `{{.EndpointRequestString}}` + "`" + `)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
 
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
-	{{range $k, $v := .EndpointResHeaders -}}
+	{{range $k, $v := $testFixture.EndpointResHeaders -}}
 	assert.Equal(
 		t,
 		"{{$v}}",
@@ -694,7 +706,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3809, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -737,10 +749,8 @@ import (
 {{- $headers := .ReqHeaders -}}
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
-{{range $.TestStubs}}
-{{- $endpointID := .EndpointID }}
-{{- $handlerID := .HandlerID }}
-func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
+{{range $testName, $testFixture := $.TestFixtures}}
+func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKResponse(t *testing.T) {
 	{{$counter}} := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
@@ -748,16 +758,16 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		"clients.{{$clientName}}.serviceName": "{{$clientName}}Service",
 	}, &testGateway.Options{
 	KnownTChannelBackends: []string{"{{$clientName}}"},
-		TestBinary:            util.DefaultMainFile("{{.TestServiceName}}"),
-		ConfigFiles:           util.DefaultConfigFiles("{{.TestServiceName}}"),
+		TestBinary:            util.DefaultMainFile("{{$testFixture.TestServiceName}}"),
+		ConfigFiles:           util.DefaultConfigFiles("{{$testFixture.TestServiceName}}"),
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
-	{{range .ClientStubs}}
-	{{$clientFunc := printf "fake%s" (title .ClientMethod) -}}
+	{{range $clientCallName, $clientCallFixture := $testFixture.ClientTestFixtures}}
+	{{$clientFunc := printf "fake%s" (title $clientCallFixture.ClientMethod) -}}
 	{{$clientFunc}} := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -767,7 +777,7 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	) ({{- if $clientMethod.ResponseType -}}{{$clientMethodResponseType}}, {{- end -}}map[string]string, error) {
 		{{$counter}}++
 
-		{{range $k, $v := .ClientReqHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientReqHeaders -}}
 		assert.Equal(
 			t,
 			"{{$v}}",
@@ -775,16 +785,18 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 		{{end -}}
 
 		var resHeaders map[string]string
-		{{if (len .ClientResHeaders) -}}
+		{{if (len $clientCallFixture.ClientResHeaders) -}}
 		resHeaders = map[string]string{}
 		{{end -}}
-		{{range $k, $v := .ClientResHeaders -}}
+		{{range $k, $v := $clientCallFixture.ClientResHeaders -}}
 		resHeaders["{{$k}}"] = "{{$v}}"
 		{{end}}
 
 		{{if $clientMethod.ResponseType -}}
 		var res {{unref $clientMethod.ResponseType}}
-		err := json.Unmarshal([]byte(` + "`" + `{{.ClientResponseString}}` + "`" + `), &res)
+
+		clientResponse := []byte({{printf "` + "`" + `%s` + "`" + `" $clientCallFixture.ClientResponse.Body}})
+		err := json.Unmarshal(clientResponse, &res)
 		if err!= nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
 			return nil, resHeaders, err
@@ -796,23 +808,29 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["{{$clientName}}"].Register(
-		"{{$endpointID}}", "{{$handlerID}}", "{{$thriftService}}::{{$clientMethodName}}",
+		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
 	{{end}}
 
 	headers := map[string]string{}
 	{{ if $headers -}}
-	{{range $k, $v := .EndpointReqHeaders -}}
+	{{range $k, $v := $testFixture.EndpointReqHeaders -}}
 	headers["{{$k}}"] = "{{$v}}"
 	{{end}}
+	{{- end}}
+
+	{{ if $testFixture.EndpointRequest.Body -}}
+	endpointRequest := []byte({{printf "` + "`" + `%s` + "`" + `" $testFixture.EndpointRequest.Body}})
+	{{else}}
+	endpointRequest := []byte(` + "`" + `{}` + "`" + `)
 	{{- end}}
 
 	res, err := gateway.MakeRequest(
 		"{{$.Method.HTTPMethod}}",
 		"{{$.Method.HTTPPath}}",
 		headers,
-		bytes.NewReader([]byte(` + "`" + `{{.EndpointRequestString}}` + "`" + `)),
+		bytes.NewReader(endpointRequest),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return
@@ -828,14 +846,14 @@ func Test{{title $handlerID}}{{title .TestName}}OKResponse(t *testing.T) {
 
 	assert.Equal(t, 1, {{$counter}})
 	assert.Equal(t, {{$.Method.OKStatusCode.Code}}, res.StatusCode)
-	{{range $k, $v := .EndpointResHeaders -}}
+	{{range $k, $v := $testFixture.EndpointResHeaders -}}
 	assert.Equal(
 		t,
 		"{{$v}}",
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.Equal(t, ` + "`" + `{{.EndpointResponseString}}` + "`" + `, string(data))
+		assert.Equal(t, []byte(` + "`" + `{{$testFixture.EndpointResponse.Body}}` + "`" + `), data)
 	{{end -}}
 }
 
@@ -853,7 +871,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4077, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4500, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -47,14 +47,8 @@ func (r *Repository) WriteEndpointConfig(
 	if err != nil {
 		return errors.Wrap(err, "failed to create endpoint config dir")
 	}
-	baseName := codegen.CamelToSnake(config.HandleID)
-	fileName := baseName + ".json"
-	testName := baseName + "_test.json"
+	fileName := codegen.CamelToSnake(config.HandleID) + ".json"
 	config.ThriftFileSha = thriftFileSha
-	err = writeToJSONFile(filepath.Join(dir, testName), config.TestFixtures)
-	if err != nil {
-		return errors.Wrap(err, "failed to write to endpoint test cases file")
-	}
 	err = writeToJSONFile(filepath.Join(dir, fileName), config)
 	if err != nil {
 		return errors.Wrap(err, "failed to write to endpoint config file")

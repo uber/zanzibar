@@ -6,16 +6,85 @@
 	"thriftFileSha": "{{placeholder}}",
 	"thriftMethodName": "Bar::tooManyArgs",
 	"workflowType": "httpClient",
-	"clientID": "bar",
+	"clientId": "bar",
 	"clientMethod": "TooManyArgs",
-	"testFixtures": [],
+	"testFixtures": {
+		"successfulRequest": {
+			"testName": "successfulRequest",
+			"testServiceName": "example-gateway",
+			"endpointId": "bar",
+			"handleId": "tooManyArgs",
+			"endpointRequest": {
+				"requestType": "http",
+				"httpRequest": {
+					"method": "POST",
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"request": {
+								"stringField": "foo",
+								"boolField": true
+							}
+						}
+					}
+				}
+			},
+			"endpointReqHeaders": {
+				"X-Uuid": "test-uuid",
+				"X-Token": "test-token"
+			},
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200
+				}
+			},
+			"endpointResHeaders": {
+				"X-Uuid": "test-uuid",
+				"X-Token": "test-token"
+			},
+			"clientTestFixtures": {
+				"bar::tooManyArgs": {
+					"clientId": "bar",
+					"clientMethod": "tooManyArgs",
+					"clientRequest": {
+						"requestType": "tchannel",
+						"tchannelRequest": {
+							"request": {
+								"stringField": "foo",
+								"boolField": true
+							}
+						}
+					},
+					"clientReqHeaders": {
+						"X-Uuid": "test-uuid",
+						"X-Token": "test-token"
+					},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"stringField": "foo",
+							"intWithRange": 0,
+							"intWithoutRange": 1,
+							"mapIntWithRange": {},
+							"mapIntWithoutRange": {}
+						}
+					},
+					"clientResHeaders": {
+						"X-Uuid": "test-uuid",
+						"X-Token": "test-token"
+					}
+				}
+			}
+		}
+	},
 	"middlewares": [],
 	"reqHeaderMap": {
-		"X-Uuid": "X-Uuid", 
+		"X-Uuid": "X-Uuid",
 		"X-Token": "X-Token"
 	},
 	"resHeaderMap": {
-		"X-Uuid": "X-Uuid", 
+		"X-Uuid": "X-Uuid",
 		"X-Token": "X-Token"
-	}	
+	}
 }
