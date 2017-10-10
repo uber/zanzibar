@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -o pipefail
 
 if [ -z "$1" ]; then
 	echo "build dir argument (\$1) is missing"
