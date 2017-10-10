@@ -48,6 +48,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		BarNoRequestHandler:                NewBarNoRequestHandler(g, deps),
 		BarNormalHandler:                   NewBarNormalHandler(g, deps),
 		BarTooManyArgsHandler:              NewBarTooManyArgsHandler(g, deps),
+		BarHelloWorldHandler:               NewBarHelloWorldHandler(g, deps),
 	}
 }
 
