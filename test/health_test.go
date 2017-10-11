@@ -126,10 +126,10 @@ func TestHealthMetrics(t *testing.T) {
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics), "expected 5 metrics")
 	names := []string{
-		"inbound.calls.latency",
-		"inbound.calls.recvd",
-		"inbound.calls.success",
-		"inbound.calls.status.200",
+		"test-gateway.test.all-workers.inbound.calls.latency",
+		"test-gateway.test.all-workers.inbound.calls.recvd",
+		"test-gateway.test.all-workers.inbound.calls.success",
+		"test-gateway.test.all-workers.inbound.calls.status.200",
 	}
 	tags := map[string]string{
 		"env":      "test",
@@ -147,27 +147,39 @@ func TestHealthMetrics(t *testing.T) {
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
-	loggedKey := tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)
+	loggedKey := tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
+	)
 	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
-	latencyMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.latency", tags)]
+	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.latency", tags,
+	)]
 	value := *latencyMetric.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
-	recvdMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.recvd", tags)]
+	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.recvd", tags,
+	)]
 	value = *recvdMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	successMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.success", tags)]
+	successMetric := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.success", tags,
+	)]
 	value = *successMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	statusMetric := metrics[tally.KeyForPrefixedStringMap("inbound.calls.status.200", tags)]
+	statusMetric := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.status.200", tags,
+	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
+	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
+	)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
 	assert.Equal(t, int64(2), value, "expected counter to be 2")
 }
@@ -195,36 +207,36 @@ func TestRuntimeMetrics(t *testing.T) {
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics), "expected 31 metrics")
 	names := []string{
-		"per-worker.runtime.cpu.cgoCalls",
-		"per-worker.runtime.cpu.count",
-		"per-worker.runtime.cpu.goMaxProcs",
-		"per-worker.runtime.cpu.goroutines",
-		"per-worker.runtime.mem.alloc",
-		"per-worker.runtime.mem.frees",
-		"per-worker.runtime.mem.gc.count",
-		"per-worker.runtime.mem.gc.cpuFraction",
-		"per-worker.runtime.mem.gc.last",
-		"per-worker.runtime.mem.gc.next",
-		"per-worker.runtime.mem.gc.pause",
-		"per-worker.runtime.mem.gc.pauseTotal",
-		"per-worker.runtime.mem.gc.sys",
-		"per-worker.runtime.mem.heap.alloc",
-		"per-worker.runtime.mem.heap.idle",
-		"per-worker.runtime.mem.heap.inuse",
-		"per-worker.runtime.mem.heap.objects",
-		"per-worker.runtime.mem.heap.released",
-		"per-worker.runtime.mem.heap.sys",
-		"per-worker.runtime.mem.lookups",
-		"per-worker.runtime.mem.malloc",
-		"per-worker.runtime.mem.otherSys",
-		"per-worker.runtime.mem.stack.inuse",
-		"per-worker.runtime.mem.stack.mcacheInuse",
-		"per-worker.runtime.mem.stack.mcacheSys",
-		"per-worker.runtime.mem.stack.mspanInuse",
-		"per-worker.runtime.mem.stack.mspanSys",
-		"per-worker.runtime.mem.stack.sys",
-		"per-worker.runtime.mem.sys",
-		"per-worker.runtime.mem.total",
+		"test-gateway.test.per-worker.runtime.cpu.cgoCalls",
+		"test-gateway.test.per-worker.runtime.cpu.count",
+		"test-gateway.test.per-worker.runtime.cpu.goMaxProcs",
+		"test-gateway.test.per-worker.runtime.cpu.goroutines",
+		"test-gateway.test.per-worker.runtime.mem.alloc",
+		"test-gateway.test.per-worker.runtime.mem.frees",
+		"test-gateway.test.per-worker.runtime.mem.gc.count",
+		"test-gateway.test.per-worker.runtime.mem.gc.cpuFraction",
+		"test-gateway.test.per-worker.runtime.mem.gc.last",
+		"test-gateway.test.per-worker.runtime.mem.gc.next",
+		"test-gateway.test.per-worker.runtime.mem.gc.pause",
+		"test-gateway.test.per-worker.runtime.mem.gc.pauseTotal",
+		"test-gateway.test.per-worker.runtime.mem.gc.sys",
+		"test-gateway.test.per-worker.runtime.mem.heap.alloc",
+		"test-gateway.test.per-worker.runtime.mem.heap.idle",
+		"test-gateway.test.per-worker.runtime.mem.heap.inuse",
+		"test-gateway.test.per-worker.runtime.mem.heap.objects",
+		"test-gateway.test.per-worker.runtime.mem.heap.released",
+		"test-gateway.test.per-worker.runtime.mem.heap.sys",
+		"test-gateway.test.per-worker.runtime.mem.lookups",
+		"test-gateway.test.per-worker.runtime.mem.malloc",
+		"test-gateway.test.per-worker.runtime.mem.otherSys",
+		"test-gateway.test.per-worker.runtime.mem.stack.inuse",
+		"test-gateway.test.per-worker.runtime.mem.stack.mcacheInuse",
+		"test-gateway.test.per-worker.runtime.mem.stack.mcacheSys",
+		"test-gateway.test.per-worker.runtime.mem.stack.mspanInuse",
+		"test-gateway.test.per-worker.runtime.mem.stack.mspanSys",
+		"test-gateway.test.per-worker.runtime.mem.stack.sys",
+		"test-gateway.test.per-worker.runtime.mem.sys",
+		"test-gateway.test.per-worker.runtime.mem.total",
 	}
 	tags := map[string]string{
 		"env":     "test",
