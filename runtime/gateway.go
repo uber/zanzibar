@@ -333,10 +333,14 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	)
 	// As per M3 best practices, creating separate all-host and per-host metrics
 	// to reduce metric cardinality when querying metrics for all hosts.
-	gateway.AllHostScope = gateway.RootScope
-	gateway.PerHostScope = gateway.RootScope.Tagged(
+	gateway.AllHostScope = gateway.RootScope.SubScope(
+		service + ".production.all-workers",
+	)
+	gateway.PerHostScope = gateway.RootScope.SubScope(
+		service + ".production.per-worker",
+	).Tagged(
 		map[string]string{"host": GetHostname()},
-	).SubScope("per-worker")
+	)
 
 	// start collecting runtime metrics
 	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
