@@ -1,7 +1,6 @@
 {
 	"service.env.config": {},
 
-	"serviceName": "my-gateway",
 	"env": "production",
 	"useDatacenter": false,
 
@@ -11,12 +10,8 @@
 	"jaeger.sampler.type": "remote",
 	"jaeger.sampler.param": 0.001,
 
-	"logger.output": "stdout",
-	"logger.fileName": "",
-
 	"metrics.type": "m3",
 	"metrics.flushInterval": 1000,
-	"metrics.serviceName": "my-gateway",
 
 	"metrics.m3.hostPort": "127.0.0.1:9052",
 	"metrics.m3.maxQueueSize": 10000,
@@ -25,10 +20,5 @@
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
-	"metrics.runtime.collectInterval": 1000,
-
-	"http.port": 4000,
-
-	"tchannel.serviceName": "my-gateway",
-	"tchannel.processName": "my-gateway"
+	"metrics.runtime.collectInterval": 1000
 }

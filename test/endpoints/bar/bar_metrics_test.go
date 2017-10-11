@@ -148,5 +148,5 @@ func TestCallMetrics(t *testing.T) {
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap("zap.logged.info", defaultTags)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
-	assert.Equal(t, int64(5), value, "expected counter to be 5")
+	assert.Equal(t, int64(3), value, "expected counter to be 3")
 }

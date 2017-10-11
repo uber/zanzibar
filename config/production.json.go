@@ -67,7 +67,6 @@ func (fi bindataFileInfo) Sys() interface{} {
 var _productionJson = []byte(`{
 	"service.env.config": {},
 
-	"serviceName": "my-gateway",
 	"env": "production",
 	"useDatacenter": false,
 
@@ -77,12 +76,8 @@ var _productionJson = []byte(`{
 	"jaeger.sampler.type": "remote",
 	"jaeger.sampler.param": 0.001,
 
-	"logger.output": "stdout",
-	"logger.fileName": "",
-
 	"metrics.type": "m3",
 	"metrics.flushInterval": 1000,
-	"metrics.serviceName": "my-gateway",
 
 	"metrics.m3.hostPort": "127.0.0.1:9052",
 	"metrics.m3.maxQueueSize": 10000,
@@ -91,12 +86,7 @@ var _productionJson = []byte(`{
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
-	"metrics.runtime.collectInterval": 1000,
-
-	"http.port": 4000,
-
-	"tchannel.serviceName": "my-gateway",
-	"tchannel.processName": "my-gateway"
+	"metrics.runtime.collectInterval": 1000
 }
 `)
 
@@ -110,7 +100,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 610, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
