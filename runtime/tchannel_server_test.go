@@ -33,6 +33,7 @@ func TestCreatingTChannel(t *testing.T) {
 	_, err := benchGateway.CreateGateway(
 		map[string]interface{}{
 			"tchannel.serviceName": "",
+			"serviceName":          "",
 		},
 		nil,
 		exampleGateway.CreateGateway,
