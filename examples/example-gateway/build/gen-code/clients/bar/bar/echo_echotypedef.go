@@ -50,12 +50,6 @@ func (v *Echo_EchoTypedef_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
-}
-
 // FromWire deserializes a Echo_EchoTypedef_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.

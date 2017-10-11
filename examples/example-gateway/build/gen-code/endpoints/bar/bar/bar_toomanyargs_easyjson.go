@@ -787,7 +787,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 		switch key {
 		case "stringField":
-			out.StringField = string(in.String())
+			out.StringField = UUID(in.String())
 			StringFieldSet = true
 		case "boolField":
 			out.BoolField = bool(in.Bool())

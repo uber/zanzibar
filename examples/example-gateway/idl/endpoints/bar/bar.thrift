@@ -2,8 +2,10 @@ namespace java com.uber.zanzibar.clients.bar
 
 include "../foo/foo.thrift"
 
+typedef string UUID
+
 struct BarRequest {
-    1: required string stringField
+    1: required UUID stringField
     2: required bool boolField
 }
 struct BarResponse {

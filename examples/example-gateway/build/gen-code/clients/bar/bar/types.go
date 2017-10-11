@@ -125,8 +125,8 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string `json:"stringField,required"`
-	BoolField   bool   `json:"boolField,required"`
+	StringField UUID `json:"stringField,required"`
+	BoolField   bool `json:"boolField,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -152,7 +152,7 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 		err    error
 	)
 
-	w, err = wire.NewValueString(v.StringField), error(nil)
+	w, err = v.StringField.ToWire()
 	if err != nil {
 		return w, err
 	}
@@ -167,6 +167,12 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a BarRequest struct from its Thrift-level
@@ -196,7 +202,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		switch field.ID {
 		case 1:
 			if field.Value.Type() == wire.TBinary {
-				v.StringField, err = field.Value.GetString(), error(nil)
+				v.StringField, err = _UUID_Read(field.Value)
 				if err != nil {
 					return err
 				}

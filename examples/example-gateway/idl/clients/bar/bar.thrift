@@ -10,7 +10,7 @@ enum Fruit {
 }
 
 struct BarRequest {
-    1: required string stringField
+    1: required UUID stringField
     2: required bool boolField
 }
 

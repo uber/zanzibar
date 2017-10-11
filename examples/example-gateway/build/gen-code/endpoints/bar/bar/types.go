@@ -121,8 +121,8 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string `json:"stringField,required"`
-	BoolField   bool   `json:"boolField,required"`
+	StringField UUID `json:"stringField,required"`
+	BoolField   bool `json:"boolField,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -148,7 +148,7 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 		err    error
 	)
 
-	w, err = wire.NewValueString(v.StringField), error(nil)
+	w, err = v.StringField.ToWire()
 	if err != nil {
 		return w, err
 	}
@@ -163,6 +163,12 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a BarRequest struct from its Thrift-level
@@ -192,7 +198,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		switch field.ID {
 		case 1:
 			if field.Value.Type() == wire.TBinary {
-				v.StringField, err = field.Value.GetString(), error(nil)
+				v.StringField, err = _UUID_Read(field.Value)
 				if err != nil {
 					return err
 				}
@@ -1088,4 +1094,35 @@ func (v *QueryParamsStruct) GetAuthUUID2() (o string) {
 	}
 
 	return
+}
+
+type UUID string
+
+// ToWire translates UUID into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v UUID) ToWire() (wire.Value, error) {
+	x := (string)(v)
+	return wire.NewValueString(x), error(nil)
+}
+
+// String returns a readable string representation of UUID.
+func (v UUID) String() string {
+	x := (string)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes UUID from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *UUID) FromWire(w wire.Value) error {
+	x, err := w.GetString(), error(nil)
+	*v = (UUID)(x)
+	return err
+}
+
+// Equals returns true if this UUID is equal to the provided
+// UUID.
+func (lhs UUID) Equals(rhs UUID) bool {
+	return (lhs == rhs)
 }

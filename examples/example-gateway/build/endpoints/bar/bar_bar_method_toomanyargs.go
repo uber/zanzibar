@@ -199,7 +199,7 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 
 	if in.Request != nil {
 		out.Request = &clientsBarBar.BarRequest{}
-		out.Request.StringField = string(in.Request.StringField)
+		out.Request.StringField = clientsBarBar.UUID(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 	} else {
 		out.Request = nil

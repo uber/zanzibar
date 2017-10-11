@@ -173,7 +173,7 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 
 	if in.Request != nil {
 		out.Request = &clientsBarBar.BarRequest{}
-		out.Request.StringField = string(in.Request.StringField)
+		out.Request.StringField = clientsBarBar.UUID(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 	} else {
 		out.Request = nil
