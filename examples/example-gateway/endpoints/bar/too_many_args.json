@@ -23,7 +23,8 @@
 						"bodyJson": {
 							"request": {
 								"stringField": "foo",
-								"boolField": true
+								"boolField": true,
+								"binaryField": "aGVsbG8="
 							}
 						}
 					}
@@ -52,6 +53,7 @@
 						"tchannelRequest": {
 							"request": {
 								"stringField": "foo",
+								"binaryField": "aGVsbG8=",
 								"boolField": true
 							}
 						}

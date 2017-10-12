@@ -178,6 +178,18 @@
 					"Annotations": {
 						"zanzibar.http.ref": "query.some-query-field"
 					}
+				},
+				{
+					"ID": 3,
+					"Name": "binaryField",
+					"Type": {
+						"Annotations": null
+					},
+					"Required": true,
+					"Default": null,
+					"Annotations": {
+						"zanzibar.http.ref": "query.some-query-field"
+					}
 				}
 			],
 			"Annotations": null
@@ -358,6 +370,18 @@
 									{
 										"ID": 2,
 										"Name": "boolField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "query.some-query-field"
+										}
+									},
+									{
+										"ID": 3,
+										"Name": "binaryField",
 										"Type": {
 											"Annotations": null
 										},
@@ -783,6 +807,18 @@
 									{
 										"ID": 2,
 										"Name": "boolField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "query.some-query-field"
+										}
+									},
+									{
+										"ID": 3,
+										"Name": "binaryField",
 										"Type": {
 											"Annotations": null
 										},
