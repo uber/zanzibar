@@ -346,16 +346,34 @@ func (c *TypeConverter) genConverterForMap(
 		return err
 	}
 
-	_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
-	if !isStringKey {
-		return errors.Errorf(
-			"could not convert key (%s), map is not string-keyed.",
-			toField.Name,
-		)
-	}
-
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	sourceIdentifier := fromIdentifier
+	_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
+
+	if !isStringKey {
+		realType := compile.RootTypeSpec(toFieldType.KeySpec)
+		switch realType.(type) {
+		case
+			*compile.MapSpec,
+			*compile.SetSpec,
+			*compile.ListSpec:
+			return errors.Errorf(
+				"could not convert key (%s), map cannot be keyed as map type",
+				toField.Name,
+			)
+		default:
+			keyType, _ := c.getGoTypeName(toFieldType.KeySpec)
+			c.appendf(
+				"%s = make(map[%s]%s, len(%s))",
+				toIdentifier, keyType, typeName, sourceIdentifier,
+			)
+			c.appendf("for key, value := range %s {", sourceIdentifier)
+			c.append("\t", toIdentifier, "[ ", keyType, "(key)] = ", typeName, "(value)")
+			c.append("}")
+			return nil
+		}
+	}
+
 	checkOverride := false
 	if overriddenIdentifier != "" {
 		// Determine which map (from or overrride) to use

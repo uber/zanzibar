@@ -199,7 +199,7 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 
 	if in.Request != nil {
 		out.Request = &clientsBarBar.BarRequest{}
-		out.Request.StringField = clientsBarBar.UUID(in.Request.StringField)
+		out.Request.StringField = string(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 	} else {
 		out.Request = nil
@@ -249,9 +249,9 @@ func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsB
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[string]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key, value := range in.MapIntWithRange {
-		out.MapIntWithRange[key] = int32(value)
+		out.MapIntWithRange[endpointsBarBar.UUID(key)] = int32(value)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key, value := range in.MapIntWithoutRange {

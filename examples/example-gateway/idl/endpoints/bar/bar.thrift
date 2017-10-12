@@ -5,7 +5,7 @@ include "../foo/foo.thrift"
 typedef string UUID
 
 struct BarRequest {
-    1: required UUID stringField
+    1: required string stringField
     2: required bool boolField
 }
 struct BarResponse {
@@ -15,7 +15,7 @@ struct BarResponse {
     )
     2: required i32 intWithRange
     3: required i32 intWithoutRange (zanzibar.ignore.integer.range = "true")
-    4: required map<string, i32> mapIntWithRange
+    4: required map<UUID, i32> mapIntWithRange
     5: required map<string, i32> mapIntWithoutRange (
         zanzibar.ignore.integer.range = "true"
     )

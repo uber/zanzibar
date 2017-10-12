@@ -211,12 +211,12 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.MapIntWithRange = make(map[string]int32)
+					out.MapIntWithRange = make(map[UUID]int32)
 				} else {
 					out.MapIntWithRange = nil
 				}
 				for !in.IsDelim('}') {
-					key := string(in.String())
+					key := UUID(in.String())
 					in.WantColon()
 					var v1 int32
 					v1 = int32(in.Int32())
@@ -444,7 +444,7 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 		switch key {
 		case "stringField":
-			out.StringField = UUID(in.String())
+			out.StringField = string(in.String())
 			StringFieldSet = true
 		case "boolField":
 			out.BoolField = bool(in.Bool())

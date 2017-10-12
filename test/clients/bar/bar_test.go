@@ -596,8 +596,8 @@ func TestEchoStructSet(t *testing.T) {
 			StringField:     "a",
 			IntWithRange:    int32(0),
 			IntWithoutRange: int32(0),
-			MapIntWithRange: map[string]int32{
-				"0": int32(0),
+			MapIntWithRange: map[barGen.UUID]int32{
+				barGen.UUID("fakeUUID"): int32(0),
 			},
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
@@ -704,8 +704,8 @@ func TestEchoStructList(t *testing.T) {
 			StringField:     "a",
 			IntWithRange:    int32(0),
 			IntWithoutRange: int32(0),
-			MapIntWithRange: map[string]int32{
-				"0": int32(0),
+			MapIntWithRange: map[barGen.UUID]int32{
+				barGen.UUID("fakeUUID"): int32(0),
 			},
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
@@ -764,8 +764,8 @@ func TestEchoStringMap(t *testing.T) {
 			StringField:     "a",
 			IntWithRange:    int32(0),
 			IntWithoutRange: int32(0),
-			MapIntWithRange: map[string]int32{
-				"0": int32(0),
+			MapIntWithRange: map[barGen.UUID]int32{
+				barGen.UUID("fakeUUID"): int32(0),
 			},
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
@@ -828,8 +828,8 @@ func TestEchoStructMap(t *testing.T) {
 				StringField:     "a",
 				IntWithRange:    int32(0),
 				IntWithoutRange: int32(0),
-				MapIntWithRange: map[string]int32{
-					"0": int32(0),
+				MapIntWithRange: map[barGen.UUID]int32{
+					barGen.UUID("fakeUUID"): int32(0),
 				},
 				MapIntWithoutRange: map[string]int32{
 					"0": int32(0),
