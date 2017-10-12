@@ -4,6 +4,7 @@
 package bar
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"go.uber.org/thriftrw/wire"
@@ -123,6 +124,7 @@ func (v *BarException) Error() string {
 type BarRequest struct {
 	StringField string `json:"stringField,required"`
 	BoolField   bool   `json:"boolField,required"`
+	BinaryField []byte `json:"binaryField,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -142,7 +144,7 @@ type BarRequest struct {
 //   }
 func (v *BarRequest) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -160,6 +162,15 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 		return w, err
 	}
 	fields[i] = wire.Field{ID: 2, Value: w}
+	i++
+	if v.BinaryField == nil {
+		return w, errors.New("field BinaryField of BarRequest is required")
+	}
+	w, err = wire.NewValueBinary(v.BinaryField), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 3, Value: w}
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
@@ -187,6 +198,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 
 	stringFieldIsSet := false
 	boolFieldIsSet := false
+	binaryFieldIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -206,6 +218,14 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 				}
 				boolFieldIsSet = true
 			}
+		case 3:
+			if field.Value.Type() == wire.TBinary {
+				v.BinaryField, err = field.Value.GetBinary(), error(nil)
+				if err != nil {
+					return err
+				}
+				binaryFieldIsSet = true
+			}
 		}
 	}
 
@@ -215,6 +235,10 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 
 	if !boolFieldIsSet {
 		return errors.New("field BoolField of BarRequest is required")
+	}
+
+	if !binaryFieldIsSet {
+		return errors.New("field BinaryField of BarRequest is required")
 	}
 
 	return nil
@@ -227,11 +251,13 @@ func (v *BarRequest) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
 	fields[i] = fmt.Sprintf("BoolField: %v", v.BoolField)
+	i++
+	fields[i] = fmt.Sprintf("BinaryField: %v", v.BinaryField)
 	i++
 
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
@@ -246,6 +272,9 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 		return false
 	}
 	if !(v.BoolField == rhs.BoolField) {
+		return false
+	}
+	if !bytes.Equal(v.BinaryField, rhs.BinaryField) {
 		return false
 	}
 

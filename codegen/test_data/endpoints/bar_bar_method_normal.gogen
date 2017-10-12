@@ -175,6 +175,7 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 		out.Request = &clientsBarBar.BarRequest{}
 		out.Request.StringField = string(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
+		out.Request.BinaryField = []byte(in.Request.BinaryField)
 	} else {
 		out.Request = nil
 	}

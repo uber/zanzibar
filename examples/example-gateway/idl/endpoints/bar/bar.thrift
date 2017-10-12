@@ -7,6 +7,7 @@ typedef string UUID
 struct BarRequest {
     1: required string stringField
     2: required bool boolField
+    3: required binary binaryField
 }
 struct BarResponse {
     1: required string stringField (
