@@ -70,15 +70,16 @@ type Gateway struct {
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
 
-	loggerFile      *os.File
-	scopeCloser     io.Closer
-	metricsBackend  tally.CachedStatsReporter
-	runtimeMetrics  RuntimeMetricsCollector
-	logWriter       zapcore.WriteSyncer
-	httpServer      *HTTPServer
-	localHTTPServer *HTTPServer
-	tchannelServer  *tchannel.Channel
-	tracerCloser    io.Closer
+	loggerFile         *os.File
+	scopeCloser        io.Closer
+	allHostScopePrefix string
+	metricsBackend     tally.CachedStatsReporter
+	runtimeMetrics     RuntimeMetricsCollector
+	logWriter          zapcore.WriteSyncer
+	httpServer         *HTTPServer
+	localHTTPServer    *HTTPServer
+	tchannelServer     *tchannel.Channel
+	tracerCloser       io.Closer
 	//	- panic ???
 	//	- process reporter ?
 }
@@ -334,8 +335,9 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	)
 	// As per M3 best practices, creating separate all-host and per-host metrics
 	// to reduce metric cardinality when querying metrics for all hosts.
+	gateway.allHostScopePrefix = service + "." + env + ".all-workers"
 	gateway.AllHostScope = gateway.RootScope.SubScope(
-		service + "." + env + ".all-workers",
+		gateway.allHostScopePrefix,
 	)
 	gateway.PerHostScope = gateway.RootScope.SubScope(
 		service + "." + env + ".per-worker",
@@ -494,8 +496,12 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 		serviceName,
 		&tchannel.ChannelOptions{
 			ProcessName: processName,
-			Logger:      NewTChannelLogger(gateway.Logger),
 			Tracer:      gateway.Tracer,
+			Logger:      NewTChannelLogger(gateway.Logger),
+			StatsReporter: NewTChannelStatsReporter(
+				gateway.AllHostScope,
+				gateway.allHostScopePrefix,
+			),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
 			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,

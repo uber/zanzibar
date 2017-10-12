@@ -45,6 +45,24 @@ const (
 	outboundCallsStatus       = "outbound.calls.status"
 )
 
+var knownMetrics = []string{
+	inboundCallsRecvd,
+	inboundCallsLatency,
+	inboundCallsSuccess,
+	inboundCallsAppErrors,
+	inboundCallsSystemErrors,
+	inboundCallsErrors,
+	inboundCallsStatus,
+
+	outboundCallsSent,
+	outboundCallsLatency,
+	outboundCallsSuccess,
+	outboundCallsAppErrors,
+	outboundCallsSystemErrors,
+	outboundCallsErrors,
+	outboundCallsStatus,
+}
+
 var knownStatusCodes = map[int]bool{
 	http.StatusContinue:                      true, // 100
 	http.StatusSwitchingProtocols:            true, // 101
