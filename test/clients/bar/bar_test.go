@@ -602,6 +602,7 @@ func TestEchoStructSet(t *testing.T) {
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
 			},
+			BinaryField: []byte("d29ybGQ="),
 		},
 	}
 	marshaled, err := json.Marshal(arg)
@@ -710,6 +711,7 @@ func TestEchoStructList(t *testing.T) {
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
 			},
+			BinaryField: []byte("d29ybGQ="),
 		},
 	}
 	marshaled, err := json.Marshal(arg)
@@ -770,6 +772,7 @@ func TestEchoStringMap(t *testing.T) {
 			MapIntWithoutRange: map[string]int32{
 				"0": int32(0),
 			},
+			BinaryField: []byte("d29ybGQ="),
 		},
 	}
 	marshaled, err := json.Marshal(arg)
@@ -833,7 +836,8 @@ func TestEchoStructMap(t *testing.T) {
 				},
 				MapIntWithoutRange: map[string]int32{
 					"0": int32(0),
-				}},
+				},
+				BinaryField: []byte("d29ybGQ=")},
 			Value: "a",
 		},
 	}

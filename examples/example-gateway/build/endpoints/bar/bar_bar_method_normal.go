@@ -205,6 +205,7 @@ func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar
 	for key, value := range in.MapIntWithoutRange {
 		out.MapIntWithoutRange[key] = int32(value)
 	}
+	out.BinaryField = []byte(in.BinaryField)
 
 	return out
 }

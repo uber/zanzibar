@@ -35,7 +35,8 @@ var barResponseBytes = `{
 	"intWithRange":0,
 	"intWithoutRange":0,
 	"mapIntWithRange":{},
-	"mapIntWithoutRange":{}	
+	"mapIntWithoutRange":{},
+	"binaryField":"d29ybGQ="
 }`
 
 func TestBarWithQueryParamsCall(t *testing.T) {

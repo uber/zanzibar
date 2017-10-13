@@ -218,7 +218,8 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 				"intWithRange": 0,
 				"intWithoutRange": 1,
 				"mapIntWithRange": {},
-				"mapIntWithoutRange": {}
+				"mapIntWithoutRange": {},
+				"binaryField": "d29ybGQ="
 			}`))
 		},
 	)

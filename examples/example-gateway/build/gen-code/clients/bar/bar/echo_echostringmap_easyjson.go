@@ -149,6 +149,7 @@ func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var IntWithoutRangeSet bool
 	var MapIntWithRangeSet bool
 	var MapIntWithoutRangeSet bool
+	var BinaryFieldSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -210,6 +211,14 @@ func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.Delim('}')
 			}
 			MapIntWithoutRangeSet = true
+		case "binaryField":
+			if in.IsNull() {
+				in.Skip()
+				out.BinaryField = nil
+			} else {
+				out.BinaryField = in.Bytes()
+			}
+			BinaryFieldSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -233,6 +242,9 @@ func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !MapIntWithoutRangeSet {
 		in.AddError(fmt.Errorf("key 'mapIntWithoutRange' is required"))
+	}
+	if !BinaryFieldSet {
+		in.AddError(fmt.Errorf("key 'binaryField' is required"))
 	}
 }
 func easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out *jwriter.Writer, in BarResponse) {
@@ -266,15 +278,15 @@ func easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(`null`)
 	} else {
 		out.RawByte('{')
-		v5First := true
-		for v5Name, v5Value := range in.MapIntWithRange {
-			if !v5First {
+		v6First := true
+		for v6Name, v6Value := range in.MapIntWithRange {
+			if !v6First {
 				out.RawByte(',')
 			}
-			v5First = false
-			out.String(string(v5Name))
+			v6First = false
+			out.String(string(v6Name))
 			out.RawByte(':')
-			out.Int32(int32(v5Value))
+			out.Int32(int32(v6Value))
 		}
 		out.RawByte('}')
 	}
@@ -287,18 +299,24 @@ func easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(`null`)
 	} else {
 		out.RawByte('{')
-		v6First := true
-		for v6Name, v6Value := range in.MapIntWithoutRange {
-			if !v6First {
+		v7First := true
+		for v7Name, v7Value := range in.MapIntWithoutRange {
+			if !v7First {
 				out.RawByte(',')
 			}
-			v6First = false
-			out.String(string(v6Name))
+			v7First = false
+			out.String(string(v7Name))
 			out.RawByte(':')
-			out.Int32(int32(v6Value))
+			out.Int32(int32(v7Value))
 		}
 		out.RawByte('}')
 	}
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"binaryField\":")
+	out.Base64Bytes(in.BinaryField)
 	out.RawByte('}')
 }
 func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarEchoEchoStringMap1(in *jlexer.Lexer, out *Echo_EchoStringMap_Args) {
@@ -334,17 +352,17 @@ func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v7 *BarResponse
+					var v10 *BarResponse
 					if in.IsNull() {
 						in.Skip()
-						v7 = nil
+						v10 = nil
 					} else {
-						if v7 == nil {
-							v7 = new(BarResponse)
+						if v10 == nil {
+							v10 = new(BarResponse)
 						}
-						easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(in, &*v7)
+						easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(in, &*v10)
 					}
-					(out.Arg)[key] = v7
+					(out.Arg)[key] = v10
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -376,18 +394,18 @@ func easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		out.RawString(`null`)
 	} else {
 		out.RawByte('{')
-		v8First := true
-		for v8Name, v8Value := range in.Arg {
-			if !v8First {
+		v11First := true
+		for v11Name, v11Value := range in.Arg {
+			if !v11First {
 				out.RawByte(',')
 			}
-			v8First = false
-			out.String(string(v8Name))
+			v11First = false
+			out.String(string(v11Name))
 			out.RawByte(':')
-			if v8Value == nil {
+			if v11Value == nil {
 				out.RawString("null")
 			} else {
-				easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out, *v8Value)
+				easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out, *v11Value)
 			}
 		}
 		out.RawByte('}')

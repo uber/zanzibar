@@ -20,6 +20,7 @@ struct BarResponse {
     5: required map<string, i32> mapIntWithoutRange (
         zanzibar.ignore.integer.range = "true"
     )
+    6: required binary binaryField
 }
 
 struct QueryParamsStruct {

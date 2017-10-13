@@ -270,6 +270,16 @@
 					"Annotations": {
 						"zanzibar.ignore.integer.range": "true"
 					}
+				},
+				{
+					"ID": 6,
+					"Name": "binaryField",
+					"Type": {
+						"Annotations": null
+					},
+					"Required": true,
+					"Default": null,
+					"Annotations": null
 				}
 			],
 			"Annotations": null
@@ -476,6 +486,16 @@
 									"Annotations": {
 										"zanzibar.ignore.integer.range": "true"
 									}
+								},
+								{
+									"ID": 6,
+									"Name": "binaryField",
+									"Type": {
+										"Annotations": null
+									},
+									"Required": true,
+									"Default": null,
+									"Annotations": null
 								}
 							],
 							"Annotations": null
@@ -604,6 +624,16 @@
 									"Annotations": {
 										"zanzibar.ignore.integer.range": "true"
 									}
+								},
+								{
+									"ID": 6,
+									"Name": "binaryField",
+									"Type": {
+										"Annotations": null
+									},
+									"Required": true,
+									"Default": null,
+									"Annotations": null
 								}
 							],
 							"Annotations": null
@@ -732,6 +762,16 @@
 									"Annotations": {
 										"zanzibar.ignore.integer.range": "true"
 									}
+								},
+								{
+									"ID": 6,
+									"Name": "binaryField",
+									"Type": {
+										"Annotations": null
+									},
+									"Required": true,
+									"Default": null,
+									"Annotations": null
 								}
 							],
 							"Annotations": null
@@ -1012,6 +1052,16 @@
 									"Annotations": {
 										"zanzibar.ignore.integer.range": "true"
 									}
+								},
+								{
+									"ID": 6,
+									"Name": "binaryField",
+									"Type": {
+										"Annotations": null
+									},
+									"Required": true,
+									"Default": null,
+									"Annotations": null
 								}
 							],
 							"Annotations": null
