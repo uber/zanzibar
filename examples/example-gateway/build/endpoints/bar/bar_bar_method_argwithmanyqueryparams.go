@@ -303,9 +303,9 @@ func convertArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) 
 	out.StringField = string(in.StringField)
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[string]int32, len(in.MapIntWithRange))
+	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
 	for key, value := range in.MapIntWithRange {
-		out.MapIntWithRange[key] = int32(value)
+		out.MapIntWithRange[endpointsBarBar.UUID(key)] = int32(value)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
 	for key, value := range in.MapIntWithoutRange {

@@ -1102,16 +1102,45 @@ func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
 	)
 }
 
-func TestConvertWithBadKeyMapOfString(t *testing.T) {
+func TestConvertWithCorrectKeyMapNotStringKey(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
-		`struct Foo {
-			1: optional map<i32, string> one
+		`
+		typedef string UUID
+
+		struct Foo {
+			1: optional map<UUID, string> one
+		}
+
+		struct Bar {
+			1: optional map<UUID, string> one
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		out.One = make(map[structs.UUID]string, len(in.One))
+		for key, value := range in.One {
+			out.One[ structs.UUID(key)] = string(value)
+		}
+	`), lines)
+}
+
+func TestConvertWithBadKeyMapMapKey(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		typedef string UUID
+
+		struct Foo {
+			1: optional map<map<string, string>, string> one
 			2: required map<i32, string> two
 		}
 
 		struct Bar {
-			1: optional map<i32, string> one
+			1: optional map<map<string, string>, string> one
 			2: required map<i32, string> two
 		}`,
 		nil,
@@ -1120,10 +1149,7 @@ func TestConvertWithBadKeyMapOfString(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t,
-		"could not convert key (one), map is not string-keyed.",
-		err.Error(),
-	)
+	assert.Equal(t, "could not convert key (one), map is not string-keyed.", err.Error())
 }
 
 // Enduse that common acronyms are handled consistently with the
