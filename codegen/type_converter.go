@@ -353,18 +353,6 @@ func (c *TypeConverter) genConverterForMap(
 	if !isStringKey {
 		realType := compile.RootTypeSpec(toFieldType.KeySpec)
 		switch realType.(type) {
-		case
-			*compile.MapSpec,
-			*compile.SetSpec,
-			*compile.ListSpec,
-			*compile.StructSpec,
-			*compile.I8Spec,
-			*compile.DoubleSpec,
-			*compile.BoolSpec:
-			return errors.Errorf(
-				"could not convert key (%s), map cannot be keyed as map type",
-				toField.Name,
-			)
 		case *compile.StringSpec:
 			keyType, _ := c.getGoTypeName(toFieldType.KeySpec)
 			c.appendf(

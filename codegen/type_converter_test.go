@@ -1149,7 +1149,7 @@ func TestConvertWithBadKeyMapMapKey(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
-	assert.Equal(t, "could not convert key (one), map cannot be keyed as map type", err.Error())
+	assert.Equal(t, "could not convert key (one), map is not string-keyed.", err.Error())
 }
 
 // Enduse that common acronyms are handled consistently with the
