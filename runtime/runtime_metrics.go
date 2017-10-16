@@ -211,6 +211,7 @@ func (r *runtimeCollector) collectGCMetrics(memStats *runtime.MemStats) {
 	if delta := num - lastNum; delta > 0 {
 		r.metrics.numGC.Inc(int64(delta))
 		if delta >= _numGCThreshold {
+			/* coverage ignore next line */
 			lastNum = num - _numGCThreshold
 		}
 
