@@ -200,43 +200,24 @@ func TestRuntimeMetrics(t *testing.T) {
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
 	// Expect 30 runtime metrics + 1 logged metric
-	numMetrics := 31
+	numMetrics := 10
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 31 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 10 metrics")
 	names := []string{
-		"test-gateway.test.per-worker.runtime.cpu.cgoCalls",
-		"test-gateway.test.per-worker.runtime.cpu.count",
-		"test-gateway.test.per-worker.runtime.cpu.goMaxProcs",
-		"test-gateway.test.per-worker.runtime.cpu.goroutines",
-		"test-gateway.test.per-worker.runtime.mem.alloc",
-		"test-gateway.test.per-worker.runtime.mem.frees",
-		"test-gateway.test.per-worker.runtime.mem.gc.count",
-		"test-gateway.test.per-worker.runtime.mem.gc.cpuFraction",
-		"test-gateway.test.per-worker.runtime.mem.gc.last",
-		"test-gateway.test.per-worker.runtime.mem.gc.next",
-		"test-gateway.test.per-worker.runtime.mem.gc.pause",
-		"test-gateway.test.per-worker.runtime.mem.gc.pauseTotal",
-		"test-gateway.test.per-worker.runtime.mem.gc.sys",
-		"test-gateway.test.per-worker.runtime.mem.heap.alloc",
-		"test-gateway.test.per-worker.runtime.mem.heap.idle",
-		"test-gateway.test.per-worker.runtime.mem.heap.inuse",
-		"test-gateway.test.per-worker.runtime.mem.heap.objects",
-		"test-gateway.test.per-worker.runtime.mem.heap.released",
-		"test-gateway.test.per-worker.runtime.mem.heap.sys",
-		"test-gateway.test.per-worker.runtime.mem.lookups",
-		"test-gateway.test.per-worker.runtime.mem.malloc",
-		"test-gateway.test.per-worker.runtime.mem.otherSys",
-		"test-gateway.test.per-worker.runtime.mem.stack.inuse",
-		"test-gateway.test.per-worker.runtime.mem.stack.mcacheInuse",
-		"test-gateway.test.per-worker.runtime.mem.stack.mcacheSys",
-		"test-gateway.test.per-worker.runtime.mem.stack.mspanInuse",
-		"test-gateway.test.per-worker.runtime.mem.stack.mspanSys",
-		"test-gateway.test.per-worker.runtime.mem.stack.sys",
-		"test-gateway.test.per-worker.runtime.mem.sys",
-		"test-gateway.test.per-worker.runtime.mem.total",
+		"test-gateway.test.per-worker.runtime.num-cpu",
+		"test-gateway.test.per-worker.runtime.gomaxprocs",
+		"test-gateway.test.per-worker.runtime.num-goroutines",
+
+		"test-gateway.test.per-worker.runtime.memory.heap",
+		"test-gateway.test.per-worker.runtime.memory.heapidle",
+		"test-gateway.test.per-worker.runtime.memory.heapinuse",
+		"test-gateway.test.per-worker.runtime.memory.stack",
+
+		"test-gateway.test.per-worker.runtime.memory.num-gc",
+		"test-gateway.test.per-worker.runtime.memory.gc-pause-ms",
 	}
 	tags := map[string]string{
 		"env":     "test",
