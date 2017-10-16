@@ -151,6 +151,12 @@ func TestBarExceptionCode(t *testing.T) {
 	gateway.HTTPBackends()["bar"].HandleFunc(
 		"POST", "/bar-path",
 		func(w http.ResponseWriter, r *http.Request) {
+			bytes, err := ioutil.ReadAll(r.Body)
+			assert.NoError(t, err)
+			assert.Equal(t,
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w=="}}`),
+				bytes,
+			)
 			w.WriteHeader(403)
 			if _, err := w.Write([]byte(`{"stringField":"foo"}`)); err != nil {
 				t.Fatal("can't write fake response")
@@ -162,7 +168,7 @@ func TestBarExceptionCode(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8="}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w=="}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
