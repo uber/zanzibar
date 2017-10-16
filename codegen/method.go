@@ -85,6 +85,7 @@ type MethodSpec struct {
 	ResHeaders []string
 
 	RequestType       string
+	ShortRequestType  string
 	ResponseType      string
 	ShortResponseType string
 	OKStatusCode      StatusCode
@@ -283,6 +284,7 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 		ms.RequestBoxed = true
 		ms.RequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
 		if err == nil && IsStructType(funcSpec.ArgsSpec[0].Type) {
+			ms.ShortRequestType = ms.RequestType
 			ms.RequestType = "*" + ms.RequestType
 		}
 	} else {
@@ -290,8 +292,9 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 
 		goPackageName, err := packageHelper.TypePackageName(curThriftFile)
 		if err == nil {
-			ms.RequestType = "*" + goPackageName + "." +
+			ms.ShortRequestType = goPackageName + "." +
 				ms.ThriftService + "_" + strings.Title(ms.Name) + "_Args"
+			ms.RequestType = "*" + ms.ShortRequestType
 		}
 	}
 	if err != nil {
@@ -854,11 +857,19 @@ func (ms *MethodSpec) setTypeConverters(
 		Helper:      h,
 	}
 
+	typeConverter.append(
+		"func convertTo",
+		pascalCase(ms.Name),
+		"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
+
+	typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
+
 	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms)
 	if err != nil {
 		return err
 	}
-
+	typeConverter.append("\nreturn out")
+	typeConverter.append("}")
 	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types

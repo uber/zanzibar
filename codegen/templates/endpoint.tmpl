@@ -329,15 +329,9 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(in {{.RequestType}}) {{$clientReqType}} {
-	out := &{{unref $clientReqType}}{}
-
-	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
-	{{$line}}
-	{{ end }}
-
-	return out
-}
+{{ range $key, $line := $method.ConvertRequestGoStatements -}}
+{{$line}}
+{{ end }}
 {{end -}}
 
 {{- $exceptionIndex := .ExceptionsIndex }}
