@@ -356,7 +356,11 @@ func (c *TypeConverter) genConverterForMap(
 		case
 			*compile.MapSpec,
 			*compile.SetSpec,
-			*compile.ListSpec:
+			*compile.ListSpec,
+			*compile.StructSpec,
+			*compile.I8Spec,
+			*compile.DoubleSpec,
+			*compile.BoolSpec:
 			return errors.Errorf(
 				"could not convert key (%s), map cannot be keyed as map type",
 				toField.Name,
