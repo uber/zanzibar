@@ -350,7 +350,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
 		CollectInterval:  collectInterval,
 	}
-	gateway.runtimeMetrics = StartRuntimeMetricsCollector(runtimeMetricsOpts, gateway.PerHostScope)
+	gateway.runtimeMetrics = StartRuntimeMetricsCollector(
+		runtimeMetricsOpts,
+		gateway.PerHostScope,
+	)
 
 	return nil
 }
