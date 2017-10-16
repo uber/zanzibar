@@ -1110,12 +1110,10 @@ func TestConvertWithCorrectKeyMapNotStringKey(t *testing.T) {
 
 		struct Foo {
 			1: optional map<UUID, string> one
-			2: required map<i32, string> two
 		}
 
 		struct Bar {
 			1: optional map<UUID, string> one
-			2: required map<i32, string> two
 		}`,
 		nil,
 		nil,
@@ -1126,10 +1124,6 @@ func TestConvertWithCorrectKeyMapNotStringKey(t *testing.T) {
 		out.One = make(map[structs.UUID]string, len(in.One))
 		for key, value := range in.One {
 			out.One[ structs.UUID(key)] = string(value)
-		}
-		out.Two = make(map[int32]string, len(in.Two))
-		for key, value := range in.Two {
-			out.Two[ int32(key)] = string(value)
 		}
 	`), lines)
 }

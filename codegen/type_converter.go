@@ -365,7 +365,7 @@ func (c *TypeConverter) genConverterForMap(
 				"could not convert key (%s), map cannot be keyed as map type",
 				toField.Name,
 			)
-		default:
+		case *compile.StringSpec:
 			keyType, _ := c.getGoTypeName(toFieldType.KeySpec)
 			c.appendf(
 				"%s = make(map[%s]%s, len(%s))",
@@ -375,6 +375,9 @@ func (c *TypeConverter) genConverterForMap(
 			c.append("\t", toIdentifier, "[ ", keyType, "(key)] = ", typeName, "(value)")
 			c.append("}")
 			return nil
+		default:
+			return errors.Errorf(
+				"could not convert key (%s), map is not string-keyed.", toField.Name)
 		}
 	}
 
