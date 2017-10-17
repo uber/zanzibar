@@ -154,7 +154,7 @@ func TestBarExceptionCode(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":123}}`),
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":9223372036854775807}}`),
 				bytes,
 			)
 			w.WriteHeader(403)
@@ -168,7 +168,7 @@ func TestBarExceptionCode(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":9223372036854775807}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
