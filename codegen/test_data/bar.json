@@ -48,6 +48,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgNotStruct_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgNotStruct_Args",
 					"ResponseType": "",
 					"ShortResponseType": "",
 					"OKStatusCode": {
@@ -143,6 +144,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithHeaders_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithHeaders_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -246,6 +248,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithManyQueryParams_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithManyQueryParams_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -342,6 +345,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithNestedQueryParams_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithNestedQueryParams_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -424,6 +428,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithParams_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithParams_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -488,6 +493,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithQueryHeader_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithQueryHeader_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -555,6 +561,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_ArgWithQueryParams_Args",
+					"ShortRequestType": "clientsBarBar.Bar_ArgWithQueryParams_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -608,6 +615,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
+					"ShortRequestType": "",
 					"ResponseType": "string",
 					"ShortResponseType": "string",
 					"OKStatusCode": {
@@ -684,6 +692,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
+					"ShortRequestType": "",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -760,6 +769,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "",
+					"ShortRequestType": "",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -836,6 +846,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_Normal_Args",
+					"ShortRequestType": "clientsBarBar.Bar_Normal_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -914,6 +925,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_NormalRecur_Args",
+					"ShortRequestType": "clientsBarBar.Bar_NormalRecur_Args",
 					"ResponseType": "*clientsBarBar.BarResponseRecur",
 					"ShortResponseType": "clientsBarBar.BarResponseRecur",
 					"OKStatusCode": {
@@ -990,6 +1002,7 @@
 					"ReqHeaders": null,
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Bar_TooManyArgs_Args",
+					"ShortRequestType": "clientsBarBar.Bar_TooManyArgs_Args",
 					"ResponseType": "*clientsBarBar.BarResponse",
 					"ShortResponseType": "clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -1102,6 +1115,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoBinary_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoBinary_Args",
 					"ResponseType": "[]byte",
 					"ShortResponseType": "[]byte",
 					"OKStatusCode": {
@@ -1157,6 +1171,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoBool_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoBool_Args",
 					"ResponseType": "bool",
 					"ShortResponseType": "bool",
 					"OKStatusCode": {
@@ -1212,6 +1227,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoDouble_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoDouble_Args",
 					"ResponseType": "float64",
 					"ShortResponseType": "float64",
 					"OKStatusCode": {
@@ -1267,6 +1283,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoEnum_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoEnum_Args",
 					"ResponseType": "clientsBarBar.Fruit",
 					"ShortResponseType": "clientsBarBar.Fruit",
 					"OKStatusCode": {
@@ -1322,6 +1339,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoI16_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoI16_Args",
 					"ResponseType": "int16",
 					"ShortResponseType": "int16",
 					"OKStatusCode": {
@@ -1377,6 +1395,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoI32_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoI32_Args",
 					"ResponseType": "int32",
 					"ShortResponseType": "int32",
 					"OKStatusCode": {
@@ -1432,6 +1451,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoI64_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoI64_Args",
 					"ResponseType": "int64",
 					"ShortResponseType": "int64",
 					"OKStatusCode": {
@@ -1487,6 +1507,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoI8_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoI8_Args",
 					"ResponseType": "int8",
 					"ShortResponseType": "int8",
 					"OKStatusCode": {
@@ -1542,6 +1563,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoString_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoString_Args",
 					"ResponseType": "string",
 					"ShortResponseType": "string",
 					"OKStatusCode": {
@@ -1597,6 +1619,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStringList_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStringList_Args",
 					"ResponseType": "[]string",
 					"ShortResponseType": "[]string",
 					"OKStatusCode": {
@@ -1652,6 +1675,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStringMap_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStringMap_Args",
 					"ResponseType": "map[string]*clientsBarBar.BarResponse",
 					"ShortResponseType": "map[string]*clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -1707,6 +1731,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStringSet_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStringSet_Args",
 					"ResponseType": "map[string]struct{}",
 					"ShortResponseType": "map[string]struct{}",
 					"OKStatusCode": {
@@ -1762,6 +1787,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStructList_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStructList_Args",
 					"ResponseType": "[]*clientsBarBar.BarResponse",
 					"ShortResponseType": "[]*clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -1817,6 +1843,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStructMap_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStructMap_Args",
 					"ResponseType": "[]struct{Key *clientsBarBar.BarResponse; Value string}",
 					"ShortResponseType": "[]struct{Key *clientsBarBar.BarResponse; Value string}",
 					"OKStatusCode": {
@@ -1872,6 +1899,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoStructSet_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoStructSet_Args",
 					"ResponseType": "[]*clientsBarBar.BarResponse",
 					"ShortResponseType": "[]*clientsBarBar.BarResponse",
 					"OKStatusCode": {
@@ -1927,6 +1955,7 @@
 					],
 					"ResHeaders": null,
 					"RequestType": "*clientsBarBar.Echo_EchoTypedef_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoTypedef_Args",
 					"ResponseType": "clientsBarBar.UUID",
 					"ShortResponseType": "clientsBarBar.UUID",
 					"OKStatusCode": {

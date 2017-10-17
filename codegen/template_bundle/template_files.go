@@ -436,15 +436,9 @@ func (w {{$workflow}}) Handle(
 }
 
 {{if and (ne .RequestType "") (ne $clientReqType "") -}}
-func convertTo{{title .Name}}ClientRequest(in {{.RequestType}}) {{$clientReqType}} {
-	out := &{{unref $clientReqType}}{}
-
-	{{ range $key, $line := $method.ConvertRequestGoStatements -}}
-	{{$line}}
-	{{ end }}
-
-	return out
-}
+{{ range $key, $line := $method.ConvertRequestGoStatements -}}
+{{$line}}
+{{ end }}
 {{end -}}
 
 {{- $exceptionIndex := .ExceptionsIndex }}
@@ -481,7 +475,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9910, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
