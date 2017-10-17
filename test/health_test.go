@@ -129,13 +129,19 @@ func TestHealthMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",
 		"test-gateway.test.all-workers.inbound.calls.success",
-		"test-gateway.test.all-workers.inbound.calls.status.200",
 	}
 	tags := map[string]string{
 		"env":      "test",
 		"service":  "test-gateway",
 		"endpoint": "health",
 		"handler":  "health",
+	}
+	statusTags := map[string]string{
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "health",
+		"handler":  "health",
+		"status":   "200",
 	}
 	defaultTags := map[string]string{
 		"env":     "test",
@@ -146,6 +152,11 @@ func TestHealthMetrics(t *testing.T) {
 		key := tally.KeyForPrefixedStringMap(name, tags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
+
+	statusKey := tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
+	)
+	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
 	loggedKey := tally.KeyForPrefixedStringMap(
 		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
@@ -172,7 +183,7 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status.200", tags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")

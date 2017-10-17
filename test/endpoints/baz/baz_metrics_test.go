@@ -95,13 +95,19 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",
 		"test-gateway.test.all-workers.inbound.calls.success",
-		"test-gateway.test.all-workers.inbound.calls.status.204",
 	}
 	endpointTags := map[string]string{
 		"env":      "test",
 		"service":  "test-gateway",
 		"endpoint": "baz",
 		"handler":  "call",
+	}
+	statusTags := map[string]string{
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "baz",
+		"handler":  "call",
+		"status":   "204",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -128,7 +134,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status.204", endpointTags,
+		"test-gateway.test.all-workers.inbound.calls.status.204", statusTags,
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")

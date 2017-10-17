@@ -165,7 +165,9 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	metrics.Errors = scope.Counter(inboundCallsErrors)
 	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
 	for statusCode := range knownStatusCodes {
-		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", inboundCallsStatus, statusCode))
+		metrics.Status[statusCode] = scope.Tagged(map[string]string{
+			"status": fmt.Sprintf("%d", statusCode),
+		}).Counter(fmt.Sprintf("%s.%d", inboundCallsStatus, statusCode))
 	}
 	return &metrics
 }
@@ -190,7 +192,9 @@ func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
 	metrics.Errors = scope.Counter(outboundCallsErrors)
 	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
 	for statusCode := range knownStatusCodes {
-		metrics.Status[statusCode] = scope.Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
+		metrics.Status[statusCode] = scope.Tagged(map[string]string{
+			"status": fmt.Sprintf("%d", statusCode),
+		}).Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
 	}
 	return &metrics
 }
