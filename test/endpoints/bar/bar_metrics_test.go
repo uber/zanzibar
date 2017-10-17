@@ -52,7 +52,8 @@ func TestCallMetrics(t *testing.T) {
 				"intWithRange": 0,
 				"intWithoutRange": 0,
 				"mapIntWithRange": {},
-				"mapIntWithoutRange": {}
+				"mapIntWithoutRange": {},
+				"binaryField": "d29ybGQ="
 			}`)); err != nil {
 				t.Fatal("can't write fake response")
 			}
@@ -66,7 +67,7 @@ func TestCallMetrics(t *testing.T) {
 	_, err = gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8="}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {

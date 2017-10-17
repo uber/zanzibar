@@ -73,7 +73,7 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 
 		w.WriteHeader(200)
 
-		payload := []byte(`{"intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)
+		payload := []byte(`{"binaryField":"d29ybGQ=","intWithRange":0,"intWithoutRange":1,"mapIntWithRange":{},"mapIntWithoutRange":{},"stringField":"foo"}`)
 
 		// TODO(zw): generate client response.
 		if _, err := w.Write(payload); err != nil {
@@ -88,7 +88,7 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
-	endpointRequest := []byte(`{"request":{"boolField":true,"stringField":"foo"}}`)
+	endpointRequest := []byte(`{"request":{"binaryField":"aGVsbG8=","boolField":true,"stringField":"foo"}}`)
 
 	res, err := gateway.MakeRequest(
 		"POST",

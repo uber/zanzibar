@@ -7,6 +7,7 @@ typedef string UUID
 struct BarRequest {
     1: required string stringField
     2: required bool boolField
+    3: required binary binaryField
 }
 struct BarResponse {
     1: required string stringField (
@@ -19,6 +20,7 @@ struct BarResponse {
     5: required map<string, i32> mapIntWithoutRange (
         zanzibar.ignore.integer.range = "true"
     )
+    6: required binary binaryField
 }
 
 struct QueryParamsStruct {
