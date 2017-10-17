@@ -23,7 +23,8 @@
 							"request": {
 								"binaryField": "aGVsbG8=",
 								"boolField": true,
-								"stringField": "foo"
+								"stringField": "foo",
+								"timestamp": 123
 							}
 						}
 					}
@@ -49,7 +50,8 @@
 								"request": {
 									"binaryField": "aGVsbG8=",
 									"boolField": true,
-									"stringField": "foo"
+									"stringField": "foo",
+									"timestamp": 123
 								}
 							}
 						}

@@ -176,6 +176,7 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 		out.Request.StringField = string(in.Request.StringField)
 		out.Request.BoolField = bool(in.Request.BoolField)
 		out.Request.BinaryField = []byte(in.Request.BinaryField)
+		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
 	} else {
 		out.Request = nil
 	}

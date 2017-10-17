@@ -190,6 +190,18 @@
 					"Annotations": {
 						"zanzibar.http.ref": "query.some-query-field"
 					}
+				},
+				{
+					"ID": 4,
+					"Name": "timestamp",
+					"Type": {
+						"Annotations": null
+					},
+					"Required": true,
+					"Default": null,
+					"Annotations": {
+						"zanzibar.http.ref": "query.some-query-field"
+					}
 				}
 			],
 			"Annotations": null
@@ -392,6 +404,18 @@
 									{
 										"ID": 3,
 										"Name": "binaryField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "query.some-query-field"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "timestamp",
 										"Type": {
 											"Annotations": null
 										},
@@ -859,6 +883,18 @@
 									{
 										"ID": 3,
 										"Name": "binaryField",
+										"Type": {
+											"Annotations": null
+										},
+										"Required": true,
+										"Default": null,
+										"Annotations": {
+											"zanzibar.http.ref": "query.some-query-field"
+										}
+									},
+									{
+										"ID": 4,
+										"Name": "timestamp",
 										"Type": {
 											"Annotations": null
 										},
