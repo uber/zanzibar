@@ -82,13 +82,19 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",
 		"test-gateway.test.all-workers.inbound.calls.success",
-		"test-gateway.test.all-workers.inbound.calls.status.200",
 	}
 	endpointTags := map[string]string{
 		"env":      "test",
 		"service":  "test-gateway",
 		"endpoint": "bar",
 		"handler":  "normal",
+	}
+	eStatusTags := map[string]string{
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "bar",
+		"handler":  "normal",
+		"status":   "200",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -109,7 +115,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status.200", endpointTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", eStatusTags,
 	)]
 	value = *inboundStatus.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
@@ -118,7 +124,6 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.outbound.calls.latency",
 		"test-gateway.test.all-workers.outbound.calls.sent",
 		"test-gateway.test.all-workers.outbound.calls.success",
-		"test-gateway.test.all-workers.outbound.calls.status.200",
 	}
 	httpClientTags := map[string]string{
 		"env":     "test",
@@ -126,6 +131,14 @@ func TestCallMetrics(t *testing.T) {
 		"client":  "bar",
 		"method":  "Normal",
 	}
+	cStatusTags := map[string]string{
+		"env":     "test",
+		"service": "test-gateway",
+		"client":  "bar",
+		"method":  "Normal",
+		"status":  "200",
+	}
+
 	for _, name := range httpClientNames {
 		key := tally.KeyForPrefixedStringMap(name, httpClientTags)
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
@@ -152,7 +165,7 @@ func TestCallMetrics(t *testing.T) {
 
 	statusSuccess := metrics[tally.KeyForPrefixedStringMap(
 		"test-gateway.test.all-workers.outbound.calls.status.200",
-		httpClientTags,
+		cStatusTags,
 	)]
 	value = *statusSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
