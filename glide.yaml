@@ -9,7 +9,7 @@ import:
 - package: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - package: github.com/mailru/easyjson
-  version: dffba8d13bbd998df17d8557570cdea0624b9d1d
+  version: 3fd5e860b68f3cc81671ece2e226c78a6bbf54d3
   subpackages:
   - buffer
   - jlexer

@@ -1,5 +1,5 @@
-hash: 40fbb60fd143ee8d617119db53d53dc3ab109cedda5ebd8950061b9f1b36dcf9
-updated: 2017-10-04T16:10:53.450806832-07:00
+hash: 5e3f24c1a82fc835373e7c8f09adab510d2959885715f1747a4301ba0db7f910
+updated: 2017-10-17T11:16:18.809678-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -10,7 +10,7 @@ imports:
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/codahale/hdrhistogram
-  version: 3a0bb77429bd3a61596f5e8a3172445844342120
+  version: f8ad88b59a584afeee9d334eff879b104439117b
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -24,13 +24,13 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
+  version: f88afde2fa19a30cf50ba4b05b3d13bc6bae3079
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/mailru/easyjson
-  version: dffba8d13bbd998df17d8557570cdea0624b9d1d
+  version: 3fd5e860b68f3cc81671ece2e226c78a6bbf54d3
   subpackages:
   - bootstrap
   - buffer
@@ -39,7 +39,7 @@ imports:
   - jwriter
   - parser
 - name: github.com/mcuadros/go-jsonschema-generator
-  version: b230f1338bcd899d31970d8f08207cfb955592c3
+  version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
@@ -79,7 +79,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 5b29ee594f76a8f6a822c18b02ef985d68ddd991
+  version: 21a3da6d66fe0e278072676fdc84cd4c9ccb9b67
   subpackages:
   - metrics
   - metrics/tally
