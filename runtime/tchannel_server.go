@@ -112,6 +112,7 @@ func NewTChannelEndpointWithPostResponseCB(
 		zap.String("handlerID", handlerID),
 		zap.String("method", method),
 	)
+
 	scope = scope.Tagged(map[string]string{
 		"endpoint": endpointID,
 		"handler":  handlerID,
