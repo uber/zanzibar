@@ -158,7 +158,7 @@ func TestCallMetrics(t *testing.T) {
 		"service":  "test-gateway",
 		"endpoint": "bazTChannel",
 		"handler":  "call",
-		"method":   "SimpleService::Call",
+		"method":   "SimpleService--Call",
 	}
 
 	for _, name := range endpointNames {
@@ -241,12 +241,11 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	clientTags := map[string]string{
-		"env":             "test",
-		"service":         "test-gateway",
-		"client":          "baz",
-		"method":          "Call",
-		"target-service":  "bazService",
-		"target-endpoint": "SimpleService::call",
+		"env":            "test",
+		"service":        "test-gateway",
+		"client":         "baz",
+		"method":         "Call",
+		"target-service": "bazService",
 	}
 
 	for _, name := range clientNames {
