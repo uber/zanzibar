@@ -79,7 +79,7 @@ lint: check-licence eclint-check
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking errcheck..."
 	@go get github.com/kisielk/errcheck
-	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@errcheck --ignore "WriteString" $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
 	@go get honnef.co/go/tools/cmd/staticcheck
 	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log

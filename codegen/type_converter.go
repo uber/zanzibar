@@ -69,24 +69,101 @@ func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error
 	return GoType(c.Helper, valueType)
 }
 
-func (c *TypeConverter) assignWithOverride(
+//   input of "A.B.C.D" returns ["A","A.B", "A.B.C", "A.B.C.D"]
+func getMiddleIdentifiers(identifier string) []string {
+	subIds := strings.Split(identifier, ".")
+
+	middleIds := make([]string, 0, len(subIds))
+
+	middleIds = append(middleIds, subIds[0])
+	for i := 1; i < len(subIds); i++ {
+		middleIds = append(middleIds, fmt.Sprintf("%s.%s", middleIds[i-1], subIds[i]))
+	}
+
+	return middleIds
+}
+
+//  converts a list of identifier paths into boolean nil check expressions on those paths
+func convertIdentifiersToNilChecks(identifiers []string) []string {
+	checks := make([]string, 0, len(identifiers)-1)
+
+	for i, ident := range identifiers {
+		if i == 0 {
+			continue // discard the check on "in" object
+		}
+
+		checks = append(checks, ident+" != nil")
+	}
+	return checks
+}
+
+//  tranforms will have different paths,   to->from proxy mappings will have the same identifier path aside from prefix
+func isTransform(from string, to string) bool {
+	//  from prefix is "in." and to prefix "out."
+	return from[3:] != to[4:]
+}
+
+// helper func for assignWithOverride
+func (c *TypeConverter) assignWithChecks(
 	indent string,
 	toIdentifier string,
-	typeName string,
+	toTypeName string,
+	toRequired bool,
 	fromIdentifier string,
-	overriddenTypeCast string,
-	overriddenIdentifier string,
+	fromRequired bool,
+	extraNilCheck bool,
 ) {
-	if overriddenIdentifier == "" {
-		c.append(indent, toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
+
+	if !isTransform(fromIdentifier, toIdentifier) {
+
+		if !fromRequired && toRequired || extraNilCheck {
+			// need to nil check otherwise we could be cast or deref nil
+			c.append(indent, "if ", fromIdentifier, " != nil {")
+			c.append(indent, "\t", toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+			c.append(indent, "}")
+		} else {
+			c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+		}
 		return
 	}
 
-	// TODO: Verify all intermediate objects are not nil
-	c.append(indent, toIdentifier, " = ", overriddenTypeCast, "(", overriddenIdentifier, ")")
-	c.append(indent, "if ", fromIdentifier, " != nil {")
-	c.append(indent, "\t", toIdentifier, " = ", typeName, "(", fromIdentifier, ")")
+	//  generates nil checks for intermediate objects on the fromIdentifier path
+	checks := convertIdentifiersToNilChecks(getMiddleIdentifiers(fromIdentifier))
+
+	if !extraNilCheck {
+		// if from is required or from/to are both optional   then we don't need the final outer check
+		if fromRequired || !fromRequired && !toRequired {
+			checks = checks[:len(checks)-1]
+		}
+		if len(checks) == 0 {
+			c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+			return
+		}
+	}
+	c.append(indent, "if ", strings.Join(checks, " && "), " {")
+	c.append(indent, "\t", toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
 	c.append(indent, "}")
+	// TODO else?  log/stat it?  should this siliently eat intermediate nils as none-assignement,  should set nil?
+}
+
+func (c *TypeConverter) assignWithOverride(
+	indent string,
+	toIdentifier string,
+	toTypeName string,
+	toRequired bool,
+	fromIdentifier string,
+	fromRequired bool,
+	overriddenTypeCast string,
+	overriddenIdentifier string,
+	overrideRequired bool,
+) {
+	if overriddenIdentifier != "" {
+		c.assignWithChecks(indent, toIdentifier, overriddenTypeCast, toRequired, overriddenIdentifier, overrideRequired, false)
+		// second assignment uses extraNilCheck so that we do not re-assign to a nil value
+		c.assignWithChecks(indent, toIdentifier, toTypeName, toRequired, fromIdentifier, fromRequired, true)
+		return
+	}
+	c.assignWithChecks(indent, toIdentifier, toTypeName, toRequired, fromIdentifier, fromRequired, false)
 }
 
 func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
@@ -119,6 +196,27 @@ func (c *TypeConverter) genConverterForStruct(
 	}
 	subToFields := toFieldType.Fields
 
+	// if no fromFieldType assume we're constructing from transform fieldMap  TODO: make this less subtle
+	if fromFieldType == nil {
+		//  in the direct assignment we do a nil check on fromField here. its hard for unknown number of transforms
+		//  initialize the toField with an empty struct
+		c.append(indent, toIdentifier, " = &", typeName, "{}")
+
+		// recursive call
+		err = c.genStructConverter(
+			keyPrefix+".",
+			fromPrefix+".",
+			indent,
+			nil,
+			subToFields,
+			fieldMap,
+		)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	fromFieldStruct, ok := fromFieldType.(*compile.StructSpec)
 	if !ok {
 		return errors.Errorf(
@@ -132,16 +230,16 @@ func (c *TypeConverter) genConverterForStruct(
 
 	c.append(indent, "\t", toIdentifier, " = &", typeName, "{}")
 
+	// TODO(jake8):  not convinced this is necessary, can we just pass the full fieldMap
 	subFromFields := fromFieldStruct.Fields
 	subFromFieldsMap := make(map[string]FieldMapperEntry)
 	// Build subfield mapping
-	for k, v := range fieldMap {
-		if strings.HasPrefix(v.QualifiedName, keyPrefix) {
+	for toFieldID, fromFieldEntry := range fieldMap {
+		if strings.HasPrefix(toFieldID, keyPrefix) {
 			// string keyPrefix and append
-			subFromFieldsMap[k] = v
+			subFromFieldsMap[toFieldID] = fromFieldEntry
 		}
 	}
-
 	err = c.genStructConverter(
 		keyPrefix+".",
 		fromPrefix+".",
@@ -155,9 +253,7 @@ func (c *TypeConverter) genConverterForStruct(
 	}
 
 	c.append(indent, "} else {")
-
 	c.append(indent, "\t", toIdentifier, " = nil")
-
 	c.append(indent, "}")
 
 	return nil
@@ -176,23 +272,31 @@ func (c *TypeConverter) genConverterForPrimitive(
 	if err != nil {
 		return err
 	}
+	overriddenFieldRequired := false
 	if toField.Required {
 		overriddenType := typeName
 		if !fromField.Required {
 			// Dereference the pointer
 			typeName = "*"
 		}
-		if overriddenField != nil && !overriddenField.Required {
-			// Dereference the pointer
-			overriddenType = "*"
+		if overriddenField != nil {
+			if !overriddenField.Required {
+				// Dereference the pointer
+				overriddenType = "*"
+			} else {
+				overriddenFieldRequired = true
+			}
 		}
 		c.assignWithOverride(
 			indent,
 			toIdentifier,
 			typeName,
+			toField.Required,
 			fromIdentifier,
+			fromField.Required,
 			overriddenType,
 			overriddenIdentifier,
+			overriddenFieldRequired,
 		)
 	} else {
 		fromType := fmt.Sprintf("(*%s)", typeName)
@@ -202,15 +306,19 @@ func (c *TypeConverter) genConverterForPrimitive(
 		overriddenType := fmt.Sprintf("(*%s)", typeName)
 		if overriddenField != nil && overriddenField.Required {
 			overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+			overriddenFieldRequired = true
 		}
 
 		c.assignWithOverride(
 			indent,
 			toIdentifier,
 			fromType,
+			toField.Required,
 			fromIdentifier,
+			fromField.Required,
 			overriddenType,
 			overriddenIdentifier,
+			overriddenFieldRequired,
 		)
 	}
 	return nil
@@ -468,6 +576,14 @@ func (c *TypeConverter) genConverterForMap(
 	return nil
 }
 
+// recursive function to walk a DFS on toFields and try to assign fromFields or fieldMap tranforms
+//  generated code is appended as we traverse the toFields thrift type structure
+//  keyPrefix - the identifier (path) of the current position in the "to" struct
+//  fromPrefix - the identifier (path) of the corresponding position in the "from" struct
+//  indent - a string of tabs for current block scope
+//  fromFields - fields in the current from struct,  can be nil  if only fieldMap transforms are applicable in the path
+//  toFields - fields in the current to struct
+//  fieldMap - a data structure specifying configured transforms   Map[toIdentifier ] ->  fromField FieldMapperEntry
 func (c *TypeConverter) genStructConverter(
 	keyPrefix string,
 	fromPrefix string,
@@ -476,6 +592,7 @@ func (c *TypeConverter) genStructConverter(
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
 ) error {
+
 	for i := 0; i < len(toFields); i++ {
 		toField := toFields[i]
 
@@ -488,22 +605,27 @@ func (c *TypeConverter) genStructConverter(
 			}
 		}
 
-		toIdentifier := "out." + keyPrefix + pascalCase(toField.Name)
+		toSubIdentifier := keyPrefix + pascalCase(toField.Name)
+		toIdentifier := "out." + toSubIdentifier
 		overriddenIdentifier := ""
 		fromIdentifier := ""
 
 		// Check for mapped field
 		var overriddenField *compile.FieldSpec
 
-		v, ok := fieldMap[keyPrefix+pascalCase(toField.Name)]
+		// check if this toField satisfies a fieldMap transform
+		transformFrom, ok := fieldMap[toSubIdentifier]
 		if ok {
+			// no existing direct fromField,  just assign the transform
 			if fromField == nil {
-				fromField = v.Field
-				fromIdentifier = "in." + v.QualifiedName
+				fromField = transformFrom.Field
+				fromIdentifier = "in." + transformFrom.QualifiedName
+				// else there is a conflicting direct fromField
 			} else {
-				if v.Override {
+				//  depending on Override flag either the direct fromField or transformFrom is the OverrideField
+				if transformFrom.Override {
 					// check for required/optional setting
-					if !v.Field.Required {
+					if !transformFrom.Field.Required {
 						overriddenField = fromField
 						overriddenIdentifier = "in." + fromPrefix +
 							pascalCase(overriddenField.Name)
@@ -511,27 +633,48 @@ func (c *TypeConverter) genStructConverter(
 					// If override is true and the new field is required,
 					// there's a default instantiation value and will always
 					// overwrite.
-					fromField = v.Field
-					fromIdentifier = "in." + v.QualifiedName
+					fromField = transformFrom.Field
+					fromIdentifier = "in." + transformFrom.QualifiedName
 				} else {
 					// If override is false and the from field is required,
 					// From is always populated and will never be overwritten.
 					if !fromField.Required {
-						overriddenField = v.Field
-						overriddenIdentifier = "in." + v.QualifiedName
+						overriddenField = transformFrom.Field
+						overriddenIdentifier = "in." + transformFrom.QualifiedName
 					}
 				}
 			}
 		}
 
+		// neither direct or transform fromField was found
 		if fromField == nil {
-			return errors.Errorf(
-				"cannot map by name for the field %s",
-				toField.Name,
-			)
+			// search the fieldMap toField identifiers for matching identifier prefix
+			// e.g.  the current toField is a struct and something within it has a transform
+			//   a full match identifiers for transform non-struct types would have been caught above
+			hasStructFieldMapping := false
+			for toID := range fieldMap {
+				if strings.HasPrefix(toID, toSubIdentifier) {
+					hasStructFieldMapping = true
+				}
+			}
+			//  if there's no fromField and no fieldMap transform that could be applied
+			if !hasStructFieldMapping {
+				if toField.Required {
+					// unrecoverable error
+					return errors.Errorf(
+						"required toField %s does not have a valid fromField mapping",
+						toField.Name,
+					)
+				}
+
+				// the toField is optional and there's nothing that maps to it or its sub-fields so we should skip it
+				// TODO: should we explicitly set the field to nil?
+				continue
+			}
 		}
 
-		if fromIdentifier == "" {
+		if fromIdentifier == "" && fromField != nil {
+			// should we set this if no fromField ??
 			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
 		}
 
@@ -563,6 +706,7 @@ func (c *TypeConverter) genStructConverter(
 			if err != nil {
 				return err
 			}
+			overriddenFieldRequired := false
 
 			// TODO: typedef for struct is invalid here ...
 			if toField.Required {
@@ -571,17 +715,24 @@ func (c *TypeConverter) genStructConverter(
 					// Dereference the pointer
 					typeName = "*"
 				}
-				if overriddenField != nil && !overriddenField.Required {
-					// Dereference the pointer
-					overriddenType = "*"
+				if overriddenField != nil {
+					if !overriddenField.Required {
+						// Dereference the pointer
+						overriddenType = "*"
+					} else {
+						overriddenFieldRequired = true
+					}
 				}
 				c.assignWithOverride(
 					indent,
 					toIdentifier,
 					typeName,
+					toField.Required,
 					fromIdentifier,
+					fromField.Required,
 					overriddenType,
 					overriddenIdentifier,
+					overriddenFieldRequired,
 				)
 			} else {
 				fromType := fmt.Sprintf("(*%s)", typeName)
@@ -591,26 +742,42 @@ func (c *TypeConverter) genStructConverter(
 				overriddenType := fmt.Sprintf("(*%s)", typeName)
 				if overriddenField != nil && overriddenField.Required {
 					overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+					overriddenFieldRequired = true
 				}
 
 				c.assignWithOverride(
 					indent,
 					toIdentifier,
 					fromType,
+					toField.Required,
 					fromIdentifier,
+					fromField.Required,
 					overriddenType,
 					overriddenIdentifier,
+					overriddenFieldRequired,
 				)
 			}
 
 		case *compile.StructSpec:
+			var (
+				stFromPrefix string
+				stFromType   compile.TypeSpec
+			)
+			if fromField != nil {
+				stFromType = fromField.Type
+				stFromPrefix = keyPrefix + pascalCase(fromField.Name)
+			} else {
+				stFromType = nil
+				stFromPrefix = keyPrefix
+			}
+
 			err := c.genConverterForStruct(
 				toField.Name,
 				toFieldType,
-				fromField.Type,
+				stFromType,
 				fromIdentifier,
 				keyPrefix+pascalCase(toField.Name),
-				keyPrefix+pascalCase(fromField.Name),
+				stFromPrefix,
 				indent,
 				fieldMap,
 			)
@@ -719,11 +886,8 @@ func addSpecToMap(
 				overrideMap[k] = v
 				break
 			} else if strings.HasPrefix(v.QualifiedName, fieldQualName) {
-				overrideMap = addSpecToMap(
-					overrideMap,
-					spec.Type.(*compile.StructSpec).Fields,
-					fieldQualName+".",
-				)
+				structSpec := spec.Type.(*compile.StructSpec)
+				overrideMap = addSpecToMap(overrideMap, structSpec.Fields, fieldQualName+".")
 			}
 		}
 	}
