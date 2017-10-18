@@ -150,7 +150,7 @@ func TestCallMetrics(t *testing.T) {
 		"app":             "test-gateway",
 		"service":         "test-gateway",
 		"target-service":  "bazService",
-		"target-endpoint": "SimpleService::call",
+		"target-endpoint": "SimpleService__call",
 		"host":            zanzibar.GetHostname(),
 	}
 	for _, name := range tchannelNames {
@@ -194,11 +194,12 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	clientTags := map[string]string{
-		"env":            "test",
-		"service":        "test-gateway",
-		"client":         "baz",
-		"method":         "Call",
-		"target-service": "bazService",
+		"env":             "test",
+		"service":         "test-gateway",
+		"client":          "baz",
+		"method":          "Call",
+		"target-service":  "bazService",
+		"target-endpoint": "SimpleService__call",
 	}
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)
