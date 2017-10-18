@@ -15,6 +15,7 @@ struct BarRequest {
     2: required bool boolField
     3: required binary binaryField
     4: required Timestamp timestamp
+    5: required Fruit enumField
 }
 
 struct BarResponse {
