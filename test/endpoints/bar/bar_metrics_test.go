@@ -67,7 +67,7 @@ func TestCallMetrics(t *testing.T) {
 	_, err = gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8="}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {

@@ -3,6 +3,7 @@ namespace java com.uber.zanzibar.clients.bar
 include "../foo/foo.thrift"
 
 typedef string UUID
+typedef i64 (js.type = 'Date') Timestamp
 
 enum Fruit {
     APPLE,
@@ -13,6 +14,7 @@ struct BarRequest {
     1: required string stringField
     2: required bool boolField
     3: required binary binaryField
+    4: required Timestamp timestamp
 }
 
 struct BarResponse {

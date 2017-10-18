@@ -452,6 +452,7 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var StringFieldSet bool
 	var BoolFieldSet bool
 	var BinaryFieldSet bool
+	var TimestampSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -476,6 +477,9 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				out.BinaryField = in.Bytes()
 			}
 			BinaryFieldSet = true
+		case "timestamp":
+			out.Timestamp = Timestamp(in.Int64())
+			TimestampSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -493,6 +497,9 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !BinaryFieldSet {
 		in.AddError(fmt.Errorf("key 'binaryField' is required"))
+	}
+	if !TimestampSet {
+		in.AddError(fmt.Errorf("key 'timestamp' is required"))
 	}
 }
 func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out *jwriter.Writer, in BarRequest) {
@@ -517,5 +524,11 @@ func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"binaryField\":")
 	out.Base64Bytes(in.BinaryField)
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"timestamp\":")
+	out.Int64(int64(in.Timestamp))
 	out.RawByte('}')
 }

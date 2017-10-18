@@ -24,6 +24,7 @@
 							"request": {
 								"stringField": "foo",
 								"boolField": true,
+								"timestamp": 123,
 								"binaryField": "aGVsbG8="
 							}
 						}
@@ -53,6 +54,7 @@
 						"tchannelRequest": {
 							"request": {
 								"stringField": "foo",
+								"timestamp": 123,
 								"binaryField": "aGVsbG8=",
 								"boolField": true
 							}

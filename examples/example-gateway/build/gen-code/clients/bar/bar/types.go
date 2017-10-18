@@ -125,9 +125,10 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string `json:"stringField,required"`
-	BoolField   bool   `json:"boolField,required"`
-	BinaryField []byte `json:"binaryField,required"`
+	StringField string    `json:"stringField,required"`
+	BoolField   bool      `json:"boolField,required"`
+	BinaryField []byte    `json:"binaryField,required"`
+	Timestamp   Timestamp `json:"timestamp,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -147,7 +148,7 @@ type BarRequest struct {
 //   }
 func (v *BarRequest) ToWire() (wire.Value, error) {
 	var (
-		fields [3]wire.Field
+		fields [4]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -176,7 +177,20 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	fields[i] = wire.Field{ID: 3, Value: w}
 	i++
 
+	w, err = v.Timestamp.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 4, Value: w}
+	i++
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Timestamp_Read(w wire.Value) (Timestamp, error) {
+	var x Timestamp
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a BarRequest struct from its Thrift-level
@@ -202,6 +216,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 	stringFieldIsSet := false
 	boolFieldIsSet := false
 	binaryFieldIsSet := false
+	timestampIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -229,6 +244,14 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 				}
 				binaryFieldIsSet = true
 			}
+		case 4:
+			if field.Value.Type() == wire.TI64 {
+				v.Timestamp, err = _Timestamp_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				timestampIsSet = true
+			}
 		}
 	}
 
@@ -244,6 +267,10 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		return errors.New("field BinaryField of BarRequest is required")
 	}
 
+	if !timestampIsSet {
+		return errors.New("field Timestamp of BarRequest is required")
+	}
+
 	return nil
 }
 
@@ -254,13 +281,15 @@ func (v *BarRequest) String() string {
 		return "<nil>"
 	}
 
-	var fields [3]string
+	var fields [4]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
 	fields[i] = fmt.Sprintf("BoolField: %v", v.BoolField)
 	i++
 	fields[i] = fmt.Sprintf("BinaryField: %v", v.BinaryField)
+	i++
+	fields[i] = fmt.Sprintf("Timestamp: %v", v.Timestamp)
 	i++
 
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
@@ -278,6 +307,9 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 		return false
 	}
 	if !bytes.Equal(v.BinaryField, rhs.BinaryField) {
+		return false
+	}
+	if !(v.Timestamp == rhs.Timestamp) {
 		return false
 	}
 
@@ -1694,6 +1726,37 @@ func (v *QueryParamsStruct) GetAuthUUID2() (o string) {
 	}
 
 	return
+}
+
+type Timestamp int64
+
+// ToWire translates Timestamp into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v Timestamp) ToWire() (wire.Value, error) {
+	x := (int64)(v)
+	return wire.NewValueI64(x), error(nil)
+}
+
+// String returns a readable string representation of Timestamp.
+func (v Timestamp) String() string {
+	x := (int64)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes Timestamp from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *Timestamp) FromWire(w wire.Value) error {
+	x, err := w.GetI64(), error(nil)
+	*v = (Timestamp)(x)
+	return err
+}
+
+// Equals returns true if this Timestamp is equal to the provided
+// Timestamp.
+func (lhs Timestamp) Equals(rhs Timestamp) bool {
+	return (lhs == rhs)
 }
 
 type UUID string
