@@ -325,9 +325,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	}
 	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
 		tally.ScopeOptions{
-			Tags:           defaultTags,
-			CachedReporter: gateway.metricsBackend,
-			Separator:      tally.DefaultSeparator,
+			Tags:            defaultTags,
+			CachedReporter:  gateway.metricsBackend,
+			Separator:       tally.DefaultSeparator,
+			SanitizeOptions: &m3.DefaultSanitizerOpts,
 		},
 		time.Duration(config.MustGetInt("metrics.flushInterval"))*time.Millisecond,
 	)
