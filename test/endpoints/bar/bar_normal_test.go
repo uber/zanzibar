@@ -66,9 +66,21 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
-
 	assert.Equal(t, "500 Internal Server Error", res.Status)
 	assert.Equal(t, 1, counter)
+
+	res, err = gateway.MakeRequest(
+		"POST", "/bar/bar-path", nil,
+		bytes.NewReader([]byte(`{
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":"APPLE"}
+		}`)),
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "500 Internal Server Error", res.Status)
+	assert.Equal(t, 2, counter)
 
 	respBytes, err := ioutil.ReadAll(res.Body)
 	if !assert.NoError(t, err, "got http resp error") {
