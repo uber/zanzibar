@@ -113,12 +113,10 @@ func NewTChannelEndpointWithPostResponseCB(
 		zap.String("method", method),
 	)
 
-	cleanMethod := strings.Replace(method, ":", "-", -1)
-
 	scope = scope.Tagged(map[string]string{
 		"endpoint": endpointID,
 		"handler":  handlerID,
-		"method":   cleanMethod,
+		"method":   method,
 	})
 	return &TChannelEndpoint{
 		EndpointID: endpointID,

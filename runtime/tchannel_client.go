@@ -88,9 +88,10 @@ func NewTChannelClient(
 			zap.String("serviceMethod", serviceMethod),
 		)
 		metrics[serviceMethod] = NewOutboundTChannelMetrics(scope.Tagged(map[string]string{
-			"client":         opt.ClientID,
-			"method":         methodName,
-			"target-service": opt.ServiceName,
+			"client":          opt.ClientID,
+			"method":          methodName,
+			"target-service":  opt.ServiceName,
+			"target-endpoint": serviceMethod,
 		}))
 	}
 
