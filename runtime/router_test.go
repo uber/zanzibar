@@ -202,6 +202,9 @@ func TestRouterPanic(t *testing.T) {
 	)
 
 	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 
 	assert.Equal(t, resp.Status, "500 Internal Server Error")
 	assert.Equal(t, resp.StatusCode, 500)
@@ -259,6 +262,9 @@ func TestRouterPanicObject(t *testing.T) {
 	)
 
 	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 
 	assert.Equal(t, resp.Status, "500 Internal Server Error")
 	assert.Equal(t, resp.StatusCode, 500)
