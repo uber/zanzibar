@@ -27,6 +27,7 @@ import (
 
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
@@ -169,4 +170,118 @@ func TestRouterInvalidMethod(t *testing.T) {
 	assert.Equal(t, 1, len(
 		gateway.Logs("info", "Finished an incoming server HTTP request"),
 	))
+}
+
+func TestRouterPanic(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/panic",
+		zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"panic", "panic",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				resp *zanzibar.ServerHTTPResponse,
+			) {
+				panic("a string")
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
+
+	assert.Equal(t, resp.Status, "500 Internal Server Error")
+	assert.Equal(t, resp.StatusCode, 500)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, bytes, []byte("Internal Server Error\n"))
+
+	allLogs := gateway.AllLogs()
+	assert.Equal(t, 1, len(allLogs))
+
+	logLines := allLogs["A http request handler paniced"]
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t, "http router panic: a string", line["error"])
+	assert.Equal(t, "/panic", line["pathname"])
+	assert.Contains(
+		t,
+		line["errorVerbose"],
+		"runtime_test.TestRouterPanic.func1",
+	)
+}
+
+func TestRouterPanicObject(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/panic",
+		zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"panic", "panic",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				resp *zanzibar.ServerHTTPResponse,
+			) {
+				panic(errors.New("an error"))
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
+
+	assert.Equal(t, resp.Status, "500 Internal Server Error")
+	assert.Equal(t, resp.StatusCode, 500)
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, bytes, []byte("Internal Server Error\n"))
+
+	allLogs := gateway.AllLogs()
+	assert.Equal(t, 1, len(allLogs))
+
+	logLines := allLogs["A http request handler paniced"]
+	assert.Equal(t, 1, len(logLines))
+
+	line := logLines[0]
+	assert.Equal(t, "an error", line["error"])
+	assert.Equal(t, "/panic", line["pathname"])
+	assert.Contains(
+		t,
+		line["errorVerbose"],
+		"runtime_test.TestRouterPanicObject.func1",
+	)
 }
