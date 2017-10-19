@@ -359,6 +359,12 @@ func (c *barClient) ArgWithHeaders(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -451,6 +457,12 @@ func (c *barClient) ArgWithManyQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -536,6 +548,12 @@ func (c *barClient) ArgWithNestedQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -586,6 +604,12 @@ func (c *barClient) ArgWithParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -633,6 +657,12 @@ func (c *barClient) ArgWithQueryHeader(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -689,6 +719,12 @@ func (c *barClient) ArgWithQueryParams(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1115,6 +1151,12 @@ func (c *barClient) EchoBinary(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1166,6 +1208,12 @@ func (c *barClient) EchoBool(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1217,6 +1265,12 @@ func (c *barClient) EchoDouble(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1268,6 +1322,12 @@ func (c *barClient) EchoEnum(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1319,6 +1379,12 @@ func (c *barClient) EchoI16(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1370,6 +1436,12 @@ func (c *barClient) EchoI32(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1421,6 +1493,12 @@ func (c *barClient) EchoI64(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1472,6 +1550,12 @@ func (c *barClient) EchoI8(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1523,6 +1607,12 @@ func (c *barClient) EchoString(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1574,6 +1664,12 @@ func (c *barClient) EchoStringList(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1625,6 +1721,12 @@ func (c *barClient) EchoStringMap(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1676,6 +1778,12 @@ func (c *barClient) EchoStringSet(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1727,6 +1835,12 @@ func (c *barClient) EchoStructList(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1787,6 +1901,12 @@ func (c *barClient) EchoStructMap(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1838,6 +1958,12 @@ func (c *barClient) EchoStructSet(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -1889,6 +2015,12 @@ func (c *barClient) EchoTypedef(
 		}
 
 		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{

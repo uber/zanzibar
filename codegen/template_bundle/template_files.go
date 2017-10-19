@@ -1033,6 +1033,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 				return respHeaders, err
 			}
 			return respHeaders, nil
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return respHeaders, err
+			}
 	}
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
@@ -1048,6 +1054,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- end}}
 
 			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return defaultRes, respHeaders, err
+			}
 	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
@@ -1127,7 +1139,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 6842, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7122, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

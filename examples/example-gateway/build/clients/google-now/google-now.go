@@ -127,6 +127,12 @@ func (c *googleNowClient) AddCredentials(
 			return respHeaders, err
 		}
 		return respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
 	}
 
 	return respHeaders, &zanzibar.UnexpectedHTTPError{
@@ -176,6 +182,12 @@ func (c *googleNowClient) CheckCredentials(
 			return respHeaders, err
 		}
 		return respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
 	}
 
 	return respHeaders, &zanzibar.UnexpectedHTTPError{
