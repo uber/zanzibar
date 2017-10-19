@@ -25,6 +25,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
@@ -99,9 +100,11 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 // HTTPRouter data structure to handle and register endpoints
 type HTTPRouter struct {
+	gateway                  *Gateway
 	httpRouter               *httprouter.Router
 	notFoundEndpoint         *RouterEndpoint
 	methodNotAllowedEndpoint *RouterEndpoint
+	panicCount               tally.Counter
 }
 
 // NewHTTPRouter allocates a HTTP router
@@ -115,6 +118,8 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 			gateway.Logger, gateway.AllHostScope,
 			methodNotAllowed, methodNotAllowed, nil,
 		),
+		gateway:    gateway,
+		panicCount: gateway.PerHostScope.Counter("runtime.router.panic"),
 	}
 	router.httpRouter = &httprouter.Router{
 		// We handle trailing slash in Register() without redirect
@@ -123,10 +128,30 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 		HandleMethodNotAllowed: true,
 		NotFound:               router.handleNotFound,
 		MethodNotAllowed:       router.handleMethodNotAllowed,
-		// TODO add panic handler
-		// PanicHandler:           router.handlePanic,
+		PanicHandler:           router.handlePanic,
 	}
 	return router
+}
+
+func (router *HTTPRouter) handlePanic(
+	w http.ResponseWriter, r *http.Request, v interface{},
+) {
+	err, ok := v.(error)
+	if !ok {
+		err = errors.Errorf("http router panic: %v", v)
+	}
+
+	router.gateway.Logger.Error(
+		"A http request handler paniced",
+		zap.Error(err),
+		zap.String("pathname", r.URL.RequestURI()),
+	)
+	router.panicCount.Inc(1)
+
+	http.Error(w,
+		http.StatusText(http.StatusInternalServerError),
+		http.StatusInternalServerError,
+	)
 }
 
 func (router *HTTPRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
