@@ -167,6 +167,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 				return respHeaders, err
 			}
 			return respHeaders, nil
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return respHeaders, err
+			}
 	}
 	{{else if eq (len .Exceptions) 0}}
 	switch res.StatusCode {
@@ -182,6 +188,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- end}}
 
 			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
+		default:
+			// TODO: log about unexpected body bytes?
+			_, err = res.ReadAll()
+			if err != nil {
+				return defaultRes, respHeaders, err
+			}
 	}
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
