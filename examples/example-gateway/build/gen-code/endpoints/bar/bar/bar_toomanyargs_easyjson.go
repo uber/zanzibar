@@ -796,6 +796,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var BoolFieldSet bool
 	var BinaryFieldSet bool
 	var TimestampSet bool
+	var EnumFieldSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -823,6 +824,11 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		case "timestamp":
 			out.Timestamp = Timestamp(in.Int64())
 			TimestampSet = true
+		case "enumField":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.EnumField).UnmarshalJSON(data))
+			}
+			EnumFieldSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -843,6 +849,9 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !TimestampSet {
 		in.AddError(fmt.Errorf("key 'timestamp' is required"))
+	}
+	if !EnumFieldSet {
+		in.AddError(fmt.Errorf("key 'enumField' is required"))
 	}
 }
 func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out *jwriter.Writer, in BarRequest) {
@@ -873,5 +882,11 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"timestamp\":")
 	out.Int64(int64(in.Timestamp))
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"enumField\":")
+	out.Raw((in.EnumField).MarshalJSON())
 	out.RawByte('}')
 }

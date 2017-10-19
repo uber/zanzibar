@@ -23,6 +23,7 @@
 							"request": {
 								"binaryField": "aGVsbG8=",
 								"boolField": true,
+								"enumField": "APPLE",
 								"stringField": "foo",
 								"timestamp": 123
 							}
@@ -50,6 +51,7 @@
 								"request": {
 									"binaryField": "aGVsbG8=",
 									"boolField": true,
+									"enumField": "APPLE",
 									"stringField": "foo",
 									"timestamp": 123
 								}
