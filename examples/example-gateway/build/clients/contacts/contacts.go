@@ -118,6 +118,12 @@ func (c *contactsClient) SaveContacts(
 		}
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
