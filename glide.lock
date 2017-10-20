@@ -1,5 +1,5 @@
-hash: 5e3f24c1a82fc835373e7c8f09adab510d2959885715f1747a4301ba0db7f910
-updated: 2017-10-17T11:16:18.809678-07:00
+hash: ebe6df5ec6d77b526557719d05bc71e5bf58f2b4c0ed3811db0897e3da867efe
+updated: 2017-10-23T10:56:00.946426-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -30,7 +30,7 @@ imports:
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/mailru/easyjson
-  version: 3fd5e860b68f3cc81671ece2e226c78a6bbf54d3
+  version: 4d347d79dea0067c945f374f990601decb08abb5
   subpackages:
   - bootstrap
   - buffer
@@ -137,7 +137,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: a04bdaca5b32abe1c069418fb7088ae607de5bd0
+  version: aabf50738bcdd9b207582cbe796b59ed65d56680
   subpackages:
   - context
 testImports: []
