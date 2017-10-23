@@ -133,6 +133,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Echo_EchoI32_Args,
 	) (int32, map[string]string, error)
+	EchoI32Map(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Echo_EchoI32Map_Args,
+	) (map[int32]*clientsBarBar.BarResponse, map[string]string, error)
 	EchoI64(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -229,6 +234,7 @@ func NewClient(
 				"EchoEnum",
 				"EchoI16",
 				"EchoI32",
+				"EchoI32Map",
 				"EchoI64",
 				"EchoI8",
 				"EchoString",
@@ -1430,6 +1436,63 @@ func (c *barClient) EchoI32(
 	switch res.StatusCode {
 	case 200:
 		var responseBody int32
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// EchoI32Map calls "/echo/i32-map" endpoint.
+func (c *barClient) EchoI32Map(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Echo_EchoI32Map_Args,
+) (map[int32]*clientsBarBar.BarResponse, map[string]string, error) {
+	var defaultRes map[int32]*clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoI32Map", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/echo" + "/i32-map"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	headerErr := req.CheckHeaders([]string{"x-uuid"})
+	if headerErr != nil {
+		return defaultRes, nil, headerErr
+	}
+
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody map[int32]*clientsBarBar.BarResponse
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err

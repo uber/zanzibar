@@ -338,6 +338,15 @@ service  Echo {
         zanzibar.http.status = "200"
     )
 
+    map<i32, BarResponse> echoI32Map (
+        1: required map<i32, BarResponse> arg
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.reqHeaders = "x-uuid"
+        zanzibar.http.path = "/echo/i32-map"
+        zanzibar.http.status = "200"
+    )
+
     map<string, BarResponse> echoStringMap (
         1: required map<string, BarResponse> arg
     ) (

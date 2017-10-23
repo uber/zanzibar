@@ -748,6 +748,67 @@ func TestEchoStructList(t *testing.T) {
 	assert.Equal(t, arg, result)
 }
 
+func TestEchoI32Map(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	arg := map[int32]*barGen.BarResponse{
+		42: {
+			StringField:     "a",
+			IntWithRange:    int32(0),
+			IntWithoutRange: int32(0),
+			MapIntWithRange: map[barGen.UUID]int32{
+				barGen.UUID("fakeUUID"): int32(0),
+			},
+			MapIntWithoutRange: map[string]int32{
+				"0": int32(0),
+			},
+			BinaryField: []byte("d29ybGQ="),
+		},
+	}
+	marshaled, err := json.Marshal(arg)
+	assert.NoError(t, err)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/echo/i32-map",
+		func(w http.ResponseWriter, r *http.Request) {
+			body, err := ioutil.ReadAll(r.Body)
+			assert.NoError(t, err)
+
+			err = r.Body.Close()
+			assert.NoError(t, err)
+
+			var req barGen.Echo_EchoI32Map_Args
+			err = json.Unmarshal(body, &req)
+			assert.NoError(t, err)
+			assert.Equal(t, req.Arg, arg)
+
+			w.WriteHeader(200)
+			_, err = w.Write(marshaled)
+			assert.NoError(t, err)
+		},
+	)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	result, _, err := bar.EchoI32Map(
+		context.Background(), map[string]string{
+			"x-uuid": "a-uuid",
+		}, &barGen.Echo_EchoI32Map_Args{Arg: arg},
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, arg, result)
+}
+
 func TestEchoStringMap(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

@@ -32,6 +32,7 @@
 			"EchoStructSet": "Echo::echoStructSet",
 			"EchoStringList": "Echo::echoStringList",
 			"EchoStructList": "Echo::echoStructList",
+			"EchoI32Map": "Echo::echoI32Map",
 			"EchoStringMap": "Echo::echoStringMap",
 			"EchoStructMap": "Echo::echoStructMap"
 		}
