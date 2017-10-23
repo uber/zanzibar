@@ -20,7 +20,8 @@
 	},
 	"dependencies": {
 		"client": [
-			"bar"
+			"bar",
+			"quux"
 		]
 	}
 }

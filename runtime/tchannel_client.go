@@ -33,7 +33,7 @@ import (
 	netContext "golang.org/x/net/context"
 )
 
-// TChannelClientOption is used when creating a new tchannelClient
+// TChannelClientOption is used when creating a new TChannelClient
 type TChannelClientOption struct {
 	ServiceName       string
 	ClientID          string
@@ -43,8 +43,10 @@ type TChannelClientOption struct {
 	RoutingKey        *string
 }
 
-// tchannelClient implements TChannelClient and makes outgoing Thrift calls.
-type tchannelClient struct {
+// TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
+type TChannelClient struct {
+	TChannelCaller
+
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	serviceName       string
@@ -53,12 +55,13 @@ type tchannelClient struct {
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
 	routingKey        *string
-	loggers           map[string]*zap.Logger
+	Loggers           map[string]*zap.Logger
+	Scopes            map[string]tally.Scope
 	metrics           map[string]*OutboundTChannelMetrics
 }
 
 type tchannelOutboundCall struct {
-	client        *tchannelClient
+	client        *TChannelClient
 	call          *tchannel.OutboundCall
 	methodName    string
 	serviceMethod string
@@ -71,15 +74,17 @@ type tchannelOutboundCall struct {
 	metrics       *OutboundTChannelMetrics
 }
 
-// NewTChannelClient returns a tchannelClient that makes calls over the given tchannel to the given thrift service.
+// NewTChannelClient returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
 func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	scope tally.Scope,
 	opt *TChannelClientOption,
-) TChannelClient {
-	loggers := make(map[string]*zap.Logger, len(opt.MethodNames))
-	metrics := make(map[string]*OutboundTChannelMetrics, len(opt.MethodNames))
+) *TChannelClient {
+	numMethods := len(opt.MethodNames)
+	loggers := make(map[string]*zap.Logger, numMethods)
+	scopes := make(map[string]tally.Scope, numMethods)
+	metrics := make(map[string]*OutboundTChannelMetrics, numMethods)
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String("clientId", opt.ClientID),
@@ -87,15 +92,16 @@ func NewTChannelClient(
 			zap.String("serviceName", opt.ServiceName),
 			zap.String("serviceMethod", serviceMethod),
 		)
-		metrics[serviceMethod] = NewOutboundTChannelMetrics(scope.Tagged(map[string]string{
+		scopes[serviceMethod] = scope.Tagged(map[string]string{
 			"client":          opt.ClientID,
 			"method":          methodName,
 			"target-service":  opt.ServiceName,
 			"target-endpoint": serviceMethod,
-		}))
+		})
+		metrics[serviceMethod] = NewOutboundTChannelMetrics(scopes[serviceMethod])
 	}
 
-	return &tchannelClient{
+	return &TChannelClient{
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
 		serviceName:       opt.ServiceName,
@@ -104,13 +110,14 @@ func NewTChannelClient(
 		timeout:           opt.Timeout,
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
 		routingKey:        opt.RoutingKey,
-		loggers:           loggers,
+		Loggers:           loggers,
+		Scopes:            scopes,
 		metrics:           metrics,
 	}
 }
 
 // Call makes a RPC call to the given service.
-func (c *tchannelClient) Call(
+func (c *TChannelClient) Call(
 	ctx context.Context,
 	thriftService, methodName string,
 	reqHeaders map[string]string,
@@ -135,7 +142,7 @@ func (c *tchannelClient) Call(
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
-		logger:        c.loggers[serviceMethod],
+		logger:        c.Loggers[serviceMethod],
 		metrics:       c.metrics[serviceMethod],
 	}
 	defer func() { call.finish(err) }()
