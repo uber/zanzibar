@@ -34,15 +34,14 @@ type statsReporter struct {
 
 // NewTChannelStatsReporter returns a StatsReporter using the given tally.Scope.
 func NewTChannelStatsReporter(scope tally.Scope, prefix string) tchannel.StatsReporter {
-	sr := &statsReporter{
+	s := &statsReporter{
 		scope:        scope,
 		knownMetrics: make(map[string]bool, len(knownMetrics)),
 	}
-
 	for _, m := range knownMetrics {
-		sr.knownMetrics[prefix+m] = true
+		s.knownMetrics[prefix+"."+m] = true
 	}
-	return sr
+	return s
 }
 
 // IncCounter ...

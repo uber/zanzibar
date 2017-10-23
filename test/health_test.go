@@ -210,7 +210,7 @@ func TestRuntimeMetrics(t *testing.T) {
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
-	// Expect 30 runtime metrics + 1 logged metric
+	// Expect 9 runtime metrics + 1 logged metric
 	numMetrics := 10
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 	cgateway.MetricsWaitGroup.Wait()

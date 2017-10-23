@@ -499,8 +499,8 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			Tracer:      gateway.Tracer,
 			Logger:      NewTChannelLogger(gateway.Logger),
 			StatsReporter: NewTChannelStatsReporter(
-				gateway.AllHostScope,
-				gateway.allHostScopePrefix,
+				gateway.AllHostScope.SubScope("tchannel"),
+				gateway.allHostScopePrefix+".tchannel",
 			),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
