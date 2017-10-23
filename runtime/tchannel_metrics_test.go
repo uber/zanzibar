@@ -48,26 +48,26 @@ var (
 
 func TestNewTChannelStatsReporter(t *testing.T) {
 	testScope := tally.NewTestScope(prefix, nil)
-	reporter := NewTChannelStatsReporter(testScope, prefix)
+	reporter := NewTChannelStatsReporter(testScope)
 
 	reporter.IncCounter(counterName, tags, 1)
 	reporter.IncCounter(counterName, tags, 41)
 	for _, m := range knownMetrics {
-		reporter.IncCounter(prefix+m, tags, 5)
+		reporter.IncCounter(m, tags, 5)
 	}
 
 	reporter.UpdateGauge(gaugeName, tags, 1)
 	reporter.UpdateGauge(gaugeName, tags, 42)
 	reporter.UpdateGauge(gaugeName, tags, 13)
 	for _, m := range knownMetrics {
-		reporter.UpdateGauge(prefix+m, tags, 17)
+		reporter.UpdateGauge(m, tags, 17)
 	}
 
 	reporter.RecordTimer(timerName, tags, 100)
 	reporter.RecordTimer(timerName, tags, 200)
 	reporter.RecordTimer(timerName, tags, 400)
 	for _, m := range knownMetrics {
-		reporter.RecordTimer(prefix+m, tags, 1000)
+		reporter.RecordTimer(m, tags, 1000)
 	}
 
 	snapshot := testScope.Snapshot()
@@ -91,7 +91,7 @@ func TestNewTChannelStatsReporter(t *testing.T) {
 	assert.Equal(t, []time.Duration{100, 200, 400}, timerSnapshot.Values())
 
 	for _, m := range knownMetrics {
-		name := tally.KeyForPrefixedStringMap(prefix+m, tags)
+		name := tally.KeyForPrefixedStringMap(prefix+"."+m, tags)
 		assert.Nil(t, snapshot.Counters()[name])
 		assert.Nil(t, snapshot.Gauges()[name])
 		assert.Nil(t, snapshot.Timers()[name])

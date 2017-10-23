@@ -73,7 +73,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	numMetrics := 16
+	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -140,10 +140,8 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	tchannelNames := []string{
-		"test-gateway.test.all-workers.tchannel.outbound.calls.latency",
 		"test-gateway.test.all-workers.tchannel.outbound.calls.per-attempt.latency",
 		"test-gateway.test.all-workers.tchannel.outbound.calls.send",
-		"test-gateway.test.all-workers.tchannel.outbound.calls.success",
 	}
 	tchannelTags := map[string]string{
 		"env":             "test",
@@ -158,14 +156,6 @@ func TestCallMetrics(t *testing.T) {
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
-	outboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.tchannel.outbound.calls.latency",
-		tchannelTags,
-	)]
-	value = *outboundLatency.MetricValue.Timer.I64Value
-	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
-	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
 	perAttemptOutboundLatency := metrics[tally.KeyForPrefixedStringMap(
 		"test-gateway.test.all-workers.tchannel.outbound.calls.per-attempt.latency",
 		tchannelTags,
@@ -179,13 +169,6 @@ func TestCallMetrics(t *testing.T) {
 		tchannelTags,
 	)]
 	value = *outboundSend.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	outboundSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.tchannel.outbound.calls.success",
-		tchannelTags,
-	)]
-	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	clientNames := []string{
@@ -206,7 +189,7 @@ func TestCallMetrics(t *testing.T) {
 		assert.Contains(t, metrics, key, "expected metric: %s", key)
 	}
 
-	outboundLatency = metrics[tally.KeyForPrefixedStringMap(
+	outboundLatency := metrics[tally.KeyForPrefixedStringMap(
 		"test-gateway.test.all-workers.outbound.calls.latency", clientTags,
 	)]
 	value = *outboundLatency.MetricValue.Timer.I64Value
@@ -219,7 +202,7 @@ func TestCallMetrics(t *testing.T) {
 	value = *outboundSent.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
-	outboundSuccess = metrics[tally.KeyForPrefixedStringMap(
+	outboundSuccess := metrics[tally.KeyForPrefixedStringMap(
 		"test-gateway.test.all-workers.outbound.calls.success", clientTags,
 	)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
