@@ -1420,6 +1420,62 @@
 					"RequestParamGoStatements": null
 				},
 				{
+					"Name": "echoI32Map",
+					"HTTPMethod": "POST",
+					"EndpointName": "",
+					"HTTPPath": "/echo/i32-map",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "echo",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						},
+						{
+							"Type": "static",
+							"Text": "i32-map",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						}
+					],
+					"IsEndpoint": false,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
+					"ReqHeaderGoStatements": null,
+					"ReqClientHeaderGoStatements": null,
+					"ResHeaderFields": null,
+					"ReqHeaders": [
+						"x-uuid"
+					],
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Echo_EchoI32Map_Args",
+					"ShortRequestType": "clientsBarBar.Echo_EchoI32Map_Args",
+					"ResponseType": "map[int32]*clientsBarBar.BarResponse",
+					"ShortResponseType": "map[int32]*clientsBarBar.BarResponse",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Echo",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null,
+					"RequestParamGoStatements": null
+				},
+				{
 					"Name": "echoI64",
 					"HTTPMethod": "POST",
 					"EndpointName": "",

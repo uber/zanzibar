@@ -311,6 +311,7 @@
 				"EchoEnum": "Echo::echoEnum",
 				"EchoI16": "Echo::echoI16",
 				"EchoI32": "Echo::echoI32",
+				"EchoI32Map": "Echo::echoI32Map",
 				"EchoI64": "Echo::echoI64",
 				"EchoI8": "Echo::echoI8",
 				"EchoString": "Echo::echoString",
@@ -488,6 +489,10 @@
 					},
 					{
 						"Name": "echoI32",
+						"Type": "http"
+					},
+					{
+						"Name": "echoI32Map",
 						"Type": "http"
 					},
 					{
