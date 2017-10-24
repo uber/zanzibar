@@ -28,27 +28,39 @@ import (
 )
 
 type statsReporter struct {
-	scope tally.Scope
+	scope        tally.Scope
+	knownMetrics map[string]bool
 }
 
 // NewTChannelStatsReporter returns a StatsReporter using the given tally.Scope.
-func NewTChannelStatsReporter(s tally.Scope) tchannel.StatsReporter {
-	return &statsReporter{
-		scope: s,
+func NewTChannelStatsReporter(scope tally.Scope) tchannel.StatsReporter {
+	s := &statsReporter{
+		scope:        scope,
+		knownMetrics: make(map[string]bool, len(knownMetrics)),
 	}
+	for _, m := range knownMetrics {
+		s.knownMetrics[m] = true
+	}
+	return s
 }
 
 // IncCounter ...
 func (s statsReporter) IncCounter(name string, tags map[string]string, value int64) {
-	s.scope.Tagged(tags).Counter(name).Inc(value)
+	if !s.knownMetrics[name] {
+		s.scope.Tagged(tags).Counter(name).Inc(value)
+	}
 }
 
 // UpdateGauge ...
 func (s statsReporter) UpdateGauge(name string, tags map[string]string, value int64) {
-	s.scope.Tagged(tags).Gauge(name).Update(float64(value))
+	if !s.knownMetrics[name] {
+		s.scope.Tagged(tags).Gauge(name).Update(float64(value))
+	}
 }
 
 // RecordTimer ...
 func (s statsReporter) RecordTimer(name string, tags map[string]string, d time.Duration) {
-	s.scope.Tagged(tags).Timer(name).Record(d)
+	if !s.knownMetrics[name] {
+		s.scope.Tagged(tags).Timer(name).Record(d)
+	}
 }

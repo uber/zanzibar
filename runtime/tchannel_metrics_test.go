@@ -36,41 +36,64 @@ var tags = map[string]string{
 	"target-endpoint": "operation",
 }
 
+var (
+	prefix            = "prefix"
+	counterName       = "outbound.counter"
+	gaugeName         = "outbound.gauge"
+	timerName         = "outbound.timer"
+	prefixCounterName = prefix + "." + counterName
+	prefixGaugeName   = prefix + "." + gaugeName
+	prefixTimerName   = prefix + "." + timerName
+)
+
 func TestNewTChannelStatsReporter(t *testing.T) {
-	testScope := tally.NewTestScope("", nil)
+	testScope := tally.NewTestScope(prefix, nil)
 	reporter := NewTChannelStatsReporter(testScope)
 
-	counterName := "outbound.success"
 	reporter.IncCounter(counterName, tags, 1)
 	reporter.IncCounter(counterName, tags, 41)
+	for _, m := range knownMetrics {
+		reporter.IncCounter(m, tags, 5)
+	}
 
-	gaugeName := "outbound.pending"
 	reporter.UpdateGauge(gaugeName, tags, 1)
 	reporter.UpdateGauge(gaugeName, tags, 42)
 	reporter.UpdateGauge(gaugeName, tags, 13)
+	for _, m := range knownMetrics {
+		reporter.UpdateGauge(m, tags, 17)
+	}
 
-	timerName := "outbound.pending"
 	reporter.RecordTimer(timerName, tags, 100)
 	reporter.RecordTimer(timerName, tags, 200)
 	reporter.RecordTimer(timerName, tags, 400)
+	for _, m := range knownMetrics {
+		reporter.RecordTimer(m, tags, 1000)
+	}
 
 	snapshot := testScope.Snapshot()
 
-	snapshotCounterName := tally.KeyForPrefixedStringMap(counterName, tags)
+	snapshotCounterName := tally.KeyForPrefixedStringMap(prefixCounterName, tags)
 	counterSnapshot, ok := snapshot.Counters()[snapshotCounterName]
 	assert.True(t, ok)
-	assert.Equal(t, counterName, counterSnapshot.Name())
+	assert.Equal(t, prefixCounterName, counterSnapshot.Name())
 	assert.Equal(t, int64(42), counterSnapshot.Value())
 
-	snapshotGaugeName := tally.KeyForPrefixedStringMap(gaugeName, tags)
+	snapshotGaugeName := tally.KeyForPrefixedStringMap(prefixGaugeName, tags)
 	gaugeSnapshot, ok := snapshot.Gauges()[snapshotGaugeName]
 	assert.True(t, ok)
-	assert.Equal(t, gaugeName, gaugeSnapshot.Name())
+	assert.Equal(t, prefixGaugeName, gaugeSnapshot.Name())
 	assert.Equal(t, float64(13), gaugeSnapshot.Value())
 
-	snapshotTimerName := tally.KeyForPrefixedStringMap(timerName, tags)
+	snapshotTimerName := tally.KeyForPrefixedStringMap(prefixTimerName, tags)
 	timerSnapshot, ok := snapshot.Timers()[snapshotTimerName]
 	assert.True(t, ok)
-	assert.Equal(t, timerName, timerSnapshot.Name())
+	assert.Equal(t, prefixTimerName, timerSnapshot.Name())
 	assert.Equal(t, []time.Duration{100, 200, 400}, timerSnapshot.Values())
+
+	for _, m := range knownMetrics {
+		name := tally.KeyForPrefixedStringMap(prefix+"."+m, tags)
+		assert.Nil(t, snapshot.Counters()[name])
+		assert.Nil(t, snapshot.Gauges()[name])
+		assert.Nil(t, snapshot.Timers()[name])
+	}
 }

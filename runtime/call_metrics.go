@@ -36,6 +36,12 @@ const (
 	inboundCallsErrors       = "inbound.calls.errors"
 	inboundCallsStatus       = "inbound.calls.status"
 
+	// TChannel docs say it emits 'outbound.calls.sent':
+	// http://tchannel.readthedocs.io/en/latest/metrics/#call-metrics
+	// but uber/tchannel-go emits 'outbound.calls.send':
+	// https://github.com/uber/tchannel-go/blob/3abb4c025c1663b383452339a22d918cf9d0be0b/outbound.go#L196
+	outboundCallsSend = "outbound.calls.send"
+
 	outboundCallsSent         = "outbound.calls.sent"
 	outboundCallsLatency      = "outbound.calls.latency"
 	outboundCallsSuccess      = "outbound.calls.success"
@@ -44,6 +50,25 @@ const (
 	outboundCallsErrors       = "outbound.calls.errors"
 	outboundCallsStatus       = "outbound.calls.status"
 )
+
+var knownMetrics = []string{
+	inboundCallsRecvd,
+	inboundCallsLatency,
+	inboundCallsSuccess,
+	inboundCallsAppErrors,
+	inboundCallsSystemErrors,
+	inboundCallsErrors,
+	inboundCallsStatus,
+
+	outboundCallsSend,
+	outboundCallsSent,
+	outboundCallsLatency,
+	outboundCallsSuccess,
+	outboundCallsAppErrors,
+	outboundCallsSystemErrors,
+	outboundCallsErrors,
+	outboundCallsStatus,
+}
 
 var knownStatusCodes = map[int]bool{
 	http.StatusContinue:                      true, // 100

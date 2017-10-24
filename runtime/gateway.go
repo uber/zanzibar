@@ -490,14 +490,15 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
 
-	subScope := gateway.AllHostScope.SubScope("tchannel")
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
-			ProcessName:   processName,
-			Logger:        NewTChannelLogger(gateway.Logger),
-			StatsReporter: NewTChannelStatsReporter(subScope),
-			Tracer:        gateway.Tracer,
+			ProcessName: processName,
+			Tracer:      gateway.Tracer,
+			Logger:      NewTChannelLogger(gateway.Logger),
+			StatsReporter: NewTChannelStatsReporter(
+				gateway.AllHostScope.SubScope("tchannel"),
+			),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,
 			//OnPeerStatusChanged:      opts.OnPeerStatusChanged,
