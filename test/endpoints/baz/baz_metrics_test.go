@@ -73,7 +73,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	numMetrics := 14
+	numMetrics := 13
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -141,7 +141,6 @@ func TestCallMetrics(t *testing.T) {
 
 	tchannelNames := []string{
 		"test-gateway.test.all-workers.tchannel.outbound.calls.per-attempt.latency",
-		"test-gateway.test.all-workers.tchannel.outbound.calls.send",
 	}
 	tchannelTags := map[string]string{
 		"env":             "test",
@@ -163,13 +162,6 @@ func TestCallMetrics(t *testing.T) {
 	value = *perAttemptOutboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
-	outboundSend := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.tchannel.outbound.calls.send",
-		tchannelTags,
-	)]
-	value = *outboundSend.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	clientNames := []string{
 		"test-gateway.test.all-workers.outbound.calls.latency",

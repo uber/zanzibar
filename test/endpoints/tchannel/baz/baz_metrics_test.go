@@ -72,7 +72,7 @@ func TestCallMetrics(t *testing.T) {
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
 
-	numMetrics := 13
+	numMetrics := 12
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
@@ -146,7 +146,6 @@ func TestCallMetrics(t *testing.T) {
 
 	tchannelOutboundNames := []string{
 		"test-gateway.test.all-workers.tchannel.outbound.calls.per-attempt.latency",
-		"test-gateway.test.all-workers.tchannel.outbound.calls.send",
 	}
 	tchannelOutboundTags := map[string]string{
 		"app":             "test-gateway",
@@ -169,13 +168,6 @@ func TestCallMetrics(t *testing.T) {
 	value = *outboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
-
-	outboundSend := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.tchannel.outbound.calls.send",
-		tchannelOutboundTags,
-	)]
-	value = *outboundSend.MetricValue.Count.I64Value
-	assert.Equal(t, int64(1), value)
 
 	clientNames := []string{
 		"test-gateway.test.all-workers.outbound.calls.latency",
