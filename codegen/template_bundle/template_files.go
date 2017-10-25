@@ -1562,9 +1562,10 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
+
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
@@ -1700,7 +1701,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.Warn("{{$clientName}}.{{$methodName}} ({{$serviceMethod}}) returned error", zap.Error(err))
+			logger.Warn("Client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
@@ -1713,7 +1714,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Error("Unable to unwrap {{$clientName}}.{{$methodName}} ({{$serviceMethod}}) response", zap.Error(err))
+				logger.Warn("Unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}
@@ -1733,7 +1734,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5221, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5117, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

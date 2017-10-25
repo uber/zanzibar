@@ -21,49 +21,18 @@
 package quux
 
 import (
-	barClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
-	"golang.org/x/net/context"
 )
 
 // Client is a custom client that does nothing yet
 type Client interface{}
 
-type quux struct {
-	client *zanzibar.TChannelClient
-	bar    barClient.Client
-}
+type quux struct{}
 
 // NewClient creates a new Quux client
 func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
-	return &quux{
-		client: zanzibar.NewTChannelClient(
-			deps.Default.Channel,
-			deps.Default.Logger,
-			deps.Default.Scope,
-			&zanzibar.TChannelClientOption{
-				ServiceName: "quux",
-				ClientID:    "quux",
-				MethodNames: map[string]string{
-					"Quux::Foo": "Foo",
-				},
-			},
-		),
-		bar: deps.Client.Bar,
-	}
+	return &quux{}
 }
 
-func (c *quux) Foo() {
-	logger := c.client.Loggers["Quux::Foo"]
-	_, _, err := c.bar.Hello(context.Background(), nil)
-	if err != nil {
-		logger.Error("hello error", zap.Error(err))
-	}
-	_, _, err = c.client.Call(context.Background(), "quux", "foo", nil, nil, nil)
-	if err != nil {
-		logger.Error("client call error", zap.Error(err))
-	}
-	c.client.Scopes["Quux::Foo"].Counter("foo.called").Inc(1)
-}
+func (c *quux) Foo() {}

@@ -208,7 +208,7 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.Len(t, gateway.Logs("info", "Inbound connection is active."), 1)
 	assert.Len(t, gateway.Logs("info", "Outbound connection is active."), 1)
 	assert.Len(t, gateway.Logs("warn", "baz.Call returned error"), 1)
-	assert.Len(t, gateway.Logs("warn", "bazClient.Call (SimpleService::call) returned error"), 1)
+	assert.Len(t, gateway.Logs("warn", "Client call returned error"), 1)
 	assert.Len(t, gateway.Logs("warn", "Could not create arg2reader for outbound response"), 1)
 	assert.Len(t, gateway.Logs("warn", "Could not make outbound request"), 1)
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)

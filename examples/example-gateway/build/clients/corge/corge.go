@@ -29,11 +29,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
+
+	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // Client defines corge client interface.
@@ -118,13 +120,13 @@ func (c *corgeClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("corgeClient.EchoString (Corge::echoString) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap corgeClient.EchoString (Corge::echoString) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }

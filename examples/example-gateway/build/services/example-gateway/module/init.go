@@ -32,7 +32,6 @@ import (
 	contactsClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 	googlenowClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
-	quuxClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -43,7 +42,6 @@ import (
 	googlenowEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
-	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -60,7 +58,6 @@ type ClientDependenciesNodes struct {
 	Baz       bazClientGenerated.Client
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
-	Quux      quuxClientStatic.Client
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -100,20 +97,13 @@ func InitializeDependencies(
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(g, &googlenowClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Quux = quuxClientStatic.NewClient(g, &quuxClientModule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Client: &quuxClientModule.ClientDependencies{
-			Bar: initializedClientDependencies.Bar,
-		},
-	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(g, &barEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
-			Bar:  initializedClientDependencies.Bar,
-			Quux: initializedClientDependencies.Quux,
+			Bar: initializedClientDependencies.Bar,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(g, &bazEndpointModule.Dependencies{

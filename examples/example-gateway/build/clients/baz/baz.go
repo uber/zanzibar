@@ -29,12 +29,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/uber/tchannel-go"
+	"go.uber.org/zap"
+
+	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // Client defines baz client interface.
@@ -234,13 +236,13 @@ func (c *bazClient) EchoBinary(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoBinary (SecondService::echoBinary) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoBinary (SecondService::echoBinary) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -267,13 +269,13 @@ func (c *bazClient) EchoBool(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoBool (SecondService::echoBool) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoBool (SecondService::echoBool) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -300,13 +302,13 @@ func (c *bazClient) EchoDouble(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoDouble (SecondService::echoDouble) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoDouble (SecondService::echoDouble) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -333,13 +335,13 @@ func (c *bazClient) EchoEnum(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoEnum (SecondService::echoEnum) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoEnum (SecondService::echoEnum) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -366,13 +368,13 @@ func (c *bazClient) EchoI16(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoI16 (SecondService::echoI16) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoI16 (SecondService::echoI16) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -399,13 +401,13 @@ func (c *bazClient) EchoI32(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoI32 (SecondService::echoI32) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoI32 (SecondService::echoI32) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -432,13 +434,13 @@ func (c *bazClient) EchoI64(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoI64 (SecondService::echoI64) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoI64 (SecondService::echoI64) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -465,13 +467,13 @@ func (c *bazClient) EchoI8(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoI8 (SecondService::echoI8) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoI8 (SecondService::echoI8) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -498,13 +500,13 @@ func (c *bazClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoString (SecondService::echoString) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoString (SecondService::echoString) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -531,13 +533,13 @@ func (c *bazClient) EchoStringList(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStringList (SecondService::echoStringList) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStringList (SecondService::echoStringList) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -564,13 +566,13 @@ func (c *bazClient) EchoStringMap(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStringMap (SecondService::echoStringMap) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStringMap (SecondService::echoStringMap) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -597,13 +599,13 @@ func (c *bazClient) EchoStringSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStringSet (SecondService::echoStringSet) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStringSet (SecondService::echoStringSet) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -630,13 +632,13 @@ func (c *bazClient) EchoStructList(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStructList (SecondService::echoStructList) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStructList (SecondService::echoStructList) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -669,13 +671,13 @@ func (c *bazClient) EchoStructMap(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStructMap (SecondService::echoStructMap) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructMap_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStructMap (SecondService::echoStructMap) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -702,13 +704,13 @@ func (c *bazClient) EchoStructSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoStructSet (SecondService::echoStructSet) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoStructSet (SecondService::echoStructSet) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -735,13 +737,13 @@ func (c *bazClient) EchoTypedef(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.EchoTypedef (SecondService::echoTypedef) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.EchoTypedef (SecondService::echoTypedef) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -769,7 +771,7 @@ func (c *bazClient) Call(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.Call (SimpleService::call) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return nil, err
 	}
 
@@ -802,13 +804,13 @@ func (c *bazClient) Compare(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.Compare (SimpleService::compare) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.Compare (SimpleService::compare) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -835,13 +837,13 @@ func (c *bazClient) Ping(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.Ping (SimpleService::ping) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Error("Unable to unwrap bazClient.Ping (SimpleService::ping) response", zap.Error(err))
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -871,7 +873,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		}
 	}
 	if err != nil {
-		logger.Warn("bazClient.DeliberateDiffNoop (SimpleService::sillyNoop) returned error", zap.Error(err))
+		logger.Warn("Client call returned error", zap.Error(err))
 		return nil, err
 	}
 
