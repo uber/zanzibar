@@ -861,6 +861,119 @@
 		}
 	},
 	{
+		"name": "get the module structure of thrift code",
+		"request": {
+			"method": "POST",
+			"url": "/thrift-file-code/clients/baz/baz.thrift",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"content": "namespace java com.uber.zanzibar.clients.baz\ninclude \"base.thrift\"\ntypedef base.UUID SomeThing\nconst SomeThing theThing = 'ABC'\n"
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"constants": {
+					"theThing": {
+						"file": "clients/baz/baz.thrift",
+						"line": 4,
+						"name": "theThing",
+						"type": {
+							"name": "SomeThing"
+						},
+						"value": "\"ABC\""
+					}
+				},
+				"includes": {
+					"base": {
+						"line": 2,
+						"module": {
+							"name": "base",
+							"namespace": [
+								{
+									"line": 1,
+									"name": "com.uber.zanzibar.clients.baz",
+									"scope": "java"
+								}
+							],
+							"thrift_path": "clients/baz/base.thrift",
+							"types": {
+								"BazResponse": {
+									"file": "clients/baz/base.thrift",
+									"line": 5,
+									"name": "BazResponse",
+									"struct_type": {
+										"fields": [
+											{
+												"id": 1,
+												"line": 6,
+												"name": "message",
+												"required": true,
+												"type": {
+													"name": "string"
+												}
+											}
+										],
+										"kind": "struct"
+									}
+								},
+								"ServerErr": {
+									"file": "clients/baz/base.thrift",
+									"line": 9,
+									"name": "ServerErr",
+									"struct_type": {
+										"fields": [
+											{
+												"id": 1,
+												"line": 10,
+												"name": "message",
+												"required": true,
+												"type": {
+													"name": "string"
+												}
+											}
+										],
+										"kind": "exception"
+									}
+								},
+								"UUID": {
+									"file": "clients/baz/base.thrift",
+									"line": 3,
+									"name": "UUID",
+									"type_def_target": {
+										"name": "string"
+									}
+								}
+							}
+						},
+						"name": "base"
+					}
+				},
+				"name": "baz",
+				"namespace": [
+					{
+						"line": 1,
+						"name": "com.uber.zanzibar.clients.baz",
+						"scope": "java"
+					}
+				],
+				"thrift_path": "clients/baz/baz.thrift",
+				"types": {
+					"SomeThing": {
+						"file": "clients/baz/baz.thrift",
+						"line": 3,
+						"name": "SomeThing",
+						"type_def_target": {
+							"name": "base.UUID"
+						}
+					}
+				}
+			}
+		}
+	},
+	{
 		"name": "get the module structure of a thrift file in a gateway",
 		"request": {
 			"method": "GET",
@@ -877,15 +990,24 @@
 						"line": 2,
 						"module": {
 							"name": "base",
+							"namespace": [
+								{
+									"line": 1,
+									"name": "com.uber.zanzibar.clients.baz",
+									"scope": "java"
+								}
+							],
 							"thrift_path": "clients/baz/base.thrift",
 							"types": {
 								"BazResponse": {
 									"file": "clients/baz/base.thrift",
+									"line": 5,
 									"name": "BazResponse",
 									"struct_type": {
 										"fields": [
 											{
 												"id": 1,
+												"line": 6,
 												"name": "message",
 												"required": true,
 												"type": {
@@ -898,11 +1020,13 @@
 								},
 								"ServerErr": {
 									"file": "clients/baz/base.thrift",
+									"line": 9,
 									"name": "ServerErr",
 									"struct_type": {
 										"fields": [
 											{
 												"id": 1,
+												"line": 10,
 												"name": "message",
 												"required": true,
 												"type": {
@@ -915,6 +1039,7 @@
 								},
 								"UUID": {
 									"file": "clients/baz/base.thrift",
+									"line": 3,
 									"name": "UUID",
 									"type_def_target": {
 										"name": "string"
@@ -941,6 +1066,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 75,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -948,6 +1074,7 @@
 										}
 									}
 								],
+								"line": 74,
 								"name": "echoBinary",
 								"one_way": false,
 								"result_spec": {
@@ -960,6 +1087,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 71,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -967,6 +1095,7 @@
 										}
 									}
 								],
+								"line": 70,
 								"name": "echoBool",
 								"one_way": false,
 								"result_spec": {
@@ -979,6 +1108,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 67,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -986,6 +1116,7 @@
 										}
 									}
 								],
+								"line": 66,
 								"name": "echoDouble",
 								"one_way": false,
 								"result_spec": {
@@ -999,45 +1130,19 @@
 									{
 										"default": "Fruit.APPLE",
 										"id": 1,
+										"line": 83,
 										"name": "arg",
-										"required": false,
+										"required": true,
 										"type": {
-											"enum_type": {
-												"file": "clients/baz/baz.thrift",
-												"items": [
-													{
-														"name": "APPLE"
-													},
-													{
-														"name": "BANANA",
-														"value": 1
-													}
-												],
-												"name": "Fruit"
-											},
-											"file": "clients/baz/baz.thrift",
 											"name": "Fruit"
 										}
 									}
 								],
+								"line": 82,
 								"name": "echoEnum",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"enum_type": {
-											"file": "clients/baz/baz.thrift",
-											"items": [
-												{
-													"name": "APPLE"
-												},
-												{
-													"name": "BANANA",
-													"value": 1
-												}
-											],
-											"name": "Fruit"
-										},
-										"file": "clients/baz/baz.thrift",
 										"name": "Fruit"
 									}
 								}
@@ -1046,6 +1151,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 55,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1053,6 +1159,7 @@
 										}
 									}
 								],
+								"line": 54,
 								"name": "echoI16",
 								"one_way": false,
 								"result_spec": {
@@ -1065,6 +1172,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 59,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1072,6 +1180,7 @@
 										}
 									}
 								],
+								"line": 58,
 								"name": "echoI32",
 								"one_way": false,
 								"result_spec": {
@@ -1084,6 +1193,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 63,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1091,6 +1201,7 @@
 										}
 									}
 								],
+								"line": 62,
 								"name": "echoI64",
 								"one_way": false,
 								"result_spec": {
@@ -1103,6 +1214,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 51,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1110,6 +1222,7 @@
 										}
 									}
 								],
+								"line": 50,
 								"name": "echoI8",
 								"one_way": false,
 								"result_spec": {
@@ -1122,6 +1235,7 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 79,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1129,6 +1243,7 @@
 										}
 									}
 								],
+								"line": 78,
 								"name": "echoString",
 								"one_way": false,
 								"result_spec": {
@@ -1141,23 +1256,19 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 100,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"list_value_type": {
-												"name": "string"
-											},
 											"name": "list\u003cstring\u003e"
 										}
 									}
 								],
+								"line": 99,
 								"name": "echoStringList",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"list_value_type": {
-											"name": "string"
-										},
 										"name": "list\u003cstring\u003e"
 									}
 								}
@@ -1166,62 +1277,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 108,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"map_type": {
-												"key_type": {
-													"name": "string"
-												},
-												"value_type": {
-													"file": "clients/baz/base.thrift",
-													"name": "BazResponse",
-													"struct_type": {
-														"fields": [
-															{
-																"id": 1,
-																"name": "message",
-																"required": true,
-																"type": {
-																	"name": "string"
-																}
-															}
-														],
-														"kind": "struct"
-													}
-												}
-											},
-											"name": "map\u003cstring, BazResponse\u003e"
+											"name": "map\u003cstring, base.BazResponse\u003e"
 										}
 									}
 								],
+								"line": 107,
 								"name": "echoStringMap",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"map_type": {
-											"key_type": {
-												"name": "string"
-											},
-											"value_type": {
-												"file": "clients/baz/base.thrift",
-												"name": "BazResponse",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "struct"
-												}
-											}
-										},
-										"name": "map\u003cstring, BazResponse\u003e"
+										"name": "map\u003cstring, base.BazResponse\u003e"
 									}
 								}
 							},
@@ -1229,24 +1298,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 91,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cstring\u003e",
-											"set_value_type": {
-												"name": "string"
-											}
+											"name": "set\u003cstring\u003e"
 										}
 									}
 								],
+								"line": 90,
 								"name": "echoStringSet",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cstring\u003e",
-										"set_value_type": {
-											"name": "string"
-										}
+										"name": "set\u003cstring\u003e"
 									}
 								}
 							},
@@ -1254,52 +1319,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 104,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"list_value_type": {
-												"file": "clients/baz/base.thrift",
-												"name": "BazResponse",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "struct"
-												}
-											},
-											"name": "list\u003cBazResponse\u003e"
+											"name": "list\u003cbase.BazResponse\u003e"
 										}
 									}
 								],
+								"line": 103,
 								"name": "echoStructList",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"list_value_type": {
-											"file": "clients/baz/base.thrift",
-											"name": "BazResponse",
-											"struct_type": {
-												"fields": [
-													{
-														"id": 1,
-														"name": "message",
-														"required": true,
-														"type": {
-															"name": "string"
-														}
-													}
-												],
-												"kind": "struct"
-											}
-										},
-										"name": "list\u003cBazResponse\u003e"
+										"name": "list\u003cbase.BazResponse\u003e"
 									}
 								}
 							},
@@ -1307,62 +1340,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 113,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"map_type": {
-												"key_type": {
-													"file": "clients/baz/base.thrift",
-													"name": "BazResponse",
-													"struct_type": {
-														"fields": [
-															{
-																"id": 1,
-																"name": "message",
-																"required": true,
-																"type": {
-																	"name": "string"
-																}
-															}
-														],
-														"kind": "struct"
-													}
-												},
-												"value_type": {
-													"name": "string"
-												}
-											},
-											"name": "map\u003cBazResponse, string\u003e"
+											"name": "map\u003cbase.BazResponse, string\u003e"
 										}
 									}
 								],
+								"line": 112,
 								"name": "echoStructMap",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"map_type": {
-											"key_type": {
-												"file": "clients/baz/base.thrift",
-												"name": "BazResponse",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "struct"
-												}
-											},
-											"value_type": {
-												"name": "string"
-											}
-										},
-										"name": "map\u003cBazResponse, string\u003e"
+										"name": "map\u003cbase.BazResponse, string\u003e"
 									}
 								}
 							},
@@ -1370,52 +1361,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 96,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cBazResponse\u003e",
-											"set_value_type": {
-												"file": "clients/baz/base.thrift",
-												"name": "BazResponse",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "struct"
-												}
-											}
+											"name": "set\u003cbase.BazResponse\u003e"
 										}
 									}
 								],
+								"line": 95,
 								"name": "echoStructSet",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cBazResponse\u003e",
-										"set_value_type": {
-											"file": "clients/baz/base.thrift",
-											"name": "BazResponse",
-											"struct_type": {
-												"fields": [
-													{
-														"id": 1,
-														"name": "message",
-														"required": true,
-														"type": {
-															"name": "string"
-														}
-													}
-												],
-												"kind": "struct"
-											}
-										}
+										"name": "set\u003cbase.BazResponse\u003e"
 									}
 								}
 							},
@@ -1423,26 +1382,20 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 87,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"file": "clients/baz/base.thrift",
-											"name": "UUID",
-											"type_def_target": {
-												"name": "string"
-											}
+											"name": "base.UUID"
 										}
 									}
 								],
+								"line": 86,
 								"name": "echoTypedef",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"file": "clients/baz/base.thrift",
-										"name": "UUID",
-										"type_def_target": {
-											"name": "string"
-										}
+										"name": "base.UUID"
 									}
 								}
 							}
@@ -1461,67 +1414,26 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 33,
 										"name": "arg",
 										"required": true,
 										"type": {
-											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest",
-											"struct_type": {
-												"fields": [
-													{
-														"id": 1,
-														"name": "b1",
-														"required": true,
-														"type": {
-															"name": "bool"
-														}
-													},
-													{
-														"id": 2,
-														"name": "s2",
-														"required": true,
-														"type": {
-															"name": "string"
-														}
-													},
-													{
-														"id": 3,
-														"name": "i3",
-														"required": true,
-														"type": {
-															"name": "i32"
-														}
-													}
-												],
-												"kind": "struct"
-											}
+											"name": "BazRequest"
 										}
 									}
 								],
+								"line": 32,
 								"name": "call",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
+											"line": 35,
 											"name": "authErr",
 											"required": false,
 											"type": {
-												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "exception"
-												}
+												"name": "AuthErr"
 											}
 										}
 									],
@@ -1532,219 +1444,84 @@
 								"args_spec": [
 									{
 										"id": 1,
+										"line": 25,
 										"name": "arg1",
 										"required": true,
 										"type": {
-											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest",
-											"struct_type": {
-												"fields": [
-													{
-														"id": 1,
-														"name": "b1",
-														"required": true,
-														"type": {
-															"name": "bool"
-														}
-													},
-													{
-														"id": 2,
-														"name": "s2",
-														"required": true,
-														"type": {
-															"name": "string"
-														}
-													},
-													{
-														"id": 3,
-														"name": "i3",
-														"required": true,
-														"type": {
-															"name": "i32"
-														}
-													}
-												],
-												"kind": "struct"
-											}
+											"name": "BazRequest"
 										}
 									},
 									{
 										"id": 2,
+										"line": 26,
 										"name": "arg2",
 										"required": true,
 										"type": {
-											"file": "clients/baz/baz.thrift",
-											"name": "BazRequest",
-											"struct_type": {
-												"fields": [
-													{
-														"id": 1,
-														"name": "b1",
-														"required": true,
-														"type": {
-															"name": "bool"
-														}
-													},
-													{
-														"id": 2,
-														"name": "s2",
-														"required": true,
-														"type": {
-															"name": "string"
-														}
-													},
-													{
-														"id": 3,
-														"name": "i3",
-														"required": true,
-														"type": {
-															"name": "i32"
-														}
-													}
-												],
-												"kind": "struct"
-											}
+											"name": "BazRequest"
 										}
 									}
 								],
+								"line": 24,
 								"name": "compare",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
+											"line": 28,
 											"name": "authErr",
 											"required": false,
 											"type": {
-												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "exception"
-												}
+												"name": "AuthErr"
 											}
 										},
 										{
 											"id": 2,
+											"line": 29,
 											"name": "otherAuthErr",
 											"required": false,
 											"type": {
-												"file": "clients/baz/baz.thrift",
-												"name": "OtherAuthErr",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "exception"
-												}
+												"name": "OtherAuthErr"
 											}
 										}
 									],
 									"return_type": {
-										"file": "clients/baz/base.thrift",
-										"name": "BazResponse",
-										"struct_type": {
-											"fields": [
-												{
-													"id": 1,
-													"name": "message",
-													"required": true,
-													"type": {
-														"name": "string"
-													}
-												}
-											],
-											"kind": "struct"
-										}
+										"name": "base.BazResponse"
 									}
 								}
 							},
 							"ping": {
+								"line": 41,
 								"name": "ping",
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"file": "clients/baz/base.thrift",
-										"name": "BazResponse",
-										"struct_type": {
-											"fields": [
-												{
-													"id": 1,
-													"name": "message",
-													"required": true,
-													"type": {
-														"name": "string"
-													}
-												}
-											],
-											"kind": "struct"
-										}
+										"name": "base.BazResponse"
 									}
 								}
 							},
 							"sillyNoop": {
+								"line": 43,
 								"name": "sillyNoop",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
+											"line": 44,
 											"name": "authErr",
 											"required": false,
 											"type": {
-												"file": "clients/baz/baz.thrift",
-												"name": "AuthErr",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "exception"
-												}
+												"name": "AuthErr"
 											}
 										},
 										{
 											"id": 2,
+											"line": 45,
 											"name": "serverErr",
 											"required": false,
 											"type": {
-												"file": "clients/baz/base.thrift",
-												"name": "ServerErr",
-												"struct_type": {
-													"fields": [
-														{
-															"id": 1,
-															"name": "message",
-															"required": true,
-															"type": {
-																"name": "string"
-															}
-														}
-													],
-													"kind": "exception"
-												}
+												"name": "base.ServerErr"
 											}
 										}
 									],
@@ -1766,6 +1543,7 @@
 							"fields": [
 								{
 									"id": 1,
+									"line": 16,
 									"name": "message",
 									"required": true,
 									"type": {
@@ -1784,6 +1562,7 @@
 							"fields": [
 								{
 									"id": 1,
+									"line": 10,
 									"name": "b1",
 									"required": true,
 									"type": {
@@ -1792,6 +1571,7 @@
 								},
 								{
 									"id": 2,
+									"line": 11,
 									"name": "s2",
 									"required": true,
 									"type": {
@@ -1800,6 +1580,7 @@
 								},
 								{
 									"id": 3,
+									"line": 12,
 									"name": "i3",
 									"required": true,
 									"type": {
@@ -1818,8 +1599,7 @@
 									"name": "APPLE"
 								},
 								{
-									"name": "BANANA",
-									"value": 1
+									"name": "BANANA"
 								}
 							],
 							"name": "Fruit"
@@ -1836,6 +1616,7 @@
 							"fields": [
 								{
 									"id": 1,
+									"line": 20,
 									"name": "message",
 									"required": true,
 									"type": {

@@ -174,19 +174,232 @@ type ResultSpec struct {
 
 // CompileThriftFile compiles a thrift file in a structured module.
 func CompileThriftFile(thriftAbsPath string, thriftRootPath string) (*Module, error) {
-	compiledModule, err := compile.Compile(thriftAbsPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to compile thrift file")
-	}
 	b, err := ioutil.ReadFile(thriftAbsPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read file %q", thriftAbsPath)
 	}
-	program, err := idl.Parse(b)
+	return CompileThriftCode(b, thriftAbsPath, thriftRootPath)
+}
+
+// CompileThriftCode compiles thrift code into a structured module.
+func CompileThriftCode(rawCode []byte, thriftAbsPath string, thriftRootPath string) (*Module, error) {
+	thriftFile := relPath(thriftRootPath, thriftAbsPath)
+	thriftFileName := strings.Split(filepath.Base(thriftFile), ".")[0]
+
+	program, err := idl.Parse(rawCode)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse thrift program")
 	}
-	return ConvertModule(compiledModule, program, thriftRootPath), nil
+
+	var namespaces []*Namespace
+	includedModules := make(map[string]*IncludedModule)
+
+	for _, header := range program.Headers {
+		switch header := header.(type) {
+		case *ast.Include:
+			targetPath := filepath.Join(filepath.Dir(thriftAbsPath), header.Path)
+			incModuleDetails, err := CompileThriftFile(targetPath, thriftRootPath)
+			if err == nil {
+				includedModules[incModuleDetails.Name] = &IncludedModule{
+					Name:   incModuleDetails.Name,
+					Module: incModuleDetails,
+					Line:   header.Line,
+				}
+			}
+		case *ast.Namespace:
+			namespaces = append(namespaces,
+				&Namespace{
+					Name:  header.Name,
+					Scope: header.Scope,
+					Line:  header.Line,
+				})
+		}
+	}
+
+	constants := make(map[string]*Constant)
+	types := make(map[string]*TypeSpec)
+	services := make(map[string]*ServiceSpec)
+
+	for _, definition := range program.Definitions {
+		switch definition := definition.(type) {
+		case *ast.Constant:
+			constants[definition.Name] = &Constant{
+				Name: definition.Name,
+				File: thriftFile,
+				Line: definition.Line,
+				Type: &TypeSpec{
+					Name: definition.Type.String(),
+				},
+				Value: constantAstValue(definition.Value),
+			}
+		case *ast.Typedef:
+			types[definition.Name] = &TypeSpec{
+				Name: definition.Name,
+				File: thriftFile,
+				Line: definition.Line,
+				TypeDefTarget: &TypeSpec{
+					Name: definition.Type.String(),
+				},
+				Annotations: convertAstAnnotations(definition.Annotations),
+			}
+		case *ast.Enum:
+			types[definition.Name] = &TypeSpec{
+				Name: definition.Name,
+				File: thriftFile,
+				Line: definition.Line,
+				EnumType: &EnumSpec{
+					Name:  definition.Name,
+					File:  thriftFile,
+					Items: convertAstEnumItems(definition.Items),
+				},
+			}
+		case *ast.Struct:
+			types[definition.Name] = &TypeSpec{
+				Name: definition.Name,
+				File: thriftFile,
+				Line: definition.Line,
+				StructType: &StructTypeSpec{
+					Kind:   convertStructType(definition.Type),
+					Fields: convertAstFields(definition.Fields),
+				},
+				Annotations: convertAstAnnotations(definition.Annotations),
+			}
+		case *ast.Service:
+			services[definition.Name] = &ServiceSpec{
+				Name:        definition.Name,
+				File:        thriftFile,
+				Line:        definition.Line,
+				Functions:   convertAstFunctions(definition.Functions),
+				Annotations: convertAstAnnotations(definition.Annotations),
+			}
+		}
+	}
+
+	m := &Module{
+		Name:       thriftFileName,
+		ThriftPath: thriftFile,
+		Namespace:  namespaces,
+		Includes:   includedModules,
+		Types:      types,
+		Constants:  constants,
+		Services:   services,
+	}
+
+	return m, nil
+}
+
+func convertAstFunctions(functions []*ast.Function) map[string]*FunctionSpec {
+	if functions == nil {
+		return nil
+	}
+
+	funcMap := make(map[string]*FunctionSpec)
+	for _, function := range functions {
+		newFunc := &FunctionSpec{
+			Name:        function.Name,
+			ArgsSpec:    convertAstFields(function.Parameters),
+			OneWay:      function.OneWay,
+			Annotations: convertAstAnnotations(function.Annotations),
+			Line:        function.Line,
+		}
+		results := createResultSpec(function)
+		if results != nil {
+			newFunc.ResultSpec = results
+		}
+		funcMap[function.Name] = newFunc
+	}
+
+	return funcMap
+}
+
+func createResultSpec(function *ast.Function) *ResultSpec {
+	if function.Exceptions == nil && function.ReturnType == nil {
+		return nil
+	}
+	results := &ResultSpec{}
+	if function.Exceptions != nil {
+		results.Exceptions = convertAstFields(function.Exceptions)
+	}
+
+	if function.ReturnType != nil {
+		results.ReturnType = &TypeSpec{
+			Name: function.ReturnType.String(),
+		}
+	}
+
+	return results
+}
+
+func convertStructType(kind ast.StructureType) StructureType {
+	if kind == ast.StructType {
+		return "struct"
+	}
+
+	return "exception"
+}
+
+func convertAstFields(fields []*ast.Field) []*FieldSpec {
+	if fields == nil {
+		return nil
+	}
+
+	var outputFields []*FieldSpec
+	for _, field := range fields {
+		outputFields = append(outputFields, &FieldSpec{
+			ID:       int16(field.ID),
+			Name:     field.Name,
+			Default:  constantAstValue(field.Default),
+			Required: convertRequiredness(field.Requiredness),
+			Type: &TypeSpec{
+				Name: field.Type.String(),
+			},
+			Annotations: convertAstAnnotations(field.Annotations),
+			Line:        field.Line,
+		})
+	}
+
+	return outputFields
+}
+
+func convertRequiredness(isRequired ast.Requiredness) bool {
+	if isRequired == ast.Required {
+		return true
+	}
+
+	return false
+}
+
+func convertAstEnumItems(items []*ast.EnumItem) []EnumItem {
+	if items == nil {
+		return nil
+	}
+
+	var enumItems []EnumItem
+	for _, item := range items {
+		newItem := EnumItem{
+			Name:        item.Name,
+			Annotations: convertAstAnnotations(item.Annotations),
+		}
+		if item.Value != nil {
+			newItem.Value = int32(*item.Value)
+		}
+		enumItems = append(enumItems, newItem)
+	}
+
+	return enumItems
+}
+
+func convertAstAnnotations(annotations []*ast.Annotation) compile.Annotations {
+	if annotations == nil {
+		return nil
+	}
+
+	am := make(compile.Annotations)
+	for _, annotation := range annotations {
+		am[annotation.Name] = annotation.Value
+	}
+
+	return am
 }
 
 // ConvertModule converts a compile.Module into Module.
@@ -245,6 +458,26 @@ func constant(c *compile.Constant, basePath string) *Constant {
 	}
 }
 
+func constantAstValue(value ast.ConstantValue) string {
+	if value == nil {
+		return ""
+	}
+	switch t := value.(type) {
+	case ast.ConstantBoolean:
+		return fmt.Sprintf("%t", t)
+	case ast.ConstantInteger:
+		return fmt.Sprintf("%d", t)
+	case ast.ConstantString:
+		return fmt.Sprintf("%q", string(t))
+	case ast.ConstantDouble:
+		return fmt.Sprintf("%f", t)
+	case ast.ConstantReference:
+		return fmt.Sprintf("%s", t.Name)
+	}
+	// TODO: Add complete type converstions and make this message panic.
+	return fmt.Sprintf("unknown constant value type: %v", value)
+}
+
 func constantValue(value compile.ConstantValue) string {
 	if value == nil {
 		return ""
@@ -262,7 +495,7 @@ func constantValue(value compile.ConstantValue) string {
 		return fmt.Sprintf("%s.%s", t.Enum.Name, t.Item.Name)
 	}
 	// TODO(zw): Add complete type converstions and make this message panic.
-	return fmt.Sprintf("unknown contantant value type: %v", value)
+	return fmt.Sprintf("unknown constant value type: %v", value)
 }
 
 func typeSpec(t compile.TypeSpec, basePath string) *TypeSpec {

@@ -177,6 +177,21 @@ func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
 	return CompileThriftFile(absPath, prefix)
 }
 
+// CodeThriftFile returns the content and meta data of a file in a gateway.
+func (m *Manager) CodeThriftFile(rawCode, gateway, path string) (*Module, error) {
+	repo, ok := m.RepoMap[gateway]
+	if !ok {
+		return nil, errors.Errorf("gateway %s is not found", gateway)
+	}
+	cfg, err := repo.GatewayConfig()
+	if err != nil {
+		return nil, err
+	}
+	prefix := filepath.Join(repo.LocalDir(), cfg.ThriftRootDir)
+	absPath := filepath.Join(prefix, path)
+	return CompileThriftCode([]byte(rawCode), absPath, prefix)
+}
+
 // UpdateThriftFiles update thrift files to their master version in the IDL-registry.
 func (m *Manager) UpdateThriftFiles(r *Repository, paths []string) error {
 	if len(paths) == 0 {
