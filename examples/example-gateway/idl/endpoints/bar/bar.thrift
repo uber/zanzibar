@@ -4,10 +4,17 @@ include "../foo/foo.thrift"
 
 typedef string UUID
 typedef i64 (js.type = 'Date') Timestamp
+typedef i64 (js.type = 'Long') Long
 
 enum Fruit {
     APPLE,
     BANANA
+}
+
+struct I64TestField {
+    1: required i64 i64Field
+    2: required Timestamp timestamp
+    3: required Long longField
 }
 
 struct BarRequest {
