@@ -5,6 +5,7 @@ package bar
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type BarException struct {
@@ -125,11 +127,12 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string    `json:"stringField,required"`
-	BoolField   bool      `json:"boolField,required"`
-	BinaryField []byte    `json:"binaryField,required"`
-	Timestamp   Timestamp `json:"timestamp,required"`
-	EnumField   Fruit     `json:"enumField,required"`
+	StringField  string        `json:"stringField,required"`
+	BoolField    bool          `json:"boolField,required"`
+	BinaryField  []byte        `json:"binaryField,required"`
+	Timestamp    Timestamp     `json:"timestamp,required"`
+	EnumField    Fruit         `json:"enumField,required"`
+	I64TestField *I64TestField `json:"i64TestField,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -149,7 +152,7 @@ type BarRequest struct {
 //   }
 func (v *BarRequest) ToWire() (wire.Value, error) {
 	var (
-		fields [5]wire.Field
+		fields [6]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -191,6 +194,15 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 5, Value: w}
 	i++
+	if v.I64TestField == nil {
+		return w, errors.New("field I64TestField of BarRequest is required")
+	}
+	w, err = v.I64TestField.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 6, Value: w}
+	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -205,6 +217,12 @@ func _Fruit_Read(w wire.Value) (Fruit, error) {
 	var v Fruit
 	err := v.FromWire(w)
 	return v, err
+}
+
+func _I64TestField_Read(w wire.Value) (*I64TestField, error) {
+	var v I64TestField
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a BarRequest struct from its Thrift-level
@@ -232,6 +250,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 	binaryFieldIsSet := false
 	timestampIsSet := false
 	enumFieldIsSet := false
+	i64TestFieldIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -275,6 +294,14 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 				}
 				enumFieldIsSet = true
 			}
+		case 6:
+			if field.Value.Type() == wire.TStruct {
+				v.I64TestField, err = _I64TestField_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				i64TestFieldIsSet = true
+			}
 		}
 	}
 
@@ -298,6 +325,10 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		return errors.New("field EnumField of BarRequest is required")
 	}
 
+	if !i64TestFieldIsSet {
+		return errors.New("field I64TestField of BarRequest is required")
+	}
+
 	return nil
 }
 
@@ -308,7 +339,7 @@ func (v *BarRequest) String() string {
 		return "<nil>"
 	}
 
-	var fields [5]string
+	var fields [6]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
@@ -319,6 +350,8 @@ func (v *BarRequest) String() string {
 	fields[i] = fmt.Sprintf("Timestamp: %v", v.Timestamp)
 	i++
 	fields[i] = fmt.Sprintf("EnumField: %v", v.EnumField)
+	i++
+	fields[i] = fmt.Sprintf("I64TestField: %v", v.I64TestField)
 	i++
 
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
@@ -342,6 +375,9 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 		return false
 	}
 	if !v.EnumField.Equals(rhs.EnumField) {
+		return false
+	}
+	if !v.I64TestField.Equals(rhs.I64TestField) {
 		return false
 	}
 
@@ -1065,6 +1101,37 @@ func (v Long) ToWire() (wire.Value, error) {
 	return wire.NewValueI64(x), error(nil)
 }
 
+func (v Long) MarshalJSON() ([]byte, error) {
+	byteArray := make([]byte, 8, 8)
+	binary.BigEndian.PutUint64(byteArray, uint64(v))
+	high := int32(binary.BigEndian.Uint32(byteArray[:4]))
+	low := int32(binary.BigEndian.Uint32(byteArray[4:]))
+	return ([]byte)(fmt.Sprintf("{\"high\":%d,\"low\":%d}", high, low)), nil
+}
+
+func (v *Long) UnmarshalJSON(text []byte) error {
+	firstByte := text[0]
+	if firstByte == byte('{') {
+		result := map[string]int32{}
+		err := json.Unmarshal(text, &result)
+		if err != nil {
+			return err
+		}
+		byteArray := make([]byte, 8, 8)
+		binary.BigEndian.PutUint32(byteArray[:4], uint32(result["high"]))
+		binary.BigEndian.PutUint32(byteArray[4:], uint32(result["low"]))
+		x := binary.BigEndian.Uint64(byteArray)
+		*v = Long(int64(x))
+	} else {
+		x, err := strconv.ParseInt(string(text), 10, 64)
+		if err != nil {
+			return err
+		}
+		*v = Long(x)
+	}
+	return nil
+}
+
 // String returns a readable string representation of Long.
 func (v Long) String() string {
 	x := (int64)(v)
@@ -1638,6 +1705,29 @@ type Timestamp int64
 func (v Timestamp) ToWire() (wire.Value, error) {
 	x := (int64)(v)
 	return wire.NewValueI64(x), error(nil)
+}
+
+func (v Timestamp) MarshalJSON() ([]byte, error) {
+	x := (int64)(v)
+	return ([]byte)("\"" + time.Unix(x/1000, 0).UTC().Format(time.RFC3339) + "\""), nil
+}
+
+func (v *Timestamp) UnmarshalJSON(text []byte) error {
+	firstByte := text[0]
+	if firstByte == byte('"') {
+		x, err := time.Parse(time.RFC3339, string(text[1:len(text)-1]))
+		if err != nil {
+			return err
+		}
+		*v = Timestamp(x.Unix() * 1000)
+	} else {
+		x, err := strconv.ParseInt(string(text), 10, 64)
+		if err != nil {
+			return err
+		}
+		*v = Timestamp(x)
+	}
+	return nil
 }
 
 // String returns a readable string representation of Timestamp.

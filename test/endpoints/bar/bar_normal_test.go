@@ -60,7 +60,7 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -72,7 +72,7 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	res, err = gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":"APPLE"}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":"APPLE","i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -110,7 +110,7 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 
 	endpoints := map[string]string{
 		"/bar/bar-path": `{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`,
 		"/bar/arg-not-struct-path": `{"request":"foo"}`,
 	}
@@ -166,7 +166,7 @@ func TestBarExceptionCode(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":9223372036854775807,"enumField":"APPLE"}}`),
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2010-11-04T18:06:40Z","enumField":"APPLE","i64TestField":{"i64Field":123,"timestamp":"2009-11-10T23:00:00Z","longField":{"high":0,"low":1234}}}}`),
 				bytes,
 			)
 			w.WriteHeader(403)
@@ -180,7 +180,7 @@ func TestBarExceptionCode(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":9223372036854775807,"enumField":0}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":1288894000000,"enumField":0,"i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -218,7 +218,7 @@ func TestMalformedBarExceptionCode(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -256,7 +256,7 @@ func TestBarExceptionInvalidStatusCode(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"i64TestField":{"i64Field":123,"timestamp":1257894000000,"longField":1234}}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
