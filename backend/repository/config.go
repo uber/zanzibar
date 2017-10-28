@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -229,6 +230,10 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		return nil, errors.Wrap(err, "failed to read client configuration")
 	}
 	config.Endpoints = r.endpointConfigs(config.ThriftRootDir, gatewaySpec)
+
+	if config.Middlewares, err = r.middlewareConfigs(config.MiddlewareConfigDir); err != nil {
+		return nil, errors.Wrap(err, "fail to read middleware configuration")
+	}
 	return config, nil
 }
 
@@ -340,6 +345,38 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 		}
 	}
 	return cfgs
+}
+
+func (r *Repository) middlewareConfigs(middlewareConfigFile string) (map[string]*codegen.MiddlewareConfig, error) {
+	cfgs := make(map[string]*codegen.MiddlewareConfig)
+	var rawCfgs map[string][]*codegen.MiddlewareConfig
+
+	if middlewareConfigFile == "" {
+		return cfgs, nil
+	}
+	bytes, err := r.ReadFile(middlewareConfigFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(bytes) == 0 {
+		panic("EMPTY MIDDLEWARE CONFIG")
+	}
+
+	err = json.Unmarshal(bytes, &rawCfgs)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := rawCfgs["middlewares"]; !ok {
+		return nil, errors.New("middlewares config is missing root object property \"middlewares\"")
+	}
+
+	for _, mc := range rawCfgs["middlewares"] {
+		cfgs[mc.Name] = mc
+	}
+
+	return cfgs, nil
 }
 
 func (r *Repository) thriftservices(thriftRootDir string, packageHelper *codegen.PackageHelper) (ThriftServiceMap, error) {

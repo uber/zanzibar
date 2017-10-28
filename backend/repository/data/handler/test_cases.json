@@ -212,7 +212,19 @@
 			}
 		},
 		"response": {
-			"code": 200
+			"code": 200,
+			"body": {
+				"example": {
+					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+					"name": "example",
+					"schema": "./middlewares/example/example_schema.json"
+				},
+				"example_reader": {
+					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+					"name": "example_reader",
+					"schema": "./middlewares/example_reader/example_reader_schema.json"
+				}
+			}
 		}
 	},
 	{
@@ -1916,7 +1928,10 @@
 						"handleId": "compare",
 						"middlewares": [
 							{
-								"name": "example_reader"
+								"name": "example_reader",
+								"options": {
+									"Foo": "test"
+								}
 							}
 						],
 						"reqHeaderMap": {},
@@ -2591,7 +2606,18 @@
 					"ID": "example-gateway",
 					"ManagedThriftFolder": "./github.com/uber/zanzibar",
 					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-					"Middlewares": null,
+					"Middlewares": {
+						"example": {
+							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+							"name": "example",
+							"schema": "./middlewares/example/example_schema.json"
+						},
+						"example_reader": {
+							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+							"name": "example_reader",
+							"schema": "./middlewares/example_reader/example_reader_schema.json"
+						}
+					},
 					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 					"Repository": "example-gateway",
 					"TargetGenDir": "./build",
@@ -3434,7 +3460,18 @@
 				"ID": "example-gateway",
 				"ManagedThriftFolder": "./github.com/uber/zanzibar",
 				"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-				"Middlewares": null,
+				"Middlewares": {
+					"example": {
+						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+						"name": "example",
+						"schema": "./middlewares/example/example_schema.json"
+					},
+					"example_reader": {
+						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+						"name": "example_reader",
+						"schema": "./middlewares/example_reader/example_reader_schema.json"
+					}
+				},
 				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 				"Repository": "example-gateway",
 				"TargetGenDir": "./build",

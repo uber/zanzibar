@@ -83,7 +83,8 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	for _, mid := range req.Middlewares {
 		for _, midCfg := range r.gatewayConfig.Middlewares {
 			if mid.Name == midCfg.Name {
-				err := codegen.SchemaValidateGo(midCfg.SchemaFile, mid.Options)
+				absFile := "file://" + r.absPath(midCfg.SchemaFile)
+				err := codegen.SchemaValidateGo(absFile, mid.Options)
 				if err != nil {
 					return err
 				}
