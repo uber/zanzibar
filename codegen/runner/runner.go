@@ -104,6 +104,7 @@ func main() {
 		packageHelper.PackageRoot(),
 		configRoot,
 		packageHelper.CodeGenTargetPath(),
+		true,
 	)
 	checkError(err, "Failed to generate module system components")
 }

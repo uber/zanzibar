@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package repository
+package errors
 
 import "fmt"
 
@@ -31,11 +31,31 @@ type RequestError struct {
 // RequestField is a field name in a request.
 type RequestField string
 
+// unique camel-cased key naming with module name + field name
+// comment annotates jq style field path in json payload from UI
+// json tag used by UI follows previous convention
+// TODO: fix mixed-case-naming introduced in early commits
 const (
-	// ClientID field.
-	ClientID RequestField = "client_id"
-	// ClientType field.
-	ClientType RequestField = "client_type"
+	// ClientsType: .client_updates[idx].type
+	ClientsType RequestField = "client_type"
+	// ClientsServiceName: .client_updates[idx].serviceName
+	ClientsServiceName RequestField = "service_name"
+	// ClientsIP: .client_updates[idx].ip
+	ClientsIP RequestField = "ip"
+	// ClientsPort: .client_updates[idx].port
+	ClientsPort RequestField = "port"
+	// ClientsThriftFile: .client_updates[idx].thriftFile
+	ClientsThriftFile RequestField = "ThriftFile"
+	// ClientsExposedMethods: .client_updates[idx].exposedMethods
+	ClientsExposedMethods RequestField = "exposedMethods"
+	// EndpointsThriftFile: .endpoint_updates[idx].thriftFile
+	EndpointsThriftFile RequestField = "ThriftFile"
+	// EndpointsClientID: .endpoint_updates[idx].ClientId
+	EndpointsClientID RequestField = "client_id"
+	// EndpointThriftMethodName: .endpoint_updates[idx].ClientMethod
+	EndpointThriftMethodName RequestField = "thriftMethodName"
+	// ThriftFiles: .thrift_files
+	ThriftFiles RequestField = "thrift_files"
 )
 
 // NewRequestError returns an error for invalid request.

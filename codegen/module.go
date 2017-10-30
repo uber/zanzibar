@@ -846,11 +846,12 @@ func readPackageInfo(
 
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
-// and write the generated output to the module build directory
+// and write the generated output to the module build directory if commitChange
 func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
+	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 	resolvedModules, err := system.ResolveModules(
 		packageRoot,
@@ -922,9 +923,10 @@ func (system *ModuleSystem) GenerateBuild(
 			if buildResult == nil {
 				continue
 			}
-
 			classInstance.genSpec = buildResult.Spec
-
+			if !commitChange {
+				continue
+			}
 			for filePath, content := range buildResult.Files {
 				filePath = filepath.Clean(filePath)
 
