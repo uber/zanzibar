@@ -1260,6 +1260,9 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"list_value_type": {
+												"name": "string"
+											},
 											"name": "list\u003cstring\u003e"
 										}
 									}
@@ -1269,6 +1272,9 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"list_value_type": {
+											"name": "string"
+										},
 										"name": "list\u003cstring\u003e"
 									}
 								}
@@ -1281,6 +1287,14 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"map_type": {
+												"key_type": {
+													"name": "string"
+												},
+												"value_type": {
+													"name": "base.BazResponse"
+												}
+											},
 											"name": "map\u003cstring, base.BazResponse\u003e"
 										}
 									}
@@ -1290,6 +1304,14 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"map_type": {
+											"key_type": {
+												"name": "string"
+											},
+											"value_type": {
+												"name": "base.BazResponse"
+											}
+										},
 										"name": "map\u003cstring, base.BazResponse\u003e"
 									}
 								}
@@ -1302,7 +1324,10 @@
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cstring\u003e"
+											"name": "set\u003cstring\u003e",
+											"set_value_type": {
+												"name": "string"
+											}
 										}
 									}
 								],
@@ -1311,7 +1336,10 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cstring\u003e"
+										"name": "set\u003cstring\u003e",
+										"set_value_type": {
+											"name": "string"
+										}
 									}
 								}
 							},
@@ -1323,6 +1351,9 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"list_value_type": {
+												"name": "base.BazResponse"
+											},
 											"name": "list\u003cbase.BazResponse\u003e"
 										}
 									}
@@ -1332,6 +1363,9 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"list_value_type": {
+											"name": "base.BazResponse"
+										},
 										"name": "list\u003cbase.BazResponse\u003e"
 									}
 								}
@@ -1344,6 +1378,14 @@
 										"name": "arg",
 										"required": true,
 										"type": {
+											"map_type": {
+												"key_type": {
+													"name": "base.BazResponse"
+												},
+												"value_type": {
+													"name": "string"
+												}
+											},
 											"name": "map\u003cbase.BazResponse, string\u003e"
 										}
 									}
@@ -1353,6 +1395,14 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
+										"map_type": {
+											"key_type": {
+												"name": "base.BazResponse"
+											},
+											"value_type": {
+												"name": "string"
+											}
+										},
 										"name": "map\u003cbase.BazResponse, string\u003e"
 									}
 								}
@@ -1365,7 +1415,10 @@
 										"name": "arg",
 										"required": true,
 										"type": {
-											"name": "set\u003cbase.BazResponse\u003e"
+											"name": "set\u003cbase.BazResponse\u003e",
+											"set_value_type": {
+												"name": "base.BazResponse"
+											}
 										}
 									}
 								],
@@ -1374,7 +1427,10 @@
 								"one_way": false,
 								"result_spec": {
 									"return_type": {
-										"name": "set\u003cbase.BazResponse\u003e"
+										"name": "set\u003cbase.BazResponse\u003e",
+										"set_value_type": {
+											"name": "base.BazResponse"
+										}
 									}
 								}
 							},

@@ -293,7 +293,7 @@ func (h *Handler) CodeThrift(w http.ResponseWriter, r *http.Request, ps httprout
 		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for converting raw code"))
 		return
 	}
-	h.logger.Info("Validating update request.", zap.String("request", string(b)))
+	h.logger.Info("Validating and parsing thrift code", zap.String("request", string(b)))
 	id := r.Header.Get(h.gatewayHeader)
 	path := strings.TrimLeft(ps.ByName("path"), "/")
 	module, err := h.Manager.CodeThriftFile(req.Content, id, path)
