@@ -31,7 +31,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
@@ -90,14 +90,12 @@ func NewClient(
 
 	return &corgeClient{
 		client: client,
-		logger: deps.Default.Logger,
 	}
 }
 
 // corgeClient is the TChannel client for downstream service.
 type corgeClient struct {
-	client zanzibar.TChannelClient
-	logger *zap.Logger
+	client *zanzibar.TChannelClient
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -108,6 +106,8 @@ func (c *corgeClient) EchoString(
 ) (string, map[string]string, error) {
 	var result clientsCorgeCorge.Corge_EchoString_Result
 	var resp string
+
+	logger := c.client.Loggers["Corge::echoString"]
 
 	success, respHeaders, err := c.client.Call(
 		ctx, "Corge", "echoString", reqHeaders, args, &result,
@@ -120,9 +120,13 @@ func (c *corgeClient) EchoString(
 		}
 	}
 	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
+	if err != nil {
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
+	}
 	return resp, respHeaders, err
 }

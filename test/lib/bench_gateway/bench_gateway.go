@@ -50,7 +50,7 @@ type BenchGateway struct {
 	readLogs         bool
 	logMessages      map[string][]testGateway.LogMessage
 	httpClient       *http.Client
-	tchannelClient   zanzibar.TChannelClient
+	tchannelClient   zanzibar.TChannelCaller
 }
 
 func getDirName() string {

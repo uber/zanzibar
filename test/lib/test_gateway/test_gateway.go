@@ -88,7 +88,7 @@ type ChildProcessGateway struct {
 
 	HTTPClient       *http.Client
 	JaegerAgent      *testutils.MockAgent
-	TChannelClient   zanzibar.TChannelClient
+	TChannelClient   zanzibar.TChannelCaller
 	M3Service        *testM3Server.FakeM3Service
 	MetricsWaitGroup lib.WaitAtLeast
 	RealHTTPAddr     string

@@ -45,10 +45,11 @@ type PostResponseCB func(ctx context.Context, method string, response RWTStruct)
 
 // TChannelEndpoint handles tchannel requests
 type TChannelEndpoint struct {
+	TChannelHandler
+
 	EndpointID string
 	HandlerID  string
 	Method     string
-	handler    TChannelHandler
 	callback   PostResponseCB
 	Logger     *zap.Logger
 	Scope      tally.Scope
@@ -119,14 +120,14 @@ func NewTChannelEndpointWithPostResponseCB(
 		"method":   method,
 	})
 	return &TChannelEndpoint{
-		EndpointID: endpointID,
-		HandlerID:  handlerID,
-		Method:     method,
-		handler:    handler,
-		callback:   callback,
-		Logger:     logger,
-		Scope:      scope,
-		metrics:    NewInboundTChannelMetrics(scope),
+		TChannelHandler: handler,
+		EndpointID:      endpointID,
+		HandlerID:       handlerID,
+		Method:          method,
+		callback:        callback,
+		Logger:          logger,
+		Scope:           scope,
+		metrics:         NewInboundTChannelMetrics(scope),
 	}
 }
 
@@ -172,7 +173,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		call:     call,
 	}
 	c.start()
-	go func() { errc <- s.handle(ctx, e, &c) }()
+	go func() { errc <- s.handle(ctx, &c) }()
 	select {
 	case <-ctx.Done():
 		err = ctx.Err()
@@ -189,7 +190,6 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 
 func (s *TChannelRouter) handle(
 	ctx context.Context,
-	e *TChannelEndpoint,
 	c *tchannelInboundCall,
 ) (err error) {
 	// read request
@@ -364,7 +364,7 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 		return
 	}
 
-	c.success, resp, c.resHeaders, err = c.endpoint.handler.Handle(ctx, c.reqHeaders, wireValue)
+	c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, wireValue)
 	if c.endpoint.callback != nil {
 		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}

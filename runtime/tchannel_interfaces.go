@@ -32,8 +32,8 @@ type RWTStruct interface {
 	FromWire(wire.Value) error
 }
 
-// TChannelClient abstracts calling a Thrift endpoint, and is used by the generated client code.
-type TChannelClient interface {
+// TChannelCaller abstracts calling a Thrift endpoint, and is used by the generated client code.
+type TChannelCaller interface {
 	// Call should be passed the method to call, headers and the request/response thriftrw structs.
 	// The arguments returned are (whether there was an application error, unexpected error)
 	Call(ctx context.Context, service, method string, reqHeaders map[string]string, req, resp RWTStruct) (success bool, respHeaders map[string]string, err error)

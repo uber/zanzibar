@@ -1561,11 +1561,10 @@ import (
 	"strconv"
 	"time"
 
-	"go.uber.org/zap"	
-	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -1656,14 +1655,12 @@ func {{$exportName}}(
 
 	return &{{$clientName}}{
 		client: client,
-		logger: deps.Default.Logger,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
-	client        zanzibar.TChannelClient
-	logger *zap.Logger
+	client *zanzibar.TChannelClient
 }
 
 {{range $svc := .Services}}
@@ -1671,7 +1668,7 @@ type {{$clientName}} struct {
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 {{if $methodName -}}
-	// {{$methodName}} is a client RPC call for method "{{$svc.Name}}::{{.Name}}"
+	// {{$methodName}} is a client RPC call for method "{{$serviceMethod}}"
 	func (c *{{$clientName}}) {{$methodName}}(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -1683,6 +1680,7 @@ type {{$clientName}} struct {
 		{{if .ResponseType -}}
 		var resp {{.ResponseType}}
 		{{end}}
+		logger := c.client.Loggers["{{$serviceMethod}}"]
 
 		{{if eq .RequestType "" -}}
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
@@ -1703,6 +1701,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
+			logger.Warn("TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
@@ -1714,6 +1713,9 @@ type {{$clientName}} struct {
 			return respHeaders, err
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
+			if err != nil {
+				logger.Warn("Unable to unwrap client response", zap.Error(err))
+			}
 			return resp, respHeaders, err
 		{{end -}}
 	}
@@ -1732,7 +1734,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 4995, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5126, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
