@@ -95,6 +95,7 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.POST("/create-diff", h.CreateDiff)
 	r.POST("/land-diff", h.LandDiff)
 	r.POST("/thrift-file-parsed", h.ThriftModuleToCode)
+	r.POST("/thrift-file-code/*path", h.CodeThrift)
 	return r
 }
 
@@ -273,6 +274,29 @@ func (h *Handler) CompiledThrift(w http.ResponseWriter, r *http.Request, ps http
 	id := r.Header.Get(h.gatewayHeader)
 	path := strings.TrimLeft(ps.ByName("path"), "/")
 	module, err := h.Manager.CompileThriftFile(id, path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+	h.WriteJSON(w, http.StatusOK, module)
+}
+
+type rawCodeRequest struct {
+	Content string `json:"content"`
+}
+
+// CodeThrift takes raw code, validates and returns the parsed Module version
+func (h *Handler) CodeThrift(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	req := &rawCodeRequest{}
+	b, err := UnmarshalJSONBody(r, req)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for converting raw code"))
+		return
+	}
+	h.logger.Info("Validating and parsing thrift code", zap.String("request", string(b)))
+	id := r.Header.Get(h.gatewayHeader)
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	module, err := h.Manager.CodeThriftFile(req.Content, id, path)
 	if err != nil {
 		h.WriteErrorResponse(w, http.StatusBadRequest, err)
 		return
