@@ -45,8 +45,6 @@ type TChannelClientOption struct {
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
-	TChannelCaller
-
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	serviceName       string
