@@ -1701,7 +1701,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.Warn("Client call returned error", zap.Error(err))
+			logger.Warn("TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
@@ -1734,7 +1734,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5117, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5126, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

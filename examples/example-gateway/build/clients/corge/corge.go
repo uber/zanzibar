@@ -120,7 +120,7 @@ func (c *corgeClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 

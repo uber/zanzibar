@@ -209,7 +209,7 @@ func TestPingWithInvalidResponse(t *testing.T) {
 	assert.Equal(t, 1, len(allLogs["Failed after non-retriable error."]))
 	assert.Equal(t, 1, len(allLogs["Could not create arg2reader for outbound response"]))
 	assert.Equal(t, 1, len(allLogs["Could not make outbound request"]))
-	assert.Equal(t, 1, len(allLogs["Client call returned error"]))
+	assert.Equal(t, 1, len(allLogs["TChannel client call returned error"]))
 	assert.Equal(t, 1, len(allLogs["Could not make client request"]))
 	assert.Equal(t, 1, len(allLogs["Workflow for endpoint returned error"]))
 	assert.Equal(t, 1, len(allLogs["Sending error for endpoint request"]))

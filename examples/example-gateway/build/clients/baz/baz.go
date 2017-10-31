@@ -236,7 +236,7 @@ func (c *bazClient) EchoBinary(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -269,7 +269,7 @@ func (c *bazClient) EchoBool(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -302,7 +302,7 @@ func (c *bazClient) EchoDouble(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -335,7 +335,7 @@ func (c *bazClient) EchoEnum(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -368,7 +368,7 @@ func (c *bazClient) EchoI16(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -401,7 +401,7 @@ func (c *bazClient) EchoI32(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -434,7 +434,7 @@ func (c *bazClient) EchoI64(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -467,7 +467,7 @@ func (c *bazClient) EchoI8(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -500,7 +500,7 @@ func (c *bazClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -533,7 +533,7 @@ func (c *bazClient) EchoStringList(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -566,7 +566,7 @@ func (c *bazClient) EchoStringMap(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -599,7 +599,7 @@ func (c *bazClient) EchoStringSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -632,7 +632,7 @@ func (c *bazClient) EchoStructList(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -671,7 +671,7 @@ func (c *bazClient) EchoStructMap(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -704,7 +704,7 @@ func (c *bazClient) EchoStructSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -737,7 +737,7 @@ func (c *bazClient) EchoTypedef(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -771,7 +771,7 @@ func (c *bazClient) Call(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 
@@ -804,7 +804,7 @@ func (c *bazClient) Compare(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -837,7 +837,7 @@ func (c *bazClient) Ping(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
@@ -873,7 +873,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		}
 	}
 	if err != nil {
-		logger.Warn("Client call returned error", zap.Error(err))
+		logger.Warn("TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 
