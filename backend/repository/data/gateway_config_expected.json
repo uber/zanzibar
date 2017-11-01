@@ -5,6 +5,7 @@
 	"Tier": 0,
 	"ThriftRootDir": "./idl",
 	"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
+	"ManagedThriftFolder": "./github.com/uber/zanzibar",
 	"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 	"TargetGenDir": "./build",
 	"ClientConfigDir": "./clients",
