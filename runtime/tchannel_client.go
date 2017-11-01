@@ -48,7 +48,7 @@ type TChannelClient struct {
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	serviceName       string
-	clientID          string
+	ClientID          string
 	methodNames       map[string]string
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
@@ -103,7 +103,7 @@ func NewTChannelClient(
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
 		serviceName:       opt.ServiceName,
-		clientID:          opt.ClientID,
+		ClientID:          opt.ClientID,
 		methodNames:       opt.MethodNames,
 		timeout:           opt.Timeout,
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
@@ -157,7 +157,7 @@ func (c *TChannelClient) Call(
 			LogErrorWarnTimeout(call.logger, err, "Could not begin outbound request")
 			return errors.Wrapf(
 				err, "Could not begin outbound %s.%s (%s %s) request",
-				call.client.clientID, call.methodName, call.client.serviceName, call.serviceMethod,
+				call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
 			)
 		}
 
@@ -190,7 +190,7 @@ func (c *TChannelClient) Call(
 		}
 		return call.success, nil, errors.Wrapf(
 			err, "Could not make outbound %s.%s (%s %s) response",
-			call.client.clientID, call.methodName, call.client.serviceName, call.serviceMethod,
+			call.client.ClientID, call.methodName, call.client.serviceName, call.serviceMethod,
 		)
 	}
 
@@ -246,7 +246,7 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 		LogErrorWarnTimeout(c.logger, err, "Could not create arg2writer for outbound request")
 		return errors.Wrapf(
 			err, "Could not create arg2writer for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := WriteHeaders(twriter, reqHeaders); err != nil {
@@ -254,14 +254,14 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 		LogErrorWarnTimeout(c.logger, err, "Could not write headers for outbound request")
 		return errors.Wrapf(
 			err, "Could not write headers for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := twriter.Close(); err != nil {
 		LogErrorWarnTimeout(c.logger, err, "Could not close arg2writer for outbound request")
 		return errors.Wrapf(
 			err, "Could not close arg2writer for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
@@ -275,7 +275,7 @@ func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
 		LogErrorWarnTimeout(c.logger, err, "Could not write request for outbound request")
 		return errors.Wrapf(
 			err, "Could not write request for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
@@ -284,7 +284,7 @@ func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
 		LogErrorWarnTimeout(c.logger, err, "Could not create arg3writer for outbound request")
 		return errors.Wrapf(
 			err, "Could not create arg3writer for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := protocol.Binary.Encode(structWireValue, twriter); err != nil {
@@ -292,14 +292,14 @@ func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
 		LogErrorWarnTimeout(c.logger, err, "Could not write request for outbound request")
 		return errors.Wrapf(
 			err, "Could not write request for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := twriter.Close(); err != nil {
 		LogErrorWarnTimeout(c.logger, err, "Could not close arg3writer for outbound request")
 		return errors.Wrapf(
 			err, "Could not close arg3writer for outbound %s.%s (%s %s) request",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
@@ -319,7 +319,7 @@ func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallRes
 		}
 		return errors.Wrapf(
 			err, "Could not create arg2reader for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if c.resHeaders, err = ReadHeaders(treader); err != nil {
@@ -327,7 +327,7 @@ func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallRes
 		LogErrorWarnTimeout(c.logger, err, "Could not read headers for outbound response")
 		return errors.Wrapf(
 			err, "Could not read headers for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := EnsureEmpty(treader, "reading response headers"); err != nil {
@@ -335,14 +335,14 @@ func (c *tchannelOutboundCall) readResHeaders(response *tchannel.OutboundCallRes
 		LogErrorWarnTimeout(c.logger, err, "Could not ensure arg2reader is empty for outbound response")
 		return errors.Wrapf(
 			err, "Could not ensure arg2reader is empty for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := treader.Close(); err != nil {
 		LogErrorWarnTimeout(c.logger, err, "Could not close arg2reader for outbound response")
 		return errors.Wrapf(
 			err, "Could not close arg2reader for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
@@ -358,7 +358,7 @@ func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallRespon
 		LogErrorWarnTimeout(c.logger, err, "Could not create arg3Reader for outbound response")
 		return errors.Wrapf(
 			err, "Could not create arg3Reader for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := ReadStruct(treader, resp); err != nil {
@@ -366,7 +366,7 @@ func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallRespon
 		LogErrorWarnTimeout(c.logger, err, "Could not read outbound response")
 		return errors.Wrapf(
 			err, "Could not read outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := EnsureEmpty(treader, "reading response body"); err != nil {
@@ -374,14 +374,14 @@ func (c *tchannelOutboundCall) readResBody(response *tchannel.OutboundCallRespon
 		LogErrorWarnTimeout(c.logger, err, "Could not ensure arg3reader is empty for outbound response")
 		return errors.Wrapf(
 			err, "Could not ensure arg3reader is empty for outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 	if err := treader.Close(); err != nil {
 		LogErrorWarnTimeout(c.logger, err, "Could not close arg3reader for outbound response")
 		return errors.Wrapf(
 			err, "Could not close arg3reader outbound %s.%s (%s %s) response",
-			c.client.clientID, c.methodName, c.client.serviceName, c.serviceMethod,
+			c.client.ClientID, c.methodName, c.client.serviceName, c.serviceMethod,
 		)
 	}
 
