@@ -24,9 +24,10 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -249,6 +250,37 @@ type UpdateRequest struct {
 	ThriftFiles     []string         `json:"thrift_files"`
 	ClientUpdates   []ClientConfig   `json:"client_updates"`
 	EndpointUpdates []EndpointConfig `json:"endpoint_updates"`
+}
+
+// Validate validates the request and surface user friendly error
+func (m *Manager) Validate(r *Repository, req *UpdateRequest) error {
+	cfg, err := r.GatewayConfig()
+	if err != nil {
+		return err
+	}
+	packageHelper, err := codegen.NewPackageHelper(
+		cfg.PackageRoot,
+		r.LocalDir(),
+		cfg.MiddlewareConfigDir,
+		m.IDLRegistry.ThriftRootDir(),
+		cfg.GenCodePackage,
+		"./build",
+		"",
+	)
+	if err != nil {
+		return err
+	}
+	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
+	if err != nil {
+		return err
+	}
+	_, err = moduleSystem.GenerateBuild(
+		packageHelper.PackageRoot(),
+		r.LocalDir(),
+		packageHelper.CodeGenTargetPath(),
+		false,
+	)
+	return err
 }
 
 // UpdateAll writes the updates for thrift files, clients and endpoints.

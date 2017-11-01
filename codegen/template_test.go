@@ -81,6 +81,7 @@ func TestGenerateBar(t *testing.T) {
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
+		true,
 	)
 	if !assert.NoError(t, buildErr, "failed to create clients init %s", buildErr) {
 		return

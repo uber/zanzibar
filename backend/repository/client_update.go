@@ -30,6 +30,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
+	reqerr "github.com/uber/zanzibar/codegen/errors"
 )
 
 // ClientJSONConfig defines the JSON content of the configuration file.
@@ -98,14 +99,16 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 func allExposedMethods(thriftServices map[string]map[string]*ThriftService, thriftFile string) (map[string]string, error) {
 	serviceMap, ok := thriftServices[thriftFile]
 	if !ok {
-		return nil, errors.Errorf("thrift file %q not found", thriftFile)
+		return nil, reqerr.NewRequestError(
+			reqerr.ClientsThriftFile, errors.Errorf("endpoint thrift file %q not found", thriftFile))
 	}
 	exposedMethods := map[string]string{}
 	for _, tservice := range serviceMap {
 		for _, method := range tservice.Methods {
 			exposedName := tservice.Name + "::" + method.Name
 			if pre, ok := exposedMethods[method.Name]; ok {
-				return nil, errors.Errorf("duplicated method name for %q and %q", pre, exposedName)
+				return nil, reqerr.NewRequestError(
+					reqerr.ClientsExposedMethods, errors.Errorf("duplicated method name for %q and %q", pre, exposedName))
 			}
 			exposedMethods[strings.Title(method.Name)] = exposedName
 		}
@@ -115,10 +118,16 @@ func allExposedMethods(thriftServices map[string]map[string]*ThriftService, thri
 
 func validateClientUpdateRequest(req *ClientConfig) error {
 	if req.Type == "tchannel" && req.ServiceName == "" {
-		return errors.New("invalid request: muttley name is required for tchannel client")
+		return reqerr.NewRequestError(
+			reqerr.ClientsServiceName, errors.New("invalid request: muttley name is required for tchannel client"))
 	}
 	if req.IP == "" || req.Port == 0 {
-		return errors.New("invalid request: ip and port are required")
+		return reqerr.NewRequestError(
+			reqerr.ClientsIP, errors.New("invalid request: ip is required"))
+	}
+	if req.Port == 0 {
+		return reqerr.NewRequestError(
+			reqerr.ClientsPort, errors.New("invalid request: port is required"))
 	}
 	if req.Type == "tchannel" && req.Timeout == 0 {
 		req.Timeout = 10000

@@ -27,6 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
+	reqerr "github.com/uber/zanzibar/codegen/errors"
 )
 
 // WriteEndpointConfig writes endpoint configs and its test cases into a runtime repository and
@@ -67,15 +68,15 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	}
 	clientCfg, ok := gatewayConfig.Clients[req.ClientID]
 	if !ok {
-		return NewRequestError(
-			ClientID, errors.Errorf("can't find client %q", req.ClientID))
+		return reqerr.NewRequestError(
+			reqerr.EndpointsClientID, errors.Errorf("can't find client %q", req.ClientID))
 	}
 	if clientCfg.Type == HTTP {
 		req.WorkflowType = "httpClient"
 	} else if clientCfg.Type == TCHANNEL {
 		req.WorkflowType = "tchannelClient"
 	} else {
-		return NewRequestError(ClientType,
+		return reqerr.NewRequestError(reqerr.ClientsType,
 			errors.Errorf("client type %q is not supported", clientCfg.Type))
 	}
 

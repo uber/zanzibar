@@ -30,6 +30,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
+	reqerr "github.com/uber/zanzibar/codegen/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -385,6 +386,10 @@ func (h *Handler) CreateDiff(w http.ResponseWriter, r *http.Request, ps httprout
 		h.WriteErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
+	if err := h.Manager.Validate(repo, req); err != nil {
+		h.WriteErrorResponse(w, http.StatusInternalServerError, err)
+		return
+	}
 	if _, err := repo.LatestGatewayConfig(); err != nil {
 		h.WriteErrorResponse(w, http.StatusInternalServerError, errors.Wrap(err, "invalid gateway config after upadte"))
 		return
@@ -472,7 +477,7 @@ func (h *Handler) WriteErrorResponse(w http.ResponseWriter, code int, err error)
 	errJSON := fmt.Sprintf("{\"error\": %q}", err.Error())
 	causeErr := errors.Cause(err)
 	// In case we know the real cause of the error.
-	if e, ok := causeErr.(*RequestError); ok {
+	if e, ok := causeErr.(*reqerr.RequestError); ok {
 		code = http.StatusBadRequest
 		errJSON = e.JSON()
 		causeErr = e.Cause

@@ -173,6 +173,7 @@ func TestExampleService(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
+		true,
 	)
 	if err != nil {
 		t.Errorf("Unexpected error generating build %s", err)
@@ -467,6 +468,7 @@ func TestExampleServiceCycles(t *testing.T) {
 		"github.com/uber/zanzibar/codegen/test-service",
 		testServiceDir,
 		path.Join(testServiceDir, "build"),
+		true,
 	)
 	if err == nil {
 		t.Errorf("Expected cycle error generating build")

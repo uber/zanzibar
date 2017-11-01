@@ -2000,7 +2000,12 @@
 										"clientId": "baz",
 										"clientMethod": "compare",
 										"clientReqHeaders": {},
-										"clientRequest": {},
+										"clientRequest": {
+											"requestType": "http",
+											"httpRequest": {
+												"method": "GET"
+											}
+										},
 										"clientResHeaders": {},
 										"clientResponse": {
 											"httpResponse": {
@@ -2019,15 +2024,18 @@
 								"endpointId": "baz",
 								"endpointReqHeaders": {},
 								"endpointRequest": {
-									"arg1": {
-										"b1": true,
-										"i3": 42,
-										"s2": "hello"
-									},
-									"arg2": {
-										"b1": true,
-										"i3": 42,
-										"s2": "hola"
+									"requestType": "tchannel",
+									"tchannelRequest": {
+										"arg1": {
+											"b1": true,
+											"i3": 42,
+											"s2": "hello"
+										},
+										"arg2": {
+											"b1": true,
+											"i3": 42,
+											"s2": "hola"
+										}
 									}
 								},
 								"endpointResHeaders": {},

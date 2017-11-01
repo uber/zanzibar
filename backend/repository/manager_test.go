@@ -93,6 +93,30 @@ func TestIDLThriftService(t *testing.T) {
 	assert.Error(t, err, "Should return an error for thrift not found.")
 }
 
+func TestValidate(t *testing.T) {
+	r, err := manager.NewRuntimeRepository(gatewayID)
+	assert.Nil(t, err)
+	b, err := ioutil.ReadFile(tchannelClientUpdateRequestFile)
+	assert.Nil(t, err)
+	clientReq := &ClientConfig{}
+	err = json.Unmarshal(b, clientReq)
+	assert.Nil(t, err)
+	endpointCfgUpdateRequestFile := filepath.Join(endpointUpdateRequestDir, "baz/compare.json")
+	b, err = ioutil.ReadFile(endpointCfgUpdateRequestFile)
+	assert.Nil(t, err)
+	endpointReq := &EndpointConfig{}
+	err = json.Unmarshal(b, endpointReq)
+
+	assert.Nil(t, err)
+	req := &UpdateRequest{
+		ThriftFiles:     []string{"clients/baz/baz.thrift"},
+		ClientUpdates:   []ClientConfig{*clientReq},
+		EndpointUpdates: []EndpointConfig{*endpointReq},
+	}
+	err = manager.Validate(r, req)
+	assert.Nil(t, err)
+}
+
 func TestUpdateAll(t *testing.T) {
 	r, err := manager.NewRuntimeRepository(gatewayID)
 	if !assert.NoError(t, err, "Failed to create runtime repository.") {
