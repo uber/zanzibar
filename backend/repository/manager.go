@@ -282,6 +282,7 @@ func (m *Manager) Validate(r *Repository, req *UpdateRequest) error {
 	}
 	packageHelper, err := codegen.NewPackageHelper(
 		cfg.PackageRoot,
+		cfg.ManagedThriftFolder,
 		r.LocalDir(),
 		cfg.MiddlewareConfigDir,
 		m.IDLRegistry.ThriftRootDir(),

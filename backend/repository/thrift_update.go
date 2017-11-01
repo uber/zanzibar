@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	reqerr "github.com/uber/zanzibar/codegen/errors"
 )
 
 const (
@@ -62,12 +63,13 @@ func (r *Repository) WriteManagedThriftFiles(files []ManagedThriftFile) error {
 	for _, mfile := range files {
 		fileName := filepath.Join(cfg.ManagedThriftFolder, mfile.Filename)
 
+		// TODO: syntax check before write() ( or after write() )
 		err := r.writeThriftFile(thriftRootDir, &ThriftMeta{
 			Path:    fileName,
 			Content: mfile.SourceCode,
 		})
 		if err != nil {
-			return err
+			return reqerr.NewRequestError(reqerr.Filename, err)
 		}
 	}
 
