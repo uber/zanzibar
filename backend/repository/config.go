@@ -38,6 +38,7 @@ type Config struct {
 	Tier                int
 	ThriftRootDir       string
 	PackageRoot         string
+	ManagedThriftFolder string
 	GenCodePackage      string
 	TargetGenDir        string
 	ClientConfigDir     string
@@ -173,6 +174,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		Repository:          r.remote,
 		ThriftRootDir:       cfg.MustGetString("thriftRootDir"),
 		PackageRoot:         cfg.MustGetString("packageRoot"),
+		ManagedThriftFolder: cfg.MustGetString("managedThriftFolder"),
 		GenCodePackage:      cfg.MustGetString("genCodePackage"),
 		TargetGenDir:        cfg.MustGetString("targetGenDir"),
 		ClientConfigDir:     cfg.MustGetString("clientConfig"),
@@ -181,6 +183,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 	}
 	pkgHelper, err := codegen.NewPackageHelper(
 		config.PackageRoot,
+		config.ManagedThriftFolder,
 		configDir,
 		config.MiddlewareConfigDir,
 		config.ThriftRootDir,

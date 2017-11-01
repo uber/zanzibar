@@ -45,6 +45,39 @@ func (r *Repository) ThriftConfig(idlRoot string) (map[string]*ThriftMeta, error
 	return config, nil
 }
 
+// WriteManagedThriftFiles will write new thrift files to disk
+func (r *Repository) WriteManagedThriftFiles(files []ManagedThriftFile) error {
+	cfg, err := r.LatestGatewayConfig()
+	if err != nil {
+		return errors.Wrap(
+			err, "invalid configuration before writing new thrift files",
+		)
+	}
+
+	thriftRootDir := cfg.ThriftRootDir
+	r.Lock()
+	defer r.Unlock()
+
+	/* First write to disk */
+	for _, mfile := range files {
+		fileName := filepath.Join(cfg.ManagedThriftFolder, mfile.Filename)
+
+		err := r.writeThriftFile(thriftRootDir, &ThriftMeta{
+			Path:    fileName,
+			Content: mfile.SourceCode,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	/* next resolve imports */
+	// for _, mfile := range files {
+	// }
+
+	return nil
+}
+
 // WriteThriftFileAndConfig writes the update the file contents and meta config.
 func (r *Repository) WriteThriftFileAndConfig(thriftMeta map[string]*ThriftMeta) error {
 	cfg, err := r.LatestGatewayConfig()

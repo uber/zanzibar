@@ -86,6 +86,7 @@ func (m *Manager) IDLThriftService(path string) (map[string]*ThriftService, erro
 	thriftRootDir := m.IDLRegistry.ThriftRootDir()
 	packageHelper, err := codegen.NewPackageHelper(
 		"idl-registry",          // packgeRoot
+		"",                      // managedThriftFolder
 		localRootDir,            // configDirName
 		"",                      // middlewareConfig
 		thriftRootDir,           // thriftRootDir
@@ -209,6 +210,20 @@ func (m *Manager) UpdateThriftFiles(r *Repository, paths []string) error {
 	return nil
 }
 
+// UpdateManagedThriftFiles will write new thrift files to disk.
+func (m *Manager) UpdateManagedThriftFiles(
+	r *Repository, files []ManagedThriftFile,
+) error {
+	if len(files) == 0 {
+		return nil
+	}
+
+	if err := r.WriteManagedThriftFiles(files); err != nil {
+		return errors.Wrap(err, "failed to write managed thrift files")
+	}
+	return nil
+}
+
 // UpdateClients updates configurations for a list of clients.
 func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientConfig) error {
 	for i := range req {
@@ -245,11 +260,18 @@ func (m *Manager) UpdateEndpoints(r *Repository, endpointCfgDir string, req []En
 	return nil
 }
 
+// ManagedThriftFile represents a thrift file we want to write
+type ManagedThriftFile struct {
+	SourceCode string `json:"source_code"`
+	Filename   string `json:"filename"`
+}
+
 // UpdateRequest is the request to update thrift files, clients and endpoints.
 type UpdateRequest struct {
-	ThriftFiles     []string         `json:"thrift_files"`
-	ClientUpdates   []ClientConfig   `json:"client_updates"`
-	EndpointUpdates []EndpointConfig `json:"endpoint_updates"`
+	ThriftFiles        []string            `json:"thrift_files"`
+	ManagedThriftFiles []ManagedThriftFile `json:"managed_thrift_files"`
+	ClientUpdates      []ClientConfig      `json:"client_updates"`
+	EndpointUpdates    []EndpointConfig    `json:"endpoint_updates"`
 }
 
 // Validate validates the request and surface user friendly error
@@ -285,6 +307,9 @@ func (m *Manager) Validate(r *Repository, req *UpdateRequest) error {
 
 // UpdateAll writes the updates for thrift files, clients and endpoints.
 func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, req *UpdateRequest) error {
+	if err := m.UpdateManagedThriftFiles(r, req.ManagedThriftFiles); err != nil {
+		return errors.Wrap(err, "Failed to update managed thrift files")
+	}
 	if err := m.UpdateThriftFiles(r, req.ThriftFiles); err != nil {
 		return errors.Wrap(err, "failed to update thrift files")
 	}
