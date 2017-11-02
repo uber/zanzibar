@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	reqerr "github.com/uber/zanzibar/codegen/errors"
 )
 
 const (
@@ -43,6 +44,40 @@ func (r *Repository) ThriftConfig(idlRoot string) (map[string]*ThriftMeta, error
 		return nil, errors.Wrap(err, "failed to unmarshal idls.json file")
 	}
 	return config, nil
+}
+
+// WriteManagedThriftFiles will write new thrift files to disk
+func (r *Repository) WriteManagedThriftFiles(files []ManagedThriftFile) error {
+	cfg, err := r.LatestGatewayConfig()
+	if err != nil {
+		return errors.Wrap(
+			err, "invalid configuration before writing new thrift files",
+		)
+	}
+
+	thriftRootDir := cfg.ThriftRootDir
+	r.Lock()
+	defer r.Unlock()
+
+	/* First write to disk */
+	for _, mfile := range files {
+		fileName := filepath.Join(cfg.ManagedThriftFolder, mfile.Filename)
+
+		// TODO: syntax check before write() ( or after write() )
+		err := r.writeThriftFile(thriftRootDir, &ThriftMeta{
+			Path:    fileName,
+			Content: mfile.SourceCode,
+		})
+		if err != nil {
+			return reqerr.NewRequestError(reqerr.Filename, err)
+		}
+	}
+
+	/* next resolve imports */
+	// for _, mfile := range files {
+	// }
+
+	return nil
 }
 
 // WriteThriftFileAndConfig writes the update the file contents and meta config.

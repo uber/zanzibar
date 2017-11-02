@@ -4,6 +4,7 @@
 	"thriftRootDir": "./idl",
 	"genCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 	"targetGenDir": "./build",
+	"managedThriftFolder": "./github.com/uber/zanzibar",
 
 	"clientConfig": "./clients",
 	"endpointConfig": "./endpoints",

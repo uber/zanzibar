@@ -2069,6 +2069,28 @@
 		}
 	},
 	{
+		"name": "create-diff-managed-thrift",
+		"request": {
+			"method": "POST",
+			"url": "/create-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"managed_thrift_files": [{
+					"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n",
+					"filename": "bar/my-thrift.thrift"
+				}]
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"diff_uri": "http://diff-for-example-gateway"
+			}
+		}
+	},
+	{
 		"name": "invalid create-diff request with unknown client ID",
 		"request": {
 			"method": "POST",
@@ -2567,6 +2589,7 @@
 					},
 					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 					"ID": "example-gateway",
+					"ManagedThriftFolder": "./github.com/uber/zanzibar",
 					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
 					"Middlewares": null,
 					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
@@ -3409,6 +3432,7 @@
 				},
 				"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 				"ID": "example-gateway",
+				"ManagedThriftFolder": "./github.com/uber/zanzibar",
 				"MiddlewareConfigDir": "./middlewares/middleware-config.json",
 				"Middlewares": null,
 				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",

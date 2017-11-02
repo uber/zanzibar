@@ -54,6 +54,8 @@ const (
 	EndpointsClientID RequestField = "client_id"
 	// EndpointThriftMethodName: .endpoint_updates[idx].ClientMethod
 	EndpointThriftMethodName RequestField = "thriftMethodName"
+	// Filename: .managed_thrift_files[idx].filename
+	Filename RequestField = "filename"
 	// ThriftFiles: .thrift_files
 	ThriftFiles RequestField = "thrift_files"
 )
