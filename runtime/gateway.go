@@ -420,10 +420,12 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	host := GetHostname()
 
 	datacenter := gateway.Config.MustGetString("datacenter")
+	env := gateway.Config.MustGetString("env")
 
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
 		zap.String("hostname", host),
+		zap.String("env", env),
 		zap.Int("pid", os.Getpid()),
 		zap.String("zone", datacenter),
 	)
