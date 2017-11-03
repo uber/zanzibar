@@ -50,6 +50,11 @@ func (l *LineBuilder) GetLines() []string {
 	return l.lines
 }
 
+type fieldStruct struct {
+	Identifier string
+	TypeName   string
+}
+
 // PackageNameResolver interface allows for resolving what the
 // package name for a thrift file is. This depends on where the
 // thrift-based structs are generated.
@@ -62,7 +67,17 @@ type PackageNameResolver interface {
 // operates on two variables, "in" and "out" and that both are a go struct.
 type TypeConverter struct {
 	LineBuilder
-	Helper PackageNameResolver
+	Helper        PackageNameResolver
+	uninitialized map[string]*fieldStruct
+}
+
+// NewTypeConverter returns *TypeConverter
+func NewTypeConverter(h PackageNameResolver) *TypeConverter {
+	return &TypeConverter{
+		LineBuilder:   LineBuilder{},
+		Helper:        h,
+		uninitialized: make(map[string]*fieldStruct),
+	}
 }
 
 func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error) {
@@ -99,8 +114,14 @@ func convertIdentifiersToNilChecks(identifiers []string) []string {
 
 //  tranforms will have different paths,   to->from proxy mappings will have the same identifier path aside from prefix
 func isTransform(from string, to string) bool {
-	//  from prefix is "in." and to prefix "out."
-	return from[3:] != to[4:]
+	var (
+		in  = len("in.")
+		out = len("out.")
+	)
+	if from[:in] != "in." || to[:out] != "out." {
+		panic("isTransform check called on unexpected input")
+	}
+	return from[in:] != to[out:]
 }
 
 // helper func for assignWithOverride
@@ -114,15 +135,27 @@ func (c *TypeConverter) assignWithChecks(
 	extraNilCheck bool,
 ) {
 
+	// initialize optional structs in current nested path if any
+	assignOptionalCheckNil := func(indent, toIdentifier, toTypeName, fromIdentifier string) {
+		for k, v := range c.uninitialized {
+			if strings.HasPrefix(toIdentifier, k) {
+				c.append(indent, "if ", v.Identifier, " == nil {")
+				c.append(indent, "\t", v.Identifier, " = &", v.TypeName, "{}")
+				c.append(indent, "}")
+			}
+		}
+		c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+	}
+
 	if !isTransform(fromIdentifier, toIdentifier) {
 
-		if !fromRequired && toRequired || extraNilCheck {
+		if (!fromRequired && toRequired) || extraNilCheck {
 			// need to nil check otherwise we could be cast or deref nil
 			c.append(indent, "if ", fromIdentifier, " != nil {")
-			c.append(indent, "\t", toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+			assignOptionalCheckNil(indent+"\t", toIdentifier, toTypeName, fromIdentifier)
 			c.append(indent, "}")
 		} else {
-			c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+			assignOptionalCheckNil(indent, toIdentifier, toTypeName, fromIdentifier)
 		}
 		return
 	}
@@ -135,17 +168,19 @@ func (c *TypeConverter) assignWithChecks(
 		if fromRequired || !fromRequired && !toRequired {
 			checks = checks[:len(checks)-1]
 		}
+
 		if len(checks) == 0 {
-			c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+			assignOptionalCheckNil(indent, toIdentifier, toTypeName, fromIdentifier)
 			return
 		}
 	}
 	c.append(indent, "if ", strings.Join(checks, " && "), " {")
-	c.append(indent, "\t", toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
+	assignOptionalCheckNil(indent+"\t", toIdentifier, toTypeName, fromIdentifier)
 	c.append(indent, "}")
 	// TODO else?  log/stat it?  should this siliently eat intermediate nils as none-assignement,  should set nil?
 }
 
+// TODO: pack params
 func (c *TypeConverter) assignWithOverride(
 	indent string,
 	toIdentifier string,
@@ -181,6 +216,7 @@ func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, e
 func (c *TypeConverter) genConverterForStruct(
 	toFieldName string,
 	toFieldType *compile.StructSpec,
+	toRequired bool,
 	fromFieldType compile.TypeSpec,
 	fromIdentifier string,
 	keyPrefix string,
@@ -199,8 +235,15 @@ func (c *TypeConverter) genConverterForStruct(
 	// if no fromFieldType assume we're constructing from transform fieldMap  TODO: make this less subtle
 	if fromFieldType == nil {
 		//  in the direct assignment we do a nil check on fromField here. its hard for unknown number of transforms
-		//  initialize the toField with an empty struct
-		c.append(indent, toIdentifier, " = &", typeName, "{}")
+		//  initialize the toField with an empty struct only if it's required, otherwise send to uninitialized map
+		if toRequired {
+			c.append(indent, toIdentifier, " = &", typeName, "{}")
+		} else {
+			c.uninitialized[toIdentifier] = &fieldStruct{
+				Identifier: toIdentifier,
+				TypeName:   typeName,
+			}
+		}
 
 		// recursive call
 		err = c.genStructConverter(
@@ -227,26 +270,16 @@ func (c *TypeConverter) genConverterForStruct(
 	}
 
 	c.append(indent, "if ", fromIdentifier, " != nil {")
-
 	c.append(indent, "\t", toIdentifier, " = &", typeName, "{}")
 
-	// TODO(jake8):  not convinced this is necessary, can we just pass the full fieldMap
 	subFromFields := fromFieldStruct.Fields
-	subFromFieldsMap := make(map[string]FieldMapperEntry)
-	// Build subfield mapping
-	for toFieldID, fromFieldEntry := range fieldMap {
-		if strings.HasPrefix(toFieldID, keyPrefix) {
-			// string keyPrefix and append
-			subFromFieldsMap[toFieldID] = fromFieldEntry
-		}
-	}
 	err = c.genStructConverter(
 		keyPrefix+".",
 		fromPrefix+".",
 		indent+"\t",
 		subFromFields,
 		subToFields,
-		subFromFieldsMap,
+		fieldMap,
 	)
 	if err != nil {
 		return err
@@ -301,11 +334,11 @@ func (c *TypeConverter) genConverterForPrimitive(
 	} else {
 		fromType := fmt.Sprintf("(*%s)", typeName)
 		if fromField.Required {
-			fromType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+			fromType = fmt.Sprintf("(*%s)&", typeName)
 		}
 		overriddenType := fmt.Sprintf("(*%s)", typeName)
 		if overriddenField != nil && overriddenField.Required {
-			overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+			overriddenType = fmt.Sprintf("(*%s)&", typeName)
 			overriddenFieldRequired = true
 		}
 
@@ -394,6 +427,7 @@ func (c *TypeConverter) genConverterForList(
 		err = c.genConverterForStruct(
 			toField.Name,
 			valueStruct,
+			toField.Required,
 			fromFieldType.ValueSpec,
 			"value",
 			keyPrefix+pascalCase(toField.Name)+"[index]",
@@ -418,6 +452,7 @@ func (c *TypeConverter) genConverterForList(
 			err = c.genConverterForStruct(
 				toField.Name,
 				valueStruct,
+				toField.Required,
 				overriddenFieldType.ValueSpec,
 				"value",
 				keyPrefix+pascalCase(toField.Name)+"[index]",
@@ -531,6 +566,7 @@ func (c *TypeConverter) genConverterForMap(
 		err = c.genConverterForStruct(
 			toField.Name,
 			valueStruct,
+			toField.Required,
 			fromFieldType.ValueSpec,
 			"value",
 			keyPrefix+pascalCase(toField.Name)+"[key]",
@@ -556,6 +592,7 @@ func (c *TypeConverter) genConverterForMap(
 			err = c.genConverterForStruct(
 				toField.Name,
 				valueStruct,
+				toField.Required,
 				overriddenFieldType.ValueSpec,
 				"value",
 				keyPrefix+pascalCase(toField.Name)+"[key]",
@@ -607,6 +644,9 @@ func (c *TypeConverter) genStructConverter(
 
 		toSubIdentifier := keyPrefix + pascalCase(toField.Name)
 		toIdentifier := "out." + toSubIdentifier
+		if toIdentifier == "out.Four" {
+			fmt.Println()
+		}
 		overriddenIdentifier := ""
 		fromIdentifier := ""
 
@@ -666,9 +706,7 @@ func (c *TypeConverter) genStructConverter(
 						toField.Name,
 					)
 				}
-
 				// the toField is optional and there's nothing that maps to it or its sub-fields so we should skip it
-				// TODO: should we explicitly set the field to nil?
 				continue
 			}
 		}
@@ -737,11 +775,11 @@ func (c *TypeConverter) genStructConverter(
 			} else {
 				fromType := fmt.Sprintf("(*%s)", typeName)
 				if fromField.Required {
-					fromType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+					fromType = fmt.Sprintf("(*%s)&", typeName)
 				}
 				overriddenType := fmt.Sprintf("(*%s)", typeName)
 				if overriddenField != nil && overriddenField.Required {
-					overriddenType = fmt.Sprintf("ptr.%s", pascalCase(typeName))
+					overriddenType = fmt.Sprintf("(*%s)&", typeName)
 					overriddenFieldRequired = true
 				}
 
@@ -774,6 +812,7 @@ func (c *TypeConverter) genStructConverter(
 			err := c.genConverterForStruct(
 				toField.Name,
 				toFieldType,
+				toField.Required,
 				stFromType,
 				fromIdentifier,
 				keyPrefix+pascalCase(toField.Name),

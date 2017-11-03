@@ -66,9 +66,7 @@ func (r *naivePackageNameResolver) TypePackageName(
 }
 
 func newTypeConverter() *codegen.TypeConverter {
-	return &codegen.TypeConverter{
-		Helper: &naivePackageNameResolver{},
-	}
+	return codegen.NewTypeConverter(&naivePackageNameResolver{})
 }
 
 func compileProgram(
@@ -152,7 +150,7 @@ func trim(text string) string {
 	return strings.TrimSpace(newText)
 }
 
-func TestConverStrings(t *testing.T) {
+func TestConvertStrings(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`struct Foo {
@@ -214,7 +212,7 @@ func TestConvertBoolsOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = ptr.Bool(in.One)
+		out.One = (*bool)&(in.One)
 	`), lines)
 }
 
@@ -592,7 +590,6 @@ func TestConvertTypeDef(t *testing.T) {
 	`), lines)
 }
 
-// TODO this is badly broken,  ptr.StructsUUID is not a thing
 func TestConvertTypeDefReqToOpt(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
@@ -613,7 +610,7 @@ func TestConvertTypeDefReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = ptr.StructsUUID(in.One)
+		out.One = (*structs.UUID)&(in.One)
 		if in.Two != nil {
 			out.Two = *(in.Two)
 		}
@@ -1315,7 +1312,7 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = ptr.StructsUUID(in.Three)
+		out.One = (*structs.UUID)&(in.Three)
 		if in.One != nil {
 			out.One = (*structs.UUID)(in.One)
 		}
@@ -1438,8 +1435,8 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 		if in.One != nil {
 			out.Two = *(in.One)
 		}
-		out.Three = ptr.Bool(in.Four)
-		out.Four = ptr.Bool(in.Four)
+		out.Three = (*bool)&(in.Four)
+		out.Four = (*bool)&(in.Four)
 		`), lines)
 }
 
@@ -1467,7 +1464,7 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.One = ptr.Bool(in.One)
+		out.One = (*bool)&(in.One)
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
@@ -1599,15 +1596,6 @@ func TestConverterMapStructWithFromOptDropped(t *testing.T) {
 
 func TestConverterMapStructWithToOptMissingOk(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
-	//fieldMap["Five.One"] = codegen.FieldMapperEntry{
-	//	QualifiedName: "Four.Two",
-	//	Override:      true,
-	//}
-	//fieldMap["Four.Two"] = codegen.FieldMapperEntry{
-	//	QualifiedName: "Three.One",
-	//	Override:      true,
-	//}
-
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`struct NestedFoo {
@@ -1714,6 +1702,55 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
 		lines)
 }
 
+func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required NestedFoo three
+ 		}
+
+ 		struct Bar {
+ 			1: required NestedFoo three
+ 			2: optional NestedFoo four
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
+		}
+		if in.Three != nil {
+			out.Four = &structs.NestedFoo{}
+			if in.Three != nil {
+				out.Four.One = string(in.Three.One)
+			}
+			if in.Three != nil {
+				out.Four.Two = (*string)(in.Three.Two)
+			}
+		} else {
+			out.Four = nil
+		}`),
+		lines)
+}
+
 func TestConverterMapStructWithFieldMap(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["Five.One"] = codegen.FieldMapperEntry{
@@ -1754,12 +1791,17 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 		} else {
 			out.Three = nil
 		}
-		out.Five = &structs.NestedFoo{}
 		if in.Three != nil && in.Three.Two != nil {
+			if out.Five == nil {
+				out.Five = &structs.NestedFoo{}
+			}
 			out.Five.One = *(in.Three.Two)
 		}
 		if in.Four != nil {
-			out.Five.Two = ptr.String(in.Four.One)
+			if out.Five == nil {
+				out.Five = &structs.NestedFoo{}
+			}
+			out.Five.Two = (*string)&(in.Four.One)
 		}`),
 		lines)
 }
@@ -1877,8 +1919,55 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
 		out.Six = &structs.NestedC{}
-		out.Six.Four = &structs.NestedA{}
 		if in.Five != nil && in.Five.Three != nil {
+			if out.Six.Four == nil {
+				out.Six.Four = &structs.NestedA{}
+			}
+			out.Six.Four.One = (*string)(in.Five.Three.One)
+		}`),
+		lines)
+}
+
+func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three.One",
+		Override:      true,
+	}
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedA {
+ 			1: optional string one
+ 		}
+
+ 		struct NestedB {
+ 			1: required NestedA three
+		}
+
+		struct NestedC {
+			1: optional NestedA four
+		}
+
+ 		struct Foo {
+ 			1: required NestedB five
+ 		}
+
+ 		struct Bar {
+ 			1: optional NestedC six
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, trim(`
+		if in.Five != nil && in.Five.Three != nil {
+			if out.Six == nil {
+				out.Six = &structs.NestedC{}
+			}
+			if out.Six.Four == nil {
+				out.Six.Four = &structs.NestedA{}
+			}
 			out.Six.Four.One = (*string)(in.Five.Three.One)
 		}`),
 		lines)
@@ -1922,15 +2011,17 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, trim(`
-		out.Five = &structs.NestedBar{}
 		if in.Four != nil && in.Four.Two != nil {
+			if out.Five == nil {
+				out.Five = &structs.NestedBar{}
+			}
 			out.Five.One = *(in.Four.Two)
 		}
 		if in.Four != nil {
 			out.Four = &structs.NestedBar{}
 			out.Four.One = string(in.Four.One)
 			if in.Three != nil {
-				out.Four.Two = ptr.String(in.Three.One)
+				out.Four.Two = (*string)&(in.Three.One)
 			}
 		} else {
 			out.Four = nil
@@ -1990,7 +2081,7 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 			out.Four = &structs.NestedBar{}
 			out.Four.One = string(in.Four.One)
 			if in.Four != nil {
-				out.Four.Two = ptr.String(in.Four.One)
+				out.Four.Two = (*string)&(in.Four.One)
 			}
 		} else {
 			out.Four = nil
