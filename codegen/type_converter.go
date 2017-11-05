@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -112,8 +113,8 @@ func convertIdentifiersToNilChecks(identifiers []string) []string {
 	return checks
 }
 
-//  tranforms will have different paths,   to->from proxy mappings will have the same identifier path aside from prefix
-func isTransform(from string, to string) bool {
+// IsTransform tranforms will have different paths,   to->from proxy mappings will have the same identifier path aside from prefix
+func IsTransform(from string, to string) bool {
 	var (
 		in  = len("in.")
 		out = len("out.")
@@ -137,8 +138,14 @@ func (c *TypeConverter) assignWithChecks(
 
 	// initialize optional structs in current nested path if any
 	assignOptionalCheckNil := func(indent, toIdentifier, toTypeName, fromIdentifier string) {
-		for k, v := range c.uninitialized {
-			if strings.HasPrefix(toIdentifier, k) {
+		keys := make([]string, 0, len(c.uninitialized))
+		for k := range c.uninitialized {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, id := range keys {
+			if strings.HasPrefix(toIdentifier, id) {
+				v := c.uninitialized[id]
 				c.append(indent, "if ", v.Identifier, " == nil {")
 				c.append(indent, "\t", v.Identifier, " = &", v.TypeName, "{}")
 				c.append(indent, "}")
@@ -147,7 +154,7 @@ func (c *TypeConverter) assignWithChecks(
 		c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
 	}
 
-	if !isTransform(fromIdentifier, toIdentifier) {
+	if !IsTransform(fromIdentifier, toIdentifier) {
 
 		if (!fromRequired && toRequired) || extraNilCheck {
 			// need to nil check otherwise we could be cast or deref nil

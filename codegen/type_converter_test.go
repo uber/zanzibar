@@ -2501,3 +2501,11 @@ func TestConvertNestedStructError(t *testing.T) {
 		"required toField four does not have a valid fromField mapping",
 	)
 }
+
+func TestCoverIsTransform(t *testing.T) {
+	defer func() {
+		r := recover()
+		assert.NotNil(t, r)
+	}()
+	codegen.IsTransform("gg.field", "lol.field")
+}
