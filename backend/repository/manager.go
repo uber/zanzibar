@@ -284,7 +284,7 @@ func (m *Manager) Validate(r *Repository, req *UpdateRequest) error {
 		cfg.PackageRoot,
 		cfg.ManagedThriftFolder,
 		r.LocalDir(),
-		cfg.MiddlewareConfigDir,
+		cfg.MiddlewareConfigFile,
 		m.IDLRegistry.ThriftRootDir(),
 		cfg.GenCodePackage,
 		"./build",
