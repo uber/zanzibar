@@ -2016,10 +2016,10 @@
 										"clientMethod": "compare",
 										"clientReqHeaders": {},
 										"clientRequest": {
-											"requestType": "http",
 											"httpRequest": {
 												"method": "GET"
-											}
+											},
+											"requestType": "http"
 										},
 										"clientResHeaders": {},
 										"clientResponse": {
@@ -2092,10 +2092,12 @@
 				"gateway-id": "example-gateway"
 			},
 			"body": {
-				"managed_thrift_files": [{
-					"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n",
-					"filename": "bar/my-thrift.thrift"
-				}]
+				"managed_thrift_files": [
+					{
+						"filename": "bar/my-thrift.thrift",
+						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n"
+					}
+				]
 			}
 		},
 		"response": {
@@ -2604,12 +2606,8 @@
 					},
 					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 					"ID": "example-gateway",
-<<<<<<< HEAD
 					"ManagedThriftFolder": "./github.com/uber/zanzibar",
-					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-=======
 					"MiddlewareConfigFile": "./middlewares/middleware-config.json",
->>>>>>> b3599b6... regenerate golden test files
 					"Middlewares": {
 						"example": {
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
@@ -3462,12 +3460,8 @@
 				},
 				"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 				"ID": "example-gateway",
-<<<<<<< HEAD
 				"ManagedThriftFolder": "./github.com/uber/zanzibar",
-				"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-=======
 				"MiddlewareConfigFile": "./middlewares/middleware-config.json",
->>>>>>> b3599b6... regenerate golden test files
 				"Middlewares": {
 					"example": {
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
