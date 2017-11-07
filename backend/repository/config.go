@@ -363,7 +363,7 @@ func (r *Repository) middlewareConfigs(middlewareConfigFile string) (map[string]
 	}
 
 	if len(bytes) == 0 {
-		panic("EMPTY MIDDLEWARE CONFIG")
+		return nil, errors.New("middlewares file is an empty file")
 	}
 
 	err = json.Unmarshal(bytes, &rawCfgs)
