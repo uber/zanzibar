@@ -2604,8 +2604,12 @@
 					},
 					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 					"ID": "example-gateway",
+<<<<<<< HEAD
 					"ManagedThriftFolder": "./github.com/uber/zanzibar",
 					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+=======
+					"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+>>>>>>> b3599b6... regenerate golden test files
 					"Middlewares": {
 						"example": {
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
@@ -3458,8 +3462,12 @@
 				},
 				"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 				"ID": "example-gateway",
+<<<<<<< HEAD
 				"ManagedThriftFolder": "./github.com/uber/zanzibar",
 				"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+=======
+				"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+>>>>>>> b3599b6... regenerate golden test files
 				"Middlewares": {
 					"example": {
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",

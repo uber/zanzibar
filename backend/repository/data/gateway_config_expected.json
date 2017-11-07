@@ -10,7 +10,7 @@
 	"TargetGenDir": "./build",
 	"ClientConfigDir": "./clients",
 	"EndpointConfigDir": "./endpoints",
-	"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+	"MiddlewareConfigFile": "./middlewares/middleware-config.json",
 	"Endpoints": {
 		"bar.argNotStruct": {
 			"endpointId": "bar",
