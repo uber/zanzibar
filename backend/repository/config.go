@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -33,18 +34,18 @@ import (
 
 // Config stores configuration for a gateway.
 type Config struct {
-	ID                  string
-	Repository          string
-	Team                string
-	Tier                int
-	ThriftRootDir       string
-	PackageRoot         string
-	ManagedThriftFolder string
-	GenCodePackage      string
-	TargetGenDir        string
-	ClientConfigDir     string
-	EndpointConfigDir   string
-	MiddlewareConfigDir string
+	ID                   string
+	Repository           string
+	Team                 string
+	Tier                 int
+	ThriftRootDir        string
+	PackageRoot          string
+	ManagedThriftFolder  string
+	GenCodePackage       string
+	TargetGenDir         string
+	ClientConfigDir      string
+	EndpointConfigDir    string
+	MiddlewareConfigFile string
 	// Maps endpointID to configuration.
 	Endpoints map[string]*EndpointConfig
 	// Maps clientID to configuration.
@@ -171,22 +172,22 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		zanzibar.ConfigFilePath(filepath.Join(configDir, gatewayConfigFile)),
 	}, nil)
 	config := &Config{
-		ID:                  cfg.MustGetString("gatewayName"),
-		Repository:          r.remote,
-		ThriftRootDir:       cfg.MustGetString("thriftRootDir"),
-		PackageRoot:         cfg.MustGetString("packageRoot"),
-		ManagedThriftFolder: cfg.MustGetString("managedThriftFolder"),
-		GenCodePackage:      cfg.MustGetString("genCodePackage"),
-		TargetGenDir:        cfg.MustGetString("targetGenDir"),
-		ClientConfigDir:     cfg.MustGetString("clientConfig"),
-		EndpointConfigDir:   cfg.MustGetString("endpointConfig"),
-		MiddlewareConfigDir: cfg.MustGetString("middlewareConfig"),
+		ID:                   cfg.MustGetString("gatewayName"),
+		Repository:           r.remote,
+		ThriftRootDir:        cfg.MustGetString("thriftRootDir"),
+		PackageRoot:          cfg.MustGetString("packageRoot"),
+		ManagedThriftFolder:  cfg.MustGetString("managedThriftFolder"),
+		GenCodePackage:       cfg.MustGetString("genCodePackage"),
+		TargetGenDir:         cfg.MustGetString("targetGenDir"),
+		ClientConfigDir:      cfg.MustGetString("clientConfig"),
+		EndpointConfigDir:    cfg.MustGetString("endpointConfig"),
+		MiddlewareConfigFile: cfg.MustGetString("middlewareConfig"),
 	}
 	pkgHelper, err := codegen.NewPackageHelper(
 		config.PackageRoot,
 		config.ManagedThriftFolder,
 		configDir,
-		config.MiddlewareConfigDir,
+		config.MiddlewareConfigFile,
 		config.ThriftRootDir,
 		config.GenCodePackage,
 		config.TargetGenDir,
@@ -215,7 +216,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		pkgHelper,
 		configDir,
 		config.EndpointConfigDir,
-		config.MiddlewareConfigDir,
+		config.MiddlewareConfigFile,
 		config.ID,
 	)
 	if err != nil {
@@ -231,7 +232,9 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 	}
 	config.Endpoints = r.endpointConfigs(config.ThriftRootDir, gatewaySpec)
 
-	if config.Middlewares, err = r.middlewareConfigs(config.MiddlewareConfigDir); err != nil {
+	if config.Middlewares, err = r.middlewareConfigs(
+		config.MiddlewareConfigFile,
+	); err != nil {
 		return nil, errors.Wrap(err, "fail to read middleware configuration")
 	}
 	return config, nil
