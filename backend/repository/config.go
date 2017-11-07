@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"encoding/json"
+
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -32,18 +34,18 @@ import (
 
 // Config stores configuration for a gateway.
 type Config struct {
-	ID                  string
-	Repository          string
-	Team                string
-	Tier                int
-	ThriftRootDir       string
-	PackageRoot         string
-	ManagedThriftFolder string
-	GenCodePackage      string
-	TargetGenDir        string
-	ClientConfigDir     string
-	EndpointConfigDir   string
-	MiddlewareConfigDir string
+	ID                   string
+	Repository           string
+	Team                 string
+	Tier                 int
+	ThriftRootDir        string
+	PackageRoot          string
+	ManagedThriftFolder  string
+	GenCodePackage       string
+	TargetGenDir         string
+	ClientConfigDir      string
+	EndpointConfigDir    string
+	MiddlewareConfigFile string
 	// Maps endpointID to configuration.
 	Endpoints map[string]*EndpointConfig
 	// Maps clientID to configuration.
@@ -170,22 +172,22 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		zanzibar.ConfigFilePath(filepath.Join(configDir, gatewayConfigFile)),
 	}, nil)
 	config := &Config{
-		ID:                  cfg.MustGetString("gatewayName"),
-		Repository:          r.remote,
-		ThriftRootDir:       cfg.MustGetString("thriftRootDir"),
-		PackageRoot:         cfg.MustGetString("packageRoot"),
-		ManagedThriftFolder: cfg.MustGetString("managedThriftFolder"),
-		GenCodePackage:      cfg.MustGetString("genCodePackage"),
-		TargetGenDir:        cfg.MustGetString("targetGenDir"),
-		ClientConfigDir:     cfg.MustGetString("clientConfig"),
-		EndpointConfigDir:   cfg.MustGetString("endpointConfig"),
-		MiddlewareConfigDir: cfg.MustGetString("middlewareConfig"),
+		ID:                   cfg.MustGetString("gatewayName"),
+		Repository:           r.remote,
+		ThriftRootDir:        cfg.MustGetString("thriftRootDir"),
+		PackageRoot:          cfg.MustGetString("packageRoot"),
+		ManagedThriftFolder:  cfg.MustGetString("managedThriftFolder"),
+		GenCodePackage:       cfg.MustGetString("genCodePackage"),
+		TargetGenDir:         cfg.MustGetString("targetGenDir"),
+		ClientConfigDir:      cfg.MustGetString("clientConfig"),
+		EndpointConfigDir:    cfg.MustGetString("endpointConfig"),
+		MiddlewareConfigFile: cfg.MustGetString("middlewareConfig"),
 	}
 	pkgHelper, err := codegen.NewPackageHelper(
 		config.PackageRoot,
 		config.ManagedThriftFolder,
 		configDir,
-		config.MiddlewareConfigDir,
+		config.MiddlewareConfigFile,
 		config.ThriftRootDir,
 		config.GenCodePackage,
 		config.TargetGenDir,
@@ -214,7 +216,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		pkgHelper,
 		configDir,
 		config.EndpointConfigDir,
-		config.MiddlewareConfigDir,
+		config.MiddlewareConfigFile,
 		config.ID,
 	)
 	if err != nil {
@@ -229,6 +231,12 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		return nil, errors.Wrap(err, "failed to read client configuration")
 	}
 	config.Endpoints = r.endpointConfigs(config.ThriftRootDir, gatewaySpec)
+
+	if config.Middlewares, err = r.middlewareConfigs(
+		config.MiddlewareConfigFile,
+	); err != nil {
+		return nil, errors.Wrap(err, "fail to read middleware configuration")
+	}
 	return config, nil
 }
 
@@ -340,6 +348,38 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 		}
 	}
 	return cfgs
+}
+
+func (r *Repository) middlewareConfigs(middlewareConfigFile string) (map[string]*codegen.MiddlewareConfig, error) {
+	cfgs := make(map[string]*codegen.MiddlewareConfig)
+	var rawCfgs map[string][]*codegen.MiddlewareConfig
+
+	if middlewareConfigFile == "" {
+		return cfgs, nil
+	}
+	bytes, err := r.ReadFile(middlewareConfigFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(bytes) == 0 {
+		return nil, errors.New("middlewares file is an empty file")
+	}
+
+	err = json.Unmarshal(bytes, &rawCfgs)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := rawCfgs["middlewares"]; !ok {
+		return nil, errors.New("middlewares config is missing root object property \"middlewares\"")
+	}
+
+	for _, mc := range rawCfgs["middlewares"] {
+		cfgs[mc.Name] = mc
+	}
+
+	return cfgs, nil
 }
 
 func (r *Repository) thriftservices(thriftRootDir string, packageHelper *codegen.PackageHelper) (ThriftServiceMap, error) {

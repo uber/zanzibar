@@ -212,7 +212,19 @@
 			}
 		},
 		"response": {
-			"code": 200
+			"code": 200,
+			"body": {
+				"example": {
+					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+					"name": "example",
+					"schema": "./middlewares/example/example_schema.json"
+				},
+				"example_reader": {
+					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+					"name": "example_reader",
+					"schema": "./middlewares/example_reader/example_reader_schema.json"
+				}
+			}
 		}
 	},
 	{
@@ -1916,7 +1928,10 @@
 						"handleId": "compare",
 						"middlewares": [
 							{
-								"name": "example_reader"
+								"name": "example_reader",
+								"options": {
+									"Foo": "test"
+								}
 							}
 						],
 						"reqHeaderMap": {},
@@ -2001,10 +2016,10 @@
 										"clientMethod": "compare",
 										"clientReqHeaders": {},
 										"clientRequest": {
-											"requestType": "http",
 											"httpRequest": {
 												"method": "GET"
-											}
+											},
+											"requestType": "http"
 										},
 										"clientResHeaders": {},
 										"clientResponse": {
@@ -2077,10 +2092,12 @@
 				"gateway-id": "example-gateway"
 			},
 			"body": {
-				"managed_thrift_files": [{
-					"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n",
-					"filename": "bar/my-thrift.thrift"
-				}]
+				"managed_thrift_files": [
+					{
+						"filename": "bar/my-thrift.thrift",
+						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n"
+					}
+				]
 			}
 		},
 		"response": {
@@ -2590,8 +2607,19 @@
 					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 					"ID": "example-gateway",
 					"ManagedThriftFolder": "./github.com/uber/zanzibar",
-					"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-					"Middlewares": null,
+					"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+					"Middlewares": {
+						"example": {
+							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+							"name": "example",
+							"schema": "./middlewares/example/example_schema.json"
+						},
+						"example_reader": {
+							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+							"name": "example_reader",
+							"schema": "./middlewares/example_reader/example_reader_schema.json"
+						}
+					},
 					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 					"Repository": "example-gateway",
 					"TargetGenDir": "./build",
@@ -3433,8 +3461,19 @@
 				"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 				"ID": "example-gateway",
 				"ManagedThriftFolder": "./github.com/uber/zanzibar",
-				"MiddlewareConfigDir": "./middlewares/middleware-config.json",
-				"Middlewares": null,
+				"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+				"Middlewares": {
+					"example": {
+						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
+						"name": "example",
+						"schema": "./middlewares/example/example_schema.json"
+					},
+					"example_reader": {
+						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
+						"name": "example_reader",
+						"schema": "./middlewares/example_reader/example_reader_schema.json"
+					}
+				},
 				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 				"Repository": "example-gateway",
 				"TargetGenDir": "./build",

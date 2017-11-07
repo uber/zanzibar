@@ -68,7 +68,7 @@ func TestHandlers(t *testing.T) {
 		for _, tc := range testCases {
 			tc := tc // Capture range variable
 			t.Run(tc.Name, func(t *testing.T) {
-				t.Parallel()
+				//t.Parallel()
 				resp, err := getResponse(t, server, tc.Request)
 				if !assert.NoErrorf(t, err, "Failed to get response. Request: %v", tc.Request) {
 					return

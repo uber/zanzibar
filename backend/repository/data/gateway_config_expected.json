@@ -10,7 +10,7 @@
 	"TargetGenDir": "./build",
 	"ClientConfigDir": "./clients",
 	"EndpointConfigDir": "./endpoints",
-	"MiddlewareConfigDir": "./middlewares/middleware-config.json",
+	"MiddlewareConfigFile": "./middlewares/middleware-config.json",
 	"Endpoints": {
 		"bar.argNotStruct": {
 			"endpointId": "bar",
@@ -815,5 +815,16 @@
 			}
 		}
 	},
-	"Middlewares": null
+	"Middlewares": {
+		"example": {
+			"name": "example",
+			"schema": "./middlewares/example/example_schema.json",
+			"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+		},
+		"example_reader": {
+			"name": "example_reader",
+			"schema": "./middlewares/example_reader/example_reader_schema.json",
+			"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
+		}
+	}
 }
