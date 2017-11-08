@@ -102,9 +102,7 @@ func (h *SimpleServiceCompareHandler) HandleRequest(
 			return
 
 		default:
-			req.Logger.Warn("Workflow for endpoint returned error",
-				zap.String("error", errValue.Error()),
-			)
+			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
 			res.SendErrorString(500, "Unexpected server error")
 			return
 		}
@@ -154,9 +152,7 @@ func (w CompareEndpoint) Handle(
 			return nil, nil, serverErr
 
 		default:
-			w.Logger.Warn("Could not make client request",
-				zap.String("error", errValue.Error()),
-			)
+			w.Logger.Warn("Could not make client request", zap.Error(errValue))
 			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, err

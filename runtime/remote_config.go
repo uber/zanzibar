@@ -195,7 +195,7 @@ func (rc *remoteConfig) GetStruct(key string, ptr interface{}) bool {
 	if err := json.Unmarshal(ret.bytes, ptr); err != nil {
 		rc.logger.Error("GetStruct unmarshal error",
 			zap.ByteString("bytes", ret.bytes),
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		return false
 	}

@@ -91,9 +91,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		switch errValue := err.(type) {
 
 		default:
-			req.Logger.Warn("Workflow for endpoint returned error",
-				zap.String("error", errValue.Error()),
-			)
+			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
 			res.SendErrorString(500, "Unexpected server error")
 			return
 		}

@@ -262,9 +262,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				return
 			{{end}}
 			default:
-				req.Logger.Warn("Workflow for endpoint returned error",
-					zap.String("error", errValue.Error()),
-				)
+				req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
 				res.SendErrorString(500, "Unexpected server error")
 				return
 		}
@@ -283,9 +281,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- else if eq .ResponseType "string" -}}
 	bytes, err := json.Marshal(response)
 	if err != nil {
-		req.Logger.Warn("Unable to marshal response into json",
-				zap.String("error", err.Error()),
-			)
+		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
 			res.SendErrorString(500, "Unexpected server error")
 			return
 	}
@@ -405,9 +401,7 @@ func (w {{$workflow}}) Handle(
 				{{end}}
 			{{end}}
 			default:
-				w.Logger.Warn("Could not make client request",
-					zap.String("error", errValue.Error()),
-				)
+				w.Logger.Warn("Could not make client request", zap.Error(errValue))
 				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
@@ -475,7 +469,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9910, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9825, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1321,7 +1315,7 @@ func TestStartGateway(t *testing.T) {
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		return
 	}
@@ -1331,7 +1325,7 @@ func TestStartGateway(t *testing.T) {
 	if err != nil {
 		testLogger.Error(
 			"Failed to Bootstrap in TestStartGateway()",
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		return
 	}
@@ -1349,7 +1343,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1387, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1351, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

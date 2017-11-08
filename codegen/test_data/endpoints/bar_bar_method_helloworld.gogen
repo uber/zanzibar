@@ -92,9 +92,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 			return
 
 		default:
-			req.Logger.Warn("Workflow for endpoint returned error",
-				zap.String("error", errValue.Error()),
-			)
+			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
 			res.SendErrorString(500, "Unexpected server error")
 			return
 		}
@@ -102,9 +100,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 
 	bytes, err := json.Marshal(response)
 	if err != nil {
-		req.Logger.Warn("Unable to marshal response into json",
-			zap.String("error", err.Error()),
-		)
+		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
 		res.SendErrorString(500, "Unexpected server error")
 		return
 	}
@@ -142,9 +138,7 @@ func (w HelloWorldEndpoint) Handle(
 			return "", nil, serverErr
 
 		default:
-			w.Logger.Warn("Could not make client request",
-				zap.String("error", errValue.Error()),
-			)
+			w.Logger.Warn("Could not make client request", zap.Error(errValue))
 			// TODO(sindelar): Consider returning partial headers
 
 			return "", nil, err

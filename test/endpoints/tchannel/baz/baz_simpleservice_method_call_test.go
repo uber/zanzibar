@@ -122,7 +122,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	tags = allLogs["Finished an outgoing client TChannel request"][0]
 	assert.Equal(t, "info", tags["level"])
 	assert.Equal(t, "Finished an outgoing client TChannel request", tags["msg"])
-	assert.Equal(t, "baz", tags["clientId"])
+	assert.Equal(t, "baz", tags["clientID"])
 	assert.Equal(t, "bazService", tags["serviceName"])
 	assert.Equal(t, "Call", tags["methodName"])
 	assert.Equal(t, "SimpleService::call", tags["serviceMethod"])
