@@ -90,8 +90,6 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 		if headerValue == "" {
 			req.Logger.Warn("Got outbound request without mandatory header",
 				zap.String("headerName", headerName),
-				zap.String("clientId", req.ClientID),
-				zap.String("methodName", req.MethodName),
 			)
 
 			return errors.New("Missing mandatory header: " + headerName)

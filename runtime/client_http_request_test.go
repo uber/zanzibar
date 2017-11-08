@@ -64,12 +64,12 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		"/",
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientId", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not serialize clientId.DoStuff request json: cannot serialize",
+		"Could not serialize clientID.DoStuff request json: cannot serialize",
 		err.Error(),
 	)
 
@@ -97,12 +97,12 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		"/",
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientId", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not create outbound clientId.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
+		"Could not create outbound clientID.DoStuff request: net/http: invalid method \"@INVALIDMETHOD\"",
 		err.Error(),
 	)
 
@@ -190,7 +190,7 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 	assert.Equal(t, 1, len(lines))
 
 	logLine := lines[0]
-	assert.Equal(t, "bar", logLine["clientId"])
+	assert.Equal(t, "bar", logLine["clientID"])
 	assert.Equal(t, "EchoI8", logLine["methodName"])
 	assert.Equal(t, "x-uuid", logLine["headerName"])
 }

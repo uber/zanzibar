@@ -75,7 +75,7 @@ func TestStartGateway(t *testing.T) {
 	if err != nil {
 		testLogger.Error(
 			"Failed to CreateGateway in TestStartGateway()",
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		return
 	}
@@ -85,7 +85,7 @@ func TestStartGateway(t *testing.T) {
 	if err != nil {
 		testLogger.Error(
 			"Failed to Bootstrap in TestStartGateway()",
-			zap.String("error", err.Error()),
+			zap.Error(err),
 		)
 		return
 	}

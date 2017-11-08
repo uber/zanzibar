@@ -155,9 +155,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				return
 			{{end}}
 			default:
-				req.Logger.Warn("Workflow for endpoint returned error",
-					zap.String("error", errValue.Error()),
-				)
+				req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
 				res.SendErrorString(500, "Unexpected server error")
 				return
 		}
@@ -176,9 +174,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- else if eq .ResponseType "string" -}}
 	bytes, err := json.Marshal(response)
 	if err != nil {
-		req.Logger.Warn("Unable to marshal response into json",
-				zap.String("error", err.Error()),
-			)
+		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
 			res.SendErrorString(500, "Unexpected server error")
 			return
 	}
@@ -298,9 +294,7 @@ func (w {{$workflow}}) Handle(
 				{{end}}
 			{{end}}
 			default:
-				w.Logger.Warn("Could not make client request",
-					zap.String("error", errValue.Error()),
-				)
+				w.Logger.Warn("Could not make client request", zap.Error(errValue))
 				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err

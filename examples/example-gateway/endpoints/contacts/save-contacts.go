@@ -30,9 +30,7 @@ func (w SaveContactsEndpoint) Handle(
 	clientBody := convertToClient(r)
 	cres, _, err := w.Clients.Contacts.SaveContacts(ctx, nil, clientBody)
 	if err != nil {
-		w.Logger.Error("Could not make client request",
-			zap.String("error", err.Error()),
-		)
+		w.Logger.Error("Could not make client request", zap.Error(err))
 		return nil, nil, err
 	}
 

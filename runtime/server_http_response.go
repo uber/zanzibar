@@ -143,8 +143,8 @@ func (res *ServerHTTPResponse) SendErrorString(
 ) {
 	res.Request.Logger.Warn(
 		"Sending error for endpoint request",
-		zap.String("error", err),
 		zap.String("path", res.Request.URL.Path),
+		zap.String("error", err),
 	)
 
 	res.WriteJSONBytes(statusCode, nil,
