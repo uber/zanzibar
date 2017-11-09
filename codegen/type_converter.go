@@ -651,9 +651,6 @@ func (c *TypeConverter) genStructConverter(
 
 		toSubIdentifier := keyPrefix + pascalCase(toField.Name)
 		toIdentifier := "out." + toSubIdentifier
-		if toIdentifier == "out.Four" {
-			fmt.Println()
-		}
 		overriddenIdentifier := ""
 		fromIdentifier := ""
 
