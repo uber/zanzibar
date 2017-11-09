@@ -852,10 +852,7 @@ func (ms *MethodSpec) setTypeConverters(
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	typeConverter := &TypeConverter{
-		LineBuilder: LineBuilder{},
-		Helper:      h,
-	}
+	typeConverter := NewTypeConverter(h)
 
 	typeConverter.append(
 		"func convertTo",
@@ -880,10 +877,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return nil
 	}
 
-	respConverter := &TypeConverter{
-		LineBuilder: LineBuilder{},
-		Helper:      h,
-	}
+	respConverter := NewTypeConverter(h)
 
 	respConverter.append(
 		"func convert",
