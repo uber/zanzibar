@@ -215,14 +215,31 @@
 			"code": 200,
 			"body": {
 				"example": {
-					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
-					"name": "example",
-					"schema": "./middlewares/example/example_schema.json"
+					"$schema": "http://json-schema.org/schema#",
+					"properties": {
+						"Bar": {
+							"type": "integer"
+						},
+						"Foo": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"Foo"
+					],
+					"type": "object"
 				},
 				"example_reader": {
-					"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
-					"name": "example_reader",
-					"schema": "./middlewares/example_reader/example_reader_schema.json"
+					"$schema": "http://json-schema.org/schema#",
+					"properties": {
+						"Foo": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"Foo"
+					],
+					"type": "object"
 				}
 			}
 		}
@@ -2610,6 +2627,36 @@
 					"MiddlewareConfigFile": "./middlewares/middleware-config.json",
 					"Middlewares": {
 						"example": {
+							"$schema": "http://json-schema.org/schema#",
+							"properties": {
+								"Bar": {
+									"type": "integer"
+								},
+								"Foo": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"Foo"
+							],
+							"type": "object"
+						},
+						"example_reader": {
+							"$schema": "http://json-schema.org/schema#",
+							"properties": {
+								"Foo": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"Foo"
+							],
+							"type": "object"
+						}
+					},
+					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
+					"RawMiddlewares": {
+						"example": {
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
 							"name": "example",
 							"schema": "./middlewares/example/example_schema.json"
@@ -2620,7 +2667,6 @@
 							"schema": "./middlewares/example_reader/example_reader_schema.json"
 						}
 					},
-					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 					"Repository": "example-gateway",
 					"TargetGenDir": "./build",
 					"Team": "",
@@ -3464,6 +3510,36 @@
 				"MiddlewareConfigFile": "./middlewares/middleware-config.json",
 				"Middlewares": {
 					"example": {
+						"$schema": "http://json-schema.org/schema#",
+						"properties": {
+							"Bar": {
+								"type": "integer"
+							},
+							"Foo": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"Foo"
+						],
+						"type": "object"
+					},
+					"example_reader": {
+						"$schema": "http://json-schema.org/schema#",
+						"properties": {
+							"Foo": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"Foo"
+						],
+						"type": "object"
+					}
+				},
+				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
+				"RawMiddlewares": {
+					"example": {
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
 						"name": "example",
 						"schema": "./middlewares/example/example_schema.json"
@@ -3474,7 +3550,6 @@
 						"schema": "./middlewares/example_reader/example_reader_schema.json"
 					}
 				},
-				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
 				"Repository": "example-gateway",
 				"TargetGenDir": "./build",
 				"Team": "",
