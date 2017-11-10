@@ -51,7 +51,8 @@ type Config struct {
 	// Maps clientID to configuration.
 	Clients        map[string]*ClientConfig
 	ThriftServices ThriftServiceMap
-	Middlewares    map[string]*codegen.MiddlewareConfig
+	Middlewares    map[string]interface{}
+	RawMiddlewares map[string]*codegen.MiddlewareConfig
 }
 
 // ThriftServiceMap maps thrift file -> service name -> *ThriftService
@@ -232,7 +233,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 	}
 	config.Endpoints = r.endpointConfigs(config.ThriftRootDir, gatewaySpec)
 
-	if config.Middlewares, err = r.middlewareConfigs(
+	if config.Middlewares, config.RawMiddlewares, err = r.middlewareConfigs(
 		config.MiddlewareConfigFile,
 	); err != nil {
 		return nil, errors.Wrap(err, "fail to read middleware configuration")
@@ -350,36 +351,58 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 	return cfgs
 }
 
-func (r *Repository) middlewareConfigs(middlewareConfigFile string) (map[string]*codegen.MiddlewareConfig, error) {
-	cfgs := make(map[string]*codegen.MiddlewareConfig)
+func (r *Repository) middlewareConfigs(
+	middlewareConfigFile string,
+) (map[string]interface{}, map[string]*codegen.MiddlewareConfig, error) {
+	middlewares := make(map[string]*codegen.MiddlewareConfig)
+	cfgs := make(map[string]interface{})
 	var rawCfgs map[string][]*codegen.MiddlewareConfig
 
 	if middlewareConfigFile == "" {
-		return cfgs, nil
+		return cfgs, middlewares, nil
 	}
 	bytes, err := r.ReadFile(middlewareConfigFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if len(bytes) == 0 {
-		return nil, errors.New("middlewares file is an empty file")
+		return nil, nil, errors.New("middlewares file is an empty file")
 	}
 
 	err = json.Unmarshal(bytes, &rawCfgs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if _, ok := rawCfgs["middlewares"]; !ok {
-		return nil, errors.New("middlewares config is missing root object property \"middlewares\"")
+		return nil, nil, errors.New(
+			"middlewares config is missing root object property \"middlewares\"",
+		)
 	}
 
 	for _, mc := range rawCfgs["middlewares"] {
-		cfgs[mc.Name] = mc
+		schemaFile := mc.SchemaFile
+		bytes, err := r.ReadFile(schemaFile)
+		if err != nil {
+			return nil, nil, errors.Wrapf(
+				err, "could not read schemaFile(%s)", schemaFile,
+			)
+		}
+
+		rawData := map[string]interface{}{}
+		err = json.Unmarshal(bytes, &rawData)
+		if err != nil {
+			return nil, nil, errors.Wrapf(
+				err, "could not parse schemaFile(%s)", schemaFile,
+			)
+		}
+
+		cfgs[mc.Name] = rawData
+		middlewares[mc.Name] = mc
 	}
 
-	return cfgs, nil
+	return cfgs, middlewares, nil
 }
 
 func (r *Repository) thriftservices(thriftRootDir string, packageHelper *codegen.PackageHelper) (ThriftServiceMap, error) {
