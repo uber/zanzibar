@@ -25,6 +25,7 @@ import (
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
+
 	"go.uber.org/zap"
 )
 
