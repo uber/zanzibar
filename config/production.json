@@ -20,5 +20,9 @@
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
-	"metrics.runtime.collectInterval": 1000
+	"metrics.runtime.collectInterval": 1000,
+
+	"subLoggerLevel.http": "info",
+	"subLoggerLevel.jaeger": "info",
+	"subLoggerLevel.tchannel": "info"
 }
