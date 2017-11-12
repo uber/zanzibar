@@ -29,6 +29,8 @@ EASY_JSON_FILE="$EASY_JSON_DIR/easy_json.go"
 EASY_JSON_BINARY="$EASY_JSON_DIR/easy_json"
 RESOLVE_THRIFT_FILE="$DIRNAME/../../scripts/resolve_thrift/main.go"
 RESOLVE_THRIFT_BINARY="$DIRNAME/../../scripts/resolve_thrift/resolve_thrift"
+RESOLVE_I64_FILE="$DIRNAME/../../scripts/resolve_i64/main.go"
+RESOLVE_I64_BINARY="$DIRNAME/../../scripts/resolve_i64/resolve_i64"
 
 if [ -d "$DIRNAME/../../vendor" ]; then
 	THRIFTRW_RAW_DIR="$DIRNAME/../../vendor/go.uber.org/thriftrw"
@@ -69,6 +71,7 @@ runtime=$((end-start))
 echo "Compiled easyjson : +$runtime"
 
 go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
+go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
 
 # find the modules that actually need JSON (un)marshallers
 ABS_IDL_DIR="$(cd "$CONFIG_DIR" && pwd)/$(basename "$CONFIG_DIR/idl")"
@@ -96,6 +99,7 @@ for config_file in ${config_files}; do
 			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
 			sort | uniq | xargs
 		)
+		"$RESOLVE_I64_BINARY" "$thrift_file"
 		target_dirs+=" $gen_code_dir"
 	done
 done
