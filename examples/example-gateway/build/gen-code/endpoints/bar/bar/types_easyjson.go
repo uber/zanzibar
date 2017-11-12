@@ -603,7 +603,9 @@ func easyjson6601e8cdDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			}
 			BinaryFieldSet = true
 		case "timestamp":
-			out.Timestamp = Timestamp(in.Int64())
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Timestamp).UnmarshalJSON(data))
+			}
 			TimestampSet = true
 		case "enumField":
 			if data := in.Raw(); in.Ok() {
@@ -662,7 +664,7 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	first = false
 	out.RawString("\"timestamp\":")
-	out.Int64(int64(in.Timestamp))
+	out.Raw((in.Timestamp).MarshalJSON())
 	if !first {
 		out.RawByte(',')
 	}

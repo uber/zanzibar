@@ -3,7 +3,7 @@ namespace java com.uber.zanzibar.clients.bar
 include "../foo/foo.thrift"
 
 typedef string UUID
-typedef i64 (js.type = 'Date') Timestamp
+typedef i64 (json.type = 'Date') Timestamp
 
 enum Fruit {
     APPLE,
