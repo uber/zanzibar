@@ -47,11 +47,11 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 	case *compile.BinarySpec:
 		return "[]byte", nil
 	case *compile.MapSpec:
-		k, err := goReferenceType(p, s.KeySpec)
+		k, err := GoReferenceType(p, s.KeySpec)
 		if err != nil {
 			return "", err
 		}
-		v, err := goReferenceType(p, s.ValueSpec)
+		v, err := GoReferenceType(p, s.ValueSpec)
 		if err != nil {
 			return "", err
 		}
@@ -60,13 +60,13 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 		}
 		return fmt.Sprintf("map[%s]%s", k, v), nil
 	case *compile.ListSpec:
-		v, err := goReferenceType(p, s.ValueSpec)
+		v, err := GoReferenceType(p, s.ValueSpec)
 		if err != nil {
 			return "", err
 		}
 		return "[]" + v, nil
 	case *compile.SetSpec:
-		v, err := goReferenceType(p, s.ValueSpec)
+		v, err := GoReferenceType(p, s.ValueSpec)
 		if err != nil {
 			return "", err
 		}
@@ -81,10 +81,10 @@ func GoType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 	}
 }
 
-// goReferenceType returns the Go reference type string representation for the given thrift type.
+// GoReferenceType returns the Go reference type string representation for the given thrift type.
 // for types like slice and map that are already of reference type, it returns the result of GoType;
 // for struct type, it returns the pointer of the result of GoType.
-func goReferenceType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
+func GoReferenceType(p PackageNameResolver, spec compile.TypeSpec) (string, error) {
 	t, err := GoType(p, spec)
 	if err != nil {
 		return "", err
