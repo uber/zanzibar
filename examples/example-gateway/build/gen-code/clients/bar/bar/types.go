@@ -1216,6 +1216,37 @@ func (v *Fruit) UnmarshalJSON(text []byte) error {
 	}
 }
 
+type Long int64
+
+// ToWire translates Long into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v Long) ToWire() (wire.Value, error) {
+	x := (int64)(v)
+	return wire.NewValueI64(x), error(nil)
+}
+
+// String returns a readable string representation of Long.
+func (v Long) String() string {
+	x := (int64)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes Long from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *Long) FromWire(w wire.Value) error {
+	x, err := w.GetI64(), error(nil)
+	*v = (Long)(x)
+	return err
+}
+
+// Equals returns true if this Long is equal to the provided
+// Long.
+func (lhs Long) Equals(rhs Long) bool {
+	return (lhs == rhs)
+}
+
 type ParamsStruct struct {
 	UserUUID string `json:"userUUID,required"`
 }

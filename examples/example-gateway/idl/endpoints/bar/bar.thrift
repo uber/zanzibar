@@ -4,6 +4,7 @@ include "../foo/foo.thrift"
 
 typedef string UUID
 typedef i64 (json.type = 'Date') Timestamp
+typedef i64 (json.type = "Long") Long
 
 enum Fruit {
     APPLE,
