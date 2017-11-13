@@ -113,101 +113,6 @@ func convertIdentifiersToNilChecks(identifiers []string) []string {
 	return checks
 }
 
-// IsTransform tranforms will have different paths,   to->from proxy mappings will have the same identifier path aside from prefix
-func IsTransform(from string, to string) bool {
-	var (
-		in  = len("in.")
-		out = len("out.")
-	)
-	if from[:in] != "in." || to[:out] != "out." {
-		panic("isTransform check called on unexpected input")
-	}
-	return from[in:] != to[out:]
-}
-
-// helper func for assignWithOverride
-func (c *TypeConverter) assignWithChecks(
-	indent string,
-	toIdentifier string,
-	toTypeName string,
-	toRequired bool,
-	fromIdentifier string,
-	fromRequired bool,
-	extraNilCheck bool,
-) {
-
-	// initialize optional structs in current nested path if any
-	assignOptionalCheckNil := func(indent, toIdentifier, toTypeName, fromIdentifier string) {
-		keys := make([]string, 0, len(c.uninitialized))
-		for k := range c.uninitialized {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, id := range keys {
-			if strings.HasPrefix(toIdentifier, id) {
-				v := c.uninitialized[id]
-				c.append(indent, "if ", v.Identifier, " == nil {")
-				c.append(indent, "\t", v.Identifier, " = &", v.TypeName, "{}")
-				c.append(indent, "}")
-			}
-		}
-		c.append(indent, toIdentifier, " = ", toTypeName, "(", fromIdentifier, ")")
-	}
-
-	if !IsTransform(fromIdentifier, toIdentifier) {
-
-		if (!fromRequired && toRequired) || extraNilCheck {
-			// need to nil check otherwise we could be cast or deref nil
-			c.append(indent, "if ", fromIdentifier, " != nil {")
-			assignOptionalCheckNil(indent+"\t", toIdentifier, toTypeName, fromIdentifier)
-			c.append(indent, "}")
-		} else {
-			assignOptionalCheckNil(indent, toIdentifier, toTypeName, fromIdentifier)
-		}
-		return
-	}
-
-	//  generates nil checks for intermediate objects on the fromIdentifier path
-	checks := convertIdentifiersToNilChecks(getMiddleIdentifiers(fromIdentifier))
-
-	if !extraNilCheck {
-		// if from is required or from/to are both optional   then we don't need the final outer check
-		if fromRequired || !fromRequired && !toRequired {
-			checks = checks[:len(checks)-1]
-		}
-
-		if len(checks) == 0 {
-			assignOptionalCheckNil(indent, toIdentifier, toTypeName, fromIdentifier)
-			return
-		}
-	}
-	c.append(indent, "if ", strings.Join(checks, " && "), " {")
-	assignOptionalCheckNil(indent+"\t", toIdentifier, toTypeName, fromIdentifier)
-	c.append(indent, "}")
-	// TODO else?  log/stat it?  should this siliently eat intermediate nils as none-assignement,  should set nil?
-}
-
-// TODO: pack params
-func (c *TypeConverter) assignWithOverride(
-	indent string,
-	toIdentifier string,
-	toTypeName string,
-	toRequired bool,
-	fromIdentifier string,
-	fromRequired bool,
-	overriddenTypeCast string,
-	overriddenIdentifier string,
-	overrideRequired bool,
-) {
-	if overriddenIdentifier != "" {
-		c.assignWithChecks(indent, toIdentifier, overriddenTypeCast, toRequired, overriddenIdentifier, overrideRequired, false)
-		// second assignment uses extraNilCheck so that we do not re-assign to a nil value
-		c.assignWithChecks(indent, toIdentifier, toTypeName, toRequired, fromIdentifier, fromRequired, true)
-		return
-	}
-	c.assignWithChecks(indent, toIdentifier, toTypeName, toRequired, fromIdentifier, fromRequired, false)
-}
-
 func (c *TypeConverter) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
 	t, err := goCustomType(c.Helper, fieldType)
 	if err != nil {
@@ -296,71 +201,6 @@ func (c *TypeConverter) genConverterForStruct(
 	c.append(indent, "\t", toIdentifier, " = nil")
 	c.append(indent, "}")
 
-	return nil
-}
-
-func (c *TypeConverter) genConverterForPrimitive(
-	toField *compile.FieldSpec,
-	toIdentifier string,
-	fromField *compile.FieldSpec,
-	fromIdentifier string,
-	overriddenField *compile.FieldSpec,
-	overriddenIdentifier string,
-	indent string,
-) error {
-	typeName, err := c.getGoTypeName(toField.Type)
-	if err != nil {
-		return err
-	}
-	overriddenFieldRequired := false
-	if toField.Required {
-		overriddenType := typeName
-		if !fromField.Required {
-			// Dereference the pointer
-			typeName = "*"
-		}
-		if overriddenField != nil {
-			if !overriddenField.Required {
-				// Dereference the pointer
-				overriddenType = "*"
-			} else {
-				overriddenFieldRequired = true
-			}
-		}
-		c.assignWithOverride(
-			indent,
-			toIdentifier,
-			typeName,
-			toField.Required,
-			fromIdentifier,
-			fromField.Required,
-			overriddenType,
-			overriddenIdentifier,
-			overriddenFieldRequired,
-		)
-	} else {
-		fromType := fmt.Sprintf("(*%s)", typeName)
-		if fromField.Required {
-			fromType = fmt.Sprintf("(*%s)&", typeName)
-		}
-		overriddenType := fmt.Sprintf("(*%s)", typeName)
-		if overriddenField != nil && overriddenField.Required {
-			overriddenType = fmt.Sprintf("(*%s)&", typeName)
-			overriddenFieldRequired = true
-		}
-
-		c.assignWithOverride(
-			indent,
-			toIdentifier,
-			fromType,
-			toField.Required,
-			fromIdentifier,
-			fromField.Required,
-			overriddenType,
-			overriddenIdentifier,
-			overriddenFieldRequired,
-		)
-	}
 	return nil
 }
 
@@ -731,11 +571,17 @@ func (c *TypeConverter) genStructConverter(
 			*compile.EnumSpec,
 			*compile.I64Spec,
 			*compile.DoubleSpec,
-			*compile.StringSpec:
+			*compile.StringSpec,
+			*compile.TypedefSpec:
 
-			err := c.genConverterForPrimitive(
-				toField, toIdentifier, fromField, fromIdentifier,
-				overriddenField, overriddenIdentifier, indent,
+			err := c.genConverterForPrimitiveOrTypedef(
+				toField,
+				toIdentifier,
+				fromField,
+				fromIdentifier,
+				overriddenField,
+				overriddenIdentifier,
+				indent,
 			)
 			if err != nil {
 				return err
@@ -743,76 +589,16 @@ func (c *TypeConverter) genStructConverter(
 		case *compile.BinarySpec:
 			// TODO: handle override. Check if binarySpec can be optional.
 			c.append(toIdentifier, " = []byte(", fromIdentifier, ")")
-		case *compile.TypedefSpec:
-			typeName, err := c.getIdentifierName(toField.Type)
-			if err != nil {
-				return err
-			}
-			overriddenFieldRequired := false
-
-			// TODO: typedef for struct is invalid here ...
-			if toField.Required {
-				overriddenType := typeName
-				if !fromField.Required {
-					// Dereference the pointer
-					typeName = "*"
-				}
-				if overriddenField != nil {
-					if !overriddenField.Required {
-						// Dereference the pointer
-						overriddenType = "*"
-					} else {
-						overriddenFieldRequired = true
-					}
-				}
-				c.assignWithOverride(
-					indent,
-					toIdentifier,
-					typeName,
-					toField.Required,
-					fromIdentifier,
-					fromField.Required,
-					overriddenType,
-					overriddenIdentifier,
-					overriddenFieldRequired,
-				)
-			} else {
-				fromType := fmt.Sprintf("(*%s)", typeName)
-				if fromField.Required {
-					fromType = fmt.Sprintf("(*%s)&", typeName)
-				}
-				overriddenType := fmt.Sprintf("(*%s)", typeName)
-				if overriddenField != nil && overriddenField.Required {
-					overriddenType = fmt.Sprintf("(*%s)&", typeName)
-					overriddenFieldRequired = true
-				}
-
-				c.assignWithOverride(
-					indent,
-					toIdentifier,
-					fromType,
-					toField.Required,
-					fromIdentifier,
-					fromField.Required,
-					overriddenType,
-					overriddenIdentifier,
-					overriddenFieldRequired,
-				)
-			}
 
 		case *compile.StructSpec:
 			var (
-				stFromPrefix string
+				stFromPrefix = keyPrefix
 				stFromType   compile.TypeSpec
 			)
 			if fromField != nil {
 				stFromType = fromField.Type
 				stFromPrefix = keyPrefix + pascalCase(fromField.Name)
-			} else {
-				stFromType = nil
-				stFromPrefix = keyPrefix
 			}
-
 			err := c.genConverterForStruct(
 				toField.Name,
 				toFieldType,
@@ -935,4 +721,177 @@ func addSpecToMap(
 		}
 	}
 	return overrideMap
+}
+
+// FieldAssignment is responsible to generate an assignment
+type FieldAssignment struct {
+	From           *compile.FieldSpec
+	FromIdentifier string
+	To             *compile.FieldSpec
+	ToIdentifier   string
+	TypeCast       string
+	ExtraNilCheck  bool
+}
+
+// IsTransform returns true if field assignment is not proxy
+func (f *FieldAssignment) IsTransform() bool {
+	var (
+		in  = len("in.")
+		out = len("out.")
+	)
+	if f.FromIdentifier[:in] != "in." || f.ToIdentifier[:out] != "out." {
+		panic("isTransform check called on unexpected input  fromIdentifer " + f.FromIdentifier + " toIdentifer " + f.ToIdentifier)
+	}
+	return f.FromIdentifier[in:] != f.ToIdentifier[out:]
+}
+
+// checkOptionalNil nil-checks fields that may not be initialized along
+// the assign path
+func checkOptionalNil(
+	indent string,
+	uninitialized map[string]*fieldStruct,
+	toIdentifier string,
+) []string {
+	var ret = make([]string, 0)
+	if len(uninitialized) < 1 {
+		return ret
+	}
+	keys := make([]string, 0, len(uninitialized))
+	for k := range uninitialized {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, id := range keys {
+		if strings.HasPrefix(toIdentifier, id) {
+			v := uninitialized[id]
+			ret = append(ret, indent+"if "+v.Identifier+" == nil {")
+			ret = append(ret, indent+"\t"+v.Identifier+" = &"+v.TypeName+"{}")
+			ret = append(ret, indent+"}")
+		}
+	}
+	return ret
+}
+
+// Generate generates assignment
+func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct) string {
+	var lines = make([]string, 0)
+	if !f.IsTransform() {
+		//  do an extra nil check for Overrides
+		if (!f.From.Required && f.To.Required) || f.ExtraNilCheck {
+			// need to nil check otherwise we could be cast or deref nil
+			lines = append(lines, indent+"if "+f.FromIdentifier+" != nil {")
+			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
+			lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+			lines = append(lines, indent+"}")
+		} else {
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
+			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+		}
+		return strings.Join(lines, "\n")
+	}
+	//  generates nil checks for intermediate objects on the f.FromIdentifier path
+	checks := convertIdentifiersToNilChecks(getMiddleIdentifiers(f.FromIdentifier))
+	if !f.ExtraNilCheck {
+		// if from is required or from/to are both optional   then we don't need the final outer check
+		if f.From.Required || !f.From.Required && !f.To.Required {
+			checks = checks[:len(checks)-1]
+		}
+		if len(checks) == 0 {
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
+			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+			return strings.Join(lines, "\n")
+		}
+	}
+	lines = append(lines, indent+"if "+strings.Join(checks, " && ")+" {")
+	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
+	lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+	lines = append(lines, indent+"}")
+	// TODO else?  log? should this silently eat intermediate nils as none-assignment,  should set nil?
+	return strings.Join(lines, "\n")
+}
+
+func (c *TypeConverter) assignWithOverride(
+	indent string,
+	defaultAssign *FieldAssignment,
+	overrideAssign *FieldAssignment,
+) {
+	if overrideAssign != nil && overrideAssign.FromIdentifier != "" {
+		c.append(overrideAssign.Generate(indent, c.uninitialized))
+		defaultAssign.ExtraNilCheck = true
+		c.append(defaultAssign.Generate(indent, c.uninitialized))
+		return
+	}
+	c.append(defaultAssign.Generate(indent, c.uninitialized))
+}
+
+func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
+	toField *compile.FieldSpec,
+	toIdentifier string,
+	fromField *compile.FieldSpec,
+	fromIdentifier string,
+	overriddenField *compile.FieldSpec,
+	overriddenIdentifier string,
+	indent string,
+) error {
+	var (
+		typeName           string
+		toTypeCast         string
+		overrideTypeCast   string
+		defaultAssignment  *FieldAssignment
+		overrideAssignment *FieldAssignment
+		err                error
+	)
+	// resolve type
+	if _, ok := toField.Type.(*compile.TypedefSpec); ok {
+		typeName, err = c.getIdentifierName(toField.Type)
+	} else {
+		typeName, err = c.getGoTypeName(toField.Type)
+	}
+	if err != nil {
+		return err
+	}
+	// set assignment
+	if toField.Required {
+		toTypeCast = typeName
+		overrideTypeCast = typeName
+		if !fromField.Required {
+			toTypeCast = "*"
+		}
+		if overriddenField != nil {
+			if !overriddenField.Required {
+				overrideTypeCast = "*"
+			} else {
+				overriddenField.Required = true
+			}
+		}
+	} else {
+		toTypeCast = fmt.Sprintf("(*%s)", typeName)
+		overrideTypeCast = fmt.Sprintf("(*%s)", typeName)
+		if fromField.Required {
+			toTypeCast = fmt.Sprintf("(*%s)&", typeName)
+		}
+		if overriddenField != nil && overriddenField.Required {
+			overrideTypeCast = fmt.Sprintf("(*%s)&", typeName)
+			overriddenField.Required = true
+		}
+	}
+	defaultAssignment = &FieldAssignment{
+		From:           fromField,
+		FromIdentifier: fromIdentifier,
+		To:             toField,
+		ToIdentifier:   toIdentifier,
+		TypeCast:       toTypeCast,
+	}
+	if overriddenField != nil {
+		overrideAssignment = &FieldAssignment{
+			From:           overriddenField,
+			FromIdentifier: overriddenIdentifier,
+			To:             toField,
+			ToIdentifier:   toIdentifier,
+			TypeCast:       overrideTypeCast,
+		}
+	}
+	// generate assignement
+	c.assignWithOverride(indent, defaultAssignment, overrideAssignment)
+	return nil
 }
