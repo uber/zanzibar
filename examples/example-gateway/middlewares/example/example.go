@@ -33,8 +33,9 @@ type exampleMiddleware struct {
 
 // Options for middleware configuration
 type Options struct {
-	Foo string `json:"Foo"`
-	Bar int    `json:",omitempty"`
+	Foo string   `json:"Foo"`
+	Bar int      `json:",omitempty"`
+	Baz []string `json:"Baz"`
 }
 
 // MiddlewareState accessible by other middlewares and endpoint handler

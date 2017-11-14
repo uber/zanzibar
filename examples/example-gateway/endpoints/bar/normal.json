@@ -80,7 +80,11 @@
 		{
 			"name": "example",
 			"options": {
-				"Foo": "\"test\""
+				"Baz": [
+					"foo",
+					"bar"
+				],
+				"Foo": "test"
 			}
 		}
 	],
