@@ -178,7 +178,7 @@ func New{{$handlerName}}(
 			{{$middleware.Name}}.NewMiddleWare(
 				g,
 				{{$middleware.Name}}.Options{
-				{{range $key, $value := $middleware.Options -}}
+				{{range $key, $value := $middleware.PrettyOptions -}}
 					{{$key}} : {{$value}},
 				{{end -}}
 				},
@@ -469,7 +469,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9825, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
