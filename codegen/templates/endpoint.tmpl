@@ -71,8 +71,8 @@ func New{{$handlerName}}(
 			{{$middleware.Name}}.NewMiddleWare(
 				g,
 				{{$middleware.Name}}.Options{
-				{{range $key, $value := $middleware.Options -}}
-					{{$key}} : {{printf "%#v" $value}},
+				{{range $key, $value := $middleware.PrettyOptions -}}
+					{{$key}} : {{$value}},
 				{{end -}}
 				},
 			),
