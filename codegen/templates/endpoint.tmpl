@@ -72,7 +72,7 @@ func New{{$handlerName}}(
 				g,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.Options -}}
-					{{$key}} : {{$value}},
+					{{$key}} : {{printf "%#v" $value}},
 				{{end -}}
 				},
 			),
