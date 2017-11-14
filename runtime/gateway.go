@@ -86,6 +86,7 @@ type Gateway struct {
 	runtimeMetrics  RuntimeMetricsCollector
 	logEncoder      zapcore.Encoder
 	logWriter       zapcore.WriteSyncer
+	logWriteSyncer  zapcore.WriteSyncer
 	httpServer      *HTTPServer
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
@@ -431,9 +432,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	)
 
 	gateway.logEncoder = logEncoder
-	if gateway.logWriter == nil {
-		gateway.logWriter = output
-	}
+	gateway.logWriteSyncer = output
 
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
@@ -451,7 +450,7 @@ func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger 
 	newCore := NewInstrumentedZapCore(
 		zapcore.NewCore(
 			gateway.logEncoder.Clone(),
-			gateway.logWriter,
+			gateway.logWriteSyncer,
 			level,
 		),
 		gateway.AllHostScope,
