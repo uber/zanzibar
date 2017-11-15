@@ -44,6 +44,16 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var levelMap = map[string]zapcore.Level{
+	"debug":  zapcore.DebugLevel,
+	"info":   zapcore.InfoLevel,
+	"warn":   zapcore.WarnLevel,
+	"error":  zapcore.ErrorLevel,
+	"dpanic": zapcore.DPanicLevel,
+	"panic":  zapcore.PanicLevel,
+	"fatal":  zapcore.FatalLevel,
+}
+
 // Options configures the gateway
 type Options struct {
 	MetricsBackend tally.CachedStatsReporter
@@ -74,7 +84,9 @@ type Gateway struct {
 	scopeCloser     io.Closer
 	metricsBackend  tally.CachedStatsReporter
 	runtimeMetrics  RuntimeMetricsCollector
+	logEncoder      zapcore.Encoder
 	logWriter       zapcore.WriteSyncer
+	logWriteSyncer  zapcore.WriteSyncer
 	httpServer      *HTTPServer
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
@@ -361,11 +373,13 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 
 func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	var output zapcore.WriteSyncer
+	logEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	logLevel := zap.InfoLevel
 	tempLogger := zap.New(
 		zapcore.NewCore(
-			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			logEncoder,
 			os.Stderr,
-			zap.InfoLevel,
+			logLevel,
 		),
 	)
 
@@ -407,15 +421,18 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	}
 
 	prodCore := zapcore.NewCore(
-		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+		logEncoder,
 		output,
-		zap.InfoLevel,
+		logLevel,
 	)
 	zapLogger := zap.New(
 		NewInstrumentedZapCore(
 			prodCore, gateway.AllHostScope,
 		),
 	)
+
+	gateway.logEncoder = logEncoder
+	gateway.logWriteSyncer = output
 
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
@@ -426,6 +443,25 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		zap.Int("pid", os.Getpid()),
 	)
 	return nil
+}
+
+// SubLogger returns a sub logger clone with given name and log level.
+func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger {
+	newCore := NewInstrumentedZapCore(
+		zapcore.NewCore(
+			gateway.logEncoder.Clone(),
+			gateway.logWriteSyncer,
+			level,
+		),
+		gateway.AllHostScope,
+	)
+	return gateway.Logger.With(
+		zap.String("subLogger", name),
+	).WithOptions(
+		zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+			return newCore
+		}),
+	)
 }
 
 func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Configuration {
@@ -443,9 +479,15 @@ func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Con
 }
 
 func (gateway *Gateway) setupTracer(config *StaticConfig) error {
+	levelString := gateway.Config.MustGetString("subLoggerLevel.jaeger")
+	level, ok := levelMap[levelString]
+	if !ok {
+		return errors.Errorf("unknown sub logger level for jaeger tracer: %s", levelString)
+	}
+
 	opts := []jaegerConfig.Option{
 		// TChannel logger implements jaeger logger interface
-		jaegerConfig.Logger(NewTChannelLogger(gateway.Logger)),
+		jaegerConfig.Logger(NewTChannelLogger(gateway.SubLogger("jaeger", level))),
 		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.AllHostScope)),
 	}
 	jc := gateway.initJaegerConfig(config)
@@ -462,6 +504,13 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 }
 
 func (gateway *Gateway) setupHTTPServer() error {
+	levelString := gateway.Config.MustGetString("subLoggerLevel.http")
+	level, ok := levelMap[levelString]
+	if !ok {
+		return errors.Errorf("unknown sub logger level for http server: %s", levelString)
+	}
+	httpLogger := gateway.SubLogger("http", level)
+
 	listenIP, err := tchannel.ListenIP()
 	if err != nil {
 		return errors.Wrap(err, "error finding the best IP")
@@ -471,7 +520,7 @@ func (gateway *Gateway) setupHTTPServer() error {
 			Addr:    listenIP.String() + ":" + strconv.FormatInt(int64(gateway.HTTPPort), 10),
 			Handler: gateway.HTTPRouter,
 		},
-		Logger: gateway.Logger,
+		Logger: httpLogger,
 	}
 
 	gateway.localHTTPServer = &HTTPServer{
@@ -479,7 +528,7 @@ func (gateway *Gateway) setupHTTPServer() error {
 			Addr:    "127.0.0.1:" + strconv.FormatInt(int64(gateway.HTTPPort), 10),
 			Handler: gateway.HTTPRouter,
 		},
-		Logger: gateway.Logger,
+		Logger: httpLogger,
 	}
 	return nil
 }
@@ -487,13 +536,18 @@ func (gateway *Gateway) setupHTTPServer() error {
 func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	serviceName := config.MustGetString("tchannel.serviceName")
 	processName := config.MustGetString("tchannel.processName")
+	levelString := gateway.Config.MustGetString("subLoggerLevel.tchannel")
+	level, ok := levelMap[levelString]
+	if !ok {
+		return errors.Errorf("unknown sub logger level for tchannel server: %s", levelString)
+	}
 
 	channel, err := tchannel.NewChannel(
 		serviceName,
 		&tchannel.ChannelOptions{
 			ProcessName: processName,
 			Tracer:      gateway.Tracer,
-			Logger:      NewTChannelLogger(gateway.Logger),
+			Logger:      NewTChannelLogger(gateway.SubLogger("tchannel", level)),
 			StatsReporter: NewTChannelStatsReporter(
 				gateway.AllHostScope.SubScope("tchannel"),
 			),

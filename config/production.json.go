@@ -86,7 +86,11 @@ var _productionJson = []byte(`{
 	"metrics.runtime.enableCPUMetrics": true,
 	"metrics.runtime.enableMemMetrics": true,
 	"metrics.runtime.enableGCMetrics": true,
-	"metrics.runtime.collectInterval": 1000
+	"metrics.runtime.collectInterval": 1000,
+
+	"subLoggerLevel.http": "info",
+	"subLoggerLevel.jaeger": "info",
+	"subLoggerLevel.tchannel": "info"
 }
 `)
 
@@ -100,7 +104,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 610, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 713, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
