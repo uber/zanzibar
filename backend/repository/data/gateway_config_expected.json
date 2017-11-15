@@ -822,6 +822,12 @@
 				"Bar": {
 					"type": "integer"
 				},
+				"Baz": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array"
+				},
 				"Foo": {
 					"type": "string"
 				}

@@ -220,6 +220,12 @@
 						"Bar": {
 							"type": "integer"
 						},
+						"Baz": {
+							"items": {
+								"type": "string"
+							},
+							"type": "array"
+						},
 						"Foo": {
 							"type": "string"
 						}
@@ -2632,6 +2638,12 @@
 								"Bar": {
 									"type": "integer"
 								},
+								"Baz": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
 								"Foo": {
 									"type": "string"
 								}
@@ -3514,6 +3526,12 @@
 						"properties": {
 							"Bar": {
 								"type": "integer"
+							},
+							"Baz": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
 							},
 							"Foo": {
 								"type": "string"

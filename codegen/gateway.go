@@ -22,9 +22,11 @@ package codegen
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 
@@ -321,6 +323,8 @@ type MiddlewareSpec struct {
 	Path string `json:"path,omitempty"`
 	// Middleware specific configuration options.
 	Options map[string]interface{} `json:"options,omitempty"`
+	// Options pretty printed for template initialization
+	PrettyOptions map[string]string `json:"prettyOptions,omitempty"`
 }
 
 // NewMiddlewareSpec creates a middleware spec from a go file.
@@ -715,10 +719,41 @@ func augmentHTTPEndpointSpec(
 			opts = make(map[string]interface{})
 		}
 
+		prettyOpts := map[string]string{}
+		for key, value := range opts {
+			rValue := reflect.ValueOf(value)
+			kind := rValue.Kind()
+
+			if kind == reflect.Slice && rValue.Len() > 0 {
+				rType := rValue.Type()
+				rElemType := rType.Elem()
+				elemTypeString := rElemType.String()
+				if rElemType.Kind() == reflect.Interface {
+					rFirstValue := rValue.Index(0)
+					rRawFirstValue := rFirstValue.Interface()
+
+					elemTypeString = reflect.TypeOf(rRawFirstValue).String()
+				}
+
+				str := fmt.Sprintf("[]%s{", elemTypeString)
+				for i := 0; i < rValue.Len(); i++ {
+					str += fmt.Sprintf("%#v", rValue.Index(i))
+					if i != rValue.Len()-1 {
+						str += ","
+					}
+				}
+				str += "}"
+				prettyOpts[key] = str
+			} else {
+				prettyOpts[key] = fmt.Sprintf("%#v", rValue)
+			}
+		}
+
 		middlewares[idx] = MiddlewareSpec{
-			Name:    name,
-			Path:    midSpecs[name].Path,
-			Options: opts,
+			Name:          name,
+			Path:          midSpecs[name].Path,
+			Options:       opts,
+			PrettyOptions: prettyOpts,
 		}
 	}
 	espec.Middlewares = middlewares

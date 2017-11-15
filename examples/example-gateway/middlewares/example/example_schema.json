@@ -5,6 +5,12 @@
 		"Bar": {
 			"type": "integer"
 		},
+		"Baz": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			}
+		},
 		"Foo": {
 			"type": "string"
 		}

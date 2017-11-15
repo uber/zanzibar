@@ -58,6 +58,7 @@ func NewBarNormalHandler(
 			example.NewMiddleWare(
 				g,
 				example.Options{
+					Baz: []string{"foo", "bar"},
 					Foo: "test",
 				},
 			),

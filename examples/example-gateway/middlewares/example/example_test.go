@@ -37,16 +37,23 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 		"        \"Bar\": {\n" +
 		"            \"type\": \"integer\"\n" +
 		"        },\n" +
+		"        \"Baz\": {\n" +
+		"            \"type\": \"array\",\n" +
+		"            \"items\": {\n" +
+		"                \"type\": \"string\"\n" +
+		"            }\n" +
+		"        },\n" +
 		"        \"Foo\": {\n" +
 		"            \"type\": \"string\"\n" +
 		"        }\n" +
 		"    },\n" +
 		"    \"required\": [\n" +
-		"        \"Foo\"\n" +
+		"        \"Foo\",\n" +
+		"        \"Baz\"\n" +
 		"    ]\n" +
 		"}"
 
 	json, err := schema.Marshal()
 	assert.Nil(t, err)
-	assert.Equal(t, string(json), expected)
+	assert.Equal(t, expected, string(json))
 }
