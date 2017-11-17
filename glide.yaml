@@ -46,3 +46,5 @@ import:
   version: f6abca593680b2315d2075e0f5e2a9751e3f431a
 - package: github.com/xeipuuv/gojsonschema
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
+- package: github.com/sergi/go-diff
+  version: feef008d51ad2b3778f85d387ccf91735543008d
