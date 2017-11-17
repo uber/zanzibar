@@ -70,6 +70,7 @@ type TypeConverter struct {
 	LineBuilder
 	Helper        PackageNameResolver
 	uninitialized map[string]*fieldStruct
+	fieldCounter  int
 }
 
 // NewTypeConverter returns *TypeConverter
@@ -79,6 +80,12 @@ func NewTypeConverter(h PackageNameResolver) *TypeConverter {
 		Helper:        h,
 		uninitialized: make(map[string]*fieldStruct),
 	}
+}
+
+func (c *TypeConverter) makeUniqIdentifier(prefix string) string {
+	c.fieldCounter++
+
+	return fmt.Sprintf("%s%d", prefix, c.fieldCounter)
 }
 
 func (c *TypeConverter) getGoTypeName(valueType compile.TypeSpec) (string, error) {
@@ -254,7 +261,12 @@ func (c *TypeConverter) genConverterForList(
 		)
 	}
 
-	c.append("for index, value := range ", sourceIdentifier, " {")
+	indexID := c.makeUniqIdentifier("index")
+	valID := c.makeUniqIdentifier("value")
+	c.appendf(
+		"for %s, %s := range %s {",
+		indexID, valID, sourceIdentifier,
+	)
 
 	if isStruct {
 		nestedIndent := "\t" + indent
@@ -276,9 +288,9 @@ func (c *TypeConverter) genConverterForList(
 			valueStruct,
 			toField.Required,
 			fromFieldType.ValueSpec,
-			"value",
-			keyPrefix+pascalCase(toField.Name)+"[index]",
-			strings.TrimPrefix(fromIdentifier, "in.")+"[index]",
+			valID,
+			keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
+			strings.TrimPrefix(fromIdentifier, "in.")+"["+indexID+"]",
 			nestedIndent,
 			nil,
 		)
@@ -301,9 +313,9 @@ func (c *TypeConverter) genConverterForList(
 				valueStruct,
 				toField.Required,
 				overriddenFieldType.ValueSpec,
-				"value",
-				keyPrefix+pascalCase(toField.Name)+"[index]",
-				strings.TrimPrefix(overriddenIdentifier, "in.")+"[index]",
+				valID,
+				keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
+				strings.TrimPrefix(overriddenIdentifier, "in.")+"["+indexID+"]",
 				nestedIndent,
 				nil,
 			)
@@ -313,7 +325,10 @@ func (c *TypeConverter) genConverterForList(
 			c.append("\t", "}")
 		}
 	} else {
-		c.append("\t", toIdentifier, "[index] = ", typeName, "(value)")
+		c.appendf(
+			"\t%s[%s] = %s(%s)",
+			toIdentifier, indexID, typeName, valID,
+		)
 	}
 
 	c.append("}")
@@ -349,8 +364,17 @@ func (c *TypeConverter) genConverterForMap(
 				"%s = make(map[%s]%s, len(%s))",
 				toIdentifier, keyType, typeName, sourceIdentifier,
 			)
-			c.appendf("for key, value := range %s {", sourceIdentifier)
-			c.append("\t", toIdentifier, "[ ", keyType, "(key)] = ", typeName, "(value)")
+
+			keyID := c.makeUniqIdentifier("key")
+			valID := c.makeUniqIdentifier("value")
+			c.appendf(
+				"for %s, %s := range %s {",
+				keyID, valID, sourceIdentifier,
+			)
+			c.appendf(
+				"\t %s[%s(%s)] = %s(%s)",
+				toIdentifier, keyType, keyID, typeName, valID,
+			)
 			c.append("}")
 			return nil
 		default:
@@ -392,7 +416,12 @@ func (c *TypeConverter) genConverterForMap(
 		)
 	}
 
-	c.appendf("for key, value := range %s {", sourceIdentifier)
+	keyID := c.makeUniqIdentifier("key")
+	valID := c.makeUniqIdentifier("value")
+	c.appendf(
+		"for %s, %s := range %s {",
+		keyID, valID, sourceIdentifier,
+	)
 
 	if isStruct {
 		nestedIndent := "\t" + indent
@@ -415,9 +444,9 @@ func (c *TypeConverter) genConverterForMap(
 			valueStruct,
 			toField.Required,
 			fromFieldType.ValueSpec,
-			"value",
-			keyPrefix+pascalCase(toField.Name)+"[key]",
-			strings.TrimPrefix(fromIdentifier, "in.")+"[key]",
+			valID,
+			keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
+			strings.TrimPrefix(fromIdentifier, "in.")+"["+keyID+"]",
 			nestedIndent,
 			nil,
 		)
@@ -441,9 +470,9 @@ func (c *TypeConverter) genConverterForMap(
 				valueStruct,
 				toField.Required,
 				overriddenFieldType.ValueSpec,
-				"value",
-				keyPrefix+pascalCase(toField.Name)+"[key]",
-				strings.TrimPrefix(overriddenIdentifier, "in.")+"[key]",
+				valID,
+				keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
+				strings.TrimPrefix(overriddenIdentifier, "in.")+"["+keyID+"]",
 				nestedIndent,
 				nil,
 			)
@@ -453,7 +482,10 @@ func (c *TypeConverter) genConverterForMap(
 			c.append("\t", "}")
 		}
 	} else {
-		c.append("\t", toIdentifier, "[key] = ", typeName, "(value)")
+		c.appendf(
+			"\t%s[%s] = %s(%s)",
+			toIdentifier, keyID, typeName, valID,
+		)
 	}
 
 	c.append("}")
