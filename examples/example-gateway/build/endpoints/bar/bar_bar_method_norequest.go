@@ -164,12 +164,12 @@ func convertNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBar
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
 	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
-	for key, value := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key)] = int32(value)
+	for key1, value2 := range in.MapIntWithRange {
+		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
-	for key, value := range in.MapIntWithoutRange {
-		out.MapIntWithoutRange[key] = int32(value)
+	for key3, value4 := range in.MapIntWithoutRange {
+		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
 

@@ -211,8 +211,8 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 		out.Foo.FooDouble = (*float64)(in.Foo.FooDouble)
 		out.Foo.FooBool = (*bool)(in.Foo.FooBool)
 		out.Foo.FooMap = make(map[string]string, len(in.Foo.FooMap))
-		for key, value := range in.Foo.FooMap {
-			out.Foo.FooMap[key] = string(value)
+		for key1, value2 := range in.Foo.FooMap {
+			out.Foo.FooMap[key1] = string(value2)
 		}
 		if in.Foo.Message != nil {
 			out.Foo.Message = &clientsFooBaseBase.Message{}
@@ -249,12 +249,12 @@ func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsB
 	out.IntWithRange = int32(in.IntWithRange)
 	out.IntWithoutRange = int32(in.IntWithoutRange)
 	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
-	for key, value := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key)] = int32(value)
+	for key1, value2 := range in.MapIntWithRange {
+		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
 	}
 	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
-	for key, value := range in.MapIntWithoutRange {
-		out.MapIntWithoutRange[key] = int32(value)
+	for key3, value4 := range in.MapIntWithoutRange {
+		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
 

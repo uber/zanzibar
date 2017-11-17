@@ -1,5 +1,5 @@
-hash: ebe6df5ec6d77b526557719d05bc71e5bf58f2b4c0ed3811db0897e3da867efe
-updated: 2017-10-23T10:56:00.946426-07:00
+hash: eeb75db0ca3cb98e99cee83dda58cc3ab8baf80d3a8a898e952e043b4a1829eb
+updated: 2017-11-17T14:24:27.765472993-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -51,6 +51,8 @@ imports:
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
+- name: github.com/sergi/go-diff
+  version: feef008d51ad2b3778f85d387ccf91735543008d
 - name: github.com/stretchr/testify
   version: f6abca593680b2315d2075e0f5e2a9751e3f431a
   subpackages:
@@ -137,7 +139,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: aabf50738bcdd9b207582cbe796b59ed65d56680
+  version: 9dfe39835686865bff950a07b394c12a98ddc811
   subpackages:
   - context
 testImports: []
