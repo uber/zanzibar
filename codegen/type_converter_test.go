@@ -2507,5 +2507,9 @@ func TestCoverIsTransform(t *testing.T) {
 		r := recover()
 		assert.NotNil(t, r)
 	}()
-	codegen.IsTransform("gg.field", "lol.field")
+	f := &codegen.FieldAssignment{
+		FromIdentifier: "gg.field",
+		ToIdentifier:   "lol.field",
+	}
+	f.IsTransform()
 }
