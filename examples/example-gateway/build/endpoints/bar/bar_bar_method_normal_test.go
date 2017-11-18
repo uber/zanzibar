@@ -88,7 +88,7 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 
 	headers := map[string]string{}
 
-	endpointRequest := []byte(`{"request":{"binaryField":"aGVsbG8=","boolField":true,"enumField":"APPLE","stringField":"foo","timestamp":123}}`)
+	endpointRequest := []byte(`{"request":{"binaryField":"aGVsbG8=","boolField":true,"enumField":"APPLE","i64TestField":{"i64Field":123,"longField":1234,"timestamp":1257894000000},"stringField":"foo","timestamp":123}}`)
 
 	res, err := gateway.MakeRequest(
 		"POST",

@@ -175,6 +175,14 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 		out.Request.BinaryField = []byte(in.Request.BinaryField)
 		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
 		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
+		if in.Request.I64TestField != nil {
+			out.Request.I64TestField = &clientsBarBar.I64TestField{}
+			out.Request.I64TestField.I64Field = int64(in.Request.I64TestField.I64Field)
+			out.Request.I64TestField.Timestamp = clientsBarBar.Timestamp(in.Request.I64TestField.Timestamp)
+			out.Request.I64TestField.LongField = clientsBarBar.Long(in.Request.I64TestField.LongField)
+		} else {
+			out.Request.I64TestField = nil
+		}
 	} else {
 		out.Request = nil
 	}

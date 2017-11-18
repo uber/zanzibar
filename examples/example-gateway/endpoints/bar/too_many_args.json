@@ -26,7 +26,12 @@
 								"boolField": true,
 								"timestamp": 123,
 								"enumField": "APPLE",
-								"binaryField": "aGVsbG8="
+								"binaryField": "aGVsbG8=",
+								"i64TestField": {
+									"i64Field": 123,
+									"timestamp": 1257894000000,
+									"longField": 1234
+								}
 							}
 						}
 					}
@@ -58,7 +63,12 @@
 								"timestamp": 123,
 								"enumField": "APPLE",
 								"binaryField": "aGVsbG8=",
-								"boolField": true
+								"boolField": true,
+								"i64TestField": {
+									"i64Field": 123,
+									"timestamp": 1257894000000,
+									"longField": 1234
+								}
 							}
 						}
 					},
