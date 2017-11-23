@@ -857,3 +857,60 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 
 	return err == nil, &res, respHeaders, nil
 }
+
+// SimpleServicetransFunc is the handler function for "trans" method of thrift service "SimpleService".
+type SimpleServicetransFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_Trans_Args,
+) (*clientsBazBase.TransStruct, map[string]string, error)
+
+// NewSimpleServiceTransHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceTransHandler(f SimpleServicetransFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceTransHandler{f}
+}
+
+// SimpleServiceTransHandler handles the "trans" method call of thrift service "SimpleService".
+type SimpleServiceTransHandler struct {
+	trans SimpleServicetransFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceTransHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_Trans_Args
+	var res clientsBazBaz.SimpleService_Trans_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.trans(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for trans returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		case *clientsBazBaz.OtherAuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for trans returned non-nil error type *OtherAuthErr but nil value",
+				)
+			}
+			res.OtherAuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}

@@ -236,6 +236,20 @@
 			"reqHeaderMap": null,
 			"resHeaderMap": null
 		},
+		"baz.trans": {
+			"endpointId": "baz",
+			"endpointType": "http",
+			"handleId": "trans",
+			"thriftFile": "endpoints/baz/baz.thrift",
+			"thriftMethodName": "SimpleService::trans",
+			"workflowType": "tchannelClient",
+			"clientId": "baz",
+			"clientMethod": "Trans",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
+		},
 		"bazTChannel.call": {
 			"endpointId": "bazTChannel",
 			"endpointType": "tchannel",
@@ -358,7 +372,8 @@
 				"EchoStructMap": "SecondService::echoStructMap",
 				"EchoStructSet": "SecondService::echoStructSet",
 				"EchoTypedef": "SecondService::echoTypedef",
-				"Ping": "SimpleService::ping"
+				"Ping": "SimpleService::ping",
+				"Trans": "SimpleService::trans"
 			},
 			"ip": "127.0.0.1",
 			"port": 4002,
@@ -630,6 +645,10 @@
 					{
 						"Name": "sillyNoop",
 						"Type": "tchannel"
+					},
+					{
+						"Name": "trans",
+						"Type": "tchannel"
 					}
 				]
 			}
@@ -755,6 +774,10 @@
 					},
 					{
 						"Name": "sillyNoop",
+						"Type": "http"
+					},
+					{
+						"Name": "trans",
 						"Type": "http"
 					}
 				]

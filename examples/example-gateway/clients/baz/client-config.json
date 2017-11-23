@@ -24,7 +24,8 @@
 			"EchoStructMap": "SecondService::echoStructMap",
 			"EchoStructSet": "SecondService::echoStructSet",
 			"EchoTypedef": "SecondService::echoTypedef",
-			"Ping": "SimpleService::ping"
+			"Ping": "SimpleService::ping",
+			"Trans": "SimpleService::trans"
 		}
 	}
 }

@@ -611,8 +611,8 @@ func augmentHTTPEndpointSpec(
 			"Unable to parse middlewares field",
 		)
 	}
-	middlewares := make([]MiddlewareSpec, len(endpointMids))
-	for idx, middleware := range endpointMids {
+	middlewares := make([]MiddlewareSpec, 0)
+	for _, middleware := range endpointMids {
 		middlewareObj, ok := middleware.(map[string]interface{})
 		if !ok {
 			return nil, errors.Errorf(
@@ -627,83 +627,21 @@ func augmentHTTPEndpointSpec(
 				middlewareObj,
 			)
 		}
-		// Check for middlewares that are fixed by the platform, i.e. transforms
-		// TODO(sindelar): Refactor into helper method.
+		// req/res transform middleware set type converter
 		if name == "transformRequest" {
-			// FieldMap's key is the target fields and
-			fieldMap := make(map[string]FieldMapperEntry)
-			opts, ok := middlewareObj["options"].(map[string]interface{})
-			if !ok {
-				return nil, errors.Errorf(
-					"transform middleware found with no options.",
-				)
+			reqTransforms, err := setTransformMiddleware(middlewareObj)
+			if err != nil {
+				return nil, err
 			}
-			transforms := opts["transforms"].([]map[string]interface{})
-			for _, transform := range transforms {
-				fromField, ok := transform["from"].(string)
-				if !ok {
-					return nil, errors.Errorf(
-						"transform middleware found with no source field.",
-					)
-				}
-				toField, ok := transform["to"].(string)
-				if !ok {
-					return nil, errors.Errorf(
-						"transform middleware found with no destination field.",
-					)
-				}
-				overrideOpt, ok := transform["override"].(bool)
-				if ok {
-					fieldMap[toField] = FieldMapperEntry{
-						QualifiedName: fromField,
-						Override:      overrideOpt,
-					}
-				} else {
-					fieldMap[toField] = FieldMapperEntry{
-						QualifiedName: fromField,
-					}
-				}
-			}
-			espec.ReqTransforms = fieldMap
+			espec.ReqTransforms = reqTransforms
 			continue
 		}
-		// Check for middlewares that are fixed by the platform, i.e. transforms
 		if name == "transformResponse" {
-			// FieldMap's key is the target fields and
-			fieldMap := make(map[string]FieldMapperEntry)
-			opts, ok := middlewareObj["options"].(map[string]interface{})
-			if !ok {
-				return nil, errors.Errorf(
-					"transform middleware found with no options.",
-				)
+			resTransforms, err := setTransformMiddleware(middlewareObj)
+			if err != nil {
+				return nil, err
 			}
-			transforms := opts["transforms"].([]map[string]interface{})
-			for _, transform := range transforms {
-				fromField, ok := transform["from"].(string)
-				if !ok {
-					return nil, errors.Errorf(
-						"transform middleware found with no source field.",
-					)
-				}
-				toField, ok := transform["to"].(string)
-				if !ok {
-					return nil, errors.Errorf(
-						"transform middleware found with no destination field.",
-					)
-				}
-				overrideOpt, ok := transform["override"].(bool)
-				if ok {
-					fieldMap[toField] = FieldMapperEntry{
-						QualifiedName: fromField,
-						Override:      overrideOpt,
-					}
-				} else {
-					fieldMap[toField] = FieldMapperEntry{
-						QualifiedName: fromField,
-					}
-				}
-			}
-			espec.ReqTransforms = fieldMap
+			espec.RespTransforms = resTransforms
 			continue
 		}
 		// Verify the middleware name is defined.
@@ -749,12 +687,12 @@ func augmentHTTPEndpointSpec(
 			}
 		}
 
-		middlewares[idx] = MiddlewareSpec{
+		middlewares = append(middlewares, MiddlewareSpec{
 			Name:          name,
 			Path:          midSpecs[name].Path,
 			Options:       opts,
 			PrettyOptions: prettyOpts,
-		}
+		})
 	}
 	espec.Middlewares = middlewares
 
@@ -823,6 +761,44 @@ func augmentHTTPEndpointSpec(
 	espec.ResHeaderMapKeys = resHeaderMapKeys
 
 	return espec, nil
+}
+
+func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
+	fieldMap := make(map[string]FieldMapperEntry)
+	opts, ok := middlewareObj["options"].(map[string]interface{})
+	if !ok {
+		return nil, errors.Errorf(
+			"transform middleware found with no options.",
+		)
+	}
+	transforms := opts["transforms"].([]interface{})
+	for _, transform := range transforms {
+		transformMap := transform.(map[string]interface{})
+		fromField, ok := transformMap["from"].(string)
+		if !ok {
+			return nil, errors.Errorf(
+				"transform middleware found with no source field.",
+			)
+		}
+		toField, ok := transformMap["to"].(string)
+		if !ok {
+			return nil, errors.Errorf(
+				"transform middleware found with no destination field.",
+			)
+		}
+		overrideOpt, ok := transformMap["override"].(bool)
+		if ok {
+			fieldMap[toField] = FieldMapperEntry{
+				QualifiedName: fromField,
+				Override:      overrideOpt,
+			}
+		} else {
+			fieldMap[toField] = FieldMapperEntry{
+				QualifiedName: fromField,
+			}
+		}
+	}
+	return fieldMap, nil
 }
 
 // TargetEndpointPath generates a filepath for each endpoint method
