@@ -58,7 +58,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.AuthErr == nil {
 					out.AuthErr = new(AuthErr)
 				}
-				(*out.AuthErr).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, &*out.AuthErr)
 			}
 		case "otherAuthErr":
 			if in.IsNull() {
@@ -68,7 +68,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.OtherAuthErr == nil {
 					out.OtherAuthErr = new(OtherAuthErr)
 				}
-				(*out.OtherAuthErr).UnmarshalEasyJSON(in)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in, &*out.OtherAuthErr)
 			}
 		default:
 			in.SkipRecursive()
@@ -105,7 +105,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.AuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.AuthErr).MarshalEasyJSON(out)
+			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
 		}
 	}
 	if in.OtherAuthErr != nil {
@@ -117,7 +117,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.OtherAuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.OtherAuthErr).MarshalEasyJSON(out)
+			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *in.OtherAuthErr)
 		}
 	}
 	out.RawByte('}')
@@ -145,6 +145,102 @@ func (v *SimpleService_Trans_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_Trans_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceTrans(l, v)
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in *jlexer.Lexer, out *OtherAuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out *jwriter.Writer, in OtherAuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
+}
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in *jlexer.Lexer, out *AuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out *jwriter.Writer, in AuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
 }
 func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *TransStruct) {
 	isTopLevel := in.IsStart()
@@ -178,7 +274,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Driver == nil {
 					out.Driver = new(NestedStruct)
 				}
-				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, &*out.Driver)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in, &*out.Driver)
 			}
 		case "rider":
 			if in.IsNull() {
@@ -188,7 +284,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Rider == nil {
 					out.Rider = new(NestedStruct)
 				}
-				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, &*out.Rider)
+				easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in, &*out.Rider)
 			}
 			RiderSet = true
 		default:
@@ -226,7 +322,7 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Driver == nil {
 			out.RawString("null")
 		} else {
-			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.Driver)
+			easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Driver)
 		}
 	}
 	if !first {
@@ -237,11 +333,11 @@ func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	if in.Rider == nil {
 		out.RawString("null")
 	} else {
-		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.Rider)
+		easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Rider)
 	}
 	out.RawByte('}')
 }
-func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in *jlexer.Lexer, out *NestedStruct) {
+func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in *jlexer.Lexer, out *NestedStruct) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -287,7 +383,7 @@ func easyjsonCdc54b66DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'msg' is required"))
 	}
 }
-func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out *jwriter.Writer, in NestedStruct) {
+func easyjsonCdc54b66EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out *jwriter.Writer, in NestedStruct) {
 	out.RawByte('{')
 	first := true
 	_ = first
