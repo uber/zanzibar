@@ -35,6 +35,7 @@ import (
 	"strings"
 	"github.com/uber/zanzibar/codegen"
 	"github.com/pkg/errors"
+	"sort"
 )
 
 const (
@@ -61,12 +62,21 @@ type Meta struct {
 	Types []I64Struct
 }
 
+// I64Structs is the struct container for array if I64Struct
+type I64Structs []I64Struct
+
 // I64Struct is the struct container for i64 related meta data
 type I64Struct struct {
 	IsLong bool
 	IsTimestamp bool
 	TypedefType string
 }
+
+func (l I64Structs) Len() int           { return len(l) }
+func (l I64Structs) Less(i, j int) bool {
+	return l[i].IsTimestamp
+}
+func (l I64Structs) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
@@ -115,6 +125,7 @@ func main() {
 			meta.Types = append(meta.Types, i64Struct)
 		}
 	}
+	sort.Sort(I64Structs(meta.Types))
 	tmpl, err := template.ParseFiles(filepath.Join(getDirName(), templateFileName))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fmt.Errorf(
