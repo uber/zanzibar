@@ -130,6 +130,7 @@ type BarRequest struct {
 	BinaryField []byte    `json:"binaryField,required"`
 	Timestamp   Timestamp `json:"timestamp,required"`
 	EnumField   Fruit     `json:"enumField,required"`
+	LongField   Long      `json:"longField,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -149,7 +150,7 @@ type BarRequest struct {
 //   }
 func (v *BarRequest) ToWire() (wire.Value, error) {
 	var (
-		fields [5]wire.Field
+		fields [6]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -192,6 +193,13 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	fields[i] = wire.Field{ID: 5, Value: w}
 	i++
 
+	w, err = v.LongField.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 6, Value: w}
+	i++
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
@@ -205,6 +213,12 @@ func _Fruit_Read(w wire.Value) (Fruit, error) {
 	var v Fruit
 	err := v.FromWire(w)
 	return v, err
+}
+
+func _Long_Read(w wire.Value) (Long, error) {
+	var x Long
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a BarRequest struct from its Thrift-level
@@ -232,6 +246,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 	binaryFieldIsSet := false
 	timestampIsSet := false
 	enumFieldIsSet := false
+	longFieldIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -275,6 +290,14 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 				}
 				enumFieldIsSet = true
 			}
+		case 6:
+			if field.Value.Type() == wire.TI64 {
+				v.LongField, err = _Long_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				longFieldIsSet = true
+			}
 		}
 	}
 
@@ -298,6 +321,10 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		return errors.New("field EnumField of BarRequest is required")
 	}
 
+	if !longFieldIsSet {
+		return errors.New("field LongField of BarRequest is required")
+	}
+
 	return nil
 }
 
@@ -308,7 +335,7 @@ func (v *BarRequest) String() string {
 		return "<nil>"
 	}
 
-	var fields [5]string
+	var fields [6]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
@@ -319,6 +346,8 @@ func (v *BarRequest) String() string {
 	fields[i] = fmt.Sprintf("Timestamp: %v", v.Timestamp)
 	i++
 	fields[i] = fmt.Sprintf("EnumField: %v", v.EnumField)
+	i++
+	fields[i] = fmt.Sprintf("LongField: %v", v.LongField)
 	i++
 
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
@@ -342,6 +371,9 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 		return false
 	}
 	if !v.EnumField.Equals(rhs.EnumField) {
+		return false
+	}
+	if !(v.LongField == rhs.LongField) {
 		return false
 	}
 

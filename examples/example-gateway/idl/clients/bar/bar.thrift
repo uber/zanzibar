@@ -17,6 +17,7 @@ struct BarRequest {
     3: required binary binaryField
     4: required Timestamp timestamp
     5: required Fruit enumField
+    6: required Long longField
 }
 
 struct BarResponse {

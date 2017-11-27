@@ -200,6 +200,7 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 		out.Request.BinaryField = []byte(in.Request.BinaryField)
 		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
 		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
+		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
 	} else {
 		out.Request = nil
 	}

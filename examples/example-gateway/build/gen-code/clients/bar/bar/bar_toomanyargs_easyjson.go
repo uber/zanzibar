@@ -797,6 +797,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var BinaryFieldSet bool
 	var TimestampSet bool
 	var EnumFieldSet bool
+	var LongFieldSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -831,6 +832,11 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.AddError((out.EnumField).UnmarshalJSON(data))
 			}
 			EnumFieldSet = true
+		case "longField":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.LongField).UnmarshalJSON(data))
+			}
+			LongFieldSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -854,6 +860,9 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !EnumFieldSet {
 		in.AddError(fmt.Errorf("key 'enumField' is required"))
+	}
+	if !LongFieldSet {
+		in.AddError(fmt.Errorf("key 'longField' is required"))
 	}
 }
 func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(out *jwriter.Writer, in BarRequest) {
@@ -890,5 +899,11 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"enumField\":")
 	out.Raw((in.EnumField).MarshalJSON())
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"longField\":")
+	out.Raw((in.LongField).MarshalJSON())
 	out.RawByte('}')
 }

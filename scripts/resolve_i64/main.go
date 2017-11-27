@@ -125,6 +125,7 @@ func main() {
 			meta.Types = append(meta.Types, i64Struct)
 		}
 	}
+	// Note type defs are not read by unique order so they need to be sorted before writing
 	sort.Sort(I64Structs(meta.Types))
 	tmpl, err := template.ParseFiles(filepath.Join(getDirName(), templateFileName))
 	if err != nil {
