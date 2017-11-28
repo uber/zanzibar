@@ -24,7 +24,8 @@
 		"EchoStructList": "SecondService::echoStructList",
 		"EchoStringMap": "SecondService::echoStringMap",
 		"EchoStructMap": "SecondService::echoStructMap",
-		"Ping": "SimpleService::ping"
+		"Ping": "SimpleService::ping",
+		"Trans": "SimpleService::trans"
 	},
 	"ip": "127.0.0.1",
 	"port": 4002,

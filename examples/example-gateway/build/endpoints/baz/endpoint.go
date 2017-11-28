@@ -41,6 +41,7 @@ func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
 		SimpleServiceCompareHandler:   NewSimpleServiceCompareHandler(g, deps),
 		SimpleServicePingHandler:      NewSimpleServicePingHandler(g, deps),
 		SimpleServiceSillyNoopHandler: NewSimpleServiceSillyNoopHandler(g, deps),
+		SimpleServiceTransHandler:     NewSimpleServiceTransHandler(g, deps),
 	}
 }
 
@@ -50,6 +51,7 @@ type EndpointHandlers struct {
 	SimpleServiceCompareHandler   *SimpleServiceCompareHandler
 	SimpleServicePingHandler      *SimpleServicePingHandler
 	SimpleServiceSillyNoopHandler *SimpleServiceSillyNoopHandler
+	SimpleServiceTransHandler     *SimpleServiceTransHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -69,6 +71,10 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	err3 := handlers.SimpleServiceSillyNoopHandler.Register(gateway)
 	if err3 != nil {
 		return err3
+	}
+	err4 := handlers.SimpleServiceTransHandler.Register(gateway)
+	if err4 != nil {
+		return err4
 	}
 	return nil
 }

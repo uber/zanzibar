@@ -34,7 +34,7 @@ import (
 	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
+	module "github.com/uber/zanzibar/.tmp_gen/clients/baz/module"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )

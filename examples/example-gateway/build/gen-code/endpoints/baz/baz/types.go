@@ -384,6 +384,158 @@ func (v *BazResponse) Equals(rhs *BazResponse) bool {
 	return true
 }
 
+type NestedStruct struct {
+	Msg   string `json:"msg,required"`
+	Check *int32 `json:"check,omitempty"`
+}
+
+// ToWire translates a NestedStruct struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *NestedStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Msg), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Check != nil {
+		w, err = wire.NewValueI32(*(v.Check)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a NestedStruct struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a NestedStruct struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v NestedStruct
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *NestedStruct) FromWire(w wire.Value) error {
+	var err error
+
+	msgIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Msg, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				msgIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.Check = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !msgIsSet {
+		return errors.New("field Msg of NestedStruct is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a NestedStruct
+// struct.
+func (v *NestedStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Msg: %v", v.Msg)
+	i++
+	if v.Check != nil {
+		fields[i] = fmt.Sprintf("Check: %v", *(v.Check))
+		i++
+	}
+
+	return fmt.Sprintf("NestedStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _I32_EqualsPtr(lhs, rhs *int32) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this NestedStruct match the
+// provided NestedStruct.
+//
+// This function performs a deep comparison.
+func (v *NestedStruct) Equals(rhs *NestedStruct) bool {
+	if !(v.Msg == rhs.Msg) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.Check, rhs.Check) {
+		return false
+	}
+
+	return true
+}
+
+// GetCheck returns the value of Check if it is set or its
+// zero value if it is unset.
+func (v *NestedStruct) GetCheck() (o int32) {
+	if v.Check != nil {
+		return *v.Check
+	}
+
+	return
+}
+
 type OtherAuthErr struct {
 	Message string `json:"message,required"`
 }
@@ -602,4 +754,169 @@ func (v *ServerErr) Equals(rhs *ServerErr) bool {
 
 func (v *ServerErr) Error() string {
 	return v.String()
+}
+
+type TransStruct struct {
+	Message string        `json:"message,required"`
+	Driver  *NestedStruct `json:"driver,omitempty"`
+	Rider   *NestedStruct `json:"rider,required"`
+}
+
+// ToWire translates a TransStruct struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *TransStruct) ToWire() (wire.Value, error) {
+	var (
+		fields [3]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Message), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Driver != nil {
+		w, err = v.Driver.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+	if v.Rider == nil {
+		return w, errors.New("field Rider of TransStruct is required")
+	}
+	w, err = v.Rider.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 3, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _NestedStruct_Read(w wire.Value) (*NestedStruct, error) {
+	var v NestedStruct
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a TransStruct struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a TransStruct struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v TransStruct
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *TransStruct) FromWire(w wire.Value) error {
+	var err error
+
+	messageIsSet := false
+
+	riderIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Message, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				messageIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Driver, err = _NestedStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		case 3:
+			if field.Value.Type() == wire.TStruct {
+				v.Rider, err = _NestedStruct_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				riderIsSet = true
+			}
+		}
+	}
+
+	if !messageIsSet {
+		return errors.New("field Message of TransStruct is required")
+	}
+
+	if !riderIsSet {
+		return errors.New("field Rider of TransStruct is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a TransStruct
+// struct.
+func (v *TransStruct) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [3]string
+	i := 0
+	fields[i] = fmt.Sprintf("Message: %v", v.Message)
+	i++
+	if v.Driver != nil {
+		fields[i] = fmt.Sprintf("Driver: %v", v.Driver)
+		i++
+	}
+	fields[i] = fmt.Sprintf("Rider: %v", v.Rider)
+	i++
+
+	return fmt.Sprintf("TransStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this TransStruct match the
+// provided TransStruct.
+//
+// This function performs a deep comparison.
+func (v *TransStruct) Equals(rhs *TransStruct) bool {
+	if !(v.Message == rhs.Message) {
+		return false
+	}
+	if !((v.Driver == nil && rhs.Driver == nil) || (v.Driver != nil && rhs.Driver != nil && v.Driver.Equals(rhs.Driver))) {
+		return false
+	}
+	if !v.Rider.Equals(rhs.Rider) {
+		return false
+	}
+
+	return true
 }

@@ -6,6 +6,17 @@ struct BazRequest {
   3: required i32 i3
 }
 
+struct NestedStruct {
+    1: required string msg
+    2: optional i32 check
+}
+
+struct TransStruct {
+    1: required string message
+    2: optional NestedStruct driver
+    3: required NestedStruct rider
+}
+
 struct BazResponse {
   1: required string message
 }
@@ -59,6 +70,18 @@ service SimpleService {
     zanzibar.handler = "baz.multiArgs"
   )
 
+  TransStruct trans(
+      1: required TransStruct arg1
+      2: optional TransStruct arg2
+  ) throws (
+      1: AuthErr authErr (zanzibar.http.status = "403")
+      2: OtherAuthErr otherAuthErr (zanzibar.http.status = "403")
+  ) (
+      zanzibar.http.status = "200"
+      zanzibar.http.method = "POST"
+      zanzibar.http.path = "/baz/trans"
+      zanzibar.handler = "baz.trans"
+  )
   // neither request body nor response body
   void sillyNoop() throws (
     1: AuthErr authErr (zanzibar.http.status = "403")
@@ -70,7 +93,3 @@ service SimpleService {
     zanzibar.handler = "baz.sillyNoop"
   )
 }
-
-// service SecondService {
-//  string Echo(1: string arg)
-// }

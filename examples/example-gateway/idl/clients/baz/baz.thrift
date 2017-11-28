@@ -29,6 +29,14 @@ service SimpleService {
         2: OtherAuthErr otherAuthErr
     )
 
+    base.TransStruct trans(
+        1: required base.TransStruct arg1
+        2: optional base.TransStruct arg2
+    ) throws (
+        1: AuthErr authErr
+        2: OtherAuthErr otherAuthErr
+    )
+
     void call(
         1: required BazRequest arg
     ) throws (

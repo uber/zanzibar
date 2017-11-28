@@ -1,0 +1,50 @@
+{
+	"endpointId": "baz",
+	"endpointType": "http",
+	"handleId": "trans",
+	"thriftFile": "endpoints/baz/baz.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::trans",
+	"workflowType": "tchannelClient",
+	"clientId": "baz",
+	"clientMethod": "Trans",
+	"middlewares": [
+		{
+			"name": "transformRequest",
+			"options": {
+				"transforms": [
+					{
+						"from": "Arg1.Driver.Msg",
+						"to": "Arg2.Rider.Msg",
+						"override": true
+					},
+					{
+						"from": "Arg1.Rider",
+						"to": "Arg2.Driver",
+						"override": false
+					}
+				]
+			}
+		},
+		{
+			"name": "transformResponse",
+			"options": {
+				"transforms": [
+					{
+						"from": "Message",
+						"to": "Rider.Msg",
+						"override": true
+					},
+					{
+						"from": "Message",
+						"to": "Driver.Msg",
+						"override": false
+					}
+				]
+			}
+		}
+	],
+	"reqHeaderMap": {},
+	"resHeaderMap": {},
+	"testFixtures": {}
+}
