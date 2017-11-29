@@ -73,6 +73,7 @@
 				"ip": "127.0.0.1",
 				"name": "bar",
 				"port": 4001,
+				"routingKey": "",
 				"thriftFile": "clients/bar/bar.thrift",
 				"type": "http"
 			}
@@ -126,6 +127,7 @@
 					"ip": "127.0.0.1",
 					"name": "bar",
 					"port": 4001,
+					"routingKey": "",
 					"thriftFile": "clients/bar/bar.thrift",
 					"type": "http"
 				},
@@ -157,6 +159,7 @@
 					"ip": "127.0.0.1",
 					"name": "baz",
 					"port": 4002,
+					"routingKey": "",
 					"serviceName": "Qux",
 					"thriftFile": "clients/baz/baz.thrift",
 					"type": "tchannel"
@@ -168,6 +171,7 @@
 					"ip": "127.0.0.1",
 					"name": "contacts",
 					"port": 4000,
+					"routingKey": "",
 					"thriftFile": "clients/contacts/contacts.thrift",
 					"type": "http"
 				},
@@ -180,6 +184,7 @@
 					"ip": "127.0.0.1",
 					"name": "corge",
 					"port": 5000,
+					"routingKey": "",
 					"serviceName": "Corge",
 					"thriftFile": "clients/corge/corge.thrift",
 					"type": "tchannel"
@@ -192,11 +197,13 @@
 					"ip": "127.0.0.1",
 					"name": "google-now",
 					"port": 14120,
+					"routingKey": "",
 					"thriftFile": "clients/googlenow/googlenow.thrift",
 					"type": "http"
 				},
 				"quux": {
 					"name": "quux",
+					"routingKey": "",
 					"type": "custom"
 				}
 			}
@@ -2270,6 +2277,7 @@
 							"ip": "127.0.0.1",
 							"name": "bar",
 							"port": 4001,
+							"routingKey": "",
 							"thriftFile": "clients/bar/bar.thrift",
 							"type": "http"
 						},
@@ -2301,6 +2309,7 @@
 							"ip": "127.0.0.1",
 							"name": "baz",
 							"port": 4002,
+							"routingKey": "",
 							"serviceName": "Qux",
 							"thriftFile": "clients/baz/baz.thrift",
 							"type": "tchannel"
@@ -2312,6 +2321,7 @@
 							"ip": "127.0.0.1",
 							"name": "contacts",
 							"port": 4000,
+							"routingKey": "",
 							"thriftFile": "clients/contacts/contacts.thrift",
 							"type": "http"
 						},
@@ -2324,6 +2334,7 @@
 							"ip": "127.0.0.1",
 							"name": "corge",
 							"port": 5000,
+							"routingKey": "",
 							"serviceName": "Corge",
 							"thriftFile": "clients/corge/corge.thrift",
 							"type": "tchannel"
@@ -2336,11 +2347,13 @@
 							"ip": "127.0.0.1",
 							"name": "google-now",
 							"port": 14120,
+							"routingKey": "",
 							"thriftFile": "clients/googlenow/googlenow.thrift",
 							"type": "http"
 						},
 						"quux": {
 							"name": "quux",
+							"routingKey": "",
 							"type": "custom"
 						}
 					},
@@ -3159,6 +3172,7 @@
 						"ip": "127.0.0.1",
 						"name": "bar",
 						"port": 4001,
+						"routingKey": "",
 						"thriftFile": "clients/bar/bar.thrift",
 						"type": "http"
 					},
@@ -3190,6 +3204,7 @@
 						"ip": "127.0.0.1",
 						"name": "baz",
 						"port": 4002,
+						"routingKey": "",
 						"serviceName": "Qux",
 						"thriftFile": "clients/baz/baz.thrift",
 						"type": "tchannel"
@@ -3201,6 +3216,7 @@
 						"ip": "127.0.0.1",
 						"name": "contacts",
 						"port": 4000,
+						"routingKey": "",
 						"thriftFile": "clients/contacts/contacts.thrift",
 						"type": "http"
 					},
@@ -3213,6 +3229,7 @@
 						"ip": "127.0.0.1",
 						"name": "corge",
 						"port": 5000,
+						"routingKey": "",
 						"serviceName": "Corge",
 						"thriftFile": "clients/corge/corge.thrift",
 						"type": "tchannel"
@@ -3225,11 +3242,13 @@
 						"ip": "127.0.0.1",
 						"name": "google-now",
 						"port": 14120,
+						"routingKey": "",
 						"thriftFile": "clients/googlenow/googlenow.thrift",
 						"type": "http"
 					},
 					"quux": {
 						"name": "quux",
+						"routingKey": "",
 						"type": "custom"
 					}
 				},

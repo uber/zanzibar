@@ -331,7 +331,8 @@
 				"TooManyArgs": "Bar::tooManyArgs"
 			},
 			"ip": "127.0.0.1",
-			"port": 4001
+			"port": 4001,
+			"routingKey": ""
 		},
 		"baz": {
 			"name": "baz",
@@ -363,7 +364,8 @@
 			"ip": "127.0.0.1",
 			"port": 4002,
 			"clientTimeout": 10000,
-			"clientTimeoutPerAttempt": 2000
+			"clientTimeoutPerAttempt": 2000,
+			"routingKey": ""
 		},
 		"contacts": {
 			"name": "contacts",
@@ -373,7 +375,8 @@
 				"SaveContacts": "Contacts::saveContacts"
 			},
 			"ip": "127.0.0.1",
-			"port": 4000
+			"port": 4000,
+			"routingKey": ""
 		},
 		"corge": {
 			"name": "corge",
@@ -386,7 +389,8 @@
 			"ip": "127.0.0.1",
 			"port": 5000,
 			"clientTimeout": 10000,
-			"clientTimeoutPerAttempt": 2000
+			"clientTimeoutPerAttempt": 2000,
+			"routingKey": ""
 		},
 		"google-now": {
 			"name": "google-now",
@@ -397,11 +401,13 @@
 				"CheckCredentials": "GoogleNowService::checkCredentials"
 			},
 			"ip": "127.0.0.1",
-			"port": 14120
+			"port": 14120,
+			"routingKey": ""
 		},
 		"quux": {
 			"name": "quux",
-			"type": "custom"
+			"type": "custom",
+			"routingKey": ""
 		}
 	},
 	"ThriftServices": {
