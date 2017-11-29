@@ -173,7 +173,8 @@ func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 	if req.Type == "tchannel" {
 		content[prefix+"serviceName"] = req.ServiceName
 		content[prefix+"timeout"] = req.Timeout
-		content[prefix+"timeoutPerAttempt"] = req.TimeoutPerAttempt
+		content[prefix+"timeoutPerAttempt"] = req.TimeoutPerAttempt,
+		content[prefix+"routingKey"] = req.routingKey
 	}
 	content[prefix+"port"] = req.Port
 	content[prefix+"ip"] = req.IP

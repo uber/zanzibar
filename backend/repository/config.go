@@ -85,7 +85,8 @@ type ClientConfig struct {
 	IP                string            `json:"ip,omitempty"`
 	Port              int64             `json:"port,omitempty"`
 	Timeout           int64             `json:"clientTimeout,omitempty"`
-	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`
+	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`,
+	RoutingKey string `json:"routingKey"`
 }
 
 // ThriftService is a service defined in Thrift file.
