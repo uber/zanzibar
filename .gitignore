@@ -19,6 +19,7 @@ benchmarks/runner/runner
 benchmarks/benchserver/benchserver
 examples/example-gateway/bin/
 scripts/easy_json/easy_json
+scripts/resolve_i64/resolve_i64
 scripts/resolve_thrift/resolve_thrift
 *.log
 *.svg

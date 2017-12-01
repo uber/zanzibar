@@ -949,7 +949,7 @@ func (system *ModuleSystem) GenerateBuild(
 				// as a library or a custom post build script
 				// for the generators yet.
 				if filepath.Ext(filePath) == ".go" {
-					if err := formatGoFile(resolvedPath); err != nil {
+					if err := FormatGoFile(resolvedPath); err != nil {
 						return nil, err
 					}
 				}
@@ -960,7 +960,8 @@ func (system *ModuleSystem) GenerateBuild(
 	return resolvedModules, nil
 }
 
-func formatGoFile(filePath string) error {
+// FormatGoFile reformat the go file imports
+func FormatGoFile(filePath string) error {
 	gofmtCmd := exec.Command("gofmt", "-s", "-w", "-e", filePath)
 	gofmtCmd.Stdout = os.Stdout
 	gofmtCmd.Stderr = os.Stderr
