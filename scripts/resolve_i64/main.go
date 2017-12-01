@@ -92,6 +92,7 @@ func main() {
 	meta := &Meta{}
 
 	s := strings.TrimSuffix(thriftFile, ".thrift")
+	// TODO use os.Args[2] instead of hard-coded path
 	s = strings.Replace(s, "/idl/", "/build/gen-code/", 1)
 	meta.PackageName = filepath.Base(s)
 
@@ -124,6 +125,9 @@ func main() {
 		if i64Struct.IsTimestamp || i64Struct.IsLong {
 			meta.Types = append(meta.Types, i64Struct)
 		}
+	}
+	if len(meta.Types) == 0 {
+		return
 	}
 	// Note type defs are not read by unique order so they need to be sorted before writing
 	sort.Sort(I64Structs(meta.Types))
