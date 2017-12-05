@@ -339,7 +339,7 @@ func (c *TypeConverter) genConverterForList(
 			)
 		}
 
-		err = c.GenConverterForStruct(
+		_ = c.GenConverterForStruct(
 			toField.Name,
 			valueStruct,
 			toField.Required,
@@ -353,9 +353,6 @@ func (c *TypeConverter) genConverterForList(
 			false,
 			level+1,
 		)
-		if err != nil {
-			return err
-		}
 		if checkOverride {
 			c.append("\t", "} else {")
 
@@ -508,7 +505,7 @@ func (c *TypeConverter) genConverterForMap(
 			)
 		}
 
-		err = c.GenConverterForStruct(
+		_ = c.GenConverterForStruct(
 			toField.Name,
 			valueStruct,
 			toField.Required,
@@ -522,9 +519,6 @@ func (c *TypeConverter) genConverterForMap(
 			false,
 			level+1,
 		)
-		if err != nil {
-			return err
-		}
 
 		if checkOverride {
 			c.append("\t", "} else {")
