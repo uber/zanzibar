@@ -339,7 +339,7 @@ func (c *TypeConverter) genConverterForList(
 			)
 		}
 
-		_ = c.GenConverterForStruct(
+		err = c.GenConverterForStruct(
 			toField.Name,
 			valueStruct,
 			toField.Required,
@@ -353,6 +353,12 @@ func (c *TypeConverter) genConverterForList(
 			false,
 			level+1,
 		)
+
+		if err != nil {
+			/* coverage ignore next line recursive call from list to struct will generate helper function that has no err */
+			return nil
+		}
+
 		if checkOverride {
 			c.append("\t", "} else {")
 
@@ -505,7 +511,7 @@ func (c *TypeConverter) genConverterForMap(
 			)
 		}
 
-		_ = c.GenConverterForStruct(
+		err = c.GenConverterForStruct(
 			toField.Name,
 			valueStruct,
 			toField.Required,
@@ -519,6 +525,11 @@ func (c *TypeConverter) genConverterForMap(
 			false,
 			level+1,
 		)
+
+		if err != nil {
+			/* coverage ignore next line recursive call from map to struct will generate helper function that has no err */
+			return nil
+		}
 
 		if checkOverride {
 			c.append("\t", "} else {")
