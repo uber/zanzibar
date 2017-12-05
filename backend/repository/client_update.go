@@ -174,6 +174,9 @@ func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 		content[prefix+"serviceName"] = req.ServiceName
 		content[prefix+"timeout"] = req.Timeout
 		content[prefix+"timeoutPerAttempt"] = req.TimeoutPerAttempt
+		if req.RoutingKey != "" {
+			content[prefix+"routingKey"] = req.RoutingKey
+		}
 	}
 	content[prefix+"port"] = req.Port
 	content[prefix+"ip"] = req.IP
