@@ -168,6 +168,13 @@ func (w NormalEndpoint) Handle(
 func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
 	out := &clientsBarBar.Bar_Normal_Args{}
 
+	convertToNormalRequestClientRequest(in, out)
+	convertToNormalRequestRecurClientRequest(in, out)
+
+	return out
+}
+
+func convertToNormalRequestClientRequest(in *endpointsBarBar.Bar_Normal_Args, out *clientsBarBar.Bar_Normal_Args) {
 	if in.Request != nil {
 		out.Request = &clientsBarBar.BarRequest{}
 		out.Request.StringField = string(in.Request.StringField)
@@ -179,8 +186,26 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 	} else {
 		out.Request = nil
 	}
+}
 
-	return out
+func convertToNormalRequestRecurClientRequest(in *endpointsBarBar.Bar_Normal_Args, out *clientsBarBar.Bar_Normal_Args) {
+	if in.RequestRecur != nil {
+		out.RequestRecur = &clientsBarBar.BarRequestRecur{}
+		out.RequestRecur.Name = string(in.RequestRecur.Name)
+		convertToNormalRecurClientRequest(in, out)
+	} else {
+		out.RequestRecur = nil
+	}
+}
+
+func convertToNormalRecurClientRequest(in *endpointsBarBar.Bar_Normal_Args, out *clientsBarBar.Bar_Normal_Args) {
+	if in.RequestRecur.Recur != nil {
+		out.RequestRecur.Recur = &clientsBarBar.BarRequestRecur{}
+		out.RequestRecur.Recur.Name = string(in.RequestRecur.Recur.Name)
+		convertToNormalRecurClientRequest(in, out)
+	} else {
+		out.RequestRecur.Recur = nil
+	}
 }
 
 func convertNormalBarException(

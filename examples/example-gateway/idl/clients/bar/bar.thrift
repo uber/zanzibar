@@ -80,6 +80,7 @@ service Bar {
     )
     BarResponse normal (
         1: required BarRequest request
+        2: optional BarRequestRecur requestRecur
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
     ) (

@@ -380,6 +380,142 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 	return true
 }
 
+type BarRequestRecur struct {
+	Name  string           `json:"name,required"`
+	Recur *BarRequestRecur `json:"recur,omitempty"`
+}
+
+// ToWire translates a BarRequestRecur struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *BarRequestRecur) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Name), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Recur != nil {
+		w, err = v.Recur.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _BarRequestRecur_Read(w wire.Value) (*BarRequestRecur, error) {
+	var v BarRequestRecur
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a BarRequestRecur struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a BarRequestRecur struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v BarRequestRecur
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *BarRequestRecur) FromWire(w wire.Value) error {
+	var err error
+
+	nameIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Name, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				nameIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Recur, err = _BarRequestRecur_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !nameIsSet {
+		return errors.New("field Name of BarRequestRecur is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a BarRequestRecur
+// struct.
+func (v *BarRequestRecur) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Name: %v", v.Name)
+	i++
+	if v.Recur != nil {
+		fields[i] = fmt.Sprintf("Recur: %v", v.Recur)
+		i++
+	}
+
+	return fmt.Sprintf("BarRequestRecur{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this BarRequestRecur match the
+// provided BarRequestRecur.
+//
+// This function performs a deep comparison.
+func (v *BarRequestRecur) Equals(rhs *BarRequestRecur) bool {
+	if !(v.Name == rhs.Name) {
+		return false
+	}
+	if !((v.Recur == nil && rhs.Recur == nil) || (v.Recur != nil && rhs.Recur != nil && v.Recur.Equals(rhs.Recur))) {
+		return false
+	}
+
+	return true
+}
+
 type BarResponse struct {
 	StringField        string           `json:"stringField,required"`
 	IntWithRange       int32            `json:"intWithRange,required"`

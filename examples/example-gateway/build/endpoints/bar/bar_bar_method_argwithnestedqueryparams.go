@@ -219,6 +219,13 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
 	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
+	convertToArgWithNestedQueryParamsRequestClientRequest(in, out)
+	convertToArgWithNestedQueryParamsOptClientRequest(in, out)
+
+	return out
+}
+
+func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args, out *clientsBarBar.Bar_ArgWithNestedQueryParams_Args) {
 	if in.Request != nil {
 		out.Request = &clientsBarBar.QueryParamsStruct{}
 		out.Request.Name = string(in.Request.Name)
@@ -228,6 +235,9 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 	} else {
 		out.Request = nil
 	}
+}
+
+func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args, out *clientsBarBar.Bar_ArgWithNestedQueryParams_Args) {
 	if in.Opt != nil {
 		out.Opt = &clientsBarBar.QueryParamsOptsStruct{}
 		out.Opt.Name = string(in.Opt.Name)
@@ -237,8 +247,6 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 	} else {
 		out.Opt = nil
 	}
-
-	return out
 }
 
 func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {

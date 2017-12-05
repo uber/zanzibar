@@ -172,6 +172,13 @@ func (w CompareEndpoint) Handle(
 func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
 	out := &clientsBazBaz.SimpleService_Compare_Args{}
 
+	convertToCompareArg1ClientRequest(in, out)
+	convertToCompareArg2ClientRequest(in, out)
+
+	return out
+}
+
+func convertToCompareArg1ClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args, out *clientsBazBaz.SimpleService_Compare_Args) {
 	if in.Arg1 != nil {
 		out.Arg1 = &clientsBazBaz.BazRequest{}
 		out.Arg1.B1 = bool(in.Arg1.B1)
@@ -180,6 +187,9 @@ func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Arg
 	} else {
 		out.Arg1 = nil
 	}
+}
+
+func convertToCompareArg2ClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args, out *clientsBazBaz.SimpleService_Compare_Args) {
 	if in.Arg2 != nil {
 		out.Arg2 = &clientsBazBaz.BazRequest{}
 		out.Arg2.B1 = bool(in.Arg2.B1)
@@ -188,8 +198,6 @@ func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Arg
 	} else {
 		out.Arg2 = nil
 	}
-
-	return out
 }
 
 func convertCompareAuthErr(

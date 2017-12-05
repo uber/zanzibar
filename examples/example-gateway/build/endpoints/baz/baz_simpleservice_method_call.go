@@ -173,6 +173,12 @@ func (w CallEndpoint) Handle(
 func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
 	out := &clientsBazBaz.SimpleService_Call_Args{}
 
+	convertToCallArgClientRequest(in, out)
+
+	return out
+}
+
+func convertToCallArgClientRequest(in *endpointsBazBaz.SimpleService_Call_Args, out *clientsBazBaz.SimpleService_Call_Args) {
 	if in.Arg != nil {
 		out.Arg = &clientsBazBaz.BazRequest{}
 		out.Arg.B1 = bool(in.Arg.B1)
@@ -181,8 +187,6 @@ func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *cl
 	} else {
 		out.Arg = nil
 	}
-
-	return out
 }
 
 func convertCallAuthErr(
