@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 	testlib "github.com/uber/zanzibar/test/lib"
@@ -79,6 +80,13 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	}
 	endpointGroupExpFile := filepath.Join(exampleGateway, endpointCfgDir, req.ID, endpointConfigFileName)
 	testlib.CompareGoldenFile(t, endpointGroupExpFile, endpointGroupCfg)
+
+	serviceGroupCfg, err := ioutil.ReadFile(filepath.Join(exampleGateway, endpointCfgDir, "../services", "example-gateway", serviceConfigFileName))
+	if !assert.NoError(t, err, "Failed to read endpoint module config file.") {
+		return
+	}
+	serviceGroupExpFile := filepath.Join(exampleGateway, endpointCfgDir, "../services", "example-gateway", serviceConfigFileName)
+	testlib.CompareGoldenFile(t, serviceGroupExpFile, serviceGroupCfg)
 }
 
 func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
