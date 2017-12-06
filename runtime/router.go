@@ -141,7 +141,7 @@ func (router *HTTPRouter) handlePanic(
 	if !ok {
 		err = errors.Errorf("http router panic: %v", v)
 	}
-	_, ok = v.(fmt.Formatter)
+	_, ok = err.(fmt.Formatter)
 	if !ok {
 		err = errors.Wrap(err, "wrapped")
 	}
