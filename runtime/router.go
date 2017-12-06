@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -139,6 +140,10 @@ func (router *HTTPRouter) handlePanic(
 	err, ok := v.(error)
 	if !ok {
 		err = errors.Errorf("http router panic: %v", v)
+	}
+	_, ok = err.(fmt.Formatter)
+	if !ok {
+		err = errors.Wrap(err, "wrapped")
 	}
 
 	router.gateway.Logger.Error(
