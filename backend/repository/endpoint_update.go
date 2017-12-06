@@ -117,7 +117,8 @@ func updateServiceMetaJSON(configDir, serviceConfigJSONPath string, cfg *Endpoin
 	if i < len(endpoints) && endpoints[i] == cfg.ClientID {
 		return nil
 	}
-	endpoints = append(endpoints, cfg.ClientID)
+	// update endpoint list with the new client id
+	fileContent.Dependencies["endpoint"] = append(fileContent.Dependencies["endpoint"], cfg.ClientID)
 	return writeToJSONFile(metaFilePath, fileContent)
 }
 
