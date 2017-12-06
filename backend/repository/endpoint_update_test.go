@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 	testlib "github.com/uber/zanzibar/test/lib"
