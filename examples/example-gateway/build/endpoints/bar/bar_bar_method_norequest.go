@@ -172,6 +172,27 @@ func convertNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBar
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	convertToNoRequestRespClientResponse(in.Resp, out.Resp)
 
 	return out
+}
+
+func convertToNoRequestRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+	if in != nil {
+		out = &endpointsBarBar.BarRequestRecur{}
+		out.Name = string(in.Name)
+		convertToNoRequestRecurClientResponse(in.Recur, out.Recur)
+	} else {
+		out = nil
+	}
+}
+
+func convertToNoRequestRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+	if in != nil {
+		out = &endpointsBarBar.BarRequestRecur{}
+		out.Name = string(in.Name)
+		convertToNoRequestRecurClientResponse(in.Recur, out.Recur)
+	} else {
+		out = nil
+	}
 }

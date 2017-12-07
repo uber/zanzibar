@@ -219,33 +219,33 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
 	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
-	convertToArgWithNestedQueryParamsRequestClientRequest(in, out)
-	convertToArgWithNestedQueryParamsOptClientRequest(in, out)
+	convertToArgWithNestedQueryParamsRequestClientRequest(in.Request, out.Request)
+	convertToArgWithNestedQueryParamsOptClientRequest(in.Opt, out.Opt)
 
 	return out
 }
 
-func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args, out *clientsBarBar.Bar_ArgWithNestedQueryParams_Args) {
-	if in.Request != nil {
-		out.Request = &clientsBarBar.QueryParamsStruct{}
-		out.Request.Name = string(in.Request.Name)
-		out.Request.UserUUID = (*string)(in.Request.UserUUID)
-		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
-		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
+func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.QueryParamsStruct, out *clientsBarBar.QueryParamsStruct) {
+	if in != nil {
+		out = &clientsBarBar.QueryParamsStruct{}
+		out.Name = string(in.Name)
+		out.UserUUID = (*string)(in.UserUUID)
+		out.AuthUUID = (*string)(in.AuthUUID)
+		out.AuthUUID2 = (*string)(in.AuthUUID2)
 	} else {
-		out.Request = nil
+		out = nil
 	}
 }
 
-func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args, out *clientsBarBar.Bar_ArgWithNestedQueryParams_Args) {
-	if in.Opt != nil {
-		out.Opt = &clientsBarBar.QueryParamsOptsStruct{}
-		out.Opt.Name = string(in.Opt.Name)
-		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
-		out.Opt.AuthUUID = (*string)(in.Opt.AuthUUID)
-		out.Opt.AuthUUID2 = (*string)(in.Opt.AuthUUID2)
+func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.QueryParamsOptsStruct, out *clientsBarBar.QueryParamsOptsStruct) {
+	if in != nil {
+		out = &clientsBarBar.QueryParamsOptsStruct{}
+		out.Name = string(in.Name)
+		out.UserUUID = (*string)(in.UserUUID)
+		out.AuthUUID = (*string)(in.AuthUUID)
+		out.AuthUUID2 = (*string)(in.AuthUUID2)
 	} else {
-		out.Opt = nil
+		out = nil
 	}
 }
 
@@ -264,6 +264,27 @@ func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	convertToArgWithNestedQueryParamsRespClientResponse(in.Resp, out.Resp)
 
 	return out
+}
+
+func convertToArgWithNestedQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+	if in != nil {
+		out = &endpointsBarBar.BarRequestRecur{}
+		out.Name = string(in.Name)
+		convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
+	} else {
+		out = nil
+	}
+}
+
+func convertToArgWithNestedQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+	if in != nil {
+		out = &endpointsBarBar.BarRequestRecur{}
+		out.Name = string(in.Name)
+		convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
+	} else {
+		out = nil
+	}
 }

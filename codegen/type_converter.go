@@ -233,8 +233,8 @@ func (c *TypeConverter) GenConverterForStruct(
 	}
 
 	// if not recursive call print the thing and make it recursive call
-	c.append(indent, "if ", fromIdentifier, " != nil {")
-	c.append(indent, "\t", toIdentifier, " = &", typeName, "{}")
+	c.append(indent, "if ", strings.Split(fromIdentifier, ".")[0], " != nil {")
+	c.append(indent, "\t", strings.Split(toIdentifier, ".")[0], " = &", typeName, "{}")
 
 	err = c.genStructConverter(
 		keyPrefix+".",
@@ -252,7 +252,7 @@ func (c *TypeConverter) GenConverterForStruct(
 	}
 
 	c.append(indent, "} else {")
-	c.append(indent, "\t", toIdentifier, " = nil")
+	c.append(indent, "\t", strings.Split(toIdentifier, ".")[0], " = nil")
 	c.append(indent, "}")
 
 	return nil
@@ -679,6 +679,9 @@ func (c *TypeConverter) genStructConverter(
 			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
 		}
 
+		fromFieldShortName := "in." + pascalCase(fromField.Name)
+		toFieldShortName := "out." + pascalCase(toField.Name)
+
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toFieldType := toField.Type.(type) {
@@ -699,9 +702,9 @@ func (c *TypeConverter) genStructConverter(
 
 			err := c.genConverterForPrimitiveOrTypedef(
 				toField,
-				toIdentifier,
+				toFieldShortName,
 				fromField,
-				fromIdentifier,
+				fromFieldShortName,
 				overriddenField,
 				overriddenIdentifier,
 				indent,
@@ -714,7 +717,7 @@ func (c *TypeConverter) genStructConverter(
 			if c.shouldSkipCall(isRecursiveCall, level) {
 				continue
 			}
-			c.append(toIdentifier, " = []byte(", fromIdentifier, ")")
+			c.append(toFieldShortName, " = []byte(", fromFieldShortName, ")")
 
 		case *compile.StructSpec:
 			var (
@@ -746,7 +749,7 @@ func (c *TypeConverter) genStructConverter(
 			if fromField != nil {
 				fromFieldName = pascalCase(fromField.Name)
 			}
-			c.append("convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(in, out)")
+			c.append("convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(", fromFieldShortName, ", ", toFieldShortName, ")")
 
 			err := c.GenConverterForStruct(
 				toField.Name,
@@ -774,8 +777,8 @@ func (c *TypeConverter) genStructConverter(
 				toField,
 				fromField,
 				overriddenField,
-				toIdentifier,
-				fromIdentifier,
+				toFieldShortName,
+				fromFieldShortName,
 				overriddenIdentifier,
 				keyPrefix,
 				indent,
@@ -794,8 +797,8 @@ func (c *TypeConverter) genStructConverter(
 				toField,
 				fromField,
 				overriddenField,
-				toIdentifier,
-				fromIdentifier,
+				toFieldShortName,
+				fromFieldShortName,
 				overriddenIdentifier,
 				keyPrefix,
 				indent,

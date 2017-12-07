@@ -523,6 +523,7 @@ type BarResponse struct {
 	MapIntWithRange    map[UUID]int32   `json:"mapIntWithRange,required"`
 	MapIntWithoutRange map[string]int32 `json:"mapIntWithoutRange,required"`
 	BinaryField        []byte           `json:"binaryField,required"`
+	Resp               *BarRequestRecur `json:"resp,omitempty"`
 }
 
 type _Map_UUID_I32_MapItemList map[UUID]int32
@@ -612,7 +613,7 @@ func (_Map_String_I32_MapItemList) Close() {}
 //   }
 func (v *BarResponse) ToWire() (wire.Value, error) {
 	var (
-		fields [6]wire.Field
+		fields [7]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -665,6 +666,14 @@ func (v *BarResponse) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 6, Value: w}
 	i++
+	if v.Resp != nil {
+		w, err = v.Resp.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 7, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -808,6 +817,14 @@ func (v *BarResponse) FromWire(w wire.Value) error {
 				}
 				binaryFieldIsSet = true
 			}
+		case 7:
+			if field.Value.Type() == wire.TStruct {
+				v.Resp, err = _BarRequestRecur_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -845,7 +862,7 @@ func (v *BarResponse) String() string {
 		return "<nil>"
 	}
 
-	var fields [6]string
+	var fields [7]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
@@ -859,6 +876,10 @@ func (v *BarResponse) String() string {
 	i++
 	fields[i] = fmt.Sprintf("BinaryField: %v", v.BinaryField)
 	i++
+	if v.Resp != nil {
+		fields[i] = fmt.Sprintf("Resp: %v", v.Resp)
+		i++
+	}
 
 	return fmt.Sprintf("BarResponse{%v}", strings.Join(fields[:i], ", "))
 }
@@ -918,6 +939,9 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 		return false
 	}
 	if !bytes.Equal(v.BinaryField, rhs.BinaryField) {
+		return false
+	}
+	if !((v.Resp == nil && rhs.Resp == nil) || (v.Resp != nil && rhs.Resp != nil && v.Resp.Equals(rhs.Resp))) {
 		return false
 	}
 

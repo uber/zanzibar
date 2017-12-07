@@ -852,8 +852,6 @@ func (ms *MethodSpec) isMethodprinted(methodName string) bool {
 func (ms *MethodSpec) genStructHelperFunctions(
 	typeConverter *TypeConverter,
 	downstreamMethod *MethodSpec,
-	inType string,
-	outType string,
 	requestType string,
 ) error {
 	typeConverter.IsMethodCall = true
@@ -861,7 +859,10 @@ func (ms *MethodSpec) genStructHelperFunctions(
 	for index < len(typeConverter.HelperFunctionStructs) {
 		helperStruct := typeConverter.HelperFunctionStructs[index]
 		index++
-		methodName := "convertTo" + pascalCase(ms.Name) + pascalCase(helperStruct.FromField.Name) + requestType
+		fromField := helperStruct.FromField
+		toField := helperStruct.ToField
+
+		methodName := "convertTo" + pascalCase(ms.Name) + pascalCase(fromField.Name) + requestType
 
 		// dedup method
 		if ms.isMethodprinted(methodName) {
@@ -869,19 +870,28 @@ func (ms *MethodSpec) genStructHelperFunctions(
 		}
 		ms.MethodNames = append(ms.MethodNames, methodName)
 
-		// different methods here
-		typeConverter.append(
-			"func ",
-			methodName,
-			"(in ", inType, ", ", "out *", outType, ") {")
+		// from field type
+		fromFieldType, err := typeConverter.getIdentifierName(fromField.Type)
+		if err != nil {
+			return err
+		}
+		fromFieldType = "*" + fromFieldType
 
-		toFieldType, ok := helperStruct.ToField.Type.(*compile.StructSpec)
+		// to field type
+		toFieldType, err := typeConverter.getIdentifierName(toField.Type)
+		if err != nil {
+			return err
+		}
+		toFieldType = "*" + toFieldType
+
+		typeConverter.append("func ", methodName, "(in ", fromFieldType, ", ", "out ", toFieldType, ") {")
+		toFieldTypeStruct, ok := helperStruct.ToField.Type.(*compile.StructSpec)
 		if !ok {
 			continue
 		}
-		err := typeConverter.GenConverterForStruct(
+		err = typeConverter.GenConverterForStruct(
 			helperStruct.ToField.Name,
-			toFieldType,
+			toFieldTypeStruct,
 			helperStruct.ToField.Required,
 			*helperStruct.StructFromType,
 			helperStruct.FromIdentifier,
@@ -928,15 +938,15 @@ func (ms *MethodSpec) setTypeConverters(
 	typeConverter.append("\nreturn out")
 	typeConverter.append("}\n")
 
-	err = ms.genStructHelperFunctions(typeConverter, downstreamMethod, ms.RequestType, downstreamMethod.ShortRequestType, "ClientRequest")
+	err = ms.genStructHelperFunctions(typeConverter, downstreamMethod, "ClientRequest")
 	if err != nil {
 		return err
 	}
 	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
+	downstreamRespType := downstreamSpec.ResultSpec.ReturnType
 	respType := funcSpec.ResultSpec.ReturnType
-	downstreamRespType := funcSpec.ResultSpec.ReturnType
 
 	if respType == nil || downstreamRespType == nil {
 		return nil
@@ -972,7 +982,7 @@ func (ms *MethodSpec) setTypeConverters(
 		}
 	}
 	respConverter.append("\nreturn out \t}\n")
-	err = ms.genStructHelperFunctions(respConverter, downstreamMethod, downstreamMethod.ResponseType, ms.ShortResponseType, "ClientResponse")
+	err = ms.genStructHelperFunctions(respConverter, downstreamMethod, "ClientResponse")
 	if err != nil {
 		return err
 	}
