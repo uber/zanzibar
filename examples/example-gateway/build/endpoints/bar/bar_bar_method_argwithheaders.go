@@ -181,27 +181,29 @@ func convertArgWithHeadersClientResponse(in *clientsBarBar.BarResponse) *endpoin
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToArgWithHeadersRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToArgWithHeadersRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToArgWithHeadersRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithHeadersRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithHeadersRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithHeadersRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToArgWithHeadersRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithHeadersRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithHeadersRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithHeadersRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }

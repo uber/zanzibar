@@ -884,7 +884,7 @@ func (ms *MethodSpec) genStructHelperFunctions(
 		}
 		toFieldType = "*" + toFieldType
 
-		typeConverter.append("func ", methodName, "(in ", fromFieldType, ", ", "out ", toFieldType, ") {")
+		typeConverter.append("func ", methodName, "(in ", fromFieldType, ", ", "out ", toFieldType, ")", toFieldType, " {")
 		toFieldTypeStruct, ok := helperStruct.ToField.Type.(*compile.StructSpec)
 		if !ok {
 			continue

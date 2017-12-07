@@ -168,7 +168,7 @@ func TestBarExceptionCode(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}},"requestRecur":{"name":"abc"}}`),
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}},"requestRecur":{"name":"abc","recur":{"name":"cde"}}}`),
 				bytes,
 			)
 			w.WriteHeader(403)

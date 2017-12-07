@@ -254,6 +254,7 @@ func (c *TypeConverter) GenConverterForStruct(
 	c.append(indent, "} else {")
 	c.append(indent, "\t", strings.Split(toIdentifier, ".")[0], " = nil")
 	c.append(indent, "}")
+	c.append("return out")
 
 	return nil
 }
@@ -749,7 +750,7 @@ func (c *TypeConverter) genStructConverter(
 			if fromField != nil {
 				fromFieldName = pascalCase(fromField.Name)
 			}
-			c.append("convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(", fromFieldShortName, ", ", toFieldShortName, ")")
+			c.append(toFieldShortName, " = ", "convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(", fromFieldShortName, ", ", toFieldShortName, ")")
 
 			err := c.GenConverterForStruct(
 				toField.Name,

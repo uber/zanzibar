@@ -151,18 +151,19 @@ func convertToArgWithParamsClientRequest(in *endpointsBarBar.Bar_ArgWithParams_A
 	out := &clientsBarBar.Bar_ArgWithParams_Args{}
 
 	out.UUID = string(in.UUID)
-	convertToArgWithParamsParamsClientRequest(in.Params, out.Params)
+	out.Params = convertToArgWithParamsParamsClientRequest(in.Params, out.Params)
 
 	return out
 }
 
-func convertToArgWithParamsParamsClientRequest(in *endpointsBarBar.ParamsStruct, out *clientsBarBar.ParamsStruct) {
+func convertToArgWithParamsParamsClientRequest(in *endpointsBarBar.ParamsStruct, out *clientsBarBar.ParamsStruct) *clientsBarBar.ParamsStruct {
 	if in != nil {
 		out = &clientsBarBar.ParamsStruct{}
 		out.UserUUID = string(in.UserUUID)
 	} else {
 		out = nil
 	}
+	return out
 }
 
 func convertArgWithParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
@@ -180,27 +181,29 @@ func convertArgWithParamsClientResponse(in *clientsBarBar.BarResponse) *endpoint
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToArgWithParamsRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToArgWithParamsRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToArgWithParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToArgWithParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }

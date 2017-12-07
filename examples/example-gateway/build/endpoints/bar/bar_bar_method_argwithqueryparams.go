@@ -182,27 +182,29 @@ func convertArgWithQueryParamsClientResponse(in *clientsBarBar.BarResponse) *end
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToArgWithQueryParamsRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToArgWithQueryParamsRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToArgWithQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithQueryParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToArgWithQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithQueryParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }

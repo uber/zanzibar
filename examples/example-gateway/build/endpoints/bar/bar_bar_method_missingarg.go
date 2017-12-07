@@ -172,27 +172,29 @@ func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBa
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToMissingArgRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToMissingArgRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToMissingArgRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToMissingArgRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToMissingArgRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToMissingArgRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToMissingArgRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToMissingArgRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToMissingArgRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToMissingArgRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }

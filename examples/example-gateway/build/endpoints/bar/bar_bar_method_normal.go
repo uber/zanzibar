@@ -35,6 +35,7 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	"fmt"
 )
 
 // BarNormalHandler is the handler for "/bar/bar-path"
@@ -168,13 +169,15 @@ func (w NormalEndpoint) Handle(
 func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
 	out := &clientsBarBar.Bar_Normal_Args{}
 
-	convertToNormalRequestClientRequest(in.Request, out.Request)
-	convertToNormalRequestRecurClientRequest(in.RequestRecur, out.RequestRecur)
+	out.Request = convertToNormalRequestClientRequest(in.Request, out.Request)
+	out.RequestRecur = convertToNormalRequestRecurClientRequest(in.RequestRecur, out.RequestRecur)
+	fmt.Println("=== out.request: ", out.Request)
+	fmt.Println("=== out.RequestRecur: ", out.RequestRecur)
 
 	return out
 }
 
-func convertToNormalRequestClientRequest(in *endpointsBarBar.BarRequest, out *clientsBarBar.BarRequest) {
+func convertToNormalRequestClientRequest(in *endpointsBarBar.BarRequest, out *clientsBarBar.BarRequest) *clientsBarBar.BarRequest {
 	if in != nil {
 		out = &clientsBarBar.BarRequest{}
 		out.StringField = string(in.StringField)
@@ -186,26 +189,30 @@ func convertToNormalRequestClientRequest(in *endpointsBarBar.BarRequest, out *cl
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToNormalRequestRecurClientRequest(in *endpointsBarBar.BarRequestRecur, out *clientsBarBar.BarRequestRecur) {
+func convertToNormalRequestRecurClientRequest(in *endpointsBarBar.BarRequestRecur, out *clientsBarBar.BarRequestRecur) *clientsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &clientsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToNormalRecurClientRequest(in.Recur, out.Recur)
+		out.Recur = convertToNormalRecurClientRequest(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToNormalRecurClientRequest(in *endpointsBarBar.BarRequestRecur, out *clientsBarBar.BarRequestRecur) {
+func convertToNormalRecurClientRequest(in *endpointsBarBar.BarRequestRecur, out *clientsBarBar.BarRequestRecur) *clientsBarBar.BarRequestRecur {
+	fmt.Println("=== in: ", in)
 	if in != nil {
 		out = &clientsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToNormalRecurClientRequest(in.Recur, out.Recur)
+		out.Recur = convertToNormalRecurClientRequest(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
 func convertNormalBarException(
@@ -231,27 +238,29 @@ func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToNormalRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToNormalRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToNormalRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToNormalRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToNormalRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToNormalRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToNormalRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToNormalRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToNormalRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToNormalRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }

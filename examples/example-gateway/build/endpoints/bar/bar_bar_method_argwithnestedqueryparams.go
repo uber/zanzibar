@@ -219,13 +219,13 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
 	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
-	convertToArgWithNestedQueryParamsRequestClientRequest(in.Request, out.Request)
-	convertToArgWithNestedQueryParamsOptClientRequest(in.Opt, out.Opt)
+	out.Request = convertToArgWithNestedQueryParamsRequestClientRequest(in.Request, out.Request)
+	out.Opt = convertToArgWithNestedQueryParamsOptClientRequest(in.Opt, out.Opt)
 
 	return out
 }
 
-func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.QueryParamsStruct, out *clientsBarBar.QueryParamsStruct) {
+func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.QueryParamsStruct, out *clientsBarBar.QueryParamsStruct) *clientsBarBar.QueryParamsStruct {
 	if in != nil {
 		out = &clientsBarBar.QueryParamsStruct{}
 		out.Name = string(in.Name)
@@ -235,9 +235,10 @@ func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.Q
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.QueryParamsOptsStruct, out *clientsBarBar.QueryParamsOptsStruct) {
+func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.QueryParamsOptsStruct, out *clientsBarBar.QueryParamsOptsStruct) *clientsBarBar.QueryParamsOptsStruct {
 	if in != nil {
 		out = &clientsBarBar.QueryParamsOptsStruct{}
 		out.Name = string(in.Name)
@@ -247,6 +248,7 @@ func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.Query
 	} else {
 		out = nil
 	}
+	return out
 }
 
 func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
@@ -264,27 +266,29 @@ func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	convertToArgWithNestedQueryParamsRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToArgWithNestedQueryParamsRespClientResponse(in.Resp, out.Resp)
 
 	return out
 }
 
-func convertToArgWithNestedQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithNestedQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
 
-func convertToArgWithNestedQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) {
+func convertToArgWithNestedQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
 	if in != nil {
 		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur, out.Recur)
 	} else {
 		out = nil
 	}
+	return out
 }
