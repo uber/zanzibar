@@ -112,13 +112,13 @@ func updateServiceMetaJSON(configDir, serviceConfigJSONPath string, cfg *Endpoin
 	}
 	endpoints := fileContent.Dependencies["endpoint"]
 	sort.Strings(endpoints)
-	i := sort.SearchStrings(endpoints, cfg.ClientID)
+	i := sort.SearchStrings(endpoints, cfg.ID)
 	// not update if client id already exist
-	if i < len(endpoints) && endpoints[i] == cfg.ClientID {
+	if i < len(endpoints) && endpoints[i] == cfg.ID {
 		return nil
 	}
 	// update endpoint list with the new client id
-	fileContent.Dependencies["endpoint"] = append(fileContent.Dependencies["endpoint"], cfg.ClientID)
+	fileContent.Dependencies["endpoint"] = append(fileContent.Dependencies["endpoint"], cfg.ID)
 	return writeToJSONFile(metaFilePath, fileContent)
 }
 
