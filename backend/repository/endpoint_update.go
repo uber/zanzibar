@@ -59,7 +59,7 @@ func (r *Repository) WriteEndpointConfig(
 	if err != nil {
 		return errors.Wrap(err, "failed to write endpoint group configuration")
 	}
-	serviceConfigDir := filepath.Join(r.absPath(endpointCfgDir), "../services/", r.gatewayConfig.ID)
+	serviceConfigDir := filepath.Join(r.absPath(endpointCfgDir), "..", "/services/", r.gatewayConfig.ID)
 	err = updateServiceMetaJSON(serviceConfigDir, serviceConfigFileName, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to write service group configuration")
@@ -119,6 +119,7 @@ func updateServiceMetaJSON(configDir, serviceConfigJSONPath string, cfg *Endpoin
 	}
 	// update endpoint list with the new client id
 	fileContent.Dependencies["endpoint"] = append(fileContent.Dependencies["endpoint"], cfg.ID)
+	sort.Strings(fileContent.Dependencies["endpoint"])
 	return writeToJSONFile(metaFilePath, fileContent)
 }
 
