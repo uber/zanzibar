@@ -121,6 +121,7 @@ const (
 	clientConfigFileName   = "client-config.json"
 	clientModuleFileName   = "clients-config.json"
 	endpointConfigFileName = "endpoint-config.json"
+	serviceConfigFileName  = "service-config.json"
 )
 
 const (

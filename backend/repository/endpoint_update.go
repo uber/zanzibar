@@ -23,6 +23,7 @@ package repository
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -58,6 +59,11 @@ func (r *Repository) WriteEndpointConfig(
 	if err != nil {
 		return errors.Wrap(err, "failed to write endpoint group configuration")
 	}
+	serviceConfigDir := filepath.Join(r.absPath(endpointCfgDir), "..", "/services/", r.gatewayConfig.ID)
+	err = updateServiceMetaJSON(serviceConfigDir, serviceConfigFileName, config)
+	if err != nil {
+		return errors.Wrap(err, "failed to write service group configuration")
+	}
 	return nil
 }
 
@@ -92,6 +98,29 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 		}
 	}
 	return nil
+}
+
+// updateServiceMetaJSON adds an endpoint group in the meta json file or updates the config for an existing endpoint.
+func updateServiceMetaJSON(configDir, serviceConfigJSONPath string, cfg *EndpointConfig) error {
+	metaFilePath := filepath.Join(configDir, serviceConfigJSONPath)
+	fileContent := new(codegen.EndpointClassConfig)
+	if _, err := os.Stat(metaFilePath); !os.IsNotExist(err) {
+		err := readJSONFile(metaFilePath, fileContent)
+		if err != nil {
+			return err
+		}
+	}
+	endpoints := fileContent.Dependencies["endpoint"]
+	sort.Strings(endpoints)
+	i := sort.SearchStrings(endpoints, cfg.ID)
+	// not update if client id already exist
+	if i < len(endpoints) && endpoints[i] == cfg.ID {
+		return nil
+	}
+	// update endpoint list with the new client id
+	fileContent.Dependencies["endpoint"] = append(fileContent.Dependencies["endpoint"], cfg.ID)
+	sort.Strings(fileContent.Dependencies["endpoint"])
+	return writeToJSONFile(metaFilePath, fileContent)
 }
 
 // updateEndpointMetaJSON adds an endpoint in the meta json file or updates the config for an existing endpoint.
