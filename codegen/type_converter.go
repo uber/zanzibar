@@ -938,9 +938,13 @@ func checkOptionalNil(
 	sort.Strings(keys)
 	for _, id := range keys {
 		if strings.HasPrefix(toIdentifier, id) {
+			/* coverage ignore next line */
 			v := uninitialized[id]
+			/* coverage ignore next line */
 			ret = append(ret, indent+"if "+v.Identifier+" == nil {")
+			/* coverage ignore next line */
 			ret = append(ret, indent+"\t"+v.Identifier+" = &"+v.TypeName+"{}")
+			/* coverage ignore next line */
 			ret = append(ret, indent+"}")
 		}
 	}

@@ -73,7 +73,7 @@ function parseFunction(folderName, functionInfo) {
         var startLoc = fileLoc.computeStatementLocation(statement.Start);
         var endLoc = fileLoc.computeStatementLocation(statement.End);
 
-        var skipped = false
+        var skipped = false;
             
         // ignoredLines is 0 indexed, startLoc is 1 indexed
         var lineIndex = startLoc.line - 1;
