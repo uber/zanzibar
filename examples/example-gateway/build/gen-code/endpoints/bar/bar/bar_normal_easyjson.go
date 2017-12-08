@@ -256,6 +256,16 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				out.BinaryField = in.Bytes()
 			}
 			BinaryFieldSet = true
+		case "resp":
+			if in.IsNull() {
+				in.Skip()
+				out.Resp = nil
+			} else {
+				if out.Resp == nil {
+					out.Resp = new(BarRequestRecur)
+				}
+				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in, &*out.Resp)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -354,115 +364,21 @@ func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"binaryField\":")
 	out.Base64Bytes(in.BinaryField)
-	out.RawByte('}')
-}
-func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(in *jlexer.Lexer, out *Bar_Normal_Args) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var RequestSet bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "request":
-			if in.IsNull() {
-				in.Skip()
-				out.Request = nil
-			} else {
-				if out.Request == nil {
-					out.Request = new(BarRequest)
-				}
-				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in, &*out.Request)
-			}
-			RequestSet = true
-		case "requestRecur":
-			if in.IsNull() {
-				in.Skip()
-				out.RequestRecur = nil
-			} else {
-				if out.RequestRecur == nil {
-					out.RequestRecur = new(BarRequestRecur)
-				}
-				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(in, &*out.RequestRecur)
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !RequestSet {
-		in.AddError(fmt.Errorf("key 'request' is required"))
-	}
-}
-func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(out *jwriter.Writer, in Bar_Normal_Args) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"request\":")
-	if in.Request == nil {
-		out.RawString("null")
-	} else {
-		easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.Request)
-	}
-	if in.RequestRecur != nil {
+	if in.Resp != nil {
 		if !first {
 			out.RawByte(',')
 		}
 		first = false
-		out.RawString("\"requestRecur\":")
-		if in.RequestRecur == nil {
+		out.RawString("\"resp\":")
+		if in.Resp == nil {
 			out.RawString("null")
 		} else {
-			easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(out, *in.RequestRecur)
+			easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.Resp)
 		}
 	}
 	out.RawByte('}')
 }
-
-// MarshalJSON supports json.Marshaler interface
-func (v Bar_Normal_Args) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Bar_Normal_Args) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *Bar_Normal_Args) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Bar_Normal_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(l, v)
-}
-func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(in *jlexer.Lexer, out *BarRequestRecur) {
+func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in *jlexer.Lexer, out *BarRequestRecur) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -493,7 +409,7 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Recur == nil {
 					out.Recur = new(BarRequestRecur)
 				}
-				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(in, &*out.Recur)
+				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in, &*out.Recur)
 			}
 		default:
 			in.SkipRecursive()
@@ -508,7 +424,7 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'name' is required"))
 	}
 }
-func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(out *jwriter.Writer, in BarRequestRecur) {
+func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out *jwriter.Writer, in BarRequestRecur) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -527,12 +443,118 @@ func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Recur == nil {
 			out.RawString("null")
 		} else {
-			easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(out, *in.Recur)
+			easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.Recur)
 		}
 	}
 	out.RawByte('}')
 }
-func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in *jlexer.Lexer, out *BarRequest) {
+func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(in *jlexer.Lexer, out *Bar_Normal_Args) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var RequestSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "request":
+			if in.IsNull() {
+				in.Skip()
+				out.Request = nil
+			} else {
+				if out.Request == nil {
+					out.Request = new(BarRequest)
+				}
+				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(in, &*out.Request)
+			}
+			RequestSet = true
+		case "requestRecur":
+			if in.IsNull() {
+				in.Skip()
+				out.RequestRecur = nil
+			} else {
+				if out.RequestRecur == nil {
+					out.RequestRecur = new(BarRequestRecur)
+				}
+				easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in, &*out.RequestRecur)
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !RequestSet {
+		in.AddError(fmt.Errorf("key 'request' is required"))
+	}
+}
+func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(out *jwriter.Writer, in Bar_Normal_Args) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"request\":")
+	if in.Request == nil {
+		out.RawString("null")
+	} else {
+		easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(out, *in.Request)
+	}
+	if in.RequestRecur != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"requestRecur\":")
+		if in.RequestRecur == nil {
+			out.RawString("null")
+		} else {
+			easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.RequestRecur)
+		}
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Bar_Normal_Args) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Bar_Normal_Args) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Bar_Normal_Args) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Bar_Normal_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarNormal1(l, v)
+}
+func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(in *jlexer.Lexer, out *BarRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -614,7 +636,7 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'longField' is required"))
 	}
 }
-func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out *jwriter.Writer, in BarRequest) {
+func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar3(out *jwriter.Writer, in BarRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
