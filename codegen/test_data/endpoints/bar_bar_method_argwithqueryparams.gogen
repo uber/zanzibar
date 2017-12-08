@@ -182,6 +182,29 @@ func convertArgWithQueryParamsClientResponse(in *clientsBarBar.BarResponse) *end
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToArgWithQueryParamsRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToArgWithQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

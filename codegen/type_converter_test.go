@@ -425,8 +425,8 @@ func TestConvertStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToFourRequestType(in.Four, out.Four)
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -456,7 +456,7 @@ func TestConvertStructRequiredToOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
+		out.Three = convertToThreeRequestType(in.Three)
 	`), lines)
 }
 
@@ -486,7 +486,7 @@ func TestConvertStructOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
+		out.Three = convertToThreeRequestType(in.Three)
 	`), lines)
 }
 
@@ -516,8 +516,8 @@ func TestHandlesMissingFields(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToFourRequestType(in.Four, out.Four)`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)`),
 		lines)
 }
 
@@ -847,8 +847,8 @@ func TestConvertStructContainingList(t *testing.T) {
 
 	assert.Nil(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = convertToOneRequestType(in.One, out.One)
-		out.Two = convertToTwoRequestType(in.Two, out.Two)
+		out.One = convertToOneRequestType(in.One)
+		out.Two = convertToTwoRequestType(in.Two)
 	`), lines)
 }
 
@@ -1231,8 +1231,8 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToFourRequestType(in.Four, out.Four)
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -1525,8 +1525,8 @@ func TestConverterMapStructWithSubFields2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToFourRequestType(in.Four, out.Four)
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -1553,7 +1553,7 @@ func TestConverterMapStructWithFromReqDropped(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three, out.Three)`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1580,7 +1580,7 @@ func TestConverterMapStructWithFromOptDropped(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three, out.Three)`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1606,7 +1606,7 @@ func TestConverterMapStructWithToOptMissingOk(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three, out.Three)`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1664,8 +1664,8 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToThreeRequestType(in.Three, out.Four)`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1697,8 +1697,8 @@ func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToThreeRequestType(in.Three, out.Four)`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1735,8 +1735,8 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-	out.Three = convertToThreeRequestType(in.Three, out.Three)
-	out.Five = convertToRequestType(in.Five, out.Five)
+	out.Three = convertToThreeRequestType(in.Three)
+	out.Five = convertToRequestType(in.Five)
 	`), lines)
 }
 
@@ -1771,22 +1771,23 @@ func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 		fieldMap, true,
 	)
 
+	fmt.Println("==== lines: ", trim(lines))
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
+		out.Three = convertToThreeRequestType(in.Three)
+		out := &structs.NestedFoo{}
 		if in != nil {
-			out = &structs.NestedFoo{}
 			out.One = string(in.One)
 			out.Two = (*string)(in.Two)
 		} else {
 			out = nil
 		}
 		return out
-		out.Five = convertToRequestType(in.Five, out.Five)
+		out.Five = convertToRequestType(in.Five)
 		if in.Two != nil {
 			out.One = *(in.Two)
 		}
-		out.Two = (*string)&(in.One)`), lines)
+		out.Two = (*string)&(in.One)`), trim(lines))
 }
 
 func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
@@ -1859,7 +1860,7 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six, out.Six)
+		out.Six = convertToRequestType(in.Six)
 		out.Six = &structs.NestedC{}`),
 		lines)
 }
@@ -1898,7 +1899,7 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six, out.Six)
+		out.Six = convertToRequestType(in.Six)
 		out.Six = &structs.NestedC{}`),
 		lines)
 }
@@ -1936,7 +1937,7 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six, out.Six)`),
+		out.Six = convertToRequestType(in.Six)`),
 		lines)
 }
 
@@ -1978,8 +1979,8 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Five = convertToRequestType(in.Five, out.Five)
-		out.Four = convertToFourRequestType(in.Four, out.Four)
+		out.Five = convertToRequestType(in.Five)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -2021,8 +2022,8 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Three = convertToThreeRequestType(in.Three, out.Three)
-		out.Four = convertToFourRequestType(in.Four, out.Four)
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 

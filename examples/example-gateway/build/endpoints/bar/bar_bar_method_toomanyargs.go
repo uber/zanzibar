@@ -194,15 +194,15 @@ func (w TooManyArgsEndpoint) Handle(
 func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
 	out := &clientsBarBar.Bar_TooManyArgs_Args{}
 
-	out.Request = convertToTooManyArgsRequestClientRequest(in.Request, out.Request)
-	out.Foo = convertToTooManyArgsFooClientRequest(in.Foo, out.Foo)
+	out.Request = convertToTooManyArgsRequestClientRequest(in.Request)
+	out.Foo = convertToTooManyArgsFooClientRequest(in.Foo)
 
 	return out
 }
 
-func convertToTooManyArgsRequestClientRequest(in *endpointsBarBar.BarRequest, out *clientsBarBar.BarRequest) *clientsBarBar.BarRequest {
+func convertToTooManyArgsRequestClientRequest(in *endpointsBarBar.BarRequest) *clientsBarBar.BarRequest {
+	out := &clientsBarBar.BarRequest{}
 	if in != nil {
-		out = &clientsBarBar.BarRequest{}
 		out.StringField = string(in.StringField)
 		out.BoolField = bool(in.BoolField)
 		out.BinaryField = []byte(in.BinaryField)
@@ -215,9 +215,9 @@ func convertToTooManyArgsRequestClientRequest(in *endpointsBarBar.BarRequest, ou
 	return out
 }
 
-func convertToTooManyArgsFooClientRequest(in *endpointsFooFoo.FooStruct, out *clientsFooFoo.FooStruct) *clientsFooFoo.FooStruct {
+func convertToTooManyArgsFooClientRequest(in *endpointsFooFoo.FooStruct) *clientsFooFoo.FooStruct {
+	out := &clientsFooFoo.FooStruct{}
 	if in != nil {
-		out = &clientsFooFoo.FooStruct{}
 		out.FooString = string(in.FooString)
 		out.FooI32 = (*int32)(in.FooI32)
 		out.FooI16 = (*int16)(in.FooI16)
@@ -227,16 +227,16 @@ func convertToTooManyArgsFooClientRequest(in *endpointsFooFoo.FooStruct, out *cl
 		for key1, value2 := range in.FooMap {
 			out.FooMap[key1] = string(value2)
 		}
-		out.Message = convertToTooManyArgsMessageClientRequest(in.Message, out.Message)
+		out.Message = convertToTooManyArgsMessageClientRequest(in.Message)
 	} else {
 		out = nil
 	}
 	return out
 }
 
-func convertToTooManyArgsMessageClientRequest(in *endpointsFooBaseBase.Message, out *clientsFooBaseBase.Message) *clientsFooBaseBase.Message {
+func convertToTooManyArgsMessageClientRequest(in *endpointsFooBaseBase.Message) *clientsFooBaseBase.Message {
+	out := &clientsFooBaseBase.Message{}
 	if in != nil {
-		out = &clientsFooBaseBase.Message{}
 		out.Body = string(in.Body)
 	} else {
 		out = nil
@@ -274,27 +274,27 @@ func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsB
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	out.Resp = convertToTooManyArgsRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToTooManyArgsRespClientResponse(in.Resp)
 
 	return out
 }
 
-func convertToTooManyArgsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+func convertToTooManyArgsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
 	if in != nil {
-		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		out.Recur = convertToTooManyArgsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToTooManyArgsRecurClientResponse(in.Recur)
 	} else {
 		out = nil
 	}
 	return out
 }
 
-func convertToTooManyArgsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+func convertToTooManyArgsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
 	if in != nil {
-		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		out.Recur = convertToTooManyArgsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToTooManyArgsRecurClientResponse(in.Recur)
 	} else {
 		out = nil
 	}

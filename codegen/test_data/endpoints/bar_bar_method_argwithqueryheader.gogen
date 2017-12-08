@@ -167,6 +167,29 @@ func convertArgWithQueryHeaderClientResponse(in *clientsBarBar.BarResponse) *end
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToArgWithQueryHeaderRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToArgWithQueryHeaderRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithQueryHeaderRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithQueryHeaderRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithQueryHeaderRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

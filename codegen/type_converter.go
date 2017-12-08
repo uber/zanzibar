@@ -233,8 +233,8 @@ func (c *TypeConverter) GenConverterForStruct(
 	}
 
 	// if not recursive call print the thing and make it recursive call
+	c.append(indent, strings.Split(toIdentifier, ".")[0], " := &", typeName, "{}")
 	c.append(indent, "if ", strings.Split(fromIdentifier, ".")[0], " != nil {")
-	c.append(indent, "\t", strings.Split(toIdentifier, ".")[0], " = &", typeName, "{}")
 
 	err = c.genStructConverter(
 		keyPrefix+".",
@@ -683,9 +683,7 @@ func (c *TypeConverter) genStructConverter(
 			fromIdentifier = "in." + fromPrefix + pascalCase(toField.Name)
 		}
 
-		fromFieldShortName := fromIdentifier
-		toFieldShortName := toIdentifier
-
+		fromFieldShortName, toFieldShortName := fromIdentifier, toIdentifier
 		if fromField != nil {
 			fromFieldShortName = "in." + pascalCase(fromField.Name)
 		}
@@ -760,7 +758,7 @@ func (c *TypeConverter) genStructConverter(
 			if fromField != nil {
 				fromFieldName = pascalCase(fromField.Name)
 			}
-			c.append(toFieldShortName, " = ", "convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(", fromFieldShortName, ", ", toFieldShortName, ")")
+			c.append(toFieldShortName, " = ", "convertTo", pascalCase(c.MethodName), fromFieldName, requestType, "(", fromFieldShortName, ")")
 
 			err := c.GenConverterForStruct(
 				toField.Name,

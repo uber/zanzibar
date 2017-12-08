@@ -308,27 +308,27 @@ func convertArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) 
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
-	out.Resp = convertToArgWithManyQueryParamsRespClientResponse(in.Resp, out.Resp)
+	out.Resp = convertToArgWithManyQueryParamsRespClientResponse(in.Resp)
 
 	return out
 }
 
-func convertToArgWithManyQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+func convertToArgWithManyQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
 	if in != nil {
-		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur)
 	} else {
 		out = nil
 	}
 	return out
 }
 
-func convertToArgWithManyQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur, out *endpointsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+func convertToArgWithManyQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
 	if in != nil {
-		out = &endpointsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
-		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur, out.Recur)
+		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur)
 	} else {
 		out = nil
 	}

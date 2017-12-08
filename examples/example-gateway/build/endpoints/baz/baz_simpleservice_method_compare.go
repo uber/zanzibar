@@ -172,15 +172,15 @@ func (w CompareEndpoint) Handle(
 func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
 	out := &clientsBazBaz.SimpleService_Compare_Args{}
 
-	out.Arg1 = convertToCompareArg1ClientRequest(in.Arg1, out.Arg1)
-	out.Arg2 = convertToCompareArg2ClientRequest(in.Arg2, out.Arg2)
+	out.Arg1 = convertToCompareArg1ClientRequest(in.Arg1)
+	out.Arg2 = convertToCompareArg2ClientRequest(in.Arg2)
 
 	return out
 }
 
-func convertToCompareArg1ClientRequest(in *endpointsBazBaz.BazRequest, out *clientsBazBaz.BazRequest) *clientsBazBaz.BazRequest {
+func convertToCompareArg1ClientRequest(in *endpointsBazBaz.BazRequest) *clientsBazBaz.BazRequest {
+	out := &clientsBazBaz.BazRequest{}
 	if in != nil {
-		out = &clientsBazBaz.BazRequest{}
 		out.B1 = bool(in.B1)
 		out.S2 = string(in.S2)
 		out.I3 = int32(in.I3)
@@ -190,9 +190,9 @@ func convertToCompareArg1ClientRequest(in *endpointsBazBaz.BazRequest, out *clie
 	return out
 }
 
-func convertToCompareArg2ClientRequest(in *endpointsBazBaz.BazRequest, out *clientsBazBaz.BazRequest) *clientsBazBaz.BazRequest {
+func convertToCompareArg2ClientRequest(in *endpointsBazBaz.BazRequest) *clientsBazBaz.BazRequest {
+	out := &clientsBazBaz.BazRequest{}
 	if in != nil {
-		out = &clientsBazBaz.BazRequest{}
 		out.B1 = bool(in.B1)
 		out.S2 = string(in.S2)
 		out.I3 = int32(in.I3)
