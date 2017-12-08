@@ -999,16 +999,28 @@ func TestConvertMapOfStruct(t *testing.T) {
 			2: required map<string, Inner> two
 		}`,
 		nil,
-		nil, false,
+		nil, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 	out.One = make(map[string]*structs.Inner, len(in.One))
 	for key1, value2 := range in.One {
+		out := &structs.Inner{}
+		if value2 != nil {
+		} else {
+			out = nil
+		}
+	return out
 	}
 	out.Two = make(map[string]*structs.Inner, len(in.Two))
 	for key3, value4 := range in.Two {
+		out := &structs.Inner{}
+		if value4 != nil {
+		} else {
+			out = nil
+		}
+	return out
 	}`), lines)
 }
 
