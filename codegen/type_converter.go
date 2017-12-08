@@ -679,9 +679,19 @@ func (c *TypeConverter) genStructConverter(
 			// should we set this if no fromField ??
 			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
 		}
+		if fromIdentifier == "" && toField != nil {
+			fromIdentifier = "in." + fromPrefix + pascalCase(toField.Name)
+		}
 
-		fromFieldShortName := "in." + pascalCase(fromField.Name)
-		toFieldShortName := "out." + pascalCase(toField.Name)
+		fromFieldShortName := fromIdentifier
+		toFieldShortName := toIdentifier
+
+		if fromField != nil {
+			fromFieldShortName = "in." + pascalCase(fromField.Name)
+		}
+		if toField != nil {
+			toFieldShortName = "out." + pascalCase(toField.Name)
+		}
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.

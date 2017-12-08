@@ -35,7 +35,6 @@ import (
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
-	"fmt"
 )
 
 // BarNormalHandler is the handler for "/bar/bar-path"
@@ -171,8 +170,6 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 
 	out.Request = convertToNormalRequestClientRequest(in.Request, out.Request)
 	out.RequestRecur = convertToNormalRequestRecurClientRequest(in.RequestRecur, out.RequestRecur)
-	fmt.Println("=== out.request: ", out.Request)
-	fmt.Println("=== out.RequestRecur: ", out.RequestRecur)
 
 	return out
 }
@@ -204,7 +201,6 @@ func convertToNormalRequestRecurClientRequest(in *endpointsBarBar.BarRequestRecu
 }
 
 func convertToNormalRecurClientRequest(in *endpointsBarBar.BarRequestRecur, out *clientsBarBar.BarRequestRecur) *clientsBarBar.BarRequestRecur {
-	fmt.Println("=== in: ", in)
 	if in != nil {
 		out = &clientsBarBar.BarRequestRecur{}
 		out.Name = string(in.Name)
