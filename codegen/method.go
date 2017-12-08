@@ -55,9 +55,9 @@ type HeaderFieldInfo struct {
 
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
-	Name        string
-	MethodNames []string
-	HTTPMethod  string
+	Name                   string
+	ConverterFunctionNames []string
+	HTTPMethod             string
 	// Used by edge gateway to generate endpoint.
 	EndpointName string
 	HTTPPath     string
@@ -841,9 +841,9 @@ func (ms *MethodSpec) setDownstream(
 }
 
 func (ms *MethodSpec) isMethodprinted(methodName string) bool {
-	sort.Strings(ms.MethodNames)
-	i := sort.SearchStrings(ms.MethodNames, methodName)
-	if i < len(ms.MethodNames) && ms.MethodNames[i] == methodName {
+	sort.Strings(ms.ConverterFunctionNames)
+	i := sort.SearchStrings(ms.ConverterFunctionNames, methodName)
+	if i < len(ms.ConverterFunctionNames) && ms.ConverterFunctionNames[i] == methodName {
 		return true
 	}
 	return false
@@ -868,7 +868,7 @@ func (ms *MethodSpec) genStructHelperFunctions(
 		if ms.isMethodprinted(methodName) {
 			continue
 		}
-		ms.MethodNames = append(ms.MethodNames, methodName)
+		ms.ConverterFunctionNames = append(ms.ConverterFunctionNames, methodName)
 
 		// from field type
 		fromFieldType, err := typeConverter.getIdentifierName(fromField.Type)
