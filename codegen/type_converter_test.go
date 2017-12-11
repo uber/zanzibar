@@ -100,6 +100,7 @@ func convertTypes(
 ) (string, error) {
 	converter := newTypeConverter()
 	converter.MethodName = ""
+	converter.IsTestCall = isMethodCall
 	converter.IsMethodCall = isMethodCall
 	program, err := compileProgram(content, otherFiles)
 	if err != nil {
@@ -1008,6 +1009,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 	for key1, value2 := range in.One {
 		out := &structs.Inner{}
 		if value2 != nil {
+			out.Field = (*string)(in.Field)
 		} else {
 			out = nil
 		}
@@ -1017,6 +1019,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 	for key3, value4 := range in.Two {
 		out := &structs.Inner{}
 		if value4 != nil {
+			out.Field = (*string)(in.Field)
 		} else {
 			out = nil
 		}
@@ -1742,20 +1745,36 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
  			2: optional NestedFoo five
  		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 	out.Three = convertToThreeRequestType(in.Three)
-	out.Five = convertToRequestType(in.Five)
+	out := &structs.NestedFoo{}
+	if in != nil {
+		out.One = string(in.One)
+		out.Two = (*string)(in.Two)
+	} else {
+		out = nil
+	}
+	return out
+	out.Five = convertToRequestType()
+	if in.Two != nil {
+		out.One = *(in.Two)
+	}
+	out.Two = (*string)&(in.One)
 	`), lines)
 }
 
 func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Five"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four",
+		Override:      true,
+	}
 	fieldMap["Five.One"] = codegen.FieldMapperEntry{
-		QualifiedName: "Three.Two",
+		QualifiedName: "Four.Two",
 		Override:      true,
 	}
 	fieldMap["Five.Two"] = codegen.FieldMapperEntry{
@@ -1783,7 +1802,6 @@ func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 		fieldMap, true,
 	)
 
-	fmt.Println("==== lines: ", trim(lines))
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 		out.Three = convertToThreeRequestType(in.Three)
@@ -1795,11 +1813,20 @@ func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 			out = nil
 		}
 		return out
-		out.Five = convertToRequestType(in.Five)
-		if in.Two != nil {
-			out.One = *(in.Two)
+		out.Five = convertToFourRequestType(in.Four)
+		out := &structs.NestedFoo{}
+		if in != nil {
+			if in.Four != nil {
+				out.One = string(in.Four.One)
+			}
+			if in.Two != nil {
+				out.One = *(in.Two)
+			}
+			out.Two = (*string)&(in.One)
+		} else {
+			out = nil
 		}
-		out.Two = (*string)&(in.One)`), trim(lines))
+		return out`), trim(lines))
 }
 
 func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
@@ -1840,6 +1867,14 @@ func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
 
 func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1867,18 +1902,33 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
  			1: required NestedC six
  		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six)
-		out.Six = &structs.NestedC{}`),
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				out.One = string(in.One)
+		} else {
+			out = nil
+		}
+		return out`),
 		lines)
 }
 
 func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1906,18 +1956,38 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
  			1: required NestedC six
  		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six)
-		out.Six = &structs.NestedC{}`),
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				if in.Six != nil && in.Six.Three != nil {
+					out.One = (*string)(in.Six.Three.One)
+				}
+				if in.One != nil {
+					out.One = (*string)(in.One)
+				}
+		} else {
+			out = nil
+		}
+		return out`),
 		lines)
 }
 
 func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1944,13 +2014,26 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
  			1: optional NestedC six
  		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = convertToRequestType(in.Six)`),
-		lines)
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				if in.Six != nil && in.Six.Three != nil {
+					out.One = (*string)(in.Six.Three.One)
+				}
+				if in.One != nil {
+					out.One = (*string)(in.One)
+				}
+		} else {
+			out = nil
+		}
+		return out
+		`), lines)
 }
 
 func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
@@ -1986,13 +2069,24 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
  			4: required NestedBar four
  		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Five = convertToRequestType(in.Five)
+		out.Five = convertToRequestType()
+		if in.Two != nil {
+			out.One = *(in.Two)
+		}
 		out.Four = convertToFourRequestType(in.Four)
+		out := &structs.NestedBar{}
+		if in != nil {
+			out.One = string(in.One)
+			out.Two = (*string)&(in.One)
+		} else {
+			out = nil
+		}
+		return out
 	`), lines)
 }
 

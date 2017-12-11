@@ -75,6 +75,7 @@ type TypeConverter struct {
 
 	MethodName   string
 	IsMethodCall bool
+	IsTestCall   bool
 }
 
 // HelperFunctionStruct is the container for making request to type converter structs
@@ -574,6 +575,9 @@ func (c *TypeConverter) genConverterForMap(
 }
 
 func (c *TypeConverter) shouldSkipCall(isRecursiveCall bool, level int) bool {
+	if c.IsTestCall {
+		return false
+	}
 	return (isRecursiveCall && !c.IsMethodCall) || level > 1
 }
 
@@ -678,9 +682,6 @@ func (c *TypeConverter) genStructConverter(
 		if fromIdentifier == "" && fromField != nil {
 			// should we set this if no fromField ??
 			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
-		}
-		if fromIdentifier == "" && toField != nil {
-			fromIdentifier = "in." + fromPrefix + pascalCase(toField.Name)
 		}
 
 		fromFieldShortName, toFieldShortName := fromIdentifier, toIdentifier
@@ -938,13 +939,9 @@ func checkOptionalNil(
 	sort.Strings(keys)
 	for _, id := range keys {
 		if strings.HasPrefix(toIdentifier, id) {
-			/* coverage ignore next line */
 			v := uninitialized[id]
-			/* coverage ignore next line */
 			ret = append(ret, indent+"if "+v.Identifier+" == nil {")
-			/* coverage ignore next line */
 			ret = append(ret, indent+"\t"+v.Identifier+" = &"+v.TypeName+"{}")
-			/* coverage ignore next line */
 			ret = append(ret, indent+"}")
 		}
 	}
