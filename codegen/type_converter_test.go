@@ -820,7 +820,6 @@ func TestConvertListOfStruct(t *testing.T) {
 			} else {
 				out = nil
 			}
-		return out
 		}
 		out.Two = make([]*structs.Inner, len(in.Two))
 		for index3, value4 := range in.Two {
@@ -830,7 +829,6 @@ func TestConvertListOfStruct(t *testing.T) {
 			} else {
 				out = nil
 			}
-		return out
 		}
 	`), lines)
 }
@@ -1029,7 +1027,6 @@ func TestConvertMapOfStruct(t *testing.T) {
 		} else {
 			out = nil
 		}
-	return out
 	}
 	out.Two = make(map[string]*structs.Inner, len(in.Two))
 	for key3, value4 := range in.Two {
@@ -1039,7 +1036,6 @@ func TestConvertMapOfStruct(t *testing.T) {
 		} else {
 			out = nil
 		}
-	return out
 	}`), lines)
 }
 
@@ -1776,7 +1772,6 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 	} else {
 		out = nil
 	}
-	return out
 	out.Five = convertToRequestType()
 	if in.Two != nil {
 		out.One = *(in.Two)
@@ -1830,7 +1825,6 @@ func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 		} else {
 			out = nil
 		}
-		return out
 		out.Five = convertToFourRequestType(in.Four)
 		out := &structs.NestedFoo{}
 		if in != nil {
@@ -1843,8 +1837,7 @@ func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
 			out.Two = (*string)&(in.One)
 		} else {
 			out = nil
-		}
-		return out`), trim(lines))
+		}`), trim(lines))
 }
 
 func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
@@ -1932,8 +1925,7 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 				out.One = string(in.One)
 		} else {
 			out = nil
-		}
-		return out`),
+		}`),
 		lines)
 }
 
@@ -1991,8 +1983,7 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 				}
 		} else {
 			out = nil
-		}
-		return out`),
+		}`),
 		lines)
 }
 
@@ -2049,9 +2040,7 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 				}
 		} else {
 			out = nil
-		}
-		return out
-		`), lines)
+		}`), lines)
 }
 
 func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
@@ -2103,9 +2092,7 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 			out.Two = (*string)&(in.One)
 		} else {
 			out = nil
-		}
-		return out
-	`), lines)
+		}`), lines)
 }
 
 func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
@@ -2236,7 +2223,6 @@ func TestConverterMapListOfStructType(t *testing.T) {
 			} else {
 				out = nil
 			}
-		return out
 		}
 		sourceList3 := in.Two
 		isOverridden4 := false
@@ -2255,7 +2241,6 @@ func TestConverterMapListOfStructType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			} else {
 				out := &structs.Inner{}
 				if value6 != nil {
@@ -2263,7 +2248,6 @@ func TestConverterMapListOfStructType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			}
 		}
 	`), lines)
@@ -2319,7 +2303,6 @@ func TestConverterMapMapType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			} else {
 				out := &structs.Inner{}
 				if value4 != nil {
@@ -2327,7 +2310,6 @@ func TestConverterMapMapType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			}
 		}
 		sourceList5 := in.Two
@@ -2347,7 +2329,6 @@ func TestConverterMapMapType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			} else {
 				out := &structs.Inner{}
 				if value8 != nil {
@@ -2355,7 +2336,6 @@ func TestConverterMapMapType(t *testing.T) {
 				} else {
 					out = nil
 				}
-		return out
 			}
 		}
 	`), lines)

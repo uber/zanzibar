@@ -903,7 +903,7 @@ func (ms *MethodSpec) genStructHelperFunctions(
 		if err != nil {
 			return err
 		}
-		typeConverter.append("}\n")
+		typeConverter.append("return out \t}\n")
 	}
 	return nil
 }

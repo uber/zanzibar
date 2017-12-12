@@ -264,7 +264,6 @@ func (c *TypeConverter) GenConverterForStruct(
 	c.append(indent, "} else {")
 	c.append(indent, "\t", strings.Split(toIdentifier, ".")[0], " = nil")
 	c.append(indent, "}")
-	c.append("return out")
 
 	return nil
 }
