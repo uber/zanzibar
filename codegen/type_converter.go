@@ -213,7 +213,7 @@ func (c *TypeConverter) GenConverterForStruct(
 	}
 
 	subFromFields := fromFieldStruct.Fields
-	fromListOrMap := level + 1 == 0
+	fromListOrMap := level+1 == 0
 
 	if isRecursiveCall || !c.IsMethodCall {
 		if fromListOrMap {
