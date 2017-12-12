@@ -807,16 +807,30 @@ func TestConvertListOfStruct(t *testing.T) {
 			2: required list<Inner> two
 		}`,
 		nil,
-		nil, false,
+		nil, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 		out.One = make([]*structs.Inner, len(in.One))
 		for index1, value2 := range in.One {
+			out := &structs.Inner{}
+			if value2 != nil {
+				out.One[index1].Field = (*string)(in.One[index1].Field)
+			} else {
+				out = nil
+			}
+		return out
 		}
 		out.Two = make([]*structs.Inner, len(in.Two))
 		for index3, value4 := range in.Two {
+			out := &structs.Inner{}
+			if value4 != nil {
+				out.Two[index3].Field = (*string)(in.Two[index3].Field)
+			} else {
+				out = nil
+			}
+		return out
 		}
 	`), lines)
 }
@@ -941,14 +955,16 @@ func TestConvertWithBadImportListOfBadStructIgnoreDeeperError(t *testing.T) {
 			}
 			`),
 		},
-		nil, false,
+		nil, true,
 	)
 
 	assert.Nil(t, err)
 	assertPrettyEqual(t, trim(`
 	out.One = make([]*structs.Inner, len(in.One))
 	for index1, value2 := range in.One {
-	}
+		out := &structs.Inner{}
+		if value2 != nil {
+	out.One[index1].Field = convertToFieldRequestType(in.One[index1].Field)
 	out.Two = string(in.Two)
 	`), lines)
 }
@@ -1009,7 +1025,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 	for key1, value2 := range in.One {
 		out := &structs.Inner{}
 		if value2 != nil {
-			out.Field = (*string)(in.Field)
+			out.One[key1].Field = (*string)(in.One[key1].Field)
 		} else {
 			out = nil
 		}
@@ -1019,7 +1035,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 	for key3, value4 := range in.Two {
 		out := &structs.Inner{}
 		if value4 != nil {
-			out.Field = (*string)(in.Field)
+			out.Two[key3].Field = (*string)(in.Two[key3].Field)
 		} else {
 			out = nil
 		}
@@ -1114,14 +1130,16 @@ func TestConvertWithBadImportMapOfBadStructIgnore(t *testing.T) {
 			`),
 		},
 		nil,
-		false,
+		true,
 	)
 
 	assert.Nil(t, err)
 	assertPrettyEqual(t, trim(`
 	out.One = make(map[string]*structs.Inner, len(in.One))
 	for key1, value2 := range in.One {
-	}
+		out := &structs.Inner{}
+		if value2 != nil {
+	out.One[key1].Field = convertToFieldRequestType(in.One[key1].Field)
 	out.Two = string(in.Two)`), lines)
 }
 
@@ -2203,13 +2221,22 @@ func TestConverterMapListOfStructType(t *testing.T) {
 			2: required list<Inner> two
 		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 		out.One = make([]*structs.Inner, len(in.Two))
 		for index1, value2 := range in.Two {
+			out := &structs.Inner{}
+			if value2 != nil {
+				if in.Two[index1] != nil {
+					out.One[index1].Field = (*string)(in.Two[index1].Field)
+				}
+			} else {
+				out = nil
+			}
+		return out
 		}
 		sourceList3 := in.Two
 		isOverridden4 := false
@@ -2220,7 +2247,23 @@ func TestConverterMapListOfStructType(t *testing.T) {
 		out.Two = make([]*structs.Inner, len(sourceList3))
 		for index5, value6 := range sourceList3 {
 			if isOverridden4 {
+				out := &structs.Inner{}
+				if value6 != nil {
+					if in.One[index5] != nil {
+						out.Two[index5].Field = (*string)(in.One[index5].Field)
+					}
+				} else {
+					out = nil
+				}
+		return out
 			} else {
+				out := &structs.Inner{}
+				if value6 != nil {
+					out.Two[index5].Field = (*string)(in.Two[index5].Field)
+				} else {
+					out = nil
+				}
+		return out
 			}
 		}
 	`), lines)
@@ -2254,7 +2297,7 @@ func TestConverterMapMapType(t *testing.T) {
 			2: optional map<string, Inner> two
 		}`,
 		nil,
-		fieldMap, false,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
@@ -2268,7 +2311,23 @@ func TestConverterMapMapType(t *testing.T) {
 		out.One = make(map[string]*structs.Inner, len(sourceList1))
 		for key3, value4 := range sourceList1 {
 			if isOverridden2 {
+				out := &structs.Inner{}
+				if value4 != nil {
+					if in.Two[key3] != nil {
+						out.One[key3].Field = (*string)(in.Two[key3].Field)
+					}
+				} else {
+					out = nil
+				}
+		return out
 			} else {
+				out := &structs.Inner{}
+				if value4 != nil {
+					out.One[key3].Field = (*string)(in.One[key3].Field)
+				} else {
+					out = nil
+				}
+		return out
 			}
 		}
 		sourceList5 := in.Two
@@ -2280,7 +2339,23 @@ func TestConverterMapMapType(t *testing.T) {
 		out.Two = make(map[string]*structs.Inner, len(sourceList5))
 		for key7, value8 := range sourceList5 {
 			if isOverridden6 {
+				out := &structs.Inner{}
+				if value8 != nil {
+					if in.One[key7] != nil {
+						out.Two[key7].Field = (*string)(in.One[key7].Field)
+					}
+				} else {
+					out = nil
+				}
+		return out
 			} else {
+				out := &structs.Inner{}
+				if value8 != nil {
+					out.Two[key7].Field = (*string)(in.Two[key7].Field)
+				} else {
+					out = nil
+				}
+		return out
 			}
 		}
 	`), lines)

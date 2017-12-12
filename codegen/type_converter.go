@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -179,9 +178,7 @@ func (c *TypeConverter) GenConverterForStruct(
 	if fromFieldType == nil {
 		//  in the direct assignment we do a nil check on fromField here. its hard for unknown number of transforms
 		//  initialize the toField with an empty struct only if it's required, otherwise send to uninitialized map
-		if toRequired && !isRecursiveCall {
-			c.append(indent, toIdentifier, " = &", typeName, "{}")
-		} else {
+		if !toRequired {
 			c.uninitialized[toIdentifier] = &fieldStruct{
 				Identifier: toIdentifier,
 				TypeName:   typeName,
@@ -216,8 +213,14 @@ func (c *TypeConverter) GenConverterForStruct(
 	}
 
 	subFromFields := fromFieldStruct.Fields
+	fromListOrMap := level + 1 == 0
 
 	if isRecursiveCall || !c.IsMethodCall {
+		if fromListOrMap {
+			c.append(indent, "if ", fromIdentifier, " != nil {")
+			c.append(indent, "\t", toIdentifier, " = &", typeName, "{}")
+		}
+
 		err = c.genStructConverter(
 			keyPrefix+".",
 			fromPrefix+".",
@@ -230,6 +233,12 @@ func (c *TypeConverter) GenConverterForStruct(
 		if err != nil {
 			return err
 		}
+		if fromListOrMap {
+			c.append(indent, "} else {")
+			c.append(indent, "\t", toIdentifier, " = nil")
+			c.append(indent, "}")
+		}
+
 		return nil
 	}
 
@@ -353,7 +362,7 @@ func (c *TypeConverter) genConverterForList(
 			nil,
 			requestType,
 			false,
-			level+1,
+			level-1,
 		)
 
 		if err != nil {
@@ -384,7 +393,7 @@ func (c *TypeConverter) genConverterForList(
 				nil,
 				requestType,
 				false,
-				level+1,
+				level-1,
 			)
 			if err != nil {
 				return err
@@ -525,7 +534,7 @@ func (c *TypeConverter) genConverterForMap(
 			nil,
 			requestType,
 			false,
-			level+1,
+			level-1,
 		)
 
 		if err != nil {
@@ -556,7 +565,7 @@ func (c *TypeConverter) genConverterForMap(
 				nil,
 				requestType,
 				false,
-				level+1,
+				level-1,
 			)
 			if err != nil {
 				return err
@@ -575,7 +584,11 @@ func (c *TypeConverter) genConverterForMap(
 }
 
 func (c *TypeConverter) shouldSkipCall(isRecursiveCall bool, level int) bool {
+	// NOTE print out all recursive calls for tests
 	if c.IsTestCall {
+		return false
+	}
+	if level == 0 {
 		return false
 	}
 	return (isRecursiveCall && !c.IsMethodCall) || level > 1
@@ -685,10 +698,10 @@ func (c *TypeConverter) genStructConverter(
 		}
 
 		fromFieldShortName, toFieldShortName := fromIdentifier, toIdentifier
-		if fromField != nil {
+		if fromField != nil && level > 0 {
 			fromFieldShortName = "in." + pascalCase(fromField.Name)
 		}
-		if toField != nil {
+		if toField != nil && level > 0 {
 			toFieldShortName = "out." + pascalCase(toField.Name)
 		}
 
@@ -921,33 +934,6 @@ func (f *FieldAssignment) IsTransform() bool {
 	return f.FromIdentifier[in:] != f.ToIdentifier[out:]
 }
 
-// checkOptionalNil nil-checks fields that may not be initialized along
-// the assign path
-func checkOptionalNil(
-	indent string,
-	uninitialized map[string]*fieldStruct,
-	toIdentifier string,
-) []string {
-	var ret = make([]string, 0)
-	if len(uninitialized) < 1 {
-		return ret
-	}
-	keys := make([]string, 0, len(uninitialized))
-	for k := range uninitialized {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, id := range keys {
-		if strings.HasPrefix(toIdentifier, id) {
-			v := uninitialized[id]
-			ret = append(ret, indent+"if "+v.Identifier+" == nil {")
-			ret = append(ret, indent+"\t"+v.Identifier+" = &"+v.TypeName+"{}")
-			ret = append(ret, indent+"}")
-		}
-	}
-	return ret
-}
-
 // Generate generates assignment
 func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct) string {
 	var lines = make([]string, 0)
@@ -956,11 +942,9 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 		if (!f.From.Required && f.To.Required) || f.ExtraNilCheck {
 			// need to nil check otherwise we could be cast or deref nil
 			lines = append(lines, indent+"if "+f.FromIdentifier+" != nil {")
-			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
 			lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			lines = append(lines, indent+"}")
 		} else {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 		}
 		return strings.Join(lines, "\n")
@@ -973,13 +957,11 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 			checks = checks[:len(checks)-1]
 		}
 		if len(checks) == 0 {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			return strings.Join(lines, "\n")
 		}
 	}
 	lines = append(lines, indent+"if "+strings.Join(checks, " && ")+" {")
-	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
 	lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 	lines = append(lines, indent+"}")
 	// TODO else?  log? should this silently eat intermediate nils as none-assignment,  should set nil?
