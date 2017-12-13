@@ -29,3 +29,4 @@ node_modules/
 test/.cached_binary_test_info.json
 examples/example-gateway/build/example-gateway
 .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
+package-lock.json

@@ -36,10 +36,11 @@ import (
 
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-func TestPingSuccessfulRequestOKResponse(t *testing.T) {
-	testpingCounter := 0
+func TestTransSuccessfulRequestOKResponse(t *testing.T) {
+	testtransCounter := 0
 
 	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
 		"clients.baz.serviceName": "bazService",
@@ -53,17 +54,18 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}
 	defer gateway.Close()
 
-	fakePing := func(
+	fakeTrans := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (*clientsBazBase.BazResponse, map[string]string, error) {
-		testpingCounter++
+		args *clientsBazBaz.SimpleService_Trans_Args,
+	) (*clientsBazBase.TransStruct, map[string]string, error) {
+		testtransCounter++
 
 		var resHeaders map[string]string
 
-		var res clientsBazBase.BazResponse
+		var res clientsBazBase.TransStruct
 
-		clientResponse := []byte(`{"message":"pong"}`)
+		clientResponse := []byte(`{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_rider"}}`)
 		err := json.Unmarshal(clientResponse, &res)
 		if err != nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
@@ -73,17 +75,17 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	gateway.TChannelBackends()["baz"].Register(
-		"baz", "ping", "SimpleService::ping",
-		bazClient.NewSimpleServicePingHandler(fakePing),
+		"baz", "trans", "SimpleService::trans",
+		bazClient.NewSimpleServiceTransHandler(fakeTrans),
 	)
 
 	headers := map[string]string{}
 
-	endpointRequest := []byte(`{}`)
+	endpointRequest := []byte(`{"arg1":{"driver":{"check":2,"msg":"arg1_driver_msg"},"message":"msg_arg1","rider":{"check":1,"msg":"arg1_rider_msg"}},"arg2":{"driver":{"check":4,"msg":"arg2_driver_msg"},"message":"msg_arg2","rider":{"check":3,"msg":"arg2_rider_msg"}},"message":"message"}`)
 
 	res, err := gateway.MakeRequest(
-		"GET",
-		"/baz/ping",
+		"POST",
+		"/baz/trans",
 		headers,
 		bytes.NewReader(endpointRequest),
 	)
@@ -97,7 +99,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 1, testpingCounter)
+	assert.Equal(t, 1, testtransCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.JSONEq(t, `{"message":"pong"}`, string(data))
+	assert.JSONEq(t, `{"driver":{"check":12,"msg":"tchan_return_driver"},"message":"tchan_return_msg","rider":{"check":11,"msg":"tchan_return_msg"}}`, string(data))
 }
