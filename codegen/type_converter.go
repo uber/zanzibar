@@ -72,20 +72,20 @@ type TypeConverter struct {
 	uninitialized map[string]*fieldStruct
 	fieldCounter  int
 
-	requestTypeHelper RequestHelper
+	requestTypeHelper ConvertOptions
 }
 
-// RequestHelper is the helper struct for method generation
-type RequestHelper struct {
-	RequestSuffix     string
-	RequestInputType  string
-	RequestOutputType string
-	ResponseType      string
-	OutputMethodName  string
+// ConvertOptions is the helper struct for method generation
+type ConvertOptions struct {
+	FromSuffix       string
+	FromInputType    string
+	FromOutputType   string
+	ToType           string
+	OutputMethodName string
 }
 
 // NewTypeConverter returns *TypeConverter
-func NewTypeConverter(h PackageNameResolver, requestType RequestHelper) *TypeConverter {
+func NewTypeConverter(h PackageNameResolver, requestType ConvertOptions) *TypeConverter {
 	return &TypeConverter{
 		LineBuilder:       LineBuilder{},
 		Helper:            h,
@@ -742,10 +742,10 @@ func (c *TypeConverter) GenStructConverter(
 
 	helper := c.requestTypeHelper
 	var requestInput, requestOutput string
-	requestInput = "(in " + helper.RequestInputType + ") " + helper.RequestOutputType
-	requestOutput = "out := &" + helper.ResponseType + "{}\n"
+	requestInput = "(in " + helper.FromInputType + ") " + helper.FromOutputType
+	requestOutput = "out := &" + helper.ToType + "{}\n"
 
-	c.append("func convertTo", pascalCase(helper.OutputMethodName), c.requestTypeHelper.RequestSuffix,
+	c.append("func convertTo", pascalCase(helper.OutputMethodName), c.requestTypeHelper.FromSuffix,
 		requestInput, "{")
 
 	if isPrimitive {
