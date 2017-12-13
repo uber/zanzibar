@@ -140,7 +140,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.Equal(t, []byte(`{{$testFixture.EndpointResponse.Body}}`), data)
+		assert.JSONEq(t, `{{$testFixture.EndpointResponse.Body}}`, string(data))
 	{{end -}}
 }
 

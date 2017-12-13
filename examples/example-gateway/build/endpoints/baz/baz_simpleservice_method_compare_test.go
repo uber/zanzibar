@@ -101,5 +101,5 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 
 	assert.Equal(t, 1, testcompareCounter)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.Equal(t, []byte(`{"message":"different"}`), data)
+	assert.JSONEq(t, `{"message":"different"}`, string(data))
 }

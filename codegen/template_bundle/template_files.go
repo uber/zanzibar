@@ -835,7 +835,7 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		res.Header.Get("{{$k}}"))
 	{{end -}}
 	{{if $responseType -}}
-		assert.Equal(t, []byte(` + "`" + `{{$testFixture.EndpointResponse.Body}}` + "`" + `), data)
+		assert.JSONEq(t, ` + "`" + `{{$testFixture.EndpointResponse.Body}}` + "`" + `, string(data))
 	{{end -}}
 }
 
@@ -853,7 +853,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4500, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4501, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
