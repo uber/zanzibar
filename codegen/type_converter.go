@@ -77,9 +77,11 @@ type TypeConverter struct {
 
 // RequestHelper is the helper struct for method generation
 type RequestHelper struct {
-	UpstreamMethod   *MethodSpec
-	DownstreamMethod *MethodSpec
-	RequestSuffix    string
+	RequestSuffix     string
+	RequestInputType  string
+	RequestOutputType string
+	ResponseType      string
+	OutputMethodName  string
 }
 
 // NewTypeConverter returns *TypeConverter
@@ -738,19 +740,12 @@ func (c *TypeConverter) GenStructConverter(
 		}
 	}
 
-	method := c.requestTypeHelper.UpstreamMethod
-	downstreamMethod := c.requestTypeHelper.DownstreamMethod
-
+	helper := c.requestTypeHelper
 	var requestInput, requestOutput string
-	if c.requestTypeHelper.RequestSuffix == "ClientRequest" {
-		requestInput = "(in " + method.RequestType + ") " + downstreamMethod.RequestType
-		requestOutput = "out := &" + downstreamMethod.ShortRequestType + "{}\n"
-	} else {
-		requestInput = "(in " + downstreamMethod.ResponseType + ") " + method.ResponseType
-		requestOutput = "out := &" + method.ShortResponseType + "{}\n"
-	}
+	requestInput = "(in " + helper.RequestInputType + ") " + helper.RequestOutputType
+	requestOutput = "out := &" + helper.ResponseType + "{}\n"
 
-	c.append("func convertTo", pascalCase(method.Name), c.requestTypeHelper.RequestSuffix,
+	c.append("func convertTo", pascalCase(helper.OutputMethodName), c.requestTypeHelper.RequestSuffix,
 		requestInput, "{")
 
 	if isPrimitive {

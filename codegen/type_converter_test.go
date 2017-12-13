@@ -68,17 +68,13 @@ func (r *naivePackageNameResolver) TypePackageName(
 }
 
 func newTypeConverter() *codegen.TypeConverter {
-	fakeMethod := &codegen.MethodSpec{
-		RequestType:       "RequestType",
-		ResponseType:      "ResponseType",
-		ShortRequestType:  "ShortRequestType",
-		ShortResponseType: "ShortResponseType",
-	}
 	// construct fake request helper
 	requestHelper := codegen.RequestHelper{
-		UpstreamMethod:   fakeMethod,
-		DownstreamMethod: fakeMethod,
-		RequestSuffix:    "RequestSuffix",
+		RequestSuffix:     "RequestSuffix",
+		RequestInputType:  "ResponseType",
+		RequestOutputType: "ResponseType",
+		ResponseType:      "ShortResponseType",
+		OutputMethodName:  "",
 	}
 	return codegen.NewTypeConverter(&naivePackageNameResolver{}, requestHelper)
 }

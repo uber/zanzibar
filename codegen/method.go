@@ -853,9 +853,11 @@ func (ms *MethodSpec) setTypeConverters(
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
 	typeConverter := NewTypeConverter(h, RequestHelper{
-		UpstreamMethod:   ms,
-		DownstreamMethod: downstreamMethod,
-		RequestSuffix:    "ClientRequest",
+		RequestSuffix:     "ClientRequest",
+		RequestInputType:  ms.RequestType,
+		RequestOutputType: downstreamMethod.RequestType,
+		ResponseType:      downstreamMethod.ShortRequestType,
+		OutputMethodName:  ms.Name,
 	})
 
 	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms, false)
@@ -873,9 +875,11 @@ func (ms *MethodSpec) setTypeConverters(
 	}
 
 	respConverter := NewTypeConverter(h, RequestHelper{
-		UpstreamMethod:   ms,
-		DownstreamMethod: downstreamMethod,
-		RequestSuffix:    "ClientResponse",
+		RequestSuffix:     "ClientResponse",
+		RequestInputType:  downstreamMethod.ResponseType,
+		RequestOutputType: ms.ResponseType,
+		ResponseType:      ms.ShortResponseType,
+		OutputMethodName:  ms.Name,
 	})
 
 	var respFields, downstreamRespFields []*compile.FieldSpec
