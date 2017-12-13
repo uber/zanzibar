@@ -212,7 +212,7 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithNestedQueryParamsClientResponse(clientRespBody)
+	response := convertToArgWithNestedQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -241,7 +241,7 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 	return out
 }
 
-func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

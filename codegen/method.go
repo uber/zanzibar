@@ -858,19 +858,10 @@ func (ms *MethodSpec) setTypeConverters(
 		RequestSuffix:    "ClientRequest",
 	})
 
-	//typeConverter.append(
-	//	"func convertTo",
-	//	pascalCase(ms.Name),
-	//	"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
-
-	//typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
-
 	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms, false)
 	if err != nil {
 		return err
 	}
-	//typeConverter.append("\nreturn out")
-	//typeConverter.append("}")
 	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
@@ -887,10 +878,6 @@ func (ms *MethodSpec) setTypeConverters(
 		RequestSuffix:    "ClientResponse",
 	})
 
-	//respConverter.append(
-	//	"func convert",
-	//	pascalCase(ms.Name),
-	//	"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
 	var respFields, downstreamRespFields []*compile.FieldSpec
 	var isPrimitive bool
 	switch respType.(type) {
@@ -906,8 +893,6 @@ func (ms *MethodSpec) setTypeConverters(
 
 		isPrimitive = true
 	default:
-		// default as struct
-		//respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
 		respFields = respType.(*compile.StructSpec).Fields
 		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
 		isPrimitive = false
@@ -916,7 +901,6 @@ func (ms *MethodSpec) setTypeConverters(
 	if err != nil {
 		return err
 	}
-	//respConverter.append("\nreturn out \t}")
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
 
 	return nil

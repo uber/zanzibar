@@ -161,7 +161,7 @@ func (w NormalEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertNormalClientResponse(clientRespBody)
+	response := convertToNormalClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -191,7 +191,7 @@ func convertNormalBarException(
 	return serverError
 }
 
-func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

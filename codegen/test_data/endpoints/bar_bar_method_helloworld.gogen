@@ -151,7 +151,7 @@ func (w HelloWorldEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertHelloWorldClientResponse(clientRespBody)
+	response := convertToHelloWorldClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -163,7 +163,7 @@ func convertHelloWorldBarException(
 	return serverError
 }
 
-func convertHelloWorldClientResponse(in string) string {
+func convertToHelloWorldClientResponse(in string) string {
 	out := in
 
 	return out

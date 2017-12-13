@@ -143,7 +143,7 @@ func (w ArgWithParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithParamsClientResponse(clientRespBody)
+	response := convertToArgWithParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -161,7 +161,7 @@ func convertToArgWithParamsClientRequest(in *endpointsBarBar.Bar_ArgWithParams_A
 	return out
 }
 
-func convertArgWithParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToArgWithParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
