@@ -71,14 +71,23 @@ type TypeConverter struct {
 	Helper        PackageNameResolver
 	uninitialized map[string]*fieldStruct
 	fieldCounter  int
+
+	requestTypeHelper RequestHelper
+}
+
+type RequestHelper struct {
+	UpstreamMethod   *MethodSpec
+	DownstreamMethod *MethodSpec
+	RequestSuffix    string
 }
 
 // NewTypeConverter returns *TypeConverter
-func NewTypeConverter(h PackageNameResolver) *TypeConverter {
+func NewTypeConverter(h PackageNameResolver, requestType RequestHelper) *TypeConverter {
 	return &TypeConverter{
-		LineBuilder:   LineBuilder{},
-		Helper:        h,
-		uninitialized: make(map[string]*fieldStruct),
+		LineBuilder:       LineBuilder{},
+		Helper:            h,
+		uninitialized:     make(map[string]*fieldStruct),
+		requestTypeHelper: requestType,
 	}
 }
 
@@ -714,6 +723,7 @@ func (c *TypeConverter) GenStructConverter(
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
+	isPrimitive bool,
 ) error {
 	// Add compiled FieldSpecs to the FieldMapperEntry
 	fieldMap = addSpecToMap(fieldMap, fromFields, "")
@@ -727,11 +737,34 @@ func (c *TypeConverter) GenStructConverter(
 		}
 	}
 
+	method := c.requestTypeHelper.UpstreamMethod
+	downstreamMethod := c.requestTypeHelper.DownstreamMethod
+
+	var requestInput, requestOutput string
+	if c.requestTypeHelper.RequestSuffix == "ClientRequest" {
+		requestInput = "(in " + method.RequestType + ") " + downstreamMethod.RequestType
+		requestOutput = "out := &" + downstreamMethod.ShortRequestType + "{}\n"
+	} else {
+		requestInput = "(in " + downstreamMethod.ResponseType + ") " + method.ResponseType
+		requestOutput = "out := &" + method.ShortResponseType + "{}\n"
+	}
+
+	c.append("func convertTo", pascalCase(method.Name), c.requestTypeHelper.RequestSuffix,
+		requestInput, "{")
+
+	if isPrimitive {
+		c.append("out", " := in\t\n")
+		c.append("\nreturn out \t\n}")
+		return nil
+	}
+
+	c.append(requestOutput)
 	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
 	if err != nil {
 		return err
 	}
-
+	c.append("\nreturn out")
+	c.append("}")
 	return nil
 }
 

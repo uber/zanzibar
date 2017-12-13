@@ -852,38 +852,47 @@ func (ms *MethodSpec) setTypeConverters(
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	typeConverter := NewTypeConverter(h)
+	typeConverter := NewTypeConverter(h, RequestHelper{
+		UpstreamMethod:   ms,
+		DownstreamMethod: downstreamMethod,
+		RequestSuffix:    "ClientRequest",
+	})
 
-	typeConverter.append(
-		"func convertTo",
-		pascalCase(ms.Name),
-		"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
+	//typeConverter.append(
+	//	"func convertTo",
+	//	pascalCase(ms.Name),
+	//	"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
 
-	typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
+	//typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
 
-	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms)
+	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms, false)
 	if err != nil {
 		return err
 	}
-	typeConverter.append("\nreturn out")
-	typeConverter.append("}")
+	//typeConverter.append("\nreturn out")
+	//typeConverter.append("}")
 	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
-	downstreamRespType := funcSpec.ResultSpec.ReturnType
+	downstreamRespType := downstreamSpec.ResultSpec.ReturnType
 
 	if respType == nil || downstreamRespType == nil {
 		return nil
 	}
 
-	respConverter := NewTypeConverter(h)
+	respConverter := NewTypeConverter(h, RequestHelper{
+		UpstreamMethod:   ms,
+		DownstreamMethod: downstreamMethod,
+		RequestSuffix:    "ClientResponse",
+	})
 
-	respConverter.append(
-		"func convert",
-		pascalCase(ms.Name),
-		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
+	//respConverter.append(
+	//	"func convert",
+	//	pascalCase(ms.Name),
+	//	"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
 	var respFields, downstreamRespFields []*compile.FieldSpec
+	var isPrimitive bool
 	switch respType.(type) {
 	case
 		*compile.BoolSpec,
@@ -895,18 +904,19 @@ func (ms *MethodSpec) setTypeConverters(
 		*compile.DoubleSpec,
 		*compile.StringSpec:
 
-		respConverter.append("out", " := in\t\n")
+		isPrimitive = true
 	default:
 		// default as struct
+		//respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
 		respFields = respType.(*compile.StructSpec).Fields
 		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
-		respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
-		err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms)
-		if err != nil {
-			return err
-		}
+		isPrimitive = false
 	}
-	respConverter.append("\nreturn out \t}")
+	err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms, isPrimitive)
+	if err != nil {
+		return err
+	}
+	//respConverter.append("\nreturn out \t}")
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
 
 	return nil

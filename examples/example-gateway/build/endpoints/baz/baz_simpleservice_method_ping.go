@@ -130,11 +130,11 @@ func (w PingEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertPingClientResponse(clientRespBody)
+	response := convertToPingClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertPingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
+func convertToPingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
 	out := &endpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)

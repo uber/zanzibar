@@ -68,7 +68,19 @@ func (r *naivePackageNameResolver) TypePackageName(
 }
 
 func newTypeConverter() *codegen.TypeConverter {
-	return codegen.NewTypeConverter(&naivePackageNameResolver{})
+	fakeMethod := &codegen.MethodSpec{
+		RequestType:       "RequestType",
+		ResponseType:      "ResponseType",
+		ShortRequestType:  "ShortRequestType",
+		ShortResponseType: "ShortResponseType",
+	}
+	// construct fake request helper
+	requestHelper := codegen.RequestHelper{
+		UpstreamMethod:   fakeMethod,
+		DownstreamMethod: fakeMethod,
+		RequestSuffix:    "RequestSuffix",
+	}
+	return codegen.NewTypeConverter(&naivePackageNameResolver{}, requestHelper)
 }
 
 func compileProgram(
@@ -107,6 +119,7 @@ func convertTypes(
 		program.Types[fromStruct].(*compile.StructSpec).Fields,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
 		overrideMap,
+		false,
 	)
 	if err != nil {
 		return "", err
@@ -185,8 +198,12 @@ func TestConvertStrings(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*string)(in.One)
 		out.Two = string(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -208,8 +225,12 @@ func TestConvertBools(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*bool)(in.One)
 		out.Two = bool(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -229,7 +250,11 @@ func TestConvertBoolsOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*bool)&(in.One)
+		return out
+		}
 	`), lines)
 }
 
@@ -249,8 +274,12 @@ func TestConvertBoolsRequiredToOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.One != nil {
 			out.One = *(in.One)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -273,8 +302,12 @@ func TestConvertInt8(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*int8)(in.One)
 		out.Two = int8(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -296,8 +329,12 @@ func TestConvertInt16(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*int16)(in.One)
 		out.Two = int16(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -319,8 +356,12 @@ func TestConvertInt32(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*int32)(in.One)
 		out.Two = int32(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -342,8 +383,12 @@ func TestConvertInt64(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*int64)(in.One)
 		out.Two = int64(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -365,8 +410,12 @@ func TestConvertDouble(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*float64)(in.One)
 		out.Two = float64(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -388,8 +437,12 @@ func TestConvertBinary(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = []byte(in.One)
 		out.Two = []byte(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -421,6 +474,8 @@ func TestConvertStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
@@ -434,6 +489,8 @@ func TestConvertStruct(t *testing.T) {
 			out.Four.Two = (*string)(in.Four.Two)
 		} else {
 			out.Four = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -464,12 +521,16 @@ func TestConvertStructRequiredToOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -500,12 +561,16 @@ func TestConvertStructOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -536,6 +601,8 @@ func TestHandlesMissingFields(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
@@ -547,6 +614,8 @@ func TestHandlesMissingFields(t *testing.T) {
 			out.Four.One = string(in.Four.One)
 		} else {
 			out.Four = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -602,8 +671,12 @@ func TestConvertTypeDef(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*structs.UUID)(in.One)
 		out.Two = structs.UUID(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -627,9 +700,13 @@ func TestConvertTypeDefReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*structs.UUID)&(in.One)
 		if in.Two != nil {
 			out.Two = *(in.Two)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -657,8 +734,12 @@ func TestConvertEnum(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*structs.ItemState)(in.One)
 		out.Two = structs.ItemState(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -667,7 +748,7 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyString one
 			2: required string two
@@ -698,7 +779,7 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyEnum one
 			2: required string two
@@ -732,7 +813,7 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyStruct one
 			2: required string two
@@ -778,6 +859,8 @@ func TestConvertListOfString(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make([]string, len(in.One))
 		for index1, value2 := range in.One {
 			out.One[index1] = string(value2)
@@ -785,6 +868,8 @@ func TestConvertListOfString(t *testing.T) {
 		out.Two = make([]string, len(in.Two))
 		for index3, value4 := range in.Two {
 			out.Two[index3] = string(value4)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -807,6 +892,8 @@ func TestConvertListOfBinary(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make([][]byte, len(in.One))
 		for index1, value2 := range in.One {
 			out.One[index1] = []byte(value2)
@@ -814,6 +901,8 @@ func TestConvertListOfBinary(t *testing.T) {
 		out.Two = make([][]byte, len(in.Two))
 		for index3, value4 := range in.Two {
 			out.Two[index3] = []byte(value4)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -841,6 +930,8 @@ func TestConvertListOfStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make([]*structs.Inner, len(in.One))
 		for index1, value2 := range in.One {
 			if value2 != nil {
@@ -858,6 +949,8 @@ func TestConvertListOfStruct(t *testing.T) {
 			} else {
 				out.Two[index3] = nil
 			}
+		}
+		return out
 		}
 	`), lines)
 }
@@ -902,7 +995,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -933,7 +1026,7 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 		struct Inner {
 			1: optional bar.MyStruct field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -979,6 +1072,8 @@ func TestConvertMapOfString(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make(map[string]string, len(in.One))
 		for key1, value2 := range in.One {
 			out.One[key1] = string(value2)
@@ -986,6 +1081,8 @@ func TestConvertMapOfString(t *testing.T) {
 		out.Two = make(map[string]string, len(in.Two))
 		for key3, value4 := range in.Two {
 			out.Two[key3] = string(value4)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1013,6 +1110,8 @@ func TestConvertMapOfStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make(map[string]*structs.Inner, len(in.One))
 		for key1, value2 := range in.One {
 			if value2 != nil {
@@ -1030,6 +1129,8 @@ func TestConvertMapOfStruct(t *testing.T) {
 			} else {
 				out.Two[key3] = nil
 			}
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1152,9 +1253,13 @@ func TestConvertWithCorrectKeyMapNotStringKey(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make(map[structs.UUID]string, len(in.One))
 		for key1, value2 := range in.One {
 			 out.One[structs.UUID(key1)] = string(value2)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1217,6 +1322,8 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.UUID = string(in.Three.UUID)
@@ -1230,6 +1337,8 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 			out.Four.Two = (*string)(in.Four.Two)
 		} else {
 			out.Four = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1262,8 +1371,12 @@ func TestConverterMap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = bool(in.Two)
 		out.Two = bool(in.One)
+		return out
+		}
 	`), lines)
 }
 
@@ -1291,9 +1404,13 @@ func TestConvertTypeDefReqToReqWithOptOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.Two = structs.UUID(in.Two)
 		if in.One != nil {
 			out.Two = *(in.One)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1329,6 +1446,8 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*structs.UUID)&(in.Three)
 		if in.One != nil {
 			out.One = (*structs.UUID)(in.One)
@@ -1338,6 +1457,8 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 		}
 		if in.Two != nil {
 			out.Two = *(in.Two)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1365,8 +1486,12 @@ func TestConverterMapNewField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = bool(in.One)
 		out.Two = bool(in.One)
+		return out
+		}
 	`), lines)
 }
 
@@ -1394,11 +1519,15 @@ func TestConverterMapOptionalNoOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*bool)(in.Two)
 		if in.One != nil {
 			out.One = (*bool)(in.One)
 		}
 		out.Two = (*bool)(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -1442,6 +1571,8 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*bool)(in.One)
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
@@ -1454,6 +1585,8 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 		}
 		out.Three = (*bool)&(in.Four)
 		out.Four = (*bool)&(in.Four)
+		return out
+		}
 		`), lines)
 }
 
@@ -1481,11 +1614,15 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = (*bool)&(in.One)
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
-		out.Two = (*bool)(in.Two)	
+		out.Two = (*bool)(in.Two)
+		return out
+		}
 	`), lines)
 }
 
@@ -1523,6 +1660,8 @@ func TestConverterMapStructWithSubFields2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
@@ -1539,6 +1678,8 @@ func TestConverterMapStructWithSubFields2(t *testing.T) {
 			out.Four.Two = (*string)(in.Four.Two)
 		} else {
 			out.Four = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -1567,12 +1708,16 @@ func TestConverterMapStructWithFromReqDropped(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1601,12 +1746,16 @@ func TestConverterMapStructWithFromOptDropped(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1634,12 +1783,16 @@ func TestConverterMapStructWithToOptMissingOk(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
 			out.Three.Two = (*string)(in.Three.Two)
 		} else {
 			out.Three = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1698,6 +1851,8 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
@@ -1715,6 +1870,8 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
 			}
 		} else {
 			out.Four = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1747,6 +1904,8 @@ func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
@@ -1764,6 +1923,8 @@ func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
 			}
 		} else {
 			out.Four = nil
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1801,6 +1962,8 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedFoo{}
 			out.Three.One = string(in.Three.One)
@@ -1819,6 +1982,8 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 				out.Five = &structs.NestedFoo{}
 			}
 			out.Five.Two = (*string)&(in.Four.One)
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1893,10 +2058,14 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.Six = &structs.NestedC{}
 		out.Six.Four = &structs.NestedA{}
 		if in.Five != nil && in.Five.Three != nil {
 			out.Six.Four.One = string(in.Five.Three.One)
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1935,12 +2104,16 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.Six = &structs.NestedC{}
 		if in.Five != nil && in.Five.Three != nil {
 			if out.Six.Four == nil {
 				out.Six.Four = &structs.NestedA{}
 			}
 			out.Six.Four.One = (*string)(in.Five.Three.One)
+		}
+		return out
 		}`),
 		lines)
 }
@@ -1978,6 +2151,8 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Five != nil && in.Five.Three != nil {
 			if out.Six == nil {
 				out.Six = &structs.NestedC{}
@@ -1986,6 +2161,8 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 				out.Six.Four = &structs.NestedA{}
 			}
 			out.Six.Four.One = (*string)(in.Five.Three.One)
+		}
+		return out
 		}`),
 		lines)
 }
@@ -2028,6 +2205,8 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Four != nil && in.Four.Two != nil {
 			if out.Five == nil {
 				out.Five = &structs.NestedBar{}
@@ -2042,6 +2221,8 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 			}
 		} else {
 			out.Four = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -2084,6 +2265,8 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		if in.Three != nil {
 			out.Three = &structs.NestedBar{}
 			out.Three.One = string(in.Three.One)
@@ -2102,6 +2285,8 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 			}
 		} else {
 			out.Four = nil
+		}
+		return out
 		}
 	`), lines)
 }
@@ -2134,6 +2319,8 @@ func TestConverterMapOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make([]string, len(in.Two))
 		for index1, value2 := range in.Two {
 			out.One[index1] = string(value2)
@@ -2145,6 +2332,8 @@ func TestConverterMapOverride(t *testing.T) {
 		out.Two = make([]string, len(sourceList3))
 		for index5, value6 := range sourceList3 {
 			out.Two[index5] = string(value6)
+		}
+		return out
 		}
 	`), lines)
 }
@@ -2181,6 +2370,8 @@ func TestConverterMapListOfStructType(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		out.One = make([]*structs.Inner, len(in.Two))
 		for index1, value2 := range in.Two {
 			if value2 != nil {
@@ -2218,6 +2409,8 @@ func TestConverterMapListOfStructType(t *testing.T) {
 				}
 			}
 		}
+		return out
+		}
 	`), lines)
 }
 
@@ -2254,6 +2447,8 @@ func TestConverterMapMapType(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
+		func convertToRequestSuffix(in ResponseType) ResponseType{
+		out := &ShortResponseType{}
 		sourceList1 := in.One
 		isOverridden2 := false
 		if in.Two != nil {
@@ -2305,7 +2500,9 @@ func TestConverterMapMapType(t *testing.T) {
 					out.Two[key7] = nil
 				}
 			}
-		}		
+		}
+		return out
+		}
 	`), lines)
 }
 

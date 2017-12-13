@@ -317,7 +317,7 @@ func (w {{$workflow}}) Handle(
 	{{if eq .ResponseType "" -}}
 	return resHeaders, nil
 	{{- else -}}
-	response := convert{{title .Name}}ClientResponse(clientRespBody)
+	response := convertTo{{title .Name}}ClientResponse(clientRespBody)
 	return response, resHeaders, nil
 	{{- end -}}
 }

@@ -424,7 +424,7 @@ func (w {{$workflow}}) Handle(
 	{{if eq .ResponseType "" -}}
 	return resHeaders, nil
 	{{- else -}}
-	response := convert{{title .Name}}ClientResponse(clientRespBody)
+	response := convertTo{{title .Name}}ClientResponse(clientRespBody)
 	return response, resHeaders, nil
 	{{- end -}}
 }
@@ -469,7 +469,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9833, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

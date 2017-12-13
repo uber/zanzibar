@@ -186,7 +186,7 @@ func (w TooManyArgsEndpoint) Handle(
 	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
-	response := convertTooManyArgsClientResponse(clientRespBody)
+	response := convertToTooManyArgsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -243,7 +243,7 @@ func convertTooManyArgsFooException(
 	return serverError
 }
 
-func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
