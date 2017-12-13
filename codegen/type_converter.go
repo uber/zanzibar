@@ -75,6 +75,7 @@ type TypeConverter struct {
 	requestTypeHelper RequestHelper
 }
 
+// RequestHelper is the helper struct for method generation
 type RequestHelper struct {
 	UpstreamMethod   *MethodSpec
 	DownstreamMethod *MethodSpec
