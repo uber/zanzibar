@@ -846,11 +846,9 @@ func (ms *MethodSpec) setTypeConverters(
 	h *PackageHelper,
 	downstreamMethod *MethodSpec,
 ) error {
-	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-
 	// Add type checking and conversion, custom mapping
-	structType := compile.FieldGroup(funcSpec.ArgsSpec)
-	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
+	structType := &compile.StructSpec{Fields: compile.FieldGroup(funcSpec.ArgsSpec)}
+	downstreamStructType := &compile.StructSpec{Fields: compile.FieldGroup(downstreamSpec.ArgsSpec)}
 
 	typeConverter := NewTypeConverter(h, ConvertOptions{
 		FromSuffix:       "ClientRequest",
@@ -860,7 +858,7 @@ func (ms *MethodSpec) setTypeConverters(
 		OutputMethodName: ms.Name,
 	})
 
-	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms, false)
+	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms)
 	if err != nil {
 		return err
 	}
@@ -882,31 +880,11 @@ func (ms *MethodSpec) setTypeConverters(
 		OutputMethodName: ms.Name,
 	})
 
-	var respFields, downstreamRespFields []*compile.FieldSpec
-	var isPrimitive bool
-	switch respType.(type) {
-	case
-		*compile.BoolSpec,
-		*compile.I8Spec,
-		*compile.I16Spec,
-		*compile.I32Spec,
-		*compile.EnumSpec,
-		*compile.I64Spec,
-		*compile.DoubleSpec,
-		*compile.StringSpec:
-
-		isPrimitive = true
-	default:
-		respFields = respType.(*compile.StructSpec).Fields
-		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
-		isPrimitive = false
-	}
-	err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms, isPrimitive)
+	err = respConverter.GenStructConverter(downstreamRespType, respType, respTransforms)
 	if err != nil {
 		return err
 	}
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
-
 	return nil
 }
 

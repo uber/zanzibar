@@ -112,10 +112,9 @@ func convertTypes(
 	}
 
 	err = converter.GenStructConverter(
-		program.Types[fromStruct].(*compile.StructSpec).Fields,
-		program.Types[toStruct].(*compile.StructSpec).Fields,
+		program.Types[fromStruct],
+		program.Types[toStruct],
 		overrideMap,
-		false,
 	)
 	if err != nil {
 		return "", err

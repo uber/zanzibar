@@ -723,23 +723,10 @@ func (c *TypeConverter) genStructConverter(
 // destination fields (sent to the downstream client) and the entries are source
 // fields (from the incoming request)
 func (c *TypeConverter) GenStructConverter(
-	fromFields []*compile.FieldSpec,
-	toFields []*compile.FieldSpec,
+	fromFieldType compile.TypeSpec,
+	toFieldType compile.TypeSpec,
 	fieldMap map[string]FieldMapperEntry,
-	isPrimitive bool,
 ) error {
-	// Add compiled FieldSpecs to the FieldMapperEntry
-	fieldMap = addSpecToMap(fieldMap, fromFields, "")
-	// Check for vlaues not populated recursively by addSpecToMap
-	for k, v := range fieldMap {
-		if fieldMap[k].Field == nil {
-			return errors.Errorf(
-				"Failed to find field ( %s ) for transform.",
-				v.QualifiedName,
-			)
-		}
-	}
-
 	helper := c.requestTypeHelper
 	var requestInput, requestOutput string
 	requestInput = "(in " + helper.FromInputType + ") " + helper.FromOutputType
@@ -748,20 +735,49 @@ func (c *TypeConverter) GenStructConverter(
 	c.append("func convertTo", pascalCase(helper.OutputMethodName), c.requestTypeHelper.FromSuffix,
 		requestInput, "{")
 
-	if isPrimitive {
+	switch toFieldType.(type) {
+	case
+		*compile.BoolSpec,
+		*compile.I8Spec,
+		*compile.I16Spec,
+		*compile.I32Spec,
+		*compile.EnumSpec,
+		*compile.I64Spec,
+		*compile.DoubleSpec,
+		*compile.StringSpec:
 		c.append("out", " := in\t\n")
 		c.append("\nreturn out \t\n}")
 		return nil
+	default:
+		fromFieldStructSpec, ok := fromFieldType.(*compile.StructSpec)
+		if !ok {
+			return errors.Errorf(
+				"Failed to convert field ( %s ).",
+				fromFieldType.ThriftName(),
+			)
+		}
+		fromFields := fromFieldStructSpec.Fields
+		// Add compiled FieldSpecs to the FieldMapperEntry
+		fieldMap = addSpecToMap(fieldMap, fromFields, "")
+		// Check for vlaues not populated recursively by addSpecToMap
+		for k, v := range fieldMap {
+			if fieldMap[k].Field == nil {
+				return errors.Errorf(
+					"Failed to find field ( %s ) for transform.",
+					v.QualifiedName,
+				)
+			}
+		}
+		c.append(requestOutput)
+		toFields := toFieldType.(*compile.StructSpec).Fields
+		err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
+		if err != nil {
+			return err
+		}
+		c.append("\nreturn out")
+		c.append("}")
+		return nil
 	}
-
-	c.append(requestOutput)
-	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
-	if err != nil {
-		return err
-	}
-	c.append("\nreturn out")
-	c.append("}")
-	return nil
 }
 
 // FieldMapperEntry defines a source field and optional arguments
