@@ -29,10 +29,10 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+	"github.com/buger/jsonparser"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
-	"github.com/buger/jsonparser"
-	"fmt"
 )
 
 // ServerHTTPRequest struct manages request
