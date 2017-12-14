@@ -31,6 +31,8 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
+	"github.com/buger/jsonparser"
+	"fmt"
 )
 
 // ServerHTTPRequest struct manages request
@@ -115,6 +117,25 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 
 	}
 	return true
+}
+
+// PeekBody allows for inspecting a key path inside the body
+// that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (req *ServerHTTPRequest) PeekBody(
+	keys ...string,
+) ([]byte, jsonparser.ValueType, error) {
+	fmt.Println("=== keys: ", keys)
+	fmt.Println("=== string rawbody: ", string(req.RawBody), req.RawBody)
+	value, valueType, _, err := jsonparser.Get(
+		req.RawBody, keys...,
+	)
+
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return value, valueType, nil
 }
 
 func (req *ServerHTTPRequest) parseQueryValues() bool {

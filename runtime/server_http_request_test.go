@@ -34,6 +34,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
 	"github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"github.com/buger/jsonparser"
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
@@ -736,4 +737,43 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 	assert.Equal(t, []string(nil), lastQueryParam)
 	assert.Equal(t, 0, len(lastQueryParam))
+}
+
+func TestPeekBody(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				req.RawBody = []byte(`{"arg1":{"b1":{"c1":"result"}}}`)
+				value, vType, err := req.PeekBody("arg1", "b1", "c1")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte(`result`), value)
+				assert.Equal(t, vType, jsonparser.String)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		),
+	)
+
+	_, err = gateway.MakeRequest("GET", "/foo?foo=bar", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
 }
