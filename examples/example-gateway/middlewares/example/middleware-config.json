@@ -1,0 +1,13 @@
+{
+	"name": "example",
+	"type": "default",
+	"dependencies": {
+		"client": [
+			"baz"
+		]
+	},
+	"config": {
+		"schema": "./middlewares/example/example_schema.json",
+		"path": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	}
+}

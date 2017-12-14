@@ -91,7 +91,7 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	for _, mid := range req.Middlewares {
 		for _, midCfg := range gatewayConfig.RawMiddlewares {
 			if mid.Name == midCfg.Name {
-				absFile := "file://" + r.absPath(midCfg.SchemaFile)
+				absFile := "file://" + r.absPath(midCfg.OptionsSchemaFile)
 				err := codegen.SchemaValidateGo(absFile, mid.Options)
 				if err != nil {
 					return err
@@ -146,6 +146,13 @@ func updateEndpointMetaJSON(configDir, metaFile, newFile string, cfg *EndpointCo
 	if c := fileContent.Dependencies["client"]; !findString(cfg.ClientID, c) {
 		fileContent.Dependencies["client"] = append(c, cfg.ClientID)
 	}
+
+	for _, m := range cfg.Middlewares {
+		if middlewares := fileContent.Dependencies["middleware"]; !findString(m.Name, middlewares) {
+			fileContent.Dependencies["middleware"] = append(middlewares, m.Name)
+		}
+	}
+
 	fileContent.Name = cfg.ID
 	if fileContent.Type == "" {
 		fileContent.Type = string(cfg.Type)

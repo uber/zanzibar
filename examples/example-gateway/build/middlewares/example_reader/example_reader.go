@@ -21,28 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package examplereaderMiddleware
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
-
+	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_reader/module"
+	handle "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the bar endpoint module
-type Dependencies struct {
-	Default    *zanzibar.DefaultDependencies
-	Client     *ClientDependencies
-	Middleware *MiddlewareDependencies
+// Middleware is a container for module.Deps and factory for MiddlewareHandle
+type Middleware struct {
+	Deps *module.Dependencies
 }
 
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Bar barClientGenerated.Client
+// NewMiddleware is a factory method for the struct
+func NewMiddleware(g *zanzibar.Gateway, deps *module.Dependencies) Middleware {
+	return Middleware{
+		Deps: deps,
+	}
 }
 
-// MiddlewareDependencies contains middleware dependencies
-type MiddlewareDependencies struct {
-	Example exampleMiddlewareGenerated.Middleware
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+func (m *Middleware) NewMiddlewareHandle(g *zanzibar.Gateway, o handle.Options) zanzibar.MiddlewareHandle {
+	return handle.NewMiddleware(g, m.Deps, o)
 }

@@ -112,24 +112,64 @@ type ClientClassConfig struct {
 	Name         string                 `json:"name"`
 	Type         string                 `json:"type"`
 	Config       map[string]interface{} `json:"config"`
-	Dependencies ClientDependencies     `json:"dependencies"`
+	Dependencies Dependencies           `json:"dependencies"`
 }
 
-// ClientDependencies lists all dependencies of a client.
-type ClientDependencies struct {
+// Dependencies lists all dependencies of a module
+type Dependencies struct {
 	Client []string `json:"client"`
+	//	Service []string `json:"service"`  // example extension
 }
 
-// MiddlewareConfig represents configuration for a middleware.
+// MiddlewareConfigConfig is the inner config object as prescribed by module_system json conventions
+type MiddlewareConfigConfig struct {
+	OptionsSchemaFile string `json:"schema"`
+	ImportPath        string `json:"path"`
+}
+
+// MiddlewareConfig represents configuration for a middleware as is written in the json file
 type MiddlewareConfig struct {
-	Name       string `json:"name"`
-	SchemaFile string `json:"schema"`
-	ImportPath string `json:"importPath"`
+	Name         string                  `json:"name"`
+	Dependencies *Dependencies           `json:"dependencies,omitempty"`
+	Config       *MiddlewareConfigConfig `json:"config"`
 }
 
-// MiddlewareConfigsAll is a collection of MiddlewareConfig
-type MiddlewareConfigsAll struct {
-	Middlewares []MiddlewareConfig `json:"middlewares"`
+// Validate the config spec attributes
+func (mid *MiddlewareConfig) Validate(configDirName string) error {
+	if mid.Name == "" {
+		return errors.New("middleware config had empty name")
+	}
+
+	if mid.Config.ImportPath == "" {
+		return errors.New("middleware config had empty import path")
+	}
+
+	if mid.Config.OptionsSchemaFile == "" {
+		return errors.New("middleware config had empty schema")
+	}
+
+	schPath := filepath.Join(
+		configDirName,
+		mid.Config.OptionsSchemaFile,
+	)
+
+	bytes, err := ioutil.ReadFile(schPath)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Cannot read middleware json schema: %s",
+			schPath,
+		)
+	}
+
+	var midOptSchema map[string]interface{}
+	err = json.Unmarshal(bytes, &midOptSchema)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Cannot parse json schema for middleware options: %s",
+			schPath,
+		)
+	}
+	return nil
 }
 
 // NewClientSpec creates a client spec from a json file.
@@ -315,54 +355,28 @@ func newClientSpec(
 }
 
 // MiddlewareSpec holds information about each middleware at the endpoint
-// level. The same mid
 type MiddlewareSpec struct {
 	// The middleware package name.
-	Name string `json:"name"`
-	// Go import path for the middleware.
-	Path string `json:"path,omitempty"`
+	Name string
 	// Middleware specific configuration options.
-	Options map[string]interface{} `json:"options,omitempty"`
+	Options map[string]interface{}
 	// Options pretty printed for template initialization
-	PrettyOptions map[string]string `json:"prettyOptions,omitempty"`
+	PrettyOptions map[string]string
+	// Module Dependencies,  clients etc.
+	Dependencies *Dependencies
+	// Go Import Path for MiddlewareHandle implementation
+	ImportPath string
+	// Location of JSON Schema file for the configured endpoint options
+	OptionsSchemaFile string
 }
 
-// NewMiddlewareSpec creates a middleware spec from a go file.
-func NewMiddlewareSpec(
-	name string,
-	goFile string,
-	jsonSchemaFile string,
-	configDirName string,
-) (*MiddlewareSpec, error) {
-	schPath := filepath.Join(
-		configDirName,
-		jsonSchemaFile,
-	)
-
-	bytes, err := ioutil.ReadFile(schPath)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot read middleware json schema: %s",
-			schPath,
-		)
-	}
-
-	var midOptSchema map[string]interface{}
-	err = json.Unmarshal(bytes, &midOptSchema)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot parse json schema for middleware options: %s",
-			schPath,
-		)
-	}
-
-	// TODO(sindelar): Add middleware validation here. Validate name
-	// and package name match. Validate the options json schema matches the options
-	// struct
+func newMiddlewareSpec(cfg *MiddlewareConfig) *MiddlewareSpec {
 	return &MiddlewareSpec{
-		Name: name,
-		Path: goFile,
-	}, nil
+		Name:              cfg.Name,
+		Dependencies:      cfg.Dependencies,
+		ImportPath:        cfg.Config.ImportPath,
+		OptionsSchemaFile: cfg.Config.OptionsSchemaFile,
+	}
 }
 
 // EndpointSpec holds information about each endpoint in the
@@ -611,7 +625,7 @@ func augmentHTTPEndpointSpec(
 			"Unable to parse middlewares field",
 		)
 	}
-	middlewares := make([]MiddlewareSpec, 0)
+	var middlewares []MiddlewareSpec
 	for _, middleware := range endpointMids {
 		middlewareObj, ok := middleware.(map[string]interface{})
 		if !ok {
@@ -689,7 +703,7 @@ func augmentHTTPEndpointSpec(
 
 		middlewares = append(middlewares, MiddlewareSpec{
 			Name:          name,
-			Path:          midSpecs[name].Path,
+			ImportPath:    midSpecs[name].ImportPath,
 			Options:       opts,
 			PrettyOptions: prettyOpts,
 		})
@@ -908,59 +922,53 @@ func parseEndpointJsons(
 }
 
 func parseMiddlewareConfig(
-	middlewareConfig string,
+	middlewareConfigDir string,
 	configDirName string,
 ) (map[string]*MiddlewareSpec, error) {
 	specMap := map[string]*MiddlewareSpec{}
-	if middlewareConfig == "" {
+	if middlewareConfigDir == "" {
 		return specMap, nil
 	}
-	config := filepath.Join(configDirName, middlewareConfig)
-	bytes, err := ioutil.ReadFile(config)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot read middleware config json: %s",
-			config,
-		)
-	}
+	fullMiddlewareDir := filepath.Join(configDirName, middlewareConfigDir)
 
-	var midConfigs MiddlewareConfigsAll
-
-	err = json.Unmarshal(bytes, &midConfigs)
+	files, err := ioutil.ReadDir(fullMiddlewareDir)
 
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Cannot parse json for middleware config json: %s",
-			config,
+			err,
+			"Error reading middleware config directory %q",
+			fullMiddlewareDir,
 		)
 	}
 
-	for _, mid := range midConfigs.Middlewares {
-
-		if mid.Name == "" {
-			return nil, errors.New("middleware config had empty name")
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
 		}
-
-		if mid.ImportPath == "" {
-			return nil, errors.New("middleware config had empty importPath")
+		instanceConfig := filepath.Join(fullMiddlewareDir, file.Name(), "middleware-config.json")
+		bytes, err := ioutil.ReadFile(instanceConfig)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot read middleware config json: %s",
+				instanceConfig,
+			)
 		}
-
-		if mid.SchemaFile == "" {
-			return nil, errors.New("middleware config had empty schema")
+		var mid MiddlewareConfig
+		err = json.Unmarshal(bytes, &mid)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot parse json for middleware config json: %s",
+				instanceConfig,
+			)
 		}
-
-		specMap[mid.Name], err = NewMiddlewareSpec(
-			mid.Name,
-			mid.ImportPath,
-			mid.SchemaFile,
-			configDirName,
-		)
+		err = mid.Validate(configDirName)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot validate middleware: %s",
 				mid,
 			)
 		}
+		specMap[mid.Name] = newMiddlewareSpec(&mid)
 	}
 	return specMap, nil
 }
@@ -1041,6 +1049,7 @@ func NewGatewaySpec(
 		clientSpecs[i] = cspec
 		spec.ClientModules[cspec.ClientID] = cspec
 	}
+
 	for _, json := range endpointJsons {
 		espec, err := NewEndpointSpec(json, packageHelper, spec.MiddlewareModules)
 		if err != nil {
@@ -1057,6 +1066,9 @@ func NewGatewaySpec(
 		}
 		spec.EndpointModules[espec.EndpointID+"::"+espec.HandleID] = espec
 	}
+
+	// TODO verify that middlewares specified in Endpoint Specs are listed in the root EndpointConfig module dependencies
+	//  this is an interactions between specs and dependencies that the module system does not enforce
 
 	return spec, nil
 }

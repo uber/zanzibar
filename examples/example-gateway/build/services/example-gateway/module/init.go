@@ -42,14 +42,17 @@ import (
 	googlenowEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
+	exampleMiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
 type DependenciesTree struct {
-	Client   *ClientDependenciesNodes
-	Endpoint *EndpointDependenciesNodes
+	Client     *ClientDependenciesNodes
+	Middleware *MiddlewareDependenciesNodes
+	Endpoint   *EndpointDependenciesNodes
 }
 
 // ClientDependenciesNodes contains client dependencies
@@ -58,6 +61,11 @@ type ClientDependenciesNodes struct {
 	Baz       bazClientGenerated.Client
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
+}
+
+// MiddlewareDependenciesNodes contains middleware dependencies
+type MiddlewareDependenciesNodes struct {
+	Example exampleMiddlewareGenerated.Middleware
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -98,12 +106,24 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 
+	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
+	tree.Middleware = initializedMiddlewareDependencies
+	initializedMiddlewareDependencies.Example = exampleMiddlewareGenerated.NewMiddleware(g, &exampleMiddlewareModule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &exampleMiddlewareModule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(g, &barEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
+		},
+		Middleware: &barEndpointModule.MiddlewareDependencies{
+			Example: initializedMiddlewareDependencies.Example,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(g, &bazEndpointModule.Dependencies{

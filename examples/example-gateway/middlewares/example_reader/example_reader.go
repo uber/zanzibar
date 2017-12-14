@@ -25,11 +25,13 @@ import (
 	"net/http"
 
 	"github.com/mcuadros/go-jsonschema-generator"
+	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_reader/module"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 type exampleReaderMiddleware struct {
+	deps    *module.Dependencies
 	options Options
 }
 
@@ -42,13 +44,15 @@ type Options struct {
 // though the context object.
 type MiddlewareState struct{}
 
-// NewMiddleWare creates a new middleware that executes the next middleware
+// NewMiddleware creates a new middleware that executes the next middleware
 // after performing it's operations.
-func NewMiddleWare(
+func NewMiddleware(
 	g *zanzibar.Gateway,
+	deps *module.Dependencies,
 	options Options,
 ) zanzibar.MiddlewareHandle {
 	return &exampleReaderMiddleware{
+		deps:    deps,
 		options: options,
 	}
 }

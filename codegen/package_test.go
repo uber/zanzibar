@@ -67,7 +67,7 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		"github.com/uber/zanzibar/examples/example-gateway",
 		"github.com/uber/zanzibar",
 		absGatewayPath,
-		"middlewares/middleware-config.json",
+		"middlewares",
 		"./idl",
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,

@@ -153,7 +153,7 @@ func WriteClientModuleJSON(clientCfgDir string) error {
 		Name:   "clients",
 		Type:   "init",
 		Config: map[string]interface{}{},
-		Dependencies: codegen.ClientDependencies{
+		Dependencies: codegen.Dependencies{
 			Client: subDirs,
 		},
 	}

@@ -2877,7 +2877,7 @@
 					"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 					"ID": "example-gateway",
 					"ManagedThriftFolder": "./github.com/uber/zanzibar",
-					"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+					"MiddlewareConfigDir": "./middlewares",
 					"Middlewares": {
 						"example": {
 							"$schema": "http://json-schema.org/schema#",
@@ -2919,6 +2919,7 @@
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
 							"name": "example",
 							"schema": "./middlewares/example/example_schema.json"
+
 						},
 						"example_reader": {
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
@@ -3795,7 +3796,7 @@
 				"GenCodePackage": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 				"ID": "example-gateway",
 				"ManagedThriftFolder": "./github.com/uber/zanzibar",
-				"MiddlewareConfigFile": "./middlewares/middleware-config.json",
+				"MiddlewareConfigDir": "./middlewares",
 				"Middlewares": {
 					"example": {
 						"$schema": "http://json-schema.org/schema#",
@@ -3837,6 +3838,7 @@
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example",
 						"name": "example",
 						"schema": "./middlewares/example/example_schema.json"
+
 					},
 					"example_reader": {
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
