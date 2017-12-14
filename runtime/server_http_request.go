@@ -125,8 +125,6 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 func (req *ServerHTTPRequest) PeekBody(
 	keys ...string,
 ) ([]byte, jsonparser.ValueType, error) {
-	fmt.Println("=== keys: ", keys)
-	fmt.Println("=== string rawbody: ", string(req.RawBody), req.RawBody)
 	value, valueType, _, err := jsonparser.Get(
 		req.RawBody, keys...,
 	)

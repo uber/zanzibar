@@ -28,6 +28,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"bytes"
 	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -762,7 +763,6 @@ func TestPeekBody(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				req.RawBody = []byte(`{"arg1":{"b1":{"c1":"result"}}}`)
 				value, vType, err := req.PeekBody("arg1", "b1", "c1")
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`result`), value)
@@ -772,7 +772,7 @@ func TestPeekBody(t *testing.T) {
 		),
 	)
 
-	_, err = gateway.MakeRequest("GET", "/foo?foo=bar", nil, nil)
+	_, err = gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result"}}}`)))
 	if !assert.NoError(t, err) {
 		return
 	}
