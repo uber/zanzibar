@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
