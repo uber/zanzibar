@@ -754,7 +754,7 @@ func TestPeekBody(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+		"POST", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
 			"foo", "foo",
@@ -763,6 +763,9 @@ func TestPeekBody(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
+				rawBody, success := req.ReadAll()
+				assert.True(t, success)
+				req.RawBody = rawBody
 				value, vType, err := req.PeekBody("arg1", "b1", "c1")
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`result`), value)
@@ -772,8 +775,9 @@ func TestPeekBody(t *testing.T) {
 		),
 	)
 
-	_, err = gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result"}}}`)))
+	resp, err := gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result"}}}`)))
 	if !assert.NoError(t, err) {
 		return
 	}
+	assert.Equal(t, "200 OK", resp.Status)
 }
