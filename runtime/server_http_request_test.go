@@ -767,7 +767,12 @@ func TestPeekBody(t *testing.T) {
 				assert.Error(t, err, "do not expect error")
 				assert.Nil(t, value)
 
+				assert.Equal(t, len(req.GetRawBody()), 0)
 				_, success := req.ReadAll()
+				assert.NotEqual(t, len(req.GetRawBody()), 0)
+				assert.True(t, success)
+
+				_, success = req.ReadAll()
 				assert.True(t, success)
 				value, vType, err := req.PeekBody("arg1", "b1", "c1")
 				assert.NoError(t, err, "do not expect error")
