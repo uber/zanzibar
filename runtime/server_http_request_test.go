@@ -763,9 +763,8 @@ func TestPeekBody(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				rawBody, success := req.ReadAll()
+				_, success := req.ReadAll()
 				assert.True(t, success)
-				req.RawBody = rawBody
 				value, vType, err := req.PeekBody("arg1", "b1", "c1")
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`result`), value)

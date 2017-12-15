@@ -50,7 +50,7 @@ type ServerHTTPRequest struct {
 	Method       string
 	Params       httprouter.Params
 	Header       Header
-	RawBody      []byte
+	rawBody      []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -125,7 +125,7 @@ func (req *ServerHTTPRequest) PeekBody(
 	keys ...string,
 ) ([]byte, jsonparser.ValueType, error) {
 	value, valueType, _, err := jsonparser.Get(
-		req.RawBody, keys...,
+		req.rawBody, keys...,
 	)
 
 	if err != nil {
@@ -419,7 +419,6 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	if !success {
 		return false
 	}
-	req.RawBody = rawBody
 	return req.UnmarshalBody(body, rawBody)
 }
 
@@ -434,7 +433,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 		}
 		return nil, false
 	}
-
+	req.rawBody = rawBody
 	return rawBody, true
 }
 
