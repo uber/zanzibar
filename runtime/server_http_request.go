@@ -429,6 +429,9 @@ func (req *ServerHTTPRequest) GetRawBody() []byte {
 
 // ReadAll helper to read entire body
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
+	if req.rawBody != nil {
+		return req.rawBody, true
+	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.Logger.Error("Could not read request body", zap.Error(err))
@@ -437,9 +440,6 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 			req.parseFailed = true
 		}
 		return nil, false
-	}
-	if req.rawBody != nil {
-		return req.rawBody, true
 	}
 	req.rawBody = rawBody
 	return rawBody, true
