@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
 )
@@ -49,7 +50,7 @@ type ServerHTTPRequest struct {
 	Method       string
 	Params       httprouter.Params
 	Header       Header
-	RawBody      []byte
+	rawBody      []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -115,6 +116,23 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 
 	}
 	return true
+}
+
+// PeekBody allows for inspecting a key path inside the body
+// that is not flushed yet. This is useful for response middlewares
+// that want to inspect the response body.
+func (req *ServerHTTPRequest) PeekBody(
+	keys ...string,
+) ([]byte, jsonparser.ValueType, error) {
+	value, valueType, _, err := jsonparser.Get(
+		req.rawBody, keys...,
+	)
+
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return value, valueType, nil
 }
 
 func (req *ServerHTTPRequest) parseQueryValues() bool {
@@ -401,12 +419,19 @@ func (req *ServerHTTPRequest) ReadAndUnmarshalBody(
 	if !success {
 		return false
 	}
-	req.RawBody = rawBody
 	return req.UnmarshalBody(body, rawBody)
+}
+
+// GetRawBody returns raw body of request
+func (req *ServerHTTPRequest) GetRawBody() []byte {
+	return req.rawBody
 }
 
 // ReadAll helper to read entire body
 func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
+	if req.rawBody != nil {
+		return req.rawBody, true
+	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
 		req.Logger.Error("Could not read request body", zap.Error(err))
@@ -416,7 +441,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 		}
 		return nil, false
 	}
-
+	req.rawBody = rawBody
 	return rawBody, true
 }
 

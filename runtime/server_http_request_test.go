@@ -28,6 +28,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"bytes"
+	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -736,4 +738,54 @@ func TestGetQueryValues(t *testing.T) {
 	assert.Equal(t, "200 OK", resp.Status)
 	assert.Equal(t, []string(nil), lastQueryParam)
 	assert.Equal(t, 0, len(lastQueryParam))
+}
+
+func TestPeekBody(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"POST", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				value, _, err := req.PeekBody("arg1", "b1", "c1")
+				assert.Error(t, err, "do not expect error")
+				assert.Nil(t, value)
+
+				assert.Equal(t, len(req.GetRawBody()), 0)
+				_, success := req.ReadAll()
+				assert.NotEqual(t, len(req.GetRawBody()), 0)
+				assert.True(t, success)
+
+				_, success = req.ReadAll()
+				assert.True(t, success)
+				value, vType, err := req.PeekBody("arg1", "b1", "c1")
+				assert.NoError(t, err, "do not expect error")
+				assert.Equal(t, []byte(`result`), value)
+				assert.Equal(t, vType, jsonparser.String)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result"}}}`)))
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, "200 OK", resp.Status)
 }
