@@ -138,11 +138,19 @@ const (
 // GatewayConfig returns the cached gateway configuration of the repository if
 // the repository has not been updated for a certain time.
 func (r *Repository) GatewayConfig() (*Config, error) {
-	r.RLock()
-	curCfg, curCfgError := r.gatewayConfig, r.gatewayConfigError
-	r.RUnlock()
-	if (curCfg != nil || curCfgError != nil) && !r.Update() {
-		return curCfg, curCfgError
+	var (
+		cfgVal *Config
+		cfgErr error
+	)
+	if curCfgVal := r.gatewayCfgVal.Load(); curCfgVal != nil {
+		cfgVal = curCfgVal.(*Config)
+	}
+	if curCfgErr := r.gatewayCfgErr.Load(); curCfgErr != nil {
+		cfgErr = curCfgErr.(error)
+	}
+
+	if (cfgVal != nil || cfgErr != nil) && !r.Update() {
+		return cfgVal, cfgErr
 	}
 	return r.LatestGatewayConfig()
 }
@@ -150,11 +158,14 @@ func (r *Repository) GatewayConfig() (*Config, error) {
 // LatestGatewayConfig returns the configuration of current repository.
 func (r *Repository) LatestGatewayConfig() (*Config, error) {
 	// The newCfg won't be changed once created.
-	newCfg, newCfgError := r.newGatewayConfig()
-	r.Lock()
-	r.gatewayConfig, r.gatewayConfigError = newCfg, newCfgError
-	r.Unlock()
-	return newCfg, newCfgError
+	newCfg, newCfgErr := r.newGatewayConfig()
+	if newCfg != nil {
+		r.gatewayCfgVal.Store(newCfg)
+	}
+	if newCfgErr != nil {
+		r.gatewayCfgErr.Store(newCfgErr)
+	}
+	return newCfg, newCfgErr
 }
 
 // newGatewayConfig regenerates the configuration for a repository.
@@ -167,9 +178,6 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 			)
 		}
 	}()
-	// Get the read lock for reading the content of repository.
-	r.RLock()
-	defer r.RUnlock()
 	configDir := r.absPath(r.LocalDir())
 	cfg := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(filepath.Join(configDir, gatewayConfigFile)),

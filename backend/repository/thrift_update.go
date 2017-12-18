@@ -36,8 +36,6 @@ const (
 
 // ThriftConfig returns the meta of thrifts for a runtime repository.
 func (r *Repository) ThriftConfig(idlRoot string) (map[string]*ThriftMeta, error) {
-	r.RLock()
-	defer r.RUnlock()
 	config := make(map[string]*ThriftMeta)
 	err := readJSONFile(r.absPath(metaJSONFilePath), &config)
 	if err != nil {
@@ -56,8 +54,6 @@ func (r *Repository) WriteManagedThriftFiles(files []ManagedThriftFile) error {
 	}
 
 	thriftRootDir := cfg.ThriftRootDir
-	r.Lock()
-	defer r.Unlock()
 
 	/* First write to disk */
 	for _, mfile := range files {
@@ -95,8 +91,6 @@ func (r *Repository) WriteThriftFileAndConfig(thriftMeta map[string]*ThriftMeta)
 	for path, meta := range thriftMeta {
 		curMeta[path] = meta
 	}
-	r.Lock()
-	defer r.Unlock()
 	for _, meta := range thriftMeta {
 		if err := r.writeThriftFile(thriftRootDir, meta); err != nil {
 			return err
@@ -139,8 +133,6 @@ func (r *Repository) writeThriftConfig(meta map[string]*ThriftMeta) error {
 // ThriftFileVersion returns the version of a thrft file.
 func (r *Repository) ThriftFileVersion(thriftFile string) (string, error) {
 	path := r.absPath(metaJSONFilePath)
-	r.RLock()
-	defer r.RUnlock()
 	meta := make(map[string]*ThriftMeta)
 	err := readJSONFile(path, &meta)
 	if err != nil {

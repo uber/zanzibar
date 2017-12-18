@@ -79,8 +79,6 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	}
 	cfgJSON.Config.ThriftFileSha = thriftFileSha
 	clientPath := filepath.Join(r.absPath(clientCfgDir), cfgJSON.Name)
-	r.Lock()
-	defer r.Unlock()
 	if err := os.MkdirAll(clientPath, os.ModePerm); err != nil {
 		return errors.Wrap(err, "failed to create client config dir")
 	}

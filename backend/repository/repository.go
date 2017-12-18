@@ -21,11 +21,18 @@
 package repository
 
 import (
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/pkg/errors"
+	"io/ioutil"
+	"path/filepath"
 )
+
+type meta struct {
+	lastUpdate time.Time
+	version    string
+}
 
 // Repository operates one local repository:
 // get/set configurations and sync with its remote repository.
@@ -34,16 +41,11 @@ type Repository struct {
 	localDir        string
 	fetcher         Fetcher
 	refreshInterval time.Duration
-
-	// The following fields and the content of local repository are protected
-	// by RWMutex.
-	version        string
-	lastUpdateTime time.Time
 	// Cached gateway config.
-	gatewayConfig *Config
+	gatewayCfgVal atomic.Value
 	// Cached error when getting gateway config.
-	gatewayConfigError error
-	sync.RWMutex
+	gatewayCfgErr atomic.Value
+	meta          atomic.Value
 }
 
 // Fetcher fetches remote repository to local repository.
@@ -71,14 +73,19 @@ func NewRepository(localRoot, remote string, fetcher Fetcher,
 		return nil, errors.Wrapf(err,
 			"failed to get the version of local repository for %s", remote)
 	}
-	return &Repository{
+
+	meta := &meta{
+		version:    version,
+		lastUpdate: time.Now(),
+	}
+	repo := &Repository{
 		remote:          remote,
 		localDir:        localDir,
-		version:         version,
 		fetcher:         fetcher,
-		lastUpdateTime:  time.Now(),
 		refreshInterval: refreshInterval,
-	}, nil
+	}
+	repo.meta.Store(meta)
+	return repo, nil
 }
 
 // Remote returns the remote for the repository.
@@ -93,29 +100,34 @@ func (r *Repository) LocalDir() string {
 
 // Version returns the version of local repository.
 func (r *Repository) Version() string {
-	r.RLock()
-	defer r.RUnlock()
-	return r.version
+	meta := r.meta.Load().(*meta)
+	return meta.version
 }
 
 // Update update the local repository and returns whether there is an update.
 func (r *Repository) Update() bool {
-	r.Lock()
-	defer r.Unlock()
 	now := time.Now()
-	if now.Sub(r.lastUpdateTime) < r.refreshInterval {
+	meta := r.meta.Load().(*meta)
+	if now.Sub(meta.lastUpdate) < r.refreshInterval {
 		return false
 	}
 	isUpdated, err := r.fetcher.Update(r.localDir, r.remote)
 	if err != nil {
 		return false
 	}
-	r.lastUpdateTime = now
 	version, err := r.fetcher.Version(r.localDir)
 	if err != nil {
-		r.version = "unknown"
+		meta.version = "unknown"
 	} else {
-		r.version = version
+		meta.version = version
 	}
+	meta.lastUpdate = now
+	r.meta.Store(meta)
 	return isUpdated
+}
+
+// ReadFile returns the content of a file in a relativePath in a repository.
+func (r *Repository) ReadFile(relativePath string) ([]byte, error) {
+	path := filepath.Join(r.localDir, relativePath)
+	return ioutil.ReadFile(path)
 }

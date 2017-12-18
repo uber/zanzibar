@@ -62,7 +62,7 @@ func TestHandlers(t *testing.T) {
 		return
 	}
 	server := NewTestServer()
-	t.Logf("Server started: %+v\n", server)
+	t.Log("Server started\n")
 	// The following tests will be run in parallel with 'go test -parallel <#threads>'.
 	t.Run("group", func(t *testing.T) {
 		for _, tc := range testCases {
