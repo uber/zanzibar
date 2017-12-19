@@ -272,6 +272,7 @@ type UpdateRequest struct {
 	ManagedThriftFiles []ManagedThriftFile `json:"managed_thrift_files"`
 	ClientUpdates      []ClientConfig      `json:"client_updates"`
 	EndpointUpdates    []EndpointConfig    `json:"endpoint_updates"`
+	DIffID             *string             `json:"diff_id,omitempty"`
 }
 
 // Validate validates the request and surface user friendly error

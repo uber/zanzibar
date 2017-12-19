@@ -47,6 +47,8 @@ type Handler struct {
 type DiffCreator interface {
 	// NewDiff return a URI for the diff or an error.
 	NewDiff(r *Repository, request *DiffRequest) (string, error)
+	// UpdateDiff return a URI for the diff or an error.
+	UpdateDiff(r *Repository, request *DiffRequest) (string, error)
 	// LandDiff lands a diff into a remote repository.
 	LandDiff(r *Repository, diffURI string) error
 }
@@ -62,6 +64,7 @@ type DiffRequest struct {
 	BranchName    string
 	CommitMessage string
 	Reviewers     []string
+	DiffID        string
 }
 
 // NewHandler constructs a new Handler.
@@ -95,7 +98,7 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.GET("/thrift-file/*path", h.ThriftFile)
 	r.GET("/thrift-file-compiled/*path", h.CompiledThrift)
 	r.POST("/validate-updates", h.ValidateUpdates)
-	r.POST("/create-diff", h.CreateDiff)
+	r.POST("/create-diff", h.GenerateDiff)
 	r.POST("/land-diff", h.LandDiff)
 	r.POST("/thrift-file-parsed", h.ThriftModuleToCode)
 	r.POST("/thrift-file-code/*path", h.CodeThrift)
@@ -383,19 +386,25 @@ func (h *Handler) ThriftModuleToCode(w http.ResponseWriter, r *http.Request, ps 
 	h.WriteJSON(w, http.StatusOK, &thriftToCodeResponse{Content: code})
 }
 
-type createDiffResponse struct {
+type generateDiffResponse struct {
 	DiffURI string `json:"diff_uri"`
 }
 
-// CreateDiff creates a diff for updates for thrift files, clients and endpoints.
-func (h *Handler) CreateDiff(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	req := &UpdateRequest{}
+// GenerateDiff generates diff for thrift files, client and endpoints.
+// optionally it takes a diff id to updating an existing diff
+func (h *Handler) GenerateDiff(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var (
+		resp string
+		err  error
+		req  *UpdateRequest
+	)
+	req = &UpdateRequest{}
 	b, err := UnmarshalJSONBody(r, req)
 	if err != nil {
 		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for createing a diff"))
 		return
 	}
-	h.logger.Info("Creating a diff.",
+	h.logger.Info("Generating a diff.",
 		zap.String("request", string(b)),
 	)
 	gatewayConfig, err := h.GatewayConfig(r)
@@ -424,17 +433,22 @@ func (h *Handler) CreateDiff(w http.ResponseWriter, r *http.Request, ps httprout
 		BranchName:    strings.Join([]string{"batch", "update", currentTime()}, "_"),
 		CommitMessage: fmt.Sprintf("[%s] Batch update", gatewayConfig.ID),
 	}
-	h.logger.Info("Creating diff...",
+	h.logger.Info("Generating diff...",
 		zap.String("localDir", repo.LocalDir()),
 		zap.String("remote", repo.Remote()),
 		zap.String("diffRequest", fmt.Sprintf("%+v", diffReq)),
 	)
-	resp, err := h.DiffCreator.NewDiff(repo, diffReq)
+	if req.DIffID == nil {
+		resp, err = h.DiffCreator.NewDiff(repo, diffReq)
+	} else {
+		diffReq.DiffID = *req.DIffID
+		resp, err = h.DiffCreator.UpdateDiff(repo, diffReq)
+	}
 	if err != nil {
 		h.WriteJSON(w, http.StatusInternalServerError, resp)
 		return
 	}
-	h.WriteJSON(w, http.StatusOK, &createDiffResponse{DiffURI: resp})
+	h.WriteJSON(w, http.StatusOK, &generateDiffResponse{DiffURI: resp})
 }
 
 // LandDiff lands a diff.

@@ -114,6 +114,10 @@ func (d *diffCreator) LandDiff(r *Repository, diffURL string) error {
 	return nil
 }
 
+func (d *diffCreator) UpdateDiff(r *Repository, request *DiffRequest) (string, error) {
+	return fmt.Sprintf("http://diff-for-%s", r.Remote()), nil
+}
+
 func NewTestServer() *httptest.Server {
 	manager := NewTestManager()
 	handler := NewHandler(manager, &diffCreator{}, "gateway-id", &logger{})
