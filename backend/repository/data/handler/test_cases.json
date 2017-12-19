@@ -2430,6 +2430,25 @@
 		}
 	},
 	{
+		"name": "land-diff",
+		"request": {
+			"method": "POST",
+			"url": "/land-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"diff_url": "https://panic"
+			}
+		},
+		"response": {
+			"code": 500,
+			"body": {
+				"message": "backend handler panic: dummy panic for testing"
+			}
+		}
+	},
+	{
 		"name": "get-all-gateway-config",
 		"request": {
 			"method": "GET",
