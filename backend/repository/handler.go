@@ -77,6 +77,8 @@ func NewHandler(m *Manager, dc DiffCreator, gatewayHeader string, logger Logger)
 // NewHTTPRouter constructs the endpoints for http server.
 func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r := httprouter.New()
+	r.PanicHandler = h.handlePanic
+
 	// TODO(zw): Add more endpoints and tests.
 	r.GET("/gateways", h.GatewayAll)
 	r.GET("/gateway/:id", h.GatewayByID)
@@ -98,6 +100,30 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.POST("/thrift-file-parsed", h.ThriftModuleToCode)
 	r.POST("/thrift-file-code/*path", h.CodeThrift)
 	return r
+}
+
+func (h *Handler) handlePanic(
+	w http.ResponseWriter, r *http.Request, v interface{},
+) {
+	err, ok := v.(error)
+	if !ok {
+		err = errors.Errorf("backend handler panic: %v", v)
+	}
+	_, ok = err.(fmt.Formatter)
+	if !ok {
+		err = errors.Wrap(err, "wrapped")
+	}
+
+	h.logger.Error(
+		"A backed request handler panicked",
+		zap.Error(err),
+		zap.String("pathname", r.URL.RequestURI()),
+	)
+
+	h.WriteJSON(w,
+		http.StatusInternalServerError,
+		map[string]string{"message": err.Error()},
+	)
 }
 
 // GatewayAll returns configurations of all edge gateways.

@@ -2419,13 +2419,32 @@
 				"gateway-id": "example-gateway"
 			},
 			"body": {
-				"diff_uri": "https://some-diff-uri"
+				"diff_url": "https://some-diff-uri"
 			}
 		},
 		"response": {
 			"code": 200,
 			"body": {
 				"Status": "OK"
+			}
+		}
+	},
+	{
+		"name": "land-diff",
+		"request": {
+			"method": "POST",
+			"url": "/land-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"diff_url": "https://panic"
+			}
+		},
+		"response": {
+			"code": 500,
+			"body": {
+				"message": "backend handler panic: dummy panic for testing"
 			}
 		}
 	},

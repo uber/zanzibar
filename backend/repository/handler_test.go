@@ -33,6 +33,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	testlib "github.com/uber/zanzibar/test/lib"
 	"go.uber.org/zap/zapcore"
+	"strings"
 )
 
 type TestCase struct {
@@ -104,7 +105,12 @@ func (d *diffCreator) NewDiff(r *Repository, request *DiffRequest) (string, erro
 	return fmt.Sprintf("http://diff-for-%s", r.Remote()), nil
 }
 
-func (d *diffCreator) LandDiff(r *Repository, diffURI string) error {
+func (d *diffCreator) LandDiff(r *Repository, diffURL string) error {
+	// For the sake of testing, we panic when the diffURL
+	// contains the string panic.
+	if strings.Contains(diffURL, "panic") {
+		panic("dummy panic for testing")
+	}
 	return nil
 }
 
