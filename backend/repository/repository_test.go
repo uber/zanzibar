@@ -121,11 +121,13 @@ func TestRepositoryUpdateSuccessfully(t *testing.T) {
 	r := &Repository{
 		remote:          remote,
 		localDir:        localDir,
-		version:         "init_version",
 		fetcher:         fetcher,
-		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
+	r.meta.Store(&meta{
+		version:    "init_version",
+		lastUpdate: time.Now().Add(-1 * time.Minute),
+	})
 	assert.Equal(t, true, r.Update(), "Failed to update repository.")
 	assert.Equal(t, "new_version", r.Version(), "Failed to update version.")
 }
@@ -134,11 +136,13 @@ func TestRepositoryUpdateTooSoon(t *testing.T) {
 	r := &Repository{
 		remote:          "remote",
 		localDir:        "local_dir",
-		version:         "init_version",
 		fetcher:         &fakeFetcher{},
-		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 3 * time.Minute,
 	}
+	r.meta.Store(&meta{
+		version:    "init_version",
+		lastUpdate: time.Now().Add(-1 * time.Minute),
+	})
 	assert.Equal(t, false, r.Update(), "Should not update repository.")
 }
 
@@ -154,11 +158,13 @@ func TestRepositoryUpdateWithError(t *testing.T) {
 	r := &Repository{
 		remote:          remote,
 		localDir:        localDir,
-		version:         "init_version",
 		fetcher:         fetcher,
-		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
+	r.meta.Store(&meta{
+		version:    "init_version",
+		lastUpdate: time.Now().Add(-1 * time.Minute),
+	})
 	assert.Equal(t, false, r.Update(), "Should not update repository.")
 	assert.Equal(t, "init_version", r.Version(), "Should not update version.")
 }
@@ -175,11 +181,13 @@ func TestRepositoryUpdateWithUnknownVersion(t *testing.T) {
 	r := &Repository{
 		remote:          remote,
 		localDir:        localDir,
-		version:         "init_version",
 		fetcher:         fetcher,
-		lastUpdateTime:  time.Now().Add(-1 * time.Minute),
 		refreshInterval: 30 * time.Second,
 	}
+	r.meta.Store(&meta{
+		version:    "init_version",
+		lastUpdate: time.Now().Add(-1 * time.Minute),
+	})
 	assert.Equal(t, true, r.Update(), "Failed to update repository.")
 	assert.Equal(t, "unknown", r.Version(), "Failed to update version.")
 }

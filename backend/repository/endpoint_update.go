@@ -41,11 +41,13 @@ func (r *Repository) WriteEndpointConfig(
 	if err := r.validateEndpointCfg(config); err != nil {
 		return errors.Wrap(err, "invalid endpoint config")
 	}
-	r.Lock()
-	defer r.Unlock()
+	gatewayCfg, err := r.GatewayConfig()
+	if err != nil {
+		return errors.Wrap(err, "loading gateway config error")
+	}
 	endpointDir := codegen.CamelToSnake(strings.TrimSuffix(config.ID, "."+config.HandleID))
 	dir := filepath.Join(r.absPath(endpointCfgDir), endpointDir)
-	err := os.MkdirAll(dir, os.ModePerm)
+	err = os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
 		return errors.Wrap(err, "failed to create endpoint config dir")
 	}
@@ -59,7 +61,7 @@ func (r *Repository) WriteEndpointConfig(
 	if err != nil {
 		return errors.Wrap(err, "failed to write endpoint group configuration")
 	}
-	serviceConfigDir := filepath.Join(r.absPath(endpointCfgDir), "..", "/services/", r.gatewayConfig.ID)
+	serviceConfigDir := filepath.Join(r.absPath(endpointCfgDir), "..", "/services/", gatewayCfg.ID)
 	err = updateServiceMetaJSON(serviceConfigDir, serviceConfigFileName, config)
 	if err != nil {
 		return errors.Wrap(err, "failed to write service group configuration")
@@ -87,7 +89,7 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 	}
 
 	for _, mid := range req.Middlewares {
-		for _, midCfg := range r.gatewayConfig.RawMiddlewares {
+		for _, midCfg := range gatewayConfig.RawMiddlewares {
 			if mid.Name == midCfg.Name {
 				absFile := "file://" + r.absPath(midCfg.SchemaFile)
 				err := codegen.SchemaValidateGo(absFile, mid.Options)

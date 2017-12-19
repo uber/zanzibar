@@ -364,11 +364,3 @@ func addThriftDependencies(idlRoot string, module *compile.Module, meta map[stri
 	}
 	return nil
 }
-
-// ReadFile returns the content of a file in a relativePath in a repository.
-func (r *Repository) ReadFile(relativePath string) ([]byte, error) {
-	r.RLock()
-	defer r.RUnlock()
-	path := filepath.Join(r.localDir, relativePath)
-	return ioutil.ReadFile(path)
-}

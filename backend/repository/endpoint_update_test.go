@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
@@ -57,8 +58,13 @@ func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) 
 	err := readJSONFile(requestFile, req)
 	assert.NoError(t, err, "Failed to unmarshal endpoint config.")
 	r := &Repository{
-		localDir: tempDir,
+		localDir:        tempDir,
+		refreshInterval: time.Hour * 65535,
 	}
+	r.meta.Store(&meta{
+		lastUpdate: time.Now(),
+		version:    "test",
+	})
 	endpointCfgDir := "endpoints"
 	err = r.WriteEndpointConfig(endpointCfgDir, req, "{{placeholder}}")
 	if !assert.NoError(t, err, "Failed to write endpoint config.") {
