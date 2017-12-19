@@ -2419,7 +2419,7 @@
 				"gateway-id": "example-gateway"
 			},
 			"body": {
-				"diff_uri": "https://some-diff-uri"
+				"diff_url": "https://some-diff-uri"
 			}
 		},
 		"response": {
