@@ -208,6 +208,10 @@ func NewClient(
 	port := deps.Default.Config.MustGetInt("clients.bar.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("clients.bar.defaultHeaders") {
+        deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
+    }
 
 	return &barClient{
 		clientID: "bar",
@@ -247,6 +251,7 @@ func NewClient(
 				"EchoTypedef",
 			},
 			baseURL,
+			defaultHeaders,
 			timeout,
 		),
 	}

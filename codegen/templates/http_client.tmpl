@@ -57,6 +57,10 @@ func {{$exportName}}(
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
+	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -69,6 +73,7 @@ func {{$exportName}}(
 				{{end}}
 			},
 			baseURL,
+			defaultHeaders,
 			timeout,
 		),
 	}

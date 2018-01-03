@@ -72,6 +72,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		"bar",
 		[]string{"echo"},
 		baseURL,
+		map[string]string{},
 		time.Second,
 	)
 	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
@@ -127,6 +128,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		"bar",
 		[]string{"echo"},
 		baseURL,
+		map[string]string{},
 		time.Second,
 	)
 	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
@@ -181,6 +183,7 @@ func TestUnknownStatusCode(t *testing.T) {
 		"bar",
 		[]string{"echo"},
 		baseURL,
+		map[string]string{},
 		time.Second,
 	)
 

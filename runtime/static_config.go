@@ -206,7 +206,7 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 	panic(errors.Errorf("Key (%s) not available", key))
 }
 
-// ContainsKey returns the value as a string or panics.
+// ContainsKey returns true if key is found otherwise false.
 func (conf *StaticConfig) ContainsKey(key string) bool {
 	if conf.destroyed {
 		panic(errors.Errorf("Cannot ContainsKey(%s) because destroyed", key))

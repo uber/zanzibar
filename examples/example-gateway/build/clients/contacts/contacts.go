@@ -63,6 +63,10 @@ func NewClient(
 	port := deps.Default.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
+	}
 
 	return &contactsClient{
 		clientID: "contacts",
@@ -74,6 +78,7 @@ func NewClient(
 				"TestURLURL",
 			},
 			baseURL,
+			defaultHeaders,
 			timeout,
 		),
 	}

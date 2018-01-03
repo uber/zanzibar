@@ -62,6 +62,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		"clientID",
 		[]string{"DoStuff"},
 		"/",
+		map[string]string{},
 		time.Second,
 	)
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
@@ -95,6 +96,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		"clientID",
 		[]string{"DoStuff"},
 		"/",
+		map[string]string{},
 		time.Second,
 	)
 	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
