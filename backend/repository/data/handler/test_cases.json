@@ -68,6 +68,7 @@
 					"NoRequest": "Bar::noRequest",
 					"Normal": "Bar::normal",
 					"NormalRecur": "Bar::normalRecur",
+					"TestURL": "Bar::testUrl",
 					"TooManyArgs": "Bar::tooManyArgs"
 				},
 				"ip": "127.0.0.1",
@@ -122,6 +123,7 @@
 						"NoRequest": "Bar::noRequest",
 						"Normal": "Bar::normal",
 						"NormalRecur": "Bar::normalRecur",
+						"TestURL": "Bar::testUrl",
 						"TooManyArgs": "Bar::tooManyArgs"
 					},
 					"ip": "127.0.0.1",
@@ -386,6 +388,10 @@
 							},
 							{
 								"Name": "normalRecur",
+								"Type": "http"
+							},
+							{
+								"Name": "testUrl",
 								"Type": "http"
 							},
 							{
@@ -661,6 +667,10 @@
 							},
 							{
 								"Name": "normal",
+								"Type": "http"
+							},
+							{
+								"Name": "testUrl",
 								"Type": "http"
 							},
 							{
@@ -2491,6 +2501,7 @@
 								"NoRequest": "Bar::noRequest",
 								"Normal": "Bar::normal",
 								"NormalRecur": "Bar::normalRecur",
+								"TestURL": "Bar::testUrl",
 								"TooManyArgs": "Bar::tooManyArgs"
 							},
 							"ip": "127.0.0.1",
@@ -2983,6 +2994,10 @@
 										"Type": "http"
 									},
 									{
+										"Name": "testUrl",
+										"Type": "http"
+									},
+									{
 										"Name": "tooManyArgs",
 										"Type": "http"
 									}
@@ -3258,6 +3273,10 @@
 										"Type": "http"
 									},
 									{
+										"Name": "testUrl",
+										"Type": "http"
+									},
+									{
 										"Name": "tooManyArgs",
 										"Type": "http"
 									}
@@ -3409,6 +3428,7 @@
 							"NoRequest": "Bar::noRequest",
 							"Normal": "Bar::normal",
 							"NormalRecur": "Bar::normalRecur",
+							"TestURL": "Bar::testUrl",
 							"TooManyArgs": "Bar::tooManyArgs"
 						},
 						"ip": "127.0.0.1",
@@ -3901,6 +3921,10 @@
 									"Type": "http"
 								},
 								{
+									"Name": "testUrl",
+									"Type": "http"
+								},
+								{
 									"Name": "tooManyArgs",
 									"Type": "http"
 								}
@@ -4173,6 +4197,10 @@
 								},
 								{
 									"Name": "normal",
+									"Type": "http"
+								},
+								{
+									"Name": "testUrl",
 									"Type": "http"
 								},
 								{

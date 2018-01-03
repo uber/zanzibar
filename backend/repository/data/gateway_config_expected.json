@@ -342,6 +342,7 @@
 				"NoRequest": "Bar::noRequest",
 				"Normal": "Bar::normal",
 				"NormalRecur": "Bar::normalRecur",
+				"TestURL": "Bar::testUrl",
 				"TooManyArgs": "Bar::tooManyArgs"
 			},
 			"ip": "127.0.0.1",
@@ -477,6 +478,10 @@
 					},
 					{
 						"Name": "normalRecur",
+						"Type": "http"
+					},
+					{
+						"Name": "testUrl",
 						"Type": "http"
 					},
 					{
@@ -752,6 +757,10 @@
 					},
 					{
 						"Name": "normal",
+						"Type": "http"
+					},
+					{
+						"Name": "testUrl",
 						"Type": "http"
 					},
 					{

@@ -41,6 +41,14 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
+var lintCorrectionMap = map[string]string{
+	"Url":  "URL",
+	"Api":  "API",
+	"Id":   "ID",
+	"Http": "HTTP",
+	"Uuid": "UUID",
+}
+
 var mandatoryClientFields = []string{
 	"thriftFile",
 	"thriftFileSha",
@@ -184,6 +192,7 @@ func NewTChannelClientSpec(
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
+		key = correctMethodNaming(key)
 		cspec.ExposedMethods[key] = val.(string)
 		if _, ok := reversed[val.(string)]; ok {
 			return nil, errors.Errorf(
@@ -251,6 +260,7 @@ func NewHTTPClientSpec(
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
+		key = correctMethodNaming(key)
 		cspec.ExposedMethods[key] = val.(string)
 		if _, ok := reversed[val.(string)]; ok {
 			return nil, errors.Errorf(
@@ -1059,4 +1069,14 @@ func NewGatewaySpec(
 	}
 
 	return spec, nil
+}
+
+// correct method name for lint conventions, e.g convert Uuid to UUID
+func correctMethodNaming(key string) string {
+	for k := range lintCorrectionMap {
+		if strings.Contains(key, k) {
+			key = strings.Replace(key, k, lintCorrectionMap[k], 1)
+		}
+	}
+	return key
 }
