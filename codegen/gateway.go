@@ -41,14 +41,6 @@ func getDirName() string {
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
 
-var lintCorrectionMap = map[string]string{
-	"Url":  "URL",
-	"Api":  "API",
-	"Id":   "ID",
-	"Http": "HTTP",
-	"Uuid": "UUID",
-}
-
 var mandatoryClientFields = []string{
 	"thriftFile",
 	"thriftFileSha",
@@ -102,7 +94,7 @@ type ClientSpec struct {
 	// only the method values in this map are generated for the client
 	ExposedMethods map[string]string
 	// SidecarRouter indicates the client uses the given sidecar router to
-	// to communicate with downstream service, it's not relevant to custom clients.
+	// to communicate with downstream service, it"s not relevant to custom clients.
 	SidecarRouter string
 }
 
@@ -1073,9 +1065,10 @@ func NewGatewaySpec(
 
 // correct method name for lint conventions, e.g convert Uuid to UUID
 func correctMethodNaming(key string) string {
-	for k := range lintCorrectionMap {
-		if strings.Contains(key, k) {
-			key = strings.Replace(key, k, lintCorrectionMap[k], 1)
+	for k := range commonInitialisms {
+		initial := string(k[0]) + strings.ToLower(k[1:])
+		if strings.Contains(key, string(k[0]) + strings.ToLower(k[1:])) {
+			key = strings.Replace(key, initial, k, 1)
 		}
 	}
 	return key
