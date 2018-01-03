@@ -27,8 +27,7 @@ import (
 	"unicode"
 )
 
-// CommonInitialisms, taken from
-// https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
+// CommonInitialisms, taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
 var CommonInitialisms = map[string]bool{
 	"ACL":   true,
 	"API":   true,
