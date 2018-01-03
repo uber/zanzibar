@@ -98,10 +98,14 @@ func CreateGateway(
 	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
 		seedConfig["tchannel.serviceName"] = "bench-gateway"
 	}
+	if _, ok := seedConfig["logger.output"]; !ok {
+		seedConfig["logger.output"] = "disk"
+	}
+	if _, ok := seedConfig["logger.fileName"]; !ok {
+		seedConfig["logger.fileName"] = "zanzibar.log"
+	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.serviceName"] = "bench-gateway"
-	seedConfig["logger.output"] = "disk"
-	seedConfig["logger.fileName"] = "zanzibar.log"
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{
