@@ -1,10 +1,10 @@
 {
-	"clients.bar.ip": "127.0.0.1",
-	"clients.bar.port": 4001,
-	"clients.bar.timeout": 10000,
 	"clients.bar.defaultHeaders": {
 		"X-Client-ID": "bar"
 	},
+	"clients.bar.ip": "127.0.0.1",
+	"clients.bar.port": 4001,
+	"clients.bar.timeout": 10000,
 	"clients.baz.ip": "127.0.0.1",
 	"clients.baz.port": 4002,
 	"clients.baz.serviceName": "Qux",
