@@ -210,8 +210,8 @@ func NewClient(
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.bar.defaultHeaders") {
-        deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
-    }
+		deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
+	}
 
 	return &barClient{
 		clientID: "bar",

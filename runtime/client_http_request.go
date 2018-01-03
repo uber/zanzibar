@@ -34,16 +34,17 @@ import (
 // ClientHTTPRequest is the struct for making client
 // requests using an outbound http client.
 type ClientHTTPRequest struct {
-	ClientID   string
-	MethodName string
-	client     *HTTPClient
-	httpReq    *http.Request
-	res        *ClientHTTPResponse
-	started    bool
-	startTime  time.Time
-	Logger     *zap.Logger
-	metrics    *OutboundHTTPMetrics
-	rawBody    []byte
+	ClientID       string
+	MethodName     string
+	client         *HTTPClient
+	httpReq        *http.Request
+	res            *ClientHTTPResponse
+	started        bool
+	startTime      time.Time
+	Logger         *zap.Logger
+	metrics        *OutboundHTTPMetrics
+	rawBody        []byte
+	defaultHeaders map[string]string
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest
@@ -52,16 +53,14 @@ func NewClientHTTPRequest(
 	client *HTTPClient,
 ) *ClientHTTPRequest {
 	req := &ClientHTTPRequest{
-		ClientID:   clientID,
-		MethodName: methodName,
-		client:     client,
-		Logger:     client.loggers[methodName],
-		metrics:    client.metrics[methodName],
+		ClientID:       clientID,
+		MethodName:     methodName,
+		client:         client,
+		Logger:         client.loggers[methodName],
+		metrics:        client.metrics[methodName],
+		defaultHeaders: client.Headers,
 	}
 	req.res = NewClientHTTPResponse(req)
-	for headerKey, headerValue := range client.Headers {
-		req.httpReq.Header.Add(headerKey, headerValue)
-	}
 	req.start()
 	return req
 }
@@ -131,6 +130,12 @@ func (req *ClientHTTPRequest) WriteJSON(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
 		)
+	}
+
+	// Using `Add` over `Set` intentionally, allowing us to create a list
+	// of headerValues for a given key.
+	for headerKey, headerValue := range req.defaultHeaders {
+		httpReq.Header.Add(headerKey, headerValue)
 	}
 
 	for k := range headers {
