@@ -42,6 +42,10 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsContactsContacts.SaveContactsRequest,
 	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
+	TestURL(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (string, map[string]string, error)
 }
 
 // contactsClient is the http client.
@@ -67,6 +71,7 @@ func NewClient(
 			"contacts",
 			[]string{
 				"SaveContacts",
+				"TestURL",
 			},
 			baseURL,
 			timeout,
@@ -118,6 +123,57 @@ func (c *contactsClient) SaveContacts(
 		}
 
 		return &responseBody, respHeaders, nil
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// TestURL calls "/contacts/testUrl" endpoint.
+func (c *contactsClient) TestURL(
+	ctx context.Context,
+	headers map[string]string,
+) (string, map[string]string, error) {
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "TestURL", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
 	default:
 		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()

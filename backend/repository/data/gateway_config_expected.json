@@ -387,7 +387,8 @@
 			"type": "http",
 			"thriftFile": "clients/contacts/contacts.thrift",
 			"exposedMethods": {
-				"SaveContacts": "Contacts::saveContacts"
+				"SaveContacts": "Contacts::saveContacts",
+				"TestURL": "Contacts::testUrl"
 			},
 			"ip": "127.0.0.1",
 			"port": 4000,
@@ -667,6 +668,10 @@
 					{
 						"Name": "saveContacts",
 						"Type": "http"
+					},
+					{
+						"Name": "testUrl",
+						"Type": "http"
 					}
 				]
 			}
@@ -796,6 +801,10 @@
 				"Methods": [
 					{
 						"Name": "saveContacts",
+						"Type": "http"
+					},
+					{
+						"Name": "testUrl",
 						"Type": "http"
 					}
 				]
