@@ -1067,7 +1067,7 @@ func NewGatewaySpec(
 func correctMethodNaming(key string) string {
 	for k := range commonInitialisms {
 		initial := string(k[0]) + strings.ToLower(k[1:])
-		if strings.Contains(key, string(k[0]) + strings.ToLower(k[1:])) {
+		if strings.Contains(key, string(k[0])+strings.ToLower(k[1:])) {
 			key = strings.Replace(key, initial, k, 1)
 		}
 	}
