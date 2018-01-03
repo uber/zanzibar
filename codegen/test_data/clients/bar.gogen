@@ -98,6 +98,10 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_NormalRecur_Args,
 	) (*clientsBarBar.BarResponseRecur, map[string]string, error)
+	TestURL(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (string, map[string]string, error)
 	TooManyArgs(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -227,6 +231,7 @@ func NewClient(
 				"NoRequest",
 				"Normal",
 				"NormalRecur",
+				"TestURL",
 				"TooManyArgs",
 				"EchoBinary",
 				"EchoBool",
@@ -1021,6 +1026,66 @@ func (c *barClient) NormalRecur(
 		}
 
 		return &responseBody, respHeaders, nil
+
+	case 403:
+		var exception clientsBarBar.BarException
+		err = res.ReadAndUnmarshalBody(&exception)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return defaultRes, respHeaders, &exception
+
+	default:
+		// TODO: log about unexpected body bytes?
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// TestURL calls "/bar/testUrl" endpoint.
+func (c *barClient) TestURL(
+	ctx context.Context,
+	headers map[string]string,
+) (string, map[string]string, error) {
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "TestURL", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/testUrl"
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	res, err := req.Do(ctx)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200, 403})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
 
 	case 403:
 		var exception clientsBarBar.BarException

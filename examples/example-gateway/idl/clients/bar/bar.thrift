@@ -78,6 +78,14 @@ service Bar {
        zanzibar.http.path = "/bar/hello"
        zanzibar.http.status = "200"
     )
+    string testUrl(
+    ) throws (
+        1: BarException barException (zanzibar.http.status = "403")
+    ) (
+       zanzibar.http.method = "GET"
+       zanzibar.http.path = "/bar/testUrl"
+       zanzibar.http.status = "200"
+    )
     BarResponse normal (
         1: required BarRequest request
     ) throws (

@@ -94,7 +94,7 @@ type ClientSpec struct {
 	// only the method values in this map are generated for the client
 	ExposedMethods map[string]string
 	// SidecarRouter indicates the client uses the given sidecar router to
-	// to communicate with downstream service, it's not relevant to custom clients.
+	// to communicate with downstream service, it"s not relevant to custom clients.
 	SidecarRouter string
 }
 
@@ -184,6 +184,7 @@ func NewTChannelClientSpec(
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
+		key = correctMethodNaming(key)
 		cspec.ExposedMethods[key] = val.(string)
 		if _, ok := reversed[val.(string)]; ok {
 			return nil, errors.Errorf(
@@ -251,6 +252,7 @@ func NewHTTPClientSpec(
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
+		key = correctMethodNaming(key)
 		cspec.ExposedMethods[key] = val.(string)
 		if _, ok := reversed[val.(string)]; ok {
 			return nil, errors.Errorf(
@@ -1059,4 +1061,15 @@ func NewGatewaySpec(
 	}
 
 	return spec, nil
+}
+
+// correct method name for lint conventions, e.g convert Uuid to UUID
+func correctMethodNaming(key string) string {
+	for k := range commonInitialisms {
+		initial := string(k[0]) + strings.ToLower(k[1:])
+		if strings.Contains(key, string(k[0])+strings.ToLower(k[1:])) {
+			key = strings.Replace(key, initial, k, 1)
+		}
+	}
+	return key
 }
