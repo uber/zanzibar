@@ -63,6 +63,10 @@ func NewClient(
 	port := deps.Default.Config.MustGetInt("clients.google-now.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("clients.google-now.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("clients.google-now.defaultHeaders", &defaultHeaders)
+	}
 
 	return &googleNowClient{
 		clientID: "google-now",
@@ -74,6 +78,7 @@ func NewClient(
 				"CheckCredentials",
 			},
 			baseURL,
+			defaultHeaders,
 			timeout,
 		),
 	}

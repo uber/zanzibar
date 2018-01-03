@@ -59,6 +59,9 @@ func NewClientHTTPRequest(
 		metrics:    client.metrics[methodName],
 	}
 	req.res = NewClientHTTPResponse(req)
+	for headerKey, headerValue := range client.Headers {
+		req.httpReq.Header.Add(headerKey, headerValue)
+	}
 	req.start()
 	return req
 }

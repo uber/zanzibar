@@ -917,6 +917,10 @@ func {{$exportName}}(
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
+	defaultHeaders := make(map[string]string)
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
+		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
+	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -929,6 +933,7 @@ func {{$exportName}}(
 				{{end}}
 			},
 			baseURL,
+			defaultHeaders,
 			timeout,
 		),
 	}
@@ -1133,7 +1138,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7122, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

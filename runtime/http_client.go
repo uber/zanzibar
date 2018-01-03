@@ -33,6 +33,7 @@ import (
 type HTTPClient struct {
 	Client  *http.Client
 	BaseURL string
+	Headers map[string]string
 	loggers map[string]*zap.Logger
 	metrics map[string]*OutboundHTTPMetrics
 }
@@ -55,6 +56,7 @@ func NewHTTPClient(
 	clientID string,
 	methodNames []string,
 	baseURL string,
+	defaultHeaders map[string]string,
 	timeout time.Duration,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
@@ -79,6 +81,7 @@ func NewHTTPClient(
 			Timeout: timeout,
 		},
 		BaseURL: baseURL,
+		Headers: defaultHeaders,
 		loggers: loggers,
 		metrics: metrics,
 	}
