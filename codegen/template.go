@@ -63,6 +63,7 @@ var defaultFuncMap = tmpl.FuncMap{
 	"jsonMarshal":   jsonMarshal,
 	"isPointerType": isPointerType,
 	"unref":         unref,
+	"lintAcronym":   CorrectMethodNaming,
 }
 
 func fullTypeName(typeName, packageName string) string {

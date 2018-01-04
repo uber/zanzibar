@@ -34,21 +34,21 @@ import (
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
-// SecondServiceechoBinaryFunc is the handler function for "echoBinary" method of thrift service "SecondService".
-type SecondServiceechoBinaryFunc func(
+// SecondServiceEchoBinaryFunc is the handler function for "echoBinary" method of thrift service "SecondService".
+type SecondServiceEchoBinaryFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoBinary_Args,
 ) ([]byte, map[string]string, error)
 
 // NewSecondServiceEchoBinaryHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoBinaryHandler(f SecondServiceechoBinaryFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoBinaryHandler(f SecondServiceEchoBinaryFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoBinaryHandler{f}
 }
 
 // SecondServiceEchoBinaryHandler handles the "echoBinary" method call of thrift service "SecondService".
 type SecondServiceEchoBinaryHandler struct {
-	echobinary SecondServiceechoBinaryFunc
+	echobinary SecondServiceEchoBinaryFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -73,21 +73,21 @@ func (h *SecondServiceEchoBinaryHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoBoolFunc is the handler function for "echoBool" method of thrift service "SecondService".
-type SecondServiceechoBoolFunc func(
+// SecondServiceEchoBoolFunc is the handler function for "echoBool" method of thrift service "SecondService".
+type SecondServiceEchoBoolFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoBool_Args,
 ) (bool, map[string]string, error)
 
 // NewSecondServiceEchoBoolHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoBoolHandler(f SecondServiceechoBoolFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoBoolHandler(f SecondServiceEchoBoolFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoBoolHandler{f}
 }
 
 // SecondServiceEchoBoolHandler handles the "echoBool" method call of thrift service "SecondService".
 type SecondServiceEchoBoolHandler struct {
-	echobool SecondServiceechoBoolFunc
+	echobool SecondServiceEchoBoolFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -112,21 +112,21 @@ func (h *SecondServiceEchoBoolHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoDoubleFunc is the handler function for "echoDouble" method of thrift service "SecondService".
-type SecondServiceechoDoubleFunc func(
+// SecondServiceEchoDoubleFunc is the handler function for "echoDouble" method of thrift service "SecondService".
+type SecondServiceEchoDoubleFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoDouble_Args,
 ) (float64, map[string]string, error)
 
 // NewSecondServiceEchoDoubleHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoDoubleHandler(f SecondServiceechoDoubleFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoDoubleHandler(f SecondServiceEchoDoubleFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoDoubleHandler{f}
 }
 
 // SecondServiceEchoDoubleHandler handles the "echoDouble" method call of thrift service "SecondService".
 type SecondServiceEchoDoubleHandler struct {
-	echodouble SecondServiceechoDoubleFunc
+	echodouble SecondServiceEchoDoubleFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -151,21 +151,21 @@ func (h *SecondServiceEchoDoubleHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoEnumFunc is the handler function for "echoEnum" method of thrift service "SecondService".
-type SecondServiceechoEnumFunc func(
+// SecondServiceEchoEnumFunc is the handler function for "echoEnum" method of thrift service "SecondService".
+type SecondServiceEchoEnumFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoEnum_Args,
 ) (clientsBazBaz.Fruit, map[string]string, error)
 
 // NewSecondServiceEchoEnumHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoEnumHandler(f SecondServiceechoEnumFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoEnumHandler(f SecondServiceEchoEnumFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoEnumHandler{f}
 }
 
 // SecondServiceEchoEnumHandler handles the "echoEnum" method call of thrift service "SecondService".
 type SecondServiceEchoEnumHandler struct {
-	echoenum SecondServiceechoEnumFunc
+	echoenum SecondServiceEchoEnumFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -190,21 +190,21 @@ func (h *SecondServiceEchoEnumHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoI16Func is the handler function for "echoI16" method of thrift service "SecondService".
-type SecondServiceechoI16Func func(
+// SecondServiceEchoI16Func is the handler function for "echoI16" method of thrift service "SecondService".
+type SecondServiceEchoI16Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoI16_Args,
 ) (int16, map[string]string, error)
 
 // NewSecondServiceEchoI16Handler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoI16Handler(f SecondServiceechoI16Func) zanzibar.TChannelHandler {
+func NewSecondServiceEchoI16Handler(f SecondServiceEchoI16Func) zanzibar.TChannelHandler {
 	return &SecondServiceEchoI16Handler{f}
 }
 
 // SecondServiceEchoI16Handler handles the "echoI16" method call of thrift service "SecondService".
 type SecondServiceEchoI16Handler struct {
-	echoi16 SecondServiceechoI16Func
+	echoi16 SecondServiceEchoI16Func
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -229,21 +229,21 @@ func (h *SecondServiceEchoI16Handler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoI32Func is the handler function for "echoI32" method of thrift service "SecondService".
-type SecondServiceechoI32Func func(
+// SecondServiceEchoI32Func is the handler function for "echoI32" method of thrift service "SecondService".
+type SecondServiceEchoI32Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoI32_Args,
 ) (int32, map[string]string, error)
 
 // NewSecondServiceEchoI32Handler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoI32Handler(f SecondServiceechoI32Func) zanzibar.TChannelHandler {
+func NewSecondServiceEchoI32Handler(f SecondServiceEchoI32Func) zanzibar.TChannelHandler {
 	return &SecondServiceEchoI32Handler{f}
 }
 
 // SecondServiceEchoI32Handler handles the "echoI32" method call of thrift service "SecondService".
 type SecondServiceEchoI32Handler struct {
-	echoi32 SecondServiceechoI32Func
+	echoi32 SecondServiceEchoI32Func
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -268,21 +268,21 @@ func (h *SecondServiceEchoI32Handler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoI64Func is the handler function for "echoI64" method of thrift service "SecondService".
-type SecondServiceechoI64Func func(
+// SecondServiceEchoI64Func is the handler function for "echoI64" method of thrift service "SecondService".
+type SecondServiceEchoI64Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoI64_Args,
 ) (int64, map[string]string, error)
 
 // NewSecondServiceEchoI64Handler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoI64Handler(f SecondServiceechoI64Func) zanzibar.TChannelHandler {
+func NewSecondServiceEchoI64Handler(f SecondServiceEchoI64Func) zanzibar.TChannelHandler {
 	return &SecondServiceEchoI64Handler{f}
 }
 
 // SecondServiceEchoI64Handler handles the "echoI64" method call of thrift service "SecondService".
 type SecondServiceEchoI64Handler struct {
-	echoi64 SecondServiceechoI64Func
+	echoi64 SecondServiceEchoI64Func
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -307,21 +307,21 @@ func (h *SecondServiceEchoI64Handler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoI8Func is the handler function for "echoI8" method of thrift service "SecondService".
-type SecondServiceechoI8Func func(
+// SecondServiceEchoI8Func is the handler function for "echoI8" method of thrift service "SecondService".
+type SecondServiceEchoI8Func func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoI8_Args,
 ) (int8, map[string]string, error)
 
 // NewSecondServiceEchoI8Handler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoI8Handler(f SecondServiceechoI8Func) zanzibar.TChannelHandler {
+func NewSecondServiceEchoI8Handler(f SecondServiceEchoI8Func) zanzibar.TChannelHandler {
 	return &SecondServiceEchoI8Handler{f}
 }
 
 // SecondServiceEchoI8Handler handles the "echoI8" method call of thrift service "SecondService".
 type SecondServiceEchoI8Handler struct {
-	echoi8 SecondServiceechoI8Func
+	echoi8 SecondServiceEchoI8Func
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -346,21 +346,21 @@ func (h *SecondServiceEchoI8Handler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStringFunc is the handler function for "echoString" method of thrift service "SecondService".
-type SecondServiceechoStringFunc func(
+// SecondServiceEchoStringFunc is the handler function for "echoString" method of thrift service "SecondService".
+type SecondServiceEchoStringFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoString_Args,
 ) (string, map[string]string, error)
 
 // NewSecondServiceEchoStringHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStringHandler(f SecondServiceechoStringFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStringHandler(f SecondServiceEchoStringFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStringHandler{f}
 }
 
 // SecondServiceEchoStringHandler handles the "echoString" method call of thrift service "SecondService".
 type SecondServiceEchoStringHandler struct {
-	echostring SecondServiceechoStringFunc
+	echostring SecondServiceEchoStringFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -385,21 +385,21 @@ func (h *SecondServiceEchoStringHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStringListFunc is the handler function for "echoStringList" method of thrift service "SecondService".
-type SecondServiceechoStringListFunc func(
+// SecondServiceEchoStringListFunc is the handler function for "echoStringList" method of thrift service "SecondService".
+type SecondServiceEchoStringListFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStringList_Args,
 ) ([]string, map[string]string, error)
 
 // NewSecondServiceEchoStringListHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStringListHandler(f SecondServiceechoStringListFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStringListHandler(f SecondServiceEchoStringListFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStringListHandler{f}
 }
 
 // SecondServiceEchoStringListHandler handles the "echoStringList" method call of thrift service "SecondService".
 type SecondServiceEchoStringListHandler struct {
-	echostringlist SecondServiceechoStringListFunc
+	echostringlist SecondServiceEchoStringListFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -424,21 +424,21 @@ func (h *SecondServiceEchoStringListHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStringMapFunc is the handler function for "echoStringMap" method of thrift service "SecondService".
-type SecondServiceechoStringMapFunc func(
+// SecondServiceEchoStringMapFunc is the handler function for "echoStringMap" method of thrift service "SecondService".
+type SecondServiceEchoStringMapFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStringMap_Args,
 ) (map[string]*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStringMapHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStringMapHandler(f SecondServiceechoStringMapFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStringMapHandler(f SecondServiceEchoStringMapFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStringMapHandler{f}
 }
 
 // SecondServiceEchoStringMapHandler handles the "echoStringMap" method call of thrift service "SecondService".
 type SecondServiceEchoStringMapHandler struct {
-	echostringmap SecondServiceechoStringMapFunc
+	echostringmap SecondServiceEchoStringMapFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -463,21 +463,21 @@ func (h *SecondServiceEchoStringMapHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStringSetFunc is the handler function for "echoStringSet" method of thrift service "SecondService".
-type SecondServiceechoStringSetFunc func(
+// SecondServiceEchoStringSetFunc is the handler function for "echoStringSet" method of thrift service "SecondService".
+type SecondServiceEchoStringSetFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStringSet_Args,
 ) (map[string]struct{}, map[string]string, error)
 
 // NewSecondServiceEchoStringSetHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStringSetHandler(f SecondServiceechoStringSetFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStringSetHandler(f SecondServiceEchoStringSetFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStringSetHandler{f}
 }
 
 // SecondServiceEchoStringSetHandler handles the "echoStringSet" method call of thrift service "SecondService".
 type SecondServiceEchoStringSetHandler struct {
-	echostringset SecondServiceechoStringSetFunc
+	echostringset SecondServiceEchoStringSetFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -502,21 +502,21 @@ func (h *SecondServiceEchoStringSetHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStructListFunc is the handler function for "echoStructList" method of thrift service "SecondService".
-type SecondServiceechoStructListFunc func(
+// SecondServiceEchoStructListFunc is the handler function for "echoStructList" method of thrift service "SecondService".
+type SecondServiceEchoStructListFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStructList_Args,
 ) ([]*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStructListHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStructListHandler(f SecondServiceechoStructListFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStructListHandler(f SecondServiceEchoStructListFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStructListHandler{f}
 }
 
 // SecondServiceEchoStructListHandler handles the "echoStructList" method call of thrift service "SecondService".
 type SecondServiceEchoStructListHandler struct {
-	echostructlist SecondServiceechoStructListFunc
+	echostructlist SecondServiceEchoStructListFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -541,8 +541,8 @@ func (h *SecondServiceEchoStructListHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStructMapFunc is the handler function for "echoStructMap" method of thrift service "SecondService".
-type SecondServiceechoStructMapFunc func(
+// SecondServiceEchoStructMapFunc is the handler function for "echoStructMap" method of thrift service "SecondService".
+type SecondServiceEchoStructMapFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStructMap_Args,
@@ -552,13 +552,13 @@ type SecondServiceechoStructMapFunc func(
 }, map[string]string, error)
 
 // NewSecondServiceEchoStructMapHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStructMapHandler(f SecondServiceechoStructMapFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStructMapHandler(f SecondServiceEchoStructMapFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStructMapHandler{f}
 }
 
 // SecondServiceEchoStructMapHandler handles the "echoStructMap" method call of thrift service "SecondService".
 type SecondServiceEchoStructMapHandler struct {
-	echostructmap SecondServiceechoStructMapFunc
+	echostructmap SecondServiceEchoStructMapFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -583,21 +583,21 @@ func (h *SecondServiceEchoStructMapHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoStructSetFunc is the handler function for "echoStructSet" method of thrift service "SecondService".
-type SecondServiceechoStructSetFunc func(
+// SecondServiceEchoStructSetFunc is the handler function for "echoStructSet" method of thrift service "SecondService".
+type SecondServiceEchoStructSetFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoStructSet_Args,
 ) ([]*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSecondServiceEchoStructSetHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStructSetHandler(f SecondServiceechoStructSetFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoStructSetHandler(f SecondServiceEchoStructSetFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoStructSetHandler{f}
 }
 
 // SecondServiceEchoStructSetHandler handles the "echoStructSet" method call of thrift service "SecondService".
 type SecondServiceEchoStructSetHandler struct {
-	echostructset SecondServiceechoStructSetFunc
+	echostructset SecondServiceEchoStructSetFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -622,21 +622,21 @@ func (h *SecondServiceEchoStructSetHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceechoTypedefFunc is the handler function for "echoTypedef" method of thrift service "SecondService".
-type SecondServiceechoTypedefFunc func(
+// SecondServiceEchoTypedefFunc is the handler function for "echoTypedef" method of thrift service "SecondService".
+type SecondServiceEchoTypedefFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SecondService_EchoTypedef_Args,
 ) (clientsBazBase.UUID, map[string]string, error)
 
 // NewSecondServiceEchoTypedefHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoTypedefHandler(f SecondServiceechoTypedefFunc) zanzibar.TChannelHandler {
+func NewSecondServiceEchoTypedefHandler(f SecondServiceEchoTypedefFunc) zanzibar.TChannelHandler {
 	return &SecondServiceEchoTypedefHandler{f}
 }
 
 // SecondServiceEchoTypedefHandler handles the "echoTypedef" method call of thrift service "SecondService".
 type SecondServiceEchoTypedefHandler struct {
-	echotypedef SecondServiceechoTypedefFunc
+	echotypedef SecondServiceEchoTypedefFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -661,21 +661,21 @@ func (h *SecondServiceEchoTypedefHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicecallFunc is the handler function for "call" method of thrift service "SimpleService".
-type SimpleServicecallFunc func(
+// SimpleServiceCallFunc is the handler function for "call" method of thrift service "SimpleService".
+type SimpleServiceCallFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Call_Args,
 ) (map[string]string, error)
 
 // NewSimpleServiceCallHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceCallHandler(f SimpleServicecallFunc) zanzibar.TChannelHandler {
+func NewSimpleServiceCallHandler(f SimpleServiceCallFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceCallHandler{f}
 }
 
 // SimpleServiceCallHandler handles the "call" method call of thrift service "SimpleService".
 type SimpleServiceCallHandler struct {
-	call SimpleServicecallFunc
+	call SimpleServiceCallFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -709,21 +709,21 @@ func (h *SimpleServiceCallHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicecompareFunc is the handler function for "compare" method of thrift service "SimpleService".
-type SimpleServicecompareFunc func(
+// SimpleServiceCompareFunc is the handler function for "compare" method of thrift service "SimpleService".
+type SimpleServiceCompareFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Compare_Args,
 ) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServiceCompareHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceCompareHandler(f SimpleServicecompareFunc) zanzibar.TChannelHandler {
+func NewSimpleServiceCompareHandler(f SimpleServiceCompareFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceCompareHandler{f}
 }
 
 // SimpleServiceCompareHandler handles the "compare" method call of thrift service "SimpleService".
 type SimpleServiceCompareHandler struct {
-	compare SimpleServicecompareFunc
+	compare SimpleServiceCompareFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -766,20 +766,20 @@ func (h *SimpleServiceCompareHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicepingFunc is the handler function for "ping" method of thrift service "SimpleService".
-type SimpleServicepingFunc func(
+// SimpleServicePingFunc is the handler function for "ping" method of thrift service "SimpleService".
+type SimpleServicePingFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (*clientsBazBase.BazResponse, map[string]string, error)
 
 // NewSimpleServicePingHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServicePingHandler(f SimpleServicepingFunc) zanzibar.TChannelHandler {
+func NewSimpleServicePingHandler(f SimpleServicePingFunc) zanzibar.TChannelHandler {
 	return &SimpleServicePingHandler{f}
 }
 
 // SimpleServicePingHandler handles the "ping" method call of thrift service "SimpleService".
 type SimpleServicePingHandler struct {
-	ping SimpleServicepingFunc
+	ping SimpleServicePingFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -804,20 +804,20 @@ func (h *SimpleServicePingHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicesillyNoopFunc is the handler function for "sillyNoop" method of thrift service "SimpleService".
-type SimpleServicesillyNoopFunc func(
+// SimpleServiceSillyNoopFunc is the handler function for "sillyNoop" method of thrift service "SimpleService".
+type SimpleServiceSillyNoopFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error)
 
 // NewSimpleServiceSillyNoopHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceSillyNoopHandler(f SimpleServicesillyNoopFunc) zanzibar.TChannelHandler {
+func NewSimpleServiceSillyNoopHandler(f SimpleServiceSillyNoopFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceSillyNoopHandler{f}
 }
 
 // SimpleServiceSillyNoopHandler handles the "sillyNoop" method call of thrift service "SimpleService".
 type SimpleServiceSillyNoopHandler struct {
-	sillynoop SimpleServicesillyNoopFunc
+	sillynoop SimpleServiceSillyNoopFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -858,20 +858,20 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicetestUUIDFunc is the handler function for "testUuid" method of thrift service "SimpleService".
-type SimpleServicetestUUIDFunc func(
+// SimpleServiceTestUUIDFunc is the handler function for "testUuid" method of thrift service "SimpleService".
+type SimpleServiceTestUUIDFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error)
 
 // NewSimpleServiceTestUUIDHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceTestUUIDHandler(f SimpleServicetestUUIDFunc) zanzibar.TChannelHandler {
+func NewSimpleServiceTestUUIDHandler(f SimpleServiceTestUUIDFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceTestUUIDHandler{f}
 }
 
 // SimpleServiceTestUUIDHandler handles the "testUuid" method call of thrift service "SimpleService".
 type SimpleServiceTestUUIDHandler struct {
-	testuuid SimpleServicetestUUIDFunc
+	testuuid SimpleServiceTestUUIDFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
@@ -895,21 +895,21 @@ func (h *SimpleServiceTestUUIDHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicetransFunc is the handler function for "trans" method of thrift service "SimpleService".
-type SimpleServicetransFunc func(
+// SimpleServiceTransFunc is the handler function for "trans" method of thrift service "SimpleService".
+type SimpleServiceTransFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsBazBaz.SimpleService_Trans_Args,
 ) (*clientsBazBase.TransStruct, map[string]string, error)
 
 // NewSimpleServiceTransHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceTransHandler(f SimpleServicetransFunc) zanzibar.TChannelHandler {
+func NewSimpleServiceTransHandler(f SimpleServiceTransFunc) zanzibar.TChannelHandler {
 	return &SimpleServiceTransHandler{f}
 }
 
 // SimpleServiceTransHandler handles the "trans" method call of thrift service "SimpleService".
 type SimpleServiceTransHandler struct {
-	trans SimpleServicetransFunc
+	trans SimpleServiceTransFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.

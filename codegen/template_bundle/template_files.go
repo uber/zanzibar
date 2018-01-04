@@ -1804,8 +1804,8 @@ import (
 {{if $methodName -}}
 {{$privateName := lower .Name -}}
 {{$genCodePkg := .GenCodePkgName -}}
-{{$func := printf "%s%sFunc" $svc.Name .AdjustedName -}}
-{{$handler := printf "%s%sHandler" $svc.Name (title .AdjustedName) -}}
+{{$func := printf "%s%sFunc" $svc.Name (lintAcronym .Name) -}}
+{{$handler := printf "%s%sHandler" $svc.Name (lintAcronym .Name) -}}
 // {{$func}} is the handler function for "{{.Name}}" method of thrift service "{{$svc.Name}}".
 type {{$func}} func (
 	ctx context.Context,
@@ -1893,7 +1893,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3010, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3014, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
