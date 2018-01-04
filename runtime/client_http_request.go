@@ -58,7 +58,7 @@ func NewClientHTTPRequest(
 		client:         client,
 		Logger:         client.loggers[methodName],
 		metrics:        client.metrics[methodName],
-		defaultHeaders: client.Headers,
+		defaultHeaders: client.DefaultHeaders,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()

@@ -31,11 +31,11 @@ import (
 
 // HTTPClient defines a http client.
 type HTTPClient struct {
-	Client  *http.Client
-	BaseURL string
-	Headers map[string]string
-	loggers map[string]*zap.Logger
-	metrics map[string]*OutboundHTTPMetrics
+	Client         *http.Client
+	BaseURL        string
+	DefaultHeaders map[string]string
+	loggers        map[string]*zap.Logger
+	metrics        map[string]*OutboundHTTPMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -80,9 +80,9 @@ func NewHTTPClient(
 			},
 			Timeout: timeout,
 		},
-		BaseURL: baseURL,
-		Headers: defaultHeaders,
-		loggers: loggers,
-		metrics: metrics,
+		BaseURL:        baseURL,
+		DefaultHeaders: defaultHeaders,
+		loggers:        loggers,
+		metrics:        metrics,
 	}
 }
