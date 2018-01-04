@@ -858,6 +858,43 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
+// SimpleServicetestUuidFunc is the handler function for "testUuid" method of thrift service "SimpleService".
+type SimpleServicetestUuidFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (map[string]string, error)
+
+// NewSimpleServiceTestUuidHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceTestUuidHandler(f SimpleServicetestUuidFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceTestUuidHandler{f}
+}
+
+// SimpleServiceTestUuidHandler handles the "testUuid" method call of thrift service "SimpleService".
+type SimpleServiceTestUuidHandler struct {
+	testuuid SimpleServicetestUuidFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceTestUuidHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_TestUuid_Args
+	var res clientsBazBaz.SimpleService_TestUuid_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	respHeaders, err := h.testuuid(ctx, reqHeaders)
+
+	if err != nil {
+		return false, nil, nil, err
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
 // SimpleServicetransFunc is the handler function for "trans" method of thrift service "SimpleService".
 type SimpleServicetransFunc func(
 	ctx context.Context,
