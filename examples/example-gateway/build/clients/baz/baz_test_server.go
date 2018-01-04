@@ -858,24 +858,24 @@ func (h *SimpleServiceSillyNoopHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SimpleServicetestUuidFunc is the handler function for "testUuid" method of thrift service "SimpleService".
-type SimpleServicetestUuidFunc func(
+// SimpleServicetestUUIDFunc is the handler function for "testUuid" method of thrift service "SimpleService".
+type SimpleServicetestUUIDFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 ) (map[string]string, error)
 
-// NewSimpleServiceTestUuidHandler wraps a handler function so it can be registered with a thrift server.
-func NewSimpleServiceTestUuidHandler(f SimpleServicetestUuidFunc) zanzibar.TChannelHandler {
-	return &SimpleServiceTestUuidHandler{f}
+// NewSimpleServiceTestUUIDHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceTestUUIDHandler(f SimpleServicetestUUIDFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceTestUUIDHandler{f}
 }
 
-// SimpleServiceTestUuidHandler handles the "testUuid" method call of thrift service "SimpleService".
-type SimpleServiceTestUuidHandler struct {
-	testuuid SimpleServicetestUuidFunc
+// SimpleServiceTestUUIDHandler handles the "testUuid" method call of thrift service "SimpleService".
+type SimpleServiceTestUUIDHandler struct {
+	testuuid SimpleServicetestUUIDFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.
-func (h *SimpleServiceTestUuidHandler) Handle(
+func (h *SimpleServiceTestUUIDHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,

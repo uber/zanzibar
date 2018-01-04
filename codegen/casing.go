@@ -71,6 +71,17 @@ var CommonInitialisms = map[string]bool{
 }
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 
+// CorrectMethodNaming correct the naming for initialisms
+func CorrectMethodNaming(key string) string {
+	for k := range CommonInitialisms {
+		initial := string(k[0]) + strings.ToLower(k[1:])
+		if strings.Contains(key, initial) {
+			key = strings.Replace(key, initial, k, -1)
+		}
+	}
+	return key
+}
+
 // startsWithInitialism returns the initialism if the given string begins with it
 func startsWithInitialism(s string) string {
 	var initialism string

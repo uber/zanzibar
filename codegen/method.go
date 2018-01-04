@@ -54,8 +54,9 @@ type HeaderFieldInfo struct {
 
 // MethodSpec specifies all needed parts to generate code for a method in service.
 type MethodSpec struct {
-	Name       string
-	HTTPMethod string
+	Name         string
+	AdjustedName string
+	HTTPMethod   string
 	// Used by edge gateway to generate endpoint.
 	EndpointName string
 	HTTPPath     string
@@ -162,6 +163,7 @@ func NewMethod(
 	var err error
 	var ok bool
 	method.Name = funcSpec.MethodName()
+	method.AdjustedName = CorrectMethodNaming(method.Name)
 	method.IsEndpoint = isEndpoint
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
