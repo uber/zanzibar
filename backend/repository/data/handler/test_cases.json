@@ -168,7 +168,7 @@
 				"contacts": {
 					"exposedMethods": {
 						"SaveContacts": "Contacts::saveContacts",
-						"TestURL": "Contacts::testUrl"
+						"TestURLURL": "Contacts::testUrlUrl"
 					},
 					"ip": "127.0.0.1",
 					"name": "contacts",
@@ -579,7 +579,7 @@
 								"Type": "http"
 							},
 							{
-								"Name": "testUrl",
+								"Name": "testUrlUrl",
 								"Type": "http"
 							}
 						],
@@ -713,7 +713,7 @@
 								"Type": "http"
 							},
 							{
-								"Name": "testUrl",
+								"Name": "testUrlUrl",
 								"Type": "http"
 							}
 						],
@@ -2546,7 +2546,7 @@
 						"contacts": {
 							"exposedMethods": {
 								"SaveContacts": "Contacts::saveContacts",
-								"TestURL": "Contacts::testUrl"
+								"TestURLURL": "Contacts::testUrlUrl"
 							},
 							"ip": "127.0.0.1",
 							"name": "contacts",
@@ -3182,7 +3182,7 @@
 										"Type": "http"
 									},
 									{
-										"Name": "testUrl",
+										"Name": "testUrlUrl",
 										"Type": "http"
 									}
 								],
@@ -3316,7 +3316,7 @@
 										"Type": "http"
 									},
 									{
-										"Name": "testUrl",
+										"Name": "testUrlUrl",
 										"Type": "http"
 									}
 								],
@@ -3473,7 +3473,7 @@
 					"contacts": {
 						"exposedMethods": {
 							"SaveContacts": "Contacts::saveContacts",
-							"TestURL": "Contacts::testUrl"
+							"TestURLURL": "Contacts::testUrlUrl"
 						},
 						"ip": "127.0.0.1",
 						"name": "contacts",
@@ -4109,7 +4109,7 @@
 									"Type": "http"
 								},
 								{
-									"Name": "testUrl",
+									"Name": "testUrlUrl",
 									"Type": "http"
 								}
 							],
@@ -4243,7 +4243,7 @@
 									"Type": "http"
 								},
 								{
-									"Name": "testUrl",
+									"Name": "testUrlUrl",
 									"Type": "http"
 								}
 							],

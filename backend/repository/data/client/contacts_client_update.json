@@ -5,7 +5,7 @@
 	"thriftFile": "clients/contacts/contacts.thrift",
 	"exposedMethods": {
 		"SaveContacts": "Contacts::saveContacts",
-		"TestURL": "Contacts::testUrl"
+		"TestURLURL": "Contacts::testUrlUrl"
 	},
 	"ip": "127.0.0.1",
 	"port": 4000

@@ -47,7 +47,7 @@ service Contacts {
         zanzibar.http.req.def = "true"
     )
 
-    string testUrl(
+    string testUrlUrl(
     ) (
        zanzibar.http.method = "GET"
        zanzibar.http.path = "/contacts/testUrl"

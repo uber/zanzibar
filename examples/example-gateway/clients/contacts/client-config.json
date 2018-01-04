@@ -6,7 +6,7 @@
 		"thriftFileSha": "{{placeholder}}",
 		"exposedMethods": {
 			"SaveContacts": "Contacts::saveContacts",
-			"TestURL": "Contacts::testUrl"
+			"TestURLURL": "Contacts::testUrlUrl"
 		}
 	}
 }

@@ -42,7 +42,7 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsContactsContacts.SaveContactsRequest,
 	) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error)
-	TestURL(
+	TestURLURL(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (string, map[string]string, error)
@@ -71,7 +71,7 @@ func NewClient(
 			"contacts",
 			[]string{
 				"SaveContacts",
-				"TestURL",
+				"TestURLURL",
 			},
 			baseURL,
 			timeout,
@@ -137,13 +137,13 @@ func (c *contactsClient) SaveContacts(
 	}
 }
 
-// TestURL calls "/contacts/testUrl" endpoint.
-func (c *contactsClient) TestURL(
+// TestURLURL calls "/contacts/testUrl" endpoint.
+func (c *contactsClient) TestURLURL(
 	ctx context.Context,
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "TestURL", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(c.clientID, "TestURLURL", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"
