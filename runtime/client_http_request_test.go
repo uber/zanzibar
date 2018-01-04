@@ -112,7 +112,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 	assert.Len(t, logs["Could not create outbound request"], 1)
 }
 
-func TestMakingClientCalLWithHeaders(t *testing.T) {
+func TestMakingClientCallWithHeaders(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
@@ -130,6 +130,8 @@ func TestMakingClientCalLWithHeaders(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 			_, _ = w.Write([]byte(r.Header.Get("Example-Header")))
+			// Check that the default header got set and actually sent to the server.
+			assert.Equal(t, r.Header.Get("X-Client-ID"), "bar")
 		},
 	)
 
