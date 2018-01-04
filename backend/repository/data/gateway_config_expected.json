@@ -654,6 +654,10 @@
 						"Type": "tchannel"
 					},
 					{
+						"Name": "testUuid",
+						"Type": "tchannel"
+					},
+					{
 						"Name": "trans",
 						"Type": "tchannel"
 					}
@@ -785,6 +789,10 @@
 					},
 					{
 						"Name": "sillyNoop",
+						"Type": "http"
+					},
+					{
+						"Name": "testUuid",
 						"Type": "http"
 					},
 					{
