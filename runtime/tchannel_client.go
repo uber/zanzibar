@@ -219,8 +219,14 @@ func (c *tchannelOutboundCall) finish(err error) {
 }
 
 func (c *tchannelOutboundCall) logFields() []zapcore.Field {
+	var hostPort string
+	if c.call != nil {
+		hostPort = c.call.RemotePeer().HostPort
+	} else {
+		hostPort = ""
+	}
 	fields := []zapcore.Field{
-		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
+		zap.String("remoteAddr", hostPort),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
 	}
