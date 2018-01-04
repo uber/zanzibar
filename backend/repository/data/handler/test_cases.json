@@ -155,7 +155,9 @@
 						"EchoStructSet": "SecondService::echoStructSet",
 						"EchoTypedef": "SecondService::echoTypedef",
 						"Ping": "SimpleService::ping",
-						"Trans": "SimpleService::trans"
+						"TestUUID": "SimpleService::testUuid",
+						"Trans": "SimpleService::trans",
+						"URLTest": "SimpleService::urlTest"
 					},
 					"ip": "127.0.0.1",
 					"name": "baz",
@@ -2575,7 +2577,9 @@
 								"EchoStructSet": "SecondService::echoStructSet",
 								"EchoTypedef": "SecondService::echoTypedef",
 								"Ping": "SimpleService::ping",
-								"Trans": "SimpleService::trans"
+								"TestUUID": "SimpleService::testUuid",
+								"Trans": "SimpleService::trans",
+								"URLTest": "SimpleService::urlTest"
 							},
 							"ip": "127.0.0.1",
 							"name": "baz",
@@ -3518,7 +3522,9 @@
 							"EchoStructSet": "SecondService::echoStructSet",
 							"EchoTypedef": "SecondService::echoTypedef",
 							"Ping": "SimpleService::ping",
-							"Trans": "SimpleService::trans"
+							"TestUUID": "SimpleService::testUuid",
+							"Trans": "SimpleService::trans",
+							"URLTest": "SimpleService::urlTest"
 						},
 						"ip": "127.0.0.1",
 						"name": "baz",
