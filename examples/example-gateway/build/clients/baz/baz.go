@@ -142,10 +142,7 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (map[string]string, error)
-	TestUUID(
-		ctx context.Context,
-		reqHeaders map[string]string,
-	) (map[string]string, error)
+
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -197,7 +194,6 @@ func NewClient(
 		"SimpleService::compare":        "Compare",
 		"SimpleService::ping":           "Ping",
 		"SimpleService::sillyNoop":      "DeliberateDiffNoop",
-		"SimpleService::testUuid":       "TestUUID",
 		"SimpleService::trans":          "Trans",
 	}
 
@@ -881,34 +877,6 @@ func (c *bazClient) DeliberateDiffNoop(
 			err = result.ServerErr
 		default:
 			err = errors.New("bazClient received no result or unknown exception for SillyNoop")
-		}
-	}
-	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
-		return nil, err
-	}
-
-	return respHeaders, err
-}
-
-// TestUUID is a client RPC call for method "SimpleService::testUuid"
-func (c *bazClient) TestUUID(
-	ctx context.Context,
-	reqHeaders map[string]string,
-) (map[string]string, error) {
-	var result clientsBazBaz.SimpleService_TestUuid_Result
-
-	logger := c.client.Loggers["SimpleService::testUuid"]
-
-	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
-	success, respHeaders, err := c.client.Call(
-		ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
-	)
-
-	if err == nil && !success {
-		switch {
-		default:
-			err = errors.New("bazClient received no result or unknown exception for TestUuid")
 		}
 	}
 	if err != nil {
