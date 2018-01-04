@@ -71,14 +71,26 @@ type TypeConverter struct {
 	Helper        PackageNameResolver
 	uninitialized map[string]*fieldStruct
 	fieldCounter  int
+
+	requestTypeHelper ConvertOptions
+}
+
+// ConvertOptions is the helper struct for method generation
+type ConvertOptions struct {
+	FromSuffix       string
+	FromInputType    string
+	FromOutputType   string
+	ToType           string
+	OutputMethodName string
 }
 
 // NewTypeConverter returns *TypeConverter
-func NewTypeConverter(h PackageNameResolver) *TypeConverter {
+func NewTypeConverter(h PackageNameResolver, requestType ConvertOptions) *TypeConverter {
 	return &TypeConverter{
-		LineBuilder:   LineBuilder{},
-		Helper:        h,
-		uninitialized: make(map[string]*fieldStruct),
+		LineBuilder:       LineBuilder{},
+		Helper:            h,
+		uninitialized:     make(map[string]*fieldStruct),
+		requestTypeHelper: requestType,
 	}
 }
 
@@ -711,28 +723,61 @@ func (c *TypeConverter) genStructConverter(
 // destination fields (sent to the downstream client) and the entries are source
 // fields (from the incoming request)
 func (c *TypeConverter) GenStructConverter(
-	fromFields []*compile.FieldSpec,
-	toFields []*compile.FieldSpec,
+	fromFieldType compile.TypeSpec,
+	toFieldType compile.TypeSpec,
 	fieldMap map[string]FieldMapperEntry,
 ) error {
-	// Add compiled FieldSpecs to the FieldMapperEntry
-	fieldMap = addSpecToMap(fieldMap, fromFields, "")
-	// Check for vlaues not populated recursively by addSpecToMap
-	for k, v := range fieldMap {
-		if fieldMap[k].Field == nil {
+	helper := c.requestTypeHelper
+	var requestInput, requestOutput string
+	requestInput = "(in " + helper.FromInputType + ") " + helper.FromOutputType
+	requestOutput = "out := &" + helper.ToType + "{}\n"
+
+	c.append("func convertTo", pascalCase(helper.OutputMethodName), c.requestTypeHelper.FromSuffix,
+		requestInput, "{")
+
+	switch toFieldType.(type) {
+	case
+		*compile.BoolSpec,
+		*compile.I8Spec,
+		*compile.I16Spec,
+		*compile.I32Spec,
+		*compile.EnumSpec,
+		*compile.I64Spec,
+		*compile.DoubleSpec,
+		*compile.StringSpec:
+		c.append("out", " := in\t\n")
+		c.append("\nreturn out \t\n}")
+		return nil
+	default:
+		fromFieldStructSpec, ok := fromFieldType.(*compile.StructSpec)
+		if !ok {
 			return errors.Errorf(
-				"Failed to find field ( %s ) for transform.",
-				v.QualifiedName,
+				"Failed to convert field ( %s ).",
+				fromFieldType.ThriftName(),
 			)
 		}
+		fromFields := fromFieldStructSpec.Fields
+		// Add compiled FieldSpecs to the FieldMapperEntry
+		fieldMap = addSpecToMap(fieldMap, fromFields, "")
+		// Check for vlaues not populated recursively by addSpecToMap
+		for k, v := range fieldMap {
+			if fieldMap[k].Field == nil {
+				return errors.Errorf(
+					"Failed to find field ( %s ) for transform.",
+					v.QualifiedName,
+				)
+			}
+		}
+		c.append(requestOutput)
+		toFields := toFieldType.(*compile.StructSpec).Fields
+		err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
+		if err != nil {
+			return err
+		}
+		c.append("\nreturn out")
+		c.append("}")
+		return nil
 	}
-
-	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // FieldMapperEntry defines a source field and optional arguments

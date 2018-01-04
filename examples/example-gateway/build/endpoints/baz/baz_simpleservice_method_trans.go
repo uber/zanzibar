@@ -165,7 +165,7 @@ func (w TransEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertTransClientResponse(clientRespBody)
+	response := convertToTransClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -233,7 +233,7 @@ func convertTransOtherAuthErr(
 	return serverError
 }
 
-func convertTransClientResponse(in *clientsBazBase.TransStruct) *endpointsBazBaz.TransStruct {
+func convertToTransClientResponse(in *clientsBazBase.TransStruct) *endpointsBazBaz.TransStruct {
 	out := &endpointsBazBaz.TransStruct{}
 
 	out.Message = string(in.Message)

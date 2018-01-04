@@ -846,69 +846,45 @@ func (ms *MethodSpec) setTypeConverters(
 	h *PackageHelper,
 	downstreamMethod *MethodSpec,
 ) error {
-	// TODO(sindelar): Iterate over fields that are structs (for foo/bar examples).
-
 	// Add type checking and conversion, custom mapping
-	structType := compile.FieldGroup(funcSpec.ArgsSpec)
-	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
+	structType := &compile.StructSpec{Fields: compile.FieldGroup(funcSpec.ArgsSpec)}
+	downstreamStructType := &compile.StructSpec{Fields: compile.FieldGroup(downstreamSpec.ArgsSpec)}
 
-	typeConverter := NewTypeConverter(h)
-
-	typeConverter.append(
-		"func convertTo",
-		pascalCase(ms.Name),
-		"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
-
-	typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
+	typeConverter := NewTypeConverter(h, ConvertOptions{
+		FromSuffix:       "ClientRequest",
+		FromInputType:    ms.RequestType,
+		FromOutputType:   downstreamMethod.RequestType,
+		ToType:           downstreamMethod.ShortRequestType,
+		OutputMethodName: ms.Name,
+	})
 
 	err := typeConverter.GenStructConverter(structType, downstreamStructType, reqTransforms)
 	if err != nil {
 		return err
 	}
-	typeConverter.append("\nreturn out")
-	typeConverter.append("}")
 	ms.ConvertRequestGoStatements = typeConverter.GetLines()
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
-	downstreamRespType := funcSpec.ResultSpec.ReturnType
+	downstreamRespType := downstreamSpec.ResultSpec.ReturnType
 
 	if respType == nil || downstreamRespType == nil {
 		return nil
 	}
 
-	respConverter := NewTypeConverter(h)
+	respConverter := NewTypeConverter(h, ConvertOptions{
+		FromSuffix:       "ClientResponse",
+		FromInputType:    downstreamMethod.ResponseType,
+		FromOutputType:   ms.ResponseType,
+		ToType:           ms.ShortResponseType,
+		OutputMethodName: ms.Name,
+	})
 
-	respConverter.append(
-		"func convert",
-		pascalCase(ms.Name),
-		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
-	var respFields, downstreamRespFields []*compile.FieldSpec
-	switch respType.(type) {
-	case
-		*compile.BoolSpec,
-		*compile.I8Spec,
-		*compile.I16Spec,
-		*compile.I32Spec,
-		*compile.EnumSpec,
-		*compile.I64Spec,
-		*compile.DoubleSpec,
-		*compile.StringSpec:
-
-		respConverter.append("out", " := in\t\n")
-	default:
-		// default as struct
-		respFields = respType.(*compile.StructSpec).Fields
-		downstreamRespFields = downstreamRespType.(*compile.StructSpec).Fields
-		respConverter.append("out", " := ", "&", ms.ShortResponseType, "{}\t\n")
-		err = respConverter.GenStructConverter(downstreamRespFields, respFields, respTransforms)
-		if err != nil {
-			return err
-		}
+	err = respConverter.GenStructConverter(downstreamRespType, respType, respTransforms)
+	if err != nil {
+		return err
 	}
-	respConverter.append("\nreturn out \t}")
 	ms.ConvertResponseGoStatements = respConverter.GetLines()
-
 	return nil
 }
 

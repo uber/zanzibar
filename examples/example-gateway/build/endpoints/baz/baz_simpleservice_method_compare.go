@@ -165,7 +165,7 @@ func (w CompareEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertCompareClientResponse(clientRespBody)
+	response := convertToCompareClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -207,7 +207,7 @@ func convertCompareOtherAuthErr(
 	return serverError
 }
 
-func convertCompareClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
+func convertToCompareClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
 	out := &endpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)

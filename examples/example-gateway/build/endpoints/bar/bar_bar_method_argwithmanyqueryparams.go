@@ -268,7 +268,7 @@ func (w ArgWithManyQueryParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithManyQueryParamsClientResponse(clientRespBody)
+	response := convertToArgWithManyQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -293,7 +293,7 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	return out
 }
 
-func convertArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

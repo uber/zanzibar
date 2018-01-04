@@ -145,7 +145,7 @@ func (w NoRequestEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertNoRequestClientResponse(clientRespBody)
+	response := convertToNoRequestClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -157,7 +157,7 @@ func convertNoRequestBarException(
 	return serverError
 }
 
-func convertNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

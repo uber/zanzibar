@@ -145,7 +145,7 @@ func (w MissingArgEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertMissingArgClientResponse(clientRespBody)
+	response := convertToMissingArgClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -157,7 +157,7 @@ func convertMissingArgBarException(
 	return serverError
 }
 
-func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertToMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
