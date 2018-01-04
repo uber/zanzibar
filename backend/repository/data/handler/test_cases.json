@@ -167,7 +167,8 @@
 				},
 				"contacts": {
 					"exposedMethods": {
-						"SaveContacts": "Contacts::saveContacts"
+						"SaveContacts": "Contacts::saveContacts",
+						"TestURLURL": "Contacts::testUrlUrl"
 					},
 					"ip": "127.0.0.1",
 					"name": "contacts",
@@ -576,6 +577,10 @@
 							{
 								"Name": "saveContacts",
 								"Type": "http"
+							},
+							{
+								"Name": "testUrlUrl",
+								"Type": "http"
 							}
 						],
 						"Name": "Contacts",
@@ -705,6 +710,10 @@
 						"Methods": [
 							{
 								"Name": "saveContacts",
+								"Type": "http"
+							},
+							{
+								"Name": "testUrlUrl",
 								"Type": "http"
 							}
 						],
@@ -2536,7 +2545,8 @@
 						},
 						"contacts": {
 							"exposedMethods": {
-								"SaveContacts": "Contacts::saveContacts"
+								"SaveContacts": "Contacts::saveContacts",
+								"TestURLURL": "Contacts::testUrlUrl"
 							},
 							"ip": "127.0.0.1",
 							"name": "contacts",
@@ -3170,6 +3180,10 @@
 									{
 										"Name": "saveContacts",
 										"Type": "http"
+									},
+									{
+										"Name": "testUrlUrl",
+										"Type": "http"
 									}
 								],
 								"Name": "Contacts",
@@ -3299,6 +3313,10 @@
 								"Methods": [
 									{
 										"Name": "saveContacts",
+										"Type": "http"
+									},
+									{
+										"Name": "testUrlUrl",
 										"Type": "http"
 									}
 								],
@@ -3454,7 +3472,8 @@
 					},
 					"contacts": {
 						"exposedMethods": {
-							"SaveContacts": "Contacts::saveContacts"
+							"SaveContacts": "Contacts::saveContacts",
+							"TestURLURL": "Contacts::testUrlUrl"
 						},
 						"ip": "127.0.0.1",
 						"name": "contacts",
@@ -4088,6 +4107,10 @@
 								{
 									"Name": "saveContacts",
 									"Type": "http"
+								},
+								{
+									"Name": "testUrlUrl",
+									"Type": "http"
 								}
 							],
 							"Name": "Contacts",
@@ -4217,6 +4240,10 @@
 							"Methods": [
 								{
 									"Name": "saveContacts",
+									"Type": "http"
+								},
+								{
+									"Name": "testUrlUrl",
 									"Type": "http"
 								}
 							],

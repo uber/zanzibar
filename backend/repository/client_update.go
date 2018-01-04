@@ -46,6 +46,16 @@ type configField struct {
 	ExposedMethods map[string]string `json:"exposedMethods,omitempty"`
 }
 
+func correctMethodNaming(key string) string {
+	for k := range codegen.CommonInitialisms {
+		initial := string(k[0]) + strings.ToLower(k[1:])
+		if strings.Contains(key, initial) {
+			key = strings.Replace(key, initial, k, -1)
+		}
+	}
+	return key
+}
+
 // NewClientConfigJSON converts ClientConfig to ClientJSONConfig.
 func NewClientConfigJSON(cfg *ClientConfig) *ClientJSONConfig {
 	cfgJSON := &ClientJSONConfig{
@@ -77,6 +87,15 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 		}
 		cfgJSON.Config.ExposedMethods = exposedMethods
 	}
+
+	// fix method naming, e.g. Uuid -> UUID
+	updatedExposedMethod := make(map[string]string)
+	for k, val := range cfgJSON.Config.ExposedMethods {
+		k = correctMethodNaming(k)
+		updatedExposedMethod[k] = val
+	}
+	cfgJSON.Config.ExposedMethods = updatedExposedMethod
+
 	cfgJSON.Config.ThriftFileSha = thriftFileSha
 	clientPath := filepath.Join(r.absPath(clientCfgDir), cfgJSON.Name)
 	if err := os.MkdirAll(clientPath, os.ModePerm); err != nil {

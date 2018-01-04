@@ -27,9 +27,8 @@ import (
 	"unicode"
 )
 
-// commonInitialisms, taken from
-// https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
-var commonInitialisms = map[string]bool{
+// CommonInitialisms is taken from https://github.com/golang/lint/blob/206c0f020eba0f7fbcfbc467a5eb808037df2ed6/lint.go#L731
+var CommonInitialisms = map[string]bool{
 	"ACL":   true,
 	"API":   true,
 	"ASCII": true,
@@ -77,7 +76,7 @@ func startsWithInitialism(s string) string {
 	var initialism string
 	// the longest initialism is 5 char, the shortest 2
 	for i := 1; i <= 5; i++ {
-		if len(s) > i-1 && commonInitialisms[s[:i]] {
+		if len(s) > i-1 && CommonInitialisms[s[:i]] {
 			initialism = s[:i]
 		}
 	}
@@ -99,7 +98,7 @@ func camelCase(src string) string {
 
 func ensureGolangAncronymCasing(segment []byte) []byte {
 	upper := bytes.ToUpper(segment)
-	if commonInitialisms[string(upper)] {
+	if CommonInitialisms[string(upper)] {
 		return upper
 	}
 
