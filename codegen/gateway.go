@@ -947,7 +947,10 @@ func parseMiddlewareConfig(
 		}
 		instanceConfig := filepath.Join(fullMiddlewareDir, file.Name(), "middleware-config.json")
 		bytes, err := ioutil.ReadFile(instanceConfig)
-		if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("Could not read config file for middleware directory \"%s\" skipping...\n", file.Name())
+			continue
+		} else if err != nil {
 			return nil, errors.Wrapf(
 				err, "Cannot read middleware config json: %s",
 				instanceConfig,
