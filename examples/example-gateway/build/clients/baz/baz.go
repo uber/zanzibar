@@ -142,6 +142,7 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (map[string]string, error)
+
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,

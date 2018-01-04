@@ -52,6 +52,8 @@ service SimpleService {
         1: AuthErr authErr
         2: base.ServerErr serverErr
     )
+
+    void testUuid()
 }
 
 service SecondService {
