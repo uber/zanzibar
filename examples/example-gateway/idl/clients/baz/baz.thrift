@@ -54,6 +54,7 @@ service SimpleService {
     )
 
     void testUuid()
+    void urlTest()
 }
 
 service SecondService {

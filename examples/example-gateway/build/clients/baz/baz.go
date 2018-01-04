@@ -142,12 +142,19 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (map[string]string, error)
-
+	TestUUID(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (map[string]string, error)
 	Trans(
 		ctx context.Context,
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Trans_Args,
 	) (*clientsBazBase.TransStruct, map[string]string, error)
+	URLTest(
+		ctx context.Context,
+		reqHeaders map[string]string,
+	) (map[string]string, error)
 }
 
 // NewClient returns a new TChannel client for service baz.
@@ -194,7 +201,9 @@ func NewClient(
 		"SimpleService::compare":        "Compare",
 		"SimpleService::ping":           "Ping",
 		"SimpleService::sillyNoop":      "DeliberateDiffNoop",
+		"SimpleService::testUuid":       "TestUUID",
 		"SimpleService::trans":          "Trans",
+		"SimpleService::urlTest":        "URLTest",
 	}
 
 	client := zanzibar.NewTChannelClient(
@@ -887,6 +896,34 @@ func (c *bazClient) DeliberateDiffNoop(
 	return respHeaders, err
 }
 
+// TestUUID is a client RPC call for method "SimpleService::testUuid"
+func (c *bazClient) TestUUID(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (map[string]string, error) {
+	var result clientsBazBaz.SimpleService_TestUuid_Result
+
+	logger := c.client.Loggers["SimpleService::testUuid"]
+
+	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
+	success, respHeaders, err := c.client.Call(
+		ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for TestUuid")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return nil, err
+	}
+
+	return respHeaders, err
+}
+
 // Trans is a client RPC call for method "SimpleService::trans"
 func (c *bazClient) Trans(
 	ctx context.Context,
@@ -922,4 +959,32 @@ func (c *bazClient) Trans(
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
+}
+
+// URLTest is a client RPC call for method "SimpleService::urlTest"
+func (c *bazClient) URLTest(
+	ctx context.Context,
+	reqHeaders map[string]string,
+) (map[string]string, error) {
+	var result clientsBazBaz.SimpleService_UrlTest_Result
+
+	logger := c.client.Loggers["SimpleService::urlTest"]
+
+	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
+	success, respHeaders, err := c.client.Call(
+		ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		default:
+			err = errors.New("bazClient received no result or unknown exception for UrlTest")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return nil, err
+	}
+
+	return respHeaders, err
 }

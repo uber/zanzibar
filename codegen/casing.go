@@ -74,6 +74,10 @@ var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 // CorrectMethodNaming correct the naming for initialisms
 func CorrectMethodNaming(key string) string {
 	for k := range CommonInitialisms {
+		start := startsWithInitialism(strings.ToUpper(key))
+		if start != "" {
+			key = start + key[len(start):]
+		}
 		initial := string(k[0]) + strings.ToLower(k[1:])
 		if strings.Contains(key, initial) {
 			key = strings.Replace(key, initial, k, -1)
