@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Uber Technologies, Inc.
+// Copyright (c) 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,12 @@ import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
+	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
 type exampleMiddleware struct {
+	deps    *module.Dependencies
 	options Options
 }
 
@@ -44,13 +46,15 @@ type MiddlewareState struct {
 	Baz string
 }
 
-// NewMiddleWare creates a new middleware that executes the next middleware
+// NewMiddleware creates a new middleware that executes the next middleware
 // after performing it's operations.
-func NewMiddleWare(
+func NewMiddleware(
 	g *zanzibar.Gateway,
+	deps *module.Dependencies,
 	options Options,
 ) zanzibar.MiddlewareHandle {
 	return &exampleMiddleware{
+		deps:    deps,
 		options: options,
 	}
 }

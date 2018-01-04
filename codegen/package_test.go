@@ -36,7 +36,7 @@ var fooThrift = filepath.Join(
 	"examples/example-gateway/idl/",
 	"clients/foo/foo.thrift")
 
-var testCopyrightHeader = `// Copyright (c) 2017 Uber Technologies, Inc.
+var testCopyrightHeader = `// Copyright (c) 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		"github.com/uber/zanzibar/examples/example-gateway",
 		"github.com/uber/zanzibar",
 		absGatewayPath,
-		"middlewares/middleware-config.json",
+		"middlewares",
 		"./idl",
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,

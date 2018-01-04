@@ -22,13 +22,15 @@ package lib
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
-	"io/ioutil"
-	"os"
-	"testing"
-
+	"fmt"
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"os"
+	"reflect"
+	"testing"
 )
 
 // UpdateGoldenFile sets the flag if updates golden files with expected response.
@@ -48,6 +50,12 @@ func CompareGoldenFile(t *testing.T, goldenFilePath string, actual []byte) {
 	if bytes.Equal(exp, actual) {
 		return
 	}
+
+	if assert.JSONEq(t, string(exp), string(actual)) {
+		return
+	}
+
+	// fallback to old string check
 	DiffStrings(t, string(exp), string(actual))
 	t.Errorf("Result doesn't match golden file %s.\n", goldenFilePath)
 }
@@ -67,4 +75,21 @@ func DiffStrings(t *testing.T, exp, actual string) {
 		return
 	}
 	t.Errorf("Unexpected result: \n%s\n", d)
+}
+
+func deepEqualJSON(b1 []byte, b2 []byte) (bool, error) {
+
+	var i1 interface{}
+	var i2 interface{}
+
+	err := json.Unmarshal(b1, &i1)
+	if err != nil {
+		return false, fmt.Errorf("Error unmarshalling string 1 :: %s", err.Error())
+	}
+	err = json.Unmarshal(b2, &i2)
+	if err != nil {
+		return false, fmt.Errorf("Error unmarshalling string 2 :: %s", err.Error())
+	}
+
+	return reflect.DeepEqual(i1, i2), nil
 }

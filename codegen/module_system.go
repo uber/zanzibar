@@ -248,12 +248,34 @@ func NewDefaultModuleSystem(
 		)
 	}
 
+	if err := system.RegisterClass(ModuleClass{
+		Name:        "middleware",
+		Directories: []string{"middlewares"},
+		ClassType:   MultiModule,
+		DependsOn:   []string{"client"},
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering middleware class",
+		)
+	}
+
+	if err := system.RegisterClassType("middleware", "default", &MiddlewareGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway middleware class type",
+		)
+	}
+
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
 		Name:        "endpoint",
 		Directories: []string{"endpoints"},
 		ClassType:   MultiModule,
-		DependsOn:   []string{"client"},
+		DependsOn:   []string{"client", "middleware"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -1052,6 +1074,65 @@ func (generator *GatewayServiceGenerator) Generate(
 	return &BuildResult{
 		Files: files,
 	}, nil
+}
+
+/*
+ * Middleware Generator
+ */
+
+// MiddlewareGenerator generates a group of zanzibar endpoints that proxy corresponding clients
+type MiddlewareGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+}
+
+// Generate returns the endpoint build result, which contains a file per
+// endpoint handler and a list of handler specs
+func (g *MiddlewareGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	ret := map[string][]byte{}
+
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s %s",
+			instance.InstanceName,
+			instance.ClassName,
+		)
+	}
+	if dependencies != nil {
+		ret["module/dependencies.go"] = dependencies
+	}
+
+	err = g.generateMiddlewareFile(instance, ret)
+
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating middleware file for %s %s",
+			instance.InstanceName,
+			instance.ClassName,
+		)
+	}
+	return &BuildResult{
+		Files: ret,
+		Spec:  nil,
+	}, nil
+}
+
+func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, out map[string][]byte) error {
+	bytes, err := g.templates.ExecTemplate("middleware.tmpl", instance, g.packageHelper)
+	if err != nil {
+		return err
+	}
+	out[instance.InstanceName+".go"] = bytes
+	return nil
 }
 
 func readClientDependencySpecs(instance *ModuleInstance) []*ClientSpec {

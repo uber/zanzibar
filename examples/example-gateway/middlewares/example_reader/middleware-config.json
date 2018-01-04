@@ -1,0 +1,9 @@
+{
+	"name": "example_reader",
+	"type": "default",
+	"dependencies": {},
+	"config": {
+		"schema": "./middlewares/example_reader/example_reader_schema.json",
+		"path": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
+	}
+}

@@ -548,7 +548,6 @@ func (system *ModuleSystem) ResolveModules(
 		for _, dir := range class.Directories {
 
 			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
-
 			if class.ClassType == SingleModule {
 				instance, instanceErr := system.readInstance(
 					packageRoot,
@@ -746,6 +745,7 @@ func (system *ModuleSystem) readInstance(
 		DependencyOrder:       []string{},
 		JSONFileName:          jsonFileName,
 		JSONFileRaw:           raw,
+		Config:                jsonConfig.Config,
 	}, nil
 }
 
@@ -1097,8 +1097,8 @@ type ModuleInstance struct {
 	// json file
 	InstanceName string
 	// Config is a reference to the instance "config" key in the instances json
-	//file
-	Config interface{}
+	//file.
+	Config map[string]interface{}
 	// Dependencies is a list of dependent modules as defined in the instances
 	// json file
 	Dependencies []ModuleDependency
@@ -1137,9 +1137,9 @@ type JSONClassConfig struct {
 	// dependency. The combination of the class Name and this instance name
 	// is unique.
 	Name string `json:"name"`
-	// The configuration object for this class instance. This depends on the
+	// The configuration map for this class instance. This depends on the
 	// class name and class type, and is interpreted by each module generator.
-	Config interface{} `json:"config"`
+	Config map[string]interface{} `json:"config"`
 	// Dependencies is a map of class name to a list of instance names. This
 	// infers the dependencies struct generated for the initializer
 	Dependencies map[string][]string `json:"dependencies"`

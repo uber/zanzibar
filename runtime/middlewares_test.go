@@ -27,6 +27,7 @@ import (
 
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader"
@@ -36,8 +37,12 @@ import (
 
 // Ensures that a middleware stack can correctly return all of its handlers.
 func TestHandlers(t *testing.T) {
-	ex := example.NewMiddleWare(
+	ex := example.NewMiddleware(
 		nil, // *zanzibar.Gateway
+		&module.Dependencies{
+			Default: &zanzibar.DefaultDependencies{},
+			Client:  &module.ClientDependencies{},
+		},
 		example.Options{
 			Foo: "foo",
 			Bar: 2,
@@ -232,15 +237,17 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 // Ensures that a middleware can read state from a middeware earlier in the stack.
 func TestMiddlewareSharedStates(t *testing.T) {
-	ex := example.NewMiddleWare(
+	ex := example.NewMiddleware(
 		nil, // *zanzibar.Gateway
+		nil,
 		example.Options{
 			Foo: "test_state",
 			Bar: 2,
 		},
 	)
-	exReader := exampleReader.NewMiddleWare(
+	exReader := exampleReader.NewMiddleware(
 		nil, // *zanzibar.Gateway
+		nil,
 		exampleReader.Options{
 			Foo: "foo",
 		},

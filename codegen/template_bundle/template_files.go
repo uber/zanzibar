@@ -8,6 +8,7 @@
 // codegen/templates/http_client.tmpl
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
+// codegen/templates/middleware.tmpl
 // codegen/templates/module_initializer.tmpl
 // codegen/templates/service.tmpl
 // codegen/templates/structs.tmpl
@@ -146,7 +147,7 @@ import (
 
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	"{{$middleware.Path}}"
+	"{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -175,7 +176,7 @@ func New{{$handlerName}}(
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
-			{{$middleware.Name}}.NewMiddleWare(
+			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
 				g,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.PrettyOptions -}}
@@ -469,7 +470,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9868, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1348,6 +1349,51 @@ func main_testTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _middlewareTmpl = []byte(`{{$instance := . -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	zanzibar "github.com/uber/zanzibar/runtime"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	handle "{{index .Config "path"}}"
+)
+
+// Middleware is a container for module.Deps and factory for MiddlewareHandle
+type Middleware struct {
+	Deps *module.Dependencies
+}
+
+// NewMiddleware is a factory method for the struct
+func NewMiddleware(g *zanzibar.Gateway, deps *module.Dependencies) Middleware {
+	return Middleware {
+		Deps: deps,
+	}
+}
+
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+func (m *Middleware) NewMiddlewareHandle(g *zanzibar.Gateway, o handle.Options) zanzibar.MiddlewareHandle {
+	return handle.NewMiddleware(g, m.Deps, o)
+}
+
+
+`)
+
+func middlewareTmplBytes() ([]byte, error) {
+	return _middlewareTmpl, nil
+}
+
+func middlewareTmpl() (*asset, error) {
+	bytes, err := middlewareTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "middleware.tmpl", size: 763, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _module_initializerTmpl = []byte(`{{$instance := . -}}
 
 package module
@@ -2081,6 +2127,7 @@ var _bindata = map[string]func() (*asset, error){
 	"http_client.tmpl":                   http_clientTmpl,
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
+	"middleware.tmpl":                    middlewareTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
 	"service.tmpl":                       serviceTmpl,
 	"structs.tmpl":                       structsTmpl,
@@ -2138,6 +2185,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"http_client.tmpl":                   {http_clientTmpl, map[string]*bintree{}},
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
+	"middleware.tmpl":                    {middlewareTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
 	"service.tmpl":                       {serviceTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       {structsTmpl, map[string]*bintree{}},

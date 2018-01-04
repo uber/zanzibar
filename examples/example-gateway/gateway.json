@@ -8,6 +8,6 @@
 
 	"clientConfig": "./clients",
 	"endpointConfig": "./endpoints",
-	"middlewareConfig": "./middlewares/middleware-config.json",
+	"middlewareConfig": "./middlewares",
 	"copyrightHeader": "./copyright_header.txt"
 }

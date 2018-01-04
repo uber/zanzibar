@@ -21,6 +21,9 @@
 	"dependencies": {
 		"client": [
 			"bar"
+		],
+		"middleware": [
+			"example"
 		]
 	}
 }
