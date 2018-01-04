@@ -27,7 +27,6 @@
 			"Methods": [
 				{
 					"Name": "argNotStruct",
-					"AdjustedName": "argNotStruct",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/arg-not-struct-path",
@@ -100,7 +99,6 @@
 				},
 				{
 					"Name": "argWithHeaders",
-					"AdjustedName": "argWithHeaders",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithHeaders",
@@ -172,7 +170,6 @@
 				},
 				{
 					"Name": "argWithManyQueryParams",
-					"AdjustedName": "argWithManyQueryParams",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithManyQueryParams",
@@ -277,7 +274,6 @@
 				},
 				{
 					"Name": "argWithNestedQueryParams",
-					"AdjustedName": "argWithNestedQueryParams",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithNestedQueryParams",
@@ -375,7 +371,6 @@
 				},
 				{
 					"Name": "argWithParams",
-					"AdjustedName": "argWithParams",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithParams/:uuid/segment/:user-uuid",
@@ -465,7 +460,6 @@
 				},
 				{
 					"Name": "argWithQueryHeader",
-					"AdjustedName": "argWithQueryHeader",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryHeader",
@@ -525,7 +519,6 @@
 				},
 				{
 					"Name": "argWithQueryParams",
-					"AdjustedName": "argWithQueryParams",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryParams",
@@ -594,7 +587,6 @@
 				},
 				{
 					"Name": "helloWorld",
-					"AdjustedName": "helloWorld",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/hello",
@@ -674,7 +666,6 @@
 				},
 				{
 					"Name": "missingArg",
-					"AdjustedName": "missingArg",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/missing-arg-path",
@@ -752,7 +743,6 @@
 				},
 				{
 					"Name": "noRequest",
-					"AdjustedName": "noRequest",
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/no-request-path",
@@ -830,7 +820,6 @@
 				},
 				{
 					"Name": "normal",
-					"AdjustedName": "normal",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar-path",
@@ -908,7 +897,6 @@
 				},
 				{
 					"Name": "normalRecur",
-					"AdjustedName": "normalRecur",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/recur",
@@ -988,7 +976,6 @@
 				},
 				{
 					"Name": "tooManyArgs",
-					"AdjustedName": "tooManyArgs",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/too-many-args-path",
@@ -1098,7 +1085,6 @@
 			"Methods": [
 				{
 					"Name": "echoBinary",
-					"AdjustedName": "echoBinary",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/binary",
@@ -1155,7 +1141,6 @@
 				},
 				{
 					"Name": "echoBool",
-					"AdjustedName": "echoBool",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/bool",
@@ -1212,7 +1197,6 @@
 				},
 				{
 					"Name": "echoDouble",
-					"AdjustedName": "echoDouble",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/double",
@@ -1269,7 +1253,6 @@
 				},
 				{
 					"Name": "echoEnum",
-					"AdjustedName": "echoEnum",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/enum",
@@ -1326,7 +1309,6 @@
 				},
 				{
 					"Name": "echoI16",
-					"AdjustedName": "echoI16",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i16",
@@ -1383,7 +1365,6 @@
 				},
 				{
 					"Name": "echoI32",
-					"AdjustedName": "echoI32",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i32",
@@ -1440,7 +1421,6 @@
 				},
 				{
 					"Name": "echoI32Map",
-					"AdjustedName": "echoI32Map",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i32-map",
@@ -1497,7 +1477,6 @@
 				},
 				{
 					"Name": "echoI64",
-					"AdjustedName": "echoI64",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i64",
@@ -1554,7 +1533,6 @@
 				},
 				{
 					"Name": "echoI8",
-					"AdjustedName": "echoI8",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i8",
@@ -1611,7 +1589,6 @@
 				},
 				{
 					"Name": "echoString",
-					"AdjustedName": "echoString",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string",
@@ -1668,7 +1645,6 @@
 				},
 				{
 					"Name": "echoStringList",
-					"AdjustedName": "echoStringList",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-list",
@@ -1725,7 +1701,6 @@
 				},
 				{
 					"Name": "echoStringMap",
-					"AdjustedName": "echoStringMap",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-map",
@@ -1782,7 +1757,6 @@
 				},
 				{
 					"Name": "echoStringSet",
-					"AdjustedName": "echoStringSet",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-set",
@@ -1839,7 +1813,6 @@
 				},
 				{
 					"Name": "echoStructList",
-					"AdjustedName": "echoStructList",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-list",
@@ -1896,7 +1869,6 @@
 				},
 				{
 					"Name": "echoStructMap",
-					"AdjustedName": "echoStructMap",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-map",
@@ -1953,7 +1925,6 @@
 				},
 				{
 					"Name": "echoStructSet",
-					"AdjustedName": "echoStructSet",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-set",
@@ -2010,7 +1981,6 @@
 				},
 				{
 					"Name": "echoTypedef",
-					"AdjustedName": "echoTypedef",
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/typedef",

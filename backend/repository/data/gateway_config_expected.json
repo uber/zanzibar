@@ -660,6 +660,10 @@
 					{
 						"Name": "trans",
 						"Type": "tchannel"
+					},
+					{
+						"Name": "urlTest",
+						"Type": "tchannel"
 					}
 				]
 			}
@@ -797,6 +801,10 @@
 					},
 					{
 						"Name": "trans",
+						"Type": "http"
+					},
+					{
+						"Name": "urlTest",
 						"Type": "http"
 					}
 				]
