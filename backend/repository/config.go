@@ -89,6 +89,7 @@ type ClientConfig struct {
 	Timeout           int64             `json:"clientTimeout,omitempty"`
 	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`
 	RoutingKey        string            `json:"routingKey"`
+	SidecarRouter     string            `json:"sidecarRouter,omitempty"`
 }
 
 // EndpointMiddlewareConfig is the configuration for a middleware instance for a endpoint

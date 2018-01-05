@@ -44,6 +44,7 @@ type configField struct {
 	ThriftFile     string            `json:"thriftFile"`
 	ThriftFileSha  string            `json:"thriftFileSha"`
 	ExposedMethods map[string]string `json:"exposedMethods,omitempty"`
+	SidecarRouter  string            `json:"sidecarRouter,omitempty"`
 }
 
 // NewClientConfigJSON converts ClientConfig to ClientJSONConfig.
@@ -54,6 +55,7 @@ func NewClientConfigJSON(cfg *ClientConfig) *ClientJSONConfig {
 		Config: &configField{
 			ThriftFile:     cfg.ThriftFile,
 			ExposedMethods: cfg.ExposedMethods,
+			SidecarRouter:  cfg.SidecarRouter,
 		},
 	}
 	return cfgJSON
@@ -85,7 +87,6 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 		updatedExposedMethod[k] = val
 	}
 	cfgJSON.Config.ExposedMethods = updatedExposedMethod
-
 	cfgJSON.Config.ThriftFileSha = thriftFileSha
 	clientPath := filepath.Join(r.absPath(clientCfgDir), cfgJSON.Name)
 	if err := os.MkdirAll(clientPath, os.ModePerm); err != nil {
@@ -128,11 +129,11 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 		return reqerr.NewRequestError(
 			reqerr.ClientsServiceName, errors.New("invalid request: muttley name is required for tchannel client"))
 	}
-	if req.IP == "" || req.Port == 0 {
+	if len(req.SidecarRouter) < 1 && req.IP == "" {
 		return reqerr.NewRequestError(
 			reqerr.ClientsIP, errors.New("invalid request: ip is required"))
 	}
-	if req.Port == 0 {
+	if len(req.SidecarRouter) < 1 && req.Port == 0 {
 		return reqerr.NewRequestError(
 			reqerr.ClientsPort, errors.New("invalid request: port is required"))
 	}
@@ -185,8 +186,10 @@ func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 			content[prefix+"routingKey"] = req.RoutingKey
 		}
 	}
-	content[prefix+"port"] = req.Port
-	content[prefix+"ip"] = req.IP
+	if len(req.SidecarRouter) < 1 {
+		content[prefix+"port"] = req.Port
+		content[prefix+"ip"] = req.IP
+	}
 	return writeToJSONFile(productionCfgJSONPath, content)
 }
 

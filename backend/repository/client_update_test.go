@@ -54,6 +54,23 @@ func TestUpdateHTTPClientWithoutExposedMethods(t *testing.T) {
 	testUpdateClientConfig(t, req, "contacts")
 }
 
+func TestUpdateTchannelClientWithSidecarRouter(t *testing.T) {
+	req := &ClientConfig{
+		Name:        "corge",
+		Type:        "tchannel",
+		ThriftFile:  "clients/corge/corge.thrift",
+		ServiceName: "Corge",
+		ExposedMethods: map[string]string{
+			"EchoString": "Corge::echoString",
+		},
+		SidecarRouter:     "default",
+		IP:                "127.0.0.1",
+		Timeout:           10000,
+		TimeoutPerAttempt: 2000,
+	}
+	testUpdateClientConfig(t, req, "corge")
+}
+
 func TestUpdateTchannelClient(t *testing.T) {
 	req := &ClientConfig{}
 	err := readJSONFile(tchannelClientUpdateRequestFile, req)
