@@ -8,6 +8,8 @@
 		"Call": "SimpleService::call",
 		"Compare": "SimpleService::compare",
 		"DeliberateDiffNoop": "SimpleService::sillyNoop",
+		"TestUUID": "SimpleService::testUuid",
+		"URLTest": "SimpleService::urlTest",
 		"EchoI8": "SecondService::echoI8",
 		"EchoI16": "SecondService::echoI16",
 		"EchoI32": "SecondService::echoI32",

@@ -32,21 +32,21 @@ import (
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
-// CorgeechoStringFunc is the handler function for "echoString" method of thrift service "Corge".
-type CorgeechoStringFunc func(
+// CorgeEchoStringFunc is the handler function for "echoString" method of thrift service "Corge".
+type CorgeEchoStringFunc func(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	args *clientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error)
 
 // NewCorgeEchoStringHandler wraps a handler function so it can be registered with a thrift server.
-func NewCorgeEchoStringHandler(f CorgeechoStringFunc) zanzibar.TChannelHandler {
+func NewCorgeEchoStringHandler(f CorgeEchoStringFunc) zanzibar.TChannelHandler {
 	return &CorgeEchoStringHandler{f}
 }
 
 // CorgeEchoStringHandler handles the "echoString" method call of thrift service "Corge".
 type CorgeEchoStringHandler struct {
-	echostring CorgeechoStringFunc
+	echostring CorgeEchoStringFunc
 }
 
 // Handle parses request from wire value and calls corresponding handler function.

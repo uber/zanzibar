@@ -93,5 +93,18 @@ service SimpleService {
     zanzibar.http.path = "/baz/silly-noop"
     zanzibar.handler = "baz.sillyNoop"
   )
-}
 
+  void testUuid() (
+    zanzibar.http.status = "204"
+    zanzibar.http.method = "GET"
+    zanzibar.http.path = "/baz/test-uuid"
+    zanzibar.handler = "baz.testUuid"
+  )
+
+  void urlTest() (
+    zanzibar.http.status = "204"
+    zanzibar.http.method = "GET"
+    zanzibar.http.path = "/baz/url-test"
+    zanzibar.handler = "baz.urlTest"
+  )
+}

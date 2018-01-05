@@ -25,7 +25,9 @@
 			"EchoStructSet": "SecondService::echoStructSet",
 			"EchoTypedef": "SecondService::echoTypedef",
 			"Ping": "SimpleService::ping",
-			"Trans": "SimpleService::trans"
+			"TestUUID": "SimpleService::testUuid",
+			"Trans": "SimpleService::trans",
+			"URLTest": "SimpleService::urlTest"
 		}
 	}
 }
