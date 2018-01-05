@@ -222,12 +222,14 @@ func (c *tchannelOutboundCall) logFields() []zapcore.Field {
 	var hostPort string
 	if c.call != nil {
 		hostPort = c.call.RemotePeer().HostPort
+	} else {
+		hostPort = "unknown"
 	}
 	fields := []zapcore.Field{
+		zap.String("remoteAddr", hostPort),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
 	}
-	fields = append(fields, zap.String("remoteAddr", hostPort))
 
 	for k, v := range c.reqHeaders {
 		fields = append(fields, zap.String("Request-Header-"+k, v))
