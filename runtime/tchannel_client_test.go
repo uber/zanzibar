@@ -21,33 +21,29 @@
 package zanzibar
 
 import (
-	"github.com/stretchr/testify/assert"
-
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {
-
 	headers := map[string]string{
 		"header-key": "header-value",
 	}
+	staticTestTime := time.Unix(1500000000, 0)
 	outboundCall := &tchannelOutboundCall{
-		client:        nil,
-		call:          nil,
-		methodName:    "GET",
+		methodName:    "Get",
 		serviceMethod: "Test",
-		success:       false,
-		startTime:     time.Now(),
-		finishTime:    time.Now(),
+		startTime:     staticTestTime,
+		finishTime:    staticTestTime,
 		reqHeaders:    headers,
 		resHeaders:    headers,
-		logger:        nil,
-		metrics:       nil,
 	}
+
 	fields := outboundCall.logFields()
 
-	// one field for each of the the:
+	// one field for each of the:
 	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
 	assert.Len(t, fields, 5)
 	assert.Equal(t, fields[0].Key, "remoteAddr")
