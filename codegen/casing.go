@@ -71,10 +71,10 @@ var CommonInitialisms = map[string]bool{
 }
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 
-// CorrectMethodNaming correct the naming for initialisms
-func CorrectMethodNaming(key string) string {
+// LintAcronym correct the naming for initialisms
+func LintAcronym(key string) string {
+	key = pascalCase(key)
 	for k := range CommonInitialisms {
-		key = pascalCase(key)
 		initial := string(k[0]) + strings.ToLower(k[1:])
 		if strings.Contains(key, initial) {
 			key = strings.Replace(key, initial, k, -1)

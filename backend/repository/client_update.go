@@ -83,7 +83,7 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	// fix method naming, e.g. Uuid -> UUID
 	updatedExposedMethod := make(map[string]string)
 	for k, val := range cfgJSON.Config.ExposedMethods {
-		k = codegen.CorrectMethodNaming(k)
+		k = codegen.LintAcronym(k)
 		updatedExposedMethod[k] = val
 	}
 	cfgJSON.Config.ExposedMethods = updatedExposedMethod
