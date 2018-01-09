@@ -292,6 +292,37 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 }
 
+// Ensures that a middleware can read state from a middeware earlier in the stack.
+func TestMiddlewareSharedStateValidationOnSet(t *testing.T) {
+	ex := example.NewMiddleware(
+		nil, // *zanzibar.Gateway
+		nil,
+		example.Options{
+			Foo: "test_state",
+			Bar: 2,
+		},
+	)
+
+	exReader := exampleReader.NewMiddleware(
+		nil, // *zanzibar.Gateway
+		nil,
+		exampleReader.Options{
+			Foo: "foo",
+		},
+	)
+
+	middles := []zanzibar.MiddlewareHandle{ex, exReader}
+
+	ss := zanzibar.NewSharedState(middles)
+
+	err := ss.SetState("example", "foo")
+	assert.NoError(t, err)
+	assert.Equal(t, ss.GetState("example").(string), "foo")
+
+	err = ss.SetState("NoSuchMiddleware", "foo")
+	assert.Error(t, err)
+}
+
 func noopHandlerFn(ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
