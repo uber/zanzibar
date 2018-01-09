@@ -21,7 +21,7 @@ import:
 - package: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - package: go.uber.org/atomic
-  version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
+  version: ^1.3.0
 - package: github.com/apache/thrift
   version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
   subpackages:
@@ -35,7 +35,7 @@ import:
 - package: go.uber.org/thriftrw
   version: v1.8.0
 - package: github.com/uber/tchannel-go
-  version: v1.3.0
+  version: 1.5.0
 - package: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
 - package: github.com/uber/jaeger-client-go
