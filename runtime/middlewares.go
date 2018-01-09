@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"errors"
 
 	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 )
@@ -75,7 +76,8 @@ type SharedState struct {
 	middlewareDict map[string]interface{}
 }
 
-func newSharedState(middlewares []MiddlewareHandle) SharedState {
+// NewSharedState constructs a ShardState
+func NewSharedState(middlewares []MiddlewareHandle) SharedState {
 	sharedState := SharedState{}
 	sharedState.middlewareDict = make(map[string]interface{})
 
@@ -90,9 +92,13 @@ func (s SharedState) GetState(name string) interface{} {
 	return s.middlewareDict[name]
 }
 
-// SetState returns the state from a different middleware
-func (s SharedState) SetState(name string, state interface{}) {
+// SetState sets value of a middleware shared state
+func (s SharedState) SetState(name string, state interface{}) error {
+	if _, containsKey := s.middlewareDict[name]; !containsKey {
+		return errors.New("middleware shared state must be keyed by middleware name")
+	}
 	s.middlewareDict[name] = state
+	return nil
 }
 
 // Handle executes the middlewares in a stack and underlying handler.
@@ -101,7 +107,7 @@ func (m *MiddlewareStack) Handle(
 	req *ServerHTTPRequest,
 	res *ServerHTTPResponse) {
 
-	shared := newSharedState(m.middlewares)
+	shared := NewSharedState(m.middlewares)
 
 	for i := 0; i < len(m.middlewares); i++ {
 		ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)

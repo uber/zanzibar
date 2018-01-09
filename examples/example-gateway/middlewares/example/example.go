@@ -66,11 +66,14 @@ func (m *exampleMiddleware) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
 ) bool {
-	shared.SetState(
+	err := shared.SetState(
 		m.Name(),
 		MiddlewareState{
 			Baz: m.options.Foo,
 		})
+	if err != nil && m.deps.Default.Logger != nil {
+		m.deps.Default.Logger.Info("Example SharedState Not Set")
+	}
 	return true
 }
 
