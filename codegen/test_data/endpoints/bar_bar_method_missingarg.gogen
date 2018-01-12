@@ -172,6 +172,29 @@ func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBa
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToMissingArgRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToMissingArgRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToMissingArgRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToMissingArgRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToMissingArgRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

@@ -27,6 +27,7 @@
 			"Methods": [
 				{
 					"Name": "argNotStruct",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/arg-not-struct-path",
@@ -99,6 +100,7 @@
 				},
 				{
 					"Name": "argWithHeaders",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithHeaders",
@@ -170,6 +172,7 @@
 				},
 				{
 					"Name": "argWithManyQueryParams",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithManyQueryParams",
@@ -274,6 +277,7 @@
 				},
 				{
 					"Name": "argWithNestedQueryParams",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithNestedQueryParams",
@@ -371,6 +375,7 @@
 				},
 				{
 					"Name": "argWithParams",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithParams/:uuid/segment/:user-uuid",
@@ -460,6 +465,7 @@
 				},
 				{
 					"Name": "argWithQueryHeader",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryHeader",
@@ -519,6 +525,7 @@
 				},
 				{
 					"Name": "argWithQueryParams",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/argWithQueryParams",
@@ -587,6 +594,7 @@
 				},
 				{
 					"Name": "helloWorld",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/bar/hello",
@@ -666,6 +674,7 @@
 				},
 				{
 					"Name": "missingArg",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/missing-arg-path",
@@ -743,6 +752,7 @@
 				},
 				{
 					"Name": "noRequest",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "GET",
 					"EndpointName": "",
 					"HTTPPath": "/no-request-path",
@@ -820,6 +830,7 @@
 				},
 				{
 					"Name": "normal",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar-path",
@@ -897,6 +908,7 @@
 				},
 				{
 					"Name": "normalRecur",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/bar/recur",
@@ -976,6 +988,7 @@
 				},
 				{
 					"Name": "tooManyArgs",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/too-many-args-path",
@@ -1085,6 +1098,7 @@
 			"Methods": [
 				{
 					"Name": "echoBinary",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/binary",
@@ -1141,6 +1155,7 @@
 				},
 				{
 					"Name": "echoBool",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/bool",
@@ -1197,6 +1212,7 @@
 				},
 				{
 					"Name": "echoDouble",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/double",
@@ -1253,6 +1269,7 @@
 				},
 				{
 					"Name": "echoEnum",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/enum",
@@ -1309,6 +1326,7 @@
 				},
 				{
 					"Name": "echoI16",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i16",
@@ -1365,6 +1383,7 @@
 				},
 				{
 					"Name": "echoI32",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i32",
@@ -1421,6 +1440,7 @@
 				},
 				{
 					"Name": "echoI32Map",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i32-map",
@@ -1477,6 +1497,7 @@
 				},
 				{
 					"Name": "echoI64",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i64",
@@ -1533,6 +1554,7 @@
 				},
 				{
 					"Name": "echoI8",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/i8",
@@ -1589,6 +1611,7 @@
 				},
 				{
 					"Name": "echoString",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string",
@@ -1645,6 +1668,7 @@
 				},
 				{
 					"Name": "echoStringList",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-list",
@@ -1701,6 +1725,7 @@
 				},
 				{
 					"Name": "echoStringMap",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-map",
@@ -1757,6 +1782,7 @@
 				},
 				{
 					"Name": "echoStringSet",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/string-set",
@@ -1813,6 +1839,7 @@
 				},
 				{
 					"Name": "echoStructList",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-list",
@@ -1869,6 +1896,7 @@
 				},
 				{
 					"Name": "echoStructMap",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-map",
@@ -1925,6 +1953,7 @@
 				},
 				{
 					"Name": "echoStructSet",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/struct-set",
@@ -1981,6 +2010,7 @@
 				},
 				{
 					"Name": "echoTypedef",
+					"ConverterFunctionNames": null,
 					"HTTPMethod": "POST",
 					"EndpointName": "",
 					"HTTPPath": "/echo/typedef",

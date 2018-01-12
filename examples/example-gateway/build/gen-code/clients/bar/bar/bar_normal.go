@@ -14,7 +14,8 @@ import (
 //
 // The arguments for normal are sent and received over the wire as this struct.
 type Bar_Normal_Args struct {
-	Request *BarRequest `json:"request,required"`
+	Request      *BarRequest      `json:"request,required"`
+	RequestRecur *BarRequestRecur `json:"requestRecur,omitempty"`
 }
 
 // ToWire translates a Bar_Normal_Args struct into a Thrift-level intermediate
@@ -34,7 +35,7 @@ type Bar_Normal_Args struct {
 //   }
 func (v *Bar_Normal_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [2]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -49,6 +50,14 @@ func (v *Bar_Normal_Args) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 1, Value: w}
 	i++
+	if v.RequestRecur != nil {
+		w, err = v.RequestRecur.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -91,6 +100,14 @@ func (v *Bar_Normal_Args) FromWire(w wire.Value) error {
 				}
 				requestIsSet = true
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.RequestRecur, err = _BarRequestRecur_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -108,10 +125,14 @@ func (v *Bar_Normal_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [1]string
+	var fields [2]string
 	i := 0
 	fields[i] = fmt.Sprintf("Request: %v", v.Request)
 	i++
+	if v.RequestRecur != nil {
+		fields[i] = fmt.Sprintf("RequestRecur: %v", v.RequestRecur)
+		i++
+	}
 
 	return fmt.Sprintf("Bar_Normal_Args{%v}", strings.Join(fields[:i], ", "))
 }
@@ -122,6 +143,9 @@ func (v *Bar_Normal_Args) String() string {
 // This function performs a deep comparison.
 func (v *Bar_Normal_Args) Equals(rhs *Bar_Normal_Args) bool {
 	if !v.Request.Equals(rhs.Request) {
+		return false
+	}
+	if !((v.RequestRecur == nil && rhs.RequestRecur == nil) || (v.RequestRecur != nil && rhs.RequestRecur != nil && v.RequestRecur.Equals(rhs.RequestRecur))) {
 		return false
 	}
 
@@ -151,6 +175,7 @@ var Bar_Normal_Helper = struct {
 	// the arguments struct for the function.
 	Args func(
 		request *BarRequest,
+		requestRecur *BarRequestRecur,
 	) *Bar_Normal_Args
 
 	// IsException returns true if the given error can be thrown
@@ -191,9 +216,11 @@ var Bar_Normal_Helper = struct {
 func init() {
 	Bar_Normal_Helper.Args = func(
 		request *BarRequest,
+		requestRecur *BarRequestRecur,
 	) *Bar_Normal_Args {
 		return &Bar_Normal_Args{
-			Request: request,
+			Request:      request,
+			RequestRecur: requestRecur,
 		}
 	}
 

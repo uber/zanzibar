@@ -186,6 +186,16 @@ func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				out.BinaryField = in.Bytes()
 			}
 			BinaryFieldSet = true
+		case "resp":
+			if in.IsNull() {
+				in.Skip()
+				out.Resp = nil
+			} else {
+				if out.Resp == nil {
+					out.Resp = new(BarRequestRecur)
+				}
+				easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(in, &*out.Resp)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -284,6 +294,88 @@ func easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"binaryField\":")
 	out.Base64Bytes(in.BinaryField)
+	if in.Resp != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"resp\":")
+		if in.Resp == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out, *in.Resp)
+		}
+	}
+	out.RawByte('}')
+}
+func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(in *jlexer.Lexer, out *BarRequestRecur) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var NameSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "name":
+			out.Name = string(in.String())
+			NameSet = true
+		case "recur":
+			if in.IsNull() {
+				in.Skip()
+				out.Recur = nil
+			} else {
+				if out.Recur == nil {
+					out.Recur = new(BarRequestRecur)
+				}
+				easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(in, &*out.Recur)
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !NameSet {
+		in.AddError(fmt.Errorf("key 'name' is required"))
+	}
+}
+func easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out *jwriter.Writer, in BarRequestRecur) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"name\":")
+	out.String(string(in.Name))
+	if in.Recur != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"recur\":")
+		if in.Recur == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out, *in.Recur)
+		}
+	}
 	out.RawByte('}')
 }
 func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarArgWithParams1(in *jlexer.Lexer, out *Bar_ArgWithParams_Args) {
@@ -317,7 +409,7 @@ func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Params == nil {
 					out.Params = new(ParamsStruct)
 				}
-				easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(in, &*out.Params)
+				easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(in, &*out.Params)
 			}
 		default:
 			in.SkipRecursive()
@@ -351,7 +443,7 @@ func easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Params == nil {
 			out.RawString("null")
 		} else {
-			easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out, *in.Params)
+			easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(out, *in.Params)
 		}
 	}
 	out.RawByte('}')
@@ -380,7 +472,7 @@ func (v *Bar_ArgWithParams_Args) UnmarshalJSON(data []byte) error {
 func (v *Bar_ArgWithParams_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarBarArgWithParams1(l, v)
 }
-func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(in *jlexer.Lexer, out *ParamsStruct) {
+func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(in *jlexer.Lexer, out *ParamsStruct) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -416,7 +508,7 @@ func easyjsonAc1d6e06DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.AddError(fmt.Errorf("key 'userUUID' is required"))
 	}
 }
-func easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar1(out *jwriter.Writer, in ParamsStruct) {
+func easyjsonAc1d6e06EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar2(out *jwriter.Writer, in ParamsStruct) {
 	out.RawByte('{')
 	first := true
 	_ = first

@@ -96,8 +96,12 @@ func convertTypes(
 	content string,
 	otherFiles map[string][]byte,
 	overrideMap map[string]codegen.FieldMapperEntry,
+	isMethodCall bool,
 ) (string, error) {
 	converter := newTypeConverter()
+	converter.MethodName = ""
+	converter.IsTestCall = isMethodCall
+	converter.IsMethodCall = isMethodCall
 	program, err := compileProgram(content, otherFiles)
 	if err != nil {
 		return "", err
@@ -107,6 +111,7 @@ func convertTypes(
 		program.Types[fromStruct].(*compile.StructSpec).Fields,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
 		overrideMap,
+		"RequestType",
 	)
 	if err != nil {
 		return "", err
@@ -180,7 +185,7 @@ func TestConvertStrings(t *testing.T) {
 			2: required string two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -203,7 +208,7 @@ func TestConvertBools(t *testing.T) {
 			2: required bool two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -224,7 +229,7 @@ func TestConvertBoolsOptionalToRequired(t *testing.T) {
 			1: optional bool one
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -244,7 +249,7 @@ func TestConvertBoolsRequiredToOptional(t *testing.T) {
 			1: required bool one
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -268,7 +273,7 @@ func TestConvertInt8(t *testing.T) {
 			2: required i8 two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -291,7 +296,7 @@ func TestConvertInt16(t *testing.T) {
 			2: required i16 two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -314,7 +319,7 @@ func TestConvertInt32(t *testing.T) {
 			2: required i32 two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -337,7 +342,7 @@ func TestConvertInt64(t *testing.T) {
 			2: required i64 two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -360,7 +365,7 @@ func TestConvertDouble(t *testing.T) {
 			2: required double two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -383,7 +388,7 @@ func TestConvertBinary(t *testing.T) {
 			2: required binary two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -416,25 +421,13 @@ func TestConvertStruct(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.One = string(in.Four.One)
-			out.Four.Two = (*string)(in.Four.Two)
-		} else {
-			out.Four = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -459,18 +452,12 @@ func TestConvertStructRequiredToOptional(t *testing.T) {
 			3: required NestedBar three
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
 	`), lines)
 }
 
@@ -495,18 +482,12 @@ func TestConvertStructOptionalToRequired(t *testing.T) {
 			3: optional NestedBar three
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
 	`), lines)
 }
 
@@ -532,22 +513,12 @@ func TestHandlesMissingFields(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-		} else {
-			out.Three = nil
-		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.One = string(in.Four.One)
-		} else {
-			out.Four = nil
-		}`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)`),
 		lines)
 }
 
@@ -574,7 +545,7 @@ func TestStructTypeMisMatch(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.Equal(t, "", lines)
@@ -597,7 +568,7 @@ func TestConvertTypeDef(t *testing.T) {
 			2: required UUID two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -622,7 +593,7 @@ func TestConvertTypeDefReqToOpt(t *testing.T) {
 			2: required UUID two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -652,7 +623,7 @@ func TestConvertEnum(t *testing.T) {
 			2: required ItemState two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -667,7 +638,7 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyString one
 			2: required string two
@@ -682,7 +653,7 @@ func TestConvertWithBadImportTypedef(t *testing.T) {
 			typedef string MyString
 			`),
 		},
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -698,7 +669,7 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyEnum one
 			2: required string two
@@ -716,7 +687,7 @@ func TestConvertWithBadImportEnum(t *testing.T) {
 			}
 			`),
 		},
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -732,7 +703,7 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional bar.MyStruct one
 			2: required string two
@@ -749,7 +720,7 @@ func TestConvertWithBadImportStruct(t *testing.T) {
 			}
 			`),
 		},
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -773,7 +744,7 @@ func TestConvertListOfString(t *testing.T) {
 			2: required list<string> two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -802,7 +773,7 @@ func TestConvertListOfBinary(t *testing.T) {
 			2: required list<binary> two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -825,7 +796,7 @@ func TestConvertListOfStruct(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required list<Inner> two
@@ -836,29 +807,61 @@ func TestConvertListOfStruct(t *testing.T) {
 			2: required list<Inner> two
 		}`,
 		nil,
-		nil,
+		nil, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 		out.One = make([]*structs.Inner, len(in.One))
 		for index1, value2 := range in.One {
+			out := &structs.Inner{}
 			if value2 != nil {
-				out.One[index1] = &structs.Inner{}
 				out.One[index1].Field = (*string)(in.One[index1].Field)
 			} else {
-				out.One[index1] = nil
+				out = nil
 			}
 		}
 		out.Two = make([]*structs.Inner, len(in.Two))
 		for index3, value4 := range in.Two {
+			out := &structs.Inner{}
 			if value4 != nil {
-				out.Two[index3] = &structs.Inner{}
 				out.Two[index3].Field = (*string)(in.Two[index3].Field)
 			} else {
-				out.Two[index3] = nil
+				out = nil
 			}
 		}
+	`), lines)
+}
+
+func TestConvertStructContainingList(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct Inner1 {
+			1: optional string stringField
+		}
+
+		struct Inner {
+			1: optional list<Inner1> field
+		}
+
+		struct Foo {
+			1: optional Inner one
+			2: required Inner two
+		}
+
+		struct Bar {
+			1: optional Inner one
+			2: required Inner two
+		}`,
+		nil,
+		nil, false,
+	)
+
+	assert.Nil(t, err)
+	assertPrettyEqual(t, trim(`
+		out.One = convertToOneRequestType(in.One)
+		out.Two = convertToTwoRequestType(in.Two)
 	`), lines)
 }
 
@@ -867,7 +870,7 @@ func TestConvertWithBadImportListOfStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional list<bar.MyStruct> one
 			2: required string two
@@ -884,7 +887,7 @@ func TestConvertWithBadImportListOfStruct(t *testing.T) {
 			}
 			`),
 		},
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -902,7 +905,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -913,7 +916,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 			2: required list<Inner> two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -924,7 +927,7 @@ func TestConvertWithMisMatchListTypes(t *testing.T) {
 	)
 }
 
-func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
+func TestConvertWithBadImportListOfBadStructIgnoreDeeperError(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`
@@ -933,7 +936,7 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 		struct Inner {
 			1: optional bar.MyStruct field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: required string two
@@ -950,15 +953,18 @@ func TestConvertWithBadImportListOfBadStruct(t *testing.T) {
 			}
 			`),
 		},
-		nil,
+		nil, true,
 	)
 
-	assert.Error(t, err)
-	assert.Equal(t, "", lines)
-	assert.Contains(t,
-		err.Error(),
-		"could not lookup fieldType when building converter for MyStruct",
-	)
+	assert.Nil(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make([]*structs.Inner, len(in.One))
+	for index1, value2 := range in.One {
+		out := &structs.Inner{}
+		if value2 != nil {
+	out.One[index1].Field = convertToFieldRequestType(in.One[index1].Field)
+	out.Two = string(in.Two)
+	`), lines)
 }
 
 func TestConvertMapOfString(t *testing.T) {
@@ -974,7 +980,7 @@ func TestConvertMapOfString(t *testing.T) {
 			2: required map<string, string> two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.NoError(t, err)
@@ -997,7 +1003,7 @@ func TestConvertMapOfStruct(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required map<string, Inner> two
@@ -1008,30 +1014,29 @@ func TestConvertMapOfStruct(t *testing.T) {
 			2: required map<string, Inner> two
 		}`,
 		nil,
-		nil,
+		nil, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = make(map[string]*structs.Inner, len(in.One))
-		for key1, value2 := range in.One {
-			if value2 != nil {
-				out.One[key1] = &structs.Inner{}
-				out.One[key1].Field = (*string)(in.One[key1].Field)
-			} else {
-				out.One[key1] = nil
-			}
+	out.One = make(map[string]*structs.Inner, len(in.One))
+	for key1, value2 := range in.One {
+		out := &structs.Inner{}
+		if value2 != nil {
+			out.One[key1].Field = (*string)(in.One[key1].Field)
+		} else {
+			out = nil
 		}
-		out.Two = make(map[string]*structs.Inner, len(in.Two))
-		for key3, value4 := range in.Two {
-			if value4 != nil {
-				out.Two[key3] = &structs.Inner{}
-				out.Two[key3].Field = (*string)(in.Two[key3].Field)
-			} else {
-				out.Two[key3] = nil
-			}
+	}
+	out.Two = make(map[string]*structs.Inner, len(in.Two))
+	for key3, value4 := range in.Two {
+		out := &structs.Inner{}
+		if value4 != nil {
+			out.Two[key3].Field = (*string)(in.Two[key3].Field)
+		} else {
+			out = nil
 		}
-	`), lines)
+	}`), lines)
 }
 
 func TestConvertWithBadImportMapOfStruct(t *testing.T) {
@@ -1039,7 +1044,7 @@ func TestConvertWithBadImportMapOfStruct(t *testing.T) {
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-		
+
 		struct Foo {
 			1: optional map<string, bar.MyStruct> one
 			2: required string two
@@ -1057,7 +1062,7 @@ func TestConvertWithBadImportMapOfStruct(t *testing.T) {
 			`),
 		},
 		nil,
-	)
+		false)
 
 	assert.Error(t, err)
 	assert.Equal(t, "", lines)
@@ -1074,7 +1079,7 @@ func TestConvertWithMisMatchMapTypes(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required string two
@@ -1085,7 +1090,7 @@ func TestConvertWithMisMatchMapTypes(t *testing.T) {
 			2: required map<string, Inner> two
 		}`,
 		nil,
-		nil,
+		nil, false,
 	)
 
 	assert.Error(t, err)
@@ -1096,21 +1101,19 @@ func TestConvertWithMisMatchMapTypes(t *testing.T) {
 	)
 }
 
-func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
+func TestConvertWithBadImportMapOfBadStructIgnore(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
 		`
 		include "../../bar.thrift"
-
 		struct Inner {
 			1: optional bar.MyStruct field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: required string two
 		}
-
 		struct Bar {
 			1: optional map<string, Inner> one
 			2: required string two
@@ -1123,6 +1126,44 @@ func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
 			`),
 		},
 		nil,
+		true,
+	)
+
+	assert.Nil(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make(map[string]*structs.Inner, len(in.One))
+	for key1, value2 := range in.One {
+		out := &structs.Inner{}
+		if value2 != nil {
+	out.One[key1].Field = convertToFieldRequestType(in.One[key1].Field)
+	out.Two = string(in.Two)`), lines)
+}
+
+func TestConvertWithBadImportMapOfBadStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		include "../../bar.thrift"
+		struct Inner {
+			1: optional bar.MyStruct field
+		}
+		struct Foo {
+			1: optional Inner one
+			2: required string two
+		}
+		struct Bar {
+			1: optional Inner one
+			2: required string two
+		}`,
+		map[string][]byte{
+			"../../bar.thrift": []byte(`
+			struct MyStruct {
+				1: optional string one
+			}
+			`),
+		},
+		nil,
+		true,
 	)
 
 	assert.Error(t, err)
@@ -1148,6 +1189,7 @@ func TestConvertWithCorrectKeyMapNotStringKey(t *testing.T) {
 		}`,
 		nil,
 		nil,
+		false,
 	)
 
 	assert.NoError(t, err)
@@ -1176,6 +1218,7 @@ func TestConvertWithBadKeyMapMapKey(t *testing.T) {
 		}`,
 		nil,
 		nil,
+		false,
 	)
 
 	assert.Error(t, err)
@@ -1212,25 +1255,13 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.UUID = string(in.Three.UUID)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.UUID = string(in.Four.UUID)
-			out.Four.Two = (*string)(in.Four.Two)
-		} else {
-			out.Four = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -1257,7 +1288,7 @@ func TestConverterMap(t *testing.T) {
 			2: required bool two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1286,7 +1317,7 @@ func TestConvertTypeDefReqToReqWithOptOverride(t *testing.T) {
 			1: required UUID two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1324,7 +1355,7 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 			2: required UUID two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1360,7 +1391,7 @@ func TestConverterMapNewField(t *testing.T) {
 			2: required bool two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1389,7 +1420,7 @@ func TestConverterMapOptionalNoOverride(t *testing.T) {
 			2: optional bool two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1437,7 +1468,7 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 			4: optional bool four
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1476,7 +1507,7 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 			2: optional bool two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -1485,7 +1516,7 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
-		out.Two = (*bool)(in.Two)	
+		out.Two = (*bool)(in.Two)
 	`), lines)
 }
 
@@ -1518,28 +1549,13 @@ func TestConverterMapStructWithSubFields2(t *testing.T) {
 			4: required NestedBar four
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-			if in.Four != nil && in.Four.Two != nil {
-				out.Three.One = *(in.Four.Two)
-			}
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.One = string(in.Four.One)
-			out.Four.Two = (*string)(in.Four.Two)
-		} else {
-			out.Four = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -1562,18 +1578,11 @@ func TestConverterMapStructWithFromReqDropped(t *testing.T) {
  			1: optional NestedFoo three
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1596,18 +1605,11 @@ func TestConverterMapStructWithFromOptDropped(t *testing.T) {
  			1: optional NestedFoo three
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1629,18 +1631,11 @@ func TestConverterMapStructWithToOptMissingOk(t *testing.T) {
  			2: optional NestedFoo four
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
-	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}`),
+	assertPrettyEqual(t, trim(`out.Three = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1663,7 +1658,7 @@ func TestConverterMapStructWithToReqMissingError(t *testing.T) {
  			2: required NestedFoo four
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -1693,29 +1688,13 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
  			2: required NestedFoo four
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Three != nil {
-			out.Four = &structs.NestedFoo{}
-			if in.Three != nil {
-				out.Four.One = string(in.Three.One)
-			}
-			if in.Three != nil {
-				out.Four.Two = (*string)(in.Three.Two)
-			}
-		} else {
-			out.Four = nil
-		}`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1742,29 +1721,13 @@ func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
  			2: optional NestedFoo four
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Three != nil {
-			out.Four = &structs.NestedFoo{}
-			if in.Three != nil {
-				out.Four.One = string(in.Three.One)
-			}
-			if in.Three != nil {
-				out.Four.Two = (*string)(in.Three.Two)
-			}
-		} else {
-			out.Four = nil
-		}`),
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToThreeRequestType(in.Three)`),
 		lines)
 }
 
@@ -1796,31 +1759,85 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
  			2: optional NestedFoo five
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedFoo{}
-			out.Three.One = string(in.Three.One)
-			out.Three.Two = (*string)(in.Three.Two)
+	out.Three = convertToThreeRequestType(in.Three)
+	out := &structs.NestedFoo{}
+	if in != nil {
+		out.One = string(in.One)
+		out.Two = (*string)(in.Two)
+	} else {
+		out = nil
+	}
+	out.Five = convertToRequestType()
+	if in.Two != nil {
+		out.One = *(in.Two)
+	}
+	out.Two = (*string)&(in.One)
+	`), lines)
+}
+
+func TestConverterMapStructWithFieldMapWithDetails(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Five"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four",
+		Override:      true,
+	}
+	fieldMap["Five.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four.Two",
+		Override:      true,
+	}
+	fieldMap["Five.Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four.One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required NestedFoo three
+ 			2: required NestedFoo four
+ 		}
+
+ 		struct Bar {
+ 			1: required NestedFoo three
+ 			2: optional NestedFoo five
+ 		}`,
+		nil,
+		fieldMap, true,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+		out.Three = convertToThreeRequestType(in.Three)
+		out := &structs.NestedFoo{}
+		if in != nil {
+			out.One = string(in.One)
+			out.Two = (*string)(in.Two)
 		} else {
-			out.Three = nil
+			out = nil
 		}
-		if in.Three != nil && in.Three.Two != nil {
-			if out.Five == nil {
-				out.Five = &structs.NestedFoo{}
+		out.Five = convertToFourRequestType(in.Four)
+		out := &structs.NestedFoo{}
+		if in != nil {
+			if in.Four != nil {
+				out.One = string(in.Four.One)
 			}
-			out.Five.One = *(in.Three.Two)
-		}
-		if in.Four != nil {
-			if out.Five == nil {
-				out.Five = &structs.NestedFoo{}
+			if in.Two != nil {
+				out.One = *(in.Two)
 			}
-			out.Five.Two = (*string)&(in.Four.One)
-		}`),
-		lines)
+			out.Two = (*string)&(in.One)
+		} else {
+			out = nil
+		}`), trim(lines))
 }
 
 func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
@@ -1848,7 +1865,7 @@ func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
 			2: optional NestedFoo five
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -1861,6 +1878,14 @@ func TestConverterMapStructWithFieldMapErrorCase(t *testing.T) {
 
 func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1888,21 +1913,32 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
  			1: required NestedC six
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = &structs.NestedC{}
-		out.Six.Four = &structs.NestedA{}
-		if in.Five != nil && in.Five.Three != nil {
-			out.Six.Four.One = string(in.Five.Three.One)
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				out.One = string(in.One)
+		} else {
+			out = nil
 		}`),
 		lines)
 }
 
 func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1930,23 +1966,37 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
  			1: required NestedC six
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.Six = &structs.NestedC{}
-		if in.Five != nil && in.Five.Three != nil {
-			if out.Six.Four == nil {
-				out.Six.Four = &structs.NestedA{}
-			}
-			out.Six.Four.One = (*string)(in.Five.Three.One)
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				if in.Six != nil && in.Six.Three != nil {
+					out.One = (*string)(in.Six.Three.One)
+				}
+				if in.One != nil {
+					out.One = (*string)(in.One)
+				}
+		} else {
+			out = nil
 		}`),
 		lines)
 }
 
 func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Six"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five",
+		Override:      true,
+	}
+	fieldMap["Six.Four"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Three",
+		Override:      true,
+	}
 	fieldMap["Six.Four.One"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.Three.One",
 		Override:      true,
@@ -1973,21 +2023,24 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
  			1: optional NestedC six
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Five != nil && in.Five.Three != nil {
-			if out.Six == nil {
-				out.Six = &structs.NestedC{}
-			}
-			if out.Six.Four == nil {
-				out.Six.Four = &structs.NestedA{}
-			}
-			out.Six.Four.One = (*string)(in.Five.Three.One)
-		}`),
-		lines)
+		out.Six = convertToFiveRequestType(in.Five)
+		out := &structs.NestedC{}
+		if in != nil {
+		out.Four = convertToThreeRequestType(in.Three)
+				if in.Six != nil && in.Six.Three != nil {
+					out.One = (*string)(in.Six.Three.One)
+				}
+				if in.One != nil {
+					out.One = (*string)(in.One)
+				}
+		} else {
+			out = nil
+		}`), lines)
 }
 
 func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
@@ -2023,27 +2076,23 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
  			4: required NestedBar four
  		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Four != nil && in.Four.Two != nil {
-			if out.Five == nil {
-				out.Five = &structs.NestedBar{}
-			}
-			out.Five.One = *(in.Four.Two)
+		out.Five = convertToRequestType()
+		if in.Two != nil {
+			out.One = *(in.Two)
 		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.One = string(in.Four.One)
-			if in.Three != nil {
-				out.Four.Two = (*string)&(in.Three.One)
-			}
+		out.Four = convertToFourRequestType(in.Four)
+		out := &structs.NestedBar{}
+		if in != nil {
+			out.One = string(in.One)
+			out.Two = (*string)&(in.One)
 		} else {
-			out.Four = nil
-		}
-	`), lines)
+			out = nil
+		}`), lines)
 }
 
 func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
@@ -2079,30 +2128,13 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 			4: optional NestedBar four
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		if in.Three != nil {
-			out.Three = &structs.NestedBar{}
-			out.Three.One = string(in.Three.One)
-			if in.Three != nil && in.Three.Two != nil {
-				out.Three.One = *(in.Three.Two)
-			}
-			out.Three.Two = (*string)(in.Three.Two)
-		} else {
-			out.Three = nil
-		}
-		if in.Four != nil {
-			out.Four = &structs.NestedBar{}
-			out.Four.One = string(in.Four.One)
-			if in.Four != nil {
-				out.Four.Two = (*string)&(in.Four.One)
-			}
-		} else {
-			out.Four = nil
-		}
+		out.Three = convertToThreeRequestType(in.Three)
+		out.Four = convertToFourRequestType(in.Four)
 	`), lines)
 }
 
@@ -2129,7 +2161,7 @@ func TestConverterMapOverride(t *testing.T) {
 			2: required list<string> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.NoError(t, err)
@@ -2176,20 +2208,20 @@ func TestConverterMapListOfStructType(t *testing.T) {
 			2: required list<Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
 		out.One = make([]*structs.Inner, len(in.Two))
 		for index1, value2 := range in.Two {
+			out := &structs.Inner{}
 			if value2 != nil {
-				out.One[index1] = &structs.Inner{}
 				if in.Two[index1] != nil {
 					out.One[index1].Field = (*string)(in.Two[index1].Field)
 				}
 			} else {
-				out.One[index1] = nil
+				out = nil
 			}
 		}
 		sourceList3 := in.Two
@@ -2201,20 +2233,20 @@ func TestConverterMapListOfStructType(t *testing.T) {
 		out.Two = make([]*structs.Inner, len(sourceList3))
 		for index5, value6 := range sourceList3 {
 			if isOverridden4 {
+				out := &structs.Inner{}
 				if value6 != nil {
-					out.Two[index5] = &structs.Inner{}
 					if in.One[index5] != nil {
 						out.Two[index5].Field = (*string)(in.One[index5].Field)
 					}
 				} else {
-					out.Two[index5] = nil
+					out = nil
 				}
 			} else {
+				out := &structs.Inner{}
 				if value6 != nil {
-					out.Two[index5] = &structs.Inner{}
 					out.Two[index5].Field = (*string)(in.Two[index5].Field)
 				} else {
-					out.Two[index5] = nil
+					out = nil
 				}
 			}
 		}
@@ -2238,7 +2270,7 @@ func TestConverterMapMapType(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, Inner> two
@@ -2249,7 +2281,7 @@ func TestConverterMapMapType(t *testing.T) {
 			2: optional map<string, Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, true,
 	)
 
 	assert.NoError(t, err)
@@ -2263,20 +2295,20 @@ func TestConverterMapMapType(t *testing.T) {
 		out.One = make(map[string]*structs.Inner, len(sourceList1))
 		for key3, value4 := range sourceList1 {
 			if isOverridden2 {
+				out := &structs.Inner{}
 				if value4 != nil {
-					out.One[key3] = &structs.Inner{}
 					if in.Two[key3] != nil {
 						out.One[key3].Field = (*string)(in.Two[key3].Field)
 					}
 				} else {
-					out.One[key3] = nil
+					out = nil
 				}
 			} else {
+				out := &structs.Inner{}
 				if value4 != nil {
-					out.One[key3] = &structs.Inner{}
 					out.One[key3].Field = (*string)(in.One[key3].Field)
 				} else {
-					out.One[key3] = nil
+					out = nil
 				}
 			}
 		}
@@ -2289,23 +2321,23 @@ func TestConverterMapMapType(t *testing.T) {
 		out.Two = make(map[string]*structs.Inner, len(sourceList5))
 		for key7, value8 := range sourceList5 {
 			if isOverridden6 {
+				out := &structs.Inner{}
 				if value8 != nil {
-					out.Two[key7] = &structs.Inner{}
 					if in.One[key7] != nil {
 						out.Two[key7].Field = (*string)(in.One[key7].Field)
 					}
 				} else {
-					out.Two[key7] = nil
+					out = nil
 				}
 			} else {
+				out := &structs.Inner{}
 				if value8 != nil {
-					out.Two[key7] = &structs.Inner{}
 					out.Two[key7].Field = (*string)(in.Two[key7].Field)
 				} else {
-					out.Two[key7] = nil
+					out = nil
 				}
 			}
-		}		
+		}
 	`), lines)
 }
 
@@ -2321,7 +2353,7 @@ func TestConvertWithMisMatchListTypesForOverride(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: optional string two
@@ -2332,7 +2364,7 @@ func TestConvertWithMisMatchListTypesForOverride(t *testing.T) {
 			2: optional list<Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -2356,7 +2388,7 @@ func TestConverterMapListTypeIncompatabile(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional list<Inner> one
 			2: optional list<string> two
@@ -2367,7 +2399,7 @@ func TestConverterMapListTypeIncompatabile(t *testing.T) {
 			2: optional list<Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -2391,7 +2423,7 @@ func TestConvertWithMisMatchMapTypesForOverride(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional string two
@@ -2402,7 +2434,7 @@ func TestConvertWithMisMatchMapTypesForOverride(t *testing.T) {
 			2: optional map<string, Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -2426,7 +2458,7 @@ func TestConverterMapMapTypeIncompatabile(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, string> two
@@ -2437,7 +2469,7 @@ func TestConverterMapMapTypeIncompatabile(t *testing.T) {
 			2: optional map<string, Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -2461,7 +2493,7 @@ func TestConverterInvalidMapping(t *testing.T) {
 		struct Inner {
 			1: optional string field
 		}
-		
+
 		struct Foo {
 			1: optional map<string, Inner> one
 			2: optional map<string, string> two
@@ -2472,7 +2504,7 @@ func TestConverterInvalidMapping(t *testing.T) {
 			2: optional map<string, Inner> two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)
@@ -2509,7 +2541,7 @@ func TestConvertNestedStructError(t *testing.T) {
 			1: required NestedBar two
 		}`,
 		nil,
-		fieldMap,
+		fieldMap, false,
 	)
 
 	assert.Error(t, err)

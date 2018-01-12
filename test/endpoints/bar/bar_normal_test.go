@@ -166,7 +166,7 @@ func TestBarExceptionCode(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}}}`),
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}},"requestRecur":{"name":"abc","recur":{"name":"cde"}}}`),
 				bytes,
 			)
 			w.WriteHeader(403)
@@ -179,9 +179,7 @@ func TestBarExceptionCode(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"POST", "/bar/bar-path", nil,
-		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":1510447958865,"enumField":0,"longField":123}
-		}`)),
+		bytes.NewReader([]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}},"requestRecur":{"name":"abc","recur":{"name":"cde"}}}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
 		return

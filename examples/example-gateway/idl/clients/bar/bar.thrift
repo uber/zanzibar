@@ -32,6 +32,7 @@ struct BarResponse {
         zanzibar.ignore.integer.range = "true"
     )
     6: required binary binaryField
+    7: optional BarRequestRecur resp
 }
 
 struct BarRequestRecur {
@@ -80,6 +81,7 @@ service Bar {
     )
     BarResponse normal (
         1: required BarRequest request
+        2: optional BarRequestRecur requestRecur
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
     ) (

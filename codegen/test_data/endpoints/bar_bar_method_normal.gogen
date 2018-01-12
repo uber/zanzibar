@@ -168,18 +168,46 @@ func (w NormalEndpoint) Handle(
 func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
 	out := &clientsBarBar.Bar_Normal_Args{}
 
-	if in.Request != nil {
-		out.Request = &clientsBarBar.BarRequest{}
-		out.Request.StringField = string(in.Request.StringField)
-		out.Request.BoolField = bool(in.Request.BoolField)
-		out.Request.BinaryField = []byte(in.Request.BinaryField)
-		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
-		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
-		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
-	} else {
-		out.Request = nil
-	}
+	out.Request = convertToNormalRequestClientRequest(in.Request)
+	out.RequestRecur = convertToNormalRequestRecurClientRequest(in.RequestRecur)
 
+	return out
+}
+
+func convertToNormalRequestClientRequest(in *endpointsBarBar.BarRequest) *clientsBarBar.BarRequest {
+	out := &clientsBarBar.BarRequest{}
+	if in != nil {
+		out.StringField = string(in.StringField)
+		out.BoolField = bool(in.BoolField)
+		out.BinaryField = []byte(in.BinaryField)
+		out.Timestamp = clientsBarBar.Timestamp(in.Timestamp)
+		out.EnumField = clientsBarBar.Fruit(in.EnumField)
+		out.LongField = clientsBarBar.Long(in.LongField)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToNormalRequestRecurClientRequest(in *endpointsBarBar.BarRequestRecur) *clientsBarBar.BarRequestRecur {
+	out := &clientsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToNormalRecurClientRequest(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToNormalRecurClientRequest(in *endpointsBarBar.BarRequestRecur) *clientsBarBar.BarRequestRecur {
+	out := &clientsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToNormalRecurClientRequest(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }
 
@@ -206,6 +234,29 @@ func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToNormalRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToNormalRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToNormalRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToNormalRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToNormalRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

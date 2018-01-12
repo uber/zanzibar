@@ -219,25 +219,35 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
 	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
-	if in.Request != nil {
-		out.Request = &clientsBarBar.QueryParamsStruct{}
-		out.Request.Name = string(in.Request.Name)
-		out.Request.UserUUID = (*string)(in.Request.UserUUID)
-		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
-		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
-	} else {
-		out.Request = nil
-	}
-	if in.Opt != nil {
-		out.Opt = &clientsBarBar.QueryParamsOptsStruct{}
-		out.Opt.Name = string(in.Opt.Name)
-		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
-		out.Opt.AuthUUID = (*string)(in.Opt.AuthUUID)
-		out.Opt.AuthUUID2 = (*string)(in.Opt.AuthUUID2)
-	} else {
-		out.Opt = nil
-	}
+	out.Request = convertToArgWithNestedQueryParamsRequestClientRequest(in.Request)
+	out.Opt = convertToArgWithNestedQueryParamsOptClientRequest(in.Opt)
 
+	return out
+}
+
+func convertToArgWithNestedQueryParamsRequestClientRequest(in *endpointsBarBar.QueryParamsStruct) *clientsBarBar.QueryParamsStruct {
+	out := &clientsBarBar.QueryParamsStruct{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.UserUUID = (*string)(in.UserUUID)
+		out.AuthUUID = (*string)(in.AuthUUID)
+		out.AuthUUID2 = (*string)(in.AuthUUID2)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithNestedQueryParamsOptClientRequest(in *endpointsBarBar.QueryParamsOptsStruct) *clientsBarBar.QueryParamsOptsStruct {
+	out := &clientsBarBar.QueryParamsOptsStruct{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.UserUUID = (*string)(in.UserUUID)
+		out.AuthUUID = (*string)(in.AuthUUID)
+		out.AuthUUID2 = (*string)(in.AuthUUID2)
+	} else {
+		out = nil
+	}
 	return out
 }
 
@@ -256,6 +266,29 @@ func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToArgWithNestedQueryParamsRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToArgWithNestedQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithNestedQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithNestedQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

@@ -151,13 +151,18 @@ func convertToArgWithParamsClientRequest(in *endpointsBarBar.Bar_ArgWithParams_A
 	out := &clientsBarBar.Bar_ArgWithParams_Args{}
 
 	out.UUID = string(in.UUID)
-	if in.Params != nil {
-		out.Params = &clientsBarBar.ParamsStruct{}
-		out.Params.UserUUID = string(in.Params.UserUUID)
-	} else {
-		out.Params = nil
-	}
+	out.Params = convertToArgWithParamsParamsClientRequest(in.Params)
 
+	return out
+}
+
+func convertToArgWithParamsParamsClientRequest(in *endpointsBarBar.ParamsStruct) *clientsBarBar.ParamsStruct {
+	out := &clientsBarBar.ParamsStruct{}
+	if in != nil {
+		out.UserUUID = string(in.UserUUID)
+	} else {
+		out = nil
+	}
 	return out
 }
 
@@ -176,6 +181,29 @@ func convertArgWithParamsClientResponse(in *clientsBarBar.BarResponse) *endpoint
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToArgWithParamsRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToArgWithParamsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }

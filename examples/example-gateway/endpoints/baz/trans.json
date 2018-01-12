@@ -33,7 +33,7 @@
 					{
 						"from": "Message",
 						"to": "Rider.Msg",
-						"override": true
+						"override": false
 					},
 					{
 						"from": "Message",

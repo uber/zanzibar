@@ -308,6 +308,29 @@ func convertArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) 
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	out.Resp = convertToArgWithManyQueryParamsRespClientResponse(in.Resp)
 
+	return out
+}
+
+func convertToArgWithManyQueryParamsRespClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
+	return out
+}
+
+func convertToArgWithManyQueryParamsRecurClientResponse(in *clientsBarBar.BarRequestRecur) *endpointsBarBar.BarRequestRecur {
+	out := &endpointsBarBar.BarRequestRecur{}
+	if in != nil {
+		out.Name = string(in.Name)
+		out.Recur = convertToArgWithManyQueryParamsRecurClientResponse(in.Recur)
+	} else {
+		out = nil
+	}
 	return out
 }
