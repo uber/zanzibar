@@ -81,7 +81,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		return
 	}
 
-	workflow := CallEndpoint{
+	workflow := SimpleServiceCallEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -108,15 +108,15 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// CallEndpoint calls thrift client Baz.Call
-type CallEndpoint struct {
+// SimpleServiceCallEndpoint calls thrift client Baz.Call
+type SimpleServiceCallEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w CallEndpoint) Handle(
+func (w SimpleServiceCallEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBazBaz.SimpleService_Call_Args,

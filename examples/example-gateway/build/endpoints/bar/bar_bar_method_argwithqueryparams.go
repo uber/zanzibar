@@ -95,7 +95,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
 
-	workflow := ArgWithQueryParamsEndpoint{
+	workflow := BarArgWithQueryParamsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -116,15 +116,15 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// ArgWithQueryParamsEndpoint calls thrift client Bar.ArgWithQueryParams
-type ArgWithQueryParamsEndpoint struct {
+// BarArgWithQueryParamsEndpoint calls thrift client Bar.ArgWithQueryParams
+type BarArgWithQueryParamsEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w ArgWithQueryParamsEndpoint) Handle(
+func (w BarArgWithQueryParamsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_ArgWithQueryParams_Args,
@@ -154,7 +154,7 @@ func (w ArgWithQueryParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithQueryParamsClientResponse(clientRespBody)
+	response := convertBarArgWithQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -167,7 +167,7 @@ func convertToArgWithQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithQue
 	return out
 }
 
-func convertArgWithQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarArgWithQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

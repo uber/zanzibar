@@ -79,7 +79,7 @@ func (h *SimpleServiceCompareHandler) HandleRequest(
 		return
 	}
 
-	workflow := CompareEndpoint{
+	workflow := SimpleServiceCompareEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -111,15 +111,15 @@ func (h *SimpleServiceCompareHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// CompareEndpoint calls thrift client Baz.Compare
-type CompareEndpoint struct {
+// SimpleServiceCompareEndpoint calls thrift client Baz.Compare
+type SimpleServiceCompareEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w CompareEndpoint) Handle(
+func (w SimpleServiceCompareEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBazBaz.SimpleService_Compare_Args,
@@ -165,7 +165,7 @@ func (w CompareEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertCompareClientResponse(clientRespBody)
+	response := convertSimpleServiceCompareClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -207,7 +207,7 @@ func convertCompareOtherAuthErr(
 	return serverError
 }
 
-func convertCompareClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
+func convertSimpleServiceCompareClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
 	out := &endpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)

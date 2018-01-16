@@ -153,7 +153,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 
 	}
 
-	workflow := ArgWithNestedQueryParamsEndpoint{
+	workflow := BarArgWithNestedQueryParamsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -174,15 +174,15 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// ArgWithNestedQueryParamsEndpoint calls thrift client Bar.ArgWithNestedQueryParams
-type ArgWithNestedQueryParamsEndpoint struct {
+// BarArgWithNestedQueryParamsEndpoint calls thrift client Bar.ArgWithNestedQueryParams
+type BarArgWithNestedQueryParamsEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w ArgWithNestedQueryParamsEndpoint) Handle(
+func (w BarArgWithNestedQueryParamsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args,
@@ -212,7 +212,7 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithNestedQueryParamsClientResponse(clientRespBody)
+	response := convertBarArgWithNestedQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -241,7 +241,7 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 	return out
 }
 
-func convertArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

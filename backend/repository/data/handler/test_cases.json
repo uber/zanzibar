@@ -205,6 +205,18 @@
 					"thriftFile": "clients/googlenow/googlenow.thrift",
 					"type": "http"
 				},
+				"multi": {
+					"exposedMethods": {
+						"HelloA": "ServiceABack::hello",
+						"HelloB": "ServiceBBack::hello"
+					},
+					"ip": "127.0.0.1",
+					"name": "multi",
+					"port": 4003,
+					"routingKey": "",
+					"thriftFile": "clients/multi/multi.thrift",
+					"type": "http"
+				},
 				"quux": {
 					"name": "quux",
 					"routingKey": "",
@@ -301,6 +313,10 @@
 					"path": "clients/googlenow/googlenow.thrift",
 					"version": "v1"
 				},
+				"clients/multi/multi.thrift": {
+					"path": "clients/multi/multi.thrift",
+					"version": "v1"
+				},
 				"endpoints/bar/bar.thrift": {
 					"path": "endpoints/bar/bar.thrift",
 					"version": "v1"
@@ -319,6 +335,10 @@
 				},
 				"endpoints/googlenow/googlenow.thrift": {
 					"path": "endpoints/googlenow/googlenow.thrift",
+					"version": "v1"
+				},
+				"endpoints/multi/multi.thrift": {
+					"path": "endpoints/multi/multi.thrift",
 					"version": "v1"
 				},
 				"endpoints/tchannel/baz/baz.thrift": {
@@ -631,6 +651,28 @@
 						"Path": "clients/googlenow/googlenow.thrift"
 					}
 				},
+				"clients/multi/multi.thrift": {
+					"ServiceABack": {
+						"Methods": [
+							{
+								"Name": "hello",
+								"Type": "http"
+							}
+						],
+						"Name": "ServiceABack",
+						"Path": "clients/multi/multi.thrift"
+					},
+					"ServiceBBack": {
+						"Methods": [
+							{
+								"Name": "hello",
+								"Type": "http"
+							}
+						],
+						"Name": "ServiceBBack",
+						"Path": "clients/multi/multi.thrift"
+					}
+				},
 				"endpoints/bar/bar.thrift": {
 					"Bar": {
 						"Methods": [
@@ -755,6 +797,28 @@
 						],
 						"Name": "GoogleNow",
 						"Path": "endpoints/googlenow/googlenow.thrift"
+					}
+				},
+				"endpoints/multi/multi.thrift": {
+					"ServiceAFront": {
+						"Methods": [
+							{
+								"Name": "hello",
+								"Type": "http"
+							}
+						],
+						"Name": "ServiceAFront",
+						"Path": "endpoints/multi/multi.thrift"
+					},
+					"ServiceBFront": {
+						"Methods": [
+							{
+								"Name": "hello",
+								"Type": "http"
+							}
+						],
+						"Name": "ServiceBFront",
+						"Path": "endpoints/multi/multi.thrift"
 					}
 				},
 				"endpoints/tchannel/baz/baz.thrift": {
@@ -2700,6 +2764,18 @@
 							"thriftFile": "clients/googlenow/googlenow.thrift",
 							"type": "http"
 						},
+						"multi": {
+							"exposedMethods": {
+								"HelloA": "ServiceABack::hello",
+								"HelloB": "ServiceBBack::hello"
+							},
+							"ip": "127.0.0.1",
+							"name": "multi",
+							"port": 4003,
+							"routingKey": "",
+							"thriftFile": "clients/multi/multi.thrift",
+							"type": "http"
+						},
 						"quux": {
 							"name": "quux",
 							"routingKey": "",
@@ -3000,6 +3076,34 @@
 							"testFixtures": null,
 							"thriftFile": "endpoints/googlenow/googlenow.thrift",
 							"thriftMethodName": "GoogleNow::checkCredentials",
+							"workflowType": "httpClient"
+						},
+						"multi.helloA": {
+							"clientId": "multi",
+							"clientMethod": "HelloA",
+							"endpointId": "multi",
+							"endpointType": "http",
+							"handleId": "helloA",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/multi/multi.thrift",
+							"thriftMethodName": "ServiceAFront::hello",
+							"workflowType": "httpClient"
+						},
+						"multi.helloB": {
+							"clientId": "multi",
+							"clientMethod": "HelloB",
+							"endpointId": "multi",
+							"endpointType": "http",
+							"handleId": "helloB",
+							"middlewares": null,
+							"reqHeaderMap": null,
+							"resHeaderMap": null,
+							"testFixtures": null,
+							"thriftFile": "endpoints/multi/multi.thrift",
+							"thriftMethodName": "ServiceBFront::hello",
 							"workflowType": "httpClient"
 						}
 					},
@@ -3351,6 +3455,28 @@
 								"Path": "clients/googlenow/googlenow.thrift"
 							}
 						},
+						"clients/multi/multi.thrift": {
+							"ServiceABack": {
+								"Methods": [
+									{
+										"Name": "hello",
+										"Type": "http"
+									}
+								],
+								"Name": "ServiceABack",
+								"Path": "clients/multi/multi.thrift"
+							},
+							"ServiceBBack": {
+								"Methods": [
+									{
+										"Name": "hello",
+										"Type": "http"
+									}
+								],
+								"Name": "ServiceBBack",
+								"Path": "clients/multi/multi.thrift"
+							}
+						},
 						"endpoints/bar/bar.thrift": {
 							"Bar": {
 								"Methods": [
@@ -3475,6 +3601,28 @@
 								],
 								"Name": "GoogleNow",
 								"Path": "endpoints/googlenow/googlenow.thrift"
+							}
+						},
+						"endpoints/multi/multi.thrift": {
+							"ServiceAFront": {
+								"Methods": [
+									{
+										"Name": "hello",
+										"Type": "http"
+									}
+								],
+								"Name": "ServiceAFront",
+								"Path": "endpoints/multi/multi.thrift"
+							},
+							"ServiceBFront": {
+								"Methods": [
+									{
+										"Name": "hello",
+										"Type": "http"
+									}
+								],
+								"Name": "ServiceBFront",
+								"Path": "endpoints/multi/multi.thrift"
 							}
 						},
 						"endpoints/tchannel/baz/baz.thrift": {
@@ -3643,6 +3791,18 @@
 						"port": 14120,
 						"routingKey": "",
 						"thriftFile": "clients/googlenow/googlenow.thrift",
+						"type": "http"
+					},
+					"multi": {
+						"exposedMethods": {
+							"HelloA": "ServiceABack::hello",
+							"HelloB": "ServiceBBack::hello"
+						},
+						"ip": "127.0.0.1",
+						"name": "multi",
+						"port": 4003,
+						"routingKey": "",
+						"thriftFile": "clients/multi/multi.thrift",
 						"type": "http"
 					},
 					"quux": {
@@ -3945,6 +4105,34 @@
 						"testFixtures": null,
 						"thriftFile": "endpoints/googlenow/googlenow.thrift",
 						"thriftMethodName": "GoogleNow::checkCredentials",
+						"workflowType": "httpClient"
+					},
+					"multi.helloA": {
+						"clientId": "multi",
+						"clientMethod": "HelloA",
+						"endpointId": "multi",
+						"endpointType": "http",
+						"handleId": "helloA",
+						"middlewares": null,
+						"reqHeaderMap": null,
+						"resHeaderMap": null,
+						"testFixtures": null,
+						"thriftFile": "endpoints/multi/multi.thrift",
+						"thriftMethodName": "ServiceAFront::hello",
+						"workflowType": "httpClient"
+					},
+					"multi.helloB": {
+						"clientId": "multi",
+						"clientMethod": "HelloB",
+						"endpointId": "multi",
+						"endpointType": "http",
+						"handleId": "helloB",
+						"middlewares": null,
+						"reqHeaderMap": null,
+						"resHeaderMap": null,
+						"testFixtures": null,
+						"thriftFile": "endpoints/multi/multi.thrift",
+						"thriftMethodName": "ServiceBFront::hello",
 						"workflowType": "httpClient"
 					}
 				},
@@ -4296,6 +4484,28 @@
 							"Path": "clients/googlenow/googlenow.thrift"
 						}
 					},
+					"clients/multi/multi.thrift": {
+						"ServiceABack": {
+							"Methods": [
+								{
+									"Name": "hello",
+									"Type": "http"
+								}
+							],
+							"Name": "ServiceABack",
+							"Path": "clients/multi/multi.thrift"
+						},
+						"ServiceBBack": {
+							"Methods": [
+								{
+									"Name": "hello",
+									"Type": "http"
+								}
+							],
+							"Name": "ServiceBBack",
+							"Path": "clients/multi/multi.thrift"
+						}
+					},
 					"endpoints/bar/bar.thrift": {
 						"Bar": {
 							"Methods": [
@@ -4420,6 +4630,28 @@
 							],
 							"Name": "GoogleNow",
 							"Path": "endpoints/googlenow/googlenow.thrift"
+						}
+					},
+					"endpoints/multi/multi.thrift": {
+						"ServiceAFront": {
+							"Methods": [
+								{
+									"Name": "hello",
+									"Type": "http"
+								}
+							],
+							"Name": "ServiceAFront",
+							"Path": "endpoints/multi/multi.thrift"
+						},
+						"ServiceBFront": {
+							"Methods": [
+								{
+									"Name": "hello",
+									"Type": "http"
+								}
+							],
+							"Name": "ServiceBFront",
+							"Path": "endpoints/multi/multi.thrift"
 						}
 					},
 					"endpoints/tchannel/baz/baz.thrift": {

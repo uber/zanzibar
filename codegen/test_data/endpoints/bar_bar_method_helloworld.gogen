@@ -75,7 +75,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := HelloWorldEndpoint{
+	workflow := BarHelloWorldEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -107,15 +107,15 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
 }
 
-// HelloWorldEndpoint calls thrift client Bar.Hello
-type HelloWorldEndpoint struct {
+// BarHelloWorldEndpoint calls thrift client Bar.Hello
+type BarHelloWorldEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w HelloWorldEndpoint) Handle(
+func (w BarHelloWorldEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (string, zanzibar.Header, error) {
@@ -151,7 +151,7 @@ func (w HelloWorldEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertHelloWorldClientResponse(clientRespBody)
+	response := convertBarHelloWorldClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -163,7 +163,7 @@ func convertHelloWorldBarException(
 	return serverError
 }
 
-func convertHelloWorldClientResponse(in string) string {
+func convertBarHelloWorldClientResponse(in string) string {
 	out := in
 
 	return out

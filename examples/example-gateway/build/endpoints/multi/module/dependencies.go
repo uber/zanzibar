@@ -24,28 +24,18 @@
 package module
 
 import (
-	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
-	multiEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
-	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
+	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the example-gateway service module
+// Dependencies contains dependencies for the multi endpoint module
 type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
+	Default *zanzibar.DefaultDependencies
+	Client  *ClientDependencies
 }
 
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bar         barEndpointGenerated.Endpoint
-	Baz         bazEndpointGenerated.Endpoint
-	BazTChannel baztchannelEndpointGenerated.Endpoint
-	Contacts    contactsEndpointGenerated.Endpoint
-	Googlenow   googlenowEndpointGenerated.Endpoint
-	Multi       multiEndpointGenerated.Endpoint
+// ClientDependencies contains client dependencies
+type ClientDependencies struct {
+	Multi multiClientGenerated.Client
 }

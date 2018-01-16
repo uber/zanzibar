@@ -21,31 +21,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package multiEndpoint
 
 import (
-	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
-	multiEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
-	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
-
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the example-gateway service module
-type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
+// Endpoint registers a request handler on a gateway
+type Endpoint interface {
+	Register(*zanzibar.Gateway) error
 }
 
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bar         barEndpointGenerated.Endpoint
-	Baz         bazEndpointGenerated.Endpoint
-	BazTChannel baztchannelEndpointGenerated.Endpoint
-	Contacts    contactsEndpointGenerated.Endpoint
-	Googlenow   googlenowEndpointGenerated.Endpoint
-	Multi       multiEndpointGenerated.Endpoint
+// NewEndpoint returns a collection of endpoints that can be registered on
+// a gateway
+func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+	return &EndpointHandlers{
+		ServiceAFrontHelloHandler: NewServiceAFrontHelloHandler(g, deps),
+		ServiceBFrontHelloHandler: NewServiceBFrontHelloHandler(g, deps),
+	}
+}
+
+// EndpointHandlers is a collection of individual endpoint handlers
+type EndpointHandlers struct {
+	ServiceAFrontHelloHandler *ServiceAFrontHelloHandler
+	ServiceBFrontHelloHandler *ServiceBFrontHelloHandler
+}
+
+// Register registers the endpoint handlers with the gateway
+func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
+	err0 := handlers.ServiceAFrontHelloHandler.Register(gateway)
+	if err0 != nil {
+		return err0
+	}
+	err1 := handlers.ServiceBFrontHelloHandler.Register(gateway)
+	if err1 != nil {
+		return err1
+	}
+	return nil
 }

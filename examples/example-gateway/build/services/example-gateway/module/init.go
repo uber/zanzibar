@@ -32,6 +32,8 @@ import (
 	contactsClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 	googlenowClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
+	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
+	multiClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -40,6 +42,8 @@ import (
 	contactsEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	googlenowEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	multiEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
+	multiEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
@@ -61,6 +65,7 @@ type ClientDependenciesNodes struct {
 	Baz       bazClientGenerated.Client
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
+	Multi     multiClientGenerated.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -75,6 +80,7 @@ type EndpointDependenciesNodes struct {
 	BazTChannel baztchannelEndpointGenerated.Endpoint
 	Contacts    contactsEndpointGenerated.Endpoint
 	Googlenow   googlenowEndpointGenerated.Endpoint
+	Multi       multiEndpointGenerated.Endpoint
 }
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
@@ -103,6 +109,9 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(g, &googlenowClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Multi = multiClientGenerated.NewClient(g, &multiClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -150,6 +159,12 @@ func InitializeDependencies(
 			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
+	initializedEndpointDependencies.Multi = multiEndpointGenerated.NewEndpoint(g, &multiEndpointModule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &multiEndpointModule.ClientDependencies{
+			Multi: initializedClientDependencies.Multi,
+		},
+	})
 
 	return tree, &Dependencies{
 		Default: initializedDefaultDependencies,
@@ -159,6 +174,7 @@ func InitializeDependencies(
 			BazTChannel: initializedEndpointDependencies.BazTChannel,
 			Contacts:    initializedEndpointDependencies.Contacts,
 			Googlenow:   initializedEndpointDependencies.Googlenow,
+			Multi:       initializedEndpointDependencies.Multi,
 		},
 	}
 }

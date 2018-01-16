@@ -21,73 +21,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package googlenowEndpoint
+package multiEndpoint
 
 import (
 	"context"
+	"encoding/json"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
-	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 )
 
-// GoogleNowAddCredentialsHandler is the handler for "/googlenow/add-credentials"
-type GoogleNowAddCredentialsHandler struct {
+// ServiceAFrontHelloHandler is the handler for "/multi/serviceA_f/hello"
+type ServiceAFrontHelloHandler struct {
 	Clients  *module.ClientDependencies
 	endpoint *zanzibar.RouterEndpoint
 }
 
-// NewGoogleNowAddCredentialsHandler creates a handler
-func NewGoogleNowAddCredentialsHandler(
+// NewServiceAFrontHelloHandler creates a handler
+func NewServiceAFrontHelloHandler(
 	g *zanzibar.Gateway,
 	deps *module.Dependencies,
-) *GoogleNowAddCredentialsHandler {
-	handler := &GoogleNowAddCredentialsHandler{
+) *ServiceAFrontHelloHandler {
+	handler := &ServiceAFrontHelloHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
-		"googlenow", "addCredentials",
+		"multi", "helloA",
 		handler.HandleRequest,
 	)
 	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
+func (h *ServiceAFrontHelloHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
-		"POST", "/googlenow/add-credentials",
+		"GET", "/multi/serviceA_f/hello",
 		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
-// HandleRequest handles "/googlenow/add-credentials".
-func (h *GoogleNowAddCredentialsHandler) HandleRequest(
+// HandleRequest handles "/multi/serviceA_f/hello".
+func (h *ServiceAFrontHelloHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
-	var requestBody endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args
-	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
-		return
-	}
 
-	workflow := GoogleNowAddCredentialsEndpoint{
+	workflow := ServiceAFrontHelloEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
 	}
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -97,37 +88,33 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 			return
 		}
 	}
-	// TODO(sindelar): implement check headers on response
 
-	res.WriteJSONBytes(202, cliRespHeaders, nil)
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
+		res.SendErrorString(500, "Unexpected server error")
+		return
+	}
+	res.WriteJSONBytes(200, cliRespHeaders, bytes)
 }
 
-// GoogleNowAddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
-type GoogleNowAddCredentialsEndpoint struct {
+// ServiceAFrontHelloEndpoint calls thrift client Multi.HelloA
+type ServiceAFrontHelloEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w GoogleNowAddCredentialsEndpoint) Handle(
+func (w ServiceAFrontHelloEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
-) (zanzibar.Header, error) {
-	clientRequest := convertToAddCredentialsClientRequest(r)
+) (string, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		clientHeaders["X-Uuid"] = h
-	}
-
-	cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, clientHeaders, clientRequest,
+	clientRespBody, _, err := w.Clients.Multi.HelloA(
+		ctx, clientHeaders,
 	)
 
 	if err != nil {
@@ -137,7 +124,7 @@ func (w GoogleNowAddCredentialsEndpoint) Handle(
 			w.Logger.Warn("Could not make client request", zap.Error(errValue))
 			// TODO(sindelar): Consider returning partial headers
 
-			return nil, err
+			return "", nil, err
 
 		}
 	}
@@ -147,15 +134,12 @@ func (w GoogleNowAddCredentialsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
-
-	return resHeaders, nil
+	response := convertServiceABackHelloClientResponse(clientRespBody)
+	return response, resHeaders, nil
 }
 
-func convertToAddCredentialsClientRequest(in *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {
-	out := &clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args{}
-
-	out.AuthCode = string(in.AuthCode)
+func convertServiceABackHelloClientResponse(in string) string {
+	out := in
 
 	return out
 }

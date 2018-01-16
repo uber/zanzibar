@@ -88,7 +88,7 @@ func (h *BarNormalHandler) HandleRequest(
 		return
 	}
 
-	workflow := NormalEndpoint{
+	workflow := BarNormalEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -115,15 +115,15 @@ func (h *BarNormalHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// NormalEndpoint calls thrift client Bar.Normal
-type NormalEndpoint struct {
+// BarNormalEndpoint calls thrift client Bar.Normal
+type BarNormalEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w NormalEndpoint) Handle(
+func (w BarNormalEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_Normal_Args,
@@ -161,7 +161,7 @@ func (w NormalEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertNormalClientResponse(clientRespBody)
+	response := convertBarNormalClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -191,7 +191,7 @@ func convertNormalBarException(
 	return serverError
 }
 
-func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

@@ -74,7 +74,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 		return
 	}
 
-	workflow := CheckCredentialsEndpoint{
+	workflow := GoogleNowCheckCredentialsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -95,15 +95,15 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
 }
 
-// CheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
-type CheckCredentialsEndpoint struct {
+// GoogleNowCheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
+type GoogleNowCheckCredentialsEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w CheckCredentialsEndpoint) Handle(
+func (w GoogleNowCheckCredentialsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (zanzibar.Header, error) {

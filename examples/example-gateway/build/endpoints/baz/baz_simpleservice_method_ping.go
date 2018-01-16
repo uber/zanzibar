@@ -74,7 +74,7 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := PingEndpoint{
+	workflow := SimpleServicePingEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -94,15 +94,15 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// PingEndpoint calls thrift client Baz.Ping
-type PingEndpoint struct {
+// SimpleServicePingEndpoint calls thrift client Baz.Ping
+type SimpleServicePingEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w PingEndpoint) Handle(
+func (w SimpleServicePingEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
@@ -130,11 +130,11 @@ func (w PingEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertPingClientResponse(clientRespBody)
+	response := convertSimpleServicePingClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertPingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
+func convertSimpleServicePingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
 	out := &endpointsBazBaz.BazResponse{}
 
 	out.Message = string(in.Message)

@@ -75,7 +75,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := SillyNoopEndpoint{
+	workflow := SimpleServiceSillyNoopEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -107,15 +107,15 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }
 
-// SillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
-type SillyNoopEndpoint struct {
+// SimpleServiceSillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
+type SimpleServiceSillyNoopEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w SillyNoopEndpoint) Handle(
+func (w SimpleServiceSillyNoopEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (zanzibar.Header, error) {

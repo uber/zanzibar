@@ -79,7 +79,7 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 		return
 	}
 
-	workflow := TransEndpoint{
+	workflow := SimpleServiceTransEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -111,15 +111,15 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// TransEndpoint calls thrift client Baz.Trans
-type TransEndpoint struct {
+// SimpleServiceTransEndpoint calls thrift client Baz.Trans
+type SimpleServiceTransEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w TransEndpoint) Handle(
+func (w SimpleServiceTransEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBazBaz.SimpleService_Trans_Args,
@@ -165,7 +165,7 @@ func (w TransEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertTransClientResponse(clientRespBody)
+	response := convertSimpleServiceTransClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -233,7 +233,7 @@ func convertTransOtherAuthErr(
 	return serverError
 }
 
-func convertTransClientResponse(in *clientsBazBase.TransStruct) *endpointsBazBaz.TransStruct {
+func convertSimpleServiceTransClientResponse(in *clientsBazBase.TransStruct) *endpointsBazBaz.TransStruct {
 	out := &endpointsBazBaz.TransStruct{}
 
 	out.Message = string(in.Message)
