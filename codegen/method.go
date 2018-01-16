@@ -881,7 +881,7 @@ func (ms *MethodSpec) setTypeConverters(
 
 	respConverter.append(
 		"func convert",
-		pascalCase(ms.Name),
+		ms.DownstreamService, pascalCase(ms.Name),
 		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
 	var respFields, downstreamRespFields []*compile.FieldSpec
 	switch respType.(type) {

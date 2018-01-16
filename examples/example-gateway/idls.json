@@ -27,6 +27,10 @@
 		"path": "clients/googlenow/googlenow.thrift",
 		"version": "v1"
 	},
+	"clients/multi/multi.thrift": {
+		"path": "clients/multi/multi.thrift",
+		"version": "v1"
+	},
 	"endpoints/bar/bar.thrift": {
 		"path": "endpoints/bar/bar.thrift",
 		"version": "v1"
@@ -49,6 +53,10 @@
 	},
 	"endpoints/tchannel/baz/baz.thrift": {
 		"path": "endpoints/tchannel/baz/baz.thrift",
+		"version": "v1"
+	},
+	"endpoints/multi/multi.thrift": {
+		"path": "endpoints/multi/multi.thrift",
 		"version": "v1"
 	}
 }
