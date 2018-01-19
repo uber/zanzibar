@@ -2403,8 +2403,8 @@
 						},
 						"ip": "127.0.0.1",
 						"name": "baz",
-						"sidecarRouter": "default",
 						"serviceName": "Qux",
+						"sidecarRouter": "default",
 						"thriftFile": "clients/baz/baz.thrift",
 						"type": "tchannel"
 					}
