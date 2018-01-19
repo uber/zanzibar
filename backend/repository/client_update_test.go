@@ -101,13 +101,6 @@ func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) 
 	clientConfigExpFile := filepath.Join(exampleGateway, clientCfgDir, clientName, clientConfigFileName)
 	testlib.CompareGoldenFile(t, clientConfigExpFile, actualClientCfg)
 
-	clientModuleCfg, err := ioutil.ReadFile(filepath.Join(tempDir, clientCfgDir, clientModuleFileName))
-	if !assert.NoError(t, err, "Failed to read client module config file.") {
-		return
-	}
-	clientModuleExpFile := filepath.Join(exampleGateway, clientCfgDir, clientModuleFileName)
-	testlib.CompareGoldenFile(t, clientModuleExpFile, clientModuleCfg)
-
 	productionJSON, err := ioutil.ReadFile(filepath.Join(tempDir, productionCfgJSONPath))
 	if !assert.NoError(t, err, "Failed to read client production JSON config file.") {
 		return
