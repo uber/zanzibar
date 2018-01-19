@@ -884,7 +884,7 @@ func (system *ModuleSystem) GenerateBuild(
 				classInstance.Directory,
 			)
 			fmt.Printf(
-				"Generating %8s %8s %-20s in %-30s %d/%d\n",
+				"Generating %12s %12s %-20s in %-40s %d/%d\n",
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
