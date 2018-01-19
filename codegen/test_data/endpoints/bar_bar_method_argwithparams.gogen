@@ -151,11 +151,18 @@ func convertToArgWithParamsClientRequest(in *endpointsBarBar.Bar_ArgWithParams_A
 	out := &clientsBarBar.Bar_ArgWithParams_Args{}
 
 	out.UUID = string(in.UUID)
-	if in.Params != nil {
-		out.Params = &clientsBarBar.ParamsStruct{}
-		out.Params.UserUUID = string(in.Params.UserUUID)
-	} else {
-		out.Params = nil
+	{
+		var convertParamsStructHelper func(in *endpointsBarBar.ParamsStruct) (out *clientsBarBar.ParamsStruct)
+		convertParamsStructHelper = func(in *endpointsBarBar.ParamsStruct) (out *clientsBarBar.ParamsStruct) {
+			if in != nil {
+				out = &clientsBarBar.ParamsStruct{}
+				out.UserUUID = string(in.UserUUID)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Params = convertParamsStructHelper(in.Params)
 	}
 
 	return out

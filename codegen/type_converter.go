@@ -71,6 +71,7 @@ type TypeConverter struct {
 	Helper        PackageNameResolver
 	uninitialized map[string]*fieldStruct
 	fieldCounter  int
+	convStructMap map[string]string
 }
 
 // NewTypeConverter returns *TypeConverter
@@ -79,6 +80,7 @@ func NewTypeConverter(h PackageNameResolver) *TypeConverter {
 		LineBuilder:   LineBuilder{},
 		Helper:        h,
 		uninitialized: make(map[string]*fieldStruct),
+		convStructMap: make(map[string]string),
 	}
 }
 
@@ -142,8 +144,12 @@ func (c *TypeConverter) genConverterForStruct(
 	fromPrefix string,
 	indent string,
 	fieldMap map[string]FieldMapperEntry,
+	prevKeyPrefixes []string,
 ) error {
-	toIdentifier := "out." + keyPrefix
+	toIdentifier := "out"
+	if keyPrefix != "" {
+		toIdentifier += "." + keyPrefix
+	}
 
 	typeName, err := c.getIdentifierName(toFieldType)
 	if err != nil {
@@ -158,20 +164,38 @@ func (c *TypeConverter) genConverterForStruct(
 		if toRequired {
 			c.append(indent, toIdentifier, " = &", typeName, "{}")
 		} else {
-			c.uninitialized[toIdentifier] = &fieldStruct{
-				Identifier: toIdentifier,
+			if prevKeyPrefixes == nil {
+				prevKeyPrefixes = []string{}
+			}
+			id := "outOriginal"
+			if len(prevKeyPrefixes) != 0 {
+				id += "." + strings.Join(prevKeyPrefixes, ".")
+			}
+			if keyPrefix != "" {
+				id += "." + keyPrefix
+			}
+			c.uninitialized[id] = &fieldStruct{
+				Identifier: id,
 				TypeName:   typeName,
 			}
 		}
 
+		if keyPrefix != "" {
+			keyPrefix += "."
+		}
+		if fromPrefix != "" {
+			fromPrefix += "."
+		}
+
 		// recursive call
 		err = c.genStructConverter(
-			keyPrefix+".",
-			fromPrefix+".",
+			keyPrefix,
+			fromPrefix,
 			indent,
 			nil,
 			subToFields,
 			fieldMap,
+			prevKeyPrefixes,
 		)
 		if err != nil {
 			return err
@@ -191,14 +215,22 @@ func (c *TypeConverter) genConverterForStruct(
 	c.append(indent, "if ", fromIdentifier, " != nil {")
 	c.append(indent, "\t", toIdentifier, " = &", typeName, "{}")
 
+	if keyPrefix != "" {
+		keyPrefix += "."
+	}
+	if fromPrefix != "" {
+		fromPrefix += "."
+	}
+
 	subFromFields := fromFieldStruct.Fields
 	err = c.genStructConverter(
-		keyPrefix+".",
-		fromPrefix+".",
+		keyPrefix,
+		fromPrefix,
 		indent+"\t",
 		subFromFields,
 		subToFields,
 		fieldMap,
+		prevKeyPrefixes,
 	)
 	if err != nil {
 		return err
@@ -297,8 +329,9 @@ func (c *TypeConverter) genConverterForList(
 			fromFieldType.ValueSpec,
 			valID,
 			keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
-			strings.TrimPrefix(fromIdentifier, "in.")+"["+indexID+"]",
+			strings.TrimPrefix(strings.TrimPrefix(fromIdentifier, "in."), "inOriginal.")+"["+indexID+"]",
 			nestedIndent,
+			nil,
 			nil,
 		)
 		if err != nil {
@@ -322,8 +355,9 @@ func (c *TypeConverter) genConverterForList(
 				overriddenFieldType.ValueSpec,
 				valID,
 				keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
-				strings.TrimPrefix(overriddenIdentifier, "in.")+"["+indexID+"]",
+				strings.TrimPrefix(strings.TrimPrefix(overriddenIdentifier, "in."), "inOriginal.")+"["+indexID+"]",
 				nestedIndent,
+				nil,
 				nil,
 			)
 			if err != nil {
@@ -458,8 +492,9 @@ func (c *TypeConverter) genConverterForMap(
 			fromFieldType.ValueSpec,
 			valID,
 			keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
-			strings.TrimPrefix(fromIdentifier, "in.")+"["+keyID+"]",
+			strings.TrimPrefix(strings.TrimPrefix(fromIdentifier, "in."), "inOriginal.")+"["+keyID+"]",
 			nestedIndent,
+			nil,
 			nil,
 		)
 		if err != nil {
@@ -484,8 +519,9 @@ func (c *TypeConverter) genConverterForMap(
 				overriddenFieldType.ValueSpec,
 				valID,
 				keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
-				strings.TrimPrefix(overriddenIdentifier, "in.")+"["+keyID+"]",
+				strings.TrimPrefix(strings.TrimPrefix(overriddenIdentifier, "in."), "inOriginal.")+"["+keyID+"]",
 				nestedIndent,
+				nil,
 				nil,
 			)
 			if err != nil {
@@ -519,6 +555,7 @@ func (c *TypeConverter) genStructConverter(
 	fromFields []*compile.FieldSpec,
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
+	prevKeyPrefixes []string,
 ) error {
 
 	for i := 0; i < len(toFields); i++ {
@@ -547,7 +584,7 @@ func (c *TypeConverter) genStructConverter(
 			// no existing direct fromField,  just assign the transform
 			if fromField == nil {
 				fromField = transformFrom.Field
-				fromIdentifier = "in." + transformFrom.QualifiedName
+				fromIdentifier = "inOriginal." + transformFrom.QualifiedName
 				// else there is a conflicting direct fromField
 			} else {
 				//  depending on Override flag either the direct fromField or transformFrom is the OverrideField
@@ -562,13 +599,13 @@ func (c *TypeConverter) genStructConverter(
 					// there's a default instantiation value and will always
 					// overwrite.
 					fromField = transformFrom.Field
-					fromIdentifier = "in." + transformFrom.QualifiedName
+					fromIdentifier = "inOriginal." + transformFrom.QualifiedName
 				} else {
 					// If override is false and the from field is required,
 					// From is always populated and will never be overwritten.
 					if !fromField.Required {
 						overriddenField = transformFrom.Field
-						overriddenIdentifier = "in." + transformFrom.QualifiedName
+						overriddenIdentifier = "inOriginal." + transformFrom.QualifiedName
 					}
 				}
 			}
@@ -604,6 +641,10 @@ func (c *TypeConverter) genStructConverter(
 			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
 		}
 
+		if prevKeyPrefixes == nil {
+			prevKeyPrefixes = []string{}
+		}
+
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toFieldType := toField.Type.(type) {
@@ -626,6 +667,7 @@ func (c *TypeConverter) genStructConverter(
 				overriddenField,
 				overriddenIdentifier,
 				indent,
+				prevKeyPrefixes,
 			)
 			if err != nil {
 				return err
@@ -638,24 +680,77 @@ func (c *TypeConverter) genStructConverter(
 			var (
 				stFromPrefix = keyPrefix
 				stFromType   compile.TypeSpec
+				fromTypeName string
 			)
 			if fromField != nil {
 				stFromType = fromField.Type
 				stFromPrefix = keyPrefix + pascalCase(fromField.Name)
+
+				var err error
+				fromTypeName, err = c.getIdentifierName(stFromType)
+				if err != nil {
+					fromTypeName = ""
+				}
 			}
-			err := c.genConverterForStruct(
-				toField.Name,
-				toFieldType,
-				toField.Required,
-				stFromType,
-				fromIdentifier,
-				keyPrefix+pascalCase(toField.Name),
-				stFromPrefix,
-				indent,
-				fieldMap,
-			)
+
+			toTypeName, err := c.getIdentifierName(toFieldType)
 			if err != nil {
 				return err
+			}
+
+			if converterMethodName, ok := c.convStructMap[toFieldType.Name]; ok {
+				// the converter for this struct already exists, so just use it
+				c.append(indent, "out.", keyPrefix+pascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
+			} else if fromTypeName != "" {
+				// generate a converter for this scope
+				converterMethodName := "convert" + toFieldType.Name + "Helper"
+				c.convStructMap[toFieldType.Name] = converterMethodName
+
+				c.append(indent, "{") // begin scope
+				funcSignature := "func(in *" + fromTypeName + ") (out *" + toTypeName + ")"
+
+				c.append(indent+"\t", "var ", converterMethodName, " ", funcSignature) // function declaration
+				c.append(indent+"\t", converterMethodName, " = ", funcSignature, " {") // begin function definition
+
+				err = c.genConverterForStruct(
+					toField.Name,
+					toFieldType,
+					toField.Required,
+					stFromType,
+					"in",
+					"",
+					"",
+					indent+"\t\t",
+					c.updateFieldMap(fieldMap, toSubIdentifier),
+					append(prevKeyPrefixes, toSubIdentifier),
+				)
+				if err != nil {
+					return err
+				}
+
+				c.append(indent+"\t\t", "return")
+				c.append(indent+"\t", "}") // end of function definition
+
+				c.append(indent+"\t", "out.", keyPrefix+pascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
+
+				delete(c.convStructMap, toFieldType.Name)
+				c.append(indent, "}") // end of scope
+			} else {
+				err := c.genConverterForStruct(
+					toField.Name,
+					toFieldType,
+					toField.Required,
+					stFromType,
+					fromIdentifier,
+					keyPrefix+pascalCase(toField.Name),
+					stFromPrefix,
+					indent,
+					fieldMap,
+					prevKeyPrefixes,
+				)
+				if err != nil {
+					return err
+				}
 			}
 		case *compile.ListSpec:
 			err := c.genConverterForList(
@@ -727,7 +822,12 @@ func (c *TypeConverter) GenStructConverter(
 		}
 	}
 
-	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap)
+	if len(fieldMap) != 0 {
+		c.append("inOriginal := in; _ = inOriginal")
+		c.append("outOriginal := out; _ = outOriginal")
+	}
+
+	err := c.genStructConverter("", "", "", fromFields, toFields, fieldMap, nil)
 	if err != nil {
 		return err
 	}
@@ -779,14 +879,14 @@ type FieldAssignment struct {
 
 // IsTransform returns true if field assignment is not proxy
 func (f *FieldAssignment) IsTransform() bool {
-	var (
-		in  = len("in.")
-		out = len("out.")
-	)
-	if f.FromIdentifier[:in] != "in." || f.ToIdentifier[:out] != "out." {
+	fromI := strings.Index(f.FromIdentifier, ".") + 1
+	toI := strings.Index(f.ToIdentifier, ".") + 1
+
+	if (f.FromIdentifier[:fromI] != "in." && f.FromIdentifier[:fromI] != "inOriginal.") || f.ToIdentifier[:toI] != "out." {
 		panic("isTransform check called on unexpected input  fromIdentifer " + f.FromIdentifier + " toIdentifer " + f.ToIdentifier)
 	}
-	return f.FromIdentifier[in:] != f.ToIdentifier[out:]
+
+	return f.FromIdentifier[fromI:] != f.ToIdentifier[toI:]
 }
 
 // checkOptionalNil nil-checks fields that may not be initialized along
@@ -795,6 +895,7 @@ func checkOptionalNil(
 	indent string,
 	uninitialized map[string]*fieldStruct,
 	toIdentifier string,
+	prevKeyPrefixes []string,
 ) []string {
 	var ret = make([]string, 0)
 	if len(uninitialized) < 1 {
@@ -804,9 +905,13 @@ func checkOptionalNil(
 	for k := range uninitialized {
 		keys = append(keys, k)
 	}
+
+	toIdentifier = strings.TrimPrefix(strings.TrimPrefix(toIdentifier, "out."), "outOriginal.")
+	completeID := "outOriginal." + strings.Join(append(prevKeyPrefixes, toIdentifier), ".")
+
 	sort.Strings(keys)
 	for _, id := range keys {
-		if strings.HasPrefix(toIdentifier, id) {
+		if strings.HasPrefix(completeID, id) {
 			v := uninitialized[id]
 			ret = append(ret, indent+"if "+v.Identifier+" == nil {")
 			ret = append(ret, indent+"\t"+v.Identifier+" = &"+v.TypeName+"{}")
@@ -817,18 +922,18 @@ func checkOptionalNil(
 }
 
 // Generate generates assignment
-func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct) string {
+func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct, prevKeyPrefixes []string) string {
 	var lines = make([]string, 0)
 	if !f.IsTransform() {
 		//  do an extra nil check for Overrides
 		if (!f.From.Required && f.To.Required) || f.ExtraNilCheck {
 			// need to nil check otherwise we could be cast or deref nil
 			lines = append(lines, indent+"if "+f.FromIdentifier+" != nil {")
-			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
+			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
 			lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			lines = append(lines, indent+"}")
 		} else {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 		}
 		return strings.Join(lines, "\n")
@@ -841,13 +946,13 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 			checks = checks[:len(checks)-1]
 		}
 		if len(checks) == 0 {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier)...)
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			return strings.Join(lines, "\n")
 		}
 	}
 	lines = append(lines, indent+"if "+strings.Join(checks, " && ")+" {")
-	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier)...)
+	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
 	lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 	lines = append(lines, indent+"}")
 	// TODO else?  log? should this silently eat intermediate nils as none-assignment,  should set nil?
@@ -858,14 +963,15 @@ func (c *TypeConverter) assignWithOverride(
 	indent string,
 	defaultAssign *FieldAssignment,
 	overrideAssign *FieldAssignment,
+	prevKeyPrefixes []string,
 ) {
 	if overrideAssign != nil && overrideAssign.FromIdentifier != "" {
-		c.append(overrideAssign.Generate(indent, c.uninitialized))
+		c.append(overrideAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
 		defaultAssign.ExtraNilCheck = true
-		c.append(defaultAssign.Generate(indent, c.uninitialized))
+		c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
 		return
 	}
-	c.append(defaultAssign.Generate(indent, c.uninitialized))
+	c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
 }
 
 func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
@@ -876,6 +982,7 @@ func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
 	overriddenField *compile.FieldSpec,
 	overriddenIdentifier string,
 	indent string,
+	prevKeyPrefixes []string,
 ) error {
 	var (
 		typeName           string
@@ -936,6 +1043,16 @@ func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
 		}
 	}
 	// generate assignement
-	c.assignWithOverride(indent, defaultAssignment, overrideAssignment)
+	c.assignWithOverride(indent, defaultAssignment, overrideAssignment, prevKeyPrefixes)
 	return nil
+}
+
+func (c *TypeConverter) updateFieldMap(currentMap map[string]FieldMapperEntry, toPrefix string) map[string]FieldMapperEntry {
+	newMap := make(map[string]FieldMapperEntry)
+	for key, value := range currentMap {
+		if strings.HasPrefix(key, toPrefix) && len(key) > len(toPrefix) {
+			newMap[key[len(toPrefix)+1:]] = value
+		}
+	}
+	return newMap
 }

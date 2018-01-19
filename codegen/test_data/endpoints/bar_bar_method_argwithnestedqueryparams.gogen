@@ -219,23 +219,37 @@ func (w ArgWithNestedQueryParamsEndpoint) Handle(
 func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
 	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
 
-	if in.Request != nil {
-		out.Request = &clientsBarBar.QueryParamsStruct{}
-		out.Request.Name = string(in.Request.Name)
-		out.Request.UserUUID = (*string)(in.Request.UserUUID)
-		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
-		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
-	} else {
-		out.Request = nil
+	{
+		var convertQueryParamsStructHelper func(in *endpointsBarBar.QueryParamsStruct) (out *clientsBarBar.QueryParamsStruct)
+		convertQueryParamsStructHelper = func(in *endpointsBarBar.QueryParamsStruct) (out *clientsBarBar.QueryParamsStruct) {
+			if in != nil {
+				out = &clientsBarBar.QueryParamsStruct{}
+				out.Name = string(in.Name)
+				out.UserUUID = (*string)(in.UserUUID)
+				out.AuthUUID = (*string)(in.AuthUUID)
+				out.AuthUUID2 = (*string)(in.AuthUUID2)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Request = convertQueryParamsStructHelper(in.Request)
 	}
-	if in.Opt != nil {
-		out.Opt = &clientsBarBar.QueryParamsOptsStruct{}
-		out.Opt.Name = string(in.Opt.Name)
-		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
-		out.Opt.AuthUUID = (*string)(in.Opt.AuthUUID)
-		out.Opt.AuthUUID2 = (*string)(in.Opt.AuthUUID2)
-	} else {
-		out.Opt = nil
+	{
+		var convertQueryParamsOptsStructHelper func(in *endpointsBarBar.QueryParamsOptsStruct) (out *clientsBarBar.QueryParamsOptsStruct)
+		convertQueryParamsOptsStructHelper = func(in *endpointsBarBar.QueryParamsOptsStruct) (out *clientsBarBar.QueryParamsOptsStruct) {
+			if in != nil {
+				out = &clientsBarBar.QueryParamsOptsStruct{}
+				out.Name = string(in.Name)
+				out.UserUUID = (*string)(in.UserUUID)
+				out.AuthUUID = (*string)(in.AuthUUID)
+				out.AuthUUID2 = (*string)(in.AuthUUID2)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Opt = convertQueryParamsOptsStructHelper(in.Opt)
 	}
 
 	return out
