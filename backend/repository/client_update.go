@@ -25,7 +25,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -95,9 +94,6 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	if err := writeToJSONFile(filepath.Join(clientPath, clientConfigFileName), cfgJSON); err != nil {
 		return errors.Wrapf(err, "failed to write config for the client %q", cfgJSON.Name)
 	}
-	if err := WriteClientModuleJSON(r.absPath(clientCfgDir)); err != nil {
-		return errors.Wrap(err, "failed to write module config for all clients")
-	}
 	if err := UpdateProductionConfigJSON(req, r.absPath(productionCfgJSONPath)); err != nil {
 		return errors.Wrap(err, "failed to update gateway production config")
 	}
@@ -144,30 +140,6 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 		req.TimeoutPerAttempt = 10000
 	}
 	return nil
-}
-
-// WriteClientModuleJSON writes the JSON file for the module to contain all clients.
-func WriteClientModuleJSON(clientCfgDir string) error {
-	files, err := ioutil.ReadDir(clientCfgDir)
-	if err != nil {
-		return err
-	}
-	subDirs := []string{}
-	for _, file := range files {
-		if file.IsDir() {
-			subDirs = append(subDirs, file.Name())
-		}
-	}
-	sort.Strings(subDirs)
-	content := &codegen.ClientClassConfig{
-		Name:   "clients",
-		Type:   "init",
-		Config: map[string]interface{}{},
-		Dependencies: codegen.Dependencies{
-			Client: subDirs,
-		},
-	}
-	return writeToJSONFile(filepath.Join(clientCfgDir, clientModuleFileName), content)
 }
 
 // UpdateProductionConfigJSON updates the production JSON config with client updates.

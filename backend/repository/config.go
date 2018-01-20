@@ -136,7 +136,6 @@ const (
 	gatewayConfigFile      = "gateway.json"
 	productionCfgJSONPath  = "config/production.json"
 	clientConfigFileName   = "client-config.json"
-	clientModuleFileName   = "clients-config.json"
 	endpointConfigFileName = "endpoint-config.json"
 	serviceConfigFileName  = "service-config.json"
 )

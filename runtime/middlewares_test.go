@@ -293,7 +293,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 }
 
 // Ensures that a middleware can read state from a middeware earlier in the stack.
-func TestMiddlewareSharedStateValidationOnSet(t *testing.T) {
+func TestMiddlewareSharedStateSet(t *testing.T) {
 	ex := example.NewMiddleware(
 		nil, // *zanzibar.Gateway
 		nil,
@@ -315,12 +315,8 @@ func TestMiddlewareSharedStateValidationOnSet(t *testing.T) {
 
 	ss := zanzibar.NewSharedState(middles)
 
-	err := ss.SetState("example", "foo")
-	assert.NoError(t, err)
+	ss.SetState(ex, "foo")
 	assert.Equal(t, ss.GetState("example").(string), "foo")
-
-	err = ss.SetState("NoSuchMiddleware", "foo")
-	assert.Error(t, err)
 }
 
 func noopHandlerFn(ctx context.Context,
