@@ -297,7 +297,7 @@ func (gateway *Gateway) setupConfig(config *StaticConfig) {
 
 		config.SetSeedOrDie("datacenter", string(bytes))
 	} else {
-		config.SetSeedOrDie("datacenter", "unknown")
+		config.SetConfigValueOrDie("datacenter", []byte("unknown"), "string")
 	}
 }
 

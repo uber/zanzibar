@@ -122,6 +122,9 @@ func CreateGateway(
 				ExpectContinueTimeout: 30 * time.Second,
 			},
 			Timeout: 30 * 1000 * time.Millisecond,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
 		},
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
