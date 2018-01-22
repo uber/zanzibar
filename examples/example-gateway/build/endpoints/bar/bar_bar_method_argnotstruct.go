@@ -78,7 +78,7 @@ func (h *BarArgNotStructHandler) HandleRequest(
 		return
 	}
 
-	workflow := ArgNotStructEndpoint{
+	workflow := BarArgNotStructEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -104,15 +104,15 @@ func (h *BarArgNotStructHandler) HandleRequest(
 	res.WriteJSONBytes(200, cliRespHeaders, nil)
 }
 
-// ArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
-type ArgNotStructEndpoint struct {
+// BarArgNotStructEndpoint calls thrift client Bar.ArgNotStruct
+type BarArgNotStructEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w ArgNotStructEndpoint) Handle(
+func (w BarArgNotStructEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_ArgNotStruct_Args,

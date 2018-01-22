@@ -1,0 +1,16 @@
+{
+	"name": "multi",
+	"type": "http",
+	"config": {
+		"rateLimit": 100,
+		"endpoints": [
+			"./helloA.json",
+			"./helloB.json"
+		]
+	},
+	"dependencies": {
+		"client": [
+			"multi"
+		]
+	}
+}

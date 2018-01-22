@@ -1,0 +1,12 @@
+{
+	"name": "multi",
+	"type": "http",
+	"config": {
+		"thriftFile": "clients/multi/multi.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"HelloA": "ServiceABack::hello",
+			"HelloB": "ServiceBBack::hello"
+		}
+	}
+}

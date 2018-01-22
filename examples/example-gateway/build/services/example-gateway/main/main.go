@@ -88,6 +88,10 @@ func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err4 != nil {
 		return err4
 	}
+	err5 := deps.Endpoint.Multi.Register(g)
+	if err5 != nil {
+		return err5
+	}
 	return nil
 }
 

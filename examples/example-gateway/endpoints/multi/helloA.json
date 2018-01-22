@@ -1,0 +1,15 @@
+{
+	"endpointType": "http",
+	"endpointId": "multi",
+	"handleId": "helloA",
+	"thriftFile": "endpoints/multi/multi.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "ServiceAFront::hello",
+	"workflowType": "httpClient",
+	"clientId": "multi",
+	"clientMethod": "HelloA",
+	"testFixtures": {},
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
+}

@@ -209,7 +209,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		requestBody.AnOptFloat64 = ptr.Float64(anOptFloat64Query)
 	}
 
-	workflow := ArgWithManyQueryParamsEndpoint{
+	workflow := BarArgWithManyQueryParamsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -230,15 +230,15 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// ArgWithManyQueryParamsEndpoint calls thrift client Bar.ArgWithManyQueryParams
-type ArgWithManyQueryParamsEndpoint struct {
+// BarArgWithManyQueryParamsEndpoint calls thrift client Bar.ArgWithManyQueryParams
+type BarArgWithManyQueryParamsEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w ArgWithManyQueryParamsEndpoint) Handle(
+func (w BarArgWithManyQueryParamsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_ArgWithManyQueryParams_Args,
@@ -268,7 +268,7 @@ func (w ArgWithManyQueryParamsEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertArgWithManyQueryParamsClientResponse(clientRespBody)
+	response := convertBarArgWithManyQueryParamsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -293,7 +293,7 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	return out
 }
 
-func convertArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

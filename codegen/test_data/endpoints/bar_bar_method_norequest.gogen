@@ -74,7 +74,7 @@ func (h *BarNoRequestHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := NoRequestEndpoint{
+	workflow := BarNoRequestEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -101,15 +101,15 @@ func (h *BarNoRequestHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// NoRequestEndpoint calls thrift client Bar.NoRequest
-type NoRequestEndpoint struct {
+// BarNoRequestEndpoint calls thrift client Bar.NoRequest
+type BarNoRequestEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w NoRequestEndpoint) Handle(
+func (w BarNoRequestEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
@@ -145,7 +145,7 @@ func (w NoRequestEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertNoRequestClientResponse(clientRespBody)
+	response := convertBarNoRequestClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -157,7 +157,7 @@ func convertNoRequestBarException(
 	return serverError
 }
 
-func convertNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarNoRequestClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

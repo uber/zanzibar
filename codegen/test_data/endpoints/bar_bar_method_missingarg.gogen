@@ -74,7 +74,7 @@ func (h *BarMissingArgHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 
-	workflow := MissingArgEndpoint{
+	workflow := BarMissingArgEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -101,15 +101,15 @@ func (h *BarMissingArgHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// MissingArgEndpoint calls thrift client Bar.MissingArg
-type MissingArgEndpoint struct {
+// BarMissingArgEndpoint calls thrift client Bar.MissingArg
+type BarMissingArgEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w MissingArgEndpoint) Handle(
+func (w BarMissingArgEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 ) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
@@ -145,7 +145,7 @@ func (w MissingArgEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertMissingArgClientResponse(clientRespBody)
+	response := convertBarMissingArgClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -157,7 +157,7 @@ func convertMissingArgBarException(
 	return serverError
 }
 
-func convertMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarMissingArgClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)

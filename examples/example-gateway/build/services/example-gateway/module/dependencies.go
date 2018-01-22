@@ -28,6 +28,7 @@ import (
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
 	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
 	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
+	multiEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
 	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -46,4 +47,5 @@ type EndpointDependencies struct {
 	BazTChannel baztchannelEndpointGenerated.Endpoint
 	Contacts    contactsEndpointGenerated.Endpoint
 	Googlenow   googlenowEndpointGenerated.Endpoint
+	Multi       multiEndpointGenerated.Endpoint
 }

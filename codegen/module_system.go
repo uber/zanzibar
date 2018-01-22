@@ -839,7 +839,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	var workflowName string
 	if method.Downstream != nil {
-		workflowName = strings.Title(method.Name) + "Endpoint"
+		workflowName = strings.Title(thriftServiceName) + strings.Title(method.Name) + "Endpoint"
 	} else {
 		workflowName = "custom" + strings.Title(m.PackageName) + "." +
 			strings.Title(method.Name) + "Endpoint"

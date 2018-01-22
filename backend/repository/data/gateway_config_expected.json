@@ -305,6 +305,34 @@
 			"middlewares": null,
 			"reqHeaderMap": null,
 			"resHeaderMap": null
+		},
+		"multi.helloA": {
+			"endpointId": "multi",
+			"endpointType": "http",
+			"handleId": "helloA",
+			"thriftFile": "endpoints/multi/multi.thrift",
+			"thriftMethodName": "ServiceAFront::hello",
+			"workflowType": "httpClient",
+			"clientId": "multi",
+			"clientMethod": "HelloA",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
+		},
+		"multi.helloB": {
+			"endpointId": "multi",
+			"endpointType": "http",
+			"handleId": "helloB",
+			"thriftFile": "endpoints/multi/multi.thrift",
+			"thriftMethodName": "ServiceBFront::hello",
+			"workflowType": "httpClient",
+			"clientId": "multi",
+			"clientMethod": "HelloB",
+			"testFixtures": null,
+			"middlewares": null,
+			"reqHeaderMap": null,
+			"resHeaderMap": null
 		}
 	},
 	"Clients": {
@@ -420,6 +448,18 @@
 			},
 			"ip": "127.0.0.1",
 			"port": 14120,
+			"routingKey": ""
+		},
+		"multi": {
+			"name": "multi",
+			"type": "http",
+			"thriftFile": "clients/multi/multi.thrift",
+			"exposedMethods": {
+				"HelloA": "ServiceABack::hello",
+				"HelloB": "ServiceBBack::hello"
+			},
+			"ip": "127.0.0.1",
+			"port": 4003,
 			"routingKey": ""
 		},
 		"quux": {
@@ -720,6 +760,28 @@
 				]
 			}
 		},
+		"clients/multi/multi.thrift": {
+			"ServiceABack": {
+				"Name": "ServiceABack",
+				"Path": "clients/multi/multi.thrift",
+				"Methods": [
+					{
+						"Name": "hello",
+						"Type": "http"
+					}
+				]
+			},
+			"ServiceBBack": {
+				"Name": "ServiceBBack",
+				"Path": "clients/multi/multi.thrift",
+				"Methods": [
+					{
+						"Name": "hello",
+						"Type": "http"
+					}
+				]
+			}
+		},
 		"endpoints/bar/bar.thrift": {
 			"Bar": {
 				"Name": "Bar",
@@ -841,6 +903,28 @@
 					},
 					{
 						"Name": "checkCredentials",
+						"Type": "http"
+					}
+				]
+			}
+		},
+		"endpoints/multi/multi.thrift": {
+			"ServiceAFront": {
+				"Name": "ServiceAFront",
+				"Path": "endpoints/multi/multi.thrift",
+				"Methods": [
+					{
+						"Name": "hello",
+						"Type": "http"
+					}
+				]
+			},
+			"ServiceBFront": {
+				"Name": "ServiceBFront",
+				"Path": "endpoints/multi/multi.thrift",
+				"Methods": [
+					{
+						"Name": "hello",
 						"Type": "http"
 					}
 				]

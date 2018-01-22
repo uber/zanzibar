@@ -84,7 +84,7 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		return
 	}
 
-	workflow := TooManyArgsEndpoint{
+	workflow := BarTooManyArgsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -118,15 +118,15 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// TooManyArgsEndpoint calls thrift client Bar.TooManyArgs
-type TooManyArgsEndpoint struct {
+// BarTooManyArgsEndpoint calls thrift client Bar.TooManyArgs
+type BarTooManyArgsEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w TooManyArgsEndpoint) Handle(
+func (w BarTooManyArgsEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	r *endpointsBarBar.Bar_TooManyArgs_Args,
@@ -186,7 +186,7 @@ func (w TooManyArgsEndpoint) Handle(
 	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
-	response := convertTooManyArgsClientResponse(clientRespBody)
+	response := convertBarTooManyArgsClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
@@ -243,7 +243,7 @@ func convertTooManyArgsFooException(
 	return serverError
 }
 
-func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
+func convertBarTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
 	out := &endpointsBarBar.BarResponse{}
 
 	out.StringField = string(in.StringField)
