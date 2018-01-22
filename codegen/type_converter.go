@@ -151,10 +151,7 @@ func (c *TypeConverter) genConverterForStruct(
 		toIdentifier += "." + keyPrefix
 	}
 
-	typeName, err := c.getIdentifierName(toFieldType)
-	if err != nil {
-		return err
-	}
+	typeName, _ := c.getIdentifierName(toFieldType)
 	subToFields := toFieldType.Fields
 
 	// if no fromFieldType assume we're constructing from transform fieldMap  TODO: make this less subtle
@@ -164,13 +161,7 @@ func (c *TypeConverter) genConverterForStruct(
 		if toRequired {
 			c.append(indent, toIdentifier, " = &", typeName, "{}")
 		} else {
-			if prevKeyPrefixes == nil {
-				prevKeyPrefixes = []string{}
-			}
 			id := "outOriginal"
-			if len(prevKeyPrefixes) != 0 {
-				id += "." + strings.Join(prevKeyPrefixes, ".")
-			}
 			if keyPrefix != "" {
 				id += "." + keyPrefix
 			}
@@ -188,7 +179,7 @@ func (c *TypeConverter) genConverterForStruct(
 		}
 
 		// recursive call
-		err = c.genStructConverter(
+		err := c.genStructConverter(
 			keyPrefix,
 			fromPrefix,
 			indent,
@@ -223,7 +214,7 @@ func (c *TypeConverter) genConverterForStruct(
 	}
 
 	subFromFields := fromFieldStruct.Fields
-	err = c.genStructConverter(
+	err := c.genStructConverter(
 		keyPrefix,
 		fromPrefix,
 		indent+"\t",
