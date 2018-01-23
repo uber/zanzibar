@@ -42,6 +42,29 @@ func TestModuleSpec(t *testing.T) {
 	testlib.CompareGoldenFile(t, parsedBarFile, actual)
 }
 
+func TestExceptionValidation(t *testing.T) {
+	var (
+		barClientThrift   = "../examples/example-gateway/idl/clients/bar/bar.thrift"
+		barEndpointThrift = "../examples/example-gateway/idl/endpoints/bar/bar.thrift"
+		pkgHelper         = newPackageHelper(t)
+	)
+	m, err := codegen.NewModuleSpec(barEndpointThrift, true, false, pkgHelper)
+	assert.NoError(t, err)
+	cs, err := codegen.NewModuleSpec(barClientThrift, true, false, pkgHelper)
+	assert.NoError(t, err)
+	service := m.Services[0]
+	method := service.Methods[0]
+	assert.Equal(t, method.Name, "argNotStruct")
+	clientSpec := &codegen.ClientSpec{
+		ExposedMethods: map[string]string{"argNotStruct": "Bar::argNotStruct"},
+		ModuleSpec:     cs,
+	}
+	assert.NoError(t, err)
+	method.ExceptionsIndex = map[string]codegen.ExceptionSpec{"test": {}}
+	err = m.SetDownstream("Bar", "argNotStruct", clientSpec, "argNotStruct", nil, nil, pkgHelper)
+	assert.NotNil(t, err)
+}
+
 func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 	index := strings.LastIndex(m.ThriftFile, "zanzibar")
 	m.ThriftFile = m.ThriftFile[index:]

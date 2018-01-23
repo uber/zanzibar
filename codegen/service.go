@@ -216,9 +216,6 @@ func (ms *ModuleSpec) SetDownstream(
 	}
 
 	// Exception validation
-	if len(method.ExceptionsIndex) < len(method.DownstreamMethod.ExceptionsIndex) {
-		return errors.New("Endpoint should surface all client exceptions")
-	}
 	for en := range method.DownstreamMethod.ExceptionsIndex {
 		if _, ok := method.ExceptionsIndex[en]; !ok {
 			return fmt.Errorf("Missing exception %s in Endpoint schema", en)
