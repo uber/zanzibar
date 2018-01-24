@@ -21,6 +21,7 @@
 package codegen
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -212,6 +213,13 @@ func (ms *ModuleSpec) SetDownstream(
 
 	if err != nil {
 		return err
+	}
+
+	// Exception validation
+	for en := range method.DownstreamMethod.ExceptionsIndex {
+		if _, ok := method.ExceptionsIndex[en]; !ok {
+			return fmt.Errorf("Missing exception %s in Endpoint schema", en)
+		}
 	}
 
 	// If this is an endpoint then a downstream will be defined.
