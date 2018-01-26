@@ -2032,6 +2032,30 @@
 		}
 	},
 	{
+		"name": "get the list of methods for a given thrift path",
+		"request": {
+			"method": "GET",
+			"url": "/thrift-method-parsed/endpoints/baz/baz.thrift",
+			"header": {
+				"gateway-id": "example-gateway"
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"functions": [
+					"SimpleService::compare",
+					"SimpleService::call",
+					"SimpleService::ping",
+					"SimpleService::trans",
+					"SimpleService::sillyNoop",
+					"SimpleService::testUuid",
+					"SimpleService::urlTest"
+				]
+			}
+		}
+	},
+	{
 		"name": "get the list of all files in IDL registry",
 		"request": {
 			"method": "GET",
