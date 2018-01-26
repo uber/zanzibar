@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -332,6 +333,7 @@ func (h *Handler) MethodFromThriftCode(w http.ResponseWriter, r *http.Request, p
 			functionNames = append(functionNames, serviceSpec.Name+"::"+functionSpec.Name)
 		}
 	}
+	sort.Strings(functionNames)
 	h.WriteJSON(w, http.StatusOK, &methodFromThriftCodeResponse{Functions: functionNames})
 }
 
