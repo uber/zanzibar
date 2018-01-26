@@ -75,7 +75,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	jsonFile := path.Join(tempConfigDir, "production.json")
+	jsonFile := path.Join(tempConfigDir, "test.json")
 	configBytes, err := json.Marshal(config)
 	if err != nil {
 		return "", err

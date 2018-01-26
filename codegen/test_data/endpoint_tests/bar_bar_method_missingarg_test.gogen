@@ -55,12 +55,12 @@ func TestMissingArgSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameMissingArgSuccessfulRequest(),
 				"../../..",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirNameMissingArgSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "production.json",
+				"config", "example-gateway", "test.json",
 			),
 		},
 	})

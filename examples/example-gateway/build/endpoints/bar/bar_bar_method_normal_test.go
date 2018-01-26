@@ -55,12 +55,12 @@ func TestNormalSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameNormalSuccessfulRequest(),
 				"../../..",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirNameNormalSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "production.json",
+				"config", "example-gateway", "test.json",
 			),
 		},
 	})
