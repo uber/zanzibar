@@ -724,11 +724,8 @@ func (c *TypeConverter) genStructConverter(
 					prevKeyPrefixes,
 					indent,
 				)
-				if err != nil {
-					return err
-				}
 			} else {
-				err := c.genConverterForStruct(
+				err = c.genConverterForStruct(
 					toField.Name,
 					toFieldType,
 					toField.Required,
@@ -740,9 +737,9 @@ func (c *TypeConverter) genStructConverter(
 					fieldMap,
 					prevKeyPrefixes,
 				)
-				if err != nil {
-					return err
-				}
+			}
+			if err != nil {
+				return err
 			}
 		case *compile.ListSpec:
 			err := c.genConverterForList(
@@ -1110,21 +1107,30 @@ func (c *TypeConverter) genConverterForStructWrapped(
 	return nil
 }
 
+// Helper function to detect a recursive struct, looking at its fields, fields of its fields, etc. to see if
+// the same type is encountered more than once down a path
 func isRecursiveStruct(spec compile.TypeSpec, seenSoFar map[string]bool) bool {
 	switch t := spec.(type) {
 	case *compile.StructSpec:
+		// detected cycle; second time seeing this type
 		if _, found := seenSoFar[t.Name]; found {
 			return true
 		}
+
+		// mark this type as seen
 		seenSoFar[t.Name] = true
 
+		// search all fields of this struct
 		for _, field := range t.Fields {
 			if isRecursiveStruct(field.Type, seenSoFar) {
 				return true
 			}
 		}
+
+		// unmark
 		delete(seenSoFar, t.Name)
 
+	// for lists and maps, check element/key types the same way
 	case *compile.MapSpec:
 		if isRecursiveStruct(t.KeySpec, seenSoFar) || isRecursiveStruct(t.ValueSpec, seenSoFar) {
 			return true
@@ -1138,6 +1144,10 @@ func isRecursiveStruct(spec compile.TypeSpec, seenSoFar map[string]bool) bool {
 	return false
 }
 
+// Returns true if any of the fields of a struct form a cycle anywhere down the line
+// e.g. struct A has optional field of type A -> cycle of length 0
+//		struct A has optional field of type B; struct B has optional field of type A -> cycle of length 2
+// 		struct A has optional field of type B; struct B has optional field of type B -> cycle of length 0 downstream
 func (c *TypeConverter) isRecursiveStruct(fields []*compile.FieldSpec) bool {
 	for _, field := range fields {
 		if isRecursiveStruct(field.Type, make(map[string]bool)) {
