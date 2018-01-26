@@ -33,7 +33,6 @@ import (
 	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-	endpointsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/base/base"
 	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -194,57 +193,36 @@ func (w TooManyArgsEndpoint) Handle(
 func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args) *clientsBarBar.Bar_TooManyArgs_Args {
 	out := &clientsBarBar.Bar_TooManyArgs_Args{}
 
-	{
-		var convertBarRequestHelper func(in *endpointsBarBar.BarRequest) (out *clientsBarBar.BarRequest)
-		convertBarRequestHelper = func(in *endpointsBarBar.BarRequest) (out *clientsBarBar.BarRequest) {
-			if in != nil {
-				out = &clientsBarBar.BarRequest{}
-				out.StringField = string(in.StringField)
-				out.BoolField = bool(in.BoolField)
-				out.BinaryField = []byte(in.BinaryField)
-				out.Timestamp = clientsBarBar.Timestamp(in.Timestamp)
-				out.EnumField = clientsBarBar.Fruit(in.EnumField)
-				out.LongField = clientsBarBar.Long(in.LongField)
-			} else {
-				out = nil
-			}
-			return
-		}
-		out.Request = convertBarRequestHelper(in.Request)
+	if in.Request != nil {
+		out.Request = &clientsBarBar.BarRequest{}
+		out.Request.StringField = string(in.Request.StringField)
+		out.Request.BoolField = bool(in.Request.BoolField)
+		out.Request.BinaryField = []byte(in.Request.BinaryField)
+		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
+		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
+		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+	} else {
+		out.Request = nil
 	}
-	{
-		var convertFooStructHelper func(in *endpointsFooFoo.FooStruct) (out *clientsFooFoo.FooStruct)
-		convertFooStructHelper = func(in *endpointsFooFoo.FooStruct) (out *clientsFooFoo.FooStruct) {
-			if in != nil {
-				out = &clientsFooFoo.FooStruct{}
-				out.FooString = string(in.FooString)
-				out.FooI32 = (*int32)(in.FooI32)
-				out.FooI16 = (*int16)(in.FooI16)
-				out.FooDouble = (*float64)(in.FooDouble)
-				out.FooBool = (*bool)(in.FooBool)
-				out.FooMap = make(map[string]string, len(in.FooMap))
-				for key1, value2 := range in.FooMap {
-					out.FooMap[key1] = string(value2)
-				}
-				{
-					var convertMessageHelper func(in *endpointsFooBaseBase.Message) (out *clientsFooBaseBase.Message)
-					convertMessageHelper = func(in *endpointsFooBaseBase.Message) (out *clientsFooBaseBase.Message) {
-						if in != nil {
-							out = &clientsFooBaseBase.Message{}
-							out.Body = string(in.Body)
-						} else {
-							out = nil
-						}
-						return
-					}
-					out.Message = convertMessageHelper(in.Message)
-				}
-			} else {
-				out = nil
-			}
-			return
+	if in.Foo != nil {
+		out.Foo = &clientsFooFoo.FooStruct{}
+		out.Foo.FooString = string(in.Foo.FooString)
+		out.Foo.FooI32 = (*int32)(in.Foo.FooI32)
+		out.Foo.FooI16 = (*int16)(in.Foo.FooI16)
+		out.Foo.FooDouble = (*float64)(in.Foo.FooDouble)
+		out.Foo.FooBool = (*bool)(in.Foo.FooBool)
+		out.Foo.FooMap = make(map[string]string, len(in.Foo.FooMap))
+		for key1, value2 := range in.Foo.FooMap {
+			out.Foo.FooMap[key1] = string(value2)
 		}
-		out.Foo = convertFooStructHelper(in.Foo)
+		if in.Foo.Message != nil {
+			out.Foo.Message = &clientsFooBaseBase.Message{}
+			out.Foo.Message.Body = string(in.Foo.Message.Body)
+		} else {
+			out.Foo.Message = nil
+		}
+	} else {
+		out.Foo = nil
 	}
 
 	return out
@@ -280,6 +258,29 @@ func convertTooManyArgsClientResponse(in *clientsBarBar.BarResponse) *endpointsB
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+		if in != nil {
+			out = &endpointsBarBar.BarResponse{}
+			out.StringField = string(in.StringField)
+			out.IntWithRange = int32(in.IntWithRange)
+			out.IntWithoutRange = int32(in.IntWithoutRange)
+			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			for key6, value7 := range in.MapIntWithRange {
+				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+			}
+			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
+			for key8, value9 := range in.MapIntWithoutRange {
+				out.MapIntWithoutRange[key8] = int32(value9)
+			}
+			out.BinaryField = []byte(in.BinaryField)
+			out.NextResponse = convertBarResponseHelper5(in.NextResponse)
+		} else {
+			out = nil
+		}
+		return
+	}
+	out.NextResponse = convertBarResponseHelper5(in.NextResponse)
 
 	return out
 }

@@ -172,35 +172,21 @@ func (w CompareEndpoint) Handle(
 func convertToCompareClientRequest(in *endpointsBazBaz.SimpleService_Compare_Args) *clientsBazBaz.SimpleService_Compare_Args {
 	out := &clientsBazBaz.SimpleService_Compare_Args{}
 
-	{
-		var convertBazRequestHelper func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest)
-		convertBazRequestHelper = func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest) {
-			if in != nil {
-				out = &clientsBazBaz.BazRequest{}
-				out.B1 = bool(in.B1)
-				out.S2 = string(in.S2)
-				out.I3 = int32(in.I3)
-			} else {
-				out = nil
-			}
-			return
-		}
-		out.Arg1 = convertBazRequestHelper(in.Arg1)
+	if in.Arg1 != nil {
+		out.Arg1 = &clientsBazBaz.BazRequest{}
+		out.Arg1.B1 = bool(in.Arg1.B1)
+		out.Arg1.S2 = string(in.Arg1.S2)
+		out.Arg1.I3 = int32(in.Arg1.I3)
+	} else {
+		out.Arg1 = nil
 	}
-	{
-		var convertBazRequestHelper func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest)
-		convertBazRequestHelper = func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest) {
-			if in != nil {
-				out = &clientsBazBaz.BazRequest{}
-				out.B1 = bool(in.B1)
-				out.S2 = string(in.S2)
-				out.I3 = int32(in.I3)
-			} else {
-				out = nil
-			}
-			return
-		}
-		out.Arg2 = convertBazRequestHelper(in.Arg2)
+	if in.Arg2 != nil {
+		out.Arg2 = &clientsBazBaz.BazRequest{}
+		out.Arg2.B1 = bool(in.Arg2.B1)
+		out.Arg2.S2 = string(in.Arg2.S2)
+		out.Arg2.I3 = int32(in.Arg2.I3)
+	} else {
+		out.Arg2 = nil
 	}
 
 	return out

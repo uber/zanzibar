@@ -421,33 +421,19 @@ func TestConvertStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedBarHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Four = convertNestedBarHelper(in.Four)
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			out.Four.Two = (*string)(in.Four.Two)
+		} else {
+			out.Four = nil
 		}
 	`), lines)
 }
@@ -478,19 +464,12 @@ func TestConvertStructRequiredToOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedBarHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
 	`), lines)
 }
@@ -521,19 +500,12 @@ func TestConvertStructOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedBarHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
 	`), lines)
 }
@@ -564,31 +536,17 @@ func TestHandlesMissingFields(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedBarHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Four = convertNestedBarHelper(in.Four)
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+		} else {
+			out.Four = nil
 		}`),
 		lines)
 }
@@ -1259,33 +1217,19 @@ func TestConvertStructWithAcoronymTypes(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.UUID = string(in.UUID)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedBarHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.UUID = string(in.Three.UUID)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.UUID = string(in.UUID)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Four = convertNestedBarHelper(in.Four)
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.UUID = string(in.Four.UUID)
+			out.Four.Two = (*string)(in.Four.Two)
+		} else {
+			out.Four = nil
 		}
 	`), lines)
 }
@@ -1318,10 +1262,8 @@ func TestConverterMap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		out.One = bool(inOriginal.Two)
-		out.Two = bool(inOriginal.One)
+		out.One = bool(in.Two)
+		out.Two = bool(in.One)
 	`), lines)
 }
 
@@ -1349,11 +1291,9 @@ func TestConvertTypeDefReqToReqWithOptOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.Two = structs.UUID(in.Two)
-		if inOriginal.One != nil {
-			out.Two = *(inOriginal.One)
+		if in.One != nil {
+			out.Two = *(in.One)
 		}
 	`), lines)
 }
@@ -1389,14 +1329,12 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		out.One = (*structs.UUID)&(inOriginal.Three)
+		out.One = (*structs.UUID)&(in.Three)
 		if in.One != nil {
 			out.One = (*structs.UUID)(in.One)
 		}
-		if inOriginal.One != nil {
-			out.Two = *(inOriginal.One)
+		if in.One != nil {
+			out.Two = *(in.One)
 		}
 		if in.Two != nil {
 			out.Two = *(in.Two)
@@ -1427,10 +1365,8 @@ func TestConverterMapNewField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.One = bool(in.One)
-		out.Two = bool(inOriginal.One)
+		out.Two = bool(in.One)
 	`), lines)
 }
 
@@ -1458,9 +1394,7 @@ func TestConverterMapOptionalNoOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		out.One = (*bool)(inOriginal.Two)
+		out.One = (*bool)(in.Two)
 		if in.One != nil {
 			out.One = (*bool)(in.One)
 		}
@@ -1508,19 +1442,17 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.One = (*bool)(in.One)
-		if inOriginal.Two != nil {
-			out.One = (*bool)(inOriginal.Two)
+		if in.Two != nil {
+			out.One = (*bool)(in.Two)
 		}
 		if in.Two != nil {
 			out.Two = *(in.Two)
 		}
-		if inOriginal.One != nil {
-			out.Two = *(inOriginal.One)
+		if in.One != nil {
+			out.Two = *(in.One)
 		}
-		out.Three = (*bool)&(inOriginal.Four)
+		out.Three = (*bool)&(in.Four)
 		out.Four = (*bool)&(in.Four)
 		`), lines)
 }
@@ -1549,13 +1481,11 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.One = (*bool)&(in.One)
-		if inOriginal.Two != nil {
-			out.One = (*bool)(inOriginal.Two)
+		if in.Two != nil {
+			out.One = (*bool)(in.Two)
 		}
-		out.Two = (*bool)(in.Two)
+		out.Two = (*bool)(in.Two)	
 	`), lines)
 }
 
@@ -1593,38 +1523,22 @@ func TestConverterMapStructWithSubFields2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					if inOriginal.Four != nil && inOriginal.Four.Two != nil {
-						out.One = *(inOriginal.Four.Two)
-					}
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			if in.Four != nil && in.Four.Two != nil {
+				out.Three.One = *(in.Four.Two)
 			}
-			out.Three = convertNestedBarHelper(in.Three)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Four = convertNestedBarHelper(in.Four)
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			out.Four.Two = (*string)(in.Four.Two)
+		} else {
+			out.Four = nil
 		}
 	`), lines)
 }
@@ -1653,19 +1567,12 @@ func TestConverterMapStructWithFromReqDropped(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}`),
 		lines)
 }
@@ -1694,19 +1601,12 @@ func TestConverterMapStructWithFromOptDropped(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}`),
 		lines)
 }
@@ -1734,19 +1634,12 @@ func TestConverterMapStructWithToOptMissingOk(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}`),
 		lines)
 }
@@ -1805,35 +1698,23 @@ func TestConverterMapStructWithFieldMapToReqField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
+		if in.Three != nil {
+			out.Four = &structs.NestedFoo{}
+			if in.Three != nil {
+				out.Four.One = string(in.Three.One)
 			}
-			out.Four = convertNestedFooHelper(inOriginal.Three)
+			if in.Three != nil {
+				out.Four.Two = (*string)(in.Three.Two)
+			}
+		} else {
+			out.Four = nil
 		}`),
 		lines)
 }
@@ -1866,35 +1747,23 @@ func TestConverterMapStructWithFieldMapToOptField(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
+		if in.Three != nil {
+			out.Four = &structs.NestedFoo{}
+			if in.Three != nil {
+				out.Four.One = string(in.Three.One)
 			}
-			out.Four = convertNestedFooHelper(inOriginal.Three)
+			if in.Three != nil {
+				out.Four.Two = (*string)(in.Three.Two)
+			}
+		} else {
+			out.Four = nil
 		}`),
 		lines)
 }
@@ -1932,33 +1801,24 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = string(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Three = convertNestedFooHelper(in.Three)
+		if in.Three != nil {
+			out.Three = &structs.NestedFoo{}
+			out.Three.One = string(in.Three.One)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		if inOriginal.Three != nil && inOriginal.Three.Two != nil {
-			if outOriginal.Five == nil {
-				outOriginal.Five = &structs.NestedFoo{}
+		if in.Three != nil && in.Three.Two != nil {
+			if out.Five == nil {
+				out.Five = &structs.NestedFoo{}
 			}
-			out.Five.One = *(inOriginal.Three.Two)
+			out.Five.One = *(in.Three.Two)
 		}
-		if inOriginal.Four != nil {
-			if outOriginal.Five == nil {
-				outOriginal.Five = &structs.NestedFoo{}
+		if in.Four != nil {
+			if out.Five == nil {
+				out.Five = &structs.NestedFoo{}
 			}
-			out.Five.Two = (*string)&(inOriginal.Four.One)
+			out.Five.Two = (*string)&(in.Four.One)
 		}`),
 		lines)
 }
@@ -2033,12 +1893,10 @@ func TestConverterMapStructWithFieldMapDeeper1(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.Six = &structs.NestedC{}
 		out.Six.Four = &structs.NestedA{}
-		if inOriginal.Five != nil && inOriginal.Five.Three != nil {
-			out.Six.Four.One = string(inOriginal.Five.Three.One)
+		if in.Five != nil && in.Five.Three != nil {
+			out.Six.Four.One = string(in.Five.Three.One)
 		}`),
 		lines)
 }
@@ -2077,14 +1935,12 @@ func TestConverterMapStructWithFieldMapDeeper2(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		out.Six = &structs.NestedC{}
-		if inOriginal.Five != nil && inOriginal.Five.Three != nil {
-			if outOriginal.Six.Four == nil {
-				outOriginal.Six.Four = &structs.NestedA{}
+		if in.Five != nil && in.Five.Three != nil {
+			if out.Six.Four == nil {
+				out.Six.Four = &structs.NestedA{}
 			}
-			out.Six.Four.One = (*string)(inOriginal.Five.Three.One)
+			out.Six.Four.One = (*string)(in.Five.Three.One)
 		}`),
 		lines)
 }
@@ -2122,16 +1978,14 @@ func TestConverterMapStructWithFieldMapDeeperOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		if inOriginal.Five != nil && inOriginal.Five.Three != nil {
-			if outOriginal.Six == nil {
-				outOriginal.Six = &structs.NestedC{}
+		if in.Five != nil && in.Five.Three != nil {
+			if out.Six == nil {
+				out.Six = &structs.NestedC{}
 			}
-			if outOriginal.Six.Four == nil {
-				outOriginal.Six.Four = &structs.NestedA{}
+			if out.Six.Four == nil {
+				out.Six.Four = &structs.NestedA{}
 			}
-			out.Six.Four.One = (*string)(inOriginal.Five.Three.One)
+			out.Six.Four.One = (*string)(in.Five.Three.One)
 		}`),
 		lines)
 }
@@ -2174,29 +2028,20 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		if inOriginal.Four != nil && inOriginal.Four.Two != nil {
-			if outOriginal.Five == nil {
-				outOriginal.Five = &structs.NestedBar{}
+		if in.Four != nil && in.Four.Two != nil {
+			if out.Five == nil {
+				out.Five = &structs.NestedBar{}
 			}
-			out.Five.One = *(inOriginal.Four.Two)
+			out.Five.One = *(in.Four.Two)
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					if inOriginal.Three != nil {
-						out.Two = (*string)&(inOriginal.Three.One)
-					}
-				} else {
-					out = nil
-				}
-				return
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			if in.Three != nil {
+				out.Four.Two = (*string)&(in.Three.One)
 			}
-			out.Four = convertNestedBarHelper(in.Four)
+		} else {
+			out.Four = nil
 		}
 	`), lines)
 }
@@ -2239,40 +2084,24 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					if inOriginal.Three != nil && inOriginal.Three.Two != nil {
-						out.One = *(inOriginal.Three.Two)
-					}
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
-				}
-				return
+		if in.Three != nil {
+			out.Three = &structs.NestedBar{}
+			out.Three.One = string(in.Three.One)
+			if in.Three != nil && in.Three.Two != nil {
+				out.Three.One = *(in.Three.Two)
 			}
-			out.Three = convertNestedBarHelper(in.Three)
+			out.Three.Two = (*string)(in.Three.Two)
+		} else {
+			out.Three = nil
 		}
-		{
-			var convertNestedBarHelper func(in *structs.NestedFoo) (out *structs.NestedBar)
-			convertNestedBarHelper = func(in *structs.NestedFoo) (out *structs.NestedBar) {
-				if in != nil {
-					out = &structs.NestedBar{}
-					out.One = string(in.One)
-					if inOriginal.Four != nil {
-						out.Two = (*string)&(inOriginal.Four.One)
-					}
-				} else {
-					out = nil
-				}
-				return
+		if in.Four != nil {
+			out.Four = &structs.NestedBar{}
+			out.Four.One = string(in.Four.One)
+			if in.Four != nil {
+				out.Four.Two = (*string)&(in.Four.One)
 			}
-			out.Four = convertNestedBarHelper(in.Four)
+		} else {
+			out.Four = nil
 		}
 	`), lines)
 }
@@ -2305,15 +2134,13 @@ func TestConverterMapOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		out.One = make([]string, len(inOriginal.Two))
-		for index1, value2 := range inOriginal.Two {
+		out.One = make([]string, len(in.Two))
+		for index1, value2 := range in.Two {
 			out.One[index1] = string(value2)
 		}
 		sourceList3 := in.Two
-		if inOriginal.One != nil {
-			sourceList3 = inOriginal.One
+		if in.One != nil {
+			sourceList3 = in.One
 		}
 		out.Two = make([]string, len(sourceList3))
 		for index5, value6 := range sourceList3 {
@@ -2354,10 +2181,8 @@ func TestConverterMapListOfStructType(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
-		out.One = make([]*structs.Inner, len(inOriginal.Two))
-		for index1, value2 := range inOriginal.Two {
+		out.One = make([]*structs.Inner, len(in.Two))
+		for index1, value2 := range in.Two {
 			if value2 != nil {
 				out.One[index1] = &structs.Inner{}
 				if in.Two[index1] != nil {
@@ -2369,8 +2194,8 @@ func TestConverterMapListOfStructType(t *testing.T) {
 		}
 		sourceList3 := in.Two
 		isOverridden4 := false
-		if inOriginal.One != nil {
-			sourceList3 = inOriginal.One
+		if in.One != nil {
+			sourceList3 = in.One
 			isOverridden4 = true
 		}
 		out.Two = make([]*structs.Inner, len(sourceList3))
@@ -2429,12 +2254,10 @@ func TestConverterMapMapType(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		inOriginal := in; _ = inOriginal
-		outOriginal := out; _ = outOriginal
 		sourceList1 := in.One
 		isOverridden2 := false
-		if inOriginal.Two != nil {
-			sourceList1 = inOriginal.Two
+		if in.Two != nil {
+			sourceList1 = in.Two
 			isOverridden2 = true
 		}
 		out.One = make(map[string]*structs.Inner, len(sourceList1))
@@ -2459,8 +2282,8 @@ func TestConverterMapMapType(t *testing.T) {
 		}
 		sourceList5 := in.Two
 		isOverridden6 := false
-		if inOriginal.One != nil {
-			sourceList5 = inOriginal.One
+		if in.One != nil {
+			sourceList5 = in.One
 			isOverridden6 = true
 		}
 		out.Two = make(map[string]*structs.Inner, len(sourceList5))
@@ -2482,7 +2305,7 @@ func TestConverterMapMapType(t *testing.T) {
 					out.Two[key7] = nil
 				}
 			}
-		}
+		}		
 	`), lines)
 }
 
@@ -2730,20 +2553,18 @@ func TestConverterRecursiveSimple(t *testing.T) {
 
 	assertPrettyEqual(t, trim(`
 		out.Three = string(in.Three)
-		{
-			var convertBarHelper func(in *structs.Foo) (out *structs.Bar)
-			convertBarHelper = func(in *structs.Foo) (out *structs.Bar) {
-				if in != nil {
-					out = &structs.Bar{}
-					out.Three = string(in.Three)
-					out.Recur = convertBarHelper(in.Recur)
-				} else {
-					out = nil
-				}
-				return
+		var convertBarHelper1 func(in *structs.Foo) (out *structs.Bar)
+		convertBarHelper1 = func(in *structs.Foo) (out *structs.Bar) {
+			if in != nil {
+				out = &structs.Bar{}
+				out.Three = string(in.Three)
+				out.Recur = convertBarHelper1(in.Recur)
+			} else {
+				out = nil
 			}
-			out.Recur = convertBarHelper(in.Recur)
+			return
 		}
+		out.Recur = convertBarHelper1(in.Recur)
 	`), lines)
 }
 
@@ -2775,20 +2596,18 @@ func TestConverterRecursiveNested(t *testing.T) {
 
 	assertPrettyEqual(t, trim(`
 		out.Three = string(in.Three)
-		{
-			var convertStringFooHelper func(in *structs.StringFoo) (out *structs.StringFoo)
-			convertStringFooHelper = func(in *structs.StringFoo) (out *structs.StringFoo) {
-				if in != nil {
-					out = &structs.StringFoo{}
-					out.One = string(in.One)
-					out.Recur = convertStringFooHelper(in.Recur)
-				} else {
-					out = nil
-				}
-				return
+		var convertStringFooHelper1 func(in *structs.StringFoo) (out *structs.StringFoo)
+		convertStringFooHelper1 = func(in *structs.StringFoo) (out *structs.StringFoo) {
+			if in != nil {
+				out = &structs.StringFoo{}
+				out.One = string(in.One)
+				out.Recur = convertStringFooHelper1(in.Recur)
+			} else {
+				out = nil
 			}
-			out.Recur = convertStringFooHelper(in.Recur)
+			return
 		}
+		out.Recur = convertStringFooHelper1(in.Recur)
 	`), lines)
 }
 
@@ -2834,76 +2653,66 @@ func TestConverterRecursiveMixedDeep(t *testing.T) {
 
 	assertPrettyEqual(t, trim(`
 		out.Three = string(in.Three)
-		{
-			var convertStringFooBHelper func(in *structs.StringFooA) (out *structs.StringFooB)
-			convertStringFooBHelper = func(in *structs.StringFooA) (out *structs.StringFooB) {
-				if in != nil {
-					out = &structs.StringFooB{}
-					out.One = string(in.One)
-					out.Recur = convertStringFooBHelper(in.Recur)
-					{
-						var convertDeepFooHelper func(in *structs.DeepFoo) (out *structs.DeepFoo)
-						convertDeepFooHelper = func(in *structs.DeepFoo) (out *structs.DeepFoo) {
+		var convertStringFooBHelper1 func(in *structs.StringFooA) (out *structs.StringFooB)
+		convertStringFooBHelper1 = func(in *structs.StringFooA) (out *structs.StringFooB) {
+			if in != nil {
+				out = &structs.StringFooB{}
+				out.One = string(in.One)
+				out.Recur = convertStringFooBHelper1(in.Recur)
+				var convertDeepFooHelper2 func(in *structs.DeepFoo) (out *structs.DeepFoo)
+				convertDeepFooHelper2 = func(in *structs.DeepFoo) (out *structs.DeepFoo) {
+					if in != nil {
+						out = &structs.DeepFoo{}
+						out.Ten = string(in.Ten)
+						out.Recur = convertDeepFooHelper2(in.Recur)
+					} else {
+						out = nil
+					}
+					return
+				}
+				out.Deep = convertDeepFooHelper2(in.Deep)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Recur = convertStringFooBHelper1(in.Recur)
+		var convertBarHelper3 func(in *structs.Foo) (out *structs.Bar)
+		convertBarHelper3 = func(in *structs.Foo) (out *structs.Bar) {
+			if in != nil {
+				out = &structs.Bar{}
+				out.Three = string(in.Three)
+				var convertStringFooBHelper4 func(in *structs.StringFooA) (out *structs.StringFooB)
+				convertStringFooBHelper4 = func(in *structs.StringFooA) (out *structs.StringFooB) {
+					if in != nil {
+						out = &structs.StringFooB{}
+						out.One = string(in.One)
+						out.Recur = convertStringFooBHelper4(in.Recur)
+						var convertDeepFooHelper5 func(in *structs.DeepFoo) (out *structs.DeepFoo)
+						convertDeepFooHelper5 = func(in *structs.DeepFoo) (out *structs.DeepFoo) {
 							if in != nil {
 								out = &structs.DeepFoo{}
 								out.Ten = string(in.Ten)
-								out.Recur = convertDeepFooHelper(in.Recur)
+								out.Recur = convertDeepFooHelper5(in.Recur)
 							} else {
 								out = nil
 							}
 							return
 						}
-						out.Deep = convertDeepFooHelper(in.Deep)
+						out.Deep = convertDeepFooHelper5(in.Deep)
+					} else {
+						out = nil
 					}
-				} else {
-					out = nil
+					return
 				}
-				return
+				out.Recur = convertStringFooBHelper4(in.Recur)
+				out.Recur2 = convertBarHelper3(in.Recur2)
+			} else {
+				out = nil
 			}
-			out.Recur = convertStringFooBHelper(in.Recur)
+			return
 		}
-		{
-			var convertBarHelper func(in *structs.Foo) (out *structs.Bar)
-			convertBarHelper = func(in *structs.Foo) (out *structs.Bar) {
-				if in != nil {
-					out = &structs.Bar{}
-					out.Three = string(in.Three)
-					{
-						var convertStringFooBHelper func(in *structs.StringFooA) (out *structs.StringFooB)
-						convertStringFooBHelper = func(in *structs.StringFooA) (out *structs.StringFooB) {
-							if in != nil {
-								out = &structs.StringFooB{}
-								out.One = string(in.One)
-								out.Recur = convertStringFooBHelper(in.Recur)
-								{
-									var convertDeepFooHelper func(in *structs.DeepFoo) (out *structs.DeepFoo)
-									convertDeepFooHelper = func(in *structs.DeepFoo) (out *structs.DeepFoo) {
-										if in != nil {
-											out = &structs.DeepFoo{}
-											out.Ten = string(in.Ten)
-											out.Recur = convertDeepFooHelper(in.Recur)
-										} else {
-											out = nil
-										}
-										return
-									}
-									out.Deep = convertDeepFooHelper(in.Deep)
-								}
-							} else {
-								out = nil
-							}
-							return
-						}
-						out.Recur = convertStringFooBHelper(in.Recur)
-					}
-					out.Recur2 = convertBarHelper(in.Recur2)
-				} else {
-					out = nil
-				}
-				return
-			}
-			out.Recur2 = convertBarHelper(in.Recur2)
-		}
+		out.Recur2 = convertBarHelper3(in.Recur2)
 	`), lines)
 }
 
@@ -2939,33 +2748,29 @@ func TestConverterRecursiveCyclic(t *testing.T) {
 
 	assertPrettyEqual(t, trim(`
 		out.Three = string(in.Three)
-		{
-			var convertStringFooAHelper func(in *structs.StringFooA) (out *structs.StringFooA)
-			convertStringFooAHelper = func(in *structs.StringFooA) (out *structs.StringFooA) {
-				if in != nil {
-					out = &structs.StringFooA{}
-					out.One = string(in.One)
-					{
-						var convertStringFooBHelper func(in *structs.StringFooB) (out *structs.StringFooB)
-						convertStringFooBHelper = func(in *structs.StringFooB) (out *structs.StringFooB) {
-							if in != nil {
-								out = &structs.StringFooB{}
-								out.Two = string(in.Two)
-								out.FooA = convertStringFooAHelper(in.FooA)
-							} else {
-								out = nil
-							}
-							return
-						}
-						out.FooB = convertStringFooBHelper(in.FooB)
+		var convertStringFooAHelper1 func(in *structs.StringFooA) (out *structs.StringFooA)
+		convertStringFooAHelper1 = func(in *structs.StringFooA) (out *structs.StringFooA) {
+			if in != nil {
+				out = &structs.StringFooA{}
+				out.One = string(in.One)
+				var convertStringFooBHelper2 func(in *structs.StringFooB) (out *structs.StringFooB)
+				convertStringFooBHelper2 = func(in *structs.StringFooB) (out *structs.StringFooB) {
+					if in != nil {
+						out = &structs.StringFooB{}
+						out.Two = string(in.Two)
+						out.FooA = convertStringFooAHelper1(in.FooA)
+					} else {
+						out = nil
 					}
-				} else {
-					out = nil
+					return
 				}
-				return
+				out.FooB = convertStringFooBHelper2(in.FooB)
+			} else {
+				out = nil
 			}
-			out.Recur = convertStringFooAHelper(in.Recur)
+			return
 		}
+		out.Recur = convertStringFooAHelper1(in.Recur)
 	`), lines)
 }
 
@@ -3032,32 +2837,35 @@ func TestConverterRecursiveStructWithFieldMap(t *testing.T) {
 	assertPrettyEqual(t, trim(`
 		inOriginal := in; _ = inOriginal
 		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					if inOriginal.Five != nil {
-						out.One = string(inOriginal.Five.Two)
-					}
-					if inOriginal.Five != nil {
-						out.Two = string(inOriginal.Five.One)
-					}
-					out.Three = convertNestedFooHelper(in.Three)
-				} else {
-					out = nil
+		var convertNestedFooHelper1 func(in *structs.NestedFoo) (out *structs.NestedFoo)
+		convertNestedFooHelper1 = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
+			if in != nil {
+				out = &structs.NestedFoo{}
+				if inOriginal.Five != nil {
+					out.One = string(inOriginal.Five.Two)
 				}
-				return
+				if inOriginal.Five != nil {
+					out.Two = string(inOriginal.Five.One)
+				}
+				out.Three = convertNestedFooHelper1(in.Three)
+			} else {
+				out = nil
 			}
-			out.Five = convertNestedFooHelper(in.Five)
-		}`),
+			return
+		}
+		out.Five = convertNestedFooHelper1(in.Five)
+`),
 		lines)
 }
 
-func TestConverterMapOptional(t *testing.T) {
+func TestConverterRecursiveMapOptional(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
 	fieldMap["Seven.Two"] = codegen.FieldMapperEntry{
 		QualifiedName: "Five.One",
+		Override:      false,
+	}
+	fieldMap["Five.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Five.Two",
 		Override:      false,
 	}
 
@@ -3068,13 +2876,20 @@ func TestConverterMapOptional(t *testing.T) {
  			2: optional string two
  		}
 
+		struct RecurFoo {
+			1: required string seven
+			2: optional RecurFoo eight
+		}
+
  		struct Foo {
  			1: optional NestedFoo five
+			3: optional RecurFoo six
  		}
 
  		struct Bar {
  			1: optional NestedFoo five
 			2: optional NestedFoo seven
+			3: optional RecurFoo six
  		}`,
 		nil,
 		fieldMap,
@@ -3084,26 +2899,119 @@ func TestConverterMapOptional(t *testing.T) {
 	assertPrettyEqual(t, trim(`
 		inOriginal := in; _ = inOriginal
 		outOriginal := out; _ = outOriginal
-		{
-			var convertNestedFooHelper func(in *structs.NestedFoo) (out *structs.NestedFoo)
-			convertNestedFooHelper = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
-				if in != nil {
-					out = &structs.NestedFoo{}
-					out.One = (*string)(in.One)
-					out.Two = (*string)(in.Two)
-				} else {
-					out = nil
+		var convertNestedFooHelper1 func(in *structs.NestedFoo) (out *structs.NestedFoo)
+		convertNestedFooHelper1 = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
+			if in != nil {
+				out = &structs.NestedFoo{}
+				if inOriginal.Five != nil {
+					out.One = (*string)(inOriginal.Five.Two)
 				}
-				return
+				out.Two = (*string)(in.Two)
+			} else {
+				out = nil
 			}
-			out.Five = convertNestedFooHelper(in.Five)
+			return
 		}
+		out.Five = convertNestedFooHelper1(in.Five)
 		if inOriginal.Five != nil {
 			if outOriginal.Seven == nil {
 				outOriginal.Seven = &structs.NestedFoo{}
 			}
 			out.Seven.Two = (*string)(inOriginal.Five.One)
-		}`),
+		}
+		var convertRecurFooHelper2 func(in *structs.RecurFoo) (out *structs.RecurFoo)
+		convertRecurFooHelper2 = func(in *structs.RecurFoo) (out *structs.RecurFoo) {
+			if in != nil {
+				out = &structs.RecurFoo{}
+				out.Seven = string(in.Seven)
+				out.Eight = convertRecurFooHelper2(in.Eight)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Six = convertRecurFooHelper2(in.Six)`),
+		lines)
+}
+
+func TestConverterRecursiveMapStruct(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+	fieldMap["Five.One"] = codegen.FieldMapperEntry{
+		QualifiedName: "Three.Two",
+		Override:      true,
+	}
+	fieldMap["Five.Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "Four.One",
+		Override:      true,
+	}
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+		struct RecurFoo {
+			1: required string seven
+			2: optional RecurFoo eight
+		}
+
+ 		struct Foo {
+ 			1: required NestedFoo three
+ 			2: required NestedFoo four
+			3: optional RecurFoo six
+ 		}
+
+ 		struct Bar {
+ 			1: required NestedFoo three
+ 			2: optional NestedFoo five
+			3: optional RecurFoo six
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+		inOriginal := in; _ = inOriginal
+		outOriginal := out; _ = outOriginal
+		var convertNestedFooHelper1 func(in *structs.NestedFoo) (out *structs.NestedFoo)
+		convertNestedFooHelper1 = func(in *structs.NestedFoo) (out *structs.NestedFoo) {
+			if in != nil {
+				out = &structs.NestedFoo{}
+				out.One = string(in.One)
+				out.Two = (*string)(in.Two)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Three = convertNestedFooHelper1(in.Three)
+		if inOriginal.Three != nil && inOriginal.Three.Two != nil {
+			if outOriginal.Five == nil {
+				outOriginal.Five = &structs.NestedFoo{}
+			}
+			out.Five.One = *(inOriginal.Three.Two)
+		}
+		if inOriginal.Four != nil {
+			if outOriginal.Five == nil {
+				outOriginal.Five = &structs.NestedFoo{}
+			}
+			out.Five.Two = (*string)&(inOriginal.Four.One)
+		}
+		var convertRecurFooHelper2 func(in *structs.RecurFoo) (out *structs.RecurFoo)
+		convertRecurFooHelper2 = func(in *structs.RecurFoo) (out *structs.RecurFoo) {
+			if in != nil {
+				out = &structs.RecurFoo{}
+				out.Seven = string(in.Seven)
+				out.Eight = convertRecurFooHelper2(in.Eight)
+			} else {
+				out = nil
+			}
+			return
+		}
+		out.Six = convertRecurFooHelper2(in.Six)`),
 		lines)
 }
 
@@ -3151,85 +3059,38 @@ func TestConverterRecursiveMixedAll(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		{
-			var convertNestedFooBHelper func(in *structs.NestedFooA) (out *structs.NestedFooB)
-			convertNestedFooBHelper = func(in *structs.NestedFooA) (out *structs.NestedFooB) {
-				if in != nil {
-					out = &structs.NestedFooB{}
+		var convertNestedFooBHelper1 func(in *structs.NestedFooA) (out *structs.NestedFooB)
+		convertNestedFooBHelper1 = func(in *structs.NestedFooA) (out *structs.NestedFooB) {
+			if in != nil {
+				out = &structs.NestedFooB{}
 		out.One = make(map[string]*structs.NestedFooBB, len(in.One))
-		for key1, value2 := range in.One {
-						if value2 != nil {
-							out.One[key1] = &structs.NestedFooBB{}
-		out.One[key1].Two = make([]*structs.NestedFooBBB, len(in.One[key1].Two))
-		for index3, value4 := range in.One[key1].Two {
-								if value4 != nil {
-									out.One[key1].Two[index3] = &structs.NestedFooBBB{}
-									out.One[key1].Two[index3].Three = string(in.One[key1].Two[index3].Three)
-									{
-										var convertNestedFooBBBHelper func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB)
-										convertNestedFooBBBHelper = func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB) {
-											if in != nil {
-												out = &structs.NestedFooBBB{}
-												out.Three = string(in.Three)
-												out.Four = convertNestedFooBBBHelper(in.Four)
-												{
-													var convertNestedFooBBHelper func(in *structs.NestedFooAA) (out *structs.NestedFooBB)
-													convertNestedFooBBHelper = func(in *structs.NestedFooAA) (out *structs.NestedFooBB) {
-														if in != nil {
-															out = &structs.NestedFooBB{}
-		out.Two = make([]*structs.NestedFooBBB, len(in.Two))
-		for index5, value6 := range in.Two {
-																if value6 != nil {
-																	out.Two[index5] = &structs.NestedFooBBB{}
-																	out.Two[index5].Three = string(in.Two[index5].Three)
-																	out.Two[index5].Four = convertNestedFooBBBHelper(in.Two[index5].Four)
-																	out.Two[index5].Five = convertNestedFooBBHelper(in.Two[index5].Five)
-																} else {
-																	out.Two[index5] = nil
-																}
-		}
-														} else {
-															out = nil
-														}
-														return
-													}
-													out.Five = convertNestedFooBBHelper(in.Five)
-												}
-											} else {
-												out = nil
-											}
-											return
-										}
-										out.One[key1].Two[index3].Four = convertNestedFooBBBHelper(in.One[key1].Two[index3].Four)
-									}
-									{
-										var convertNestedFooBBHelper func(in *structs.NestedFooAA) (out *structs.NestedFooBB)
-										convertNestedFooBBHelper = func(in *structs.NestedFooAA) (out *structs.NestedFooBB) {
+		for key2, value3 := range in.One {
+					if value3 != nil {
+						out.One[key2] = &structs.NestedFooBB{}
+		out.One[key2].Two = make([]*structs.NestedFooBBB, len(in.One[key2].Two))
+		for index4, value5 := range in.One[key2].Two {
+							if value5 != nil {
+								out.One[key2].Two[index4] = &structs.NestedFooBBB{}
+								out.One[key2].Two[index4].Three = string(in.One[key2].Two[index4].Three)
+								var convertNestedFooBBBHelper6 func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB)
+								convertNestedFooBBBHelper6 = func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB) {
+									if in != nil {
+										out = &structs.NestedFooBBB{}
+										out.Three = string(in.Three)
+										out.Four = convertNestedFooBBBHelper6(in.Four)
+										var convertNestedFooBBHelper7 func(in *structs.NestedFooAA) (out *structs.NestedFooBB)
+										convertNestedFooBBHelper7 = func(in *structs.NestedFooAA) (out *structs.NestedFooBB) {
 											if in != nil {
 												out = &structs.NestedFooBB{}
 		out.Two = make([]*structs.NestedFooBBB, len(in.Two))
-		for index7, value8 := range in.Two {
-													if value8 != nil {
-														out.Two[index7] = &structs.NestedFooBBB{}
-														out.Two[index7].Three = string(in.Two[index7].Three)
-														{
-															var convertNestedFooBBBHelper func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB)
-															convertNestedFooBBBHelper = func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB) {
-																if in != nil {
-																	out = &structs.NestedFooBBB{}
-																	out.Three = string(in.Three)
-																	out.Four = convertNestedFooBBBHelper(in.Four)
-																	out.Five = convertNestedFooBBHelper(in.Five)
-																} else {
-																	out = nil
-																}
-																return
-															}
-															out.Two[index7].Four = convertNestedFooBBBHelper(in.Two[index7].Four)
-														}
-														out.Two[index7].Five = convertNestedFooBBHelper(in.Two[index7].Five)
+		for index8, value9 := range in.Two {
+													if value9 != nil {
+														out.Two[index8] = &structs.NestedFooBBB{}
+														out.Two[index8].Three = string(in.Two[index8].Three)
+														out.Two[index8].Four = convertNestedFooBBBHelper6(in.Two[index8].Four)
+														out.Two[index8].Five = convertNestedFooBBHelper7(in.Two[index8].Five)
 													} else {
-														out.Two[index7] = nil
+														out.Two[index8] = nil
 													}
 		}
 											} else {
@@ -3237,23 +3098,60 @@ func TestConverterRecursiveMixedAll(t *testing.T) {
 											}
 											return
 										}
-										out.One[key1].Two[index3].Five = convertNestedFooBBHelper(in.One[key1].Two[index3].Five)
+										out.Five = convertNestedFooBBHelper7(in.Five)
+									} else {
+										out = nil
 									}
-								} else {
-									out.One[key1].Two[index3] = nil
+									return
 								}
+								out.One[key2].Two[index4].Four = convertNestedFooBBBHelper6(in.One[key2].Two[index4].Four)
+								var convertNestedFooBBHelper10 func(in *structs.NestedFooAA) (out *structs.NestedFooBB)
+								convertNestedFooBBHelper10 = func(in *structs.NestedFooAA) (out *structs.NestedFooBB) {
+									if in != nil {
+										out = &structs.NestedFooBB{}
+		out.Two = make([]*structs.NestedFooBBB, len(in.Two))
+		for index11, value12 := range in.Two {
+											if value12 != nil {
+												out.Two[index11] = &structs.NestedFooBBB{}
+												out.Two[index11].Three = string(in.Two[index11].Three)
+												var convertNestedFooBBBHelper13 func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB)
+												convertNestedFooBBBHelper13 = func(in *structs.NestedFooAAA) (out *structs.NestedFooBBB) {
+													if in != nil {
+														out = &structs.NestedFooBBB{}
+														out.Three = string(in.Three)
+														out.Four = convertNestedFooBBBHelper13(in.Four)
+														out.Five = convertNestedFooBBHelper10(in.Five)
+													} else {
+														out = nil
+													}
+													return
+												}
+												out.Two[index11].Four = convertNestedFooBBBHelper13(in.Two[index11].Four)
+												out.Two[index11].Five = convertNestedFooBBHelper10(in.Two[index11].Five)
+											} else {
+												out.Two[index11] = nil
+											}
 		}
-						} else {
-							out.One[key1] = nil
-						}
+									} else {
+										out = nil
+									}
+									return
+								}
+								out.One[key2].Two[index4].Five = convertNestedFooBBHelper10(in.One[key2].Two[index4].Five)
+							} else {
+								out.One[key2].Two[index4] = nil
+							}
 		}
-				} else {
-					out = nil
-				}
-				return
+					} else {
+						out.One[key2] = nil
+					}
+		}
+			} else {
+				out = nil
 			}
-			out.Six = convertNestedFooBHelper(in.Six)
+			return
 		}
+		out.Six = convertNestedFooBHelper1(in.Six)
 		`),
 		lines)
 }

@@ -173,20 +173,13 @@ func (w CallEndpoint) Handle(
 func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
 	out := &clientsBazBaz.SimpleService_Call_Args{}
 
-	{
-		var convertBazRequestHelper func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest)
-		convertBazRequestHelper = func(in *endpointsBazBaz.BazRequest) (out *clientsBazBaz.BazRequest) {
-			if in != nil {
-				out = &clientsBazBaz.BazRequest{}
-				out.B1 = bool(in.B1)
-				out.S2 = string(in.S2)
-				out.I3 = int32(in.I3)
-			} else {
-				out = nil
-			}
-			return
-		}
-		out.Arg = convertBazRequestHelper(in.Arg)
+	if in.Arg != nil {
+		out.Arg = &clientsBazBaz.BazRequest{}
+		out.Arg.B1 = bool(in.Arg.B1)
+		out.Arg.S2 = string(in.Arg.S2)
+		out.Arg.I3 = int32(in.Arg.I3)
+	} else {
+		out.Arg = nil
 	}
 
 	return out

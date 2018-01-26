@@ -303,12 +303,6 @@ func (v *Bar_ArgWithHeaders_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BarResponse_Read(w wire.Value) (*BarResponse, error) {
-	var v BarResponse
-	err := v.FromWire(w)
-	return &v, err
-}
-
 // FromWire deserializes a Bar_ArgWithHeaders_Result struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.

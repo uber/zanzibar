@@ -32,6 +32,7 @@ struct BarResponse {
         zanzibar.ignore.integer.range = "true"
     )
     6: required binary binaryField
+    7: optional BarResponse nextResponse
 }
 
 struct BarRequestRecur {

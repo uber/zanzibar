@@ -168,23 +168,16 @@ func (w NormalEndpoint) Handle(
 func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsBarBar.Bar_Normal_Args {
 	out := &clientsBarBar.Bar_Normal_Args{}
 
-	{
-		var convertBarRequestHelper func(in *endpointsBarBar.BarRequest) (out *clientsBarBar.BarRequest)
-		convertBarRequestHelper = func(in *endpointsBarBar.BarRequest) (out *clientsBarBar.BarRequest) {
-			if in != nil {
-				out = &clientsBarBar.BarRequest{}
-				out.StringField = string(in.StringField)
-				out.BoolField = bool(in.BoolField)
-				out.BinaryField = []byte(in.BinaryField)
-				out.Timestamp = clientsBarBar.Timestamp(in.Timestamp)
-				out.EnumField = clientsBarBar.Fruit(in.EnumField)
-				out.LongField = clientsBarBar.Long(in.LongField)
-			} else {
-				out = nil
-			}
-			return
-		}
-		out.Request = convertBarRequestHelper(in.Request)
+	if in.Request != nil {
+		out.Request = &clientsBarBar.BarRequest{}
+		out.Request.StringField = string(in.Request.StringField)
+		out.Request.BoolField = bool(in.Request.BoolField)
+		out.Request.BinaryField = []byte(in.Request.BinaryField)
+		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
+		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
+		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+	} else {
+		out.Request = nil
 	}
 
 	return out
@@ -213,6 +206,29 @@ func convertNormalClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+		if in != nil {
+			out = &endpointsBarBar.BarResponse{}
+			out.StringField = string(in.StringField)
+			out.IntWithRange = int32(in.IntWithRange)
+			out.IntWithoutRange = int32(in.IntWithoutRange)
+			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			for key6, value7 := range in.MapIntWithRange {
+				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+			}
+			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
+			for key8, value9 := range in.MapIntWithoutRange {
+				out.MapIntWithoutRange[key8] = int32(value9)
+			}
+			out.BinaryField = []byte(in.BinaryField)
+			out.NextResponse = convertBarResponseHelper5(in.NextResponse)
+		} else {
+			out = nil
+		}
+		return
+	}
+	out.NextResponse = convertBarResponseHelper5(in.NextResponse)
 
 	return out
 }

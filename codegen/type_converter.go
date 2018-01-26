@@ -72,6 +72,7 @@ type TypeConverter struct {
 	uninitialized map[string]*fieldStruct
 	fieldCounter  int
 	convStructMap map[string]string
+	useRecurGen   bool
 }
 
 // NewTypeConverter returns *TypeConverter
@@ -81,6 +82,7 @@ func NewTypeConverter(h PackageNameResolver) *TypeConverter {
 		Helper:        h,
 		uninitialized: make(map[string]*fieldStruct),
 		convStructMap: make(map[string]string),
+		useRecurGen:   false,
 	}
 }
 
@@ -152,6 +154,7 @@ func (c *TypeConverter) genConverterForStruct(
 	}
 
 	typeName, _ := c.getIdentifierName(toFieldType)
+
 	subToFields := toFieldType.Fields
 
 	// if no fromFieldType assume we're constructing from transform fieldMap  TODO: make this less subtle
@@ -161,7 +164,10 @@ func (c *TypeConverter) genConverterForStruct(
 		if toRequired {
 			c.append(indent, toIdentifier, " = &", typeName, "{}")
 		} else {
-			id := "outOriginal"
+			id := "out"
+			if c.useRecurGen {
+				id = "outOriginal"
+			}
 			if keyPrefix != "" {
 				id += "." + keyPrefix
 			}
@@ -575,7 +581,11 @@ func (c *TypeConverter) genStructConverter(
 			// no existing direct fromField,  just assign the transform
 			if fromField == nil {
 				fromField = transformFrom.Field
-				fromIdentifier = "inOriginal." + transformFrom.QualifiedName
+				if c.useRecurGen {
+					fromIdentifier = "inOriginal." + transformFrom.QualifiedName
+				} else {
+					fromIdentifier = "in." + transformFrom.QualifiedName
+				}
 				// else there is a conflicting direct fromField
 			} else {
 				//  depending on Override flag either the direct fromField or transformFrom is the OverrideField
@@ -590,13 +600,21 @@ func (c *TypeConverter) genStructConverter(
 					// there's a default instantiation value and will always
 					// overwrite.
 					fromField = transformFrom.Field
-					fromIdentifier = "inOriginal." + transformFrom.QualifiedName
+					if c.useRecurGen {
+						fromIdentifier = "inOriginal." + transformFrom.QualifiedName
+					} else {
+						fromIdentifier = "in." + transformFrom.QualifiedName
+					}
 				} else {
 					// If override is false and the from field is required,
 					// From is always populated and will never be overwritten.
 					if !fromField.Required {
 						overriddenField = transformFrom.Field
-						overriddenIdentifier = "inOriginal." + transformFrom.QualifiedName
+						if c.useRecurGen {
+							fromIdentifier = "inOriginal." + transformFrom.QualifiedName
+						} else {
+							overriddenIdentifier = "in." + transformFrom.QualifiedName
+						}
 					}
 				}
 			}
@@ -690,42 +708,25 @@ func (c *TypeConverter) genStructConverter(
 			}
 
 			if converterMethodName, ok := c.convStructMap[toFieldType.Name]; ok {
-				// the converter for this struct already exists, so just use it
+				// the converter for this struct has already been generated, so just use it
 				c.append(indent, "out.", keyPrefix+pascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
-			} else if fromTypeName != "" {
-				// generate a converter for this scope
-				converterMethodName := "convert" + toFieldType.Name + "Helper"
-				c.convStructMap[toFieldType.Name] = converterMethodName
-
-				c.append(indent, "{") // begin scope
-				funcSignature := "func(in *" + fromTypeName + ") (out *" + toTypeName + ")"
-
-				c.append(indent+"\t", "var ", converterMethodName, " ", funcSignature) // function declaration
-				c.append(indent+"\t", converterMethodName, " = ", funcSignature, " {") // begin function definition
-
-				err = c.genConverterForStruct(
-					toField.Name,
+			} else if c.useRecurGen && fromTypeName != "" {
+				// generate a callable converter inside function literal
+				err = c.genConverterForStructWrapped(
+					toField,
 					toFieldType,
-					toField.Required,
+					toTypeName,
+					toSubIdentifier,
+					fromTypeName,
+					fromIdentifier,
 					stFromType,
-					"in",
-					"",
-					"",
-					indent+"\t\t",
-					c.updateFieldMap(fieldMap, toSubIdentifier),
-					append(prevKeyPrefixes, toSubIdentifier),
+					fieldMap,
+					prevKeyPrefixes,
+					indent,
 				)
 				if err != nil {
 					return err
 				}
-
-				c.append(indent+"\t\t", "return")
-				c.append(indent+"\t", "}") // end of function definition
-
-				c.append(indent+"\t", "out.", keyPrefix+pascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
-
-				delete(c.convStructMap, toFieldType.Name)
-				c.append(indent, "}") // end of scope
 			} else {
 				err := c.genConverterForStruct(
 					toField.Name,
@@ -813,7 +814,13 @@ func (c *TypeConverter) GenStructConverter(
 		}
 	}
 
-	if len(fieldMap) != 0 {
+	if c.isRecursiveStruct(toFields) || c.isRecursiveStruct(fromFields) {
+		c.useRecurGen = true
+	} else {
+		c.useRecurGen = false
+	}
+
+	if c.useRecurGen && len(fieldMap) != 0 {
 		c.append("inOriginal := in; _ = inOriginal")
 		c.append("outOriginal := out; _ = outOriginal")
 	}
@@ -873,10 +880,12 @@ func (f *FieldAssignment) IsTransform() bool {
 	fromI := strings.Index(f.FromIdentifier, ".") + 1
 	toI := strings.Index(f.ToIdentifier, ".") + 1
 
+	// make sure FromIdentifier and ToIdentifier have valid prefixes
 	if (f.FromIdentifier[:fromI] != "in." && f.FromIdentifier[:fromI] != "inOriginal.") || f.ToIdentifier[:toI] != "out." {
 		panic("isTransform check called on unexpected input  fromIdentifer " + f.FromIdentifier + " toIdentifer " + f.ToIdentifier)
 	}
 
+	// it's a transform when FromIdentifier != ToIdentifier (after removing prefix)
 	return f.FromIdentifier[fromI:] != f.ToIdentifier[toI:]
 }
 
@@ -887,6 +896,7 @@ func checkOptionalNil(
 	uninitialized map[string]*fieldStruct,
 	toIdentifier string,
 	prevKeyPrefixes []string,
+	useRecurGen bool,
 ) []string {
 	var ret = make([]string, 0)
 	if len(uninitialized) < 1 {
@@ -898,7 +908,12 @@ func checkOptionalNil(
 	}
 
 	toIdentifier = strings.TrimPrefix(strings.TrimPrefix(toIdentifier, "out."), "outOriginal.")
-	completeID := "outOriginal." + strings.Join(append(prevKeyPrefixes, toIdentifier), ".")
+
+	completeID := "out."
+	if useRecurGen {
+		completeID = "outOriginal."
+	}
+	completeID += strings.Join(append(prevKeyPrefixes, toIdentifier), ".")
 
 	sort.Strings(keys)
 	for _, id := range keys {
@@ -913,18 +928,18 @@ func checkOptionalNil(
 }
 
 // Generate generates assignment
-func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct, prevKeyPrefixes []string) string {
+func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct, prevKeyPrefixes []string, useRecurGen bool) string {
 	var lines = make([]string, 0)
 	if !f.IsTransform() {
 		//  do an extra nil check for Overrides
 		if (!f.From.Required && f.To.Required) || f.ExtraNilCheck {
 			// need to nil check otherwise we could be cast or deref nil
 			lines = append(lines, indent+"if "+f.FromIdentifier+" != nil {")
-			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
+			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
 			lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			lines = append(lines, indent+"}")
 		} else {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 		}
 		return strings.Join(lines, "\n")
@@ -937,13 +952,13 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 			checks = checks[:len(checks)-1]
 		}
 		if len(checks) == 0 {
-			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
+			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
 			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 			return strings.Join(lines, "\n")
 		}
 	}
 	lines = append(lines, indent+"if "+strings.Join(checks, " && ")+" {")
-	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes)...)
+	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
 	lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
 	lines = append(lines, indent+"}")
 	// TODO else?  log? should this silently eat intermediate nils as none-assignment,  should set nil?
@@ -957,12 +972,12 @@ func (c *TypeConverter) assignWithOverride(
 	prevKeyPrefixes []string,
 ) {
 	if overrideAssign != nil && overrideAssign.FromIdentifier != "" {
-		c.append(overrideAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
+		c.append(overrideAssign.Generate(indent, c.uninitialized, prevKeyPrefixes, c.useRecurGen))
 		defaultAssign.ExtraNilCheck = true
-		c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
+		c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes, c.useRecurGen))
 		return
 	}
-	c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes))
+	c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes, c.useRecurGen))
 }
 
 func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
@@ -1033,7 +1048,7 @@ func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
 			TypeCast:       overrideTypeCast,
 		}
 	}
-	// generate assignement
+	// generate assignment
 	c.assignWithOverride(indent, defaultAssignment, overrideAssignment, prevKeyPrefixes)
 	return nil
 }
@@ -1046,4 +1061,88 @@ func (c *TypeConverter) updateFieldMap(currentMap map[string]FieldMapperEntry, t
 		}
 	}
 	return newMap
+}
+
+// Generate a wrapper for genConverterForStruct so its generated code can be re-used later
+func (c *TypeConverter) genConverterForStructWrapped(
+	toField *compile.FieldSpec,
+	toFieldType *compile.StructSpec,
+	toTypeName string,
+	toSubIdentifier string,
+	fromTypeName string,
+	fromIdentifier string,
+	stFromType compile.TypeSpec,
+	fieldMap map[string]FieldMapperEntry,
+	prevKeyPrefixes []string,
+	indent string,
+) error {
+	converterMethodName := c.makeUniqIdentifier("convert" + toFieldType.Name + "Helper")
+	c.convStructMap[toFieldType.Name] = converterMethodName
+
+	funcSignature := "func(in *" + fromTypeName + ") (out *" + toTypeName + ")"
+
+	c.append(indent, "var ", converterMethodName, " ", funcSignature) // function declaration
+	c.append(indent, converterMethodName, " = ", funcSignature, " {") // begin function definition
+
+	err := c.genConverterForStruct(
+		toField.Name,
+		toFieldType,
+		toField.Required,
+		stFromType,
+		"in",
+		"",
+		"",
+		indent+"\t",
+		c.updateFieldMap(fieldMap, toSubIdentifier),
+		append(prevKeyPrefixes, toSubIdentifier),
+	)
+	if err != nil {
+		return err
+	}
+
+	c.append(indent+"\t", "return")
+	c.append(indent, "}") // end of function definition
+
+	c.append(indent, "out.", toSubIdentifier, " = ", converterMethodName, "(", fromIdentifier, ")")
+
+	delete(c.convStructMap, toFieldType.Name)
+
+	return nil
+}
+
+func isRecursiveStruct(spec compile.TypeSpec, seenSoFar map[string]bool) bool {
+	switch t := spec.(type) {
+	case *compile.StructSpec:
+		if _, found := seenSoFar[t.Name]; found {
+			return true
+		}
+		seenSoFar[t.Name] = true
+
+		for _, field := range t.Fields {
+			if isRecursiveStruct(field.Type, seenSoFar) {
+				return true
+			}
+		}
+		delete(seenSoFar, t.Name)
+
+	case *compile.MapSpec:
+		if isRecursiveStruct(t.KeySpec, seenSoFar) || isRecursiveStruct(t.ValueSpec, seenSoFar) {
+			return true
+		}
+	case *compile.ListSpec:
+		if isRecursiveStruct(t.ValueSpec, seenSoFar) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *TypeConverter) isRecursiveStruct(fields []*compile.FieldSpec) bool {
+	for _, field := range fields {
+		if isRecursiveStruct(field.Type, make(map[string]bool)) {
+			return true
+		}
+	}
+	return false
 }
