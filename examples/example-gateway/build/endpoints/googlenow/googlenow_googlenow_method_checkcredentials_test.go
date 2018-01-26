@@ -55,12 +55,12 @@ func TestCheckCredentialsSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameCheckCredentialsSuccessfulRequest(),
 				"../../..",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirNameCheckCredentialsSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "production.json",
+				"config", "example-gateway", "test.json",
 			),
 		},
 	})

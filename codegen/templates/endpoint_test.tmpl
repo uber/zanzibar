@@ -49,12 +49,12 @@ func Test{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}OKRes
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "{{$testFixture.TestServiceName}}", "production.json",
+				"config", "{{$testFixture.TestServiceName}}", "test.json",
 			),
 		},
 	})

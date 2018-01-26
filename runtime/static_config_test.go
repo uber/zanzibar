@@ -296,7 +296,7 @@ func (writer *fixtureWriter) Close() {
 
 func TestCanReadFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -308,7 +308,7 @@ func TestCanReadFromFile(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -344,7 +344,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -352,7 +352,7 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -390,7 +390,7 @@ func TestReadFromSeedConfigIntoNil(t *testing.T) {
 
 func TestSeedConfigOverwritesFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshal(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -398,7 +398,7 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, map[string]interface{}{
 		"a": "c",
@@ -412,7 +412,7 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 
 func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshal(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -423,7 +423,7 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 		zanzibar.ConfigFilePath(
 			filepath.Join(testDir, "config", "local.json"),
@@ -438,7 +438,7 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 
 func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshal(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -450,7 +450,7 @@ func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 		zanzibar.ConfigFileContents(bytes),
 	}, nil)
@@ -489,7 +489,7 @@ func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
 func TestSupportsNonExistantFiles(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 		zanzibar.ConfigFilePath(
 			filepath.Join(testDir, "config", "local.json"),
@@ -505,7 +505,7 @@ func TestSupportsNonExistantFiles(t *testing.T) {
 
 func TestThrowsForInvalidJSONFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshal(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -515,7 +515,7 @@ func TestThrowsForInvalidJSONFile(t *testing.T) {
 	assert.Panics(t, func() {
 		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 			zanzibar.ConfigFilePath(
-				filepath.Join(testDir, "config", "production.json"),
+				filepath.Join(testDir, "config", "test.json"),
 			),
 			zanzibar.ConfigFilePath(
 				filepath.Join(testDir, "config", "local.json"),
@@ -528,7 +528,7 @@ func TestThrowsForInvalidJSONFile(t *testing.T) {
 
 func TestThrowsForInvalidJSONContents(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshal(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -537,7 +537,7 @@ func TestThrowsForInvalidJSONContents(t *testing.T) {
 	assert.Panics(t, func() {
 		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 			zanzibar.ConfigFilePath(
-				filepath.Join(testDir, "config", "production.json"),
+				filepath.Join(testDir, "config", "test.json"),
 			),
 			zanzibar.ConfigFileContents([]byte("{...}")),
 		}, nil)
@@ -556,7 +556,7 @@ func TestThrowsForReadingBadFiles(t *testing.T) {
 
 func TestGetStructFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -566,7 +566,7 @@ func TestGetStructFromDisk(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -583,14 +583,14 @@ func TestGetStructFromDisk(t *testing.T) {
 
 func TestInspectMalformedDataFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": []byte(
+		"config/test.json": []byte(
 			"{ \"a\": { \"c\": ... }, \"b\": \"c\" }",
 		),
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -603,14 +603,14 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 
 func TestReadStructIntoWrongType(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a": true,
 		}),
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -627,7 +627,7 @@ func TestReadStructIntoWrongType(t *testing.T) {
 
 func TestOverwriteStructFromSeedConfig(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -637,7 +637,7 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, map[string]interface{}{
 		"a": struct {
@@ -662,7 +662,7 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 
 func TestInspectFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -677,7 +677,7 @@ func TestInspectFromFile(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 
@@ -698,7 +698,7 @@ func TestInspectFromFile(t *testing.T) {
 
 func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/production.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshal(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -709,7 +709,7 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "production.json"),
+			filepath.Join(testDir, "config", "test.json"),
 		),
 	}, nil)
 

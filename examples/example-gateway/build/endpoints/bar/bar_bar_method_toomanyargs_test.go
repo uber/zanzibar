@@ -55,12 +55,12 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameTooManyArgsSuccessfulRequest(),
 				"../../..",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirNameTooManyArgsSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "production.json",
+				"config", "example-gateway", "test.json",
 			),
 		},
 	})

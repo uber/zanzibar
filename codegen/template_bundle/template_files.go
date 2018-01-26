@@ -594,12 +594,12 @@ func Test{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}OKRes
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "production.json",
+				"config", "test.json",
 			),
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "{{$testFixture.TestServiceName}}", "production.json",
+				"config", "{{$testFixture.TestServiceName}}", "test.json",
 			),
 		},
 	})
@@ -689,7 +689,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3809, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

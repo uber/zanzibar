@@ -43,12 +43,12 @@ func DefaultConfigFiles(serviceName string) []string {
 		filepath.Join(
 			getDirName(),
 			"..", "..", "..", "examples", "example-gateway", "config",
-			"production.json",
+			"test.json",
 		),
 		filepath.Join(
 			getDirName(),
 			"..", "..", "..", "examples", "example-gateway", "config",
-			"example-gateway", "production.json",
+			"example-gateway", "test.json",
 		),
 	}
 }
