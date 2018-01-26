@@ -312,6 +312,10 @@ func (h *Handler) CompiledThrift(w http.ResponseWriter, r *http.Request, ps http
 	h.WriteJSON(w, http.StatusOK, module)
 }
 
+type methodFromThriftCodeResponse struct {
+	Functions []string `json:"functions"`
+}
+
 // MethodFromThriftCode returns a list of method names for a given thrift file path
 func (h *Handler) MethodFromThriftCode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := r.Header.Get(h.gatewayHeader)
@@ -328,7 +332,7 @@ func (h *Handler) MethodFromThriftCode(w http.ResponseWriter, r *http.Request, p
 			functionNames = append(functionNames, serviceSpec.Name+"::"+functionSpec.Name)
 		}
 	}
-	h.WriteJSON(w, http.StatusOK, functionNames)
+	h.WriteJSON(w, http.StatusOK, &methodFromThriftCodeResponse{Functions: functionNames})
 }
 
 type rawCodeRequest struct {
