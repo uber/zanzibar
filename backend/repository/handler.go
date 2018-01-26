@@ -97,6 +97,7 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.GET("/thrift-list", h.ThriftList)
 	r.GET("/thrift-file/*path", h.ThriftFile)
 	r.GET("/thrift-file-compiled/*path", h.CompiledThrift)
+	r.GET("/thrift-method-parsed/*path", h.MethodFromThriftCode)
 	r.POST("/validate-updates", h.ValidateUpdates)
 	r.POST("/create-diff", h.GenerateDiff)
 	r.POST("/land-diff", h.LandDiff)
@@ -309,6 +310,25 @@ func (h *Handler) CompiledThrift(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 	h.WriteJSON(w, http.StatusOK, module)
+}
+
+// MethodFromThriftCode returns a list of method names for a given thrift file path
+func (h *Handler) MethodFromThriftCode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := r.Header.Get(h.gatewayHeader)
+	path := strings.TrimLeft(ps.ByName("path"), "/")
+	module, err := h.Manager.CompileThriftFile(id, path)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to compile thrift file from the given path"))
+		return
+	}
+
+	var functionNames []string
+	for _, serviceSpec := range module.Services {
+		for _, functionSpec := range serviceSpec.Functions {
+			functionNames = append(functionNames, serviceSpec.Name+"::"+functionSpec.Name)
+		}
+	}
+	h.WriteJSON(w, http.StatusOK, functionNames)
 }
 
 type rawCodeRequest struct {
