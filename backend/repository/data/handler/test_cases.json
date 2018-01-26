@@ -2044,12 +2044,12 @@
 			"code": 200,
 			"body": {
 				"functions": [
-					"SimpleService::compare",
 					"SimpleService::call",
+					"SimpleService::compare",
 					"SimpleService::ping",
-					"SimpleService::trans",
 					"SimpleService::sillyNoop",
 					"SimpleService::testUuid",
+					"SimpleService::trans",
 					"SimpleService::urlTest"
 				]
 			}
