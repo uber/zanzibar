@@ -694,11 +694,7 @@ func (c *TypeConverter) genStructConverter(
 				stFromType = fromField.Type
 				stFromPrefix = keyPrefix + pascalCase(fromField.Name)
 
-				var err error
-				fromTypeName, err = c.getIdentifierName(stFromType)
-				if err != nil {
-					fromTypeName = ""
-				}
+				fromTypeName, _ = c.getIdentifierName(stFromType)
 			}
 
 			toTypeName, err := c.getIdentifierName(toFieldType)
@@ -810,11 +806,7 @@ func (c *TypeConverter) GenStructConverter(
 		}
 	}
 
-	if c.isRecursiveStruct(toFields) || c.isRecursiveStruct(fromFields) {
-		c.useRecurGen = true
-	} else {
-		c.useRecurGen = false
-	}
+	c.useRecurGen = c.isRecursiveStruct(toFields) || c.isRecursiveStruct(fromFields)
 
 	if c.useRecurGen && len(fieldMap) != 0 {
 		c.append("inOriginal := in; _ = inOriginal")
