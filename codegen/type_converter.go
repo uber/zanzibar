@@ -82,7 +82,6 @@ func NewTypeConverter(h PackageNameResolver) *TypeConverter {
 		Helper:        h,
 		uninitialized: make(map[string]*fieldStruct),
 		convStructMap: make(map[string]string),
-		useRecurGen:   false,
 	}
 }
 
@@ -326,7 +325,7 @@ func (c *TypeConverter) genConverterForList(
 			fromFieldType.ValueSpec,
 			valID,
 			keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
-			strings.TrimPrefix(strings.TrimPrefix(fromIdentifier, "in."), "inOriginal.")+"["+indexID+"]",
+			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
 			nestedIndent,
 			nil,
 			nil,
@@ -352,7 +351,7 @@ func (c *TypeConverter) genConverterForList(
 				overriddenFieldType.ValueSpec,
 				valID,
 				keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
-				strings.TrimPrefix(strings.TrimPrefix(overriddenIdentifier, "in."), "inOriginal.")+"["+indexID+"]",
+				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
 				nestedIndent,
 				nil,
 				nil,
@@ -489,7 +488,7 @@ func (c *TypeConverter) genConverterForMap(
 			fromFieldType.ValueSpec,
 			valID,
 			keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
-			strings.TrimPrefix(strings.TrimPrefix(fromIdentifier, "in."), "inOriginal.")+"["+keyID+"]",
+			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
 			nestedIndent,
 			nil,
 			nil,
@@ -516,7 +515,7 @@ func (c *TypeConverter) genConverterForMap(
 				overriddenFieldType.ValueSpec,
 				valID,
 				keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
-				strings.TrimPrefix(strings.TrimPrefix(overriddenIdentifier, "in."), "inOriginal.")+"["+keyID+"]",
+				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
 				nestedIndent,
 				nil,
 				nil,
@@ -904,7 +903,7 @@ func checkOptionalNil(
 		keys = append(keys, k)
 	}
 
-	toIdentifier = strings.TrimPrefix(strings.TrimPrefix(toIdentifier, "out."), "outOriginal.")
+	toIdentifier = trimAnyPrefix(toIdentifier, "out.", "outOriginal.")
 
 	completeID := "out."
 	if useRecurGen {
@@ -1155,4 +1154,14 @@ func (c *TypeConverter) isRecursiveStruct(fields []*compile.FieldSpec) bool {
 		}
 	}
 	return false
+}
+
+func trimAnyPrefix(str string, prefixes ...string) string {
+	for _, p := range prefixes {
+		if strings.HasPrefix(str, p) {
+			str = strings.TrimPrefix(str, p)
+			break
+		}
+	}
+	return str
 }
