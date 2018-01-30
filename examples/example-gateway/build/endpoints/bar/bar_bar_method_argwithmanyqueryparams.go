@@ -308,6 +308,29 @@ func convertBarArgWithManyQueryParamsClientResponse(in *clientsBarBar.BarRespons
 		out.MapIntWithoutRange[key3] = int32(value4)
 	}
 	out.BinaryField = []byte(in.BinaryField)
+	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
+	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
+		if in != nil {
+			out = &endpointsBarBar.BarResponse{}
+			out.StringField = string(in.StringField)
+			out.IntWithRange = int32(in.IntWithRange)
+			out.IntWithoutRange = int32(in.IntWithoutRange)
+			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
+			for key6, value7 := range in.MapIntWithRange {
+				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
+			}
+			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
+			for key8, value9 := range in.MapIntWithoutRange {
+				out.MapIntWithoutRange[key8] = int32(value9)
+			}
+			out.BinaryField = []byte(in.BinaryField)
+			out.NextResponse = convertBarResponseHelper5(in.NextResponse)
+		} else {
+			out = nil
+		}
+		return
+	}
+	out.NextResponse = convertBarResponseHelper5(in.NextResponse)
 
 	return out
 }

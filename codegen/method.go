@@ -871,7 +871,8 @@ func (ms *MethodSpec) setTypeConverters(
 
 	// TODO: support non-struct return types
 	respType := funcSpec.ResultSpec.ReturnType
-	downstreamRespType := funcSpec.ResultSpec.ReturnType
+
+	downstreamRespType := downstreamMethod.CompiledThriftSpec.ResultSpec.ReturnType
 
 	if respType == nil || downstreamRespType == nil {
 		return nil

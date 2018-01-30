@@ -39,6 +39,16 @@ var barResponseBytes = `{
 	"binaryField":"d29ybGQ="
 }`
 
+var barResponseBytesRecursive = `{
+	"stringField":"new str val",
+	"intWithRange":4,
+	"intWithoutRange":6,
+	"mapIntWithRange":{},
+	"mapIntWithoutRange":{},
+	"binaryField":"aGV5IHdvcmxk",
+	"nextResponse":` + barResponseBytes + `
+}`
+
 func TestBarWithQueryParamsCall(t *testing.T) {
 	var counter int = 0
 
@@ -86,6 +96,55 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 	}
 
 	assert.Equal(t, string(respBytes), compactStr(barResponseBytes))
+}
+
+func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
+	var counter int = 0
+
+	gateway, err := testGateway.CreateGateway(t, nil, &testGateway.Options{
+		KnownHTTPBackends: []string{"bar"},
+		TestBinary:        util.DefaultMainFile("example-gateway"),
+		ConfigFiles:       util.DefaultConfigFiles("example-gateway"),
+	})
+	if !assert.NoError(t, err, "got bootstrap err") {
+		return
+	}
+	defer gateway.Close()
+
+	gateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/argWithQueryParams",
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t,
+				"name=foo&userUUID=bar",
+				r.URL.RawQuery,
+			)
+
+			w.WriteHeader(200)
+			if _, err := w.Write([]byte(barResponseBytesRecursive)); err != nil {
+				t.Fatal("can't write fake response")
+			}
+			counter++
+		},
+	)
+
+	res, err := gateway.MakeRequest(
+		"GET",
+		"/bar/argWithQueryParams?name=foo&userUUID=bar",
+		nil, nil,
+	)
+	if !assert.NoError(t, err, "got http error") {
+		return
+	}
+
+	assert.Equal(t, "200 OK", res.Status)
+	assert.Equal(t, 1, counter)
+
+	respBytes, err := ioutil.ReadAll(res.Body)
+	if !assert.NoError(t, err, "got http resp error") {
+		return
+	}
+
+	assert.Equal(t, string(respBytes), compactStr(barResponseBytesRecursive))
 }
 
 func TestBarWithQueryParamsCallWithMalformedQuery(t *testing.T) {

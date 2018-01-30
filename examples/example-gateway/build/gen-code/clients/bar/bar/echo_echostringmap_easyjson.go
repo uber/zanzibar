@@ -219,6 +219,16 @@ func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				out.BinaryField = in.Bytes()
 			}
 			BinaryFieldSet = true
+		case "nextResponse":
+			if in.IsNull() {
+				in.Skip()
+				out.NextResponse = nil
+			} else {
+				if out.NextResponse == nil {
+					out.NextResponse = new(BarResponse)
+				}
+				easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(in, &*out.NextResponse)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -317,6 +327,18 @@ func easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"binaryField\":")
 	out.Base64Bytes(in.BinaryField)
+	if in.NextResponse != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"nextResponse\":")
+		if in.NextResponse == nil {
+			out.RawString("null")
+		} else {
+			easyjsonD9ff8b44EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBar(out, *in.NextResponse)
+		}
+	}
 	out.RawByte('}')
 }
 func easyjsonD9ff8b44DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsBarBarEchoEchoStringMap1(in *jlexer.Lexer, out *Echo_EchoStringMap_Args) {

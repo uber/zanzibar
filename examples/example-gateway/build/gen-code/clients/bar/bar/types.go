@@ -523,6 +523,7 @@ type BarResponse struct {
 	MapIntWithRange    map[UUID]int32   `json:"mapIntWithRange,required"`
 	MapIntWithoutRange map[string]int32 `json:"mapIntWithoutRange,required"`
 	BinaryField        []byte           `json:"binaryField,required"`
+	NextResponse       *BarResponse     `json:"nextResponse,omitempty"`
 }
 
 type _Map_UUID_I32_MapItemList map[UUID]int32
@@ -612,7 +613,7 @@ func (_Map_String_I32_MapItemList) Close() {}
 //   }
 func (v *BarResponse) ToWire() (wire.Value, error) {
 	var (
-		fields [6]wire.Field
+		fields [7]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -665,6 +666,14 @@ func (v *BarResponse) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 6, Value: w}
 	i++
+	if v.NextResponse != nil {
+		w, err = v.NextResponse.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 7, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -729,6 +738,12 @@ func _Map_String_I32_Read(m wire.MapItemList) (map[string]int32, error) {
 	})
 	m.Close()
 	return o, err
+}
+
+func _BarResponse_Read(w wire.Value) (*BarResponse, error) {
+	var v BarResponse
+	err := v.FromWire(w)
+	return &v, err
 }
 
 // FromWire deserializes a BarResponse struct from its Thrift-level
@@ -808,6 +823,14 @@ func (v *BarResponse) FromWire(w wire.Value) error {
 				}
 				binaryFieldIsSet = true
 			}
+		case 7:
+			if field.Value.Type() == wire.TStruct {
+				v.NextResponse, err = _BarResponse_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -845,7 +868,7 @@ func (v *BarResponse) String() string {
 		return "<nil>"
 	}
 
-	var fields [6]string
+	var fields [7]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
@@ -859,6 +882,10 @@ func (v *BarResponse) String() string {
 	i++
 	fields[i] = fmt.Sprintf("BinaryField: %v", v.BinaryField)
 	i++
+	if v.NextResponse != nil {
+		fields[i] = fmt.Sprintf("NextResponse: %v", v.NextResponse)
+		i++
+	}
 
 	return fmt.Sprintf("BarResponse{%v}", strings.Join(fields[:i], ", "))
 }
@@ -918,6 +945,9 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 		return false
 	}
 	if !bytes.Equal(v.BinaryField, rhs.BinaryField) {
+		return false
+	}
+	if !((v.NextResponse == nil && rhs.NextResponse == nil) || (v.NextResponse != nil && rhs.NextResponse != nil && v.NextResponse.Equals(rhs.NextResponse))) {
 		return false
 	}
 
