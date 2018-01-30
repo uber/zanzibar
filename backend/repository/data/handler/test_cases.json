@@ -2032,25 +2032,38 @@
 		}
 	},
 	{
-		"name": "get the list of methods for a given thrift path",
+		"name": "get the list of methods for a given parse thrift definitions",
 		"request": {
-			"method": "GET",
-			"url": "/thrift-method-parsed/endpoints/baz/baz.thrift",
-			"header": {
-				"gateway-id": "example-gateway"
+			"method": "POST",
+			"url": "/thrift-method-parsed",
+			"body": {
+				"rawCode": "namespace java com.uber.zanzibar.clients.baz\n\ninclude \"base.thrift\"\n\nconst string MyTestString = mts\n\nenum Fruit {\n\tAPPLE = 0,\n\tBANANA = 1\n}\n\ntypedef string StringTypedefTest\n\nstruct BazRequest {\n\t1: required bool b1\n\t2: required string s2\n\t3: required i32 i3\n}\n\nexception AuthErr {\n\t1: required string message\n}\n\nexception OtherAuthErr {\n\t1: required string message\n}\n\nservice SimpleService {\n\tvoid call (\n\t\t1: required BazRequest arg\n\t) throws (\n\t\t1: AuthErr authErr\n\t) (\n\t\tzanzibar.http.reqHeaders = \"x-uuid,x-token\"\n\t\tzanzibar.http.resHeaders = \"some-res-header\"\n\t)\n\n\tbase.BazResponse compare (\n\t\t1: required BazRequest arg1\n\t\t2: required BazRequest arg2\n\t) throws (\n\t\t1: AuthErr authErr\n\t\t2: OtherAuthErr otherAuthErr\n\t)\n\n\tbase.BazResponse ping ()\n\n\tvoid sillyNoop () throws (\n\t\t1: AuthErr authErr\n\t\t2: base.ServerErr serverErr\n\t)\n}\n\nservice SecondService {\n\tbinary echoBinary (\n\t\t1: required binary arg\n\t)\n\n\tbool echoBool (\n\t\t1: required bool arg\n\t)\n\n\tdouble echoDouble (\n\t\t1: required double arg\n\t)\n\n\tFruit echoEnum (\n\t\t1: optional Fruit arg = Fruit.APPLE\n\t)\n\n\ti16 echoI16 (\n\t\t1: required i16 arg\n\t)\n\n\ti32 echoI32 (\n\t\t1: required i32 arg\n\t)\n\n\ti64 echoI64 (\n\t\t1: required i64 arg\n\t)\n\n\tbyte echoI8 (\n\t\t1: required byte arg\n\t)\n\n\tstring echoString (\n\t\t1: required string arg\n\t)\n\n\tlist\u003cstring\u003e echoStringList (\n\t\t1: required list\u003cstring\u003e arg\n\t)\n\n\tmap\u003cstring, base.BazResponse\u003e echoStringMap (\n\t\t1: required map\u003cstring, base.BazResponse\u003e arg\n\t)\n\n\tset\u003cstring\u003e echoStringSet (\n\t\t1: required set\u003cstring\u003e arg\n\t)\n\n\tlist\u003cbase.BazResponse\u003e echoStructList (\n\t\t1: required list\u003cbase.BazResponse\u003e arg\n\t)\n\n\tmap\u003cbase.BazResponse, string\u003e echoStructMap (\n\t\t1: required map\u003cbase.BazResponse, string\u003e arg\n\t)\n\n\tset\u003cbase.BazResponse\u003e echoStructSet (\n\t\t1: required set\u003cbase.BazResponse\u003e arg\n\t)\n\n\tbase.UUID echoTypedef (\n\t\t1: required base.UUID arg\n\t)\n}\n\n"
 			}
 		},
 		"response": {
 			"code": 200,
 			"body": {
 				"functions": [
+					"SecondService::echoBinary",
+					"SecondService::echoBool",
+					"SecondService::echoDouble",
+					"SecondService::echoEnum",
+					"SecondService::echoI16",
+					"SecondService::echoI32",
+					"SecondService::echoI64",
+					"SecondService::echoI8",
+					"SecondService::echoString",
+					"SecondService::echoStringList",
+					"SecondService::echoStringMap",
+					"SecondService::echoStringSet",
+					"SecondService::echoStructList",
+					"SecondService::echoStructMap",
+					"SecondService::echoStructSet",
+					"SecondService::echoTypedef",
 					"SimpleService::call",
 					"SimpleService::compare",
 					"SimpleService::ping",
-					"SimpleService::sillyNoop",
-					"SimpleService::testUuid",
-					"SimpleService::trans",
-					"SimpleService::urlTest"
+					"SimpleService::sillyNoop"
 				]
 			}
 		}
