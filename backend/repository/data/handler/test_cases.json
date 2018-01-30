@@ -2079,7 +2079,7 @@
 		"response": {
 			"code": 400,
 			"body": {
-				"error": "Raw code is empty."
+				"error": "raw code is empty"
 			}
 		}
 	},
@@ -2095,7 +2095,7 @@
 		"response": {
 			"code": 400,
 			"body": {
-				"error": "Raw code failed thrift compilation.: failed to parse thrift program: parse error\n  line 1: syntax error: unexpected IDENTIFIER\n"
+				"error": "raw code failed thrift compilation: failed to parse thrift program: parse error\n  line 1: syntax error: unexpected IDENTIFIER\n"
 			}
 		}
 	},
