@@ -98,11 +98,11 @@ func (h *Handler) NewHTTPRouter() *httprouter.Router {
 	r.GET("/thrift-list", h.ThriftList)
 	r.GET("/thrift-file/*path", h.ThriftFile)
 	r.GET("/thrift-file-compiled/*path", h.CompiledThrift)
-	r.GET("/thrift-method-parsed/*path", h.MethodFromThriftCode)
 	r.POST("/validate-updates", h.ValidateUpdates)
 	r.POST("/create-diff", h.GenerateDiff)
 	r.POST("/land-diff", h.LandDiff)
 	r.POST("/thrift-file-parsed", h.ThriftModuleToCode)
+	r.POST("/thrift-method-parsed", h.ThriftCodeToMethods)
 	r.POST("/thrift-file-code/*path", h.CodeThrift)
 	return r
 }
@@ -313,30 +313,6 @@ func (h *Handler) CompiledThrift(w http.ResponseWriter, r *http.Request, ps http
 	h.WriteJSON(w, http.StatusOK, module)
 }
 
-type methodFromThriftCodeResponse struct {
-	Functions []string `json:"functions"`
-}
-
-// MethodFromThriftCode returns a list of method names for a given thrift file path
-func (h *Handler) MethodFromThriftCode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	id := r.Header.Get(h.gatewayHeader)
-	path := strings.TrimLeft(ps.ByName("path"), "/")
-	module, err := h.Manager.CompileThriftFile(id, path)
-	if err != nil {
-		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to compile thrift file from the given path"))
-		return
-	}
-
-	var functionNames []string
-	for _, serviceSpec := range module.Services {
-		for _, functionSpec := range serviceSpec.Functions {
-			functionNames = append(functionNames, serviceSpec.Name+"::"+functionSpec.Name)
-		}
-	}
-	sort.Strings(functionNames)
-	h.WriteJSON(w, http.StatusOK, &methodFromThriftCodeResponse{Functions: functionNames})
-}
-
 type rawCodeRequest struct {
 	Content string `json:"content"`
 }
@@ -410,6 +386,40 @@ func (h *Handler) ThriftModuleToCode(w http.ResponseWriter, r *http.Request, ps 
 
 	code := req.Code()
 	h.WriteJSON(w, http.StatusOK, &thriftToCodeResponse{Content: code})
+}
+
+type thriftCodeToMethodsRequest struct {
+	RawCode string `json:"rawCode"`
+}
+
+type thriftCodeToMethodsResponse struct {
+	Functions []string `json:"functions"`
+}
+
+// ThriftCodeToMethods returns a list of method names for a given thrift file path
+func (h *Handler) ThriftCodeToMethods(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	req := &thriftCodeToMethodsRequest{}
+
+	_, err := UnmarshalJSONBody(r, req)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal request body for converting to a list of methods"))
+		return
+	}
+
+	module, err := h.Manager.CompileThriftCode(req.RawCode)
+	if err != nil {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal bytes to thrift for converting to a list of methods"))
+		return
+	}
+
+	var functionNames []string
+	for _, serviceSpec := range module.Services {
+		for _, functionSpec := range serviceSpec.Functions {
+			functionNames = append(functionNames, serviceSpec.Name+"::"+functionSpec.Name)
+		}
+	}
+	sort.Strings(functionNames)
+	h.WriteJSON(w, http.StatusOK, &thriftCodeToMethodsResponse{Functions: functionNames})
 }
 
 type generateDiffResponse struct {

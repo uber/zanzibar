@@ -179,6 +179,11 @@ func (m *Manager) CompileThriftFile(gateway, path string) (*Module, error) {
 	return CompileThriftFile(absPath, prefix)
 }
 
+// CompileThriftCode parses raw bytes in to compiled thrift.
+func (m *Manager) CompileThriftCode(rawCode string) (*Module, error) {
+	return CompileThriftCode([]byte(rawCode), "", "")
+}
+
 // CodeThriftFile returns the content and meta data of a file in a gateway.
 func (m *Manager) CodeThriftFile(rawCode, gateway, path string) (*Module, error) {
 	repo, ok := m.RepoMap[gateway]
