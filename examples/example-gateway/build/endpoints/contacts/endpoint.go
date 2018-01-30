@@ -35,9 +35,9 @@ type Endpoint interface {
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		ContactsSaveContactsHandler: NewContactsSaveContactsHandler(g, deps),
+		ContactsSaveContactsHandler: NewContactsSaveContactsHandler(deps),
 	}
 }
 

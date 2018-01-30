@@ -99,25 +99,25 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barClientGenerated.NewClient(g, &barClientModule.Dependencies{
+	initializedClientDependencies.Bar = barClientGenerated.NewClient(&barClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Baz = bazClientGenerated.NewClient(g, &bazClientModule.Dependencies{
+	initializedClientDependencies.Baz = bazClientGenerated.NewClient(&bazClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(g, &contactsClientModule.Dependencies{
+	initializedClientDependencies.Contacts = contactsClientGenerated.NewClient(&contactsClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(g, &googlenowClientModule.Dependencies{
+	initializedClientDependencies.GoogleNow = googlenowClientGenerated.NewClient(&googlenowClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Multi = multiClientGenerated.NewClient(g, &multiClientModule.Dependencies{
+	initializedClientDependencies.Multi = multiClientGenerated.NewClient(&multiClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
-	initializedMiddlewareDependencies.Example = exampleMiddlewareGenerated.NewMiddleware(g, &exampleMiddlewareModule.Dependencies{
+	initializedMiddlewareDependencies.Example = exampleMiddlewareGenerated.NewMiddleware(&exampleMiddlewareModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &exampleMiddlewareModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
@@ -126,7 +126,7 @@ func InitializeDependencies(
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
-	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(g, &barEndpointModule.Dependencies{
+	initializedEndpointDependencies.Bar = barEndpointGenerated.NewEndpoint(&barEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &barEndpointModule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -135,31 +135,31 @@ func InitializeDependencies(
 			Example: initializedMiddlewareDependencies.Example,
 		},
 	})
-	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(g, &bazEndpointModule.Dependencies{
+	initializedEndpointDependencies.Baz = bazEndpointGenerated.NewEndpoint(&bazEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bazEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(g, &baztchannelEndpointModule.Dependencies{
+	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(&baztchannelEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(g, &contactsEndpointModule.Dependencies{
+	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(&contactsEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsEndpointModule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
-	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(g, &googlenowEndpointModule.Dependencies{
+	initializedEndpointDependencies.Googlenow = googlenowEndpointGenerated.NewEndpoint(&googlenowEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &googlenowEndpointModule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
-	initializedEndpointDependencies.Multi = multiEndpointGenerated.NewEndpoint(g, &multiEndpointModule.Dependencies{
+	initializedEndpointDependencies.Multi = multiEndpointGenerated.NewEndpoint(&multiEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &multiEndpointModule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,

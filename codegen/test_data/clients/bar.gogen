@@ -200,10 +200,7 @@ type barClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func NewClient(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.bar.ip")
 	port := deps.Default.Config.MustGetInt("clients.bar.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

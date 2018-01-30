@@ -163,10 +163,7 @@ type {{$handlerName}} struct {
 }
 
 // New{{$handlerName}} creates a handler
-func New{{$handlerName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *{{$handlerName}} {
+func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
@@ -177,7 +174,6 @@ func New{{$handlerName}}(
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-				g,
 				{{$middleware.Name}}.Options{
 				{{range $key, $value := $middleware.PrettyOptions -}}
 					{{$key}} : {{$value}},
@@ -470,7 +466,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9890, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9857, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -492,12 +488,12 @@ type Endpoint interface{
 
 // NewEndpoint returns a collection of endpoints that can be registered on
 // a gateway
-func NewEndpoint(g *zanzibar.Gateway, deps *module.Dependencies) Endpoint {
+func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
 		{{- range $idx, $meta := $endpointMeta }}
 		{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
 		{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-		{{$handlerName}}: New{{$handlerName}}(g, deps),
+		{{$handlerName}}: New{{$handlerName}}(deps),
 		{{- end}}
 	}
 }
@@ -538,7 +534,7 @@ func endpoint_collectionTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1615, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_collection.tmpl", size: 1591, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -910,10 +906,7 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
@@ -1139,7 +1132,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7332, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1370,15 +1363,15 @@ type Middleware struct {
 }
 
 // NewMiddleware is a factory method for the struct
-func NewMiddleware(g *zanzibar.Gateway, deps *module.Dependencies) Middleware {
+func NewMiddleware(deps *module.Dependencies) Middleware {
 	return Middleware {
 		Deps: deps,
 	}
 }
 
 // NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
-func (m *Middleware) NewMiddlewareHandle(g *zanzibar.Gateway, o handle.Options) zanzibar.MiddlewareHandle {
-	return handle.NewMiddleware(g, m.Deps, o)
+func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareHandle {
+	return handle.NewMiddleware(m.Deps, o)
 }
 
 
@@ -1394,7 +1387,7 @@ func middlewareTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "middleware.tmpl", size: 763, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "middleware.tmpl", size: 718, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1451,7 +1444,7 @@ func InitializeDependencies(
 	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
 
 	{{- range $idx, $dependency := $moduleInstances}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(g, &{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
+	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(&{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
@@ -1487,7 +1480,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3156, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1643,10 +1636,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
@@ -1779,7 +1769,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5126, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5100, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1929,10 +1919,7 @@ import (
 {{$genCodePkg := .Method.GenCodePkgName -}}
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
-func New{{$handlerName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *{{$handlerName}} {
+func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Clients: deps.Client,
 	}
@@ -2067,7 +2054,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4619, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4593, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

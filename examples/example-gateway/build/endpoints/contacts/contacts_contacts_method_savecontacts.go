@@ -42,10 +42,7 @@ type ContactsSaveContactsHandler struct {
 }
 
 // NewContactsSaveContactsHandler creates a handler
-func NewContactsSaveContactsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *ContactsSaveContactsHandler {
+func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveContactsHandler {
 	handler := &ContactsSaveContactsHandler{
 		Clients: deps.Client,
 	}

@@ -48,10 +48,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service corge.
-func NewClient(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func NewClient(deps *module.Dependencies) Client {
 	serviceName := deps.Default.Config.MustGetString("clients.corge.serviceName")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.corge.routingKey") {

@@ -45,10 +45,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
-func {{$exportName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	{{- /* this is the service discovery service name */}}
 	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
 	var routingKey string
