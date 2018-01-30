@@ -2069,6 +2069,37 @@
 		}
 	},
 	{
+		"name": "get the list of methods for a given parse thrift definitions - empty request body",
+		"request": {
+			"method": "POST",
+			"url": "/thrift-method-parsed",
+			"body": {
+			}
+		},
+		"response": {
+			"code": 400,
+			"body": {
+				"error": "Raw code is empty."
+			}
+		}
+	},
+	{
+		"name": "get the list of methods for a given parse thrift definitions - valid json without rawCode field",
+		"request": {
+			"method": "POST",
+			"url": "/thrift-method-parsed",
+			"body": {
+				"rawCode": "test"
+			}
+		},
+		"response": {
+			"code": 400,
+			"body": {
+				"error": "Raw code failed thrift compilation.: failed to parse thrift program: parse error\n  line 1: syntax error: unexpected IDENTIFIER\n"
+			}
+		}
+	},
+	{
 		"name": "get the list of all files in IDL registry",
 		"request": {
 			"method": "GET",
