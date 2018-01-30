@@ -43,10 +43,7 @@ type BarArgWithNestedQueryParamsHandler struct {
 }
 
 // NewBarArgWithNestedQueryParamsHandler creates a handler
-func NewBarArgWithNestedQueryParamsHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarArgWithNestedQueryParamsHandler {
+func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWithNestedQueryParamsHandler {
 	handler := &BarArgWithNestedQueryParamsHandler{
 		Clients: deps.Client,
 	}

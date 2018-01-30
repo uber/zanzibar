@@ -43,10 +43,7 @@ type BarHelloWorldHandler struct {
 }
 
 // NewBarHelloWorldHandler creates a handler
-func NewBarHelloWorldHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarHelloWorldHandler {
+func NewBarHelloWorldHandler(deps *module.Dependencies) *BarHelloWorldHandler {
 	handler := &BarHelloWorldHandler{
 		Clients: deps.Client,
 	}

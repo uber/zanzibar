@@ -158,10 +158,7 @@ type Client interface {
 }
 
 // NewClient returns a new TChannel client for service baz.
-func NewClient(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func NewClient(deps *module.Dependencies) Client {
 	serviceName := deps.Default.Config.MustGetString("clients.baz.serviceName")
 	var routingKey string
 	if deps.Default.Config.ContainsKey("clients.baz.routingKey") {

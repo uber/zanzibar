@@ -49,10 +49,7 @@ type {{$clientName}} struct {
 }
 
 // {{$exportName}} returns a new http client.
-func {{$exportName}}(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func {{$exportName}}(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

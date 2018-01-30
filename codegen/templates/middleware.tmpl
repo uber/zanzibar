@@ -14,15 +14,15 @@ type Middleware struct {
 }
 
 // NewMiddleware is a factory method for the struct
-func NewMiddleware(g *zanzibar.Gateway, deps *module.Dependencies) Middleware {
+func NewMiddleware(deps *module.Dependencies) Middleware {
 	return Middleware {
 		Deps: deps,
 	}
 }
 
 // NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
-func (m *Middleware) NewMiddlewareHandle(g *zanzibar.Gateway, o handle.Options) zanzibar.MiddlewareHandle {
-	return handle.NewMiddleware(g, m.Deps, o)
+func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareHandle {
+	return handle.NewMiddleware(m.Deps, o)
 }
 
 

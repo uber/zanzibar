@@ -43,10 +43,7 @@ type SimpleServiceTransHandler struct {
 }
 
 // NewSimpleServiceTransHandler creates a handler
-func NewSimpleServiceTransHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServiceTransHandler {
+func NewSimpleServiceTransHandler(deps *module.Dependencies) *SimpleServiceTransHandler {
 	handler := &SimpleServiceTransHandler{
 		Clients: deps.Client,
 	}

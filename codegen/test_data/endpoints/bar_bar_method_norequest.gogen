@@ -42,10 +42,7 @@ type BarNoRequestHandler struct {
 }
 
 // NewBarNoRequestHandler creates a handler
-func NewBarNoRequestHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *BarNoRequestHandler {
+func NewBarNoRequestHandler(deps *module.Dependencies) *BarNoRequestHandler {
 	handler := &BarNoRequestHandler{
 		Clients: deps.Client,
 	}

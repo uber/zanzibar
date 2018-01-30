@@ -55,10 +55,7 @@ type contactsClient struct {
 }
 
 // NewClient returns a new http client.
-func NewClient(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) Client {
+func NewClient(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.contacts.ip")
 	port := deps.Default.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)

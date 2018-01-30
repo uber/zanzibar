@@ -40,10 +40,7 @@ type ServiceBFrontHelloHandler struct {
 }
 
 // NewServiceBFrontHelloHandler creates a handler
-func NewServiceBFrontHelloHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *ServiceBFrontHelloHandler {
+func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHelloHandler {
 	handler := &ServiceBFrontHelloHandler{
 		Clients: deps.Client,
 	}

@@ -37,10 +37,7 @@ import (
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
-func NewSimpleServiceCallHandler(
-	g *zanzibar.Gateway,
-	deps *module.Dependencies,
-) *SimpleServiceCallHandler {
+func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHandler {
 	handler := &SimpleServiceCallHandler{
 		Clients: deps.Client,
 	}

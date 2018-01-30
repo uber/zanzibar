@@ -47,7 +47,6 @@ type MiddlewareState struct{}
 // NewMiddleware creates a new middleware that executes the next middleware
 // after performing it's operations.
 func NewMiddleware(
-	g *zanzibar.Gateway,
 	deps *module.Dependencies,
 	options Options,
 ) zanzibar.MiddlewareHandle {
