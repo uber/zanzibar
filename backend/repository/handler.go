@@ -402,13 +402,17 @@ func (h *Handler) ThriftCodeToMethods(w http.ResponseWriter, r *http.Request, _ 
 
 	_, err := UnmarshalJSONBody(r, req)
 	if err != nil {
-		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal request body for converting to a list of methods"))
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Raw code failed unmarshalling."))
+		return
+	}
+	if req.RawCode == "" {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Errorf("Raw code is empty."))
 		return
 	}
 
 	module, err := h.Manager.CompileThriftCode(req.RawCode)
 	if err != nil {
-		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal bytes to thrift for converting to a list of methods"))
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Raw code failed thrift compilation."))
 		return
 	}
 
