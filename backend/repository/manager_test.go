@@ -181,6 +181,22 @@ func TestUpdateAll(t *testing.T) {
 	}
 	endpointGroupExpFile := filepath.Join(exampleGateway, endpointCfgDir, endpointReq.ID, endpointConfigFileName)
 	testlib.CompareGoldenFile(t, endpointGroupExpFile, endpointGroupCfg)
+
+	// Try to delete a client before removing its endpoints
+	clientReq = &ClientConfig{}
+	err = readJSONFile(deleteBazClientRequestFile, clientReq)
+	if !assert.NoError(t, err, "Failed to read delete client request json") {
+		return
+	}
+	req = &UpdateRequest{
+		ThriftFiles:     []string{},
+		ClientUpdates:   []ClientConfig{*clientReq},
+		EndpointUpdates: []EndpointConfig{},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.Error(t, err, "Deleting a client should fail when dependent endpoints exist") {
+		return
+	}
 }
 
 func TestAddThriftDepedencies(t *testing.T) {

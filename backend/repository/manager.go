@@ -28,6 +28,7 @@ import (
 	"go.uber.org/thriftrw/compile"
 
 	"github.com/pkg/errors"
+	"strings"
 )
 
 const (
@@ -226,17 +227,36 @@ func (m *Manager) UpdateManagedThriftFiles(
 
 // UpdateClients updates configurations for a list of clients.
 func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientConfig) error {
+	clientDep, err := r.GetAllClientDependencies()
+	if err != nil {
+		return errors.Wrap(err, "failed to get list of dependent endpoints per client")
+	}
+
 	for i := range req {
-		thrift := req[i].ThriftFile
-		// Adds non-existing file into the repository.
-		version, versionErr := r.ThriftFileVersion(thrift)
-		if versionErr != nil {
-			if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {
-				return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
+		if req[i].MarkedForDeletion {
+			if deps, found := clientDep[req[i].Name]; found {
+				return errors.Errorf("Cannot delete client while these endpoints are associated: %s", strings.Join(deps, ", "))
 			}
-		}
-		if err := r.UpdateClientConfigs(&req[i], clientCfgDir, version); err != nil {
-			return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
+
+			if err := r.DeleteClientConfigs(req[i].Name, clientCfgDir); err != nil {
+				return errors.Wrapf(err, "failed to delete client configs for %q", req[i].Name)
+			}
+			if err := r.DeleteThriftFile(req[i].ThriftFile); err != nil {
+				return errors.Wrapf(err, "failed to delete associated thrift file %q", req[i].ThriftFile)
+			}
+
+		} else {
+			thrift := req[i].ThriftFile
+			// Adds non-existing file into the repository.
+			version, versionErr := r.ThriftFileVersion(thrift)
+			if versionErr != nil {
+				if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {
+					return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
+				}
+			}
+			if err := r.UpdateClientConfigs(&req[i], clientCfgDir, version); err != nil {
+				return errors.Wrapf(err, "failed to update client configs for %s", req[i].Name)
+			}
 		}
 	}
 	return nil

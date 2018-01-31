@@ -100,6 +100,39 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	return nil
 }
 
+// DeleteClientConfigs deletes JSON configuration files for a client update request
+func (r *Repository) DeleteClientConfigs(clientName string, clientCfgDir string) error {
+	clientPath := filepath.Join(r.absPath(clientCfgDir), clientName)
+
+	if err := os.RemoveAll(clientPath); err != nil {
+		return errors.Wrapf(err, "failed to remove client config dir %s", clientPath)
+	}
+	if err := UpdateProductionConfigJSONForDeletion(clientName, r.absPath(productionCfgJSONPath)); err != nil {
+		return errors.Wrapf(err, "failed to remove %s client entries in gateway production config", clientName)
+	}
+
+	return nil
+}
+
+// GetAllClientDependencies creates a map of: client name -> a list of names of all its dependent endpoints
+func (r *Repository) GetAllClientDependencies() (map[string][]string, error) {
+	gatewayConfig, err := r.LatestGatewayConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid configuration before getting endpoint dependencies")
+	}
+	dep := make(map[string][]string)
+
+	for _, endpoint := range gatewayConfig.Endpoints {
+		if _, ok := dep[endpoint.ClientID]; ok {
+			dep[endpoint.ClientID] = append(dep[endpoint.ClientID], endpoint.ID+"."+endpoint.HandleID)
+		} else {
+			dep[endpoint.ClientID] = []string{endpoint.ID + "." + endpoint.HandleID}
+		}
+	}
+
+	return dep, nil
+}
+
 func allExposedMethods(thriftServices map[string]map[string]*ThriftService, thriftFile string) (map[string]string, error) {
 	serviceMap, ok := thriftServices[thriftFile]
 	if !ok {
@@ -161,6 +194,22 @@ func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 	if len(req.SidecarRouter) < 1 {
 		content[prefix+"port"] = req.Port
 		content[prefix+"ip"] = req.IP
+	}
+	return writeToJSONFile(productionCfgJSONPath, content)
+}
+
+// UpdateProductionConfigJSONForDeletion deletes configs related to a particular client
+func UpdateProductionConfigJSONForDeletion(clientName string, productionCfgJSONPath string) error {
+	content := map[string]interface{}{}
+	if err := readJSONFile(productionCfgJSONPath, &content); err != nil {
+		return err
+	}
+	prefix := "clients." + clientName + "."
+	for key := range content {
+		if strings.HasPrefix(key, prefix) {
+			// safe in Go
+			delete(content, key)
+		}
 	}
 	return writeToJSONFile(productionCfgJSONPath, content)
 }

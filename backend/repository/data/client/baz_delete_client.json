@@ -1,0 +1,6 @@
+{
+	"_comment_": "JSON for updating a tchannel client.",
+	"name": "baz",
+	"thriftFile": "clients/baz/baz.thrift",
+	"deleteThis": true
+}

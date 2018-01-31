@@ -90,6 +90,7 @@ type ClientConfig struct {
 	TimeoutPerAttempt int64             `json:"clientTimeoutPerAttempt,omitempty"`
 	RoutingKey        string            `json:"routingKey"`
 	SidecarRouter     string            `json:"sidecarRouter,omitempty"`
+	MarkedForDeletion bool              `json:"deleteThis,omitempty"`
 }
 
 // EndpointMiddlewareConfig is the configuration for a middleware instance for a endpoint

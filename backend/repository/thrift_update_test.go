@@ -28,6 +28,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	testlib "github.com/uber/zanzibar/test/lib"
+	"io/ioutil"
 )
 
 // initThriftMetaInExampleIDL initializes the idls.json file for 'example-gateway/idl'.
@@ -127,4 +128,64 @@ func TestWriteThriftFileAndConfig(t *testing.T) {
 		return
 	}
 	assert.Equal(t, version, v)
+}
+
+func TestDeleteThrift(t *testing.T) {
+	const path = "another/new/file/name.thrift"
+	version := "new version 2"
+	newMeta := map[string]*ThriftMeta{
+		path: {
+			Path:    path,
+			Version: version,
+			Content: `struct a {
+				1: required string val
+				}`,
+		},
+	}
+
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example") {
+		return
+	}
+	r := &Repository{
+		localDir: tempDir,
+	}
+
+	err = r.WriteThriftFileAndConfig(newMeta)
+	if !assert.NoError(t, err, "Failed to write new thrift configuration") {
+		return
+	}
+
+	v, err := r.ThriftFileVersion(path)
+	if !assert.NoError(t, err, "Failed to read thrift version") {
+		return
+	}
+	assert.Equal(t, version, v)
+
+	// Make sure the method returns successfully
+	err = r.DeleteThriftFile(path)
+	if !assert.NoError(t, err, "Failed to delete thrift") {
+		return
+	}
+
+	// Verify: ThriftFileVersion can't fetch the thrift again
+	_, err = r.ThriftFileVersion(path)
+	assert.Error(t, err, "Fetched a thrift that should've been deleted")
+
+	// Verify: entry deleted in thrift meta json
+	metaJSON := make(map[string]*ThriftMeta)
+	err = readJSONFile(r.absPath(filepath.Join(tempDir, "idls.json")), &metaJSON)
+	if !assert.NoError(t, err, "Failed to read thrift meta json") {
+		return
+	}
+	_, found := metaJSON[path]
+	assert.Equal(t, false, found, "entry not deleted in meta")
+
+	// Verify: directory containing thrift file deleted
+	_, err = ioutil.ReadDir(r.absPath(filepath.Join(tempDir, "idl")))
+	assert.NoError(t, err, "idl directory missing in example")
+
+	_, err = ioutil.ReadDir(r.absPath(filepath.Join(tempDir, "idl", "another")))
+	assert.Error(t, err, "thrift parent directory not deleted cleanly")
 }

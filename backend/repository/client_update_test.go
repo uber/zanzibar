@@ -37,6 +37,8 @@ const (
 	exampleGateway                  = "../../examples/example-gateway"
 	httpClientUpdateRequestFile     = "data/client/contacts_client_update.json"
 	tchannelClientUpdateRequestFile = "data/client/baz_client_update.json"
+	deleteContactsClientRequestFile = "data/client/contacts_delete_client.json"
+	deleteBazClientRequestFile      = "data/client/baz_delete_client.json"
 )
 
 func TestUpdateHTTPClient(t *testing.T) {
@@ -78,6 +80,13 @@ func TestUpdateTchannelClient(t *testing.T) {
 	testUpdateClientConfig(t, req, "baz")
 }
 
+func TestUpdateDeleteClient(t *testing.T) {
+	req := &ClientConfig{}
+	err := readJSONFile(deleteContactsClientRequestFile, req)
+	assert.NoError(t, err, "Failed to unmarshal client config")
+	testUpdateDeleteClient(t, req, "contacts")
+}
+
 func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) {
 	tempDir, err := copyExample("")
 	t.Logf("Temp dir is created at %s\n", tempDir)
@@ -107,6 +116,56 @@ func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) 
 	}
 	productionJSONExpFile := filepath.Join(exampleGateway, productionCfgJSONPath)
 	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
+}
+
+func testUpdateDeleteClient(t *testing.T, req *ClientConfig, clientName string) {
+	// Copy example
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example") {
+		return
+	}
+	r := &Repository{
+		localDir: tempDir,
+	}
+
+	// Make sure client-config.json is there
+	clientConfigFile := r.absPath(filepath.Join(tempDir, "clients", clientName, clientConfigFileName))
+	_, err = ioutil.ReadFile(clientConfigFile)
+	if !assert.NoError(t, err, "Failed to read client config file from example") {
+		return
+	}
+	// Make sure production json has entry for this client
+	prodJSONPath := r.absPath(filepath.Join(tempDir, productionCfgJSONPath))
+	b, err := ioutil.ReadFile(prodJSONPath)
+	if !assert.NoError(t, err, "Failed to read production client config") {
+		return
+	}
+	hasEntry := strings.Contains(string(b), "clients."+clientName+".")
+	if !assert.Equal(t, true, hasEntry, "Production json missing configs for client") {
+		return
+	}
+
+	// Try to delete client
+	err = r.DeleteClientConfigs(req.Name, "clients")
+	if !assert.NoError(t, err, "Call to delete client failed") {
+		return
+	}
+
+	// Verify client-config.json is gone
+	_, err = ioutil.ReadFile(clientConfigFile)
+	if !assert.Error(t, err, "Client config file is still there, should've been deleted") {
+		return
+	}
+	// Verify production json no longer has entries for this client
+	b, err = ioutil.ReadFile(prodJSONPath)
+	if !assert.NoError(t, err, "Failed to read production client config") {
+		return
+	}
+	hasEntry = strings.Contains(string(b), "clients."+clientName+".")
+	if !assert.Equal(t, false, hasEntry, "Production json still has entries for client") {
+		return
+	}
 }
 
 func copyExample(localRoot string) (string, error) {
