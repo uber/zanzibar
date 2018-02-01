@@ -189,3 +189,24 @@ func TestDeleteThrift(t *testing.T) {
 	_, err = ioutil.ReadDir(r.absPath(filepath.Join(tempDir, "idl", "another")))
 	assert.Error(t, err, "thrift parent directory not deleted cleanly")
 }
+
+func TestDeleteThriftError(t *testing.T) {
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example") {
+		return
+	}
+	r := &Repository{
+		localDir: tempDir,
+	}
+
+	err = r.DeleteThriftFile("endpoints/bar/bar.thrift")
+	if !assert.Error(t, err, "Should not delete thrift when endpoint dependency exists") {
+		return
+	}
+
+	err = r.DeleteThriftFile("clients/googlenow/googlenow.thrift")
+	if !assert.Error(t, err, "Should not delete thrift when client dependency exists") {
+		return
+	}
+}

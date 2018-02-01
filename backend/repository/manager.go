@@ -241,10 +241,6 @@ func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []Client
 			if err := r.DeleteClientConfigs(req[i].Name, clientCfgDir); err != nil {
 				return errors.Wrapf(err, "failed to delete client configs for %q", req[i].Name)
 			}
-			if err := r.DeleteThriftFile(req[i].ThriftFile); err != nil {
-				return errors.Wrapf(err, "failed to delete associated thrift file %q", req[i].ThriftFile)
-			}
-
 		} else {
 			thrift := req[i].ThriftFile
 			// Adds non-existing file into the repository.

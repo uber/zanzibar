@@ -153,6 +153,18 @@ func (r *Repository) DeleteThriftFile(thriftFile string) error {
 		return errors.Wrap(err, "invalid configuration before updating thrifts")
 	}
 
+	// Check client and endpoint dependencies
+	for _, client := range cfg.Clients {
+		if client.ThriftFile == thriftFile {
+			return errors.Errorf("Cannot delete thrift %s while client %s is associated", thriftFile, client.Name)
+		}
+	}
+	for _, endpoint := range cfg.Endpoints {
+		if endpoint.ThriftFile == thriftFile {
+			return errors.Errorf("Cannot delete thrift %s while endpoint %s.%s is associated", thriftFile, endpoint.ID, endpoint.HandleID)
+		}
+	}
+
 	meta, err := r.ThriftConfig(cfg.ThriftRootDir)
 	if err != nil {
 		return errors.Wrap(err, "failed to read current thrift meta")
