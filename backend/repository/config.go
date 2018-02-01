@@ -210,6 +210,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		EndpointConfigDir:   cfg.MustGetString("endpointConfig"),
 		MiddlewareConfigDir: cfg.MustGetString("middlewareConfig"),
 	}
+	annotationPrefix := cfg.MustGetString("annotationPrefix")
 	pkgHelper, err := codegen.NewPackageHelper(
 		config.PackageRoot,
 		config.ManagedThriftFolder,
@@ -219,6 +220,7 @@ func (r *Repository) newGatewayConfig() (configuration *Config, cfgErr error) {
 		config.GenCodePackage,
 		config.TargetGenDir,
 		"",
+		annotationPrefix,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create package helper")

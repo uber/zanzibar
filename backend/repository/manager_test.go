@@ -258,7 +258,7 @@ func NewTestManager() *Manager {
 	repoMap := map[string]*Repository{
 		gatewayID: r,
 	}
-	manager, err := NewManager(repoMap, "", idlRegistor), nil
+	manager, err := NewManager(repoMap, "", idlRegistor, "zanzibar"), nil
 	if err != nil {
 		log.Fatalf("Failed to create test manager: %v\n", err)
 	}

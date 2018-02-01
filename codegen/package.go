@@ -49,6 +49,8 @@ type PackageHelper struct {
 	testConfigsRootDir string
 	// String containing copyright header to add to generated code.
 	copyrightHeader string
+	// annotation prefix to parse for thrift schema
+	annotationPrefix string
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
 }
@@ -63,6 +65,7 @@ func NewPackageHelper(
 	genCodePackage string,
 	relTargetGenDir string,
 	copyrightHeader string,
+	annotationPrefix string,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
@@ -89,6 +92,7 @@ func NewPackageHelper(
 		targetGenDir:        filepath.Join(absConfigRoot, relTargetGenDir),
 		copyrightHeader:     copyrightHeader,
 		middlewareSpecs:     middlewareSpecs,
+		annotationPrefix:    annotationPrefix,
 	}
 	return p, nil
 }

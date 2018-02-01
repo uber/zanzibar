@@ -43,7 +43,7 @@ func main() {
 	thisThriftPath := module.ThriftPath
 	fmt.Println(thisThriftPath)
 
-	var unwrapAnnot = codegen.AntHTTPReqDefBoxed
+	var unwrapAnnot = fmt.Sprintf(codegen.AntHTTPReqDefBoxed, os.Args[2])
 
 	for _, service := range module.Services {
 		for _, method := range service.Functions {
