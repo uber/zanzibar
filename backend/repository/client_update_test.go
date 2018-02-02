@@ -81,10 +81,7 @@ func TestUpdateTchannelClient(t *testing.T) {
 }
 
 func TestUpdateDeleteClient(t *testing.T) {
-	req := &ClientConfig{}
-	err := readJSONFile(deleteContactsClientRequestFile, req)
-	assert.NoError(t, err, "Failed to unmarshal client config")
-	testUpdateDeleteClient(t, req, "contacts")
+	testUpdateDeleteClient(t, "contacts")
 }
 
 func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) {
@@ -118,7 +115,7 @@ func testUpdateClientConfig(t *testing.T, req *ClientConfig, clientName string) 
 	testlib.CompareGoldenFile(t, productionJSONExpFile, productionJSON)
 }
 
-func testUpdateDeleteClient(t *testing.T, req *ClientConfig, clientName string) {
+func testUpdateDeleteClient(t *testing.T, clientName string) {
 	// Copy example
 	tempDir, err := copyExample("")
 	t.Logf("Temp dir is created at %s\n", tempDir)
@@ -147,7 +144,7 @@ func testUpdateDeleteClient(t *testing.T, req *ClientConfig, clientName string) 
 	}
 
 	// Try to delete client
-	err = r.DeleteClientConfigs(req.Name, "clients")
+	err = r.DeleteClientConfigs(clientName, "clients")
 	if !assert.NoError(t, err, "Call to delete client failed") {
 		return
 	}

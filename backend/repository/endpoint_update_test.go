@@ -53,6 +53,85 @@ func TestUpdateEndpoint(t *testing.T) {
 	}
 }
 
+func TestDeleteEndpoint(t *testing.T) {
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example") {
+		return
+	}
+	r := &Repository{
+		localDir: tempDir,
+	}
+
+	testDeleteEndpoint(t, r, "bar", "argNotStruct")
+
+	testDeleteEndpoint(t, r, "baz", "trans")
+	testDeleteEndpoint(t, r, "baz", "call")
+	testDeleteEndpoint(t, r, "baz", "ping")
+	testDeleteEndpoint(t, r, "baz", "compare")
+	testDeleteEndpoint(t, r, "baz", "sillyNoop")
+}
+
+func testDeleteEndpoint(t *testing.T, r *Repository, endpointGroup, endpointName string) {
+	gatewayCfg, err := r.LatestGatewayConfig()
+	if !assert.NoError(t, err, "fetch gateway config error") {
+		return
+	}
+
+	// Make sure endpoint is there
+	if !assert.Equal(t, true, checkEndpointExists(t, r, endpointGroup, endpointName)) {
+		return
+	}
+	configDir := filepath.Join(r.absPath("endpoints"), codegen.CamelToSnake(endpointGroup))
+	configFile := filepath.Join(configDir, codegen.CamelToSnake(endpointName)+".json")
+	groupConfigFile := filepath.Join(configDir, "endpoint-config.json")
+	groupConfig := &codegen.EndpointClassConfig{}
+	serviceConfigFile := filepath.Join(r.absPath("endpoints"), "..", "/services/", gatewayCfg.ID, serviceConfigFileName)
+	serviceConfig := &codegen.EndpointClassConfig{}
+	if !assert.NoError(t, readJSONFile(groupConfigFile, groupConfig), "cannot read endpoint group config") {
+		return
+	}
+	_, err = ioutil.ReadFile(configFile)
+	if !assert.NoError(t, err, "endpoint config file missing") {
+		return
+	}
+	if !assert.NoError(t, readJSONFile(serviceConfigFile, serviceConfig), "cannot read service config") {
+		return
+	}
+	if !assert.NotEqual(t, -1, findString(groupConfig.Name, serviceConfig.Dependencies["endpoint"]), "service config missing endpoint") {
+		return
+	}
+
+	// Try to delete endpoint
+	if !assert.NoError(t, r.DeleteEndpointConfig("endpoints", endpointGroup+"."+endpointName), "delete endpoint failed") {
+		return
+	}
+
+	// Make sure endpoint is gone
+	if !assert.Equal(t, false, checkEndpointExists(t, r, endpointGroup, endpointName)) {
+		return
+	}
+	_, err = ioutil.ReadFile(configFile)
+	if !assert.Error(t, err, "endpoint file still exists") {
+		return
+	}
+
+	// If that was last endpoint in group, entire directory should be gone, service config should be updated
+	if len(groupConfig.Config.Endpoints) == 1 {
+		_, err = ioutil.ReadDir(configDir)
+		if !assert.Error(t, err, "endpoint directory should be deleted") {
+			return
+		}
+		if !assert.NoError(t, readJSONFile(serviceConfigFile, serviceConfig), "cannot read service config") {
+			return
+		}
+		if !assert.Equal(t, -1, findString(groupConfig.Name, serviceConfig.Dependencies["endpoint"]), "service config not updated") {
+			return
+		}
+	}
+
+}
+
 func testUpdateEndpointConfig(t *testing.T, tempDir string, requestFile string) {
 	req := &EndpointConfig{}
 	err := readJSONFile(requestFile, req)
@@ -107,4 +186,18 @@ func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
 		t.Logf("Test request in %q\n", file)
 		testUpdateEndpointConfig(t, tempDir, filepath.Join(endpointUpdateRequestDir, file))
 	}
+}
+
+func checkEndpointExists(t *testing.T, r *Repository, endpointGroup, endpointName string) bool {
+	gatewayCfg, err := r.LatestGatewayConfig()
+	if !assert.NoError(t, err, "fetch gateway config error") {
+		return false
+	}
+
+	for _, endpoint := range gatewayCfg.Endpoints {
+		if endpoint.ID == endpointGroup && endpoint.HandleID == endpointName {
+			return true
+		}
+	}
+	return false
 }

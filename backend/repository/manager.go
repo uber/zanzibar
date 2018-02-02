@@ -227,32 +227,56 @@ func (m *Manager) UpdateManagedThriftFiles(
 
 // UpdateClients updates configurations for a list of clients.
 func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []ClientConfig) error {
+	for i := range req {
+		thrift := req[i].ThriftFile
+		// Adds non-existing file into the repository.
+		version, versionErr := r.ThriftFileVersion(thrift)
+		if versionErr != nil {
+			if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {
+				return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
+			}
+		}
+		if err := r.UpdateClientConfigs(&req[i], clientCfgDir, version); err != nil {
+			return errors.Wrapf(err, "failed to update client configs for %s", req[i].Name)
+		}
+	}
+	return nil
+}
+
+// DeleteClients deletes the list of specified clients
+func (m *Manager) DeleteClients(r *Repository, clientCfgDir string, clients []string) error {
 	clientDep, err := r.GetAllClientDependencies()
 	if err != nil {
 		return errors.Wrap(err, "failed to get list of dependent endpoints per client")
 	}
 
-	for i := range req {
-		if req[i].MarkedForDeletion {
-			if deps, found := clientDep[req[i].Name]; found {
-				return errors.Errorf("Cannot delete client while these endpoints are associated: %s", strings.Join(deps, ", "))
-			}
+	for _, client := range clients {
+		if deps, found := clientDep[client]; found {
+			return errors.Errorf("Cannot delete client while these endpoints are associated: %s", strings.Join(deps, ", "))
+		}
 
-			if err := r.DeleteClientConfigs(req[i].Name, clientCfgDir); err != nil {
-				return errors.Wrapf(err, "failed to delete client configs for %q", req[i].Name)
-			}
-		} else {
-			thrift := req[i].ThriftFile
-			// Adds non-existing file into the repository.
-			version, versionErr := r.ThriftFileVersion(thrift)
-			if versionErr != nil {
-				if err := m.UpdateThriftFiles(r, []string{thrift}); err != nil {
-					return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
-				}
-			}
-			if err := r.UpdateClientConfigs(&req[i], clientCfgDir, version); err != nil {
-				return errors.Wrapf(err, "failed to update client configs for %s", req[i].Name)
-			}
+		if err := r.DeleteClientConfigs(client, clientCfgDir); err != nil {
+			return errors.Wrapf(err, "failed to delete client configs for %s", client)
+		}
+	}
+	return nil
+}
+
+// DeleteThrifts deletes the list of specified thrifts
+func (m *Manager) DeleteThrifts(r *Repository, thrifts []string) error {
+	for _, thrift := range thrifts {
+		if err := r.DeleteThriftFile(thrift); err != nil {
+			return errors.Wrapf(err, "failed to delete thrift file %s", thrift)
+		}
+	}
+	return nil
+}
+
+// DeleteEndpoints deletes the list of specified endpoints
+func (m *Manager) DeleteEndpoints(r *Repository, endpointsCfgDir string, endpoints []string) error {
+	for _, endpoint := range endpoints {
+		if err := r.DeleteEndpointConfig(endpointsCfgDir, endpoint); err != nil {
+			return errors.Wrapf(err, "failed to delete endpoint %s", endpoint)
 		}
 	}
 	return nil
@@ -289,6 +313,9 @@ type UpdateRequest struct {
 	ClientUpdates      []ClientConfig      `json:"client_updates"`
 	EndpointUpdates    []EndpointConfig    `json:"endpoint_updates"`
 	DIffID             *string             `json:"diff_id,omitempty"`
+	DeleteThrifts      []string            `json:"delete_thrifts,omitempty"`
+	DeleteClients      []string            `json:"delete_clients,omitempty"`
+	DeleteEndpoints    []string            `json:"delete_endpoints,omitempty"`
 }
 
 // Validate validates the request and surface user friendly error
@@ -336,6 +363,16 @@ func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, 
 	}
 	if err := m.UpdateEndpoints(r, endpointCfgDir, req.EndpointUpdates); err != nil {
 		return errors.Wrap(err, "failed to update endpoints")
+	}
+
+	if err := m.DeleteEndpoints(r, endpointCfgDir, req.DeleteEndpoints); err != nil {
+		return errors.Wrap(err, "failed to delete endpoints")
+	}
+	if err := m.DeleteClients(r, clientCfgDir, req.DeleteClients); err != nil {
+		return errors.Wrap(err, "failed to delete clients")
+	}
+	if err := m.DeleteThrifts(r, req.DeleteThrifts); err != nil {
+		return errors.Wrap(err, "failed to delete thrifts")
 	}
 	return nil
 }
