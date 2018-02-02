@@ -378,9 +378,30 @@ func (r *Repository) endpointConfigs(thriftRootDir string, gatewaySpec *codegen.
 func (r *Repository) middlewareConfigs(
 	gatewaySpec *codegen.GatewaySpec,
 ) (map[string]interface{}, map[string]*RawMiddlewareConfig, error) {
-	middlewareSpecs := gatewaySpec.MiddlewareModules
+	orgMiddlewareSpecs := gatewaySpec.MiddlewareModules
 	schemasByName := make(map[string]interface{})
 	middlewareConfigs := make(map[string]*RawMiddlewareConfig)
+
+	// manually add transform request response since they are features of the zanzibar platform
+	//  Note:  the schema files must be available in the middlewares directory
+	tq := &codegen.MiddlewareSpec{
+		Name:              "transformRequest",
+		OptionsSchemaFile: "./middlewares/transform-request/transform_request_schema.json",
+		ImportPath:        "github.com/uber/zanzibar/codegen",
+	}
+
+	ts := &codegen.MiddlewareSpec{
+		Name:              "transformResponse",
+		OptionsSchemaFile: "./middlewares/transform-response/transform_response_schema.json",
+		ImportPath:        "github.com/uber/zanzibar/codegen",
+	}
+
+	middlewareSpecs := make(map[string]*codegen.MiddlewareSpec)
+	for k, v := range orgMiddlewareSpecs {
+		middlewareSpecs[k] = v
+	}
+	middlewareSpecs[tq.Name] = tq
+	middlewareSpecs[ts.Name] = ts
 
 	for _, spec := range middlewareSpecs {
 		schemaFile := spec.OptionsSchemaFile

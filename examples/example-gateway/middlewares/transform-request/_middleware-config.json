@@ -1,0 +1,9 @@
+{
+	"name": "transform_request",
+	"type": "default",
+	"dependencies": {},
+	"config": {
+		"schema": "./middlewares/transform-request/transform_request_schema.json",
+		"path": "github.com/uber/zanzibar/codegen"
+	}
+}

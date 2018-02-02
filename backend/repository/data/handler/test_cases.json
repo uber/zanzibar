@@ -269,6 +269,52 @@
 						"Foo"
 					],
 					"type": "object"
+				},
+				"transformRequest": {
+					"$schema": "http://json-schema.org/schema#",
+					"properties": {
+						"transforms": {
+							"items": {
+								"properties": {
+									"from": {
+										"type": "string"
+									},
+									"override": {
+										"type": "boolean"
+									},
+									"to": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							},
+							"type": "array"
+						}
+					},
+					"type": "object"
+				},
+				"transformResponse": {
+					"$schema": "http://json-schema.org/schema#",
+					"properties": {
+						"transforms": {
+							"items": {
+								"properties": {
+									"from": {
+										"type": "string"
+									},
+									"override": {
+										"type": "boolean"
+									},
+									"to": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							},
+							"type": "array"
+						}
+					},
+					"type": "object"
 				}
 			}
 		}
@@ -3144,6 +3190,52 @@
 								"Foo"
 							],
 							"type": "object"
+						},
+						"transformRequest": {
+							"$schema": "http://json-schema.org/schema#",
+							"properties": {
+								"transforms": {
+									"items": {
+										"properties": {
+											"from": {
+												"type": "string"
+											},
+											"override": {
+												"type": "boolean"
+											},
+											"to": {
+												"type": "string"
+											}
+										},
+										"type": "object"
+									},
+									"type": "array"
+								}
+							},
+							"type": "object"
+						},
+						"transformResponse": {
+							"$schema": "http://json-schema.org/schema#",
+							"properties": {
+								"transforms": {
+									"items": {
+										"properties": {
+											"from": {
+												"type": "string"
+											},
+											"override": {
+												"type": "boolean"
+											},
+											"to": {
+												"type": "string"
+											}
+										},
+										"type": "object"
+									},
+									"type": "array"
+								}
+							},
+							"type": "object"
 						}
 					},
 					"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
@@ -3157,6 +3249,16 @@
 							"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
 							"name": "example_reader",
 							"schema": "./middlewares/example_reader/example_reader_schema.json"
+						},
+						"transformRequest": {
+							"importPath": "github.com/uber/zanzibar/codegen",
+							"name": "transformRequest",
+							"schema": "./middlewares/transform-request/transform_request_schema.json"
+						},
+						"transformResponse": {
+							"importPath": "github.com/uber/zanzibar/codegen",
+							"name": "transformResponse",
+							"schema": "./middlewares/transform-response/transform_response_schema.json"
 						}
 					},
 					"Repository": "example-gateway",
@@ -4173,6 +4275,52 @@
 							"Foo"
 						],
 						"type": "object"
+					},
+					"transformRequest": {
+						"$schema": "http://json-schema.org/schema#",
+						"properties": {
+							"transforms": {
+								"items": {
+									"properties": {
+										"from": {
+											"type": "string"
+										},
+										"override": {
+											"type": "boolean"
+										},
+										"to": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
+					},
+					"transformResponse": {
+						"$schema": "http://json-schema.org/schema#",
+						"properties": {
+							"transforms": {
+								"items": {
+									"properties": {
+										"from": {
+											"type": "string"
+										},
+										"override": {
+											"type": "boolean"
+										},
+										"to": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
 					}
 				},
 				"PackageRoot": "github.com/uber/zanzibar/examples/example-gateway",
@@ -4186,6 +4334,16 @@
 						"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
 						"name": "example_reader",
 						"schema": "./middlewares/example_reader/example_reader_schema.json"
+					},
+					"transformRequest": {
+						"importPath": "github.com/uber/zanzibar/codegen",
+						"name": "transformRequest",
+						"schema": "./middlewares/transform-request/transform_request_schema.json"
+					},
+					"transformResponse": {
+						"importPath": "github.com/uber/zanzibar/codegen",
+						"name": "transformResponse",
+						"schema": "./middlewares/transform-response/transform_response_schema.json"
 					}
 				},
 				"Repository": "example-gateway",

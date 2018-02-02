@@ -1,0 +1,9 @@
+{
+	"name": "transform_response",
+	"type": "default",
+	"dependencies": {},
+	"config": {
+		"schema": "./middlewares/transform-response/transform_response_schema.json",
+		"path": "github.com/uber/zanzibar/codegen"
+	}
+}
