@@ -988,6 +988,52 @@
 				"Foo"
 			],
 			"type": "object"
+		},
+		"transformRequest": {
+			"$schema": "http://json-schema.org/schema#",
+			"properties": {
+				"transforms": {
+					"items": {
+						"properties": {
+							"from": {
+								"type": "string"
+							},
+							"override": {
+								"type": "boolean"
+							},
+							"to": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"type": "array"
+				}
+			},
+			"type": "object"
+		},
+		"transformResponse": {
+			"$schema": "http://json-schema.org/schema#",
+			"properties": {
+				"transforms": {
+					"items": {
+						"properties": {
+							"from": {
+								"type": "string"
+							},
+							"override": {
+								"type": "boolean"
+							},
+							"to": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"type": "array"
+				}
+			},
+			"type": "object"
 		}
 	},
 	"RawMiddlewares": {
@@ -1000,6 +1046,16 @@
 			"name": "example_reader",
 			"importPath": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader",
 			"schema": "./middlewares/example_reader/example_reader_schema.json"
+		},
+		"transformRequest": {
+			"name": "transformRequest",
+			"importPath": "github.com/uber/zanzibar/codegen",
+			"schema": "./middlewares/transform-request/transform_request_schema.json"
+		},
+		"transformResponse": {
+			"name": "transformResponse",
+			"importPath": "github.com/uber/zanzibar/codegen",
+			"schema": "./middlewares/transform-response/transform_response_schema.json"
 		}
 	}
 }
