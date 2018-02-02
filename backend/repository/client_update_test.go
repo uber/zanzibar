@@ -37,8 +37,6 @@ const (
 	exampleGateway                  = "../../examples/example-gateway"
 	httpClientUpdateRequestFile     = "data/client/contacts_client_update.json"
 	tchannelClientUpdateRequestFile = "data/client/baz_client_update.json"
-	deleteContactsClientRequestFile = "data/client/contacts_delete_client.json"
-	deleteBazClientRequestFile      = "data/client/baz_delete_client.json"
 )
 
 func TestUpdateHTTPClient(t *testing.T) {
