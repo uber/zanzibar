@@ -94,7 +94,7 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	if err := writeToJSONFile(filepath.Join(clientPath, clientConfigFileName), cfgJSON); err != nil {
 		return errors.Wrapf(err, "failed to write config for the client %q", cfgJSON.Name)
 	}
-	if err := updateProductionConfigJSON(req, r.absPath(productionCfgJSONPath)); err != nil {
+	if err := UpdateProductionConfigJSON(req, r.absPath(productionCfgJSONPath)); err != nil {
 		return errors.Wrap(err, "failed to update gateway production config")
 	}
 	return nil
@@ -107,7 +107,7 @@ func (r *Repository) deleteClientConfigs(clientName string, clientCfgDir string)
 	if err := os.RemoveAll(clientPath); err != nil {
 		return errors.Wrapf(err, "failed to remove client config dir %s", clientPath)
 	}
-	if err := UpdateProductionConfigJSONForDeletion(clientName, r.absPath(productionCfgJSONPath)); err != nil {
+	if err := updateProductionConfigJSONForDeletion(clientName, r.absPath(productionCfgJSONPath)); err != nil {
 		return errors.Wrapf(err, "failed to remove %s client entries in gateway production config", clientName)
 	}
 
@@ -175,8 +175,8 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 	return nil
 }
 
-// updateProductionConfigJSON updates the production JSON config with client updates.
-func updateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string) error {
+// UpdateProductionConfigJSON updates the production JSON config with client updates.
+func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string) error {
 	content := map[string]interface{}{}
 	if err := readJSONFile(productionCfgJSONPath, &content); err != nil {
 		return err
@@ -198,8 +198,8 @@ func updateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string)
 	return writeToJSONFile(productionCfgJSONPath, content)
 }
 
-// UpdateProductionConfigJSONForDeletion deletes configs related to a particular client
-func UpdateProductionConfigJSONForDeletion(clientName string, productionCfgJSONPath string) error {
+// updateProductionConfigJSONForDeletion deletes configs related to a particular client
+func updateProductionConfigJSONForDeletion(clientName string, productionCfgJSONPath string) error {
 	content := map[string]interface{}{}
 	if err := readJSONFile(productionCfgJSONPath, &content); err != nil {
 		return err
