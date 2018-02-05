@@ -142,7 +142,7 @@ func testUpdateDeleteClient(t *testing.T, clientName string) {
 	}
 
 	// Try to delete client
-	err = r.DeleteClientConfigs(clientName, "clients")
+	err = r.deleteClientConfigs(clientName, "clients")
 	if !assert.NoError(t, err, "Call to delete client failed") {
 		return
 	}

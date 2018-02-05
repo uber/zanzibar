@@ -23,12 +23,12 @@ package repository
 import (
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
 
 	"github.com/pkg/errors"
-	"strings"
 )
 
 const (
@@ -243,11 +243,11 @@ func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []Client
 	return nil
 }
 
-// DeleteClients deletes the list of specified clients
-func (m *Manager) DeleteClients(r *Repository, clientCfgDir string, clients []string) error {
+// deleteClients deletes the list of specified clients
+func (m *Manager) deleteClients(r *Repository, clientCfgDir string, clients []string) error {
 	clientDep, err := r.GetAllClientDependencies()
 	if err != nil {
-		return errors.Wrap(err, "failed to get list of dependent endpoints per client")
+		return err
 	}
 
 	for _, client := range clients {
@@ -255,27 +255,27 @@ func (m *Manager) DeleteClients(r *Repository, clientCfgDir string, clients []st
 			return errors.Errorf("Cannot delete client while these endpoints are associated: %s", strings.Join(deps, ", "))
 		}
 
-		if err := r.DeleteClientConfigs(client, clientCfgDir); err != nil {
-			return errors.Wrapf(err, "failed to delete client configs for %s", client)
+		if err := r.deleteClientConfigs(client, clientCfgDir); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-// DeleteThrifts deletes the list of specified thrifts
-func (m *Manager) DeleteThrifts(r *Repository, thrifts []string) error {
+// deleteThrifts deletes the list of specified thrifts
+func (m *Manager) deleteThrifts(r *Repository, thrifts []string) error {
 	for _, thrift := range thrifts {
-		if err := r.DeleteThriftFile(thrift); err != nil {
+		if err := r.deleteThriftFile(thrift); err != nil {
 			return errors.Wrapf(err, "failed to delete thrift file %s", thrift)
 		}
 	}
 	return nil
 }
 
-// DeleteEndpoints deletes the list of specified endpoints
-func (m *Manager) DeleteEndpoints(r *Repository, endpointsCfgDir string, endpoints []string) error {
+// deleteEndpoints deletes the list of specified endpoints
+func (m *Manager) deleteEndpoints(r *Repository, endpointsCfgDir string, endpoints []string) error {
 	for _, endpoint := range endpoints {
-		if err := r.DeleteEndpointConfig(endpointsCfgDir, endpoint); err != nil {
+		if err := r.deleteEndpointConfig(endpointsCfgDir, endpoint); err != nil {
 			return errors.Wrapf(err, "failed to delete endpoint %s", endpoint)
 		}
 	}
@@ -365,16 +365,14 @@ func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, 
 		return errors.Wrap(err, "failed to update endpoints")
 	}
 
-	if err := m.DeleteEndpoints(r, endpointCfgDir, req.DeleteEndpoints); err != nil {
-		return errors.Wrap(err, "failed to delete endpoints")
+	if err := m.deleteEndpoints(r, endpointCfgDir, req.DeleteEndpoints); err != nil {
+		return err
 	}
-	if err := m.DeleteClients(r, clientCfgDir, req.DeleteClients); err != nil {
-		return errors.Wrap(err, "failed to delete clients")
+	if err := m.deleteClients(r, clientCfgDir, req.DeleteClients); err != nil {
+		return err
 	}
-	if err := m.DeleteThrifts(r, req.DeleteThrifts); err != nil {
-		return errors.Wrap(err, "failed to delete thrifts")
-	}
-	return nil
+
+	return m.deleteThrifts(r, req.DeleteThrifts)
 }
 
 // thriftMetaInIDLRegistry returns meta for a set of thrift file in IDL-registry.

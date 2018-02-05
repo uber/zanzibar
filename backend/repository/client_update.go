@@ -94,14 +94,14 @@ func (r *Repository) UpdateClientConfigs(req *ClientConfig, clientCfgDir, thrift
 	if err := writeToJSONFile(filepath.Join(clientPath, clientConfigFileName), cfgJSON); err != nil {
 		return errors.Wrapf(err, "failed to write config for the client %q", cfgJSON.Name)
 	}
-	if err := UpdateProductionConfigJSON(req, r.absPath(productionCfgJSONPath)); err != nil {
+	if err := updateProductionConfigJSON(req, r.absPath(productionCfgJSONPath)); err != nil {
 		return errors.Wrap(err, "failed to update gateway production config")
 	}
 	return nil
 }
 
-// DeleteClientConfigs deletes JSON configuration files for a client update request
-func (r *Repository) DeleteClientConfigs(clientName string, clientCfgDir string) error {
+// deleteClientConfigs deletes JSON configuration files for a client update request
+func (r *Repository) deleteClientConfigs(clientName string, clientCfgDir string) error {
 	clientPath := filepath.Join(r.absPath(clientCfgDir), clientName)
 
 	if err := os.RemoveAll(clientPath); err != nil {
@@ -175,8 +175,8 @@ func validateClientUpdateRequest(req *ClientConfig) error {
 	return nil
 }
 
-// UpdateProductionConfigJSON updates the production JSON config with client updates.
-func UpdateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string) error {
+// updateProductionConfigJSON updates the production JSON config with client updates.
+func updateProductionConfigJSON(req *ClientConfig, productionCfgJSONPath string) error {
 	content := map[string]interface{}{}
 	if err := readJSONFile(productionCfgJSONPath, &content); err != nil {
 		return err

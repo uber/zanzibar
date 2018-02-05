@@ -103,7 +103,7 @@ func testDeleteEndpoint(t *testing.T, r *Repository, endpointGroup, endpointName
 	}
 
 	// Try to delete endpoint
-	if !assert.NoError(t, r.DeleteEndpointConfig("endpoints", endpointGroup+"."+endpointName), "delete endpoint failed") {
+	if !assert.NoError(t, r.deleteEndpointConfig("endpoints", endpointGroup+"."+endpointName), "delete endpoint failed") {
 		return
 	}
 

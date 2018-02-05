@@ -69,9 +69,9 @@ func (r *Repository) WriteEndpointConfig(
 	return nil
 }
 
-// DeleteEndpointConfig deletes an individual endpoint config, updates endpoint group config and endpoint meta json
+// deleteEndpointConfig deletes an individual endpoint config, updates endpoint group config and endpoint meta json
 // endpointName must have the form endpointId.handleId
-func (r *Repository) DeleteEndpointConfig(endpointCfgDir string, endpointName string) error {
+func (r *Repository) deleteEndpointConfig(endpointCfgDir string, endpointName string) error {
 	gatewayCfg, err := r.LatestGatewayConfig()
 	if err != nil {
 		return errors.Wrap(err, "loading gateway config error")
@@ -81,30 +81,34 @@ func (r *Repository) DeleteEndpointConfig(endpointCfgDir string, endpointName st
 		return errors.Errorf("endpointName must have the form endpointId.handleId, got: %s", endpointName)
 	}
 	endpointDir := filepath.Join(r.absPath(endpointCfgDir), codegen.CamelToSnake(nameParts[0]))
-	endpointConfigFile := filepath.Join(endpointDir, codegen.CamelToSnake(nameParts[1])+".json")
+
+	// Read endpoint group config
+	endpointGroupConfigFile := filepath.Join(endpointDir, endpointConfigFileName)
+	groupConfig := &codegen.EndpointClassConfig{}
+	if err = readJSONFile(endpointGroupConfigFile, groupConfig); err != nil {
+		return errors.Wrapf(err, "failed to read %s for %s", endpointConfigFileName, endpointName)
+	}
 
 	// Read the existing individual endpoint config json to be deleted
+	endpointIndexInGroup := r.findEndpointInGroup(endpointDir, nameParts[1], groupConfig.Config.Endpoints)
+	if endpointIndexInGroup == -1 {
+		return errors.Errorf("cannot find individual config json for %s", endpointName)
+	}
+	endpointConfigFile := filepath.Join(endpointDir, groupConfig.Config.Endpoints[endpointIndexInGroup])
 	endpointConfig := &EndpointConfig{}
 	if err = readJSONFile(endpointConfigFile, endpointConfig); err != nil {
 		return errors.Wrap(err, "failed to read existing endpoint config")
 	}
 
-	// Get client dependencies of endpoints
+	// Need this to update the endpoint group client dependency list
 	clientDep, err := r.GetAllClientDependencies()
 	if err != nil {
-		return errors.Wrap(err, "failed to get list of dependent endpoints per client")
+		return err
 	}
 
 	// Remove the individual endpoint config json
 	if err = os.Remove(endpointConfigFile); err != nil {
 		return errors.Wrap(err, "failed to delete individual endpoint config json")
-	}
-
-	// Remove endpoint from group config
-	endpointGroupConfigFile := filepath.Join(endpointDir, endpointConfigFileName)
-	groupConfig := &codegen.EndpointClassConfig{}
-	if err = readJSONFile(endpointGroupConfigFile, groupConfig); err != nil {
-		return errors.Wrapf(err, "failed to read %s for %s", endpointConfigFileName, endpointConfig.ID)
 	}
 
 	if len(groupConfig.Config.Endpoints) == 1 {
@@ -128,11 +132,9 @@ func (r *Repository) DeleteEndpointConfig(endpointCfgDir string, endpointName st
 	} else {
 		// there are other endpoints in this group, need to update group config
 
-		if i := findString(codegen.CamelToSnake(endpointConfig.HandleID)+".json", groupConfig.Config.Endpoints); i != -1 {
-			groupConfig.Config.Endpoints = append(groupConfig.Config.Endpoints[:i], groupConfig.Config.Endpoints[i+1:]...)
-		} else {
-			return errors.Errorf("could not find endpoint %s in %s", endpointConfig.HandleID, endpointConfigFileName)
-		}
+		// Remove this endpoint from the group list
+		groupConfig.Config.Endpoints = append(groupConfig.Config.Endpoints[:endpointIndexInGroup], groupConfig.Config.Endpoints[endpointIndexInGroup+1:]...)
+
 		// Remove client dependency from group config if no other endpoints in this group use it
 		otherEndpoints, _ := clientDep[endpointConfig.ClientID]
 		if len(filterStringsByPrefix(endpointConfig.ID+".", otherEndpoints)) == 1 {
@@ -208,6 +210,31 @@ func (r *Repository) validateEndpointCfg(req *EndpointConfig) error {
 		}
 	}
 	return nil
+}
+
+func (r *Repository) findEndpointInGroup(endpointDir string, handleID string, jsonList []string) int {
+	expectedJSONName := codegen.CamelToSnake(handleID) + ".json"
+	expectedPath := filepath.Clean(filepath.Join(endpointDir, expectedJSONName))
+
+	// Try to find right json file in list (should succeed if naming convention is followed)
+	for i := range jsonList {
+		if filepath.Clean(filepath.Join(endpointDir, jsonList[i])) == expectedPath {
+			return i
+		}
+	}
+
+	// Try to find right json by examining each one
+	for i := range jsonList {
+		config := &EndpointConfig{}
+		if err := readJSONFile(filepath.Join(endpointDir, jsonList[i]), config); err != nil {
+			return -1
+		}
+		if config.HandleID == handleID {
+			return i
+		}
+	}
+
+	return -1
 }
 
 // updateServiceMetaJSON adds an endpoint group in the meta json file or updates the config for an existing endpoint.

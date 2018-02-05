@@ -22,13 +22,13 @@ package repository
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	testlib "github.com/uber/zanzibar/test/lib"
-	"io/ioutil"
 )
 
 // initThriftMetaInExampleIDL initializes the idls.json file for 'example-gateway/idl'.
@@ -164,7 +164,7 @@ func TestDeleteThrift(t *testing.T) {
 	assert.Equal(t, version, v)
 
 	// Make sure the method returns successfully
-	err = r.DeleteThriftFile(path)
+	err = r.deleteThriftFile(path)
 	if !assert.NoError(t, err, "Failed to delete thrift") {
 		return
 	}
@@ -200,12 +200,12 @@ func TestDeleteThriftError(t *testing.T) {
 		localDir: tempDir,
 	}
 
-	err = r.DeleteThriftFile("endpoints/bar/bar.thrift")
+	err = r.deleteThriftFile("endpoints/bar/bar.thrift")
 	if !assert.Error(t, err, "Should not delete thrift when endpoint dependency exists") {
 		return
 	}
 
-	err = r.DeleteThriftFile("clients/googlenow/googlenow.thrift")
+	err = r.deleteThriftFile("clients/googlenow/googlenow.thrift")
 	if !assert.Error(t, err, "Should not delete thrift when client dependency exists") {
 		return
 	}

@@ -25,10 +25,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	reqerr "github.com/uber/zanzibar/codegen/errors"
-	"strings"
 )
 
 const (
@@ -146,8 +146,8 @@ func (r *Repository) ThriftFileVersion(thriftFile string) (string, error) {
 	return thriftMeta.Version, nil
 }
 
-// DeleteThriftFile deletes specified thrift from disk, including any empty parent directories, and remove its entry from thrift meta
-func (r *Repository) DeleteThriftFile(thriftFile string) error {
+// deleteThriftFile deletes specified thrift from disk, including any empty parent directories, and remove its entry from thrift meta
+func (r *Repository) deleteThriftFile(thriftFile string) error {
 	cfg, err := r.LatestGatewayConfig()
 	if err != nil {
 		return errors.Wrap(err, "invalid configuration before updating thrifts")
