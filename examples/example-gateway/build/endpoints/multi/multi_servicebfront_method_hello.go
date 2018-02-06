@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
@@ -77,19 +78,14 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
-		switch errValue := err.(type) {
+		res.SendError(500, "Unexpected server error", err)
+		return
 
-		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
-			return
-		}
 	}
 
 	bytes, err := json.Marshal(response)
 	if err != nil {
-		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
-		res.SendErrorString(500, "Unexpected server error")
+		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
 		return
 	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
@@ -118,7 +114,11 @@ func (w ServiceBFrontHelloEndpoint) Handle(
 		switch errValue := err.(type) {
 
 		default:
-			w.Logger.Warn("Could not make client request", zap.Error(errValue))
+			w.Logger.Warn("Could not make client request",
+				zap.Error(errValue),
+				zap.String("client", "Multi"),
+			)
+
 			// TODO(sindelar): Consider returning partial headers
 
 			return "", nil, err

@@ -101,10 +101,10 @@ func (h *BarNormalHandler) HandleRequest(
 			return
 
 		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
+			res.SendError(500, "Unexpected server error", err)
 			return
 		}
+
 	}
 	// TODO(jakev): implement writing fields into response headers
 
@@ -144,7 +144,11 @@ func (w BarNormalEndpoint) Handle(
 			return nil, nil, serverErr
 
 		default:
-			w.Logger.Warn("Could not make client request", zap.Error(errValue))
+			w.Logger.Warn("Could not make client request",
+				zap.Error(errValue),
+				zap.String("client", "Bar"),
+			)
+
 			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, err

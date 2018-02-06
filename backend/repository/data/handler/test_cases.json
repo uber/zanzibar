@@ -2118,9 +2118,7 @@
 		"name": "get the list of methods for a given parse thrift definitions - empty request body",
 		"request": {
 			"method": "POST",
-			"url": "/thrift-method-parsed",
-			"body": {
-			}
+			"url": "/thrift-method-parsed"
 		},
 		"response": {
 			"code": 400,

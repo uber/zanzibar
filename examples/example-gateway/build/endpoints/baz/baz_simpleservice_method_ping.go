@@ -79,13 +79,9 @@ func (h *SimpleServicePingHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
 	if err != nil {
-		switch errValue := err.(type) {
+		res.SendError(500, "Unexpected server error", err)
+		return
 
-		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
-			return
-		}
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
@@ -114,7 +110,11 @@ func (w SimpleServicePingEndpoint) Handle(
 		switch errValue := err.(type) {
 
 		default:
-			w.Logger.Warn("Could not make client request", zap.Error(errValue))
+			w.Logger.Warn("Could not make client request",
+				zap.Error(errValue),
+				zap.String("client", "Baz"),
+			)
+
 			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, err

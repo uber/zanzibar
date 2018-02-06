@@ -95,10 +95,10 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 			return
 
 		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
+			res.SendError(500, "Unexpected server error", err)
 			return
 		}
+
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
@@ -141,7 +141,11 @@ func (w SimpleServiceSillyNoopEndpoint) Handle(
 			return nil, serverErr
 
 		default:
-			w.Logger.Warn("Could not make client request", zap.Error(errValue))
+			w.Logger.Warn("Could not make client request",
+				zap.Error(errValue),
+				zap.String("client", "Baz"),
+			)
+
 			// TODO(sindelar): Consider returning partial headers
 
 			return nil, err

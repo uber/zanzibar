@@ -51,12 +51,12 @@
 		"path": "endpoints/googlenow/googlenow.thrift",
 		"version": "v1"
 	},
-	"endpoints/tchannel/baz/baz.thrift": {
-		"path": "endpoints/tchannel/baz/baz.thrift",
-		"version": "v1"
-	},
 	"endpoints/multi/multi.thrift": {
 		"path": "endpoints/multi/multi.thrift",
+		"version": "v1"
+	},
+	"endpoints/tchannel/baz/baz.thrift": {
+		"path": "endpoints/tchannel/baz/baz.thrift",
 		"version": "v1"
 	}
 }

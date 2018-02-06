@@ -98,7 +98,6 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.True(t, success)
 
 	allLogs := gateway.AllLogs()
-	assert.Equal(t, 4, len(allLogs))
 	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
 	assert.Equal(t, 2, len(allLogs["Created new active connection."]))
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -42,6 +43,7 @@ type ServerHTTPResponse struct {
 	pendingStatusCode int
 	StatusCode        int
 	logger            *zap.Logger
+	err               error
 }
 
 // NewServerHTTPResponse is helper function to alloc ServerHTTPResponse
@@ -121,6 +123,15 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.ByteString("Response Body", res.pendingBodyBytes),
 	}
 
+	if res.err != nil {
+		fields = append(fields, zap.Error(res.err))
+
+		cause := errors.Cause(res.err)
+		if cause != nil && cause != res.err {
+			fields = append(fields, zap.NamedError("errorCause", cause))
+		}
+	}
+
 	for k, v := range req.httpRequest.Header {
 		if len(v) > 0 {
 			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
@@ -139,16 +150,20 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 
 // SendErrorString helper to send an error string
 func (res *ServerHTTPResponse) SendErrorString(
-	statusCode int, err string,
+	statusCode int, errMsg string,
 ) {
-	res.Request.Logger.Warn(
-		"Sending error for endpoint request",
-		zap.String("path", res.Request.URL.Path),
-		zap.String("error", err),
-	)
-
 	res.WriteJSONBytes(statusCode, nil,
-		[]byte(`{"error":"`+err+`"}`),
+		[]byte(`{"error":"`+errMsg+`"}`),
+	)
+}
+
+// SendError helper to send an server error message, propagates underlying cause to logs etc.
+func (res *ServerHTTPResponse) SendError(
+	statusCode int, errMsg string, errCause error,
+) {
+	res.err = errCause
+	res.WriteJSONBytes(statusCode, nil,
+		[]byte(`{"error":"`+errMsg+`"}`),
 	)
 }
 
@@ -177,14 +192,14 @@ func (res *ServerHTTPResponse) WriteJSON(
 	statusCode int, headers Header, body json.Marshaler,
 ) {
 	if body == nil {
-		res.SendErrorString(500, "Could not serialize json response")
+		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
 		res.Request.Logger.Error("Could not serialize nil pointer body")
 		return
 	}
 
 	bytes, err := body.MarshalJSON()
 	if err != nil {
-		res.SendErrorString(500, "Could not serialize json response")
+		res.SendError(500, "Could not serialize json response", err)
 		res.Request.Logger.Error("Could not serialize json response", zap.Error(err))
 		return
 	}
