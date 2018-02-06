@@ -11,14 +11,19 @@ if [ -z "$2" ]; then
 	echo "config dir argument (\$2) is missing"
 	exit 1
 fi
+if [ -z "$3" ]; then
+	echo "annotation prefix argument (\$3) is missing"
+	exit 1
+fi
 
 BUILD_DIR="$1"
 CONFIG_DIR="$2"
+ANNOPREFIX="$3"
 
-if [ -z "$3" ]; then
+if [ -z "$4" ]; then
 	THRIFTRW_SRCS="$(find "$CONFIG_DIR/idl" -name '*.thrift')"
 else
-	THRIFTRW_SRCS="$3"
+	THRIFTRW_SRCS="$4"
 fi
 THRIFTRW_SRCS="$(echo "$THRIFTRW_SRCS" | xargs -n1 | sort | uniq)"
 
@@ -95,7 +100,7 @@ for config_file in ${config_files}; do
 
 		thrift_file="$CONFIG_DIR/idl/$thrift_file"
 		gen_code_dir=$(
-		"$RESOLVE_THRIFT_BINARY" "$thrift_file" | \
+		"$RESOLVE_THRIFT_BINARY" "$thrift_file" "$ANNOPREFIX" | \
 			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
 			sort | uniq | xargs
 		)

@@ -89,6 +89,7 @@ func main() {
 		config.MustGetString("genCodePackage"),
 		config.MustGetString("targetGenDir"),
 		string(copyright),
+		config.MustGetString("annotationPrefix"),
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),

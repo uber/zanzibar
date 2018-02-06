@@ -46,7 +46,7 @@ type Manager struct {
 	// IDL-registry repository.
 	IDLRegistry IDLRegistry
 
-	// TODO: Add a Middleware schema repository
+	annoPrefix string
 }
 
 // NewManager creates a manager for remote git repositories.
@@ -54,11 +54,13 @@ func NewManager(
 	repoMap map[string]*Repository,
 	localRoot string,
 	idlRegistry IDLRegistry,
+	annoPrefix string,
 ) *Manager {
 	manager := &Manager{
 		RepoMap:      repoMap,
 		localRootDir: localRoot,
 		IDLRegistry:  idlRegistry,
+		annoPrefix:   annoPrefix,
 	}
 	return manager
 }
@@ -93,6 +95,7 @@ func (m *Manager) IDLThriftService(path string) (map[string]*ThriftService, erro
 		"idl-registry/gen-code", // genCodePackage
 		"./build",               // targetGenDir
 		"",                      // copyrightHeader
+		m.annoPrefix,
 	)
 	if err != nil {
 		return nil, err
@@ -295,6 +298,7 @@ func (m *Manager) Validate(r *Repository, req *UpdateRequest) error {
 		cfg.GenCodePackage,
 		"./build",
 		"",
+		m.annoPrefix,
 	)
 	if err != nil {
 		return err

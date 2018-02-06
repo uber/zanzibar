@@ -68,6 +68,7 @@ func TestGenerateBar(t *testing.T) {
 		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
 		tmpDir,
 		testCopyrightHeader,
+		"zanzibar",
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {
 		return

@@ -29,6 +29,22 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
+const (
+	antHTTPMethod     = "%s.http.method"
+	antHTTPPath       = "%s.http.path"
+	antHTTPStatus     = "%s.http.status"
+	antHTTPReqHeaders = "%s.http.reqHeaders"
+	antHTTPResHeaders = "%s.http.resHeaders"
+	antHTTPRef        = "%s.http.ref"
+	antMeta           = "%s.meta"
+	antHandler        = "%s.handler"
+
+	// AntHTTPReqDefBoxed annotates a method so that the genereted method takes
+	// generated argument directly instead of a struct that warps the argument.
+	// The annotated method should have one and only one argument.
+	AntHTTPReqDefBoxed = "%s.http.req.def"
+)
+
 // PathSegment represents a part of the http path.
 type PathSegment struct {
 	Type           string
@@ -60,6 +76,7 @@ type MethodSpec struct {
 	EndpointName string
 	HTTPPath     string
 	PathSegments []PathSegment
+	annotations  annotations
 	IsEndpoint   bool
 
 	// Statements for reading query parameters.
@@ -119,6 +136,18 @@ type MethodSpec struct {
 	RequestParamGoStatements []string
 }
 
+type annotations struct {
+	HTTPMethod      string
+	HTTPPath        string
+	HTTPStatus      string
+	HTTPReqHeaders  string
+	HTTPResHeaders  string
+	HTTPRef         string
+	Meta            string
+	Handler         string
+	HTTPReqDefBoxed string
+}
+
 // StructSpec specifies a Go struct to be generated.
 type StructSpec struct {
 	Type        string
@@ -132,22 +161,6 @@ type StatusCode struct {
 	Message string
 }
 
-const (
-	antHTTPMethod     = "zanzibar.http.method"
-	antHTTPPath       = "zanzibar.http.path"
-	antHTTPStatus     = "zanzibar.http.status"
-	antHTTPReqHeaders = "zanzibar.http.reqHeaders"
-	antHTTPResHeaders = "zanzibar.http.resHeaders"
-	antHTTPRef        = "zanzibar.http.ref"
-	antMeta           = "zanzibar.meta"
-	antHandler        = "zanzibar.handler"
-
-	// AntHTTPReqDefBoxed annotates a method so that the genereted method takes
-	// generated argument directly instead of a struct that warps the argument.
-	// The annotated method should have one and only one argument.
-	AntHTTPReqDefBoxed = "zanzibar.http.req.def"
-)
-
 // NewMethod creates new method specification.
 func NewMethod(
 	thriftFile string,
@@ -157,14 +170,28 @@ func NewMethod(
 	isEndpoint bool,
 	thriftService string,
 ) (*MethodSpec, error) {
-	method := &MethodSpec{}
+	var (
+		err    error
+		ok     bool
+		ant    = packageHelper.annotationPrefix
+		method = &MethodSpec{}
+	)
 	method.CompiledThriftSpec = funcSpec
-	var err error
-	var ok bool
 	method.Name = funcSpec.MethodName()
 	method.IsEndpoint = isEndpoint
 	method.WantAnnot = wantAnnot
 	method.ThriftService = thriftService
+	method.annotations = annotations{
+		HTTPMethod:      fmt.Sprintf(antHTTPMethod, ant),
+		HTTPPath:        fmt.Sprintf(antHTTPPath, ant),
+		HTTPStatus:      fmt.Sprintf(antHTTPStatus, ant),
+		HTTPReqHeaders:  fmt.Sprintf(antHTTPReqHeaders, ant),
+		HTTPResHeaders:  fmt.Sprintf(antHTTPResHeaders, ant),
+		HTTPRef:         fmt.Sprintf(antHTTPRef, ant),
+		Meta:            fmt.Sprintf(antMeta, ant),
+		Handler:         fmt.Sprintf(antHandler, ant),
+		HTTPReqDefBoxed: fmt.Sprintf(AntHTTPReqDefBoxed, ant),
+	}
 
 	method.GenCodePkgName, err = packageHelper.TypePackageName(thriftFile)
 	if err != nil {
@@ -186,20 +213,20 @@ func NewMethod(
 		return nil, err
 	}
 
-	method.ReqHeaders = headers(funcSpec.Annotations[antHTTPReqHeaders])
-	method.ResHeaders = headers(funcSpec.Annotations[antHTTPResHeaders])
+	method.ReqHeaders = headers(funcSpec.Annotations[method.annotations.HTTPReqHeaders])
+	method.ResHeaders = headers(funcSpec.Annotations[method.annotations.HTTPResHeaders])
 
 	if !wantAnnot {
 		return method, nil
 	}
 
-	if method.HTTPMethod, ok = funcSpec.Annotations[antHTTPMethod]; !ok {
-		return nil, errors.Errorf("missing annotation '%s' for HTTP method", antHTTPMethod)
+	if method.HTTPMethod, ok = funcSpec.Annotations[method.annotations.HTTPMethod]; !ok {
+		return nil, errors.Errorf("missing annotation '%s' for HTTP method", method.annotations.HTTPMethod)
 	}
 
-	method.EndpointName = funcSpec.Annotations[antHandler]
+	method.EndpointName = funcSpec.Annotations[method.annotations.Handler]
 
-	err = method.setOKStatusCode(funcSpec.Annotations[antHTTPStatus])
+	err = method.setOKStatusCode(funcSpec.Annotations[method.annotations.HTTPStatus])
 	if err != nil {
 		return nil, err
 	}
@@ -221,9 +248,9 @@ func NewMethod(
 	}
 
 	var httpPath string
-	if httpPath, ok = funcSpec.Annotations[antHTTPPath]; !ok {
+	if httpPath, ok = funcSpec.Annotations[method.annotations.HTTPPath]; !ok {
 		return nil, errors.Errorf(
-			"missing annotation '%s' for HTTP path", antHTTPPath,
+			"missing annotation '%s' for HTTP path", method.annotations.HTTPPath,
 		)
 	}
 	method.setHTTPPath(httpPath, funcSpec)
@@ -246,7 +273,7 @@ func NewMethod(
 	return method, nil
 }
 
-func scanForNonParams(funcSpec *compile.FunctionSpec) bool {
+func (ms *MethodSpec) scanForNonParams(funcSpec *compile.FunctionSpec) bool {
 	hasNonParams := false
 
 	visitor := func(
@@ -258,7 +285,7 @@ func scanForNonParams(funcSpec *compile.FunctionSpec) bool {
 			return false
 		}
 
-		param, ok := field.Annotations[antHTTPRef]
+		param, ok := field.Annotations[ms.annotations.HTTPRef]
 		if !ok || param[0:6] != "params" {
 			hasNonParams = true
 			return true
@@ -280,7 +307,7 @@ func (ms *MethodSpec) setRequestType(curThriftFile string, funcSpec *compile.Fun
 		return nil
 	}
 	var err error
-	if isRequestBoxed(funcSpec) {
+	if ms.isRequestBoxed(funcSpec) {
 		ms.RequestBoxed = true
 		ms.RequestType, err = packageHelper.TypeFullName(funcSpec.ArgsSpec[0].Type)
 		if err == nil && IsStructType(funcSpec.ArgsSpec[0].Type) {
@@ -340,7 +367,7 @@ func (ms *MethodSpec) RefResponse(respVar string) string {
 
 func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 	if statusCode == "" {
-		return errors.Errorf("no http OK status code set by annotation '%s' ", antHTTPStatus)
+		return errors.Errorf("no http OK status code set by annotation '%s' ", ms.annotations.HTTPStatus)
 	}
 
 	code, err := strconv.Atoi(statusCode)
@@ -403,11 +430,11 @@ func (ms *MethodSpec) setExceptions(
 			continue
 		}
 
-		code, err := strconv.Atoi(e.Annotations[antHTTPStatus])
+		code, err := strconv.Atoi(e.Annotations[ms.annotations.HTTPStatus])
 		if err != nil {
 			return errors.Wrapf(
 				err,
-				"cannot parse the annotation %s for exception %s", antHTTPStatus, e.Name,
+				"cannot parse the annotation %s for exception %s", ms.annotations.HTTPStatus, e.Name,
 			)
 		}
 
@@ -415,7 +442,7 @@ func (ms *MethodSpec) setExceptions(
 			return errors.Wrapf(
 				err,
 				"cannot have duplicate status code %s for exception %s",
-				antHTTPStatus,
+				ms.annotations.HTTPStatus,
 				e.Name,
 			)
 		}
@@ -438,7 +465,7 @@ func (ms *MethodSpec) setExceptions(
 	return nil
 }
 
-func findParamsAnnotation(
+func (ms *MethodSpec) findParamsAnnotation(
 	fields compile.FieldGroup, paramName string,
 ) (string, bool, bool) {
 	var identifier string
@@ -446,7 +473,7 @@ func findParamsAnnotation(
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
-		if param, ok := field.Annotations[antHTTPRef]; ok {
+		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param == "params."+paramName[1:] {
 				identifier = goPrefix + "." + pascalCase(field.Name)
 				required = field.Required
@@ -587,7 +614,7 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 			return false
 		}
 
-		if param, ok := field.Annotations[antHTTPRef]; ok {
+		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				camelHeaderName := camelCase(headerName)
@@ -681,7 +708,7 @@ func (ms *MethodSpec) setResponseHeaderFields(
 	visitor := func(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
-		if param, ok := field.Annotations[antHTTPRef]; ok {
+		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
@@ -723,7 +750,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 			return false
 		}
 
-		if param, ok := field.Annotations[antHTTPRef]; ok {
+		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
@@ -783,11 +810,11 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 			if ms.RequestBoxed {
 				// Boxed requests mean first arg is struct
 				structType := funcSpec.ArgsSpec[0].Type.(*compile.StructSpec)
-				fieldSelect, required, ok = findParamsAnnotation(
+				fieldSelect, required, ok = ms.findParamsAnnotation(
 					structType.Fields, segment,
 				)
 			} else {
-				fieldSelect, required, ok = findParamsAnnotation(
+				fieldSelect, required, ok = ms.findParamsAnnotation(
 					compile.FieldGroup(funcSpec.ArgsSpec), segment,
 				)
 			}
@@ -1012,12 +1039,12 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 			return false
 		}
 
-		httpRefAnnotation := field.Annotations[antHTTPRef]
+		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
 		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
 
-		longQueryName := getLongQueryName(field, thriftPrefix)
+		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 		identifierName := camelCase(longQueryName) + "Query"
 
 		if !hasQueryFields {
@@ -1081,7 +1108,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
 		longFieldName := goPrefix + "." + pascalCase(field.Name)
-		longQueryName := getLongQueryName(field, thriftPrefix)
+		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
@@ -1121,7 +1148,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 		identifierName := camelCase(longQueryName) + "Query"
 
-		httpRefAnnotation := field.Annotations[antHTTPRef]
+		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
 		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
@@ -1181,11 +1208,11 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 	return nil
 }
 
-func getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
+func (ms *MethodSpec) getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
 	var longQueryName string
 
 	queryName := field.Name
-	queryAnnotation := field.Annotations[antHTTPRef]
+	queryAnnotation := field.Annotations[ms.annotations.HTTPRef]
 	if strings.HasPrefix(queryAnnotation, "query.") {
 		// len("query.") == 6
 		queryName = queryAnnotation[6:]
@@ -1202,8 +1229,8 @@ func getLongQueryName(field *compile.FieldSpec, thriftPrefix string) string {
 	return longQueryName
 }
 
-func isRequestBoxed(f *compile.FunctionSpec) bool {
-	boxed, ok := f.Annotations[AntHTTPReqDefBoxed]
+func (ms *MethodSpec) isRequestBoxed(f *compile.FunctionSpec) bool {
+	boxed, ok := f.Annotations[ms.annotations.HTTPReqDefBoxed]
 	if ok && boxed == "true" {
 		return true
 	}

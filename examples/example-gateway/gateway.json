@@ -9,5 +9,7 @@
 	"clientConfig": "./clients",
 	"endpointConfig": "./endpoints",
 	"middlewareConfig": "./middlewares",
-	"copyrightHeader": "./copyright_header.txt"
+	"copyrightHeader": "./copyright_header.txt",
+
+	"annotationPrefix": "zanzibar"
 }
