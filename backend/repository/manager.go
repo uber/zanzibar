@@ -23,6 +23,7 @@ package repository
 import (
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/uber/zanzibar/codegen"
 	"go.uber.org/thriftrw/compile"
@@ -244,7 +245,46 @@ func (m *Manager) UpdateClients(r *Repository, clientCfgDir string, req []Client
 			}
 		}
 		if err := r.UpdateClientConfigs(&req[i], clientCfgDir, version); err != nil {
-			return errors.Wrapf(err, "failed to add thrift file %s into temp repository", thrift)
+			return errors.Wrapf(err, "failed to update client configs for %s", req[i].Name)
+		}
+	}
+	return nil
+}
+
+// deleteClients deletes the list of specified clients
+func (m *Manager) deleteClients(r *Repository, clientCfgDir string, clients []string) error {
+	clientDep, err := r.GetAllClientDependencies()
+	if err != nil {
+		return err
+	}
+
+	for _, client := range clients {
+		if deps, found := clientDep[client]; found {
+			return errors.Errorf("Cannot delete client while these endpoints are associated: %s", strings.Join(deps, ", "))
+		}
+
+		if err := r.deleteClientConfigs(client, clientCfgDir); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// deleteThrifts deletes the list of specified thrifts
+func (m *Manager) deleteThrifts(r *Repository, thrifts []string) error {
+	for _, thrift := range thrifts {
+		if err := r.deleteThriftFile(thrift); err != nil {
+			return errors.Wrapf(err, "failed to delete thrift file %s", thrift)
+		}
+	}
+	return nil
+}
+
+// deleteEndpoints deletes the list of specified endpoints
+func (m *Manager) deleteEndpoints(r *Repository, endpointsCfgDir string, endpoints []string) error {
+	for _, endpoint := range endpoints {
+		if err := r.deleteEndpointConfig(endpointsCfgDir, endpoint); err != nil {
+			return errors.Wrapf(err, "failed to delete endpoint %s", endpoint)
 		}
 	}
 	return nil
@@ -281,6 +321,9 @@ type UpdateRequest struct {
 	ClientUpdates      []ClientConfig      `json:"client_updates"`
 	EndpointUpdates    []EndpointConfig    `json:"endpoint_updates"`
 	DIffID             *string             `json:"diff_id,omitempty"`
+	DeleteThrifts      []string            `json:"delete_thrifts,omitempty"`
+	DeleteClients      []string            `json:"delete_clients,omitempty"`
+	DeleteEndpoints    []string            `json:"delete_endpoints,omitempty"`
 }
 
 // Validate validates the request and surface user friendly error
@@ -330,7 +373,15 @@ func (m *Manager) UpdateAll(r *Repository, clientCfgDir, endpointCfgDir string, 
 	if err := m.UpdateEndpoints(r, endpointCfgDir, req.EndpointUpdates); err != nil {
 		return errors.Wrap(err, "failed to update endpoints")
 	}
-	return nil
+
+	if err := m.deleteEndpoints(r, endpointCfgDir, req.DeleteEndpoints); err != nil {
+		return err
+	}
+	if err := m.deleteClients(r, clientCfgDir, req.DeleteClients); err != nil {
+		return err
+	}
+
+	return m.deleteThrifts(r, req.DeleteThrifts)
 }
 
 // thriftMetaInIDLRegistry returns meta for a set of thrift file in IDL-registry.

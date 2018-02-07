@@ -181,6 +181,49 @@ func TestUpdateAll(t *testing.T) {
 	}
 	endpointGroupExpFile := filepath.Join(exampleGateway, endpointCfgDir, endpointReq.ID, endpointConfigFileName)
 	testlib.CompareGoldenFile(t, endpointGroupExpFile, endpointGroupCfg)
+
+	// Try to delete a client before removing its endpoints
+	req = &UpdateRequest{
+		DeleteClients: []string{"google-now"},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.Error(t, err, "Deleting a client should fail when dependent endpoints exist") {
+		return
+	}
+
+	// Try to delete a thrift before removing the client
+	req = &UpdateRequest{
+		DeleteThrifts: []string{"clients/googlenow/googlenow.thrift"},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.Error(t, err, "Deleting a thrift should fail when dependent endpoints/clients exist") {
+		return
+	}
+
+	// Delete endpoints
+	req = &UpdateRequest{
+		DeleteEndpoints: []string{"googlenow.addCredentials", "googlenow.checkCredentials"},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.NoError(t, err, "failed to delete endpoint") {
+		return
+	}
+
+	// Now should be able to delete client and thrift
+	req = &UpdateRequest{
+		DeleteClients: []string{"google-now"},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.NoError(t, err, "failed to delete client") {
+		return
+	}
+	req = &UpdateRequest{
+		DeleteThrifts: []string{"endpoints/googlenow/googlenow.thrift", "clients/googlenow/googlenow.thrift"},
+	}
+	err = manager.UpdateAll(r, clientCfgDir, endpointCfgDir, req)
+	if !assert.NoError(t, err, "failed to delete thrift") {
+		return
+	}
 }
 
 func TestAddThriftDepedencies(t *testing.T) {

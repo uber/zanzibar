@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	reqerr "github.com/uber/zanzibar/codegen/errors"
@@ -143,4 +144,73 @@ func (r *Repository) ThriftFileVersion(thriftFile string) (string, error) {
 		return "", errors.Errorf("can't find thrift file <%s> in thrift meta file", thriftFile)
 	}
 	return thriftMeta.Version, nil
+}
+
+// deleteThriftFile deletes specified thrift from disk, including any empty parent directories, and remove its entry from thrift meta
+func (r *Repository) deleteThriftFile(thriftFile string) error {
+	cfg, err := r.LatestGatewayConfig()
+	if err != nil {
+		return errors.Wrap(err, "invalid configuration before updating thrifts")
+	}
+
+	// Check client and endpoint dependencies
+	for _, client := range cfg.Clients {
+		if client.ThriftFile == thriftFile {
+			return errors.Errorf("Cannot delete thrift %s while client %s is associated", thriftFile, client.Name)
+		}
+	}
+	for _, endpoint := range cfg.Endpoints {
+		if endpoint.ThriftFile == thriftFile {
+			return errors.Errorf("Cannot delete thrift %s while endpoint %s.%s is associated", thriftFile, endpoint.ID, endpoint.HandleID)
+		}
+	}
+
+	meta, err := r.ThriftConfig(cfg.ThriftRootDir)
+	if err != nil {
+		return errors.Wrap(err, "failed to read current thrift meta")
+	}
+
+	// Delete entry	in meta json and write to file
+	delete(meta, thriftFile)
+	err = r.writeThriftConfig(meta)
+	if err != nil {
+		return errors.Wrap(err, "failed to write new thrift meta after deleting entry")
+	}
+
+	// Get directory containing thrift file to delete
+	path := filepath.Dir(r.absPath(filepath.Join(cfg.ThriftRootDir, thriftFile)))
+
+	fInfo, err := ioutil.ReadDir(path)
+	if err != nil {
+		return errors.Wrap(err, "failed to read directory containing thrift file to delete")
+	}
+	if len(fInfo) > 1 {
+		// There are other files here, so only delete the thrift
+		err = os.Remove(r.absPath(filepath.Join(cfg.ThriftRootDir, thriftFile)))
+		if err != nil {
+			return errors.Wrap(err, "failed to delete thrift file")
+		}
+	} else {
+		// Delete thrift with any parent directories safe to delete
+		pathToDelete := path
+		thriftRootPath := r.absPath(cfg.ThriftRootDir)
+		for path = filepath.Dir(path); strings.HasPrefix(path, thriftRootPath); path = filepath.Dir(path) {
+			fInfo, err = ioutil.ReadDir(path)
+			if err != nil {
+				return errors.Wrapf(err, "failed to traverse parent directory %q", path)
+			}
+			if len(fInfo) == 1 {
+				// This directory is safe to delete since it only contains a directory (that is safe to delete)
+				pathToDelete = path
+			} else {
+				break
+			}
+		}
+		err = os.RemoveAll(pathToDelete)
+		if err != nil {
+			return errors.Wrapf(err, "failed to delete thrift directory %q", pathToDelete)
+		}
+	}
+
+	return nil
 }
