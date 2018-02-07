@@ -25,7 +25,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/config"
 )
 
 const (
@@ -44,7 +43,7 @@ func TestNewRuntimeConfigOrDie(t *testing.T) {
 
 	os.Setenv(uberPortHTTPEnv, "1111")
 	os.Setenv(uberPortTChannelEnv, "2222")
-	cfg := config.NewRuntimeConfigOrDie([]string{"test.json"}, nil)
+	cfg := NewRuntimeConfigOrDie([]string{"test.json"}, nil)
 
 	assert.Equal(t, "my-gateway", cfg.MustGetString("serviceName")) // existing config
 	assert.Equal(t, int64(1111), cfg.MustGetInt(httpPortKey))       // replaced config
