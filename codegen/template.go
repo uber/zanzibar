@@ -64,6 +64,7 @@ var defaultFuncMap = tmpl.FuncMap{
 	"isPointerType": isPointerType,
 	"unref":         unref,
 	"lintAcronym":   LintAcronym,
+	"args":          args,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -91,6 +92,10 @@ func unref(t string) string {
 		return strings.TrimLeft(t, "*")
 	}
 	return t
+}
+
+func args(v ...interface{}) []interface{} {
+	return v
 }
 
 // Template generates code for edge gateway clients and edgegateway endpoints.

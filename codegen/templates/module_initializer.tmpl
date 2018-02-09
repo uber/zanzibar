@@ -45,25 +45,10 @@ func InitializeDependencies(
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
-	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
-	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
-	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
-
-	{{- range $idx, $dependency := $moduleInstances}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(&{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
-		Default: initializedDefaultDependencies,
-		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
-			{{- range $idy, $subDependency := $moduleInstances}}
-			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
-			{{- end}}
-		},
-		{{- end}}
-	})
-	{{- end}}
+	{{template "module_class_initializer.tmpl" args $className $instance}}
 	{{end}}
 
-	return tree, &Dependencies{
+	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
@@ -73,4 +58,6 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	}
+
+	return tree, dependencies
 }

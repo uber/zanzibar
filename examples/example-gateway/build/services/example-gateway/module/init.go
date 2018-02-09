@@ -166,7 +166,7 @@ func InitializeDependencies(
 		},
 	})
 
-	return tree, &Dependencies{
+	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &EndpointDependencies{
 			Bar:         initializedEndpointDependencies.Bar,
@@ -177,4 +177,6 @@ func InitializeDependencies(
 			Multi:       initializedEndpointDependencies.Multi,
 		},
 	}
+
+	return tree, dependencies
 }
