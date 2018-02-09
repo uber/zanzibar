@@ -1060,11 +1060,25 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	mockInitializer, err := GenerateMockInitializer(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service mock initializer for %s",
+			instance.InstanceName,
+		)
+	}
+
 	files := map[string][]byte{
-		"service.go":        service,
-		"main/main.go":      main,
-		"main/main_test.go": mainTest,
-		"module/init.go":    initializer,
+		"service.go":          service,
+		"main/main.go":        main,
+		"main/main_test.go":   mainTest,
+		"module/init.go":      initializer,
+		"module/mock_init.go": mockInitializer,
 	}
 
 	if dependencies != nil {
@@ -1171,6 +1185,19 @@ func GenerateInitializer(
 ) ([]byte, error) {
 	return template.ExecTemplate(
 		"module_initializer.tmpl",
+		instance,
+		packageHelper,
+	)
+}
+
+// GenerateMockInitializer is like GenerateInitializer but with lead nodes being mocks.
+func GenerateMockInitializer(
+	instance *ModuleInstance,
+	packageHelper *PackageHelper,
+	template *Template,
+) ([]byte, error) {
+	return template.ExecTemplate(
+		"module_mock_initializer.tmpl",
 		instance,
 		packageHelper,
 	)
