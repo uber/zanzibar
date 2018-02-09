@@ -250,19 +250,23 @@ func (h *{{$handlerName}}) HandleRequest(
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
+		{{- if eq (len .Exceptions) 0 -}}
+		res.SendError(500, "Unexpected server error", err)
+		return
+		{{ else }}
 		switch errValue := err.(type) {
-			{{range $idx, $exception := .Exceptions}}
-			case *{{$exception.Type}}:
-				res.WriteJSON(
-					{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
-				)
-				return
-			{{end}}
-			default:
-				req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-				res.SendErrorString(500, "Unexpected server error")
-				return
+		{{range $idx, $exception := .Exceptions}}
+		case *{{$exception.Type}}:
+			res.WriteJSON(
+				{{$exception.StatusCode.Code}}, cliRespHeaders, errValue,
+			)
+			return
+		{{end}}
+		  default:
+			 res.SendError(500, "Unexpected server error", err)
+			 return
 		}
+		{{ end }}
 	}
 
 	{{- if .ResHeaders }}
@@ -278,9 +282,8 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- else if eq .ResponseType "string" -}}
 	bytes, err := json.Marshal(response)
 	if err != nil {
-		req.Logger.Warn("Unable to marshal response into json", zap.Error(err))
-			res.SendErrorString(500, "Unexpected server error")
-			return
+		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
+		return
 	}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, bytes)
 	{{- else -}}
@@ -398,7 +401,11 @@ func (w {{$workflow}}) Handle(
 				{{end}}
 			{{end}}
 			default:
-				w.Logger.Warn("Could not make client request", zap.Error(errValue))
+				w.Logger.Warn("Could not make client request",
+					zap.Error(errValue),
+					zap.String("client", "{{$clientName}}"),
+				)
+
 				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
@@ -466,7 +473,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 9857, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 9917, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

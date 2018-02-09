@@ -27,7 +27,6 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
@@ -85,13 +84,9 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 
 	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
-		switch errValue := err.(type) {
+		res.SendError(500, "Unexpected server error", err)
+		return
 
-		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
-			return
-		}
 	}
 
 	res.WriteJSON(202, cliRespHeaders, response)

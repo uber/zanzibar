@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	"bytes"
+
 	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -156,12 +157,11 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -213,12 +213,11 @@ func TestFailingGetQueryBool(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -270,12 +269,11 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -327,12 +325,11 @@ func TestFailingHasQueryValue(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -384,12 +381,11 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -441,12 +437,11 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -498,12 +493,11 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -555,12 +549,11 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -612,12 +605,11 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 
@@ -669,12 +661,11 @@ func TestFailingGetQueryValues(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 3, len(logs))
+	assert.Equal(t, 2, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
 	assert.Equal(t, 1, len(logs["Got request with invalid query string"]))
-	assert.Equal(t, 1, len(logs["Sending error for endpoint request"]))
 	assert.Equal(t, 1, len(logs["Finished an incoming server HTTP request"]))
 }
 

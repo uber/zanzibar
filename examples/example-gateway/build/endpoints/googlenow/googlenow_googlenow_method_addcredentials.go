@@ -86,13 +86,9 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 
 	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
-		switch errValue := err.(type) {
+		res.SendError(500, "Unexpected server error", err)
+		return
 
-		default:
-			req.Logger.Warn("Workflow for endpoint returned error", zap.Error(errValue))
-			res.SendErrorString(500, "Unexpected server error")
-			return
-		}
 	}
 	// TODO(sindelar): implement check headers on response
 
@@ -131,7 +127,11 @@ func (w GoogleNowAddCredentialsEndpoint) Handle(
 		switch errValue := err.(type) {
 
 		default:
-			w.Logger.Warn("Could not make client request", zap.Error(errValue))
+			w.Logger.Warn("Could not make client request",
+				zap.Error(errValue),
+				zap.String("client", "GoogleNow"),
+			)
+
 			// TODO(sindelar): Consider returning partial headers
 
 			return nil, err

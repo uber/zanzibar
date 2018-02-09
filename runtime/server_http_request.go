@@ -198,9 +198,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		zap.Error(err),
 	)
 	if !req.parseFailed {
-		req.res.SendErrorString(
-			400, "Could not parse query string",
-		)
+		req.res.SendError(400, "Could not parse query string", err)
 		req.parseFailed = true
 	}
 	return false, false
@@ -223,9 +221,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 			zap.Error(err),
 		)
 		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
-			)
+			req.res.SendError(400, "Could not parse query string", err)
 			req.parseFailed = true
 		}
 		return 0, false
@@ -251,9 +247,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 			zap.Error(err),
 		)
 		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
-			)
+			req.res.SendError(400, "Could not parse query string", err)
 			req.parseFailed = true
 		}
 		return 0, false
@@ -279,8 +273,8 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 			zap.Error(err),
 		)
 		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
+			req.res.SendError(
+				400, "Could not parse query string", err,
 			)
 			req.parseFailed = true
 		}
@@ -307,9 +301,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 			zap.Error(err),
 		)
 		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
-			)
+			req.res.SendError(400, "Could not parse query string", err)
 			req.parseFailed = true
 		}
 		return 0, false
@@ -335,9 +327,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 			zap.Error(err),
 		)
 		if !req.parseFailed {
-			req.res.SendErrorString(
-				400, "Could not parse query string",
-			)
+			req.res.SendError(400, "Could not parse query string", err)
 			req.parseFailed = true
 		}
 		return 0, false
@@ -436,7 +426,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	if err != nil {
 		req.Logger.Error("Could not read request body", zap.Error(err))
 		if !req.parseFailed {
-			req.res.SendErrorString(500, "Could not read request body")
+			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
 		}
 		return nil, false
@@ -453,7 +443,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	if err != nil {
 		req.Logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {
-			req.res.SendErrorString(400, "Could not parse json: "+err.Error())
+			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
 		}
 		return false
