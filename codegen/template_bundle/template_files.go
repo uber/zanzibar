@@ -9,8 +9,11 @@
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
 // codegen/templates/middleware.tmpl
+// codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
+// codegen/templates/module_mock_initializer.tmpl
 // codegen/templates/service.tmpl
+// codegen/templates/service_mock.tmpl
 // codegen/templates/structs.tmpl
 // codegen/templates/tchannel_client.tmpl
 // codegen/templates/tchannel_client_test_server.tmpl
@@ -1399,6 +1402,43 @@ func middlewareTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _module_class_initializerTmpl = []byte(`{{- $className := index . 0 }}
+{{- $instance := index . 1 }}
+{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
+{{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+tree.{{$className | title}} = {{$initializedDeps}}
+
+{{- range $idx, $dependency := $moduleInstances}}
+	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	Default: initializedDefaultDependencies,
+	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+		{{- range $idy, $subDependency := $moduleInstances}}
+		{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+		{{- end}}
+	},
+	{{- end}}
+})
+{{- end}}
+`)
+
+func module_class_initializerTmplBytes() ([]byte, error) {
+	return _module_class_initializerTmpl, nil
+}
+
+func module_class_initializerTmpl() (*asset, error) {
+	bytes, err := module_class_initializerTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1062, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _module_initializerTmpl = []byte(`{{$instance := . -}}
 
 package module
@@ -1446,25 +1486,10 @@ func InitializeDependencies(
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
-	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
-	initialized{{$className | pascal}}Dependencies := &{{$className | title}}DependenciesNodes{}
-	tree.{{$className | title}} = initialized{{$className | pascal}}Dependencies
-
-	{{- range $idx, $dependency := $moduleInstances}}
-	initialized{{$className | pascal}}Dependencies.{{$dependency.PackageInfo.QualifiedInstanceName}} = {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportName}}(&{{$dependency.PackageInfo.ModulePackageAlias}}.Dependencies{
-		Default: initializedDefaultDependencies,
-		{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$dependency.PackageInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
-			{{- range $idy, $subDependency := $moduleInstances}}
-			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
-			{{- end}}
-		},
-		{{- end}}
-	})
-	{{- end}}
+	{{template "module_class_initializer.tmpl" args $className $instance}}
 	{{end}}
 
-	return tree, &Dependencies{
+	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
 		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
@@ -1474,6 +1499,8 @@ func InitializeDependencies(
 		},
 		{{- end}}
 	}
+
+	return tree, dependencies
 }
 `)
 
@@ -1487,7 +1514,99 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 3156, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2216, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _module_mock_initializerTmpl = []byte(`{{$instance := . -}}
+{{$leafClass := index .DependencyOrder 0 -}}
+{{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
+
+package module
+
+import (
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{if not (eq $classType $leafClass) -}}
+	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end}}
+
+	zanzibar "github.com/uber/zanzibar/runtime"
+)
+
+{{$moduleInstances := (index $instance.RecursiveDependencies $leafClass) -}}
+// {{$mockDeps}} contains mock {{$leafClass}} dependencies
+type {{$mockDeps}} struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+
+// InitializeDependenciesMock fully initializes all dependencies in the dep tree
+// for the {{$instance.InstanceName}} {{$instance.ClassName}} with leaf nodes being mocks
+func InitializeDependenciesMock(
+	g *zanzibar.Gateway,
+) (*DependenciesTree, *Dependencies, *{{$mockDeps}}) {
+	tree := &DependenciesTree{}
+
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger:  g.Logger,
+		Scope:   g.AllHostScope,
+		Config:  g.Config,
+		Channel: g.Channel,
+	}
+
+	{{range $idx, $className := $instance.DependencyOrder}}
+	{{if eq $className $leafClass -}}
+	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+	{{camel $mockDeps}} := &{{$mockDeps}}{
+		{{- range $idx, $dependency := $moduleInstances}}
+		{{- $pkgInfo := $dependency.PackageInfo }}
+		{{$pkgInfo.QualifiedInstanceName}}: &{{$pkgInfo.ImportPackageAlias}}.Mock{{title $className}}{},
+		{{- end }}
+	}
+	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
+	{{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+	tree.{{$className | title}} = {{$initializedDeps}}
+	{{- range $idx, $dependency := $moduleInstances}}
+	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{camel $mockDeps}}.{{$pkgInfo.QualifiedInstanceName}}
+	{{- end }}
+	{{else -}}
+	{{template "module_class_initializer.tmpl" args $className $instance}}
+	{{end}}
+	{{end}}
+
+	dependencies := &Dependencies{
+		Default: initializedDefaultDependencies,
+		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
+		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+			{{- range $idy, $subDependency := $moduleInstances}}
+			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+			{{- end}}
+		},
+		{{- end}}
+	}
+
+	return tree, dependencies, {{camel $mockDeps}}
+}
+`)
+
+func module_mock_initializerTmplBytes() ([]byte, error) {
+	return _module_mock_initializerTmpl, nil
+}
+
+func module_mock_initializerTmpl() (*asset, error) {
+	bytes, err := module_mock_initializerTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 2919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1556,6 +1675,183 @@ func serviceTmpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "service.tmpl", size: 1297, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _service_mockTmpl = []byte(`{{- $instance := . -}}
+{{- $leafClass := index .DependencyOrder 0 -}}
+{{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
+
+package {{$instance.PackageInfo.GeneratedPackageAlias}}
+
+import (
+	"context"
+	"errors"
+	"io"
+	"net/http"
+	"time"
+
+
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+// MockService interface
+type MockService interface {
+	MakeHTTPRequest(
+		method string,
+		url string,
+		headers map[string]string,
+		body io.Reader,
+	) (*http.Response, error)
+	MakeTChannelRequest(
+		ctx context.Context,
+		thriftService string,
+		method string,
+		headers map[string]string,
+		req, resp zanzibar.RWTStruct,
+	) (bool, map[string]string, error)
+	{{$mockType}}() *module.{{$mockType}}
+	Start()
+	Stop()
+}
+
+type mockService struct {
+	started        bool
+	server         *zanzibar.Gateway
+	{{camel $mockType}}    *module.{{$mockType}}
+	httpClient     *http.Client
+	tChannelClient zanzibar.TChannelCaller
+}
+
+// TestOptions is the info needed to create a test service
+type TestOptions struct {
+	TChannelClientMethods map[string]string
+}
+
+// NewTestService creates a new MockService
+func NewTestService(opts *TestOptions) (MockService, error) {
+	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
+	server, err := zanzibar.CreateGateway(c, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	_, dependencies, mockNodes := module.InitializeDependenciesMock(server)
+	registerErr := registerDeps(server, dependencies)
+	if registerErr != nil {
+		panic(registerErr)
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives:   false,
+			MaxIdleConns:        500,
+			MaxIdleConnsPerHost: 500,
+		},
+	}
+
+	timeout := time.Duration(10000) * time.Millisecond
+	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
+
+	tchannelClient := zanzibar.NewTChannelClient(
+		server.Channel,
+		server.Logger,
+		server.RootScope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       server.ServiceName,
+			MethodNames:       opts.TChannelClientMethods,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+		},
+	)
+
+	return &mockService{
+		server:         		server,
+		{{camel $mockType}}:    mockNodes,
+		httpClient:     		httpClient,
+		tChannelClient: 		tchannelClient,
+	}, nil
+}
+
+// Start starts the mock server, panics if fails doing so
+func (m *mockService) Start() {
+	if err := m.server.Bootstrap(); err != nil {
+		panic(err)
+	}
+	m.started = true
+}
+
+// Stop stops the mock server
+func (m *mockService) Stop() {
+	m.server.Close()
+	m.started = false
+}
+
+// {{$mockType}} returns the mock nodes
+func (m *mockService) {{$mockType}}() *module.{{$mockType}} {
+	return m.{{camel $mockType}}
+}
+
+// MakeHTTPRequest makes a HTTP request to the mock server
+func (m *mockService) MakeHTTPRequest(
+	method string,
+	url string,
+	headers map[string]string,
+	body io.Reader,
+) (*http.Response, error) {
+	if !m.started {
+		return nil, errors.New("mock server is not started")
+	}
+
+	client := m.httpClient
+
+	fullURL := "http://" + m.server.RealHTTPAddr + url
+
+	req, err := http.NewRequest(method, fullURL, body)
+	for headerName, headerValue := range headers {
+		req.Header.Set(headerName, headerValue)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Do(req)
+}
+
+// MakeTChannelRequest makes a TChannel request to the mock server
+func (m *mockService) MakeTChannelRequest(
+	ctx context.Context,
+	thriftService string,
+	method string,
+	headers map[string]string,
+	req, res zanzibar.RWTStruct,
+) (bool, map[string]string, error) {
+	if !m.started {
+		return false, nil, errors.New("mock server is not started")
+	}
+
+	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
+	sc.Peers().Add(m.server.RealTChannelAddr)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
+}
+`)
+
+func service_mockTmplBytes() ([]byte, error) {
+	return _service_mockTmpl, nil
+}
+
+func service_mockTmpl() (*asset, error) {
+	bytes, err := service_mockTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 3814, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2127,8 +2423,11 @@ var _bindata = map[string]func() (*asset, error){
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
 	"middleware.tmpl":                    middlewareTmpl,
+	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
+	"module_mock_initializer.tmpl":       module_mock_initializerTmpl,
 	"service.tmpl":                       serviceTmpl,
+	"service_mock.tmpl":                  service_mockTmpl,
 	"structs.tmpl":                       structsTmpl,
 	"tchannel_client.tmpl":               tchannel_clientTmpl,
 	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
@@ -2185,8 +2484,11 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
 	"middleware.tmpl":                    {middlewareTmpl, map[string]*bintree{}},
+	"module_class_initializer.tmpl":      {module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
+	"module_mock_initializer.tmpl":       {module_mock_initializerTmpl, map[string]*bintree{}},
 	"service.tmpl":                       {serviceTmpl, map[string]*bintree{}},
+	"service_mock.tmpl":                  {service_mockTmpl, map[string]*bintree{}},
 	"structs.tmpl":                       {structsTmpl, map[string]*bintree{}},
 	"tchannel_client.tmpl":               {tchannel_clientTmpl, map[string]*bintree{}},
 	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},

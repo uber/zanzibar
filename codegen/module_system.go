@@ -993,7 +993,6 @@ func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGe
 func (generator *GatewayServiceGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	// generate main.go
 	service, err := generator.templates.ExecTemplate(
 		"service.tmpl",
 		instance,
@@ -1007,6 +1006,20 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	mockService, err := generator.templates.ExecTemplate(
+		"service_mock.tmpl",
+		instance,
+		generator.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service mock_service.go for %s",
+			instance.InstanceName,
+		)
+	}
+
+	// generate main.go
 	main, err := generator.templates.ExecTemplate(
 		"main.tmpl",
 		instance,
@@ -1075,6 +1088,7 @@ func (generator *GatewayServiceGenerator) Generate(
 
 	files := map[string][]byte{
 		"service.go":          service,
+		"mock_service.go":     mockService,
 		"main/main.go":        main,
 		"main/main_test.go":   mainTest,
 		"module/init.go":      initializer,
