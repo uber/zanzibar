@@ -2531,7 +2531,8 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				]
+				],
+				"description": "informative commit message"
 			}
 		},
 		"response": {
@@ -2604,7 +2605,8 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				]
+				],
+				"description": "informative commit message"
 			}
 		},
 		"response": {
@@ -2626,7 +2628,8 @@
 				"managed_thrift_files": [
 					{
 						"filename": "bar/my-thrift.thrift",
-						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n"
+						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n",
+						"description": "informative commit message"
 					}
 				]
 			}
@@ -2701,7 +2704,8 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				]
+				],
+				"description": "informative commit message"
 			}
 		},
 		"response": {
