@@ -34,6 +34,7 @@ import (
 	googlenowClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
+	quuxClientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -48,6 +49,7 @@ import (
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	exampleMiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -66,6 +68,7 @@ type ClientDependenciesNodes struct {
 	Contacts  contactsClientGenerated.Client
 	GoogleNow googlenowClientGenerated.Client
 	Multi     multiClientGenerated.Client
+	Quux      quuxClientStatic.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -114,6 +117,9 @@ func InitializeDependencies(
 	initializedClientDependencies.Multi = multiClientGenerated.NewClient(&multiClientModule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedClientDependencies.Quux = quuxClientStatic.NewClient(&quuxClientModule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -144,7 +150,8 @@ func InitializeDependencies(
 	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(&baztchannelEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Quux: initializedClientDependencies.Quux,
 		},
 	})
 	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(&contactsEndpointModule.Dependencies{

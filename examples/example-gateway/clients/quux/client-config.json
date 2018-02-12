@@ -4,9 +4,5 @@
 	"config": {
 		"customImportPath": "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 	},
-	"dependencies": {
-		"client": [
-			"bar"
-		]
-	}
+	"dependencies": {}
 }

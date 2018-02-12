@@ -43,6 +43,7 @@ import (
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	exampleMiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -54,6 +55,7 @@ type MockClientNodes struct {
 	Contacts  *contactsClientGenerated.MockClient
 	GoogleNow *googlenowClientGenerated.MockClient
 	Multi     *multiClientGenerated.MockClient
+	Quux      *quuxClientStatic.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -76,6 +78,7 @@ func InitializeDependenciesMock(
 		Contacts:  &contactsClientGenerated.MockClient{},
 		GoogleNow: &googlenowClientGenerated.MockClient{},
 		Multi:     &multiClientGenerated.MockClient{},
+		Quux:      &quuxClientStatic.MockClient{},
 	}
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
@@ -84,6 +87,7 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
+	initializedClientDependencies.Quux = mockClientNodes.Quux
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -114,7 +118,8 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.BazTChannel = baztchannelEndpointGenerated.NewEndpoint(&baztchannelEndpointModule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &baztchannelEndpointModule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
+			Baz:  initializedClientDependencies.Baz,
+			Quux: initializedClientDependencies.Quux,
 		},
 	})
 	initializedEndpointDependencies.Contacts = contactsEndpointGenerated.NewEndpoint(&contactsEndpointModule.Dependencies{

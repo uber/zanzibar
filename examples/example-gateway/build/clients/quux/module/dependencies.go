@@ -24,18 +24,10 @@
 package module
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the quux client module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
-	Client  *ClientDependencies
-}
-
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Bar barClientGenerated.Client
 }
