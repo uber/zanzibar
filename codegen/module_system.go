@@ -29,6 +29,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const mockTag = "mock"
+
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
 	Instance           *ModuleInstance
@@ -1010,7 +1012,7 @@ func (generator *GatewayServiceGenerator) Generate(
 		"service_mock.tmpl",
 		instance,
 		generator.packageHelper,
-		"ignore",
+		mockTag,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -1215,7 +1217,7 @@ func GenerateMockInitializer(
 		"module_mock_initializer.tmpl",
 		instance,
 		packageHelper,
-		"ignore",
+		mockTag,
 	)
 }
 
