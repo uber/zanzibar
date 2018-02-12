@@ -444,6 +444,10 @@ func (h *Handler) GenerateDiff(w http.ResponseWriter, r *http.Request, _ httprou
 		h.WriteErrorResponse(w, http.StatusBadRequest, errors.Wrap(err, "Failed to unmarshal body for creating a diff"))
 		return
 	}
+	if req.Description == "" {
+		h.WriteErrorResponse(w, http.StatusBadRequest, errors.New("`description` is a required field"))
+		return
+	}
 	h.logger.Info("Generating a diff.",
 		zap.String("request", string(b)),
 	)
@@ -471,7 +475,7 @@ func (h *Handler) GenerateDiff(w http.ResponseWriter, r *http.Request, _ httprou
 	}
 	diffReq := &DiffRequest{
 		BranchName:    strings.Join([]string{"batch", "update", currentTime()}, "_"),
-		CommitMessage: fmt.Sprintf("[%s] - %s", gatewayConfig.ID, *req.Description),
+		CommitMessage: fmt.Sprintf("[%s] - %s", gatewayConfig.ID, req.Description),
 	}
 	h.logger.Info("Generating diff...",
 		zap.String("localDir", repo.LocalDir()),

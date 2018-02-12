@@ -2642,6 +2642,30 @@
 		}
 	},
 	{
+		"name": "create-diff-managed-thrift-badrequest",
+		"request": {
+			"method": "POST",
+			"url": "/create-diff",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"managed_thrift_files": [
+					{
+						"filename": "bar/my-thrift.thrift",
+						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n"
+					}
+				]
+			}
+		},
+		"response": {
+			"code": 400,
+			"body": {
+				"error": "`description` is a required field"
+			}
+		}
+	},
+	{
 		"name": "invalid create-diff request with unknown client ID",
 		"request": {
 			"method": "POST",
