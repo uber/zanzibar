@@ -29,8 +29,8 @@ MOCKERY_BINARY="$MOCKERY_DIR/cmd/mockery/mockery"
 
 go build -o "$MOCKERY_BINARY" "$MOCKERY_MAIN_FILE"
 
-"$MOCKERY_BINARY" -name="^Client$" -dir="$BUILD_DIR/clients" -inpkg -case=underscore -recursive > /dev/null
-"$MOCKERY_BINARY" -name="^Client$" -dir="$CONFIG_DIR/clients" -inpkg -case=underscore -recursive > /dev/null
+"$MOCKERY_BINARY" -name="^Client$" -dir="$BUILD_DIR/clients" -inpkg -case=underscore -recursive -note="+build ignore" > /dev/null
+"$MOCKERY_BINARY" -name="^Client$" -dir="$CONFIG_DIR/clients" -inpkg -case=underscore -recursive -note="+build ignore" > /dev/null
 end=$(date +%s)
 runtime=$((end-start))
 echo "Generated mock clients: +$runtime"
