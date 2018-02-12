@@ -1010,6 +1010,7 @@ func (generator *GatewayServiceGenerator) Generate(
 		"service_mock.tmpl",
 		instance,
 		generator.packageHelper,
+		"ignore",
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -1214,6 +1215,7 @@ func GenerateMockInitializer(
 		"module_mock_initializer.tmpl",
 		instance,
 		packageHelper,
+		"ignore",
 	)
 }
 

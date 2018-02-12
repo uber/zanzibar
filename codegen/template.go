@@ -140,6 +140,7 @@ func (t *Template) ExecTemplate(
 	tplName string,
 	tplData interface{},
 	pkgHelper *PackageHelper,
+	buildTags ...string,
 ) (ret []byte, rErr error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -154,6 +155,14 @@ func (t *Template) ExecTemplate(
 		"// @generated \n \n"); err != nil {
 		rErr = errors.Wrapf(err, "failed to write to file: %s", err)
 		return
+	}
+	buildTagsLine := strings.Join(buildTags, " ")
+	if buildTagsLine != "" {
+		if _, err := io.WriteString(tplBuffer, "// +build "+buildTagsLine+"\n\n"); err != nil {
+			rErr = errors.Wrapf(err, "failed to write to file: %s", err)
+			return
+		}
+
 	}
 	if _, err := io.WriteString(tplBuffer, pkgHelper.copyrightHeader); err != nil {
 		rErr = errors.Wrapf(err, "failed to write to file: %s", err)
