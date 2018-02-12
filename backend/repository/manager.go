@@ -324,6 +324,7 @@ type UpdateRequest struct {
 	DeleteThrifts      []string            `json:"delete_thrifts,omitempty"`
 	DeleteClients      []string            `json:"delete_clients,omitempty"`
 	DeleteEndpoints    []string            `json:"delete_endpoints,omitempty"`
+	Description        *string             `json:"description,omitempty"`
 }
 
 // Validate validates the request and surface user friendly error
