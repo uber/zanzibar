@@ -27,7 +27,7 @@
 	"clients.multi.ip": "127.0.0.1",
 	"clients.multi.port": 4003,
 	"clients.multi.timeout": 10000,
-	"http.port": 7783,
+	"http.port": 0,
 	"logger.fileName": "./example-gateway.log",
 	"logger.output": "disk",
 	"metrics.serviceName": "example-gateway",
@@ -35,7 +35,7 @@
 	"serviceName": "example-gateway",
 	"sidecarRouter.default.tchannel.ip": "127.0.0.1",
 	"sidecarRouter.default.tchannel.port": 5000,
-	"tchannel.port": 7784,
+	"tchannel.port": 0,
 	"tchannel.processName": "example-gateway",
 	"tchannel.serviceName": "example-gateway",
 	"useDatacenter": false

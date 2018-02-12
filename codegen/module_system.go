@@ -1207,7 +1207,7 @@ func GenerateInitializer(
 	)
 }
 
-// GenerateMockInitializer is like GenerateInitializer but with lead nodes being mocks.
+// GenerateMockInitializer is like GenerateInitializer but with leaf nodes being mocks.
 func GenerateMockInitializer(
 	instance *ModuleInstance,
 	packageHelper *PackageHelper,

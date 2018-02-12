@@ -1,5 +1,5 @@
 hash: a61583a35be2c3ac829ef2e30455c8dc76bdaf0b85fca46d9e2270763d2ffd90
-updated: 2018-02-09T15:14:25.118863-08:00
+updated: 2018-02-12T15:41:23.180879-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -63,12 +63,6 @@ imports:
   - assert
   - mock
   - require
-- name: github.com/syndtr/goleveldb
-  version: 211f780988068502fe874c44dae530528ebd840f
-  subpackages:
-  - leveldb/errors
-  - leveldb/storage
-  - leveldb/util
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
