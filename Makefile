@@ -288,8 +288,18 @@ jenkins-install:
 .PHONY: jenkins-test
 jenkins-test:
 	PWD=$(pwd)
+#	We have to add original GOPATH here, when mockery generates mocks, it evaluates
+#	any symlink to the source path, the GOPATH then is no longer a prefix of given
+#   file to parse, causing go/build not to search vendor dir for imports. For example:
+#	while file path
+#   /Users/a/go/src/github.com/uber/zanzibar/workspace/src/github/uber/zanzibar/examples/example-gateway/clients/foo
+# 	has GOPATH (/Users/a/go/src/github.com/uber/zanzibar/workspace) as prefix
+#   mockery evaluates it to
+#	/Users/a/go/src/github.com/uber/zanzibar/examples/example-gateway/clients/foo
+#	where GOPATH (/Users/a/go/src/github.com/uber/zanzibar/workspace) is no longer its prefix.
+#	A work-around is to provide both the original and new GOPATH
 	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
+		GOPATH=$(PWD)/workspace:$(GOPATH) \
 		PATH=$(PWD)/workspace/bin:$(PATH) \
 		make check-generate
 	cd workspace/src/github.com/uber/zanzibar && \

@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-if [ -z $1 ]; then
+if [ -z "$1" ]; then
 	echo "prefix argument (\$1) is missing"
 	exit 1
 fi
