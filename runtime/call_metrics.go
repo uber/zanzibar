@@ -23,8 +23,10 @@ package zanzibar
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/uber-go/tally"
+	"go.uber.org/zap"
 )
 
 const (
@@ -181,6 +183,13 @@ type OutboundTChannelMetrics struct {
 	tchannelMetrics
 }
 
+// OutboundCustomMetrics ...
+type OutboundCustomMetrics struct {
+	outboundMetrics
+	commonMetrics
+	Errors tally.Counter // outbound.calls.errors
+}
+
 // NewInboundHTTPMetrics returns inbound HTTP metrics
 func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	metrics := InboundHTTPMetrics{}
@@ -233,4 +242,55 @@ func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
 	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
 	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
 	return &metrics
+}
+
+// NewOutboundCustomMetrics returns outbound metrics for custom clients
+func NewOutboundCustomMetrics(scope tally.Scope) *OutboundCustomMetrics {
+	metrics := OutboundCustomMetrics{}
+	metrics.Sent = scope.Counter(outboundCallsSent)
+	metrics.Latency = scope.Timer(outboundCallsLatency)
+	metrics.Success = scope.Counter(outboundCallsSuccess)
+	metrics.Errors = scope.Counter(outboundCallsErrors)
+	return &metrics
+}
+
+// SetupCustomClientLoggersMetrics creates:
+// - client logger/scope
+// - client method loggers/metrics
+func SetupCustomClientLoggersMetrics(
+	clientID string,
+	methods []string,
+	deps *DefaultDependencies,
+) (
+	logger *zap.Logger,
+	scope tally.Scope,
+	loggers map[string]*zap.Logger,
+	metrics map[string]*OutboundCustomMetrics,
+) {
+	logger = deps.Logger.With(zap.String("clientID", clientID))
+	scope = deps.Scope.Tagged(map[string]string{"client": clientID})
+
+	loggers = make(map[string]*zap.Logger, len(methods))
+	metrics = make(map[string]*OutboundCustomMetrics, len(methods))
+	for _, methodName := range methods {
+		loggers[methodName] = logger.With(
+			zap.String("methodName", methodName),
+		)
+		metrics[methodName] = NewOutboundCustomMetrics(scope.Tagged(map[string]string{
+			"method": methodName,
+		}))
+	}
+
+	return logger, scope, loggers, metrics
+}
+
+// EmitOutboundCustomMetrics emits outbound metrics for custom clients
+func (m *OutboundCustomMetrics) EmitOutboundCustomMetrics(start time.Time, err error) {
+	m.Sent.Inc(1)
+	if err != nil {
+		m.Errors.Inc(1)
+	} else {
+		m.Success.Inc(1)
+	}
+	m.Latency.Record(time.Now().Sub(start))
 }

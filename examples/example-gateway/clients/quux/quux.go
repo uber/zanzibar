@@ -21,18 +21,44 @@
 package quux
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	"time"
+
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
+
+	"go.uber.org/zap"
 )
 
 // Client is a custom client that does nothing yet
 type Client interface{}
 
-type quux struct{}
-
-// NewClient creates a new Quux client
-func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
-	return &quux{}
+type quux struct {
+	loggers map[string]*zap.Logger
+	metrics map[string]*zanzibar.OutboundCustomMetrics
 }
 
-func (c *quux) Foo() {}
+// NewClient creates a new Quux client, with client method loggers and metrics.
+func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
+	logger, scope, loggers, metrics := zanzibar.SetupCustomClientLoggersMetrics(
+		"quux", []string{"Foo"}, deps.Default,
+	)
+
+	logger.Debug("Created new Quux client")
+	scope.Counter("created").Inc(1)
+
+	return &quux{
+		loggers: loggers,
+		metrics: metrics,
+	}
+}
+
+// Foo implementation, using client method logger and metrics
+func (c *quux) Foo() (err error) {
+	startTime := time.Now()
+	defer c.metrics["Foo"].EmitOutboundCustomMetrics(startTime, err)
+	c.loggers["Foo"].Debug("Called Foo")
+
+	// Custom Foo implementation...
+
+	return err
+}
