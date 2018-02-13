@@ -71,8 +71,8 @@ type TestOptions struct {
 	TChannelClientMethods map[string]string
 }
 
-// NewTestService creates a new MockService
-func NewTestService(opts *TestOptions) (MockService, error) {
+// MustCreateTestService creates a new MockService, panics if it fails doing so.
+func MustCreateTestService(opts *TestOptions) MockService {
 	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
@@ -113,7 +113,7 @@ func NewTestService(opts *TestOptions) (MockService, error) {
 		mockClientNodes: mockNodes,
 		httpClient:      httpClient,
 		tChannelClient:  tchannelClient,
-	}, nil
+	}
 }
 
 // Start starts the mock server, panics if fails doing so

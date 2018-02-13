@@ -12,12 +12,10 @@ import (
 )
 
 func TestBazCall(t *testing.T) {
-	ms, err := ms.NewTestService(&ms.TestOptions{
+	ms := ms.MustCreateTestService(&ms.TestOptions{
 		TChannelClientMethods: map[string]string{"SimpleService::Call": "Call"},
 	})
-	if err != nil {
-		t.Fail()
-	}
+
 	ms.Start()
 	defer ms.Stop()
 

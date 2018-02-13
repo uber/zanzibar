@@ -1732,8 +1732,8 @@ type TestOptions struct {
 	TChannelClientMethods map[string]string
 }
 
-// NewTestService creates a new MockService
-func NewTestService(opts *TestOptions) (MockService, error) {
+// MustCreateTestService creates a new MockService, panics if it fails doing so.
+func MustCreateTestService(opts *TestOptions) MockService {
 	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
@@ -1774,7 +1774,7 @@ func NewTestService(opts *TestOptions) (MockService, error) {
 		{{camel $mockType}}:    mockNodes,
 		httpClient:     		httpClient,
 		tChannelClient: 		tchannelClient,
-	}, nil
+	}
 }
 
 // Start starts the mock server, panics if fails doing so
@@ -1851,7 +1851,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 3814, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 3844, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
