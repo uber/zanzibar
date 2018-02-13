@@ -46,12 +46,12 @@ for file in "${FILES_ARR[@]}"; do
     # TODO: need better solution for coverage from different package
     if [[ "$relativeName" == *"test/clients"* ]] || [[ "$relativeName" == *"test/endpoints"* ]]; then
         coverpkg=$(echo $file | sed s#zanzibar/test/#zanzibar/examples/example-gateway/build/#)
-        COVER_ON=1 ZANZIBAR_CACHE=1 go test \
+        COVER_ON=1 ZANZIBAR_CACHE=1 go test -tags mock \
             -cover -coverprofile coverage.tmp -coverpkg $coverpkg $file 2>&1 | \
 		    tee test.tmp.out >>test.out && \
 		    mv coverage.tmp "$COVERNAME" 2>/dev/null || true
     else
-	    COVER_ON=1 ZANZIBAR_CACHE=1 go test \
+	    COVER_ON=1 ZANZIBAR_CACHE=1 go test -tags mock \
 		    -cover -coverprofile coverage.tmp $file 2>&1 | \
 		    tee test.tmp.out >>test.out && \
 		    mv coverage.tmp "$COVERNAME" 2>/dev/null || true
