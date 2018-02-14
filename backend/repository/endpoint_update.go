@@ -241,13 +241,18 @@ func (r *Repository) findEndpointInGroup(endpointDir string, handleID string, js
 func updateServiceMetaJSON(configDir, serviceConfigJSONPath string, cfg *EndpointConfig) error {
 	metaFilePath := filepath.Join(configDir, serviceConfigJSONPath)
 	fileContent := new(codegen.EndpointClassConfig)
+	endpoints := []string{}
 	if _, err := os.Stat(metaFilePath); !os.IsNotExist(err) {
 		err := readJSONFile(metaFilePath, fileContent)
 		if err != nil {
 			return err
 		}
 	}
-	endpoints := fileContent.Dependencies["endpoint"]
+	if fileContent.Dependencies != nil {
+		endpoints = fileContent.Dependencies["endpoint"]
+	} else {
+		fileContent.Dependencies = make(map[string][]string)
+	}
 	sort.Strings(endpoints)
 	i := sort.SearchStrings(endpoints, cfg.ID)
 	// not update if client id already exist
