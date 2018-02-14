@@ -1727,13 +1727,8 @@ type mockService struct {
 	tChannelClient zanzibar.TChannelCaller
 }
 
-// TestOptions is the info needed to create a test service
-type TestOptions struct {
-	TChannelClientMethods map[string]string
-}
-
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
-func MustCreateTestService(opts *TestOptions) MockService {
+func MustCreateTestService() MockService {
 	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
@@ -1757,13 +1752,13 @@ func MustCreateTestService(opts *TestOptions) MockService {
 	timeout := time.Duration(10000) * time.Millisecond
 	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
 
-	tchannelClient := zanzibar.NewTChannelClient(
+	tchannelClient := zanzibar.NewRawTChannelClient(
 		server.Channel,
 		server.Logger,
 		server.RootScope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       server.ServiceName,
-			MethodNames:       opts.TChannelClientMethods,
+			ClientID:          "TestClient",
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 		},
@@ -1851,7 +1846,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 3844, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 3687, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
