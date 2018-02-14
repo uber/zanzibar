@@ -72,7 +72,7 @@ type EndpointConfig struct {
 	ClientID         string                                  `json:"clientId"`
 	ClientMethod     string                                  `json:"clientMethod"`
 	TestFixtures     map[string]*codegen.EndpointTestFixture `json:"testFixtures"`
-	Middlewares      []*EndpointMiddlewareConfig             `json:"middlewares"`
+	Middlewares      []EndpointMiddlewareConfig              `json:"middlewares"`
 	ReqHeaderMap     map[string]string                       `json:"reqHeaderMap"`
 	ResHeaderMap     map[string]string                       `json:"resHeaderMap"`
 }
