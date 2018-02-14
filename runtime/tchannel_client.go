@@ -37,10 +37,17 @@ import (
 type TChannelClientOption struct {
 	ServiceName       string
 	ClientID          string
-	MethodNames       map[string]string
 	Timeout           time.Duration
 	TimeoutPerAttempt time.Duration
 	RoutingKey        *string
+
+	// MethodNames is a map from "ThriftService::method" to "ZanzibarMethodName",
+	// where ThriftService and method are from the service's Thrift IDL, and
+	// ZanzibarMethodName is the public method name exposed on the Zanzibar-generated
+	// client, from the zanzibar configuration. For example, if a client named FooClient
+	// has a methodMap of map[string]string{"Foo::bar":"Bar"}, then one can do
+	// `FooClient.Bar()` to issue a RPC to Thrift service `Foo`'s `bar` method.
+	MethodNames map[string]string
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
@@ -121,6 +128,29 @@ func (c *TChannelClient) Call(
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
+	serviceMethod := thriftService + "::" + methodName
+
+	call := &tchannelOutboundCall{
+		client:        c,
+		methodName:    c.methodNames[serviceMethod],
+		serviceMethod: serviceMethod,
+		reqHeaders:    reqHeaders,
+		logger:        c.Loggers[serviceMethod],
+		metrics:       c.metrics[serviceMethod],
+	}
+
+	return c.call(ctx, call, reqHeaders, req, resp)
+}
+
+func (c *TChannelClient) call(
+	ctx context.Context,
+	call *tchannelOutboundCall,
+	reqHeaders map[string]string,
+	req, resp RWTStruct,
+) (success bool, resHeaders map[string]string, err error) {
+	defer func() { call.finish(err) }()
+	call.start()
+
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
@@ -133,23 +163,10 @@ func (c *TChannelClient) Call(
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 
-	serviceMethod := thriftService + "::" + methodName
-
-	call := &tchannelOutboundCall{
-		client:        c,
-		methodName:    c.methodNames[serviceMethod],
-		serviceMethod: serviceMethod,
-		reqHeaders:    reqHeaders,
-		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics[serviceMethod],
-	}
-	defer func() { call.finish(err) }()
-	call.start()
-
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders, call.success = nil, false
 
-		call.call, cerr = c.sc.BeginCall(ctx, serviceMethod, &tchannel.CallOptions{
+		call.call, cerr = c.sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:       tchannel.Thrift,
 			RequestState: rs,
 		})
