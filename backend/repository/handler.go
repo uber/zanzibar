@@ -445,6 +445,9 @@ func (h *Handler) GenerateDiff(w http.ResponseWriter, r *http.Request, _ httprou
 		return
 	}
 	if req.Description == "" {
+		h.logger.Info("Bad Request",
+			zap.String("request", string(b)),
+		)
 		h.WriteErrorResponse(w, http.StatusBadRequest, errors.New("`description` is a required field"))
 		return
 	}
