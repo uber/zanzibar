@@ -2333,6 +2333,50 @@
 		}
 	},
 	{
+		"name": "validate updates without clients and sha",
+		"request": {
+			"method": "POST",
+			"url": "/validate-updates",
+			"header": {
+				"gateway-id": "example-gateway"
+			},
+			"body": {
+				"endpoint_updates": [
+					{
+						"clientId": "baz",
+						"clientMethod": "Compare",
+						"endpointId": "baz",
+						"endpointType": "http",
+						"handleId": "compare",
+						"middlewares": [
+							{
+								"name": "example_reader",
+								"options": {
+									"Foo": "test"
+								}
+							}
+						],
+						"reqHeaderMap": {},
+						"resHeaderMap": {},
+						"testFixtures": {},
+						"thriftFile": "endpoints/baz/baz.thrift",
+						"thriftMethodName": "SimpleService::compare",
+						"workflowType": "tchannelClient"
+					}
+				],
+				"thrift_files": [
+					"clients/baz/baz.thrift"
+				]
+			}
+		},
+		"response": {
+			"code": 200,
+			"body": {
+				"Status": "OK"
+			}
+		}
+	},
+	{
 		"name": "validate updates",
 		"request": {
 			"method": "POST",

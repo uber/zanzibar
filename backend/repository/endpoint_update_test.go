@@ -22,6 +22,7 @@ package repository
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -185,6 +186,27 @@ func TestUpdateEndpointBadMiddlewareConfig(t *testing.T) {
 	for _, file := range requestFiles {
 		t.Logf("Test request in %q\n", file)
 		testUpdateEndpointConfig(t, tempDir, filepath.Join(endpointUpdateRequestDir, file))
+	}
+}
+
+func TestUpdateupdateServiceMetaJSON(t *testing.T) {
+	tempDir, err := copyExample("")
+	t.Logf("Temp dir is created at %s\n", tempDir)
+	if !assert.NoError(t, err, "Failed to copy example.") {
+		return
+	}
+	cfg := &EndpointConfig{ID: "test"}
+	jsonfiles := []string{`{}`, `{"dependencies": {"endpoint": ["foo"]}}`}
+	filename := "tmp-json-service-meta.json"
+	path := tempDir + "/" + filename
+
+	for _, filejson := range jsonfiles {
+		var fj = filejson
+		if err := ioutil.WriteFile(path, []byte(fj), os.ModePerm); err != nil {
+			return
+		}
+		err = updateServiceMetaJSON(tempDir, filename, cfg)
+		assert.Nil(t, err)
 	}
 }
 
