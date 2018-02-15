@@ -22,6 +22,7 @@ package repository
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -29,7 +30,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
 	testlib "github.com/uber/zanzibar/test/lib"
-	"os"
 )
 
 const endpointUpdateRequestDir = "../../examples/example-gateway/endpoints"
