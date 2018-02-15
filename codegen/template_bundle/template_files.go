@@ -1690,6 +1690,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"path/filepath"
+	"runtime"
 	"time"
 
 
@@ -1729,7 +1731,11 @@ type mockService struct {
 
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
 func MustCreateTestService() MockService {
-	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
+	_, file, _, _ := runtime.Caller(0)
+	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
+	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
+	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
+
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
 		panic(err)
@@ -1846,7 +1852,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 3687, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 3871, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

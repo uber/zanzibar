@@ -30,6 +30,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/uber/zanzibar/config"
@@ -68,7 +70,11 @@ type mockService struct {
 
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
 func MustCreateTestService() MockService {
-	c := config.NewRuntimeConfigOrDie([]string{"../../../config/test.json"}, nil)
+	_, file, _, _ := runtime.Caller(0)
+	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
+	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
+	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
+
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
 		panic(err)

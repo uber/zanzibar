@@ -28,7 +28,7 @@
 	"clients.multi.port": 4003,
 	"clients.multi.timeout": 10000,
 	"http.port": 0,
-	"logger.fileName": "./example-gateway.log",
+	"logger.fileName": "/tmp/example-gateway.log",
 	"logger.output": "disk",
 	"metrics.serviceName": "example-gateway",
 	"service.env.config": {},
