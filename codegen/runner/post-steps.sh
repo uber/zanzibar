@@ -24,6 +24,9 @@ CONFIG_DIR="$1"
 BUILD_DIR="$2"
 
 DIRNAME="$(dirname "$0")"
+# The assumption here is that either Mockery package resides in Zanzibar's vendor dir
+# or Zanzibar itself is in a vendor dir, in which Mockery also resides.
+# For the second case, it's also assumed that the vendor directory is flattened as Glide does.
 if [ -d "$DIRNAME/../../vendor" ]; then
 	MOCKERY_RAW_DIR="$DIRNAME/../../vendor/github.com/vektra/mockery"
 else
@@ -34,6 +37,9 @@ MOCKERY_MAIN_FILE="$MOCKERY_DIR/cmd/mockery/mockery.go"
 MOCKERY_BINARY="$MOCKERY_DIR/cmd/mockery/mockery"
 
 go build -o "$MOCKERY_BINARY" "$MOCKERY_MAIN_FILE"
+end=$(date +%s)
+runtime=$((end-start))
+echo "Compiled Mockery: +$runtime"
 
 "$MOCKERY_BINARY" -name="^Client$" -dir="$BUILD_DIR/clients" -inpkg -case=underscore -recursive -note="+build mock" > /dev/null
 "$MOCKERY_BINARY" -name="^Client$" -dir="$CONFIG_DIR/clients" -inpkg -case=underscore -recursive -note="+build mock" > /dev/null
