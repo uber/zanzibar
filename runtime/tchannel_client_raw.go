@@ -28,6 +28,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const rawClient = "raw"
+
 // RawTChannelClient is like TChannel client, but without ClientID or MethodNames.
 // Its Logs and metrics are not scoped per method, and not used for generate TChannel
 // clients. It is intended to be used internally to communicate with a test service,
@@ -52,7 +54,7 @@ func NewRawTChannelClient(
 	scope tally.Scope,
 	opt *TChannelClientOption,
 ) *RawTChannelClient {
-	clientID := "raw"
+	clientID := rawClient
 	if opt.ClientID != "" {
 		clientID = opt.ClientID
 	}
