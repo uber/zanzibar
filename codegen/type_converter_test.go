@@ -990,6 +990,80 @@ func TestConvertMapOfString(t *testing.T) {
 	`), lines)
 }
 
+func TestConvertMapStringToStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		struct MapValue {
+			1: required string one
+			2: optional string two
+		}
+		
+		struct Foo {
+			1: required map<string, MapValue> uuidMap
+		}
+
+		struct Bar {
+			1: required map<string, MapValue> uuidMap
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+out.UUIDMap = make(map[string]*structs.MapValue, len(in.UUIDMap))
+for key1, value2 := range in.UUIDMap {
+	if value2 != nil {
+		out.UUIDMap[key1] = &structs.MapValue{}
+		out.UUIDMap[key1].One = string(in.UUIDMap[key1].One)
+		out.UUIDMap[key1].Two = (*string)(in.UUIDMap[key1].Two)
+	} else {
+		out.UUIDMap[key1] = nil
+	}
+}
+	`), lines)
+}
+
+// Todo Test Override cases
+
+func TestConvertMapTypeDefToStruct(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		typedef string UUID
+
+		struct MapValue {
+			1: required string one
+			2: optional string two
+		}
+		
+		struct Foo {
+			1: required map<UUID, MapValue> uuidMap
+		}
+
+		struct Bar {
+			1: required map<UUID, MapValue> uuidMap
+		}`,
+		nil,
+		nil,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+out.UUIDMap = make(map[structs.UUID]*structs.MapValue, len(in.UUIDMap))
+for key1, value2 := range in.UUIDMap {
+	if value2 != nil {
+		out.UUIDMap[key1] = &structs.MapValue{}
+		out.UUIDMap[key1].One = string(in.UUIDMap[key1].One)
+		out.UUIDMap[key1].Two = (*string)(in.UUIDMap[key1].Two)
+	} else {
+		out.UUIDMap[key1] = nil
+	}
+}
+	`), lines)
+}
+
 func TestConvertMapOfStruct(t *testing.T) {
 	lines, err := convertTypes(
 		"Foo", "Bar",
