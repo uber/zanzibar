@@ -22,17 +22,20 @@ package quux
 
 import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client is a custom client that does nothing yet
-type Client interface{}
+type Client interface {
+	Echo(string) string
+}
 
 type quux struct{}
 
 // NewClient creates a new Quux client
-func NewClient(g *zanzibar.Gateway, deps *module.Dependencies) Client {
+func NewClient(deps *module.Dependencies) Client {
 	return &quux{}
 }
 
-func (c *quux) Foo() {}
+func (c *quux) Echo(s string) string {
+	return s
+}

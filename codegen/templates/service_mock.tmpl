@@ -1,0 +1,161 @@
+{{- $instance := . -}}
+{{- $leafClass := index .DependencyOrder 0 -}}
+{{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
+
+package {{$instance.PackageInfo.GeneratedPackageAlias}}
+
+import (
+	"context"
+	"errors"
+	"io"
+	"net/http"
+	"path/filepath"
+	"runtime"
+	"time"
+
+
+	"github.com/uber/zanzibar/config"
+	"github.com/uber/zanzibar/runtime"
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+// MockService interface
+type MockService interface {
+	MakeHTTPRequest(
+		method string,
+		url string,
+		headers map[string]string,
+		body io.Reader,
+	) (*http.Response, error)
+	MakeTChannelRequest(
+		ctx context.Context,
+		thriftService string,
+		method string,
+		headers map[string]string,
+		req, resp zanzibar.RWTStruct,
+	) (bool, map[string]string, error)
+	{{$mockType}}() *module.{{$mockType}}
+	Start()
+	Stop()
+}
+
+type mockService struct {
+	started        bool
+	server         *zanzibar.Gateway
+	{{camel $mockType}}    *module.{{$mockType}}
+	httpClient     *http.Client
+	tChannelClient zanzibar.TChannelCaller
+}
+
+// MustCreateTestService creates a new MockService, panics if it fails doing so.
+func MustCreateTestService() MockService {
+	_, file, _, _ := runtime.Caller(0)
+	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
+	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
+	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
+
+	server, err := zanzibar.CreateGateway(c, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	_, dependencies, mockNodes := module.InitializeDependenciesMock(server)
+	registerErr := registerDeps(server, dependencies)
+	if registerErr != nil {
+		panic(registerErr)
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives:   false,
+			MaxIdleConns:        500,
+			MaxIdleConnsPerHost: 500,
+		},
+	}
+
+	timeout := time.Duration(10000) * time.Millisecond
+	timeoutPerAttempt := time.Duration(2000) * time.Millisecond
+
+	tchannelClient := zanzibar.NewRawTChannelClient(
+		server.Channel,
+		server.Logger,
+		server.RootScope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       server.ServiceName,
+			ClientID:          "TestClient",
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+		},
+	)
+
+	return &mockService{
+		server:         		server,
+		{{camel $mockType}}:    mockNodes,
+		httpClient:     		httpClient,
+		tChannelClient: 		tchannelClient,
+	}
+}
+
+// Start starts the mock server, panics if fails doing so
+func (m *mockService) Start() {
+	if err := m.server.Bootstrap(); err != nil {
+		panic(err)
+	}
+	m.started = true
+}
+
+// Stop stops the mock server
+func (m *mockService) Stop() {
+	m.server.Close()
+	m.started = false
+}
+
+// {{$mockType}} returns the mock nodes
+func (m *mockService) {{$mockType}}() *module.{{$mockType}} {
+	return m.{{camel $mockType}}
+}
+
+// MakeHTTPRequest makes a HTTP request to the mock server
+func (m *mockService) MakeHTTPRequest(
+	method string,
+	url string,
+	headers map[string]string,
+	body io.Reader,
+) (*http.Response, error) {
+	if !m.started {
+		return nil, errors.New("mock server is not started")
+	}
+
+	client := m.httpClient
+
+	fullURL := "http://" + m.server.RealHTTPAddr + url
+
+	req, err := http.NewRequest(method, fullURL, body)
+	for headerName, headerValue := range headers {
+		req.Header.Set(headerName, headerValue)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Do(req)
+}
+
+// MakeTChannelRequest makes a TChannel request to the mock server
+func (m *mockService) MakeTChannelRequest(
+	ctx context.Context,
+	thriftService string,
+	method string,
+	headers map[string]string,
+	req, res zanzibar.RWTStruct,
+) (bool, map[string]string, error) {
+	if !m.started {
+		return false, nil, errors.New("mock server is not started")
+	}
+
+	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
+	sc.Peers().Add(m.server.RealTChannelAddr)
+	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
+}

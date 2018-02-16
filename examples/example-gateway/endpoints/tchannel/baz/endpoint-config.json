@@ -9,7 +9,8 @@
 	},
 	"dependencies": {
 		"client": [
-			"baz"
+			"baz",
+			"quux"
 		]
 	}
 }

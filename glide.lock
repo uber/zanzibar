@@ -1,5 +1,5 @@
-hash: 8d10a573e8f0c32b1c04e1f88ff7a1671fc0d3c26f86e8af43937ac9ed2ed850
-updated: 2018-01-08T21:40:22.995848-08:00
+hash: a61583a35be2c3ac829ef2e30455c8dc76bdaf0b85fca46d9e2270763d2ffd90
+updated: 2018-02-12T15:41:23.180879-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -24,7 +24,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/jessevdk/go-flags
-  version: f88afde2fa19a30cf50ba4b05b3d13bc6bae3079
+  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
@@ -55,10 +55,13 @@ imports:
   version: feef008d51ad2b3778f85d387ccf91735543008d
   subpackages:
   - diffmatchpatch
+- name: github.com/stretchr/objx
+  version: cbeaeb16a013161a98496fad62933b1d21786672
 - name: github.com/stretchr/testify
   version: f6abca593680b2315d2075e0f5e2a9751e3f431a
   subpackages:
   - assert
+  - mock
   - require
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
@@ -83,7 +86,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 713e8e6d111c4301a77c6747081b60c34ca7bab7
+  version: 7f95f4f7e80028096410abddaae2556e4c61b59f
   subpackages:
   - metrics
   - metrics/tally
@@ -96,6 +99,8 @@ imports:
   - tnet
   - trand
   - typed
+- name: github.com/vektra/mockery
+  version: b6f6c13c25c3f0a17724553fa01580f328158d7a
 - name: github.com/xeipuuv/gojsonpointer
   version: 6fe8760cad3569743d51ddbb243b26f8456742dc
 - name: github.com/xeipuuv/gojsonreference
@@ -141,7 +146,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 434ec0c7fe3742c984919a691b2018a6e9694425
+  version: f5dfe339be1d06f81b22525fe34671ee7d2c8904
   subpackages:
   - context
 testImports: []

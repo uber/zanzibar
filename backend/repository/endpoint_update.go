@@ -161,7 +161,7 @@ func (r *Repository) deleteEndpointConfig(endpointCfgDir string, endpointName st
 }
 
 func getEndpointsWithMiddleware(gatewayCfg *Config, middleware string, endpointGroup string) []string {
-	endpoints := make([]string, 0)
+	var endpoints []string
 	for _, endpoint := range gatewayCfg.Endpoints {
 		if endpoint.ID == endpointGroup {
 			found := false

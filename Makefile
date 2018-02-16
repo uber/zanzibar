@@ -79,10 +79,10 @@ lint: check-licence eclint-check
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking errcheck..."
 	@go get github.com/kisielk/errcheck
-	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@errcheck -tags mock $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
 	@go get honnef.co/go/tools/cmd/staticcheck
-	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@staticcheck -tags mock $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
 	@[ ! -s lint.log ]
@@ -147,8 +147,8 @@ test-update:
 test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
-	@ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache
-	@ZANZIBAR_CACHE=1 go test \
+	@ZANZIBAR_CACHE=1 go test -tags mock ./test/health_test.go # preload the binary cache
+	@ZANZIBAR_CACHE=1 go test -tags mock \
 		./examples/example-gateway/... \
 		./codegen/... \
 		./backend/... \
@@ -288,8 +288,20 @@ jenkins-install:
 .PHONY: jenkins-test
 jenkins-test:
 	PWD=$(pwd)
+#	When mockery generates mocks, it evaluates any symlink to the source path,
+#   the GOPATH then is no longer a prefix of given file to parse, causing go/build
+#   not to search vendor dir for imports. For example:
+#	while file path
+#   /Users/a/go/src/github.com/uber/zanzibar/workspace/src/github/uber/zanzibar/examples/example-gateway/clients/foo
+# 	has GOPATH (/Users/a/go/src/github.com/uber/zanzibar/workspace) as prefix
+#   mockery evaluates it to
+#	/Users/a/go/src/github.com/uber/zanzibar/examples/example-gateway/clients/foo
+#	where GOPATH (/Users/a/go/src/github.com/uber/zanzibar/workspace) is no longer its prefix.
+#
+#   This can be fixed by https://github.com/vektra/mockery/pull/186.
+#   Until that, the work-around is to provide both the original and new GOPATH.
 	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
+		GOPATH=$(PWD)/workspace:$(GOPATH) \
 		PATH=$(PWD)/workspace/bin:$(PATH) \
 		make check-generate
 	cd workspace/src/github.com/uber/zanzibar && \

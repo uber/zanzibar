@@ -12,6 +12,6 @@ end=`date +%s`
 runtime=$((end-start))
 echo "Generated endpoints/clients : +$runtime"
 
-bash ./codegen/runner/post-steps.sh "$PREFIX/build"
+bash ./codegen/runner/post-steps.sh "$PREFIX" "$PREFIX/build"
 
 rm .TMP_ZANZIBAR_TIMESTAMP_FILE.txt

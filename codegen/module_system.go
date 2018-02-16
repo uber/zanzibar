@@ -29,6 +29,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const mockTag = "mock"
+
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
 	Instance           *ModuleInstance
@@ -993,7 +995,6 @@ func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGe
 func (generator *GatewayServiceGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
-	// generate main.go
 	service, err := generator.templates.ExecTemplate(
 		"service.tmpl",
 		instance,
@@ -1007,6 +1008,21 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	mockService, err := generator.templates.ExecTemplate(
+		"service_mock.tmpl",
+		instance,
+		generator.packageHelper,
+		mockTag,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service mock_service.go for %s",
+			instance.InstanceName,
+		)
+	}
+
+	// generate main.go
 	main, err := generator.templates.ExecTemplate(
 		"main.tmpl",
 		instance,
@@ -1060,11 +1076,26 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
+	mockInitializer, err := GenerateMockInitializer(
+		instance,
+		generator.packageHelper,
+		generator.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service mock initializer for %s",
+			instance.InstanceName,
+		)
+	}
+
 	files := map[string][]byte{
-		"service.go":        service,
-		"main/main.go":      main,
-		"main/main_test.go": mainTest,
-		"module/init.go":    initializer,
+		"service.go":          service,
+		"mock_service.go":     mockService,
+		"main/main.go":        main,
+		"main/main_test.go":   mainTest,
+		"module/init.go":      initializer,
+		"module/mock_init.go": mockInitializer,
 	}
 
 	if dependencies != nil {
@@ -1173,6 +1204,20 @@ func GenerateInitializer(
 		"module_initializer.tmpl",
 		instance,
 		packageHelper,
+	)
+}
+
+// GenerateMockInitializer is like GenerateInitializer but with leaf nodes being mocks.
+func GenerateMockInitializer(
+	instance *ModuleInstance,
+	packageHelper *PackageHelper,
+	template *Template,
+) ([]byte, error) {
+	return template.ExecTemplate(
+		"module_mock_initializer.tmpl",
+		instance,
+		packageHelper,
+		mockTag,
 	)
 }
 
