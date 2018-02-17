@@ -48,5 +48,5 @@ import:
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - package: github.com/sergi/go-diff
   version: feef008d51ad2b3778f85d387ccf91735543008d
-- package: github.com/vektra/mockery
+- package: github.com/golang/mock
   version: master
