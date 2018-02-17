@@ -360,6 +360,7 @@ service  Echo {
     )
 
     // key is unhashable
+    // TODO: mockgen can't deal this, https://github.com/golang/mock/issues/153
     map<BarResponse, string> echoStructMap (
         1: required map<BarResponse, string> arg
     ) (

@@ -106,14 +106,7 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SecondService_EchoStructList_Args,
 	) ([]*clientsBazBase.BazResponse, map[string]string, error)
-	EchoStructMap(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBazBaz.SecondService_EchoStructMap_Args,
-	) ([]struct {
-		Key   *clientsBazBase.BazResponse
-		Value string
-	}, map[string]string, error)
+
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -191,7 +184,6 @@ func NewClient(deps *module.Dependencies) Client {
 		"SecondService::echoStringMap":  "EchoStringMap",
 		"SecondService::echoStringSet":  "EchoStringSet",
 		"SecondService::echoStructList": "EchoStructList",
-		"SecondService::echoStructMap":  "EchoStructMap",
 		"SecondService::echoStructSet":  "EchoStructSet",
 		"SecondService::echoTypedef":    "EchoTypedef",
 		"SimpleService::call":           "Call",
@@ -650,45 +642,6 @@ func (c *bazClient) EchoStructList(
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
-	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
-	}
-	return resp, respHeaders, err
-}
-
-// EchoStructMap is a client RPC call for method "SecondService::echoStructMap"
-func (c *bazClient) EchoStructMap(
-	ctx context.Context,
-	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructMap_Args,
-) ([]struct {
-	Key   *clientsBazBase.BazResponse
-	Value string
-}, map[string]string, error) {
-	var result clientsBazBaz.SecondService_EchoStructMap_Result
-	var resp []struct {
-		Key   *clientsBazBase.BazResponse
-		Value string
-	}
-
-	logger := c.client.Loggers["SecondService::echoStructMap"]
-
-	success, respHeaders, err := c.client.Call(
-		ctx, "SecondService", "echoStructMap", reqHeaders, args, &result,
-	)
-
-	if err == nil && !success {
-		switch {
-		default:
-			err = errors.New("bazClient received no result or unknown exception for EchoStructMap")
-		}
-	}
-	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
-		return resp, nil, err
-	}
-
-	resp, err = clientsBazBaz.SecondService_EchoStructMap_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
