@@ -26,11 +26,14 @@
 package module
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
-	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
+	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock_client"
+	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock_client"
+	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock_client"
+	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock_client"
+	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock_client"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -45,9 +48,7 @@ import (
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	exampleMiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
-	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
+	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/mock_client"
 )
 
 // MockClientNodes contains mock client dependencies
@@ -64,6 +65,7 @@ type MockClientNodes struct {
 // for the example-gateway service with leaf nodes being mocks
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
+	ctrl *gomock.Controller,
 ) (*DependenciesTree, *Dependencies, *MockClientNodes) {
 	tree := &DependenciesTree{}
 
@@ -75,12 +77,12 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Bar:       &barClientGenerated.MockClient{},
-		Baz:       &bazClientGenerated.MockClient{},
-		Contacts:  &contactsClientGenerated.MockClient{},
-		GoogleNow: &googlenowClientGenerated.MockClient{},
-		Multi:     &multiClientGenerated.MockClient{},
-		Quux:      &quuxClientStatic.MockClient{},
+		Bar:       barClientGenerated.NewMockClient(ctrl),
+		Baz:       bazClientGenerated.NewMockClient(ctrl),
+		Contacts:  contactsClientGenerated.NewMockClient(ctrl),
+		GoogleNow: googlenowClientGenerated.NewMockClient(ctrl),
+		Multi:     multiClientGenerated.NewMockClient(ctrl),
+		Quux:      quuxClientStatic.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies

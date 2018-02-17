@@ -1526,16 +1526,21 @@ var _module_mock_initializerTmpl = []byte(`{{$instance := . -}}
 package module
 
 import (
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType $leafClass -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock_client"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if not (eq $classType $leafClass) -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
 	{{end}}
-
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 {{$moduleInstances := (index $instance.RecursiveDependencies $leafClass) -}}
@@ -1550,6 +1555,7 @@ type {{$mockDeps}} struct {
 // for the {{$instance.InstanceName}} {{$instance.ClassName}} with leaf nodes being mocks
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
+	ctrl *gomock.Controller,
 ) (*DependenciesTree, *Dependencies, *{{$mockDeps}}) {
 	tree := &DependenciesTree{}
 
@@ -1566,7 +1572,7 @@ func InitializeDependenciesMock(
 	{{camel $mockDeps}} := &{{$mockDeps}}{
 		{{- range $idx, $dependency := $moduleInstances}}
 		{{- $pkgInfo := $dependency.PackageInfo }}
-		{{$pkgInfo.QualifiedInstanceName}}: &{{$pkgInfo.ImportPackageAlias}}.Mock{{title $className}}{},
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.NewMock{{title $className}}(ctrl),
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
@@ -1606,7 +1612,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 2919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 3118, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1692,9 +1698,11 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"testing"
 	"time"
 
 
+	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
@@ -1724,13 +1732,14 @@ type MockService interface {
 type mockService struct {
 	started        bool
 	server         *zanzibar.Gateway
+	ctrl           *gomock.Controller
 	{{camel $mockType}}    *module.{{$mockType}}
 	httpClient     *http.Client
 	tChannelClient zanzibar.TChannelCaller
 }
 
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
-func MustCreateTestService() MockService {
+func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
 	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
@@ -1741,7 +1750,8 @@ func MustCreateTestService() MockService {
 		panic(err)
 	}
 
-	_, dependencies, mockNodes := module.InitializeDependenciesMock(server)
+	ctrl := gomock.NewController(t)
+	_, dependencies, mockNodes := module.InitializeDependenciesMock(server, ctrl)
 	registerErr := registerDeps(server, dependencies)
 	if registerErr != nil {
 		panic(registerErr)
@@ -1772,6 +1782,7 @@ func MustCreateTestService() MockService {
 
 	return &mockService{
 		server:         		server,
+		ctrl:                   ctrl,
 		{{camel $mockType}}:    mockNodes,
 		httpClient:     		httpClient,
 		tChannelClient: 		tchannelClient,
@@ -1788,6 +1799,7 @@ func (m *mockService) Start() {
 
 // Stop stops the mock server
 func (m *mockService) Stop() {
+	m.ctrl.Finish()
 	m.server.Close()
 	m.started = false
 }
@@ -1852,7 +1864,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 3871, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

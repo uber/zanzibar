@@ -32,8 +32,10 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
@@ -63,13 +65,14 @@ type MockService interface {
 type mockService struct {
 	started         bool
 	server          *zanzibar.Gateway
+	ctrl            *gomock.Controller
 	mockClientNodes *module.MockClientNodes
 	httpClient      *http.Client
 	tChannelClient  zanzibar.TChannelCaller
 }
 
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
-func MustCreateTestService() MockService {
+func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
 	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
@@ -80,7 +83,8 @@ func MustCreateTestService() MockService {
 		panic(err)
 	}
 
-	_, dependencies, mockNodes := module.InitializeDependenciesMock(server)
+	ctrl := gomock.NewController(t)
+	_, dependencies, mockNodes := module.InitializeDependenciesMock(server, ctrl)
 	registerErr := registerDeps(server, dependencies)
 	if registerErr != nil {
 		panic(registerErr)
@@ -111,6 +115,7 @@ func MustCreateTestService() MockService {
 
 	return &mockService{
 		server:          server,
+		ctrl:            ctrl,
 		mockClientNodes: mockNodes,
 		httpClient:      httpClient,
 		tChannelClient:  tchannelClient,
@@ -127,6 +132,7 @@ func (m *mockService) Start() {
 
 // Stop stops the mock server
 func (m *mockService) Stop() {
+	m.ctrl.Finish()
 	m.server.Close()
 	m.started = false
 }
