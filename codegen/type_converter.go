@@ -391,29 +391,13 @@ func (c *TypeConverter) genConverterForMap(
 	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
 	sourceIdentifier := fromIdentifier
 	_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
+	keyType := "string"
 
 	if !isStringKey {
 		realType := compile.RootTypeSpec(toFieldType.KeySpec)
 		switch realType.(type) {
 		case *compile.StringSpec:
-			keyType, _ := c.getGoTypeName(toFieldType.KeySpec)
-			c.appendf(
-				"%s = make(map[%s]%s, len(%s))",
-				toIdentifier, keyType, typeName, sourceIdentifier,
-			)
-
-			keyID := c.makeUniqIdentifier("key")
-			valID := c.makeUniqIdentifier("value")
-			c.appendf(
-				"for %s, %s := range %s {",
-				keyID, valID, sourceIdentifier,
-			)
-			c.appendf(
-				"\t %s[%s(%s)] = %s(%s)",
-				toIdentifier, keyType, keyID, typeName, valID,
-			)
-			c.append("}")
-			return nil
+			keyType, _ = c.getGoTypeName(toFieldType.KeySpec)
 		default:
 			return errors.Errorf(
 				"could not convert key (%s), map is not string-keyed.", toField.Name)
@@ -445,16 +429,15 @@ func (c *TypeConverter) genConverterForMap(
 		sourceIdentifier = sourceListID
 		checkOverride = true
 	}
-
 	if isStruct {
 		c.appendf(
-			"%s = make(map[string]*%s, len(%s))",
-			toIdentifier, typeName, sourceIdentifier,
+			"%s = make(map[%s]*%s, len(%s))",
+			toIdentifier, keyType, typeName, sourceIdentifier,
 		)
 	} else {
 		c.appendf(
-			"%s = make(map[string]%s, len(%s))",
-			toIdentifier, typeName, sourceIdentifier,
+			"%s = make(map[%s]%s, len(%s))",
+			toIdentifier, keyType, typeName, sourceIdentifier,
 		)
 	}
 
@@ -526,10 +509,18 @@ func (c *TypeConverter) genConverterForMap(
 			c.append("\t", "}")
 		}
 	} else {
-		c.appendf(
-			"\t%s[%s] = %s(%s)",
-			toIdentifier, keyID, typeName, valID,
-		)
+		if keyType == "string" {
+			c.appendf(
+				"\t%s[%s] = %s(%s)",
+				toIdentifier, keyID, typeName, valID,
+			)
+
+		} else {
+			c.appendf(
+				"\t %s[%s(%s)] = %s(%s)",
+				toIdentifier, keyType, keyID, typeName, valID,
+			)
+		}
 	}
 
 	c.append("}")
