@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_uuid"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_test"
 	"go.uber.org/thriftrw/wire"
 	"math"
 	"strconv"
@@ -132,7 +132,7 @@ type BarRequest struct {
 	Timestamp   Timestamp     `json:"timestamp,required"`
 	EnumField   Fruit         `json:"enumField,required"`
 	LongField   Long          `json:"longField,required"`
-	Viewer      bar_uuid.UUID `json:"viewer,required"`
+	Viewer      bar_test.UUID `json:"viewer,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -230,8 +230,8 @@ func _Long_Read(w wire.Value) (Long, error) {
 	return x, err
 }
 
-func _UUID_Read(w wire.Value) (bar_uuid.UUID, error) {
-	var x bar_uuid.UUID
+func _UUID_Read(w wire.Value) (bar_test.UUID, error) {
+	var x bar_test.UUID
 	err := x.FromWire(w)
 	return x, err
 }

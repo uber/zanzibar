@@ -11,7 +11,7 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	bar_uuid "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_uuid"
+	bar_test "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_test"
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 )
@@ -862,7 +862,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 			}
 			LongFieldSet = true
 		case "viewer":
-			out.Viewer = bar_uuid.UUID(in.String())
+			out.Viewer = bar_test.UUID(in.String())
 			ViewerSet = true
 		default:
 			in.SkipRecursive()

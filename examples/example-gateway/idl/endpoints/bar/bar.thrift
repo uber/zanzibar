@@ -1,7 +1,7 @@
 namespace java com.uber.zanzibar.clients.bar
 
 include "../foo/foo.thrift"
-include "./bar_uuid.thrift"
+include "./bar_test.thrift"
 
 typedef string UUID
 typedef i64 (json.type = 'Date') Timestamp
@@ -19,7 +19,7 @@ struct BarRequest {
     4: required Timestamp timestamp
     5: required Fruit enumField
     6: required Long longField
-    7: required bar_uuid.UUID viewer (zanzibar.http.ref = "headers.x-uber-uuid")
+    7: required bar_test.UUID viewer (zanzibar.http.ref = "headers.x-uber-uuid")
 }
 
 struct BarResponse {
