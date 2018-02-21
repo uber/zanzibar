@@ -50,6 +50,7 @@ type RouterEndpoint struct {
 	HandlerName  string
 	HandlerFn    HandlerFn
 	logger       *zap.Logger
+	scope        tally.Scope
 	metrics      *InboundHTTPMetrics
 }
 
@@ -74,6 +75,7 @@ func NewRouterEndpoint(
 		HandlerName:  handlerID,
 		HandlerFn:    handler,
 		logger:       logger,
+		scope:        scope,
 		metrics:      NewInboundHTTPMetrics(scope),
 	}
 }

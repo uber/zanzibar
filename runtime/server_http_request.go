@@ -31,6 +31,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/julienschmidt/httprouter"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
@@ -43,6 +44,7 @@ type ServerHTTPRequest struct {
 	metrics      *InboundHTTPMetrics
 	queryValues  url.Values
 	parseFailed  bool
+	scope        tally.Scope
 	Logger       *zap.Logger
 	EndpointName string
 	HandlerName  string
@@ -61,9 +63,20 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
-		httpRequest:  r,
-		queryValues:  nil,
-		Logger:       endpoint.logger,
+		httpRequest: r,
+		queryValues: nil,
+		scope: endpoint.scope.Tagged(map[string]string{
+			"test-UUID1": "17e3a638-99e2-4ec9-9860-c64386cdd3b7",
+			"test-UUID2": "be7f7e17-8fc0-4063-a040-da9dc4326223",
+			"test-UUID3": "d8f1d9e1-de45-4479-8134-929bd086ded3",
+			"test-UUID4": "2e9f93e8-af4a-45a3-bf6a-29afc340a338",
+		}),
+		Logger: endpoint.logger.With(
+			zap.String("test-UUID1", "17e3a638-99e2-4ec9-9860-c64386cdd3b7"),
+			zap.String("test-UUID2", "be7f7e17-8fc0-4063-a040-da9dc4326223"),
+			zap.String("test-UUID3", "d8f1d9e1-de45-4479-8134-929bd086ded3"),
+			zap.String("test-UUID4", "2e9f93e8-af4a-45a3-bf6a-29afc340a338"),
+		),
 		metrics:      endpoint.metrics,
 		EndpointName: endpoint.EndpointName,
 		HandlerName:  endpoint.HandlerName,
