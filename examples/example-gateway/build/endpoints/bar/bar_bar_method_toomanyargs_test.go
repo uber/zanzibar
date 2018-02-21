@@ -102,7 +102,7 @@ func TestTooManyArgsSuccessfulRequestOKResponse(t *testing.T) {
 	headers["X-Token"] = "test-token"
 	headers["X-Uuid"] = "test-uuid"
 
-	endpointRequest := []byte(`{"request":{"binaryField":"aGVsbG8=","boolField":true,"enumField":"APPLE","longField":123,"stringField":"foo","timestamp":123}}`)
+	endpointRequest := []byte(`{"request":{"binaryField":"aGVsbG8=","boolField":true,"enumField":"APPLE","longField":123,"stringField":"foo","timestamp":123,"viewer":"UUID"}}`)
 
 	res, err := gateway.MakeRequest(
 		"POST",
