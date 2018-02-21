@@ -26,7 +26,8 @@
 								"enumField": "APPLE",
 								"longField": 123,
 								"stringField": "foo",
-								"timestamp": 123
+								"timestamp": 123,
+								"viewer": "UUID"
 							}
 						}
 					}
@@ -55,7 +56,8 @@
 									"enumField": "APPLE",
 									"longField": 123,
 									"stringField": "foo",
-									"timestamp": 123
+									"timestamp": 123,
+									"viewer": "UUID"
 								}
 							}
 						}
