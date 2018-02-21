@@ -30,7 +30,9 @@ import (
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsBarBarTest "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_test"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsBarBarTest "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar_test"
 
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
@@ -83,6 +85,12 @@ func (h *BarNormalHandler) HandleRequest(
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.BarRequest{}
+	}
+	xUberUUIDValue, _ := req.Header.Get("x-uber-uuid")
+	requestBody.Request.Viewer = endpointsBarBarTest.UUID(xUberUUIDValue)
 
 	workflow := BarNormalEndpoint{
 		Clients: h.Clients,
@@ -176,6 +184,7 @@ func convertToNormalClientRequest(in *endpointsBarBar.Bar_Normal_Args) *clientsB
 		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
 		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
 		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+		out.Request.Viewer = clientsBarBarTest.UUID(in.Request.Viewer)
 	} else {
 		out.Request = nil
 	}

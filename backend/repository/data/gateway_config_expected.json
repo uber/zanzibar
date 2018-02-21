@@ -603,6 +603,7 @@
 				]
 			}
 		},
+		"clients/bar/bar_test.thrift": {},
 		"clients/baz/base.thrift": {},
 		"clients/baz/baz.thrift": {
 			"SecondService": {
@@ -838,6 +839,7 @@
 				]
 			}
 		},
+		"endpoints/bar/bar_test.thrift": {},
 		"endpoints/baz/baz.thrift": {
 			"SimpleService": {
 				"Name": "SimpleService",

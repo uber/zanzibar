@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_test"
 	"go.uber.org/thriftrw/wire"
 	"math"
 	"strconv"
@@ -125,12 +126,13 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string    `json:"stringField,required"`
-	BoolField   bool      `json:"boolField,required"`
-	BinaryField []byte    `json:"binaryField,required"`
-	Timestamp   Timestamp `json:"timestamp,required"`
-	EnumField   Fruit     `json:"enumField,required"`
-	LongField   Long      `json:"longField,required"`
+	StringField string        `json:"stringField,required"`
+	BoolField   bool          `json:"boolField,required"`
+	BinaryField []byte        `json:"binaryField,required"`
+	Timestamp   Timestamp     `json:"timestamp,required"`
+	EnumField   Fruit         `json:"enumField,required"`
+	LongField   Long          `json:"longField,required"`
+	Viewer      bar_test.UUID `json:"viewer,required"`
 }
 
 // ToWire translates a BarRequest struct into a Thrift-level intermediate
@@ -150,7 +152,7 @@ type BarRequest struct {
 //   }
 func (v *BarRequest) ToWire() (wire.Value, error) {
 	var (
-		fields [6]wire.Field
+		fields [7]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -200,6 +202,13 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 	fields[i] = wire.Field{ID: 6, Value: w}
 	i++
 
+	w, err = v.Viewer.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 7, Value: w}
+	i++
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
@@ -217,6 +226,12 @@ func _Fruit_Read(w wire.Value) (Fruit, error) {
 
 func _Long_Read(w wire.Value) (Long, error) {
 	var x Long
+	err := x.FromWire(w)
+	return x, err
+}
+
+func _UUID_Read(w wire.Value) (bar_test.UUID, error) {
+	var x bar_test.UUID
 	err := x.FromWire(w)
 	return x, err
 }
@@ -247,6 +262,7 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 	timestampIsSet := false
 	enumFieldIsSet := false
 	longFieldIsSet := false
+	viewerIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -298,6 +314,14 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 				}
 				longFieldIsSet = true
 			}
+		case 7:
+			if field.Value.Type() == wire.TBinary {
+				v.Viewer, err = _UUID_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				viewerIsSet = true
+			}
 		}
 	}
 
@@ -325,6 +349,10 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		return errors.New("field LongField of BarRequest is required")
 	}
 
+	if !viewerIsSet {
+		return errors.New("field Viewer of BarRequest is required")
+	}
+
 	return nil
 }
 
@@ -335,7 +363,7 @@ func (v *BarRequest) String() string {
 		return "<nil>"
 	}
 
-	var fields [6]string
+	var fields [7]string
 	i := 0
 	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
 	i++
@@ -348,6 +376,8 @@ func (v *BarRequest) String() string {
 	fields[i] = fmt.Sprintf("EnumField: %v", v.EnumField)
 	i++
 	fields[i] = fmt.Sprintf("LongField: %v", v.LongField)
+	i++
+	fields[i] = fmt.Sprintf("Viewer: %v", v.Viewer)
 	i++
 
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
@@ -374,6 +404,9 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 		return false
 	}
 	if !(v.LongField == rhs.LongField) {
+		return false
+	}
+	if !(v.Viewer == rhs.Viewer) {
 		return false
 	}
 
@@ -526,9 +559,9 @@ type BarResponse struct {
 	NextResponse       *BarResponse     `json:"nextResponse,omitempty"`
 }
 
-type _Map_UUID_I32_MapItemList map[UUID]int32
+type _Map_UUID_1_I32_MapItemList map[UUID]int32
 
-func (m _Map_UUID_I32_MapItemList) ForEach(f func(wire.MapItem) error) error {
+func (m _Map_UUID_1_I32_MapItemList) ForEach(f func(wire.MapItem) error) error {
 	for k, v := range m {
 		kw, err := k.ToWire()
 		if err != nil {
@@ -547,19 +580,19 @@ func (m _Map_UUID_I32_MapItemList) ForEach(f func(wire.MapItem) error) error {
 	return nil
 }
 
-func (m _Map_UUID_I32_MapItemList) Size() int {
+func (m _Map_UUID_1_I32_MapItemList) Size() int {
 	return len(m)
 }
 
-func (_Map_UUID_I32_MapItemList) KeyType() wire.Type {
+func (_Map_UUID_1_I32_MapItemList) KeyType() wire.Type {
 	return wire.TBinary
 }
 
-func (_Map_UUID_I32_MapItemList) ValueType() wire.Type {
+func (_Map_UUID_1_I32_MapItemList) ValueType() wire.Type {
 	return wire.TI32
 }
 
-func (_Map_UUID_I32_MapItemList) Close() {}
+func (_Map_UUID_1_I32_MapItemList) Close() {}
 
 type _Map_String_I32_MapItemList map[string]int32
 
@@ -642,7 +675,7 @@ func (v *BarResponse) ToWire() (wire.Value, error) {
 	if v.MapIntWithRange == nil {
 		return w, errors.New("field MapIntWithRange of BarResponse is required")
 	}
-	w, err = wire.NewValueMap(_Map_UUID_I32_MapItemList(v.MapIntWithRange)), error(nil)
+	w, err = wire.NewValueMap(_Map_UUID_1_I32_MapItemList(v.MapIntWithRange)), error(nil)
 	if err != nil {
 		return w, err
 	}
@@ -678,13 +711,13 @@ func (v *BarResponse) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _UUID_Read(w wire.Value) (UUID, error) {
+func _UUID_1_Read(w wire.Value) (UUID, error) {
 	var x UUID
 	err := x.FromWire(w)
 	return x, err
 }
 
-func _Map_UUID_I32_Read(m wire.MapItemList) (map[UUID]int32, error) {
+func _Map_UUID_1_I32_Read(m wire.MapItemList) (map[UUID]int32, error) {
 	if m.KeyType() != wire.TBinary {
 		return nil, nil
 	}
@@ -695,7 +728,7 @@ func _Map_UUID_I32_Read(m wire.MapItemList) (map[UUID]int32, error) {
 
 	o := make(map[UUID]int32, m.Size())
 	err := m.ForEach(func(x wire.MapItem) error {
-		k, err := _UUID_Read(x.Key)
+		k, err := _UUID_1_Read(x.Key)
 		if err != nil {
 			return err
 		}
@@ -801,7 +834,7 @@ func (v *BarResponse) FromWire(w wire.Value) error {
 			}
 		case 4:
 			if field.Value.Type() == wire.TMap {
-				v.MapIntWithRange, err = _Map_UUID_I32_Read(field.Value.GetMap())
+				v.MapIntWithRange, err = _Map_UUID_1_I32_Read(field.Value.GetMap())
 				if err != nil {
 					return err
 				}
@@ -890,7 +923,7 @@ func (v *BarResponse) String() string {
 	return fmt.Sprintf("BarResponse{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _Map_UUID_I32_Equals(lhs, rhs map[UUID]int32) bool {
+func _Map_UUID_1_I32_Equals(lhs, rhs map[UUID]int32) bool {
 	if len(lhs) != len(rhs) {
 		return false
 	}
@@ -938,7 +971,7 @@ func (v *BarResponse) Equals(rhs *BarResponse) bool {
 	if !(v.IntWithoutRange == rhs.IntWithoutRange) {
 		return false
 	}
-	if !_Map_UUID_I32_Equals(v.MapIntWithRange, rhs.MapIntWithRange) {
+	if !_Map_UUID_1_I32_Equals(v.MapIntWithRange, rhs.MapIntWithRange) {
 		return false
 	}
 	if !_Map_String_I32_Equals(v.MapIntWithoutRange, rhs.MapIntWithoutRange) {

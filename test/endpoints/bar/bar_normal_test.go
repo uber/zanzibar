@@ -58,9 +58,11 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", map[string]string{
+			"x-uber-uuid": "UUID",
+		},
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123,"viewer":"UUID"}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -70,9 +72,11 @@ func TestBarNormalFailingJSONInBackend(t *testing.T) {
 	assert.Equal(t, 1, counter)
 
 	res, err = gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", map[string]string{
+			"x-uber-uuid": "UUID",
+		},
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":"APPLE","longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":"APPLE","longField":123,"viewer":"UUID"}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -110,7 +114,7 @@ func TestBarNormalMalformedClientResponseReadAll(t *testing.T) {
 
 	endpoints := map[string]string{
 		"/bar/bar-path": `{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123,"viewer":"UUID"}
 		}`,
 		"/bar/arg-not-struct-path": `{"request":"foo"}`,
 	}
@@ -166,7 +170,7 @@ func TestBarExceptionCode(t *testing.T) {
 			bytes, err := ioutil.ReadAll(r.Body)
 			assert.NoError(t, err)
 			assert.Equal(t,
-				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123}}}`),
+				[]byte(`{"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":"2017-11-12T00:52:38Z","enumField":"APPLE","longField":{"high":0,"low":123},"viewer":"UUID"}}`),
 				bytes,
 			)
 			w.WriteHeader(403)
@@ -178,9 +182,11 @@ func TestBarExceptionCode(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", map[string]string{
+			"x-uber-uuid": "UUID",
+		},
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":1510447958865,"enumField":0,"longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"AAD//w==","timestamp":1510447958865,"enumField":0,"longField":123,"viewer":"UUID"}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -216,9 +222,11 @@ func TestMalformedBarExceptionCode(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", map[string]string{
+			"x-uber-uuid": "UUID",
+		},
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123,"viewer":"UUID"}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -254,9 +262,11 @@ func TestBarExceptionInvalidStatusCode(t *testing.T) {
 	)
 
 	res, err := gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", map[string]string{
+			"x-uber-uuid": "UUID",
+		},
 		bytes.NewReader([]byte(`{
-			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
+			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123,"viewer":"UUID"}
 		}`)),
 	)
 	if !assert.NoError(t, err, "got http error") {

@@ -14,6 +14,10 @@
 			"AliasName": "clientsFooFoo"
 		},
 		{
+			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_test",
+			"AliasName": "clientsBarBarTest"
+		},
+		{
 			"PackageName": "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base",
 			"AliasName": "clientsFooBaseBase"
 		}
@@ -123,14 +127,14 @@
 					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": [
 						"nameValue, _ := req.Header.Get(\"name\")",
-						"requestBody.Name = nameValue",
+						"requestBody.Name = string(nameValue)",
 						"xUUIDValue, xUUIDValueExists := req.Header.Get(\"x-uuid\")",
 						"if xUUIDValueExists {",
 						"\trequestBody.UserUUID = ptr.String(xUUIDValue)",
 						"}"
 					],
 					"ReqClientHeaderGoStatements": [
-						"headers[\"name\"]= r.Name",
+						"headers[\"name\"]= string(r.Name)",
 						"headers[\"x-uuid\"]= *r.UserUUID"
 					],
 					"ResHeaderFields": {
@@ -835,8 +839,18 @@
 					"IsEndpoint": false,
 					"ParseQueryParamGoStatements": null,
 					"WriteQueryParamGoStatements": null,
-					"ReqHeaderGoStatements": null,
-					"ReqClientHeaderGoStatements": null,
+					"ReqHeaderGoStatements": [
+						"if requestBody.Request == nil {",
+						"\trequestBody.Request = \u0026clientsBarBar.BarRequest{}",
+						"}",
+						"xUberUUIDValue, _ := req.Header.Get(\"x-uber-uuid\")",
+						"requestBody.Request.Viewer = clientsBarBarTest.UUID(xUberUUIDValue)"
+					],
+					"ReqClientHeaderGoStatements": [
+						"if r.Request != nil {",
+						"headers[\"x-uber-uuid\"]= string(r.Request.Viewer)",
+						"}"
+					],
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",
@@ -991,8 +1005,18 @@
 					"IsEndpoint": false,
 					"ParseQueryParamGoStatements": null,
 					"WriteQueryParamGoStatements": null,
-					"ReqHeaderGoStatements": null,
-					"ReqClientHeaderGoStatements": null,
+					"ReqHeaderGoStatements": [
+						"if requestBody.Request == nil {",
+						"\trequestBody.Request = \u0026clientsBarBar.BarRequest{}",
+						"}",
+						"xUberUUIDValue, _ := req.Header.Get(\"x-uber-uuid\")",
+						"requestBody.Request.Viewer = clientsBarBarTest.UUID(xUberUUIDValue)"
+					],
+					"ReqClientHeaderGoStatements": [
+						"if r.Request != nil {",
+						"headers[\"x-uber-uuid\"]= string(r.Request.Viewer)",
+						"}"
+					],
 					"ResHeaderFields": {
 						"some-header-field": {
 							"FieldIdentifier": ".StringField",

@@ -27,6 +27,7 @@
 								"timestamp": 123,
 								"enumField": "APPLE",
 								"binaryField": "aGVsbG8=",
+								"viewer": "UUID",
 								"longField": 123
 							}
 						}
@@ -60,6 +61,7 @@
 								"enumField": "APPLE",
 								"binaryField": "aGVsbG8=",
 								"boolField": true,
+								"viewer": "UUID",
 								"longField": 123
 							}
 						}

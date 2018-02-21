@@ -329,7 +329,7 @@ func (c *barClient) ArgWithHeaders(
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "ArgWithHeaders", c.httpClient)
 
-	headers["name"] = r.Name
+	headers["name"] = string(r.Name)
 	headers["x-uuid"] = *r.UserUUID
 
 	// Generate full URL.
@@ -932,6 +932,10 @@ func (c *barClient) Normal(
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "Normal", c.httpClient)
 
+	if r.Request != nil {
+		headers["x-uber-uuid"] = string(r.Request.Viewer)
+	}
+
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar-path"
 
@@ -1054,6 +1058,10 @@ func (c *barClient) TooManyArgs(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	var defaultRes *clientsBarBar.BarResponse
 	req := zanzibar.NewClientHTTPRequest(c.clientID, "TooManyArgs", c.httpClient)
+
+	if r.Request != nil {
+		headers["x-uber-uuid"] = string(r.Request.Viewer)
+	}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/too-many-args-path"
