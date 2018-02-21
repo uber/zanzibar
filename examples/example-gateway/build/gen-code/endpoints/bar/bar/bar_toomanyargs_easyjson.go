@@ -11,6 +11,7 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	bar_uuid "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar_uuid"
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/base/base"
 	foo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 )
@@ -820,6 +821,7 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	var TimestampSet bool
 	var EnumFieldSet bool
 	var LongFieldSet bool
+	var ViewerSet bool
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()
@@ -859,6 +861,9 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				in.AddError((out.LongField).UnmarshalJSON(data))
 			}
 			LongFieldSet = true
+		case "viewer":
+			out.Viewer = bar_uuid.UUID(in.String())
+			ViewerSet = true
 		default:
 			in.SkipRecursive()
 		}
@@ -885,6 +890,9 @@ func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	}
 	if !LongFieldSet {
 		in.AddError(fmt.Errorf("key 'longField' is required"))
+	}
+	if !ViewerSet {
+		in.AddError(fmt.Errorf("key 'viewer' is required"))
 	}
 }
 func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out *jwriter.Writer, in BarRequest) {
@@ -927,5 +935,11 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first = false
 	out.RawString("\"longField\":")
 	out.Raw((in.LongField).MarshalJSON())
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"viewer\":")
+	out.String(string(in.Viewer))
 	out.RawByte('}')
 }

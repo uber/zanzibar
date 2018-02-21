@@ -30,9 +30,11 @@ import (
 	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	clientsBarBarUUID "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar_uuid"
 	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+	endpointsBarBarUUID "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar_uuid"
 	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -80,6 +82,12 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+
+	if requestBody.Request == nil {
+		requestBody.Request = &endpointsBarBar.BarRequest{}
+	}
+	xUberUUIDValue, _ := req.Header.Get("x-uber-uuid")
+	requestBody.Request.Viewer = endpointsBarBarUUID.UUID(xUberUUIDValue)
 
 	workflow := BarTooManyArgsEndpoint{
 		Clients: h.Clients,
@@ -202,6 +210,7 @@ func convertToTooManyArgsClientRequest(in *endpointsBarBar.Bar_TooManyArgs_Args)
 		out.Request.Timestamp = clientsBarBar.Timestamp(in.Request.Timestamp)
 		out.Request.EnumField = clientsBarBar.Fruit(in.Request.EnumField)
 		out.Request.LongField = clientsBarBar.Long(in.Request.LongField)
+		out.Request.Viewer = clientsBarBarUUID.UUID(in.Request.Viewer)
 	} else {
 		out.Request = nil
 	}

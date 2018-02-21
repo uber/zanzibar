@@ -618,6 +618,13 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				camelHeaderName := camelCase(headerName)
+
+				fieldThriftType, err := GoType(packageHelper, field.Type)
+				if err != nil {
+					finalError = err
+					return true
+				}
+
 				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
 
 				seenCount := headersMap[camelHeaderName]
@@ -647,8 +654,8 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 						}
 					}
 
-					statements.appendf("requestBody%s = %s",
-						bodyIdentifier, variableName,
+					statements.appendf("requestBody%s = %s(%s)",
+						bodyIdentifier, fieldThriftType, variableName,
 					)
 				} else {
 					statements.appendf("%s, %sExists := req.Header.Get(%q)",
@@ -756,7 +763,8 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
 				var headerNameValuePair string
 				if field.Required {
-					headerNameValuePair = "headers[%q]= r%s"
+					// Note header values are always string
+					headerNameValuePair = "headers[%q]= string(r%s)"
 				} else {
 					headerNameValuePair = "headers[%q]= *r%s"
 				}
