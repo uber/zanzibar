@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 set -o pipefail
 
 usage() {
@@ -22,35 +23,26 @@ start=$(cat .TMP_ZANZIBAR_TIMESTAMP_FILE.txt)
 CONFIG_DIR="$1"
 BUILD_DIR="$2"
 
-#DIRNAME="$(dirname "$0")"
-# The assumption here is that either Mockery package resides in Zanzibar's vendor dir
-# or Zanzibar itself is in a vendor dir, in which Mockery also resides.
+DIRNAME="$(dirname "$0")"
+# The assumption here is that either mockgen package resides in Zanzibar's vendor dir
+# or Zanzibar itself is in a vendor dir, in which mockgen also resides.
 # For the second case, it's also assumed that the vendor directory is flattened as Glide does.
-#if [ -d "$DIRNAME/../../vendor" ]; then
-#	MOCKERY_RAW_DIR="$DIRNAME/../../vendor/github.com/vektra/mockery"
-#else
-#	MOCKERY_RAW_DIR="$DIRNAME/../../../../../github.com/vektra/mockery"
-#fi
-#MOCKERY_DIR="$(cd "$MOCKERY_RAW_DIR";pwd)"
-#MOCKERY_MAIN_FILE="$MOCKERY_DIR/cmd/mockery/mockery.go"
-#MOCKERY_BINARY="$MOCKERY_DIR/cmd/mockery/mockery"
-#
-#go build -o "$MOCKERY_BINARY" "$MOCKERY_MAIN_FILE"
-#end=$(date +%s)
-#runtime=$((end-start))
-#echo "Compiled Mockery: +$runtime"
-#
-#"$MOCKERY_BINARY" -name="^Client$" -dir="$BUILD_DIR/clients" -inpkg -case=underscore -recursive -note="+build mock" > /dev/null
-#"$MOCKERY_BINARY" -name="^Client$" -dir="$CONFIG_DIR/clients" -inpkg -case=underscore -recursive -note="+build mock" > /dev/null
+if [ -d "$DIRNAME/../../vendor" ]; then
+	MOCKGEN_RAW_DIR="$DIRNAME/../../vendor/github.com/golang/mock"
+else
+	MOCKGEN_RAW_DIR="$DIRNAME/../../../../../github.com/golang/mock"
+fi
+MOCKGEN_DIR="$(cd "$MOCKGEN_RAW_DIR";pwd)/mockgen"
+MOCKGEN_BINARY="$MOCKGEN_DIR/mockgen"
 
-if ! [ -x "$(command -v mockgen)" ]; then
-	go get -u github.com/golang/mock/gomock
-	go get -u github.com/golang/mock/mockgen
+if ! [ -x "$(command -v $MOCKGEN_BINARY)" ]; then
+	go build -o "$MOCKGEN_BINARY" "$MOCKGEN_DIR"/*.go
 	end=$(date +%s)
 	runtime=$((end-start))
-	echo "Installed mockgen: +"$runtime""
+	echo "Compiled mockgen: +$runtime"
 fi
 
+GEN_ERR="/tmp/zanzibar-mockgen.err"
 genmock() {
 	for d in "$1/clients/"*/; do
 		abs_path="$(cd "$d"; pwd)"
@@ -58,17 +50,19 @@ genmock() {
 		dest_dir="$abs_path/mock_client"
 		mkdir -p "$dest_dir"
 		# TODO: need a better way to deal with errors, silencing for now
-		mockgen -destination="$dest_dir/mock_client.go" -package="clientmock" "$import_path" "Client" 2>/dev/null
+		"$MOCKGEN_BINARY" -destination="$dest_dir/mock_client.go" -package="clientmock" "$import_path" "Client" 2>>"$GEN_ERR"
 		if [ $? -ne 0 ]; then
 		    rm -r "$dest_dir"
 		else
 			end=$(date +%s)
 			runtime=$((end-start))
-			printf "Generated mock for %-15s: +"$runtime"\n" "$(basename "$import_path")"
+			printf "Generated mock for %-25s: +"$runtime"\n" "$(basename "$import_path")"
 		fi
 	done
 }
 
 # TODO: reflect mode is quite slow, may need do some caching here
+set +e
+rm -f "$GEN_ERR"
 genmock "$BUILD_DIR"
 genmock "$CONFIG_DIR"
