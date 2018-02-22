@@ -5,16 +5,21 @@
 package module
 
 import (
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType $leafClass -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock_client"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
-	{{if not (eq $classType $leafClass) -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
 	{{end}}
-
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 {{$moduleInstances := (index $instance.RecursiveDependencies $leafClass) -}}
@@ -29,6 +34,7 @@ type {{$mockDeps}} struct {
 // for the {{$instance.InstanceName}} {{$instance.ClassName}} with leaf nodes being mocks
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
+	ctrl *gomock.Controller,
 ) (*DependenciesTree, *Dependencies, *{{$mockDeps}}) {
 	tree := &DependenciesTree{}
 
@@ -45,7 +51,7 @@ func InitializeDependenciesMock(
 	{{camel $mockDeps}} := &{{$mockDeps}}{
 		{{- range $idx, $dependency := $moduleInstances}}
 		{{- $pkgInfo := $dependency.PackageInfo }}
-		{{$pkgInfo.QualifiedInstanceName}}: &{{$pkgInfo.ImportPackageAlias}}.Mock{{title $className}}{},
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.NewMock{{title $className}}(ctrl),
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	clientContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestSaveContactsCall(t *testing.T) {
-	ms := examplegatewayServiceGenerated.MustCreateTestService()
+	ms := examplegatewayServiceGenerated.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
 
@@ -27,7 +27,7 @@ func TestSaveContactsCall(t *testing.T) {
 	}
 	clientResponse := &clientContacts.SaveContactsResponse{}
 
-	ms.MockClientNodes().Contacts.On("SaveContacts", mock.Anything, mock.Anything, clientRequest).
+	ms.MockClientNodes().Contacts.EXPECT().SaveContacts(gomock.Any(), gomock.Any(), clientRequest).
 		Return(clientResponse, nil, nil)
 
 	res, err := ms.MakeHTTPRequest(

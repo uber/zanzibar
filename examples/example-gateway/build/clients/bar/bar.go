@@ -173,14 +173,7 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Echo_EchoStructList_Args,
 	) ([]*clientsBarBar.BarResponse, map[string]string, error)
-	EchoStructMap(
-		ctx context.Context,
-		reqHeaders map[string]string,
-		args *clientsBarBar.Echo_EchoStructMap_Args,
-	) ([]struct {
-		Key   *clientsBarBar.BarResponse
-		Value string
-	}, map[string]string, error)
+
 	EchoStructSet(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -243,7 +236,6 @@ func NewClient(deps *module.Dependencies) Client {
 				"EchoStringMap",
 				"EchoStringSet",
 				"EchoStructList",
-				"EchoStructMap",
 				"EchoStructSet",
 				"EchoTypedef",
 			},
@@ -1894,72 +1886,6 @@ func (c *barClient) EchoStructList(
 	switch res.StatusCode {
 	case 200:
 		var responseBody []*clientsBarBar.BarResponse
-		err = res.ReadAndUnmarshalBody(&responseBody)
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-
-		return responseBody, respHeaders, nil
-	default:
-		// TODO: log about unexpected body bytes?
-		_, err = res.ReadAll()
-		if err != nil {
-			return defaultRes, respHeaders, err
-		}
-	}
-
-	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
-		StatusCode: res.StatusCode,
-		RawBody:    res.GetRawBody(),
-	}
-}
-
-// EchoStructMap calls "/echo/struct-map" endpoint.
-func (c *barClient) EchoStructMap(
-	ctx context.Context,
-	headers map[string]string,
-	r *clientsBarBar.Echo_EchoStructMap_Args,
-) ([]struct {
-	Key   *clientsBarBar.BarResponse
-	Value string
-}, map[string]string, error) {
-	var defaultRes []struct {
-		Key   *clientsBarBar.BarResponse
-		Value string
-	}
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoStructMap", c.httpClient)
-
-	// Generate full URL.
-	fullURL := c.httpClient.BaseURL + "/echo" + "/struct-map"
-
-	err := req.WriteJSON("POST", fullURL, headers, r)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	headerErr := req.CheckHeaders([]string{"x-uuid"})
-	if headerErr != nil {
-		return defaultRes, nil, headerErr
-	}
-
-	res, err := req.Do(ctx)
-	if err != nil {
-		return defaultRes, nil, err
-	}
-
-	respHeaders := map[string]string{}
-	for k := range res.Header {
-		respHeaders[k] = res.Header.Get(k)
-	}
-
-	res.CheckOKResponse([]int{200})
-
-	switch res.StatusCode {
-	case 200:
-		var responseBody []struct {
-			Key   *clientsBarBar.BarResponse
-			Value string
-		}
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err

@@ -25,7 +25,6 @@
 		"EchoStringList": "SecondService::echoStringList",
 		"EchoStructList": "SecondService::echoStructList",
 		"EchoStringMap": "SecondService::echoStringMap",
-		"EchoStructMap": "SecondService::echoStructMap",
 		"Ping": "SimpleService::ping",
 		"Trans": "SimpleService::trans"
 	},

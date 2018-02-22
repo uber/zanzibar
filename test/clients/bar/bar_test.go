@@ -870,71 +870,71 @@ func TestEchoStringMap(t *testing.T) {
 	assert.Equal(t, arg, result)
 }
 
-func TestEchoStructMap(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
-
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	arg := []struct {
-		Key   *barGen.BarResponse
-		Value string
-	}{
-		{
-			Key: &barGen.BarResponse{
-				StringField:     "a",
-				IntWithRange:    int32(0),
-				IntWithoutRange: int32(0),
-				MapIntWithRange: map[barGen.UUID]int32{
-					barGen.UUID("fakeUUID"): int32(0),
-				},
-				MapIntWithoutRange: map[string]int32{
-					"0": int32(0),
-				},
-				BinaryField: []byte("d29ybGQ=")},
-			Value: "a",
-		},
-	}
-	marshaled, err := json.Marshal(arg)
-	assert.NoError(t, err)
-
-	bgateway.HTTPBackends()["bar"].HandleFunc(
-		"POST", "/echo/struct-map",
-		func(w http.ResponseWriter, r *http.Request) {
-			body, err := ioutil.ReadAll(r.Body)
-			assert.NoError(t, err)
-
-			err = r.Body.Close()
-			assert.NoError(t, err)
-
-			var req barGen.Echo_EchoStructMap_Args
-			err = json.Unmarshal(body, &req)
-			assert.NoError(t, err)
-			assert.Equal(t, req.Arg, arg)
-
-			w.WriteHeader(200)
-			_, err = w.Write(marshaled)
-			assert.NoError(t, err)
-		},
-	)
-	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
-	bar := deps.Client.Bar
-
-	result, _, err := bar.EchoStructMap(
-		context.Background(), map[string]string{
-			"x-uuid": "a-uuid",
-		}, &barGen.Echo_EchoStructMap_Args{Arg: arg},
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, arg, result)
-}
+//func TestEchoStructMap(t *testing.T) {
+//	gateway, err := benchGateway.CreateGateway(
+//		defaultTestConfig,
+//		defaultTestOptions,
+//		exampleGateway.CreateGateway,
+//	)
+//	if !assert.NoError(t, err) {
+//		return
+//	}
+//	defer gateway.Close()
+//
+//	bgateway := gateway.(*benchGateway.BenchGateway)
+//
+//	arg := []struct {
+//		Key   *barGen.BarResponse
+//		Value string
+//	}{
+//		{
+//			Key: &barGen.BarResponse{
+//				StringField:     "a",
+//				IntWithRange:    int32(0),
+//				IntWithoutRange: int32(0),
+//				MapIntWithRange: map[barGen.UUID]int32{
+//					barGen.UUID("fakeUUID"): int32(0),
+//				},
+//				MapIntWithoutRange: map[string]int32{
+//					"0": int32(0),
+//				},
+//				BinaryField: []byte("d29ybGQ=")},
+//			Value: "a",
+//		},
+//	}
+//	marshaled, err := json.Marshal(arg)
+//	assert.NoError(t, err)
+//
+//	bgateway.HTTPBackends()["bar"].HandleFunc(
+//		"POST", "/echo/struct-map",
+//		func(w http.ResponseWriter, r *http.Request) {
+//			body, err := ioutil.ReadAll(r.Body)
+//			assert.NoError(t, err)
+//
+//			err = r.Body.Close()
+//			assert.NoError(t, err)
+//
+//			var req barGen.Echo_EchoStructMap_Args
+//			err = json.Unmarshal(body, &req)
+//			assert.NoError(t, err)
+//			assert.Equal(t, req.Arg, arg)
+//
+//			w.WriteHeader(200)
+//			_, err = w.Write(marshaled)
+//			assert.NoError(t, err)
+//		},
+//	)
+//	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+//	bar := deps.Client.Bar
+//
+//	result, _, err := bar.EchoStructMap(
+//		context.Background(), map[string]string{
+//			"x-uuid": "a-uuid",
+//		}, &barGen.Echo_EchoStructMap_Args{Arg: arg},
+//	)
+//	assert.NoError(t, err)
+//	assert.Equal(t, arg, result)
+//}
 
 func TestNestedQueryParamCallWithNil(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(

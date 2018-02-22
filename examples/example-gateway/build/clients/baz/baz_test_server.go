@@ -541,48 +541,6 @@ func (h *SecondServiceEchoStructListHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
-// SecondServiceEchoStructMapFunc is the handler function for "echoStructMap" method of thrift service "SecondService".
-type SecondServiceEchoStructMapFunc func(
-	ctx context.Context,
-	reqHeaders map[string]string,
-	args *clientsBazBaz.SecondService_EchoStructMap_Args,
-) ([]struct {
-	Key   *clientsBazBase.BazResponse
-	Value string
-}, map[string]string, error)
-
-// NewSecondServiceEchoStructMapHandler wraps a handler function so it can be registered with a thrift server.
-func NewSecondServiceEchoStructMapHandler(f SecondServiceEchoStructMapFunc) zanzibar.TChannelHandler {
-	return &SecondServiceEchoStructMapHandler{f}
-}
-
-// SecondServiceEchoStructMapHandler handles the "echoStructMap" method call of thrift service "SecondService".
-type SecondServiceEchoStructMapHandler struct {
-	echostructmap SecondServiceEchoStructMapFunc
-}
-
-// Handle parses request from wire value and calls corresponding handler function.
-func (h *SecondServiceEchoStructMapHandler) Handle(
-	ctx context.Context,
-	reqHeaders map[string]string,
-	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var req clientsBazBaz.SecondService_EchoStructMap_Args
-	var res clientsBazBaz.SecondService_EchoStructMap_Result
-
-	if err := req.FromWire(*wireValue); err != nil {
-		return false, nil, nil, err
-	}
-	r, respHeaders, err := h.echostructmap(ctx, reqHeaders, &req)
-
-	if err != nil {
-		return false, nil, nil, err
-	}
-	res.Success = r
-
-	return err == nil, &res, respHeaders, nil
-}
-
 // SecondServiceEchoStructSetFunc is the handler function for "echoStructSet" method of thrift service "SecondService".
 type SecondServiceEchoStructSetFunc func(
 	ctx context.Context,

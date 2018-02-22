@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
 func TestBazCall(t *testing.T) {
-	ms := ms.MustCreateTestService()
+	ms := ms.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
 
@@ -34,7 +34,7 @@ func TestBazCall(t *testing.T) {
 
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClientNodes().Baz.On("Call", mock.Anything, reqHeaders, mock.Anything).
+	ms.MockClientNodes().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(

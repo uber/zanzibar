@@ -21,7 +21,6 @@
 			"EchoStringMap": "SecondService::echoStringMap",
 			"EchoStringSet": "SecondService::echoStringSet",
 			"EchoStructList": "SecondService::echoStructList",
-			"EchoStructMap": "SecondService::echoStructMap",
 			"EchoStructSet": "SecondService::echoStructSet",
 			"EchoTypedef": "SecondService::echoTypedef",
 			"Ping": "SimpleService::ping",
