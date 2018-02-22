@@ -275,31 +275,14 @@ tag-build:
 
 .PHONY: jenkins-install
 jenkins-install:
-	PWD=$(pwd)
 	@rm -rf ./vendor/
-	@rm -rf ./workspace/
-	@mkdir -p ./workspace/src/github.com/uber/
-	@ln -s $(PWD) workspace/src/github.com/uber/zanzibar
-	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
-		PATH=$(PWD)/workspace/bin:$(PATH) \
-		make install
+	make install
 
 .PHONY: jenkins-test
 jenkins-test:
-	PWD=$(pwd)
-	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
-		PATH=$(PWD)/workspace/bin:$(PATH) \
-		make check-generate
-	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
-		PATH=$(PWD)/workspace/bin:$(PATH) \
-		make lint
-	cd workspace/src/github.com/uber/zanzibar && \
-		GOPATH=$(PWD)/workspace \
-		PATH=$(PWD)/workspace/bin:$(PATH) \
-		make test-only
+	make check-generate
+	make lint
+	make test-only
 
 .PHONY: jenkins
 jenkins:
