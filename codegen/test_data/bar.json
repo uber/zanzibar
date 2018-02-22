@@ -123,15 +123,15 @@
 					"WriteQueryParamGoStatements": null,
 					"ReqHeaderGoStatements": [
 						"nameValue, _ := req.Header.Get(\"name\")",
-						"requestBody.Name = nameValue",
+						"requestBody.Name = string(nameValue)",
 						"xUUIDValue, xUUIDValueExists := req.Header.Get(\"x-uuid\")",
 						"if xUUIDValueExists {",
 						"\trequestBody.UserUUID = ptr.String(xUUIDValue)",
 						"}"
 					],
 					"ReqClientHeaderGoStatements": [
-						"headers[\"name\"]= r.Name",
-						"headers[\"x-uuid\"]= *r.UserUUID"
+						"headers[\"name\"]= string(r.Name)",
+						"headers[\"x-uuid\"]= string(*r.UserUUID)"
 					],
 					"ResHeaderFields": {
 						"some-header-field": {

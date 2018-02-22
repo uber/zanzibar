@@ -2500,6 +2500,7 @@
 						"type": "tchannel"
 					}
 				],
+				"description": "informative commit message",
 				"endpoint_updates": [
 					{
 						"clientId": "baz",
@@ -2575,8 +2576,7 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				],
-				"description": "informative commit message"
+				]
 			}
 		},
 		"response": {
@@ -2630,6 +2630,7 @@
 						"type": "tchannel"
 					}
 				],
+				"description": "informative commit message",
 				"endpoint_updates": [
 					{
 						"clientId": "baz",
@@ -2649,8 +2650,7 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				],
-				"description": "informative commit message"
+				]
 			}
 		},
 		"response": {
@@ -2669,13 +2669,13 @@
 				"gateway-id": "example-gateway"
 			},
 			"body": {
+				"description": "informative commit message",
 				"managed_thrift_files": [
 					{
 						"filename": "bar/my-thrift.thrift",
 						"source_code": "namespace java com.uber.zanzibar.clients.baz\n\ntypedef string UUID\n\nstruct BazResponse {\n\t1: required string message\n}\n\nexception ServerErr {\n\t1: required string message\n}\n"
 					}
-				],
-				"description": "informative commit message"
+				]
 			}
 		},
 		"response": {
@@ -2753,6 +2753,7 @@
 						"type": "tchannel"
 					}
 				],
+				"description": "informative commit message",
 				"endpoint_updates": [
 					{
 						"clientId": "bazzzzzzzz",
@@ -2772,8 +2773,7 @@
 				],
 				"thrift_files": [
 					"clients/baz/baz.thrift"
-				],
-				"description": "informative commit message"
+				]
 			}
 		},
 		"response": {
