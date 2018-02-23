@@ -1,8 +1,14 @@
 {{- $className := index . 0 }}
 {{- $instance := index . 1 }}
+
 {{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
 {{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
+
+{{- if eq (len .) 3 }}
+{{$initializedDeps}} := &{{index . 2}}.{{$className | title}}DependenciesNodes{}
+{{- else }}
 {{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+{{- end }}
 tree.{{$className | title}} = {{$initializedDeps}}
 
 {{- range $idx, $dependency := $moduleInstances}}

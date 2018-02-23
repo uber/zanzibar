@@ -2,7 +2,7 @@
 {{- $leafClass := index .DependencyOrder 0 -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 
-package {{$instance.PackageInfo.GeneratedPackageAlias}}
+package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
-	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 )
 
 // MockService interface
@@ -37,7 +37,7 @@ type MockService interface {
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
-	{{$mockType}}() *module.{{$mockType}}
+	{{$mockType}}() *{{$mockType}}
 	Start()
 	Stop()
 }
@@ -46,7 +46,7 @@ type mockService struct {
 	started        bool
 	server         *zanzibar.Gateway
 	ctrl           *gomock.Controller
-	{{camel $mockType}}    *module.{{$mockType}}
+	{{camel $mockType}}    *{{$mockType}}
 	httpClient     *http.Client
 	tChannelClient zanzibar.TChannelCaller
 }
@@ -55,7 +55,7 @@ type mockService struct {
 func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
-	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
+	testConfigPath := filepath.Join(currentDir, "../../../../config/test.json")
 	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
 
 	server, err := zanzibar.CreateGateway(c, nil)
@@ -64,8 +64,8 @@ func MustCreateTestService(t *testing.T) MockService {
 	}
 
 	ctrl := gomock.NewController(t)
-	_, dependencies, mockNodes := module.InitializeDependenciesMock(server, ctrl)
-	registerErr := registerDeps(server, dependencies)
+	_, dependencies, mockNodes := InitializeDependenciesMock(server, ctrl)
+	registerErr := service.RegisterDeps(server, dependencies)
 	if registerErr != nil {
 		panic(registerErr)
 	}
@@ -118,7 +118,7 @@ func (m *mockService) Stop() {
 }
 
 // {{$mockType}} returns the mock nodes
-func (m *mockService) {{$mockType}}() *module.{{$mockType}} {
+func (m *mockService) {{$mockType}}() *{{$mockType}} {
 	return m.{{camel $mockType}}
 }
 

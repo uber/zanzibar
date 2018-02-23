@@ -9,11 +9,11 @@ import (
 
 	clientContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 	endpointContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
-	"github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
 func TestSaveContactsCall(t *testing.T) {
-	ms := examplegatewayServiceGenerated.MustCreateTestService(t)
+	ms := ms.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
 

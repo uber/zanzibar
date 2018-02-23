@@ -1404,9 +1404,15 @@ func middlewareTmpl() (*asset, error) {
 
 var _module_class_initializerTmpl = []byte(`{{- $className := index . 0 }}
 {{- $instance := index . 1 }}
+
 {{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
 {{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
+
+{{- if eq (len .) 3 }}
+{{$initializedDeps}} := &{{index . 2}}.{{$className | title}}DependenciesNodes{}
+{{- else }}
 {{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+{{- end }}
 tree.{{$className | title}} = {{$initializedDeps}}
 
 {{- range $idx, $dependency := $moduleInstances}}
@@ -1434,7 +1440,7 @@ func module_class_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1062, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1191, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1522,14 +1528,16 @@ func module_initializerTmpl() (*asset, error) {
 var _module_mock_initializerTmpl = []byte(`{{$instance := . -}}
 {{$leafClass := index .DependencyOrder 0 -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
+{{$classPkg := "module" -}}
 
-package module
+package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	{{$classPkg}} "{{$instance.PackageInfo.ModulePackagePath}}"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
@@ -1556,8 +1564,8 @@ type {{$mockDeps}} struct {
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
 	ctrl *gomock.Controller,
-) (*DependenciesTree, *Dependencies, *{{$mockDeps}}) {
-	tree := &DependenciesTree{}
+) (*{{$classPkg}}.DependenciesTree, *{{$classPkg}}.Dependencies, *{{$mockDeps}}) {
+	tree := &{{$classPkg}}.DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:  g.Logger,
@@ -1576,21 +1584,21 @@ func InitializeDependenciesMock(
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
-	{{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+	{{$initializedDeps}} := &{{$classPkg}}.{{$className | title}}DependenciesNodes{}
 	tree.{{$className | title}} = {{$initializedDeps}}
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{camel $mockDeps}}.{{$pkgInfo.QualifiedInstanceName}}
 	{{- end }}
 	{{else -}}
-	{{template "module_class_initializer.tmpl" args $className $instance}}
+	{{template "module_class_initializer.tmpl" args $className $instance $classPkg}}
 	{{end}}
 	{{end}}
 
-	dependencies := &Dependencies{
+	dependencies := &{{$classPkg}}.Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+		{{$className | pascal}}: &{{$classPkg}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}
@@ -1612,7 +1620,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 3118, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 3346, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1648,7 +1656,7 @@ func CreateGateway(
 	}
 
 	tree, dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerDeps(gateway, dependencies)
+	registerErr := RegisterDeps(gateway, dependencies)
 	if registerErr != nil {
 		return nil, nil, registerErr
 	}
@@ -1656,7 +1664,8 @@ func CreateGateway(
 	return gateway, (*DependenciesTree)(tree), nil
 }
 
-func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+// RegisterDeps registers direct dependencies of the service
+func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	var err error
 	{{- range $class, $instances := $instance.ResolvedDependencies }}
 	{{- range $idx, $instance := $instances }}
@@ -1680,7 +1689,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1297, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1689,7 +1698,7 @@ var _service_mockTmpl = []byte(`{{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 
-package {{$instance.PackageInfo.GeneratedPackageAlias}}
+package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
 
 import (
 	"context"
@@ -1706,7 +1715,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
-	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 )
 
 // MockService interface
@@ -1724,7 +1733,7 @@ type MockService interface {
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
-	{{$mockType}}() *module.{{$mockType}}
+	{{$mockType}}() *{{$mockType}}
 	Start()
 	Stop()
 }
@@ -1733,7 +1742,7 @@ type mockService struct {
 	started        bool
 	server         *zanzibar.Gateway
 	ctrl           *gomock.Controller
-	{{camel $mockType}}    *module.{{$mockType}}
+	{{camel $mockType}}    *{{$mockType}}
 	httpClient     *http.Client
 	tChannelClient zanzibar.TChannelCaller
 }
@@ -1742,7 +1751,7 @@ type mockService struct {
 func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
-	testConfigPath := filepath.Join(currentDir, "../../../config/test.json")
+	testConfigPath := filepath.Join(currentDir, "../../../../config/test.json")
 	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
 
 	server, err := zanzibar.CreateGateway(c, nil)
@@ -1751,8 +1760,8 @@ func MustCreateTestService(t *testing.T) MockService {
 	}
 
 	ctrl := gomock.NewController(t)
-	_, dependencies, mockNodes := module.InitializeDependenciesMock(server, ctrl)
-	registerErr := registerDeps(server, dependencies)
+	_, dependencies, mockNodes := InitializeDependenciesMock(server, ctrl)
+	registerErr := service.RegisterDeps(server, dependencies)
 	if registerErr != nil {
 		panic(registerErr)
 	}
@@ -1805,7 +1814,7 @@ func (m *mockService) Stop() {
 }
 
 // {{$mockType}} returns the mock nodes
-func (m *mockService) {{$mockType}}() *module.{{$mockType}} {
+func (m *mockService) {{$mockType}}() *{{$mockType}} {
 	return m.{{camel $mockType}}
 }
 
@@ -1864,7 +1873,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4050, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4041, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
