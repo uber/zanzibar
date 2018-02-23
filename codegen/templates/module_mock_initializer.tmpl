@@ -15,7 +15,7 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
-	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock_client"
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock-client"
 	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"

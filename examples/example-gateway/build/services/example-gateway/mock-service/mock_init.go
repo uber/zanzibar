@@ -28,11 +28,11 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock_client"
-	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock_client"
-	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock_client"
-	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock_client"
-	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock_client"
+	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock-client"
+	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
+	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock-client"
+	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -47,7 +47,7 @@ import (
 	baztchannelEndpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	exampleMiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
-	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/mock_client"
+	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies
