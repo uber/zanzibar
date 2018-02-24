@@ -1,19 +1,21 @@
 {{$instance := . -}}
 {{$leafClass := index .DependencyOrder 0 -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
+{{$classPkg := "module" -}}
 
-package module
+package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	{{$classPkg}} "{{$instance.PackageInfo.ModulePackagePath}}"
 
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
-	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock_client"
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock-client"
 	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
@@ -35,8 +37,8 @@ type {{$mockDeps}} struct {
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
 	ctrl *gomock.Controller,
-) (*DependenciesTree, *Dependencies, *{{$mockDeps}}) {
-	tree := &DependenciesTree{}
+) (*{{$classPkg}}.DependenciesTree, *{{$classPkg}}.Dependencies, *{{$mockDeps}}) {
+	tree := &{{$classPkg}}.DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:  g.Logger,
@@ -55,21 +57,21 @@ func InitializeDependenciesMock(
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
-	{{$initializedDeps}} := &{{$className | title}}DependenciesNodes{}
+	{{$initializedDeps}} := &{{$classPkg}}.{{$className | title}}DependenciesNodes{}
 	tree.{{$className | title}} = {{$initializedDeps}}
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{camel $mockDeps}}.{{$pkgInfo.QualifiedInstanceName}}
 	{{- end }}
 	{{else -}}
-	{{template "module_class_initializer.tmpl" args $className $instance}}
+	{{template "module_class_initializer.tmpl" args $className $instance $classPkg}}
 	{{end}}
 	{{end}}
 
-	dependencies := &Dependencies{
+	dependencies := &{{$classPkg}}.Dependencies{
 		Default: initializedDefaultDependencies,
 		{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
-		{{$className | pascal}}: &{{$className | pascal}}Dependencies{
+		{{$className | pascal}}: &{{$classPkg}}.{{$className | pascal}}Dependencies{
 			{{- range $idy, $subDependency := $moduleInstances}}
 			{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
 			{{- end}}

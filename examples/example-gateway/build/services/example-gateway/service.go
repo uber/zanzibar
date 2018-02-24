@@ -44,7 +44,7 @@ func CreateGateway(
 	}
 
 	tree, dependencies := module.InitializeDependencies(gateway)
-	registerErr := registerDeps(gateway, dependencies)
+	registerErr := RegisterDeps(gateway, dependencies)
 	if registerErr != nil {
 		return nil, nil, registerErr
 	}
@@ -52,7 +52,8 @@ func CreateGateway(
 	return gateway, (*DependenciesTree)(tree), nil
 }
 
-func registerDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+// RegisterDeps registers direct dependencies of the service
+func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	var err error
 	err = deps.Endpoint.Bar.Register(g)
 	if err != nil {

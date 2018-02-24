@@ -47,7 +47,7 @@ genmock() {
 	for d in "$1/clients/"*/; do
 		abs_path="$(cd "$d"; pwd)"
 		import_path=${abs_path#$GOPATH/src/}
-		dest_dir="$abs_path/mock_client"
+		dest_dir="$abs_path/mock-client"
 		mkdir -p "$dest_dir"
 		# TODO: need a better way to deal with errors, silencing for now
 		"$MOCKGEN_BINARY" -destination="$dest_dir/mock_client.go" -package="clientmock" "$import_path" "Client" 2>>"$GEN_ERR"

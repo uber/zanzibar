@@ -79,10 +79,10 @@ lint: check-licence eclint-check
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking errcheck..."
 	@go get github.com/kisielk/errcheck
-	@errcheck -tags mock $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@errcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
 	@go get honnef.co/go/tools/cmd/staticcheck
-	@staticcheck -tags mock $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
+	@staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log
 	@[ ! -s lint.log ]
@@ -116,12 +116,12 @@ check-generate:
 	@[ ! -s git-status.log ] || ( cat git-status.log ; git --no-pager diff ; [ ! -s git-status.log ] );
 
 .PHONY: test-all
-test-all: 
+test-all:
 	$(MAKE) jenkins
 	$(MAKE) install
 	$(MAKE) cover
-	$(MAKE) fast-bench 
-	$(MAKE) bins 
+	$(MAKE) fast-bench
+	$(MAKE) bins
 	$(MAKE) install-wrk
 	$(MAKE) test-benchmark-runner
 
@@ -147,8 +147,8 @@ test-update:
 test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
-	@ZANZIBAR_CACHE=1 go test -tags mock ./test/health_test.go # preload the binary cache
-	@ZANZIBAR_CACHE=1 go test -tags mock \
+	@ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache
+	@ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
 		./backend/... \

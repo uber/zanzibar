@@ -29,8 +29,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const mockTag = "mock"
-
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
 	Instance           *ModuleInstance
@@ -1012,7 +1010,6 @@ func (generator *GatewayServiceGenerator) Generate(
 		"service_mock.tmpl",
 		instance,
 		generator.packageHelper,
-		mockTag,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -1090,12 +1087,12 @@ func (generator *GatewayServiceGenerator) Generate(
 	}
 
 	files := map[string][]byte{
-		"service.go":          service,
-		"mock_service.go":     mockService,
-		"main/main.go":        main,
-		"main/main_test.go":   mainTest,
-		"module/init.go":      initializer,
-		"module/mock_init.go": mockInitializer,
+		"service.go":                   service,
+		"main/main.go":                 main,
+		"main/main_test.go":            mainTest,
+		"module/init.go":               initializer,
+		"mock-service/mock_init.go":    mockInitializer,
+		"mock-service/mock_service.go": mockService,
 	}
 
 	if dependencies != nil {
@@ -1217,7 +1214,6 @@ func GenerateMockInitializer(
 		"module_mock_initializer.tmpl",
 		instance,
 		packageHelper,
-		mockTag,
 	)
 }
 
