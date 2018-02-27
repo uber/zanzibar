@@ -14,7 +14,9 @@ import (
 //
 // The arguments for call are sent and received over the wire as this struct.
 type SimpleService_Call_Args struct {
-	Arg *BazRequest `json:"arg,required"`
+	Arg         *BazRequest `json:"arg,required"`
+	I64Optional *int64      `json:"i64Optional,omitempty"`
+	TestUUID    *UUID       `json:"testUUID,omitempty"`
 }
 
 // ToWire translates a SimpleService_Call_Args struct into a Thrift-level intermediate
@@ -34,7 +36,7 @@ type SimpleService_Call_Args struct {
 //   }
 func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [1]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -49,6 +51,22 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	}
 	fields[i] = wire.Field{ID: 1, Value: w}
 	i++
+	if v.I64Optional != nil {
+		w, err = wire.NewValueI64(*(v.I64Optional)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+	if v.TestUUID != nil {
+		w, err = v.TestUUID.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
@@ -57,6 +75,12 @@ func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
 	var v BazRequest
 	err := v.FromWire(w)
 	return &v, err
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
@@ -91,6 +115,26 @@ func (v *SimpleService_Call_Args) FromWire(w wire.Value) error {
 				}
 				argIsSet = true
 			}
+		case 2:
+			if field.Value.Type() == wire.TI64 {
+				var x int64
+				x, err = field.Value.GetI64(), error(nil)
+				v.I64Optional = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 3:
+			if field.Value.Type() == wire.TBinary {
+				var x UUID
+				x, err = _UUID_Read(field.Value)
+				v.TestUUID = &x
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -108,12 +152,40 @@ func (v *SimpleService_Call_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [1]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("Arg: %v", v.Arg)
 	i++
+	if v.I64Optional != nil {
+		fields[i] = fmt.Sprintf("I64Optional: %v", *(v.I64Optional))
+		i++
+	}
+	if v.TestUUID != nil {
+		fields[i] = fmt.Sprintf("TestUUID: %v", *(v.TestUUID))
+		i++
+	}
 
 	return fmt.Sprintf("SimpleService_Call_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _I64_EqualsPtr(lhs, rhs *int64) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
 }
 
 // Equals returns true if all the fields of this SimpleService_Call_Args match the
@@ -124,8 +196,34 @@ func (v *SimpleService_Call_Args) Equals(rhs *SimpleService_Call_Args) bool {
 	if !v.Arg.Equals(rhs.Arg) {
 		return false
 	}
+	if !_I64_EqualsPtr(v.I64Optional, rhs.I64Optional) {
+		return false
+	}
+	if !_UUID_EqualsPtr(v.TestUUID, rhs.TestUUID) {
+		return false
+	}
 
 	return true
+}
+
+// GetI64Optional returns the value of I64Optional if it is set or its
+// zero value if it is unset.
+func (v *SimpleService_Call_Args) GetI64Optional() (o int64) {
+	if v.I64Optional != nil {
+		return *v.I64Optional
+	}
+
+	return
+}
+
+// GetTestUUID returns the value of TestUUID if it is set or its
+// zero value if it is unset.
+func (v *SimpleService_Call_Args) GetTestUUID() (o UUID) {
+	if v.TestUUID != nil {
+		return *v.TestUUID
+	}
+
+	return
 }
 
 // MethodName returns the name of the Thrift function as specified in
@@ -151,6 +249,8 @@ var SimpleService_Call_Helper = struct {
 	// the arguments struct for the function.
 	Args func(
 		arg *BazRequest,
+		i64Optional *int64,
+		testUUID *UUID,
 	) *SimpleService_Call_Args
 
 	// IsException returns true if the given error can be thrown
@@ -192,9 +292,13 @@ var SimpleService_Call_Helper = struct {
 func init() {
 	SimpleService_Call_Helper.Args = func(
 		arg *BazRequest,
+		i64Optional *int64,
+		testUUID *UUID,
 	) *SimpleService_Call_Args {
 		return &SimpleService_Call_Args{
-			Arg: arg,
+			Arg:         arg,
+			I64Optional: i64Optional,
+			TestUUID:    testUUID,
 		}
 	}
 

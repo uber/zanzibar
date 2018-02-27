@@ -33,6 +33,8 @@ exception OtherAuthErr {
 service SimpleService {
 	void call (
 		1: required BazRequest arg ( annotation_key = "key" )
+		2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")
+        3: optional UUID testUUID (zanzibar.http.ref = "headers.x-uuid")
 	) throws (
 		1: AuthErr authErr
 	) (

@@ -1,6 +1,8 @@
 namespace java com.uber.zanzibar.clients.baz
 include "base.thrift"
 
+typedef string UUID
+
 enum Fruit {
    APPLE,
    BANANA
@@ -39,6 +41,8 @@ service SimpleService {
 
     void call(
         1: required BazRequest arg
+        2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")
+        3: optional UUID testUUID (zanzibar.http.ref = "headers.x-uuid")
     ) throws (
         1: AuthErr authErr
     ) (
