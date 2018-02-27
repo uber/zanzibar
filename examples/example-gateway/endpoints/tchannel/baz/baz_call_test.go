@@ -1,4 +1,4 @@
-package bazHandler_test
+package bazhandler_test
 
 import (
 	"context"

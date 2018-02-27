@@ -24,12 +24,12 @@
 package module
 
 import (
-	barEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	bazEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	contactsEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	googlenowEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
-	multiEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
-	baztchannelEndpointGenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
+	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
+	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
+	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
+	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
+	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
+	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -42,10 +42,10 @@ type Dependencies struct {
 
 // EndpointDependencies contains endpoint dependencies
 type EndpointDependencies struct {
-	Bar         barEndpointGenerated.Endpoint
-	Baz         bazEndpointGenerated.Endpoint
-	BazTChannel baztchannelEndpointGenerated.Endpoint
-	Contacts    contactsEndpointGenerated.Endpoint
-	Googlenow   googlenowEndpointGenerated.Endpoint
-	Multi       multiEndpointGenerated.Endpoint
+	Bar         barendpointgenerated.Endpoint
+	Baz         bazendpointgenerated.Endpoint
+	BazTChannel baztchannelendpointgenerated.Endpoint
+	Contacts    contactsendpointgenerated.Endpoint
+	Googlenow   googlenowendpointgenerated.Endpoint
+	Multi       multiendpointgenerated.Endpoint
 }

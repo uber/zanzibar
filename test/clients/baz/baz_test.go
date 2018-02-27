@@ -29,8 +29,8 @@ import (
 	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	bazGen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	"github.com/uber/zanzibar/test/lib/bench_gateway"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
 

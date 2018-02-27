@@ -2,7 +2,7 @@
 {{- $leafClass := index .DependencyOrder 0 -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 
-package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
+package {{$instance.PackageInfo.GeneratedPackageAlias}}mock
 
 import (
 	"context"

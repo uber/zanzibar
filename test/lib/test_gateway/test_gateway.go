@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package testGateway
+package testgateway
 
 import (
 	"context"
@@ -37,8 +37,8 @@ import (
 	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
-	"github.com/uber/zanzibar/test/lib/test_backend"
-	"github.com/uber/zanzibar/test/lib/test_m3_server"
+	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
+	testM3Server "github.com/uber/zanzibar/test/lib/test_m3_server"
 	"go.uber.org/zap"
 )
 

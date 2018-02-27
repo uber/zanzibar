@@ -562,8 +562,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/test/lib/bench_gateway"
-	"github.com/uber/zanzibar/test/lib/test_backend"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 {{- $clientID := .ClientID }}
@@ -695,7 +695,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3797, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3821, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -717,7 +717,7 @@ import (
 	{{end}}
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -860,7 +860,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4501, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4513, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1530,7 +1530,7 @@ var _module_mock_initializerTmpl = []byte(`{{$instance := . -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
-package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
+package {{$instance.PackageInfo.GeneratedPackageAlias}}mock
 
 import (
 	"testing"
@@ -1698,7 +1698,7 @@ var _service_mockTmpl = []byte(`{{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 
-package {{$instance.PackageInfo.GeneratedPackageAlias}}Mock
+package {{$instance.PackageInfo.GeneratedPackageAlias}}mock
 
 import (
 	"context"

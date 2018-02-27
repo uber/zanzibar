@@ -108,6 +108,15 @@ func camelCase(src string) string {
 	return string(bytes.Join(chunks, nil))
 }
 
+func packageName(src string) string {
+	byteSrc := []byte(src)
+	chunks := camelingRegex.FindAll(byteSrc, -1)
+	for idx, val := range chunks {
+		chunks[idx] = bytes.ToLower(val)
+	}
+	return string(bytes.Join(chunks, nil))
+}
+
 func ensureGolangAncronymCasing(segment []byte) []byte {
 	upper := bytes.ToUpper(segment)
 	if CommonInitialisms[string(upper)] {

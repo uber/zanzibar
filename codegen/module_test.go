@@ -268,11 +268,11 @@ func TestExampleService(t *testing.T) {
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
-			GeneratedPackageAlias: "healthEndpointGenerated",
+			GeneratedPackageAlias: "healthendpointgenerated",
 			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/endpoints/health",
 			IsExportGenerated:     true,
-			PackageAlias:          "healthEndpointStatic",
-			PackageName:           "healthEndpoint",
+			PackageAlias:          "healthendpointStatic",
+			PackageName:           "healthendpoint",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/endpoints/health",
 		},
 		Dependencies: []ModuleDependency{
@@ -305,11 +305,11 @@ func TestExampleService(t *testing.T) {
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
-			GeneratedPackageAlias: "fooEndpointGenerated",
+			GeneratedPackageAlias: "fooendpointgenerated",
 			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/more-endpoints/foo",
 			IsExportGenerated:     true,
-			PackageAlias:          "fooEndpointStatic",
-			PackageName:           "fooEndpoint",
+			PackageAlias:          "fooendpointStatic",
+			PackageName:           "fooendpoint",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/more-endpoints/foo",
 		},
 		Dependencies: []ModuleDependency{
@@ -342,11 +342,11 @@ func TestExampleService(t *testing.T) {
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
-			GeneratedPackageAlias: "barEndpointGenerated",
+			GeneratedPackageAlias: "barendpointgenerated",
 			GeneratedPackagePath:  "github.com/uber/zanzibar/codegen/test-service/build/another/bar",
 			IsExportGenerated:     true,
-			PackageAlias:          "barEndpointStatic",
-			PackageName:           "barEndpoint",
+			PackageAlias:          "barendpointStatic",
+			PackageName:           "barendpoint",
 			PackagePath:           "github.com/uber/zanzibar/codegen/test-service/another/bar",
 		},
 		Dependencies: []ModuleDependency{

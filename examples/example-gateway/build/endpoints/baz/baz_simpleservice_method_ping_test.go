@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bazEndpoint
+package bazendpoint
 
 import (
 	"bytes"
@@ -31,10 +31,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 )
 
@@ -74,7 +74,7 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"baz", "ping", "SimpleService::ping",
-		bazClient.NewSimpleServicePingHandler(fakePing),
+		bazclient.NewSimpleServicePingHandler(fakePing),
 	)
 
 	headers := map[string]string{}

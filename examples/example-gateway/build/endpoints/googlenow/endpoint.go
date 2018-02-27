@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package googlenowEndpoint
+package googlenowendpoint
 
 import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"

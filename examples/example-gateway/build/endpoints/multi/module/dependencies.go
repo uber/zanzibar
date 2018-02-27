@@ -24,7 +24,7 @@
 package module
 
 import (
-	multiClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
+	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -37,5 +37,5 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Multi multiClientGenerated.Client
+	Multi multiclientgenerated.Client
 }

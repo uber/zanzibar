@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package bazEndpoint
+package bazendpoint
 
 import (
 	"bytes"
@@ -29,10 +29,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 
-	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 )
 
 func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
@@ -63,7 +63,7 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 
 	gateway.TChannelBackends()["baz"].Register(
 		"baz", "sillyNoop", "SimpleService::sillyNoop",
-		bazClient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
+		bazclient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 	)
 
 	headers := map[string]string{}

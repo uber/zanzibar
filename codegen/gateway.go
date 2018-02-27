@@ -331,7 +331,7 @@ func newClientSpec(
 			err, "Could not build module spec for thrift %s: ", thriftFile,
 		)
 	}
-	mspec.PackageName = mspec.PackageName + "Client"
+	mspec.PackageName = mspec.PackageName + "client"
 
 	cspec := &ClientSpec{
 		ModuleSpec:         mspec,

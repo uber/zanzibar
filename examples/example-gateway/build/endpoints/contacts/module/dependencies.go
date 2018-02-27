@@ -24,7 +24,7 @@
 package module
 
 import (
-	contactsClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
+	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -37,5 +37,5 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Contacts contactsClientGenerated.Client
+	Contacts contactsclientgenerated.Client
 }
