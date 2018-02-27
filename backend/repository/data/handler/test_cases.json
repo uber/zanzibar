@@ -1051,7 +1051,7 @@
 		"response": {
 			"code": 200,
 			"body": {
-				"content": "namespace java com.uber.zanzibar.clients.baz\ninclude \"base.thrift\"\n\nenum Fruit {\n   APPLE,\n   BANANA\n}\n\nstruct BazRequest {\n    1: required bool b1\n    2: required string s2\n    3: required i32 i3\n}\n\nexception AuthErr {\n    1: required string message\n}\n\nexception OtherAuthErr {\n  1: required string message\n}\n\nservice SimpleService {\n    base.BazResponse compare(\n        1: required BazRequest arg1\n        2: required BazRequest arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    base.TransStruct trans(\n        1: required base.TransStruct arg1\n        2: optional base.TransStruct arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    void call(\n        1: required BazRequest arg\n    ) throws (\n        1: AuthErr authErr\n    ) (\n        zanzibar.http.reqHeaders = \"x-uuid,x-token\"\n        zanzibar.http.resHeaders = \"some-res-header\"\n    )\n\n    base.BazResponse ping() ()\n\n    void sillyNoop() throws (\n        1: AuthErr authErr\n        2: base.ServerErr serverErr\n    )\n\n    void testUuid()\n    void urlTest()\n}\n\nservice SecondService {\n    i8 echoI8 (\n        1: required i8 arg\n    )\n\n    i16 echoI16(\n        1: required i16 arg\n    )\n\n    i32 echoI32(\n        1: required i32 arg\n    )\n\n    i64 echoI64(\n        1: required i64 arg\n    )\n\n    double echoDouble(\n        1: required double arg\n    )\n\n    bool echoBool (\n        1: required bool arg\n    )\n\n    binary echoBinary (\n        1: required binary arg\n    )\n\n    string echoString(\n        1: required string arg\n    )\n\n    Fruit echoEnum (\n        1: required Fruit arg = Fruit.APPLE\n    )\n\n    base.UUID echoTypedef(\n        1: required base.UUID arg\n    )\n\n    set\u003cstring\u003e echoStringSet(\n        1: required set\u003cstring\u003e arg\n    )\n\n    // value is unhashable\n    set\u003cbase.BazResponse\u003e echoStructSet(\n        1: required set\u003cbase.BazResponse\u003e arg\n    )\n\n    list\u003cstring\u003e echoStringList (\n        1: required list\u003cstring\u003e arg\n    )\n\n    list\u003cbase.BazResponse\u003e echoStructList (\n        1: required list\u003cbase.BazResponse\u003e arg\n    )\n\n    map\u003cstring, base.BazResponse\u003e echoStringMap (\n        1: required map\u003cstring, base.BazResponse\u003e arg\n    )\n\n    // key is unhashable\n    map\u003cbase.BazResponse, string\u003e echoStructMap (\n        1: required map\u003cbase.BazResponse, string\u003e arg\n    )\n}\n",
+				"content": "namespace java com.uber.zanzibar.clients.baz\ninclude \"base.thrift\"\n\ntypedef string UUID\n\nenum Fruit {\n   APPLE,\n   BANANA\n}\n\nstruct BazRequest {\n    1: required bool b1\n    2: required string s2\n    3: required i32 i3\n}\n\nexception AuthErr {\n    1: required string message\n}\n\nexception OtherAuthErr {\n  1: required string message\n}\n\nservice SimpleService {\n    base.BazResponse compare(\n        1: required BazRequest arg1\n        2: required BazRequest arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    base.TransStruct trans(\n        1: required base.TransStruct arg1\n        2: optional base.TransStruct arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    void call(\n        1: required BazRequest arg\n        2: optional i64 i64Optional (zanzibar.http.ref = \"headers.x-token\")\n        3: optional UUID testUUID (zanzibar.http.ref = \"headers.x-uuid\")\n    ) throws (\n        1: AuthErr authErr\n    ) (\n        zanzibar.http.reqHeaders = \"x-uuid,x-token\"\n        zanzibar.http.resHeaders = \"some-res-header\"\n    )\n\n    base.BazResponse ping() ()\n\n    void sillyNoop() throws (\n        1: AuthErr authErr\n        2: base.ServerErr serverErr\n    )\n\n    void testUuid()\n    void urlTest()\n}\n\nservice SecondService {\n    i8 echoI8 (\n        1: required i8 arg\n    )\n\n    i16 echoI16(\n        1: required i16 arg\n    )\n\n    i32 echoI32(\n        1: required i32 arg\n    )\n\n    i64 echoI64(\n        1: required i64 arg\n    )\n\n    double echoDouble(\n        1: required double arg\n    )\n\n    bool echoBool (\n        1: required bool arg\n    )\n\n    binary echoBinary (\n        1: required binary arg\n    )\n\n    string echoString(\n        1: required string arg\n    )\n\n    Fruit echoEnum (\n        1: required Fruit arg = Fruit.APPLE\n    )\n\n    base.UUID echoTypedef(\n        1: required base.UUID arg\n    )\n\n    set\u003cstring\u003e echoStringSet(\n        1: required set\u003cstring\u003e arg\n    )\n\n    // value is unhashable\n    set\u003cbase.BazResponse\u003e echoStructSet(\n        1: required set\u003cbase.BazResponse\u003e arg\n    )\n\n    list\u003cstring\u003e echoStringList (\n        1: required list\u003cstring\u003e arg\n    )\n\n    list\u003cbase.BazResponse\u003e echoStructList (\n        1: required list\u003cbase.BazResponse\u003e arg\n    )\n\n    map\u003cstring, base.BazResponse\u003e echoStringMap (\n        1: required map\u003cstring, base.BazResponse\u003e arg\n    )\n\n    // key is unhashable\n    map\u003cbase.BazResponse, string\u003e echoStructMap (\n        1: required map\u003cbase.BazResponse, string\u003e arg\n    )\n}\n",
 				"path": "clients/baz/baz.thrift",
 				"version": "v1"
 			}
@@ -1393,7 +1393,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 86,
+										"line": 90,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1401,7 +1401,7 @@
 										}
 									}
 								],
-								"line": 85,
+								"line": 89,
 								"name": "echoBinary",
 								"one_way": false,
 								"result_spec": {
@@ -1414,7 +1414,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 82,
+										"line": 86,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1422,7 +1422,7 @@
 										}
 									}
 								],
-								"line": 81,
+								"line": 85,
 								"name": "echoBool",
 								"one_way": false,
 								"result_spec": {
@@ -1435,7 +1435,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 78,
+										"line": 82,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1443,7 +1443,7 @@
 										}
 									}
 								],
-								"line": 77,
+								"line": 81,
 								"name": "echoDouble",
 								"one_way": false,
 								"result_spec": {
@@ -1457,7 +1457,7 @@
 									{
 										"default": "Fruit.APPLE",
 										"id": 1,
-										"line": 94,
+										"line": 98,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1465,7 +1465,7 @@
 										}
 									}
 								],
-								"line": 93,
+								"line": 97,
 								"name": "echoEnum",
 								"one_way": false,
 								"result_spec": {
@@ -1478,7 +1478,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 66,
+										"line": 70,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1486,7 +1486,7 @@
 										}
 									}
 								],
-								"line": 65,
+								"line": 69,
 								"name": "echoI16",
 								"one_way": false,
 								"result_spec": {
@@ -1499,7 +1499,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 70,
+										"line": 74,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1507,7 +1507,7 @@
 										}
 									}
 								],
-								"line": 69,
+								"line": 73,
 								"name": "echoI32",
 								"one_way": false,
 								"result_spec": {
@@ -1520,7 +1520,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 74,
+										"line": 78,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1528,7 +1528,7 @@
 										}
 									}
 								],
-								"line": 73,
+								"line": 77,
 								"name": "echoI64",
 								"one_way": false,
 								"result_spec": {
@@ -1541,7 +1541,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 62,
+										"line": 66,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1549,7 +1549,7 @@
 										}
 									}
 								],
-								"line": 61,
+								"line": 65,
 								"name": "echoI8",
 								"one_way": false,
 								"result_spec": {
@@ -1562,7 +1562,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 90,
+										"line": 94,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1570,7 +1570,7 @@
 										}
 									}
 								],
-								"line": 89,
+								"line": 93,
 								"name": "echoString",
 								"one_way": false,
 								"result_spec": {
@@ -1583,7 +1583,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 111,
+										"line": 115,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1594,7 +1594,7 @@
 										}
 									}
 								],
-								"line": 110,
+								"line": 114,
 								"name": "echoStringList",
 								"one_way": false,
 								"result_spec": {
@@ -1610,7 +1610,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 119,
+										"line": 123,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1626,7 +1626,7 @@
 										}
 									}
 								],
-								"line": 118,
+								"line": 122,
 								"name": "echoStringMap",
 								"one_way": false,
 								"result_spec": {
@@ -1647,7 +1647,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 102,
+										"line": 106,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1658,7 +1658,7 @@
 										}
 									}
 								],
-								"line": 101,
+								"line": 105,
 								"name": "echoStringSet",
 								"one_way": false,
 								"result_spec": {
@@ -1674,7 +1674,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 115,
+										"line": 119,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1685,7 +1685,7 @@
 										}
 									}
 								],
-								"line": 114,
+								"line": 118,
 								"name": "echoStructList",
 								"one_way": false,
 								"result_spec": {
@@ -1701,7 +1701,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 124,
+										"line": 128,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1717,7 +1717,7 @@
 										}
 									}
 								],
-								"line": 123,
+								"line": 127,
 								"name": "echoStructMap",
 								"one_way": false,
 								"result_spec": {
@@ -1738,7 +1738,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 107,
+										"line": 111,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1749,7 +1749,7 @@
 										}
 									}
 								],
-								"line": 106,
+								"line": 110,
 								"name": "echoStructSet",
 								"one_way": false,
 								"result_spec": {
@@ -1765,7 +1765,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 98,
+										"line": 102,
 										"name": "arg",
 										"required": true,
 										"type": {
@@ -1773,7 +1773,7 @@
 										}
 									}
 								],
-								"line": 97,
+								"line": 101,
 								"name": "echoTypedef",
 								"one_way": false,
 								"result_spec": {
@@ -1783,7 +1783,7 @@
 								}
 							}
 						},
-						"line": 60,
+						"line": 64,
 						"name": "SecondService"
 					},
 					"SimpleService": {
@@ -1797,22 +1797,46 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 41,
+										"line": 43,
 										"name": "arg",
 										"required": true,
 										"type": {
 											"name": "BazRequest"
 										}
+									},
+									{
+										"annotations": {
+											"zanzibar.http.ref": "headers.x-token"
+										},
+										"id": 2,
+										"line": 44,
+										"name": "i64Optional",
+										"required": false,
+										"type": {
+											"name": "i64"
+										}
+									},
+									{
+										"annotations": {
+											"zanzibar.http.ref": "headers.x-uuid"
+										},
+										"id": 3,
+										"line": 45,
+										"name": "testUUID",
+										"required": false,
+										"type": {
+											"name": "UUID"
+										}
 									}
 								],
-								"line": 40,
+								"line": 42,
 								"name": "call",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
-											"line": 43,
+											"line": 47,
 											"name": "authErr",
 											"required": false,
 											"type": {
@@ -1827,7 +1851,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 25,
+										"line": 27,
 										"name": "arg1",
 										"required": true,
 										"type": {
@@ -1836,7 +1860,7 @@
 									},
 									{
 										"id": 2,
-										"line": 26,
+										"line": 28,
 										"name": "arg2",
 										"required": true,
 										"type": {
@@ -1844,14 +1868,14 @@
 										}
 									}
 								],
-								"line": 24,
+								"line": 26,
 								"name": "compare",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
-											"line": 28,
+											"line": 30,
 											"name": "authErr",
 											"required": false,
 											"type": {
@@ -1860,7 +1884,7 @@
 										},
 										{
 											"id": 2,
-											"line": 29,
+											"line": 31,
 											"name": "otherAuthErr",
 											"required": false,
 											"type": {
@@ -1874,7 +1898,7 @@
 								}
 							},
 							"ping": {
-								"line": 49,
+								"line": 53,
 								"name": "ping",
 								"one_way": false,
 								"result_spec": {
@@ -1884,14 +1908,14 @@
 								}
 							},
 							"sillyNoop": {
-								"line": 51,
+								"line": 55,
 								"name": "sillyNoop",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
-											"line": 52,
+											"line": 56,
 											"name": "authErr",
 											"required": false,
 											"type": {
@@ -1900,7 +1924,7 @@
 										},
 										{
 											"id": 2,
-											"line": 53,
+											"line": 57,
 											"name": "serverErr",
 											"required": false,
 											"type": {
@@ -1912,7 +1936,7 @@
 								}
 							},
 							"testUuid": {
-								"line": 56,
+								"line": 60,
 								"name": "testUuid",
 								"one_way": false
 							},
@@ -1920,7 +1944,7 @@
 								"args_spec": [
 									{
 										"id": 1,
-										"line": 33,
+										"line": 35,
 										"name": "arg1",
 										"required": true,
 										"type": {
@@ -1929,7 +1953,7 @@
 									},
 									{
 										"id": 2,
-										"line": 34,
+										"line": 36,
 										"name": "arg2",
 										"required": false,
 										"type": {
@@ -1937,14 +1961,14 @@
 										}
 									}
 								],
-								"line": 32,
+								"line": 34,
 								"name": "trans",
 								"one_way": false,
 								"result_spec": {
 									"exceptions": [
 										{
 											"id": 1,
-											"line": 36,
+											"line": 38,
 											"name": "authErr",
 											"required": false,
 											"type": {
@@ -1953,7 +1977,7 @@
 										},
 										{
 											"id": 2,
-											"line": 37,
+											"line": 39,
 											"name": "otherAuthErr",
 											"required": false,
 											"type": {
@@ -1967,12 +1991,12 @@
 								}
 							},
 							"urlTest": {
-								"line": 57,
+								"line": 61,
 								"name": "urlTest",
 								"one_way": false
 							}
 						},
-						"line": 23,
+						"line": 25,
 						"name": "SimpleService"
 					}
 				},
@@ -1980,13 +2004,13 @@
 				"types": {
 					"AuthErr": {
 						"file": "clients/baz/baz.thrift",
-						"line": 15,
+						"line": 17,
 						"name": "AuthErr",
 						"struct_type": {
 							"fields": [
 								{
 									"id": 1,
-									"line": 16,
+									"line": 18,
 									"name": "message",
 									"required": true,
 									"type": {
@@ -1999,13 +2023,13 @@
 					},
 					"BazRequest": {
 						"file": "clients/baz/baz.thrift",
-						"line": 9,
+						"line": 11,
 						"name": "BazRequest",
 						"struct_type": {
 							"fields": [
 								{
 									"id": 1,
-									"line": 10,
+									"line": 12,
 									"name": "b1",
 									"required": true,
 									"type": {
@@ -2014,7 +2038,7 @@
 								},
 								{
 									"id": 2,
-									"line": 11,
+									"line": 13,
 									"name": "s2",
 									"required": true,
 									"type": {
@@ -2023,7 +2047,7 @@
 								},
 								{
 									"id": 3,
-									"line": 12,
+									"line": 14,
 									"name": "i3",
 									"required": true,
 									"type": {
@@ -2048,18 +2072,18 @@
 							"name": "Fruit"
 						},
 						"file": "clients/baz/baz.thrift",
-						"line": 4,
+						"line": 6,
 						"name": "Fruit"
 					},
 					"OtherAuthErr": {
 						"file": "clients/baz/baz.thrift",
-						"line": 19,
+						"line": 21,
 						"name": "OtherAuthErr",
 						"struct_type": {
 							"fields": [
 								{
 									"id": 1,
-									"line": 20,
+									"line": 22,
 									"name": "message",
 									"required": true,
 									"type": {
@@ -2068,6 +2092,14 @@
 								}
 							],
 							"kind": "exception"
+						}
+					},
+					"UUID": {
+						"file": "clients/baz/baz.thrift",
+						"line": 4,
+						"name": "UUID",
+						"type_def_target": {
+							"name": "string"
 						}
 					}
 				}
@@ -2323,7 +2355,7 @@
 		"response": {
 			"code": 200,
 			"body": {
-				"content": "namespace java com.uber.zanzibar.clients.baz\ninclude \"base.thrift\"\n\nenum Fruit {\n   APPLE,\n   BANANA\n}\n\nstruct BazRequest {\n    1: required bool b1\n    2: required string s2\n    3: required i32 i3\n}\n\nexception AuthErr {\n    1: required string message\n}\n\nexception OtherAuthErr {\n  1: required string message\n}\n\nservice SimpleService {\n    base.BazResponse compare(\n        1: required BazRequest arg1\n        2: required BazRequest arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    base.TransStruct trans(\n        1: required base.TransStruct arg1\n        2: optional base.TransStruct arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    void call(\n        1: required BazRequest arg\n    ) throws (\n        1: AuthErr authErr\n    ) (\n        zanzibar.http.reqHeaders = \"x-uuid,x-token\"\n        zanzibar.http.resHeaders = \"some-res-header\"\n    )\n\n    base.BazResponse ping() ()\n\n    void sillyNoop() throws (\n        1: AuthErr authErr\n        2: base.ServerErr serverErr\n    )\n\n    void testUuid()\n    void urlTest()\n}\n\nservice SecondService {\n    i8 echoI8 (\n        1: required i8 arg\n    )\n\n    i16 echoI16(\n        1: required i16 arg\n    )\n\n    i32 echoI32(\n        1: required i32 arg\n    )\n\n    i64 echoI64(\n        1: required i64 arg\n    )\n\n    double echoDouble(\n        1: required double arg\n    )\n\n    bool echoBool (\n        1: required bool arg\n    )\n\n    binary echoBinary (\n        1: required binary arg\n    )\n\n    string echoString(\n        1: required string arg\n    )\n\n    Fruit echoEnum (\n        1: required Fruit arg = Fruit.APPLE\n    )\n\n    base.UUID echoTypedef(\n        1: required base.UUID arg\n    )\n\n    set\u003cstring\u003e echoStringSet(\n        1: required set\u003cstring\u003e arg\n    )\n\n    // value is unhashable\n    set\u003cbase.BazResponse\u003e echoStructSet(\n        1: required set\u003cbase.BazResponse\u003e arg\n    )\n\n    list\u003cstring\u003e echoStringList (\n        1: required list\u003cstring\u003e arg\n    )\n\n    list\u003cbase.BazResponse\u003e echoStructList (\n        1: required list\u003cbase.BazResponse\u003e arg\n    )\n\n    map\u003cstring, base.BazResponse\u003e echoStringMap (\n        1: required map\u003cstring, base.BazResponse\u003e arg\n    )\n\n    // key is unhashable\n    map\u003cbase.BazResponse, string\u003e echoStructMap (\n        1: required map\u003cbase.BazResponse, string\u003e arg\n    )\n}\n",
+				"content": "namespace java com.uber.zanzibar.clients.baz\ninclude \"base.thrift\"\n\ntypedef string UUID\n\nenum Fruit {\n   APPLE,\n   BANANA\n}\n\nstruct BazRequest {\n    1: required bool b1\n    2: required string s2\n    3: required i32 i3\n}\n\nexception AuthErr {\n    1: required string message\n}\n\nexception OtherAuthErr {\n  1: required string message\n}\n\nservice SimpleService {\n    base.BazResponse compare(\n        1: required BazRequest arg1\n        2: required BazRequest arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    base.TransStruct trans(\n        1: required base.TransStruct arg1\n        2: optional base.TransStruct arg2\n    ) throws (\n        1: AuthErr authErr\n        2: OtherAuthErr otherAuthErr\n    )\n\n    void call(\n        1: required BazRequest arg\n        2: optional i64 i64Optional (zanzibar.http.ref = \"headers.x-token\")\n        3: optional UUID testUUID (zanzibar.http.ref = \"headers.x-uuid\")\n    ) throws (\n        1: AuthErr authErr\n    ) (\n        zanzibar.http.reqHeaders = \"x-uuid,x-token\"\n        zanzibar.http.resHeaders = \"some-res-header\"\n    )\n\n    base.BazResponse ping() ()\n\n    void sillyNoop() throws (\n        1: AuthErr authErr\n        2: base.ServerErr serverErr\n    )\n\n    void testUuid()\n    void urlTest()\n}\n\nservice SecondService {\n    i8 echoI8 (\n        1: required i8 arg\n    )\n\n    i16 echoI16(\n        1: required i16 arg\n    )\n\n    i32 echoI32(\n        1: required i32 arg\n    )\n\n    i64 echoI64(\n        1: required i64 arg\n    )\n\n    double echoDouble(\n        1: required double arg\n    )\n\n    bool echoBool (\n        1: required bool arg\n    )\n\n    binary echoBinary (\n        1: required binary arg\n    )\n\n    string echoString(\n        1: required string arg\n    )\n\n    Fruit echoEnum (\n        1: required Fruit arg = Fruit.APPLE\n    )\n\n    base.UUID echoTypedef(\n        1: required base.UUID arg\n    )\n\n    set\u003cstring\u003e echoStringSet(\n        1: required set\u003cstring\u003e arg\n    )\n\n    // value is unhashable\n    set\u003cbase.BazResponse\u003e echoStructSet(\n        1: required set\u003cbase.BazResponse\u003e arg\n    )\n\n    list\u003cstring\u003e echoStringList (\n        1: required list\u003cstring\u003e arg\n    )\n\n    list\u003cbase.BazResponse\u003e echoStructList (\n        1: required list\u003cbase.BazResponse\u003e arg\n    )\n\n    map\u003cstring, base.BazResponse\u003e echoStringMap (\n        1: required map\u003cstring, base.BazResponse\u003e arg\n    )\n\n    // key is unhashable\n    map\u003cbase.BazResponse, string\u003e echoStructMap (\n        1: required map\u003cbase.BazResponse, string\u003e arg\n    )\n}\n",
 				"path": "clients/baz/baz.thrift",
 				"version": "e0729d2985ec0aeb95891cba969f1fadecedb648"
 			}
