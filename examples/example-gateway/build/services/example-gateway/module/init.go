@@ -25,31 +25,31 @@ package module
 
 import (
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	barclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
+	barclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	bazclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
+	bazclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-	contactsclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
+	contactsclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
-	googlenowclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
+	googlenowclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
-	multiclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
-	quuxclientModule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	multiclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
+	quuxclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
-	barendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
-	bazendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
+	bazendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	contactsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts"
-	contactsendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
+	contactsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
-	googlenowendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	googlenowendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
-	multiendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
+	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
-	baztchannelendpointModule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
-	examplemiddlewareModule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
-	quuxclientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -68,7 +68,7 @@ type ClientDependenciesNodes struct {
 	Contacts  contactsclientgenerated.Client
 	GoogleNow googlenowclientgenerated.Client
 	Multi     multiclientgenerated.Client
-	Quux      quuxclientStatic.Client
+	Quux      quuxclientstatic.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -102,73 +102,73 @@ func InitializeDependencies(
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
-	initializedClientDependencies.Bar = barclientgenerated.NewClient(&barclientModule.Dependencies{
+	initializedClientDependencies.Bar = barclientgenerated.NewClient(&barclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientModule.Dependencies{
+	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Contacts = contactsclientgenerated.NewClient(&contactsclientModule.Dependencies{
+	initializedClientDependencies.Contacts = contactsclientgenerated.NewClient(&contactsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.GoogleNow = googlenowclientgenerated.NewClient(&googlenowclientModule.Dependencies{
+	initializedClientDependencies.GoogleNow = googlenowclientgenerated.NewClient(&googlenowclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Multi = multiclientgenerated.NewClient(&multiclientModule.Dependencies{
+	initializedClientDependencies.Multi = multiclientgenerated.NewClient(&multiclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedClientDependencies.Quux = quuxclientStatic.NewClient(&quuxclientModule.Dependencies{
+	initializedClientDependencies.Quux = quuxclientstatic.NewClient(&quuxclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
-	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewareModule.Dependencies{
+	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &examplemiddlewareModule.ClientDependencies{
+		Client: &examplemiddlewaremodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
-	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointModule.Dependencies{
+	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &barendpointModule.ClientDependencies{
+		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},
-		Middleware: &barendpointModule.MiddlewareDependencies{
+		Middleware: &barendpointmodule.MiddlewareDependencies{
 			Example: initializedMiddlewareDependencies.Example,
 		},
 	})
-	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointModule.Dependencies{
+	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &bazendpointModule.ClientDependencies{
+		Client: &bazendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointModule.Dependencies{
+	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &baztchannelendpointModule.ClientDependencies{
+		Client: &baztchannelendpointmodule.ClientDependencies{
 			Baz:  initializedClientDependencies.Baz,
 			Quux: initializedClientDependencies.Quux,
 		},
 	})
-	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointModule.Dependencies{
+	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &contactsendpointModule.ClientDependencies{
+		Client: &contactsendpointmodule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
-	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointModule.Dependencies{
+	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &googlenowendpointModule.ClientDependencies{
+		Client: &googlenowendpointmodule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
 		},
 	})
-	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointModule.Dependencies{
+	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
-		Client: &multiendpointModule.ClientDependencies{
+		Client: &multiendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
