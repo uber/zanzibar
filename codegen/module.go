@@ -817,9 +817,9 @@ func readPackageInfo(
 		// The prefixes "Static" and "Generated" are used to ensure global
 		// uniqueness of the provided package aliases. Note that the default
 		// package is "PackageName".
-		PackageAlias:          defaultAlias + "Static",
+		PackageAlias:          defaultAlias + "static",
 		GeneratedPackageAlias: defaultAlias + "generated",
-		ModulePackageAlias:    defaultAlias + "Module",
+		ModulePackageAlias:    defaultAlias + "module",
 		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,
