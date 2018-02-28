@@ -25,6 +25,7 @@ package bazendpoint
 
 import (
 	"context"
+	"strconv"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -76,6 +77,20 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	var requestBody endpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
+	}
+
+	if requestBody.Arg == nil {
+		requestBody.Arg = &endpointsBazBaz.BazRequest{}
+	}
+	xTokenValue, xTokenValueExists := req.Header.Get("x-token")
+	if xTokenValueExists {
+		body, _ := strconv.ParseInt(xTokenValue, 10, 64)
+		requestBody.I64Optional = &body
+	}
+	xUUIDValue, xUUIDValueExists := req.Header.Get("x-uuid")
+	if xUUIDValueExists {
+		body := endpointsBazBaz.UUID(xUUIDValue)
+		requestBody.TestUUID = &body
 	}
 
 	workflow := SimpleServiceCallEndpoint{
@@ -182,6 +197,8 @@ func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *cl
 	} else {
 		out.Arg = nil
 	}
+	out.I64Optional = (*int64)(in.I64Optional)
+	out.TestUUID = (*clientsBazBaz.UUID)(in.TestUUID)
 
 	return out
 }

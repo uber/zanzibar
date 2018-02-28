@@ -1,5 +1,7 @@
 namespace java com.uber.zanzibar.clients.baz
 
+typedef string UUID
+
 struct BazRequest {
   1: required bool b1
   2: required string s2
@@ -35,6 +37,8 @@ service SimpleService {
   // no response body
   void Call(
     1: required BazRequest arg
+    2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")
+    3: optional UUID testUUID (zanzibar.http.ref = "headers.x-uuid")
   ) throws (
     1: AuthErr authErr (zanzibar.http.status = "403")
   ) (

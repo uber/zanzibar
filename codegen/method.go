@@ -675,9 +675,34 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 						}
 					}
 
-					statements.appendf("\trequestBody%s = ptr.String(%s)",
-						bodyIdentifier, variableName,
-					)
+					switch fieldThriftType {
+					case "string":
+						statements.appendf("\trequestBody%s = ptr.String(%s)",
+							bodyIdentifier, variableName,
+						)
+					case "int64":
+						statements.appendf("body, _ := strconv.ParseInt(%s, 10, 64)",
+							variableName,
+						)
+						statements.appendf("requestBody%s = &body", bodyIdentifier)
+					case "bool":
+						statements.appendf("body, _ := strconv.ParseBool(%s)",
+							variableName,
+						)
+						statements.appendf("requestBody%s = &body", bodyIdentifier)
+					case "float64":
+					case "float32":
+						statements.appendf("body, _ := strconv.ParseFloat(%s, 64)",
+							variableName,
+						)
+						statements.appendf("requestBody%s = &body", bodyIdentifier)
+					default:
+						statements.appendf("body := %s(%s)",
+							fieldThriftType, variableName,
+						)
+						statements.appendf("requestBody%s = &body", bodyIdentifier)
+
+					}
 					statements.append("}")
 				}
 
