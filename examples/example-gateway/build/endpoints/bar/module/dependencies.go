@@ -24,8 +24,8 @@
 package module
 
 import (
-	barClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	exampleMiddlewareGenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
+	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -39,10 +39,10 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Bar barClientGenerated.Client
+	Bar barclientgenerated.Client
 }
 
 // MiddlewareDependencies contains middleware dependencies
 type MiddlewareDependencies struct {
-	Example exampleMiddlewareGenerated.Middleware
+	Example examplemiddlewaregenerated.Middleware
 }

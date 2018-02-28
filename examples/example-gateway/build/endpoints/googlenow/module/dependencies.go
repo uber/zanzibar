@@ -24,7 +24,7 @@
 package module
 
 import (
-	googlenowClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -37,5 +37,5 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	GoogleNow googlenowClientGenerated.Client
+	GoogleNow googlenowclientgenerated.Client
 }

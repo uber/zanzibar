@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package benchGateway
+package benchgateway
 
 import (
 	"bytes"
@@ -34,8 +34,8 @@ import (
 
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/test/lib/test_backend"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"go.uber.org/zap/zapcore"
 )
 

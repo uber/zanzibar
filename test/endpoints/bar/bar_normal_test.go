@@ -29,7 +29,7 @@ import (
 	"net"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
 

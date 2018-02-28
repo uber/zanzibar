@@ -783,8 +783,7 @@ func readPackageInfo(
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(camelCase(className))
 	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
-	defaultAlias := camelCase(strings.ToLower(qualifiedInstanceName)) +
-		qualifiedClassName
+	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
 
 	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
 	if err != nil {
@@ -818,9 +817,9 @@ func readPackageInfo(
 		// The prefixes "Static" and "Generated" are used to ensure global
 		// uniqueness of the provided package aliases. Note that the default
 		// package is "PackageName".
-		PackageAlias:          defaultAlias + "Static",
-		GeneratedPackageAlias: defaultAlias + "Generated",
-		ModulePackageAlias:    defaultAlias + "Module",
+		PackageAlias:          defaultAlias + "static",
+		GeneratedPackageAlias: defaultAlias + "generated",
+		ModulePackageAlias:    defaultAlias + "module",
 		PackagePath: path.Join(
 			packageRoot,
 			instanceDirectory,

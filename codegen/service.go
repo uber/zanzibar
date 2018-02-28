@@ -84,7 +84,7 @@ func NewModuleSpec(
 		WantAnnot:   wantAnnot,
 		IsEndpoint:  isEndpoint,
 		ThriftFile:  module.ThriftPath,
-		PackageName: camelCase(module.GetName()),
+		PackageName: packageName(module.GetName()),
 	}
 	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
 		return nil, err

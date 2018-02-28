@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package examplereaderMiddleware
+package examplereadermiddleware
 
 import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_reader/module"

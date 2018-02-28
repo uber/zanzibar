@@ -24,8 +24,8 @@
 package module
 
 import (
-	bazClientGenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	quuxClientStatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -38,6 +38,6 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Baz  bazClientGenerated.Client
-	Quux quuxClientStatic.Client
+	Baz  bazclientgenerated.Client
+	Quux quuxclientstatic.Client
 }

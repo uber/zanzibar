@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package barEndpoint
+package barendpoint
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/zanzibar/test/lib/test_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 )
 
 func getDirNameMissingArgSuccessfulRequest() string {

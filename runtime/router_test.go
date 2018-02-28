@@ -30,7 +30,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"github.com/uber/zanzibar/test/lib/bench_gateway"
+	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
