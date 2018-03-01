@@ -47,6 +47,7 @@ import (
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/mock-client"
 )
 
@@ -54,7 +55,7 @@ import (
 type MockClientNodes struct {
 	Bar       *barclientgenerated.MockClient
 	Baz       *bazclientgenerated.MockClient
-	Contacts  *contactsclientgenerated.MockClient
+	Contacts  *contactsclientgenerated.MockClientWithFixture
 	GoogleNow *googlenowclientgenerated.MockClient
 	Multi     *multiclientgenerated.MockClient
 	Quux      *quuxclientstatic.MockClient
@@ -78,7 +79,7 @@ func InitializeDependenciesMock(
 	mockClientNodes := &MockClientNodes{
 		Bar:       barclientgenerated.NewMockClient(ctrl),
 		Baz:       bazclientgenerated.NewMockClient(ctrl),
-		Contacts:  contactsclientgenerated.NewMockClient(ctrl),
+		Contacts:  contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
 		GoogleNow: googlenowclientgenerated.NewMockClient(ctrl),
 		Multi:     multiclientgenerated.NewMockClient(ctrl),
 		Quux:      quuxclientstatic.NewMockClient(ctrl),
