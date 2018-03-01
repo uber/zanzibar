@@ -17,6 +17,7 @@ var saveContactsFixtures = map[string]*mc.SaveContactsFixture{
 	},
 }
 
+// Fixture ...
 var Fixture = &mc.ClientFixture{
 	SaveContacts: saveContactsFixtures,
 }

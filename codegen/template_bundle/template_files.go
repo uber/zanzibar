@@ -106,10 +106,10 @@ type {{$methodName}}Fixture struct {
 	{{end}}
 
 	// Arg{n}Any indicates the nth argument could be gomock.Any
-    Arg0Any bool
-    Arg1Any bool
+	Arg0Any bool
+	Arg1Any bool
 	{{if ne .RequestType "" -}}
-    Arg2Any bool
+	Arg2Any bool
 	{{end}}
 
 	{{if ne .ResponseType "" -}}
@@ -136,7 +136,7 @@ func client_fixture_typesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_fixture_types.tmpl", size: 1435, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "client_fixture_types.tmpl", size: 1426, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -144,6 +144,7 @@ func client_fixture_typesTmpl() (*asset, error) {
 var _client_mockTmpl = []byte(`{{- /* template to render client mock code */ -}}
 {{- $instance := .Instance }}
 {{- $exposedMethods := .ExposedMethods -}}
+{{- $fixturePkg := .Fixture.ImportPath -}}
 {{- $scenarios := .Fixture.Scenarios -}}
 package clientmock
 
@@ -177,8 +178,9 @@ func (m *MockClientWithFixture) EXPECT() {
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
 {{- if $methodName -}}
-{{$methodMockType := printf "%sMock" (camel $methodName) -}}
+{{$methodMockType := printf "%sMock" (title $methodName) -}}
 {{$methodScenarios := (index $scenarios $methodName) -}}
+// {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
 	fixture    map[string]*{{$methodName}}Fixture
 	mockClient *MockClient
@@ -186,7 +188,7 @@ type {{$methodMockType}} struct {
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
 {{$reqType := .RequestType -}}
 {{$resType := .ResponseType -}}
-// {{$methodMockMethod}} returns a object that allows the caller to choose expected scenario for {{$methodName}}
+// {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
 func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 	return &{{$methodMockType}}{
 		fixture:    m.fixture.{{$methodName}},
@@ -195,8 +197,9 @@ func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 }
 
 {{- range $scenario := $methodScenarios -}}
-{{$scenarioMethod := pascal $scenario -}}
-// {{$scenario}} sets the expected scenario
+{{$scenarioMethod := pascal $scenario}}
+// {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
+// {{$fixturePkg}}
 func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
 	f, ok := s.fixture["{{$scenario}}"]
 	if !ok {
@@ -238,7 +241,7 @@ func client_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_mock.tmpl", size: 2358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "client_mock.tmpl", size: 2524, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
