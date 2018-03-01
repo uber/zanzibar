@@ -96,6 +96,8 @@ type ClientSpec struct {
 	// SidecarRouter indicates the client uses the given sidecar router to
 	// to communicate with downstream service, it's not relevant to custom clients.
 	SidecarRouter string
+	// Fixture is the fixture configuration for the client
+	Fixture *Fixture
 }
 
 // ModuleClassConfig represents the generic JSON config for
@@ -115,10 +117,36 @@ type ClientClassConfig struct {
 	Dependencies Dependencies           `json:"dependencies"`
 }
 
+// helper struct to pull out the fixture config
+type clientClassConfigFixture struct {
+	Config struct {
+		Fixture *Fixture `json:"fixture"`
+	} `json:"config"`
+}
+
 // Dependencies lists all dependencies of a module
 type Dependencies struct {
 	Client []string `json:"client"`
 	//	Service []string `json:"service"`  // example extension
+}
+
+// Fixture specifies client fixture import path and all scenarios
+type Fixture struct {
+	ImportPath string              `json:"importPath"`
+	Scenarios  map[string][]string `json:"scenarios"`
+}
+
+// Validate the fixture configuration
+func (f *Fixture) Validate(exposedMethods map[string]interface{}) error {
+	if f.ImportPath == "" {
+		return errors.New("fixture importPath is empty")
+	}
+	for method := range f.Scenarios {
+		if _, ok := exposedMethods[method]; !ok {
+			return errors.Errorf("method %q is not an exposed method", method)
+		}
+	}
+	return nil
 }
 
 // MiddlewareConfigConfig is the inner config object as prescribed by module_system json conventions
@@ -202,40 +230,22 @@ func NewClientSpec(
 	}
 }
 
+// NewHTTPClientSpec creates a client spec from a http client module instance
+func NewHTTPClientSpec(
+	instance *ModuleInstance,
+	clientConfig *ClientClassConfig,
+	h *PackageHelper,
+) (*ClientSpec, error) {
+	return newClientSpec(instance, clientConfig, true, h)
+}
+
 // NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
 func NewTChannelClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
-	if !ok || len(exposedMethods) == 0 {
-		return nil, errors.Errorf(
-			"No methods are exposed in client config: %s",
-			instance.JSONFileName,
-		)
-	}
-
-	cspec, err := newClientSpec(instance, clientConfig, false, h)
-	if err != nil {
-		return nil, err
-	}
-
-	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
-	reversed := make(map[string]string, len(exposedMethods))
-	for key, val := range exposedMethods {
-		cspec.ExposedMethods[key] = val.(string)
-		if _, ok := reversed[val.(string)]; ok {
-			return nil, errors.Errorf(
-				"value %q of the exposedMethods is not unique: %s",
-				val.(string),
-				instance.JSONFileName,
-			)
-		}
-		reversed[val.(string)] = key
-	}
-
-	return cspec, nil
+	return newClientSpec(instance, clientConfig, false, h)
 }
 
 // NewCustomClientSpec creates a client spec from a json file whose type is custom
@@ -254,6 +264,7 @@ func NewCustomClientSpec(
 		}
 	}
 
+	// TODO: fixture for custom client
 	clientSpec := &ClientSpec{
 		JSONFile:           instance.JSONFileName,
 		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
@@ -267,42 +278,6 @@ func NewCustomClientSpec(
 	}
 
 	return clientSpec, nil
-}
-
-// NewHTTPClientSpec creates a client spec from a http client module instance
-func NewHTTPClientSpec(
-	instance *ModuleInstance,
-	clientConfig *ClientClassConfig,
-	h *PackageHelper,
-) (*ClientSpec, error) {
-	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
-	if !ok || len(exposedMethods) == 0 {
-		return nil, errors.Errorf(
-			"No methods are exposed in client config: %s",
-			instance.JSONFileName,
-		)
-	}
-
-	cspec, err := newClientSpec(instance, clientConfig, true, h)
-	if err != nil {
-		return nil, err
-	}
-
-	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
-	reversed := make(map[string]string, len(exposedMethods))
-	for key, val := range exposedMethods {
-		cspec.ExposedMethods[key] = val.(string)
-		if _, ok := reversed[val.(string)]; ok {
-			return nil, errors.Errorf(
-				"value %q of the exposedMethods is not unique: %s",
-				val.(string),
-				instance.JSONFileName,
-			)
-		}
-		reversed[val.(string)] = key
-	}
-
-	return cspec, nil
 }
 
 func newClientSpec(
@@ -349,6 +324,46 @@ func newClientSpec(
 	sidecarRouter, ok := config["sidecarRouter"].(string)
 	if ok {
 		cspec.SidecarRouter = sidecarRouter
+	}
+
+	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	if !ok || len(exposedMethods) == 0 {
+		return nil, errors.Errorf(
+			"No methods are exposed in client config: %s",
+			instance.JSONFileName,
+		)
+	}
+	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
+	reversed := make(map[string]string, len(exposedMethods))
+	for key, val := range exposedMethods {
+		cspec.ExposedMethods[key] = val.(string)
+		if _, ok := reversed[val.(string)]; ok {
+			return nil, errors.Errorf(
+				"value %q of the exposedMethods is not unique: %s",
+				val.(string),
+				instance.JSONFileName,
+			)
+		}
+		reversed[val.(string)] = key
+	}
+
+	if _, ok := clientConfig.Config["fixture"]; ok {
+		config := &clientClassConfigFixture{}
+		if err := json.Unmarshal(instance.JSONFileRaw, config); err != nil {
+			return nil, errors.Errorf(
+				"could not parse fixture config in client config: %s",
+				instance.JSONFileName,
+			)
+
+		}
+
+		fixture := config.Config.Fixture
+		if err := fixture.Validate(exposedMethods); err != nil {
+			return nil, errors.Wrapf(
+				err, "invalid fixture config in client config: %s", instance.JSONFileName,
+			)
+		}
+		cspec.Fixture = fixture
 	}
 
 	return cspec, nil
