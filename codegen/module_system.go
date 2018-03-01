@@ -1275,9 +1275,21 @@ func GenerateMockInitializer(
 	packageHelper *PackageHelper,
 	template *Template,
 ) ([]byte, error) {
+	leafWithFixture := map[string]string{}
+	for _, leaf := range instance.RecursiveDependencies["client"] {
+		// cast is guaranteed to succeed at this point
+		spec := leaf.genSpec.(*ClientSpec)
+		if spec.Fixture != nil {
+			leafWithFixture[leaf.InstanceName] = spec.Fixture.ImportPath
+		}
+	}
+	data := map[string]interface{}{
+		"Instance":        instance,
+		"LeafWithFixture": leafWithFixture,
+	}
 	return template.ExecTemplate(
 		"module_mock_initializer.tmpl",
-		instance,
+		data,
 		packageHelper,
 	)
 }

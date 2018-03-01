@@ -40,7 +40,7 @@ type {{$methodMockType}} struct {
 	fixture    map[string]*{{$methodName}}Fixture
 	mockClient *MockClient
 }
-{{$methodMockMethod := printf "%sExpect" $methodName -}}
+{{$methodMockMethod := printf "Expect%s" $methodName -}}
 {{$reqType := .RequestType -}}
 {{$resType := .ResponseType -}}
 // {{$methodMockMethod}} returns a object that allows the caller to choose expected scenario for {{$methodName}}

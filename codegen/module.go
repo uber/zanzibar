@@ -1101,7 +1101,7 @@ type ModuleInstance struct {
 	// Dependencies is a list of dependent modules as defined in the instances
 	// json file
 	Dependencies []ModuleDependency
-	// Resolved dependencies is a list of dependent modules after processing
+	// Resolved dependencies is a list of direct dependent modules after processing
 	// (fully resolved)
 	ResolvedDependencies map[string][]*ModuleInstance
 	// Recursive dependencies is a list of dependent modules and all of their

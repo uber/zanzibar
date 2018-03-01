@@ -183,7 +183,7 @@ type {{$methodMockType}} struct {
 	fixture    map[string]*{{$methodName}}Fixture
 	mockClient *MockClient
 }
-{{$methodMockMethod := printf "%sExpect" $methodName -}}
+{{$methodMockMethod := printf "Expect%s" $methodName -}}
 {{$reqType := .RequestType -}}
 {{$resType := .ResponseType -}}
 // {{$methodMockMethod}} returns a object that allows the caller to choose expected scenario for {{$methodName}}
@@ -1706,8 +1706,9 @@ func module_initializerTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _module_mock_initializerTmpl = []byte(`{{$instance := . -}}
-{{$leafClass := index .DependencyOrder 0 -}}
+var _module_mock_initializerTmpl = []byte(`{{$instance := .Instance -}}
+{{$leafWithFixture := .LeafWithFixture -}}
+{{$leafClass := index $instance.DependencyOrder 0 -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -1724,6 +1725,9 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock-client"
+	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
+	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
+	{{end -}}
 	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
@@ -1736,8 +1740,12 @@ import (
 // {{$mockDeps}} contains mock {{$leafClass}} dependencies
 type {{$mockDeps}} struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
+	{{- if (index $leafWithFixture $dependency.InstanceName) }}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}WithFixture
+	{{- else }}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}
-	{{end -}}
+	{{- end }}
+	{{- end}}
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -1761,7 +1769,11 @@ func InitializeDependenciesMock(
 	{{camel $mockDeps}} := &{{$mockDeps}}{
 		{{- range $idx, $dependency := $moduleInstances}}
 		{{- $pkgInfo := $dependency.PackageInfo }}
+		{{- if (index $leafWithFixture $dependency.InstanceName) }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
+		{{- else }}
 		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.NewMock{{title $className}}(ctrl),
+		{{- end }}
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
@@ -1801,7 +1813,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 3346, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4055, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
