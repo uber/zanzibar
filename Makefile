@@ -1,5 +1,5 @@
 PKGS = $(shell glide novendor | grep -v "workspace/...")
-PKG_FILES = benchmarks codegen examples runtime test backend
+PKG_FILES = benchmarks codegen examples runtime test
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
@@ -41,12 +41,12 @@ fix-licence:
 eclint-check:
 	@echo "Checking eclint..."
 	@ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
-	@./node_modules/.bin/eclint check "./{codegen,examples,backend}/**/*.{json,tmpl}"
+	@./node_modules/.bin/eclint check "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: eclint-fix
 eclint-fix:
 	@ls ./node_modules/.bin/eclint >/dev/null 2>&1 || npm i eclint@v1.1.5
-	./node_modules/.bin/eclint fix "./{codegen,examples,backend}/**/*.{json,tmpl}"
+	./node_modules/.bin/eclint fix "./{codegen,examples}/**/*.{json,tmpl}"
 
 .PHONY: spell-check
 spell-check:
@@ -141,7 +141,7 @@ test: generate lint
 
 .PHONY: test-update
 test-update:
-	go test ./codegen/ ./backend/... -update
+	go test ./codegen/ -update
 
 .PHONY: test-only
 test-only:
@@ -151,7 +151,6 @@ test-only:
 	@ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
-		./backend/... \
 		./runtime/... \
 		./test/... | \
 		grep -v '\[no test files\]'

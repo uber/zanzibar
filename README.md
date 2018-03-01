@@ -92,5 +92,5 @@ If you want to update a dependency:
 
 Run the test that compares golden files with `-update` flag, e.g.,
 ```
-go test ./backend/repository -update
+go test ./codegen -update
 ```
