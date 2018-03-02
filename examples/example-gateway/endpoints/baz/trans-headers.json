@@ -1,0 +1,157 @@
+{
+	"endpointId": "baz",
+	"endpointType": "http",
+	"handleId": "transHeaders",
+	"thriftFile": "endpoints/baz/baz.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "SimpleService::transHeaders",
+	"workflowType": "tchannelClient",
+	"clientId": "baz",
+	"clientMethod": "TransHeaders",
+	"middlewares": [
+		{
+			"name": "headersPopulate",
+			"options": {
+				"populate": [
+					{
+						"from": "x-uuid",
+						"to": "Req.W1.N1.UUID",
+						"override": true
+					},
+					{
+						"from": "x-uuid",
+						"to": "Req.W1.N2.UUID",
+						"override": false
+					},
+					{
+						"from": "x-uuid",
+						"to": "Req.W2.N1.UUID",
+						"override": false
+					},
+					{
+						"from": "x-uuid",
+						"to": "Req.W2.N2.UUID",
+						"override": true
+					},
+					{
+						"from": "x-token",
+						"to": "Req.W1.N1.Token",
+						"override": true
+					},
+					{
+						"from": "x-token",
+						"to": "Req.W1.N2.Token",
+						"override": false
+					},
+					{
+						"from": "x-token",
+						"to": "Req.W2.N1.Token",
+						"override": false
+					},
+					{
+						"from": "x-token",
+						"to": "Req.W2.N2.Token",
+						"override": true
+					}
+				]
+			}
+		}
+	],
+	"reqHeaderMap": {},
+	"resHeaderMap": {},
+	"testFixtures": {
+		"successfulRequest": {
+			"testName": "successfulRequest",
+			"endpointId": "baz",
+			"handleId": "transHeaders",
+			"endpointRequest": {
+				"requestType": "http",
+				"httpRequest": {
+					"method": "POST",
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {
+							"req": {}
+						}
+					}
+				}
+			},
+			"endpointReqHeaders": {
+				"x-uuid": "uuid",
+				"x-token": "token"
+			},
+			"endpointResponse": {
+				"responseType": "http",
+				"httpResponse": {
+					"statusCode": 200,
+					"body": {
+						"bodyType": "json",
+						"bodyJson": {}
+					}
+				}
+			},
+			"endpointResHeaders": {},
+			"clientTestFixtures": {
+				"baz::call": {
+					"clientId": "baz",
+					"clientMethod": "transHeaders",
+					"clientRequest": {
+						"requestType": "tchannel",
+						"tchannelRequest": {
+							"req": {
+								"w1": {
+									"n1": {
+										"uuid": "uuid",
+										"token": "token"
+									},
+									"n2": {
+										"uuid": "uuid",
+										"token": "token"
+									}
+								},
+								"w2": {
+									"n1": {
+										"uuid": "uuid",
+										"token": "token"
+									},
+									"n2": {
+										"uuid": "uuid",
+										"token": "token"
+									}
+								}
+							}
+						}
+					},
+					"clientReqHeaders": {},
+					"clientResponse": {
+						"responseType": "tchannel",
+						"tchannelResponse": {
+							"w1": {
+								"n1": {
+									"uuid": "uuid",
+									"token": "token"
+								},
+								"n2": {
+									"uuid": "uuid",
+									"token": "token"
+								}
+							},
+							"w2": {
+								"n1": {
+									"uuid": "uuid",
+									"token": "token"
+								},
+								"n2": {
+									"uuid": "uuid",
+									"token": "token"
+								}
+							}
+						}
+					},
+					"clientResHeaders": {}
+				}
+			},
+			"testServiceName": "example-gateway"
+		}
+	}
+}

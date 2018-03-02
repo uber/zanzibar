@@ -68,7 +68,7 @@ func (r *naivePackageNameResolver) TypePackageName(
 }
 
 func newTypeConverter() *codegen.TypeConverter {
-	return codegen.NewTypeConverter(&naivePackageNameResolver{})
+	return codegen.NewTypeConverter(&naivePackageNameResolver{}, nil)
 }
 
 func compileProgram(

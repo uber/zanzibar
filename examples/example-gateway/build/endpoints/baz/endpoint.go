@@ -37,21 +37,23 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SimpleServiceCallHandler:      NewSimpleServiceCallHandler(deps),
-		SimpleServiceCompareHandler:   NewSimpleServiceCompareHandler(deps),
-		SimpleServicePingHandler:      NewSimpleServicePingHandler(deps),
-		SimpleServiceSillyNoopHandler: NewSimpleServiceSillyNoopHandler(deps),
-		SimpleServiceTransHandler:     NewSimpleServiceTransHandler(deps),
+		SimpleServiceCallHandler:         NewSimpleServiceCallHandler(deps),
+		SimpleServiceCompareHandler:      NewSimpleServiceCompareHandler(deps),
+		SimpleServicePingHandler:         NewSimpleServicePingHandler(deps),
+		SimpleServiceSillyNoopHandler:    NewSimpleServiceSillyNoopHandler(deps),
+		SimpleServiceTransHandler:        NewSimpleServiceTransHandler(deps),
+		SimpleServiceTransHeadersHandler: NewSimpleServiceTransHeadersHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	SimpleServiceCallHandler      *SimpleServiceCallHandler
-	SimpleServiceCompareHandler   *SimpleServiceCompareHandler
-	SimpleServicePingHandler      *SimpleServicePingHandler
-	SimpleServiceSillyNoopHandler *SimpleServiceSillyNoopHandler
-	SimpleServiceTransHandler     *SimpleServiceTransHandler
+	SimpleServiceCallHandler         *SimpleServiceCallHandler
+	SimpleServiceCompareHandler      *SimpleServiceCompareHandler
+	SimpleServicePingHandler         *SimpleServicePingHandler
+	SimpleServiceSillyNoopHandler    *SimpleServiceSillyNoopHandler
+	SimpleServiceTransHandler        *SimpleServiceTransHandler
+	SimpleServiceTransHeadersHandler *SimpleServiceTransHeadersHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -75,6 +77,10 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	err4 := handlers.SimpleServiceTransHandler.Register(gateway)
 	if err4 != nil {
 		return err4
+	}
+	err5 := handlers.SimpleServiceTransHeadersHandler.Register(gateway)
+	if err5 != nil {
+		return err5
 	}
 	return nil
 }

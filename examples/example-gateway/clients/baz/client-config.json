@@ -26,6 +26,7 @@
 			"Ping": "SimpleService::ping",
 			"TestUUID": "SimpleService::testUuid",
 			"Trans": "SimpleService::trans",
+			"TransHeaders": "SimpleService::transHeaders",
 			"URLTest": "SimpleService::urlTest"
 		}
 	}

@@ -144,6 +144,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Trans_Args,
 	) (*clientsBazBase.TransStruct, map[string]string, error)
+	TransHeaders(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_TransHeaders_Args,
+	) (*clientsBazBase.TransHeaders, map[string]string, error)
 	URLTest(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -192,6 +197,7 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::sillyNoop":      "DeliberateDiffNoop",
 		"SimpleService::testUuid":       "TestUUID",
 		"SimpleService::trans":          "Trans",
+		"SimpleService::transHeaders":   "TransHeaders",
 		"SimpleService::urlTest":        "URLTest",
 	}
 
@@ -905,6 +911,43 @@ func (c *bazClient) Trans(
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
+	if err != nil {
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
+	}
+	return resp, respHeaders, err
+}
+
+// TransHeaders is a client RPC call for method "SimpleService::transHeaders"
+func (c *bazClient) TransHeaders(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_TransHeaders_Args,
+) (*clientsBazBase.TransHeaders, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_TransHeaders_Result
+	var resp *clientsBazBase.TransHeaders
+
+	logger := c.client.Loggers["SimpleService::transHeaders"]
+
+	success, respHeaders, err := c.client.Call(
+		ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		case result.OtherAuthErr != nil:
+			err = result.OtherAuthErr
+		default:
+			err = errors.New("bazClient received no result or unknown exception for TransHeaders")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}

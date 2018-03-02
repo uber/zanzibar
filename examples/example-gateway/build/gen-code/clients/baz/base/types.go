@@ -116,6 +116,158 @@ func (v *BazResponse) Equals(rhs *BazResponse) bool {
 	return true
 }
 
+type NestHeaders struct {
+	UUID  string  `json:"uuid,required"`
+	Token *string `json:"token,omitempty"`
+}
+
+// ToWire translates a NestHeaders struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *NestHeaders) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.UUID), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Token != nil {
+		w, err = wire.NewValueString(*(v.Token)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a NestHeaders struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a NestHeaders struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v NestHeaders
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *NestHeaders) FromWire(w wire.Value) error {
+	var err error
+
+	uuidIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.UUID, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				uuidIsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.Token = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !uuidIsSet {
+		return errors.New("field UUID of NestHeaders is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a NestHeaders
+// struct.
+func (v *NestHeaders) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("UUID: %v", v.UUID)
+	i++
+	if v.Token != nil {
+		fields[i] = fmt.Sprintf("Token: %v", *(v.Token))
+		i++
+	}
+
+	return fmt.Sprintf("NestHeaders{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _String_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this NestHeaders match the
+// provided NestHeaders.
+//
+// This function performs a deep comparison.
+func (v *NestHeaders) Equals(rhs *NestHeaders) bool {
+	if !(v.UUID == rhs.UUID) {
+		return false
+	}
+	if !_String_EqualsPtr(v.Token, rhs.Token) {
+		return false
+	}
+
+	return true
+}
+
+// GetToken returns the value of Token if it is set or its
+// zero value if it is unset.
+func (v *NestHeaders) GetToken() (o string) {
+	if v.Token != nil {
+		return *v.Token
+	}
+
+	return
+}
+
 type NestedStruct struct {
 	Msg   string `json:"msg,required"`
 	Check *int32 `json:"check,omitempty"`
@@ -378,6 +530,145 @@ func (v *ServerErr) Error() string {
 	return v.String()
 }
 
+type TransHeaders struct {
+	W1 *Wrapped `json:"w1,required"`
+	W2 *Wrapped `json:"w2,omitempty"`
+}
+
+// ToWire translates a TransHeaders struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *TransHeaders) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.W1 == nil {
+		return w, errors.New("field W1 of TransHeaders is required")
+	}
+	w, err = v.W1.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.W2 != nil {
+		w, err = v.W2.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Wrapped_Read(w wire.Value) (*Wrapped, error) {
+	var v Wrapped
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a TransHeaders struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a TransHeaders struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v TransHeaders
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *TransHeaders) FromWire(w wire.Value) error {
+	var err error
+
+	w1IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.W1, err = _Wrapped_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				w1IsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.W2, err = _Wrapped_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !w1IsSet {
+		return errors.New("field W1 of TransHeaders is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a TransHeaders
+// struct.
+func (v *TransHeaders) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("W1: %v", v.W1)
+	i++
+	if v.W2 != nil {
+		fields[i] = fmt.Sprintf("W2: %v", v.W2)
+		i++
+	}
+
+	return fmt.Sprintf("TransHeaders{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this TransHeaders match the
+// provided TransHeaders.
+//
+// This function performs a deep comparison.
+func (v *TransHeaders) Equals(rhs *TransHeaders) bool {
+	if !v.W1.Equals(rhs.W1) {
+		return false
+	}
+	if !((v.W2 == nil && rhs.W2 == nil) || (v.W2 != nil && rhs.W2 != nil && v.W2.Equals(rhs.W2))) {
+		return false
+	}
+
+	return true
+}
+
 type TransStruct struct {
 	Message string        `json:"message,required"`
 	Driver  *NestedStruct `json:"driver,omitempty"`
@@ -572,4 +863,143 @@ func (v *UUID) FromWire(w wire.Value) error {
 // UUID.
 func (lhs UUID) Equals(rhs UUID) bool {
 	return (lhs == rhs)
+}
+
+type Wrapped struct {
+	N1 *NestHeaders `json:"n1,required"`
+	N2 *NestHeaders `json:"n2,omitempty"`
+}
+
+// ToWire translates a Wrapped struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Wrapped) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.N1 == nil {
+		return w, errors.New("field N1 of Wrapped is required")
+	}
+	w, err = v.N1.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.N2 != nil {
+		w, err = v.N2.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _NestHeaders_Read(w wire.Value) (*NestHeaders, error) {
+	var v NestHeaders
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a Wrapped struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Wrapped struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Wrapped
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Wrapped) FromWire(w wire.Value) error {
+	var err error
+
+	n1IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.N1, err = _NestHeaders_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				n1IsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.N2, err = _NestHeaders_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !n1IsSet {
+		return errors.New("field N1 of Wrapped is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Wrapped
+// struct.
+func (v *Wrapped) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("N1: %v", v.N1)
+	i++
+	if v.N2 != nil {
+		fields[i] = fmt.Sprintf("N2: %v", v.N2)
+		i++
+	}
+
+	return fmt.Sprintf("Wrapped{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Wrapped match the
+// provided Wrapped.
+//
+// This function performs a deep comparison.
+func (v *Wrapped) Equals(rhs *Wrapped) bool {
+	if !v.N1.Equals(rhs.N1) {
+		return false
+	}
+	if !((v.N2 == nil && rhs.N2 == nil) || (v.N2 != nil && rhs.N2 != nil && v.N2.Equals(rhs.N2))) {
+		return false
+	}
+
+	return true
 }

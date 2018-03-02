@@ -73,15 +73,17 @@ type TypeConverter struct {
 	fieldCounter  int
 	convStructMap map[string]string
 	useRecurGen   bool
+	auxChecks     map[string]FieldMapperEntry
 }
 
 // NewTypeConverter returns *TypeConverter
-func NewTypeConverter(h PackageNameResolver) *TypeConverter {
+func NewTypeConverter(h PackageNameResolver, auxChecks map[string]FieldMapperEntry) *TypeConverter {
 	return &TypeConverter{
 		LineBuilder:   LineBuilder{},
 		Helper:        h,
 		uninitialized: make(map[string]*fieldStruct),
 		convStructMap: make(map[string]string),
+		auxChecks:     auxChecks,
 	}
 }
 
@@ -621,17 +623,32 @@ func (c *TypeConverter) genStructConverter(
 					hasStructFieldMapping = true
 				}
 			}
+
 			//  if there's no fromField and no fieldMap transform that could be applied
 			if !hasStructFieldMapping {
-				if toField.Required {
-					// unrecoverable error
-					return errors.Errorf(
-						"required toField %s does not have a valid fromField mapping",
-						toField.Name,
-					)
+				var bypass bool
+				// check if required field is filled from other resources
+				// it can be used to set system default (customized tracing /auth required for clients),
+				// or header propagating
+				if c.auxChecks != nil {
+					for toID := range c.auxChecks {
+						if strings.HasPrefix(toID, toSubIdentifier) {
+							bypass = true
+						}
+					}
 				}
-				// the toField is optional and there's nothing that maps to it or its sub-fields so we should skip it
-				continue
+
+				// the toField is either covered by auxChecks, or optional and
+				// there's nothing that maps to it or its sub-fields so we should skip it
+				if bypass || !toField.Required {
+					continue
+				}
+
+				// unrecoverable error
+				return errors.Errorf(
+					"required toField %s does not have a valid fromField mapping",
+					toField.Name,
+				)
 			}
 		}
 

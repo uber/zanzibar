@@ -95,6 +95,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -166,6 +167,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -270,6 +272,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -367,6 +370,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -450,6 +454,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": [
 						"requestBody.UUID = req.Params.ByName(\"uuid\")",
 						"if requestBody.Params == nil {",
@@ -515,6 +520,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -583,6 +589,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -662,6 +669,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -739,6 +747,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -816,6 +825,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -893,6 +903,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -972,6 +983,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1072,6 +1084,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				}
 			],
@@ -1137,6 +1150,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1193,6 +1207,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1249,6 +1264,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1305,6 +1321,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1361,6 +1378,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1417,6 +1435,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1473,6 +1492,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1529,6 +1549,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1585,6 +1606,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1641,6 +1663,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1697,6 +1720,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1753,6 +1777,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1809,6 +1834,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1865,6 +1891,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1921,6 +1948,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -1977,6 +2005,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				},
 				{
@@ -2033,6 +2062,7 @@
 					"DownstreamMethod": null,
 					"ConvertRequestGoStatements": null,
 					"ConvertResponseGoStatements": null,
+					"PopulateHeadersGoStatements": null,
 					"RequestParamGoStatements": null
 				}
 			],
