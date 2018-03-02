@@ -336,15 +336,16 @@ func newClientSpec(
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
-		cspec.ExposedMethods[key] = val.(string)
-		if _, ok := reversed[val.(string)]; ok {
+		v := val.(string)
+		cspec.ExposedMethods[key] = v
+		if _, ok := reversed[v]; ok {
 			return nil, errors.Errorf(
 				"value %q of the exposedMethods is not unique: %s",
-				val.(string),
+				v,
 				instance.JSONFileName,
 			)
 		}
-		reversed[val.(string)] = key
+		reversed[v] = key
 	}
 
 	if _, ok := clientConfig.Config["fixture"]; ok {

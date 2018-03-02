@@ -658,7 +658,6 @@ func generateMockClientWithFixture(
 	)
 	if err != nil {
 		types = nil
-		return
 	}
 	return
 }
