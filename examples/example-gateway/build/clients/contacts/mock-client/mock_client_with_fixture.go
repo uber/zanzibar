@@ -49,14 +49,14 @@ func (m *MockClientWithFixture) EXPECT() {
 
 // SaveContactsMock mocks the SaveContacts method
 type SaveContactsMock struct {
-	fixture    *SaveContactsScenarios
+	scenarios  *SaveContactsScenarios
 	mockClient *MockClient
 }
 
 // ExpectSaveContacts returns an object that allows the caller to choose expected scenario for SaveContacts
 func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 	return &SaveContactsMock{
-		fixture:    m.fixture.SaveContacts,
+		scenarios:  m.fixture.SaveContacts,
 		mockClient: m.MockClient,
 	}
 }
@@ -64,7 +64,7 @@ func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 // Success sets the expected scenario as defined in the concrete fixture package
 // github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
 func (s *SaveContactsMock) Success() {
-	f := s.fixture.Success
+	f := s.scenarios.Success
 
 	var arg0, arg1, arg2 interface{}
 	arg0 = f.Arg0

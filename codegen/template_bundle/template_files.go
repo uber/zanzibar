@@ -193,7 +193,7 @@ func (m *MockClientWithFixture) EXPECT() {
 {{$methodScenarios := (index $scenarios $methodName) -}}
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
-	fixture    *{{$methodName}}Scenarios
+	scenarios  *{{$methodName}}Scenarios
 	mockClient *MockClient
 }
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
@@ -202,7 +202,7 @@ type {{$methodMockType}} struct {
 // {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
 func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 	return &{{$methodMockType}}{
-		fixture:    m.fixture.{{$methodName}},
+		scenarios:  m.fixture.{{$methodName}},
 		mockClient: m.MockClient,
 	}
 }
@@ -212,7 +212,7 @@ func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 // {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
 // {{$fixturePkg}}
 func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
-	f := s.fixture.{{$scenarioMethod}}
+	f := s.scenarios.{{$scenarioMethod}}
 
 	var arg0, arg1{{if $reqType -}}, arg2{{end}} interface{}
 	arg0 = f.Arg0
@@ -249,7 +249,7 @@ func client_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_mock.tmpl", size: 2472, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "client_mock.tmpl", size: 2474, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
