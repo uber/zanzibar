@@ -66,6 +66,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 
 var _client_fixture_typesTmpl = []byte(`{{- /* template to render client fixture type code */ -}}
 {{- $instance := .Instance }}
+{{- $scenariosMap := .Fixture.Scenarios }}
 package clientmock
 
 import (
@@ -85,18 +86,28 @@ type ClientFixture struct {
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
-{{$methodName}} map[string]*{{$methodName}}Fixture
+{{- if (index $scenariosMap $methodName) -}}
+{{$methodName}} *{{$methodName}}Scenarios
 {{- end -}}
 {{- end -}}
 {{- end -}}
 }
 
+{{range $methodName, $scenarios := $scenariosMap -}}
+{{$methodName := pascal $methodName -}}
+// {{$methodName}}Scenarios defines all fixture scenarios for {{$methodName}}
+type {{$methodName}}Scenarios struct {
+{{range $scenario := $scenarios -}}
+{{pascal $scenario}} *{{$methodName}}Fixture ` + "`" + `scenario:"{{$scenario}}"` + "`" + `
+{{end -}}
+}
+{{end -}}
+
 {{- range $svc := .Services -}}
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
+{{- if (index $scenariosMap $methodName) -}}
 // {{$methodName}}Fixture defines the fixture type for {{$methodName}}
 type {{$methodName}}Fixture struct {
 	Arg0 context.Context
@@ -136,7 +147,7 @@ func client_fixture_typesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_fixture_types.tmpl", size: 1426, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "client_fixture_types.tmpl", size: 1845, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -177,12 +188,12 @@ func (m *MockClientWithFixture) EXPECT() {
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
+{{- if (index $scenarios $methodName) -}}
 {{$methodMockType := printf "%sMock" (title $methodName) -}}
 {{$methodScenarios := (index $scenarios $methodName) -}}
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
-	fixture    map[string]*{{$methodName}}Fixture
+	fixture    *{{$methodName}}Scenarios
 	mockClient *MockClient
 }
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
@@ -201,10 +212,7 @@ func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 // {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
 // {{$fixturePkg}}
 func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
-	f, ok := s.fixture["{{$scenario}}"]
-	if !ok {
-		panic("{{$scenario}} fixture is not defined")
-	}
+	f := s.fixture.{{$scenarioMethod}}
 
 	var arg0, arg1{{if $reqType -}}, arg2{{end}} interface{}
 	arg0 = f.Arg0
@@ -241,7 +249,7 @@ func client_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_mock.tmpl", size: 2524, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "client_mock.tmpl", size: 2472, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

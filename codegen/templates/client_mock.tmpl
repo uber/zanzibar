@@ -34,12 +34,12 @@ func (m *MockClientWithFixture) EXPECT() {
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
+{{- if (index $scenarios $methodName) -}}
 {{$methodMockType := printf "%sMock" (title $methodName) -}}
 {{$methodScenarios := (index $scenarios $methodName) -}}
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
-	fixture    map[string]*{{$methodName}}Fixture
+	fixture    *{{$methodName}}Scenarios
 	mockClient *MockClient
 }
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
@@ -58,10 +58,7 @@ func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
 // {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
 // {{$fixturePkg}}
 func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
-	f, ok := s.fixture["{{$scenario}}"]
-	if !ok {
-		panic("{{$scenario}} fixture is not defined")
-	}
+	f := s.fixture.{{$scenarioMethod}}
 
 	var arg0, arg1{{if $reqType -}}, arg2{{end}} interface{}
 	arg0 = f.Arg0

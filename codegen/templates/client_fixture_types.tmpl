@@ -1,5 +1,6 @@
 {{- /* template to render client fixture type code */ -}}
 {{- $instance := .Instance }}
+{{- $scenariosMap := .Fixture.Scenarios }}
 package clientmock
 
 import (
@@ -19,18 +20,28 @@ type ClientFixture struct {
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
-{{$methodName}} map[string]*{{$methodName}}Fixture
+{{- if (index $scenariosMap $methodName) -}}
+{{$methodName}} *{{$methodName}}Scenarios
 {{- end -}}
 {{- end -}}
 {{- end -}}
 }
 
+{{range $methodName, $scenarios := $scenariosMap -}}
+{{$methodName := pascal $methodName -}}
+// {{$methodName}}Scenarios defines all fixture scenarios for {{$methodName}}
+type {{$methodName}}Scenarios struct {
+{{range $scenario := $scenarios -}}
+{{pascal $scenario}} *{{$methodName}}Fixture `scenario:"{{$scenario}}"`
+{{end -}}
+}
+{{end -}}
+
 {{- range $svc := .Services -}}
 {{range .Methods}}
 {{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
 {{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if $methodName -}}
+{{- if (index $scenariosMap $methodName) -}}
 // {{$methodName}}Fixture defines the fixture type for {{$methodName}}
 type {{$methodName}}Fixture struct {
 	Arg0 context.Context

@@ -49,7 +49,7 @@ func (m *MockClientWithFixture) EXPECT() {
 
 // SaveContactsMock mocks the SaveContacts method
 type SaveContactsMock struct {
-	fixture    map[string]*SaveContactsFixture
+	fixture    *SaveContactsScenarios
 	mockClient *MockClient
 }
 
@@ -64,10 +64,7 @@ func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 // Success sets the expected scenario as defined in the concrete fixture package
 // github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
 func (s *SaveContactsMock) Success() {
-	f, ok := s.fixture["success"]
-	if !ok {
-		panic("success fixture is not defined")
-	}
+	f := s.fixture.Success
 
 	var arg0, arg1, arg2 interface{}
 	arg0 = f.Arg0
@@ -84,18 +81,4 @@ func (s *SaveContactsMock) Success() {
 	}
 
 	s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(f.Ret0, f.Ret1, f.Ret2)
-}
-
-// TestURLURLMock mocks the TestURLURL method
-type TestURLURLMock struct {
-	fixture    map[string]*TestURLURLFixture
-	mockClient *MockClient
-}
-
-// ExpectTestURLURL returns an object that allows the caller to choose expected scenario for TestURLURL
-func (m *MockClientWithFixture) ExpectTestURLURL() *TestURLURLMock {
-	return &TestURLURLMock{
-		fixture:    m.fixture.TestURLURL,
-		mockClient: m.MockClient,
-	}
 }

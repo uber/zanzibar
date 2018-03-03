@@ -31,8 +31,12 @@ import (
 
 // ClientFixture defines the client fixture type for contacts
 type ClientFixture struct {
-	SaveContacts map[string]*SaveContactsFixture
-	TestURLURL   map[string]*TestURLURLFixture
+	SaveContacts *SaveContactsScenarios
+}
+
+// SaveContactsScenarios defines all fixture scenarios for SaveContacts
+type SaveContactsScenarios struct {
+	Success *SaveContactsFixture `scenario:"success"`
 }
 
 // SaveContactsFixture defines the fixture type for SaveContacts
@@ -47,20 +51,6 @@ type SaveContactsFixture struct {
 	Arg2Any bool
 
 	Ret0 *clientsContactsContacts.SaveContactsResponse
-	Ret1 map[string]string
-	Ret2 error
-}
-
-// TestURLURLFixture defines the fixture type for TestURLURL
-type TestURLURLFixture struct {
-	Arg0 context.Context
-	Arg1 map[string]string
-
-	// Arg{n}Any indicates the nth argument could be gomock.Any
-	Arg0Any bool
-	Arg1Any bool
-
-	Ret0 string
 	Ret1 map[string]string
 	Ret2 error
 }

@@ -5,8 +5,8 @@ import (
 	gen "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 )
 
-var saveContactsFixtures = map[string]*mc.SaveContactsFixture{
-	"success": {
+var saveContactsFixtures = &mc.SaveContactsScenarios{
+	Success: &mc.SaveContactsFixture{
 		Arg0Any: true,
 		Arg1Any: true,
 		Arg2: &gen.SaveContactsRequest{
