@@ -132,8 +132,11 @@ type Dependencies struct {
 
 // Fixture specifies client fixture import path and all scenarios
 type Fixture struct {
-	ImportPath string              `json:"importPath"`
-	Scenarios  map[string][]string `json:"scenarios"`
+	// ImportPath is the package where the user-defined Fixture global variable is contained.
+	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
+	ImportPath string `json:"importPath"`
+	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
+	Scenarios map[string][]string `json:"scenarios"`
 }
 
 // Validate the fixture configuration
