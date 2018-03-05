@@ -126,7 +126,7 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 ) (*endpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := convertToTransHeadersClientRequest(r)
 
-	clientRequest = populateHeadersTransHeadersClientRequests(clientRequest, reqHeaders)
+	clientRequest = propagateHeadersTransHeadersClientRequests(clientRequest, reqHeaders)
 
 	clientHeaders := map[string]string{}
 
@@ -208,7 +208,7 @@ func convertSimpleServiceTransHeadersClientResponse(in *clientsBazBase.TransHead
 	return out
 }
 
-func populateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_TransHeaders_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeaders_Args {
+func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_TransHeaders_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeaders_Args {
 	if key, ok := headers.Get("x-token"); ok {
 		if in.Req == nil {
 			in.Req = &clientsBazBase.TransHeaders{}

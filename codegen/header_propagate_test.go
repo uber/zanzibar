@@ -53,11 +53,11 @@ func strip(text string) string {
 	return strings.Join(newLines, "\n")
 }
 
-func populateHeaders(
+func propagateHeaders(
 	headers []string,
 	toStruct string,
 	content string,
-	populateMap map[string]codegen.FieldMapperEntry,
+	propagateMap map[string]codegen.FieldMapperEntry,
 	pkgHelper codegen.PackageNameResolver,
 ) (string, error) {
 
@@ -66,10 +66,10 @@ func populateHeaders(
 	if err != nil {
 		return "", err
 	}
-	err = populator.Populate(
+	err = populator.Propagate(
 		headers,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
-		populateMap,
+		propagateMap,
 	)
 	if err != nil {
 		return "", err
@@ -77,16 +77,16 @@ func populateHeaders(
 	return trim(strings.Join(populator.GetLines(), "\n")), nil
 }
 func TestErrGetIDName(t *testing.T) {
-	populateMap := make(map[string]codegen.FieldMapperEntry)
-	populateMap["One.N1.Content"] = codegen.FieldMapperEntry{
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["One.N1.Content"] = codegen.FieldMapperEntry{
 		QualifiedName: "content-type",
 		Override:      true,
 	}
-	populateMap["Two.N2.Auth"] = codegen.FieldMapperEntry{
+	propagateMap["Two.N2.Auth"] = codegen.FieldMapperEntry{
 		QualifiedName: "auth",
 		Override:      false,
 	}
-	_, err := populateHeaders(
+	_, err := propagateHeaders(
 		[]string{"content-type", "auth"},
 		"Bar",
 		`
@@ -102,30 +102,30 @@ func TestErrGetIDName(t *testing.T) {
 			1: required Wrap one
 			2: optional Wrap two
 		}`,
-		populateMap,
+		propagateMap,
 		&errPackageNameResolver{},
 	)
 	assert.Error(t, err)
 }
 
 func TestDefault(t *testing.T) {
-	populateMap := make(map[string]codegen.FieldMapperEntry)
-	populateMap["One"] = codegen.FieldMapperEntry{
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["One"] = codegen.FieldMapperEntry{
 		QualifiedName: "content-type",
 		Override:      true,
 	}
-	populateMap["Two"] = codegen.FieldMapperEntry{
+	propagateMap["Two"] = codegen.FieldMapperEntry{
 		QualifiedName: "auth",
 		Override:      true,
 	}
-	lines, err := populateHeaders(
+	lines, err := propagateHeaders(
 		[]string{"content-type", "auth"},
 		"Bar",
 		`struct Bar {
 			1: required string one
 			2: optional string two
 		}`,
-		populateMap,
+		propagateMap,
 		&naivePackageNameResolver{},
 	)
 	assert.NoError(t, err)
@@ -140,16 +140,16 @@ func TestDefault(t *testing.T) {
 }
 
 func TestMissingField(t *testing.T) {
-	populateMap := make(map[string]codegen.FieldMapperEntry)
-	populateMap["Four"] = codegen.FieldMapperEntry{
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["Four"] = codegen.FieldMapperEntry{
 		QualifiedName: "content-type",
 		Override:      true,
 	}
-	populateMap["Two.N2"] = codegen.FieldMapperEntry{
+	propagateMap["Two.N2"] = codegen.FieldMapperEntry{
 		QualifiedName: "auth",
 		Override:      false,
 	}
-	_, err := populateHeaders(
+	_, err := propagateHeaders(
 		[]string{"content-type", "auth"},
 		"Bar",
 		`
@@ -165,23 +165,23 @@ func TestMissingField(t *testing.T) {
 			1: required Wrap one
 			2: optional Wrap two
 		}`,
-		populateMap,
+		propagateMap,
 		&naivePackageNameResolver{},
 	)
 	assert.Error(t, err)
 }
 
 func TestNested(t *testing.T) {
-	populateMap := make(map[string]codegen.FieldMapperEntry)
-	populateMap["One.N1.Content"] = codegen.FieldMapperEntry{
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["One.N1.Content"] = codegen.FieldMapperEntry{
 		QualifiedName: "content-type",
 		Override:      true,
 	}
-	populateMap["Two.N2.Auth"] = codegen.FieldMapperEntry{
+	propagateMap["Two.N2.Auth"] = codegen.FieldMapperEntry{
 		QualifiedName: "auth",
 		Override:      false,
 	}
-	lines, err := populateHeaders(
+	lines, err := propagateHeaders(
 		[]string{"content-type", "auth"},
 		"Bar",
 		`
@@ -197,7 +197,7 @@ func TestNested(t *testing.T) {
 			1: required Wrap one
 			2: optional Wrap two
 		}`,
-		populateMap,
+		propagateMap,
 		&naivePackageNameResolver{},
 	)
 	assert.NoError(t, err)

@@ -133,7 +133,7 @@ type MethodSpec struct {
 	ConvertResponseGoStatements []string
 
 	// Statements for populating headers to client requests
-	PopulateHeadersGoStatements []string
+	PropagateHeadersGoStatements []string
 
 	// Statements for reading data out of url params (server)
 	RequestParamGoStatements []string
@@ -904,14 +904,14 @@ func (ms *MethodSpec) setDownstream(
 func (ms *MethodSpec) setHeaderPopulator(
 	reqHeaders []string,
 	downstreamSpec *compile.FunctionSpec,
-	headersPopulate map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
 	h *PackageHelper,
 	downstreamMethod *MethodSpec,
 ) error {
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 	hp := NewHeaderPopulator(h)
 	hp.append(
-		"func populateHeaders",
+		"func propagateHeaders",
 		pascalCase(ms.Name),
 		"ClientRequests(in ",
 		downstreamMethod.RequestType,
@@ -919,13 +919,13 @@ func (ms *MethodSpec) setHeaderPopulator(
 		downstreamMethod.RequestType,
 		"{",
 	)
-	err := hp.Populate(reqHeaders, downstreamStructType, headersPopulate)
+	err := hp.Propagate(reqHeaders, downstreamStructType, headersPropagate)
 	if err != nil {
 		return err
 	}
 	hp.append("return in")
 	hp.append("}")
-	ms.PopulateHeadersGoStatements = hp.GetLines()
+	ms.PropagateHeadersGoStatements = hp.GetLines()
 	return nil
 }
 

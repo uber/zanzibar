@@ -43,9 +43,9 @@ func NewHeaderPopulator(h PackageNameResolver) *HeaderPopulator {
 	}
 }
 
-// Populate assigns header value to downstream client request fields
+// Propagate assigns header value to downstream client request fields
 // based on fieldMap
-func (hp *HeaderPopulator) Populate(
+func (hp *HeaderPopulator) Propagate(
 	headers []string,
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
@@ -109,9 +109,14 @@ func (hp *HeaderPopulator) initNilOpt(path string, toFields []*compile.FieldSpec
 		if err != nil {
 			return err
 		}
-		t, err := hp.getIdentifierName(f.Type)
+		ftype := f.Type
+		t, err := goCustomType(hp.Helper, ftype)
 		if err != nil {
-			return err
+			return errors.Wrapf(
+				err,
+				"could not lookup fieldType when building converter for %s",
+				ftype.ThriftName(),
+			)
 		}
 		hp.appendf("if in.%s == nil {", p)
 		hp.appendf("in.%s = &%s{}", p, t)
@@ -144,16 +149,4 @@ func findField(fieldPath string, toFields []*compile.FieldSpec) (*compile.FieldS
 		}
 	}
 	return nil, missErr
-}
-
-func (hp *HeaderPopulator) getIdentifierName(fieldType compile.TypeSpec) (string, error) {
-	t, err := goCustomType(hp.Helper, fieldType)
-	if err != nil {
-		return "", errors.Wrapf(
-			err,
-			"could not lookup fieldType when building converter for %s",
-			fieldType.ThriftName(),
-		)
-	}
-	return t, nil
 }

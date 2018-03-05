@@ -10,9 +10,9 @@
 	"clientMethod": "TransHeaders",
 	"middlewares": [
 		{
-			"name": "headersPopulate",
+			"name": "headersPropagate",
 			"options": {
-				"populate": [
+				"propagate": [
 					{
 						"from": "x-uuid",
 						"to": "Req.W1.N1.UUID",

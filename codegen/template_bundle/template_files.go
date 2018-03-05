@@ -529,8 +529,8 @@ func (w {{$workflow}}) Handle(
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
-	{{- if len $method.PopulateHeadersGoStatements | ne 0 }}
-	clientRequest = populateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
+	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
 	{{end}}
 	clientHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
@@ -657,8 +657,8 @@ func convert{{$methodName}}{{title $cException.Name}}(
 
 {{end -}}
 
-{{- if len $method.PopulateHeadersGoStatements | ne 0 }}
-{{ range $key, $line := $method.PopulateHeadersGoStatements -}}
+{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+{{ range $key, $line := $method.PropagateHeadersGoStatements -}}
 {{$line}}
 {{ end }}
 {{end -}}
@@ -677,7 +677,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10225, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10229, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
