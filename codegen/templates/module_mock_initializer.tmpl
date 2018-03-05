@@ -1,5 +1,6 @@
-{{$instance := . -}}
-{{$leafClass := index .DependencyOrder 0 -}}
+{{$instance := .Instance -}}
+{{$leafWithFixture := .LeafWithFixture -}}
+{{$leafClass := index $instance.DependencyOrder 0 -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -16,6 +17,9 @@ import (
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock-client"
+	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
+	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
+	{{end -}}
 	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
@@ -28,8 +32,12 @@ import (
 // {{$mockDeps}} contains mock {{$leafClass}} dependencies
 type {{$mockDeps}} struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
+	{{- if (index $leafWithFixture $dependency.InstanceName) }}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}WithFixture
+	{{- else }}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}
-	{{end -}}
+	{{- end }}
+	{{- end}}
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -53,7 +61,11 @@ func InitializeDependenciesMock(
 	{{camel $mockDeps}} := &{{$mockDeps}}{
 		{{- range $idx, $dependency := $moduleInstances}}
 		{{- $pkgInfo := $dependency.PackageInfo }}
+		{{- if (index $leafWithFixture $dependency.InstanceName) }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
+		{{- else }}
 		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.NewMock{{title $className}}(ctrl),
+		{{- end }}
 		{{- end }}
 	}
 	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}

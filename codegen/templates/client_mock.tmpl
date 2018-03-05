@@ -1,0 +1,85 @@
+{{- /* template to render client mock code */ -}}
+{{- $instance := .Instance }}
+{{- $exposedMethods := .ExposedMethods -}}
+{{- $fixturePkg := .Fixture.ImportPath -}}
+{{- $scenarios := .Fixture.Scenarios -}}
+package clientmock
+
+import (
+	"github.com/golang/mock/gomock"
+)
+
+// MockClientWithFixture is a mock of Client interface with preset fixture
+type MockClientWithFixture struct {
+	*MockClient
+	fixture *ClientFixture
+}
+
+// New creates a new mock instance
+func New(ctrl *gomock.Controller, fixture *ClientFixture) *MockClientWithFixture {
+	return &MockClientWithFixture{
+		MockClient: NewMockClient(ctrl),
+		fixture:    fixture,
+	}
+}
+
+// EXPECT shadows the EXPECT method on the underlying mock client.
+// It should not be called directly.
+func (m *MockClientWithFixture) EXPECT() {
+	panic("should not call EXPECT directly.")
+}
+
+
+{{- range $svc := .Services -}}
+{{range .Methods}}
+{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+{{- if (index $scenarios $methodName) -}}
+{{$methodMockType := printf "%sMock" (title $methodName) -}}
+{{$methodScenarios := (index $scenarios $methodName) -}}
+// {{$methodMockType}} mocks the {{$methodName}} method
+type {{$methodMockType}} struct {
+	scenarios  *{{$methodName}}Scenarios
+	mockClient *MockClient
+}
+{{$methodMockMethod := printf "Expect%s" $methodName -}}
+{{$reqType := .RequestType -}}
+{{$resType := .ResponseType -}}
+// {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
+func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
+	return &{{$methodMockType}}{
+		scenarios:  m.fixture.{{$methodName}},
+		mockClient: m.MockClient,
+	}
+}
+
+{{- range $scenario := $methodScenarios -}}
+{{$scenarioMethod := pascal $scenario}}
+// {{$scenarioMethod}} sets the expected scenario as defined in the concrete fixture package
+// {{$fixturePkg}}
+func (s *{{$methodMockType}}) {{$scenarioMethod}}() {
+	f := s.scenarios.{{$scenarioMethod}}
+
+	var arg0, arg1{{if $reqType -}}, arg2{{end}} interface{}
+	arg0 = f.Arg0
+	if f.Arg0Any {
+		arg0 = gomock.Any()
+	}
+	arg1 = f.Arg1
+	if f.Arg1Any {
+		arg1 = gomock.Any()
+	}
+	{{if $reqType -}}
+	arg2 = f.Arg2
+	if f.Arg2Any {
+		arg2 = gomock.Any()
+	}
+	{{end}}
+
+	s.mockClient.EXPECT().{{$methodName}}(arg0, arg1{{if $reqType -}} , arg2{{end -}}).Return(f.Ret0, f.Ret1{{if $resType -}}, f.Ret2{{end -}})
+}
+{{- end -}}
+
+{{- end -}}
+{{- end -}}
+{{- end -}}
