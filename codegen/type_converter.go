@@ -637,7 +637,7 @@ func (c *TypeConverter) genStructConverter(
 					for toID := range c.optionalEntries {
 						if strings.HasPrefix(toID, toSubIdentifier) {
 							bypass = true
-							continue
+							break
 						}
 					}
 				}

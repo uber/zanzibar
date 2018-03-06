@@ -15,43 +15,35 @@
 				"propagate": [
 					{
 						"from": "x-uuid",
-						"to": "Req.W1.N1.UUID",
-						"override": true
+						"to": "Req.W1.N1.UUID"
 					},
 					{
 						"from": "x-uuid",
-						"to": "Req.W1.N2.UUID",
-						"override": false
+						"to": "Req.W1.N2.UUID"
 					},
 					{
 						"from": "x-uuid",
-						"to": "Req.W2.N1.UUID",
-						"override": false
+						"to": "Req.W2.N1.UUID"
 					},
 					{
 						"from": "x-uuid",
-						"to": "Req.W2.N2.UUID",
-						"override": true
+						"to": "Req.W2.N2.UUID"
 					},
 					{
 						"from": "x-token",
-						"to": "Req.W1.N1.Token",
-						"override": true
+						"to": "Req.W1.N1.Token"
 					},
 					{
 						"from": "x-token",
-						"to": "Req.W1.N2.Token",
-						"override": false
+						"to": "Req.W1.N2.Token"
 					},
 					{
 						"from": "x-token",
-						"to": "Req.W2.N1.Token",
-						"override": false
+						"to": "Req.W2.N1.Token"
 					},
 					{
 						"from": "x-token",
-						"to": "Req.W2.N2.Token",
-						"override": true
+						"to": "Req.W2.N2.Token"
 					}
 				]
 			}

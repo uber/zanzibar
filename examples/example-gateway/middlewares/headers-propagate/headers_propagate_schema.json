@@ -12,9 +12,6 @@
 					},
 					"to": {
 						"type": "string"
-					},
-					"override": {
-						"type": "boolean"
 					}
 				}
 			}

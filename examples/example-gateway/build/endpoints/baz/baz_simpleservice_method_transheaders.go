@@ -219,7 +219,9 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		if in.Req.W1.N1 == nil {
 			in.Req.W1.N1 = &clientsBazBase.NestHeaders{}
 		}
-		in.Req.W1.N1.Token = &key
+		if in.Req.W1.N1.Token != nil {
+			in.Req.W1.N1.Token = &key
+		}
 	}
 	if key, ok := headers.Get("x-uuid"); ok {
 		if in.Req == nil {
@@ -231,7 +233,9 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		if in.Req.W1.N1 == nil {
 			in.Req.W1.N1 = &clientsBazBase.NestHeaders{}
 		}
-		in.Req.W1.N1.UUID = key
+		if in.Req.W1.N1.UUID != "" {
+			in.Req.W1.N1.UUID = key
+		}
 	}
 	if key, ok := headers.Get("x-token"); ok {
 		if in.Req == nil {
@@ -299,7 +303,9 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		if in.Req.W2.N2 == nil {
 			in.Req.W2.N2 = &clientsBazBase.NestHeaders{}
 		}
-		in.Req.W2.N2.Token = &key
+		if in.Req.W2.N2.Token != nil {
+			in.Req.W2.N2.Token = &key
+		}
 	}
 	if key, ok := headers.Get("x-uuid"); ok {
 		if in.Req == nil {
@@ -311,7 +317,9 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		if in.Req.W2.N2 == nil {
 			in.Req.W2.N2 = &clientsBazBase.NestHeaders{}
 		}
-		in.Req.W2.N2.UUID = key
+		if in.Req.W2.N2.UUID != "" {
+			in.Req.W2.N2.UUID = key
+		}
 	}
 	return in
 }

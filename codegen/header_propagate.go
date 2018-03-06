@@ -28,7 +28,7 @@ import (
 	"sort"
 )
 
-// HeaderPropagator generates function populates endpoint request
+// HeaderPropagator generates function propagates endpoint request
 // headers to client request body
 type HeaderPropagator struct {
 	LineBuilder
@@ -87,21 +87,13 @@ func (hp *HeaderPropagator) Propagate(
 		}
 
 		if !field.Required {
-			if !val.Override {
-				hp.appendf("if in.%s != nil {", key)
-			}
+			hp.appendf("if in.%s != nil {", key)
 			hp.appendf(`in.%s = &%s`, key, assignedVal)
-			if !val.Override {
-				hp.appendf("}")
-			}
+			hp.append("}")
 		} else {
-			if !val.Override {
-				hp.appendf(`if in.%s != "" {`, key)
-			}
+			hp.appendf(`if in.%s != "" {`, key)
 			hp.appendf(`in.%s = %s`, key, assignedVal)
-			if !val.Override {
-				hp.appendf("}")
-			}
+			hp.append("}")
 		}
 		hp.append("}")
 	}

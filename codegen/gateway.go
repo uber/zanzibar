@@ -817,6 +817,7 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 		)
 	}
 	propagates := opts["propagate"].([]interface{})
+	dest := make(map[string]string)
 	for _, propagate := range propagates {
 		propagateMap := propagate.(map[string]interface{})
 		fromField, ok := propagateMap["from"].(string)
@@ -831,13 +832,15 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 				"propagate middleware found with no destination field",
 			)
 		}
-		if overrideOpt, ok := propagateMap["override"].(bool); ok {
-			fieldMap[toField] = FieldMapperEntry{
-				QualifiedName: fromField,
-				Override:      overrideOpt,
-			}
-		} else {
-			return nil, errors.New("override for field has to be set")
+		if _, ok := dest[toField]; ok {
+			return nil, errors.Errorf(
+				"propagate multiple source field to destination field %s",
+				toField,
+			)
+		}
+		dest[toField] = toField
+		fieldMap[toField] = FieldMapperEntry{
+			QualifiedName: fromField,
 		}
 	}
 	return fieldMap, nil
