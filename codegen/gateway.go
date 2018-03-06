@@ -680,7 +680,7 @@ func augmentHTTPEndpointSpec(
 			espec.RespTransforms = resTransforms
 			continue
 		}
-		// req header populate middleware set headerPopulator
+		// req header propagate middleware set headersPropagator
 		if name == "headersPropagate" {
 			headersPropagate, err := setPropagateMiddleware(middlewareObj)
 			if err != nil {

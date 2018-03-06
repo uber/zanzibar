@@ -28,16 +28,16 @@ import (
 	"sort"
 )
 
-// HeaderPopulator generates function populates endpoint request
+// HeaderPropagator generates function populates endpoint request
 // headers to client request body
-type HeaderPopulator struct {
+type HeaderPropagator struct {
 	LineBuilder
 	Helper PackageNameResolver
 }
 
-// NewHeaderPopulator returns an instance of HeaderPopulator
-func NewHeaderPopulator(h PackageNameResolver) *HeaderPopulator {
-	return &HeaderPopulator{
+// NewHeaderPropagator returns an instance of HeaderPropagator
+func NewHeaderPropagator(h PackageNameResolver) *HeaderPropagator {
+	return &HeaderPropagator{
 		LineBuilder: LineBuilder{},
 		Helper:      h,
 	}
@@ -45,7 +45,7 @@ func NewHeaderPopulator(h PackageNameResolver) *HeaderPopulator {
 
 // Propagate assigns header value to downstream client request fields
 // based on fieldMap
-func (hp *HeaderPopulator) Propagate(
+func (hp *HeaderPropagator) Propagate(
 	headers []string,
 	toFields []*compile.FieldSpec,
 	fieldMap map[string]FieldMapperEntry,
@@ -63,23 +63,34 @@ func (hp *HeaderPopulator) Propagate(
 		if err != nil {
 			return err
 		}
-		if t, err := GoType(nil, field.Type); err != nil || t != "string" {
+		gotype, err := GoType(hp.Helper, field.Type)
+		if err != nil {
 			return errors.Errorf("invalid: trying to assign header %s to non-string field in %s",
 				val.QualifiedName, field.Name)
 		}
+
 		hp.appendf(`if key, ok := headers.Get("%s"); ok {`, val.QualifiedName)
 		// patch optional params along the path
 		if err := hp.initNilOpt(key, toFields); err != nil {
 			return err
 		}
 
-		// TODO support primitive types
+		// TODO support more primitive types
+		// currently we only support string, and struct that can
+		// convert string, for example: typedef string UUID
+		// future support:
 		// e.g: -H "version: 3.0" -> int64(3)
+
+		assignedVal := "key"
+		if gotype != "string" {
+			assignedVal = gotype + "(key)"
+		}
+
 		if !field.Required {
 			if !val.Override {
 				hp.appendf("if in.%s != nil {", key)
 			}
-			hp.appendf(`in.%s = &key`, key)
+			hp.appendf(`in.%s = &%s`, key, assignedVal)
 			if !val.Override {
 				hp.appendf("}")
 			}
@@ -87,7 +98,7 @@ func (hp *HeaderPopulator) Propagate(
 			if !val.Override {
 				hp.appendf(`if in.%s != "" {`, key)
 			}
-			hp.appendf(`in.%s = key`, key)
+			hp.appendf(`in.%s = %s`, key, assignedVal)
 			if !val.Override {
 				hp.appendf("}")
 			}
@@ -98,7 +109,7 @@ func (hp *HeaderPopulator) Propagate(
 }
 
 // init optional field that could be nil on field assign path
-func (hp *HeaderPopulator) initNilOpt(path string, toFields []*compile.FieldSpec) error {
+func (hp *HeaderPropagator) initNilOpt(path string, toFields []*compile.FieldSpec) error {
 	initChecks := getMiddleIdentifiers(path)
 	if len(initChecks) < 2 {
 		return nil

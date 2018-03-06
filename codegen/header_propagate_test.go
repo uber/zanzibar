@@ -36,8 +36,8 @@ func (r *errPackageNameResolver) TypePackageName(string) (string, error) {
 	return "", errors.Errorf("Naive does not support relative imports")
 }
 
-func newPopulator(h codegen.PackageNameResolver) *codegen.HeaderPopulator {
-	return codegen.NewHeaderPopulator(h)
+func newPropagator(h codegen.PackageNameResolver) *codegen.HeaderPropagator {
+	return codegen.NewHeaderPropagator(h)
 }
 
 func strip(text string) string {
@@ -61,12 +61,12 @@ func propagateHeaders(
 	pkgHelper codegen.PackageNameResolver,
 ) (string, error) {
 
-	populator := newPopulator(pkgHelper)
+	propagator := newPropagator(pkgHelper)
 	program, err := compileProgram(content, map[string][]byte{})
 	if err != nil {
 		return "", err
 	}
-	err = populator.Propagate(
+	err = propagator.Propagate(
 		headers,
 		program.Types[toStruct].(*compile.StructSpec).Fields,
 		propagateMap,
@@ -74,7 +74,7 @@ func propagateHeaders(
 	if err != nil {
 		return "", err
 	}
-	return trim(strings.Join(populator.GetLines(), "\n")), nil
+	return trim(strings.Join(propagator.GetLines(), "\n")), nil
 }
 func TestErrGetIDName(t *testing.T) {
 	propagateMap := make(map[string]codegen.FieldMapperEntry)
@@ -132,6 +132,47 @@ func TestDefault(t *testing.T) {
 	s := `
 		if key, ok := headers.Get("content-type"); ok {
 			in.One = key
+		}
+		if key, ok := headers.Get("auth"); ok {
+			in.Two = &key
+		}`
+	assert.Equal(t, strip(s), strip(lines))
+}
+
+func TestTypeDefString(t *testing.T) {
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "content-type",
+		Override:      true,
+	}
+	propagateMap["Two"] = codegen.FieldMapperEntry{
+		QualifiedName: "auth",
+		Override:      true,
+	}
+	propagateMap["Three"] = codegen.FieldMapperEntry{
+		QualifiedName: "auth",
+		Override:      true,
+	}
+	lines, err := propagateHeaders(
+		[]string{"content-type", "auth"},
+		"Bar",
+		`
+		typedef string UUID
+		struct Bar {
+			1: required UUID one
+			2: optional string two
+			3: optional UUID three
+		}`,
+		propagateMap,
+		&naivePackageNameResolver{},
+	)
+	assert.NoError(t, err)
+	s := `
+		if key, ok := headers.Get("content-type"); ok {
+			in.One = structs.UUID(key)
+		}
+		if key, ok := headers.Get("auth"); ok {
+			in.Three = &structs.UUID(key)
 		}
 		if key, ok := headers.Get("auth"); ok {
 			in.Two = &key

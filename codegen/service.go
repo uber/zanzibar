@@ -251,7 +251,7 @@ func (ms *ModuleSpec) SetDownstream(
 		}
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 
-		err = method.setHeaderPopulator(method.ReqHeaders, downstreamSpec, headersPropagate, h, downstreamMethod)
+		err = method.setHeaderPropagator(method.ReqHeaders, downstreamSpec, headersPropagate, h, downstreamMethod)
 		if err != nil {
 			return err
 		}

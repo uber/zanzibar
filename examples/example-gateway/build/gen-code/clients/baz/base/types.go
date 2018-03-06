@@ -117,7 +117,7 @@ func (v *BazResponse) Equals(rhs *BazResponse) bool {
 }
 
 type NestHeaders struct {
-	UUID  string  `json:"uuid,required"`
+	UUID  string  `json:"UUID,required"`
 	Token *string `json:"token,omitempty"`
 }
 
@@ -182,7 +182,7 @@ func (v *NestHeaders) ToWire() (wire.Value, error) {
 func (v *NestHeaders) FromWire(w wire.Value) error {
 	var err error
 
-	uuidIsSet := false
+	UUIDIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -192,7 +192,7 @@ func (v *NestHeaders) FromWire(w wire.Value) error {
 				if err != nil {
 					return err
 				}
-				uuidIsSet = true
+				UUIDIsSet = true
 			}
 		case 2:
 			if field.Value.Type() == wire.TBinary {
@@ -207,7 +207,7 @@ func (v *NestHeaders) FromWire(w wire.Value) error {
 		}
 	}
 
-	if !uuidIsSet {
+	if !UUIDIsSet {
 		return errors.New("field UUID of NestHeaders is required")
 	}
 

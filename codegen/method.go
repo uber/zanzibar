@@ -132,7 +132,7 @@ type MethodSpec struct {
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
 
-	// Statements for populating headers to client requests
+	// Statements for propagating headers to client requests
 	PropagateHeadersGoStatements []string
 
 	// Statements for reading data out of url params (server)
@@ -901,7 +901,7 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
-func (ms *MethodSpec) setHeaderPopulator(
+func (ms *MethodSpec) setHeaderPropagator(
 	reqHeaders []string,
 	downstreamSpec *compile.FunctionSpec,
 	headersPropagate map[string]FieldMapperEntry,
@@ -909,7 +909,7 @@ func (ms *MethodSpec) setHeaderPopulator(
 	downstreamMethod *MethodSpec,
 ) error {
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
-	hp := NewHeaderPopulator(h)
+	hp := NewHeaderPropagator(h)
 	hp.append(
 		"func propagateHeaders",
 		pascalCase(ms.Name),
@@ -933,7 +933,7 @@ func (ms *MethodSpec) setTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
 	reqTransforms map[string]FieldMapperEntry,
-	reqAuxCheck map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
 	respTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
 	downstreamMethod *MethodSpec,
@@ -944,7 +944,7 @@ func (ms *MethodSpec) setTypeConverters(
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	typeConverter := NewTypeConverter(h, reqAuxCheck)
+	typeConverter := NewTypeConverter(h, headersPropagate)
 
 	typeConverter.append(
 		"func convertTo",

@@ -18,7 +18,7 @@ struct TransStruct {
 }
 
 struct NestHeaders {
-    1: required string uuid
+    1: required string UUID
     2: optional string token
 }
 
