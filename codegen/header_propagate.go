@@ -87,13 +87,9 @@ func (hp *HeaderPropagator) Propagate(
 		}
 
 		if !field.Required {
-			hp.appendf("if in.%s != nil {", key)
 			hp.appendf(`in.%s = &%s`, key, assignedVal)
-			hp.append("}")
 		} else {
-			hp.appendf(`if in.%s != "" {`, key)
 			hp.appendf(`in.%s = %s`, key, assignedVal)
-			hp.append("}")
 		}
 		hp.append("}")
 	}

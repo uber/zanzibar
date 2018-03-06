@@ -259,9 +259,7 @@ func TestNested(t *testing.T) {
 		if in.Two.N2 == nil {
 			in.Two.N2 = &structs.Nested{}
 		}
-		if in.Two.N2.Auth!="" {
-			in.Two.N2.Auth = key
-		}
+		in.Two.N2.Auth = key
 	}`
 	assert.Equal(t, strip(s), strip(lines))
 }
