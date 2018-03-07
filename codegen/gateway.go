@@ -462,6 +462,8 @@ type EndpointSpec struct {
 	ClientMethod string
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec
+	// check if the client is on shadow mode
+	OnShadowMode bool
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
@@ -517,6 +519,11 @@ func NewEndpointSpec(
 		return nil, errors.Errorf(
 			"Cannot support unknown endpointType for endpoint: %s", jsonFile,
 		)
+	}
+
+	onShadowMode := endpointConfigObj["onShadowMode"]
+	if onShadowMode == nil {
+		endpointConfigObj["onShadowMode"] = false
 	}
 
 	thriftFile := filepath.Join(
@@ -600,6 +607,7 @@ func NewEndpointSpec(
 		EndpointType:       endpointConfigObj["endpointType"].(string),
 		EndpointID:         endpointConfigObj["endpointId"].(string),
 		HandleID:           endpointConfigObj["handleId"].(string),
+		OnShadowMode:       endpointConfigObj["onShadowMode"].(bool),
 		ThriftFile:         thriftFile,
 		ThriftServiceName:  parts[0],
 		ThriftMethodName:   parts[1],

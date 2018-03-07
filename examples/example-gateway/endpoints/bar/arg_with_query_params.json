@@ -11,5 +11,6 @@
 	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {},
-	"resHeaderMap": {}
+	"resHeaderMap": {},
+	"onShadowMode": true
 }

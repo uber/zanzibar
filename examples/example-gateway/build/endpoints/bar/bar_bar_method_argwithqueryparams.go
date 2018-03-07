@@ -25,6 +25,7 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
@@ -72,6 +73,17 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithQueryParams_Args
+	var traceID string
+	traceID, ok := req.Header.Get("traceID")
+	if ok {
+		// only log when traceID exists
+		req.Logger.Info("Endpoint request",
+			zap.String("endpoint", h.endpoint.EndpointName),
+			zap.String("headers", fmt.Sprintf("%#v", req.Header)),
+			zap.String("traceID", traceID),
+			zap.String("body", fmt.Sprintf("%#v", requestBody)),
+		)
+	}
 
 	nameOk := req.CheckQueryValue("name")
 	if !nameOk {
