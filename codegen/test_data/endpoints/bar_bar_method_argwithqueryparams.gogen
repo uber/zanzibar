@@ -77,7 +77,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	traceID, ok := req.Header.Get("traceID")
 	if ok {
 		// only log when traceID exists
-		req.Logger.Info("Endpoint request",
+		req.Logger.Info("Endpoint request to client",
 			zap.String("endpoint", h.endpoint.EndpointName),
 			zap.String("headers", fmt.Sprintf("%#v", req.Header)),
 			zap.String("traceID", traceID),

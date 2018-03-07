@@ -13,7 +13,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $responseType := .Method.ResponseType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
-{{- $onShadowMode := .Spec.OnShadowMode }}
+{{- $shouldLogClientRequest := .Spec.ShouldLogClientRequest }}
 {{- $handleId := .Spec.HandleID }}
 {{- $middlewares := .Spec.Middlewares }}
 
@@ -113,7 +113,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{end}}
 
-	{{- if ne $onShadowMode false}}
+	{{- if ne $shouldLogClientRequest false}}
 	var traceID string
 	traceID, ok := req.Header.Get("traceID")
 	if ok {

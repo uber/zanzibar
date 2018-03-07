@@ -12,5 +12,5 @@
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {},
-	"onShadowMode": true
+	"shouldLogClientRequest": true
 }

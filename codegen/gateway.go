@@ -462,8 +462,8 @@ type EndpointSpec struct {
 	ClientMethod string
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec
-	// check if the client is on shadow mode
-	OnShadowMode bool
+	// check if should log the request of service to client
+	ShouldLogClientRequest bool
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
@@ -521,9 +521,9 @@ func NewEndpointSpec(
 		)
 	}
 
-	onShadowMode := endpointConfigObj["onShadowMode"]
-	if onShadowMode == nil {
-		endpointConfigObj["onShadowMode"] = false
+	shouldLogClientRequest := endpointConfigObj["shouldLogClientRequest"]
+	if shouldLogClientRequest == nil {
+		endpointConfigObj["shouldLogClientRequest"] = false
 	}
 
 	thriftFile := filepath.Join(
@@ -599,22 +599,22 @@ func NewEndpointSpec(
 	}
 
 	espec := &EndpointSpec{
-		ModuleSpec:         mspec,
-		JSONFile:           jsonFile,
-		GoStructsFileName:  goStructsFileName,
-		GoFolderName:       goFolderName,
-		GoPackageName:      goPackageName,
-		EndpointType:       endpointConfigObj["endpointType"].(string),
-		EndpointID:         endpointConfigObj["endpointId"].(string),
-		HandleID:           endpointConfigObj["handleId"].(string),
-		OnShadowMode:       endpointConfigObj["onShadowMode"].(bool),
-		ThriftFile:         thriftFile,
-		ThriftServiceName:  parts[0],
-		ThriftMethodName:   parts[1],
-		WorkflowType:       workflowType,
-		WorkflowImportPath: workflowImportPath,
-		ClientID:           clientID,
-		ClientMethod:       clientMethod,
+		ModuleSpec:             mspec,
+		JSONFile:               jsonFile,
+		GoStructsFileName:      goStructsFileName,
+		GoFolderName:           goFolderName,
+		GoPackageName:          goPackageName,
+		EndpointType:           endpointConfigObj["endpointType"].(string),
+		EndpointID:             endpointConfigObj["endpointId"].(string),
+		HandleID:               endpointConfigObj["handleId"].(string),
+		ShouldLogClientRequest: endpointConfigObj["shouldLogClientRequest"].(bool),
+		ThriftFile:             thriftFile,
+		ThriftServiceName:      parts[0],
+		ThriftMethodName:       parts[1],
+		WorkflowType:           workflowType,
+		WorkflowImportPath:     workflowImportPath,
+		ClientID:               clientID,
+		ClientMethod:           clientMethod,
 	}
 
 	if endpointType == "tchannel" {
