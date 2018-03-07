@@ -171,6 +171,7 @@ func (ms *ModuleSpec) SetDownstream(
 	methodName string,
 	clientSpec *ClientSpec,
 	clientMethod string,
+	headersPropagate map[string]FieldMapperEntry,
 	reqTransforms map[string]FieldMapperEntry,
 	respTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
@@ -235,7 +236,22 @@ func (ms *ModuleSpec) SetDownstream(
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 		funcSpec := method.CompiledThriftSpec
 
-		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, respTransforms, h, downstreamMethod)
+		err = method.setTypeConverters(funcSpec, downstreamSpec, reqTransforms, headersPropagate, respTransforms, h, downstreamMethod)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	if method.Downstream != nil && len(headersPropagate) > 0 {
+
+		downstreamMethod, err := findMethodByName(method.Name, method.Downstream.Services)
+		if err != nil {
+			return err
+		}
+		downstreamSpec := downstreamMethod.CompiledThriftSpec
+
+		err = method.setHeaderPropagator(method.ReqHeaders, downstreamSpec, headersPropagate, h, downstreamMethod)
 		if err != nil {
 			return err
 		}

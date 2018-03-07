@@ -39,6 +39,13 @@ service SimpleService {
         2: OtherAuthErr otherAuthErr
     )
 
+    base.TransHeaders transHeaders(
+        1: required base.TransHeaders req
+    ) throws (
+        1: AuthErr authErr
+        2: OtherAuthErr otherAuthErr
+    )
+
     void call(
         1: required BazRequest arg
         2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")

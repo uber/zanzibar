@@ -132,6 +132,9 @@ type MethodSpec struct {
 	// Statements for converting response types
 	ConvertResponseGoStatements []string
 
+	// Statements for propagating headers to client requests
+	PropagateHeadersGoStatements []string
+
 	// Statements for reading data out of url params (server)
 	RequestParamGoStatements []string
 }
@@ -898,10 +901,39 @@ func (ms *MethodSpec) setDownstream(
 	return nil
 }
 
+func (ms *MethodSpec) setHeaderPropagator(
+	reqHeaders []string,
+	downstreamSpec *compile.FunctionSpec,
+	headersPropagate map[string]FieldMapperEntry,
+	h *PackageHelper,
+	downstreamMethod *MethodSpec,
+) error {
+	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
+	hp := NewHeaderPropagator(h)
+	hp.append(
+		"func propagateHeaders",
+		pascalCase(ms.Name),
+		"ClientRequests(in ",
+		downstreamMethod.RequestType,
+		", headers zanzibar.Header) ",
+		downstreamMethod.RequestType,
+		"{",
+	)
+	err := hp.Propagate(reqHeaders, downstreamStructType, headersPropagate)
+	if err != nil {
+		return err
+	}
+	hp.append("return in")
+	hp.append("}")
+	ms.PropagateHeadersGoStatements = hp.GetLines()
+	return nil
+}
+
 func (ms *MethodSpec) setTypeConverters(
 	funcSpec *compile.FunctionSpec,
 	downstreamSpec *compile.FunctionSpec,
 	reqTransforms map[string]FieldMapperEntry,
+	headersPropagate map[string]FieldMapperEntry,
 	respTransforms map[string]FieldMapperEntry,
 	h *PackageHelper,
 	downstreamMethod *MethodSpec,
@@ -912,7 +944,7 @@ func (ms *MethodSpec) setTypeConverters(
 	structType := compile.FieldGroup(funcSpec.ArgsSpec)
 	downstreamStructType := compile.FieldGroup(downstreamSpec.ArgsSpec)
 
-	typeConverter := NewTypeConverter(h)
+	typeConverter := NewTypeConverter(h, headersPropagate)
 
 	typeConverter.append(
 		"func convertTo",
@@ -938,7 +970,7 @@ func (ms *MethodSpec) setTypeConverters(
 		return nil
 	}
 
-	respConverter := NewTypeConverter(h)
+	respConverter := NewTypeConverter(h, nil)
 
 	respConverter.append(
 		"func convert",

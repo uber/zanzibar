@@ -326,6 +326,20 @@ func (mr *MockClientMockRecorder) Trans(arg0, arg1, arg2 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Trans", reflect.TypeOf((*MockClient)(nil).Trans), arg0, arg1, arg2)
 }
 
+// TransHeaders mocks base method
+func (m *MockClient) TransHeaders(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeaders_Args) (*base.TransHeaders, map[string]string, error) {
+	ret := m.ctrl.Call(m, "TransHeaders", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*base.TransHeaders)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// TransHeaders indicates an expected call of TransHeaders
+func (mr *MockClientMockRecorder) TransHeaders(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransHeaders", reflect.TypeOf((*MockClient)(nil).TransHeaders), arg0, arg1, arg2)
+}
+
 // URLTest mocks base method
 func (m *MockClient) URLTest(arg0 context.Context, arg1 map[string]string) (map[string]string, error) {
 	ret := m.ctrl.Call(m, "URLTest", arg0, arg1)

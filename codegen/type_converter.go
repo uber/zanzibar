@@ -68,20 +68,25 @@ type PackageNameResolver interface {
 // operates on two variables, "in" and "out" and that both are a go struct.
 type TypeConverter struct {
 	LineBuilder
-	Helper        PackageNameResolver
-	uninitialized map[string]*fieldStruct
-	fieldCounter  int
-	convStructMap map[string]string
-	useRecurGen   bool
+	Helper          PackageNameResolver
+	uninitialized   map[string]*fieldStruct
+	fieldCounter    int
+	convStructMap   map[string]string
+	useRecurGen     bool
+	optionalEntries map[string]FieldMapperEntry
 }
 
-// NewTypeConverter returns *TypeConverter
-func NewTypeConverter(h PackageNameResolver) *TypeConverter {
+// NewTypeConverter returns *TypeConverter (tc)
+// @optionalEntries contains Entries that already set for tc fromFields
+// entry set in @optionalEntries, tc will not raise error when this entry
+// is required for toFields but missing from fromFields
+func NewTypeConverter(h PackageNameResolver, optionalEntries map[string]FieldMapperEntry) *TypeConverter {
 	return &TypeConverter{
-		LineBuilder:   LineBuilder{},
-		Helper:        h,
-		uninitialized: make(map[string]*fieldStruct),
-		convStructMap: make(map[string]string),
+		LineBuilder:     LineBuilder{},
+		Helper:          h,
+		uninitialized:   make(map[string]*fieldStruct),
+		convStructMap:   make(map[string]string),
+		optionalEntries: optionalEntries,
 	}
 }
 
@@ -621,17 +626,33 @@ func (c *TypeConverter) genStructConverter(
 					hasStructFieldMapping = true
 				}
 			}
+
 			//  if there's no fromField and no fieldMap transform that could be applied
 			if !hasStructFieldMapping {
-				if toField.Required {
-					// unrecoverable error
-					return errors.Errorf(
-						"required toField %s does not have a valid fromField mapping",
-						toField.Name,
-					)
+				var bypass bool
+				// check if required field is filled from other resources
+				// it can be used to set system default (customized tracing /auth required for clients),
+				// or header propagating
+				if c.optionalEntries != nil {
+					for toID := range c.optionalEntries {
+						if strings.HasPrefix(toID, toSubIdentifier) {
+							bypass = true
+							break
+						}
+					}
 				}
-				// the toField is optional and there's nothing that maps to it or its sub-fields so we should skip it
-				continue
+
+				// the toField is either covered by optionalEntries, or optional and
+				// there's nothing that maps to it or its sub-fields so we should skip it
+				if bypass || !toField.Required {
+					continue
+				}
+
+				// unrecoverable error
+				return errors.Errorf(
+					"required toField %s does not have a valid fromField mapping",
+					toField.Name,
+				)
 			}
 		}
 

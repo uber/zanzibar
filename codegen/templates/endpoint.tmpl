@@ -226,6 +226,9 @@ func (w {{$workflow}}) Handle(
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
+	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
+	{{end}}
 	clientHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
@@ -349,6 +352,12 @@ func convert{{$methodName}}{{title $cException.Name}}(
 {{$line}}
 {{ end }}
 
+{{end -}}
+
+{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+{{ range $key, $line := $method.PropagateHeadersGoStatements -}}
+{{$line}}
+{{ end }}
 {{end -}}
 
 {{end -}}

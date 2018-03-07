@@ -19,6 +19,8 @@ struct TransStruct {
     3: required NestedStruct rider
 }
 
+struct TransHeader {}
+
 struct BazResponse {
   1: required string message
 }
@@ -61,6 +63,18 @@ service SimpleService {
       zanzibar.http.method = "POST"
       zanzibar.http.path = "/baz/trans"
       zanzibar.handler = "baz.trans"
+  )
+
+  TransHeader transHeaders(
+      1: required TransHeader req
+  ) throws (
+      1: AuthErr authErr (zanzibar.http.status = "401")
+      2: OtherAuthErr otherAuthErr (zanzibar.http.status = "403")
+  ) (
+      zanzibar.http.status = "200"
+      zanzibar.http.method = "POST"
+      zanzibar.http.path = "/baz/trans-headers"
+      zanzibar.http.reqHeaders = "x-uuid,x-token"
   )
 
   // no response body

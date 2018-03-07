@@ -756,6 +756,82 @@ func (v *ServerErr) Error() string {
 	return v.String()
 }
 
+type TransHeader struct {
+}
+
+// ToWire translates a TransHeader struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *TransHeader) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a TransHeader struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a TransHeader struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v TransHeader
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *TransHeader) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a TransHeader
+// struct.
+func (v *TransHeader) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("TransHeader{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this TransHeader match the
+// provided TransHeader.
+//
+// This function performs a deep comparison.
+func (v *TransHeader) Equals(rhs *TransHeader) bool {
+
+	return true
+}
+
 type TransStruct struct {
 	Message string        `json:"message,required"`
 	Driver  *NestedStruct `json:"driver,omitempty"`

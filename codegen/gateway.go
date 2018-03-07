@@ -429,6 +429,9 @@ type EndpointSpec struct {
 	TestFixtures map[string]*EndpointTestFixture
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec
+	// HeadersPropagate, a map from endpoint request headers to
+	// client request fields.
+	HeadersPropagate map[string]FieldMapperEntry
 	// ReqTransforms, a map from client request fields to endpoint
 	// request fields that should override their values.
 	ReqTransforms map[string]FieldMapperEntry
@@ -677,6 +680,15 @@ func augmentHTTPEndpointSpec(
 			espec.RespTransforms = resTransforms
 			continue
 		}
+		// req header propagate middleware set headersPropagator
+		if name == "headersPropagate" {
+			headersPropagate, err := setPropagateMiddleware(middlewareObj)
+			if err != nil {
+				return nil, err
+			}
+			espec.HeadersPropagate = headersPropagate
+			continue
+		}
 		// Verify the middleware name is defined.
 		if midSpecs[name] == nil {
 			return nil, errors.Errorf(
@@ -796,6 +808,44 @@ func augmentHTTPEndpointSpec(
 	return espec, nil
 }
 
+func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
+	fieldMap := make(map[string]FieldMapperEntry)
+	opts, ok := middlewareObj["options"].(map[string]interface{})
+	if !ok {
+		return nil, errors.New(
+			"missing or invalid options for propagate middleware",
+		)
+	}
+	propagates := opts["propagate"].([]interface{})
+	dest := make(map[string]string)
+	for _, propagate := range propagates {
+		propagateMap := propagate.(map[string]interface{})
+		fromField, ok := propagateMap["from"].(string)
+		if !ok {
+			return nil, errors.New(
+				"propagate middleware found with no source field",
+			)
+		}
+		toField, ok := propagateMap["to"].(string)
+		if !ok {
+			return nil, errors.New(
+				"propagate middleware found with no destination field",
+			)
+		}
+		if _, ok := dest[toField]; ok {
+			return nil, errors.Errorf(
+				"propagate multiple source field to destination field %s",
+				toField,
+			)
+		}
+		dest[toField] = toField
+		fieldMap[toField] = FieldMapperEntry{
+			QualifiedName: fromField,
+		}
+	}
+	return fieldMap, nil
+}
+
 func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
 	opts, ok := middlewareObj["options"].(map[string]interface{})
@@ -809,14 +859,14 @@ func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 		transformMap := transform.(map[string]interface{})
 		fromField, ok := transformMap["from"].(string)
 		if !ok {
-			return nil, errors.Errorf(
-				"transform middleware found with no source field.",
+			return nil, errors.New(
+				"transform middleware found with no source field",
 			)
 		}
 		toField, ok := transformMap["to"].(string)
 		if !ok {
-			return nil, errors.Errorf(
-				"transform middleware found with no destination field.",
+			return nil, errors.New(
+				"transform middleware found with no destination field",
 			)
 		}
 		overrideOpt, ok := transformMap["override"].(bool)
@@ -890,7 +940,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	return e.ModuleSpec.SetDownstream(
 		e.ThriftServiceName, e.ThriftMethodName,
-		clientSpec, e.ClientMethod, e.ReqTransforms, e.RespTransforms, h,
+		clientSpec, e.ClientMethod, e.HeadersPropagate, e.ReqTransforms, e.RespTransforms, h,
 	)
 }
 
