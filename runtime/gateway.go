@@ -80,6 +80,7 @@ type Gateway struct {
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
 
+	atomLevel       *zap.AtomicLevel
 	loggerFile      *os.File
 	scopeCloser     io.Closer
 	metricsBackend  tally.CachedStatsReporter
@@ -231,6 +232,8 @@ func (gateway *Gateway) registerPredefined() {
 	gateway.HTTPRouter.RegisterRaw(
 		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
 	)
+	gateway.HTTPRouter.RegisterRaw("GET", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
+	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
 	gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
 		gateway.Logger, gateway.AllHostScope,
@@ -420,10 +423,11 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		}
 	}
 
+	atomLevel := zap.NewAtomicLevelAt(logLevel)
 	prodCore := zapcore.NewCore(
 		logEncoder,
 		output,
-		logLevel,
+		atomLevel,
 	)
 	zapLogger := zap.New(
 		NewInstrumentedZapCore(
@@ -431,6 +435,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
+	gateway.atomLevel = &atomLevel
 	gateway.logEncoder = logEncoder
 	gateway.logWriteSyncer = output
 
