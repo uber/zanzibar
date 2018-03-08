@@ -11,5 +11,8 @@
 	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {},
-	"resHeaderMap": {}
+	"resHeaderMap": {},
+	"logDownstreamRequest": {
+		"validationID": "x-trace-id"
+	}
 }
