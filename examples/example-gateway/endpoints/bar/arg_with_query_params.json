@@ -12,5 +12,7 @@
 	"middlewares": [],
 	"reqHeaderMap": {},
 	"resHeaderMap": {},
-	"shouldLogClientRequest": true
+	"logDownstreamRequest": {
+		"validationID": "x-trace-id"
+	}
 }

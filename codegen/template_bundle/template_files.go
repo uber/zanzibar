@@ -316,7 +316,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $responseType := .Method.ResponseType }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
-{{- $shouldLogClientRequest := .Spec.ShouldLogClientRequest }}
+{{- $logDownstreamRequest := .Spec.LogDownstreamRequest }}
 {{- $handleId := .Spec.HandleID }}
 {{- $middlewares := .Spec.Middlewares }}
 
@@ -416,15 +416,15 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{end}}
 
-	{{- if ne $shouldLogClientRequest false}}
-	var traceID string
-	traceID, ok := req.Header.Get("traceID")
+	{{- if ne $logDownstreamRequest.ShouldLogRequest false}}
+	var {{$logDownstreamRequest.ValidationID | pascal}} string
+	{{$logDownstreamRequest.ValidationID | pascal}}, ok := req.Header.Get("{{$logDownstreamRequest.ValidationID}}")
 	if ok {
 		// only log when traceID exists
 		req.Logger.Info("Endpoint request to client",
 			zap.String("endpoint", h.endpoint.EndpointName),
 			zap.String("headers", fmt.Sprintf("%#v", req.Header)),
-			zap.String("traceID", traceID),
+			zap.String("{{$logDownstreamRequest.ValidationID}}", {{$logDownstreamRequest.ValidationID | pascal}}),
 			zap.String("body", fmt.Sprintf("%#v", requestBody)),
 		)
 	}
@@ -692,7 +692,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10706, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10899, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

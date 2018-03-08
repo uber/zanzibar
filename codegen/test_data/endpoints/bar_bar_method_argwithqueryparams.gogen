@@ -73,14 +73,14 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 ) {
 	var requestBody endpointsBarBar.Bar_ArgWithQueryParams_Args
-	var traceID string
-	traceID, ok := req.Header.Get("traceID")
+	var XTraceID string
+	XTraceID, ok := req.Header.Get("x-trace-id")
 	if ok {
 		// only log when traceID exists
 		req.Logger.Info("Endpoint request to client",
 			zap.String("endpoint", h.endpoint.EndpointName),
 			zap.String("headers", fmt.Sprintf("%#v", req.Header)),
-			zap.String("traceID", traceID),
+			zap.String("x-trace-id", XTraceID),
 			zap.String("body", fmt.Sprintf("%#v", requestBody)),
 		)
 	}

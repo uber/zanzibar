@@ -398,6 +398,12 @@ func newMiddlewareSpec(cfg *MiddlewareConfig) *MiddlewareSpec {
 	}
 }
 
+// LogDownstreamRequestSpec holds the information about logging request from service to client
+type LogDownstreamRequestSpec struct {
+	ShouldLogRequest bool
+	ValidationID string
+}
+
 // EndpointSpec holds information about each endpoint in the
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
@@ -463,7 +469,7 @@ type EndpointSpec struct {
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec
 	// check if should log the request of service to client
-	ShouldLogClientRequest bool
+	LogDownstreamRequest LogDownstreamRequestSpec
 }
 
 func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
@@ -519,11 +525,6 @@ func NewEndpointSpec(
 		return nil, errors.Errorf(
 			"Cannot support unknown endpointType for endpoint: %s", jsonFile,
 		)
-	}
-
-	shouldLogClientRequest := endpointConfigObj["shouldLogClientRequest"]
-	if shouldLogClientRequest == nil {
-		endpointConfigObj["shouldLogClientRequest"] = false
 	}
 
 	thriftFile := filepath.Join(
@@ -607,7 +608,6 @@ func NewEndpointSpec(
 		EndpointType:           endpointConfigObj["endpointType"].(string),
 		EndpointID:             endpointConfigObj["endpointId"].(string),
 		HandleID:               endpointConfigObj["handleId"].(string),
-		ShouldLogClientRequest: endpointConfigObj["shouldLogClientRequest"].(bool),
 		ThriftFile:             thriftFile,
 		ThriftServiceName:      parts[0],
 		ThriftMethodName:       parts[1],
@@ -642,6 +642,12 @@ func augmentHTTPEndpointSpec(
 	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
+	espec.LogDownstreamRequest = LogDownstreamRequestSpec{}
+	logRequest, ok := endpointConfigObj["logDownstreamRequest"].(map[string]interface{})
+	if ok {
+		espec.LogDownstreamRequest.ShouldLogRequest = true
+		espec.LogDownstreamRequest.ValidationID = logRequest["validationID"].(string)
+	}
 
 	testFixtures, err := testFixtures(endpointConfigObj)
 	if err != nil {
