@@ -401,7 +401,7 @@ func newMiddlewareSpec(cfg *MiddlewareConfig) *MiddlewareSpec {
 // LogDownstreamRequestSpec holds the information about logging request from service to client
 type LogDownstreamRequestSpec struct {
 	ShouldLogRequest bool
-	ValidationID string
+	ValidationID     string
 }
 
 // EndpointSpec holds information about each endpoint in the
@@ -600,21 +600,21 @@ func NewEndpointSpec(
 	}
 
 	espec := &EndpointSpec{
-		ModuleSpec:             mspec,
-		JSONFile:               jsonFile,
-		GoStructsFileName:      goStructsFileName,
-		GoFolderName:           goFolderName,
-		GoPackageName:          goPackageName,
-		EndpointType:           endpointConfigObj["endpointType"].(string),
-		EndpointID:             endpointConfigObj["endpointId"].(string),
-		HandleID:               endpointConfigObj["handleId"].(string),
-		ThriftFile:             thriftFile,
-		ThriftServiceName:      parts[0],
-		ThriftMethodName:       parts[1],
-		WorkflowType:           workflowType,
-		WorkflowImportPath:     workflowImportPath,
-		ClientID:               clientID,
-		ClientMethod:           clientMethod,
+		ModuleSpec:         mspec,
+		JSONFile:           jsonFile,
+		GoStructsFileName:  goStructsFileName,
+		GoFolderName:       goFolderName,
+		GoPackageName:      goPackageName,
+		EndpointType:       endpointConfigObj["endpointType"].(string),
+		EndpointID:         endpointConfigObj["endpointId"].(string),
+		HandleID:           endpointConfigObj["handleId"].(string),
+		ThriftFile:         thriftFile,
+		ThriftServiceName:  parts[0],
+		ThriftMethodName:   parts[1],
+		WorkflowType:       workflowType,
+		WorkflowImportPath: workflowImportPath,
+		ClientID:           clientID,
+		ClientMethod:       clientMethod,
 	}
 
 	if endpointType == "tchannel" {
