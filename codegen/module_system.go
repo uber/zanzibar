@@ -1276,9 +1276,8 @@ func GenerateMockInitializer(
 ) ([]byte, error) {
 	leafWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
-		// cast is guaranteed to succeed at this point
-		spec := leaf.genSpec.(*ClientSpec)
-		if spec.Fixture != nil {
+		spec, ok := leaf.genSpec.(*ClientSpec)
+		if ok && spec.Fixture != nil {
 			leafWithFixture[leaf.InstanceName] = spec.Fixture.ImportPath
 		}
 	}
