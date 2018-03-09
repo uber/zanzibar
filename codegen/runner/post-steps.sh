@@ -18,6 +18,11 @@ if [ -z "$2" ]; then
 	exit 1
 fi
 
+if [ -z "$3" ]; then
+	echo "generating mocks disabled"
+	exit 0
+fi
+
 start=$(cat .TMP_ZANZIBAR_TIMESTAMP_FILE.txt)
 
 CONFIG_DIR="$1"
