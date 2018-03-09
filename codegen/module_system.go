@@ -198,13 +198,20 @@ type ClientTestFixture struct {
 }
 
 // NewDefaultModuleSystem creates a fresh instance of the default zanzibar
-// module system (clients, endpoints)
+// module system (clients, endpoints, services) with a post build hook to generate client mocks
 func NewDefaultModuleSystem(
 	h *PackageHelper,
+	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	system := NewModuleSystem()
-	tmpl, err := NewDefaultTemplate()
+	clienMockGenHook, err := ClientMockGenHook(h)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating client mock gen hook")
+	}
 
+	allHooks := append([]PostGenHook{clienMockGenHook}, hooks...)
+	system := NewModuleSystem(allHooks...)
+
+	tmpl, err := NewDefaultTemplate()
 	if err != nil {
 		return nil, err
 	}
