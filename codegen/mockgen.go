@@ -22,13 +22,14 @@ package codegen
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/pkg/errors"
-	"strings"
 )
 
 const (
@@ -49,6 +50,7 @@ func NewMockgenBin(projRoot string) (*MockgenBin, error) {
 	if projRoot == exampleGatewayPkg {
 		projRoot = zanzibarPkg
 	}
+	// we assume that the vendor directory is flattened as Glide does
 	mockgenDir := path.Join(goPath, "src", projRoot, "vendor", mockgenPkg)
 	if _, err := os.Stat(mockgenDir); err != nil {
 		return nil, errors.Wrapf(
@@ -118,4 +120,40 @@ func (m MockgenBin) GenMock(instance *ModuleInstance, dest, pkg, intf string) er
 	}
 
 	return nil
+}
+
+// ClientMockGenHook returns a PostGenHook to generate client mocks
+func ClientMockGenHook(h *PackageHelper) (PostGenHook, error) {
+	bin, err := NewMockgenBin(h.PackageRoot())
+	if err != nil {
+		return nil, errors.Wrap(err, "error building mockgen binary")
+	}
+
+	return func(instances map[string][]*ModuleInstance) error {
+		fmt.Println("Generating client mocks:")
+		mockCount := len(instances["client"])
+		for i, instance := range instances["client"] {
+			if err := bin.GenMock(
+				instance,
+				"mock-client/mock_client.go",
+				"clientmock",
+				"Client",
+			); err != nil {
+				return errors.Wrapf(
+					err,
+					"error generating mocks for client %q",
+					instance.InstanceName,
+				)
+			}
+			fmt.Printf(
+				"Generating %12s %12s %-20s in %-40s %d/%d\n",
+				"mock",
+				instance.ClassName,
+				instance.InstanceName,
+				path.Join(path.Base(h.CodeGenTargetPath()), instance.Directory),
+				i+1, mockCount,
+			)
+		}
+		return nil
+	}, nil
 }
