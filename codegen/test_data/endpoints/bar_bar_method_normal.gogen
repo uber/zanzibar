@@ -52,7 +52,7 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.Example.NewMiddlewareHandle(

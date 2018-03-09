@@ -76,6 +76,7 @@ func TestHandlers(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
 		),
@@ -162,6 +163,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
 		),
@@ -216,6 +218,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
 		),
@@ -278,6 +281,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
 		),

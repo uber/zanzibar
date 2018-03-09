@@ -49,7 +49,7 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"googlenow", "addCredentials",
 		handler.HandleRequest,
 	)

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -96,6 +97,11 @@ func (res *ServerHTTPResponse) finish() {
 		res.Request.metrics.Errors.Inc(1)
 	} else {
 		res.Request.metrics.Success.Inc(1)
+	}
+
+	span := opentracing.SpanFromContext(res.Request.httpRequest.Context())
+	if span != nil {
+		span.Finish()
 	}
 
 	// write logs

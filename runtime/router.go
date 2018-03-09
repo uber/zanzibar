@@ -26,6 +26,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -51,12 +52,14 @@ type RouterEndpoint struct {
 	HandlerFn    HandlerFn
 	logger       *zap.Logger
 	metrics      *InboundHTTPMetrics
+	tracer       opentracing.Tracer
 }
 
 // NewRouterEndpoint creates an endpoint with all the necessary data
 func NewRouterEndpoint(
 	logger *zap.Logger,
 	scope tally.Scope,
+	tracer opentracing.Tracer,
 	endpointID string,
 	handlerID string,
 	handler HandlerFn,
@@ -75,6 +78,7 @@ func NewRouterEndpoint(
 		HandlerFn:    handler,
 		logger:       logger,
 		metrics:      NewInboundHTTPMetrics(scope),
+		tracer:       tracer,
 	}
 }
 
@@ -112,11 +116,11 @@ type HTTPRouter struct {
 func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	router := &HTTPRouter{
 		notFoundEndpoint: NewRouterEndpoint(
-			gateway.Logger, gateway.AllHostScope,
+			gateway.Logger, gateway.AllHostScope, gateway.Tracer,
 			notFound, notFound, nil,
 		),
 		methodNotAllowedEndpoint: NewRouterEndpoint(
-			gateway.Logger, gateway.AllHostScope,
+			gateway.Logger, gateway.AllHostScope, gateway.Tracer,
 			methodNotAllowed, methodNotAllowed, nil,
 		),
 		gateway:    gateway,

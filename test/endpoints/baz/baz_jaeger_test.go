@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/jaeger-client-go/thrift-gen/jaeger"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
@@ -91,11 +92,18 @@ func TestCallJaeger(t *testing.T) {
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
-	assert.Equal(t, 1, len(batches))
-	assert.Equal(t, 1, len(batches[0].Spans))
-	span := batches[0].Spans[0]
-	assert.Equal(t, "SimpleService::call", span.GetOperationName())
+	var spans []*jaeger.Span
+	for _, batch := range batches {
+		for _, span := range batch.Spans {
+			spans = append(spans, span)
+		}
+	}
 
+	assert.Equal(t, 2, len(spans))
+	assert.Equal(t, "SimpleService::call", spans[0].GetOperationName())
+	assert.Equal(t, "POST baz.call", spans[1].GetOperationName())
+
+	span := spans[0]
 	for _, tag := range span.GetTags() {
 		if tag.GetKey() == "peer.service" {
 			assert.Equal(t, "bazService", tag.GetVStr())

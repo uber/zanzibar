@@ -50,7 +50,7 @@ func NewSimpleServiceTransHandler(deps *module.Dependencies) *SimpleServiceTrans
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"baz", "trans",
 		handler.HandleRequest,
 	)

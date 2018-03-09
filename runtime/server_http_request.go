@@ -21,7 +21,9 @@
 package zanzibar
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -31,6 +33,8 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/julienschmidt/httprouter"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"go.uber.org/zap"
 )
 
@@ -41,6 +45,7 @@ type ServerHTTPRequest struct {
 	started      bool
 	startTime    time.Time
 	metrics      *InboundHTTPMetrics
+	tracer       opentracing.Tracer
 	queryValues  url.Values
 	parseFailed  bool
 	Logger       *zap.Logger
@@ -71,6 +76,7 @@ func NewServerHTTPRequest(
 		Method:       r.Method,
 		Params:       params,
 		Header:       NewServerHTTPHeader(r.Header),
+		tracer:       endpoint.tracer,
 	}
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
@@ -93,6 +99,26 @@ func (req *ServerHTTPRequest) start() {
 
 	// emit metrics
 	req.metrics.Recvd.Inc(1)
+
+	if req.tracer != nil {
+		// TODO better operation name   normalized path  etc.
+		opName := fmt.Sprintf("%s %s.%s", req.Method, req.EndpointName, req.HandlerName)
+		carrier := opentracing.HTTPHeadersCarrier(req.httpRequest.Header)
+		spanContext, err := req.tracer.Extract(opentracing.HTTPHeaders, carrier)
+		var span opentracing.Span
+		if err != nil {
+			if err != opentracing.ErrSpanContextNotFound {
+				req.Logger.Warn("Error Extracting Trace Headers", zap.Error(err))
+			}
+			span = req.tracer.StartSpan(opName)
+
+		} else {
+			span = req.tracer.StartSpan(opName, ext.RPCServerOption(spanContext))
+		}
+		newCtx := opentracing.ContextWithSpan(req.httpRequest.Context(), span)
+		req.httpRequest = req.httpRequest.WithContext(newCtx)
+	}
+
 }
 
 // CheckHeaders verifies that request contains required headers.
@@ -450,4 +476,9 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	}
 
 	return true
+}
+
+// GetContext returns the http request Context
+func (req *ServerHTTPRequest) GetContext() context.Context {
+	return req.httpRequest.Context()
 }
