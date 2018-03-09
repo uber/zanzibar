@@ -203,18 +203,19 @@ func NewDefaultModuleSystem(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	clienMockGenHook, err := ClientMockGenHook(h)
+	clientMockGenHook, err := ClientMockGenHook(h)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating client mock gen hook")
 	}
-
-	allHooks := append([]PostGenHook{clienMockGenHook}, hooks...)
-	system := NewModuleSystem(allHooks...)
 
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {
 		return nil, err
 	}
+	servcieMockGenHook := ServiceMockGenHook(h, tmpl)
+
+	allHooks := append([]PostGenHook{clientMockGenHook, servcieMockGenHook}, hooks...)
+	system := NewModuleSystem(allHooks...)
 
 	// Register client module class and type generators
 	if err := system.RegisterClass(ModuleClass{
@@ -1077,19 +1078,6 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	mockService, err := generator.templates.ExecTemplate(
-		"service_mock.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service mock_service.go for %s",
-			instance.InstanceName,
-		)
-	}
-
 	// generate main.go
 	main, err := generator.templates.ExecTemplate(
 		"main.tmpl",
@@ -1144,26 +1132,11 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	mockInitializer, err := GenerateMockInitializer(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service mock initializer for %s",
-			instance.InstanceName,
-		)
-	}
-
 	files := map[string][]byte{
-		"service.go":                   service,
-		"main/main.go":                 main,
-		"main/main_test.go":            mainTest,
-		"module/init.go":               initializer,
-		"mock-service/mock_init.go":    mockInitializer,
-		"mock-service/mock_service.go": mockService,
+		"service.go":        service,
+		"main/main.go":      main,
+		"main/main_test.go": mainTest,
+		"module/init.go":    initializer,
 	}
 
 	if dependencies != nil {
@@ -1271,30 +1244,6 @@ func GenerateInitializer(
 	return template.ExecTemplate(
 		"module_initializer.tmpl",
 		instance,
-		packageHelper,
-	)
-}
-
-// GenerateMockInitializer is like GenerateInitializer but with leaf nodes being mocks.
-func GenerateMockInitializer(
-	instance *ModuleInstance,
-	packageHelper *PackageHelper,
-	template *Template,
-) ([]byte, error) {
-	leafWithFixture := map[string]string{}
-	for _, leaf := range instance.RecursiveDependencies["client"] {
-		spec, ok := leaf.genSpec.(*ClientSpec)
-		if ok && spec.Fixture != nil {
-			leafWithFixture[leaf.InstanceName] = spec.Fixture.ImportPath
-		}
-	}
-	data := map[string]interface{}{
-		"Instance":        instance,
-		"LeafWithFixture": leafWithFixture,
-	}
-	return template.ExecTemplate(
-		"module_mock_initializer.tmpl",
-		data,
 		packageHelper,
 	)
 }
