@@ -197,9 +197,9 @@ type ClientTestFixture struct {
 	ClientResHeaders FixtureBlob     `json:"clientResHeaders"`
 }
 
-// NewDefaultModuleSystem creates a fresh instance of the default zanzibar
-// module system (clients, endpoints, services) with a post build hook to generate client mocks
-func NewDefaultModuleSystem(
+// NewDefaultModuleSystemWithMockHook reates a fresh instance of the default zanzibar
+// module system (clients, endpoints, services) with a post build hook to generate client and service mocks
+func NewDefaultModuleSystemWithMockHook(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
@@ -208,14 +208,28 @@ func NewDefaultModuleSystem(
 		return nil, errors.Wrap(err, "error creating client mock gen hook")
 	}
 
+	t, err := NewDefaultTemplate()
+	if err != nil {
+		return nil, err
+	}
+	serviceMockGenHook := ServiceMockGenHook(h, t)
+
+	allHooks := append([]PostGenHook{clientMockGenHook, serviceMockGenHook}, hooks...)
+	return NewDefaultModuleSystem(h, allHooks...)
+}
+
+// NewDefaultModuleSystem creates a fresh instance of the default zanzibar
+// module system (clients, endpoints, services)
+func NewDefaultModuleSystem(
+	h *PackageHelper,
+	hooks ...PostGenHook,
+) (*ModuleSystem, error) {
+	system := NewModuleSystem(hooks...)
+
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {
 		return nil, err
 	}
-	servcieMockGenHook := ServiceMockGenHook(h, tmpl)
-
-	allHooks := append([]PostGenHook{clientMockGenHook, servcieMockGenHook}, hooks...)
-	system := NewModuleSystem(allHooks...)
 
 	// Register client module class and type generators
 	if err := system.RegisterClass(ModuleClass{
