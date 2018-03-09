@@ -1744,7 +1744,7 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
-	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}/mock-client"
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
 	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
 	{{end -}}
@@ -1761,9 +1761,9 @@ import (
 type {{$mockDeps}} struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{- if (index $leafWithFixture $dependency.InstanceName) }}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}WithFixture
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.GeneratedPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}WithFixture
 	{{- else }}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.ImportPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} *{{$dependency.PackageInfo.GeneratedPackageAlias}}.Mock{{$dependency.PackageInfo.ExportType}}
 	{{- end }}
 	{{- end}}
 }
@@ -1790,9 +1790,9 @@ func InitializeDependenciesMock(
 		{{- range $idx, $dependency := $moduleInstances}}
 		{{- $pkgInfo := $dependency.PackageInfo }}
 		{{- if (index $leafWithFixture $dependency.InstanceName) }}
-		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
 		{{- else }}
-		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.ImportPackageAlias}}.NewMock{{title $className}}(ctrl),
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.NewMock{{title $className}}(ctrl),
 		{{- end }}
 		{{- end }}
 	}
@@ -1833,7 +1833,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4055, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4073, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

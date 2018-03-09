@@ -33,6 +33,7 @@ import (
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
+	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -48,7 +49,6 @@ import (
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
-	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies
@@ -58,7 +58,7 @@ type MockClientNodes struct {
 	Contacts  *contactsclientgenerated.MockClientWithFixture
 	GoogleNow *googlenowclientgenerated.MockClient
 	Multi     *multiclientgenerated.MockClient
-	Quux      *quuxclientstatic.MockClient
+	Quux      *quuxclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -82,7 +82,7 @@ func InitializeDependenciesMock(
 		Contacts:  contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
 		GoogleNow: googlenowclientgenerated.NewMockClient(ctrl),
 		Multi:     multiclientgenerated.NewMockClient(ctrl),
-		Quux:      quuxclientstatic.NewMockClient(ctrl),
+		Quux:      quuxclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
