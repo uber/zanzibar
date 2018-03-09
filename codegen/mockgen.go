@@ -89,9 +89,9 @@ func NewMockgenBin(projRoot string) (*MockgenBin, error) {
 // the instance's generated package dir, pkg is the package name of the generated mocks,
 // and intf is the interface to generate mock for
 func (m MockgenBin) GenMock(instance *ModuleInstance, dest, pkg, intf string) error {
-	importPath := instance.PackageInfo.PackagePath
-	if _, ok := instance.Config["thriftFile"]; ok {
-		importPath = instance.PackageInfo.GeneratedPackagePath
+	importPath := instance.PackageInfo.GeneratedPackagePath
+	if instance.ClassType == "custom" {
+		importPath = instance.PackageInfo.PackagePath
 	}
 
 	genDir := path.Join(os.Getenv("GOPATH"), "src")
