@@ -48,18 +48,24 @@ const (
 const configSuffix = "-config.json"
 
 // NewModuleSystem returns a new module system
-func NewModuleSystem() *ModuleSystem {
+func NewModuleSystem(postGenHook ...PostGenHook) *ModuleSystem {
 	return &ModuleSystem{
-		classes:    map[string]*ModuleClass{},
-		classOrder: []string{},
+		classes:     map[string]*ModuleClass{},
+		classOrder:  []string{},
+		postGenHook: postGenHook,
 	}
 }
 
 // ModuleSystem defines the module classes and their type generators
 type ModuleSystem struct {
-	classes    map[string]*ModuleClass
-	classOrder []string
+	classes     map[string]*ModuleClass
+	classOrder  []string
+	postGenHook []PostGenHook
 }
+
+// PostGenHook provides a way to do work after the build is generated,
+// useful to augment the build, e.g. generate mocks after interfaces are generated
+type PostGenHook func(map[string][]*ModuleInstance) error
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
@@ -878,7 +884,6 @@ func (system *ModuleSystem) GenerateBuild(
 				classInstance.Directory,
 			)
 			prettyBuildPath := filepath.Join(
-				".",
 				filepath.Base(targetGenDir),
 				classInstance.Directory,
 			)
@@ -953,6 +958,16 @@ func (system *ModuleSystem) GenerateBuild(
 					}
 				}
 			}
+		}
+	}
+
+	for i, hook := range system.postGenHook {
+		if err := hook(resolvedModules); err != nil {
+			return resolvedModules, errors.Wrapf(
+				err,
+				"error running post generation hook number %d",
+				i,
+			)
 		}
 	}
 
