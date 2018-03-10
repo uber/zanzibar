@@ -89,7 +89,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 			buildPath := filepath.Join(h.CodeGenTargetPath(), instance.Directory)
 			mockInitPath := filepath.Join(buildPath, "mock-service/mock_init.go")
-			mockServicePath := filepath.Join(buildPath, "mock-service/mock_Service.go")
+			mockServicePath := filepath.Join(buildPath, "mock-service/mock_service.go")
 
 			for _, s := range []struct {
 				path    string
