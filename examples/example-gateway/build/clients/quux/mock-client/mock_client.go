@@ -32,14 +32,14 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Echo mocks base method
-func (m *MockClient) Echo(arg0 string) string {
-	ret := m.ctrl.Call(m, "Echo", arg0)
+// EchoString mocks base method
+func (m *MockClient) EchoString(arg0 string) string {
+	ret := m.ctrl.Call(m, "EchoString", arg0)
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Echo indicates an expected call of Echo
-func (mr *MockClientMockRecorder) Echo(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Echo", reflect.TypeOf((*MockClient)(nil).Echo), arg0)
+// EchoString indicates an expected call of EchoString
+func (mr *MockClientMockRecorder) EchoString(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0)
 }
