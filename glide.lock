@@ -1,15 +1,6 @@
-hash: b44011d948bd794eb6b7fe5f9592de893215deaf65c45b8c669e72f48d69e33b
-updated: 2018-02-16T21:49:37.042506-08:00
+hash: 64ca5bc644c90e95fcd9c892bc7ea94e0df42b8e9f29da81a250c9c184fa90f9
+updated: 2018-03-09T17:09:31.818929-08:00
 imports:
-- name: cloud.google.com/go
-  version: cf555a6f15e9db85c41392d14c9018daceeace40
-  subpackages:
-  - compute/metadata
-  - iam
-  - internal
-  - internal/optional
-  - internal/version
-  - storage
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
@@ -19,7 +10,7 @@ imports:
 - name: github.com/buger/jsonparser
   version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
 - name: github.com/codahale/hdrhistogram
-  version: f8ad88b59a584afeee9d334eff879b104439117b
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -32,37 +23,16 @@ imports:
   version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-- name: github.com/golang/lint
-  version: e14d9b0f1d332b1420c1ffa32562ad2dc84d645d
 - name: github.com/golang/mock
   version: 58cd061d09382b6011f84c1291ebe50ef2e25bab
   subpackages:
   - gomock
-- name: github.com/golang/protobuf
-  version: c9c7427a2a70d2eb3bafa0ab2dc163e45f143317
-  subpackages:
-  - proto
-  - protoc-gen-go/descriptor
-  - ptypes
-  - ptypes/any
-  - ptypes/duration
-  - ptypes/timestamp
-- name: github.com/googleapis/gax-go
-  version: 317e0006254c44a0ac427cc52a0e083ff0b9622f
 - name: github.com/jessevdk/go-flags
-  version: 6cf8f02b4ae8ba723ddc64dcfd403e530c06d927
+  version: f88afde2fa19a30cf50ba4b05b3d13bc6bae3079
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
-- name: github.com/kisielk/errcheck
-  version: b1445a9dd8285a50c6d1661d16f0a9ceb08125f7
-  subpackages:
-  - internal/errcheck
-- name: github.com/kisielk/gotool
-  version: d6ce6262d87e3a4e153e86023ff56ae771554a41
-  subpackages:
-  - internal/load
 - name: github.com/mailru/easyjson
   version: 4d347d79dea0067c945f374f990601decb08abb5
   subpackages:
@@ -79,6 +49,8 @@ imports:
   subpackages:
   - ext
   - log
+- name: github.com/pborman/uuid
+  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -97,7 +69,7 @@ imports:
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
-  version: 6c4631652c6aab57c64f65c2e0aaec2e9aae3a64
+  version: 522328b48efad0c6034dba92bf39228694e9d31f
   subpackages:
   - m3
   - m3/customtransports
@@ -131,9 +103,9 @@ imports:
   - trand
   - typed
 - name: github.com/xeipuuv/gojsonpointer
-  version: 6fe8760cad3569743d51ddbb243b26f8456742dc
+  version: 4e3ac2762d5f479393488629ee9370b50873b3a6
 - name: github.com/xeipuuv/gojsonreference
-  version: e02fc20de94c78484cd5ffb007f8af96be030a45
+  version: bd5ef7bd5415a7ac448318e64f11a24cd21e594b
 - name: github.com/xeipuuv/gojsonschema
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
@@ -174,171 +146,8 @@ imports:
   - internal/exit
   - zapcore
   - zaptest/observer
-- name: golang.org/x/build
-  version: ef2faf7a5d16b41e67a26b9e1b415f8b780bdeef
-  subpackages:
-  - autocertcache
-- name: golang.org/x/crypto
-  version: 81e90905daefcd6fd217b62423c0908922eadb30
-  subpackages:
-  - acme
-  - acme/autocert
 - name: golang.org/x/net
-  version: 136a25c244d3019482a795d728110278d6ba09a4
+  version: d25186b37f34ebdbbea8f488ef055638dfab272d
   subpackages:
   - context
-  - context/ctxhttp
-  - html
-  - html/atom
-  - http2
-  - http2/hpack
-  - idna
-  - internal/timeseries
-  - lex/httplex
-  - trace
-  - websocket
-- name: golang.org/x/oauth2
-  version: 543e37812f10c46c622c9575afd7ad22f22a12ba
-  subpackages:
-  - google
-  - internal
-  - jws
-  - jwt
-- name: golang.org/x/text
-  version: e19ae1496984b1c655b8044a65c0300a3c878dd3
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
-- name: golang.org/x/tools
-  version: ce871d178848e3eea1e8795e5cfb74053dde4bb9
-  subpackages:
-  - benchmark/parse
-  - blog
-  - blog/atom
-  - cmd/guru
-  - cmd/guru/serial
-  - container/intsets
-  - cover
-  - go/ast/astutil
-  - go/buildutil
-  - go/callgraph
-  - go/callgraph/cha
-  - go/callgraph/rta
-  - go/callgraph/static
-  - go/gccgoexportdata
-  - go/gcexportdata
-  - go/gcimporter15
-  - go/internal/gccgoimporter
-  - go/loader
-  - go/pointer
-  - go/ssa
-  - go/ssa/interp
-  - go/ssa/ssautil
-  - go/types/typeutil
-  - godoc
-  - godoc/analysis
-  - godoc/dl
-  - godoc/proxy
-  - godoc/redirect
-  - godoc/short
-  - godoc/static
-  - godoc/util
-  - godoc/vfs
-  - godoc/vfs/gatefs
-  - godoc/vfs/httpfs
-  - godoc/vfs/mapfs
-  - godoc/vfs/zipfs
-  - imports
-  - playground
-  - playground/socket
-  - present
-  - refactor/eg
-  - refactor/importgraph
-  - refactor/rename
-  - refactor/satisfy
-- name: google.golang.org/api
-  version: c7a403bb5fe12fe4644bb956edd5cd677626120a
-  subpackages:
-  - gensupport
-  - googleapi
-  - googleapi/internal/uritemplates
-  - googleapi/transport
-  - internal
-  - iterator
-  - option
-  - storage/v1
-  - transport/http
-- name: google.golang.org/appengine
-  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
-  subpackages:
-  - datastore
-  - internal
-  - internal/app_identity
-  - internal/base
-  - internal/datastore
-  - internal/log
-  - internal/memcache
-  - internal/modules
-  - internal/remote_api
-  - internal/urlfetch
-  - internal/user
-  - log
-  - memcache
-  - urlfetch
-  - user
-- name: google.golang.org/genproto
-  version: a8101f21cf983e773d0c1133ebc5424792003214
-  subpackages:
-  - googleapis/api/annotations
-  - googleapis/iam/v1
-  - googleapis/rpc/status
-- name: google.golang.org/grpc
-  version: 6b51017f791ae1cfbec89c52efdf444b13b550ef
-  subpackages:
-  - balancer
-  - balancer/base
-  - balancer/roundrobin
-  - codes
-  - connectivity
-  - credentials
-  - encoding
-  - grpclb/grpc_lb_v1/messages
-  - grpclog
-  - internal
-  - keepalive
-  - metadata
-  - naming
-  - peer
-  - resolver
-  - resolver/dns
-  - resolver/passthrough
-  - stats
-  - status
-  - tap
-  - transport
-- name: honnef.co/go/tools
-  version: 8ed405e85c65fb38745a8eafe01ee9590523f172
-  subpackages:
-  - callgraph
-  - callgraph/cha
-  - callgraph/rta
-  - callgraph/static
-  - deprecated
-  - errcheck
-  - functions
-  - gcsizes
-  - internal/sharedcheck
-  - lint
-  - lint/lintutil
-  - lint/testutil
-  - simple
-  - ssa
-  - ssa/ssautil
-  - staticcheck
-  - staticcheck/vrp
-  - structlayout
-  - unused
-  - version
 testImports: []
