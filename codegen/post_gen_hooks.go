@@ -31,6 +31,39 @@ import (
 
 const clientInterface = "Client"
 
+// helper struct to pull out the fixture config
+type moduleConfig struct {
+	Config *config `json:"config"`
+}
+
+// config is the struct corresponding to the config field in client-config.json
+type config struct {
+	CustomImportPath string   `json:"customImportPath"`
+	Fixture          *Fixture `json:"fixture"`
+}
+
+// Fixture specifies client fixture import path and all scenarios
+type Fixture struct {
+	// ImportPath is the package where the user-defined Fixture global variable is contained.
+	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
+	ImportPath string `json:"importPath"`
+	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
+	Scenarios map[string][]string `json:"scenarios"`
+}
+
+// Validate the fixture configuration
+func (f *Fixture) Validate(methods map[string]interface{}) error {
+	if f.ImportPath == "" {
+		return errors.New("fixture importPath is empty")
+	}
+	for m := range f.Scenarios {
+		if _, ok := methods[m]; !ok {
+			return errors.Errorf("%q is not a valid method", m)
+		}
+	}
+	return nil
+}
+
 // ClientMockGenHook returns a PostGenHook to generate client mocks
 func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	bin, err := NewMockgenBin(h, t)
@@ -41,26 +74,58 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	return func(instances map[string][]*ModuleInstance) error {
 		fmt.Println("Generating client mocks:")
 		mockCount := len(instances["client"])
+		files := make(map[string][]byte)
 		for i, instance := range instances["client"] {
-			if err := bin.GenMock(
-				instance,
-				"mock-client/mock_client.go",
-				"clientmock",
-				clientInterface,
-			); err != nil {
+			var mc moduleConfig
+			if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
+				return errors.Wrapf(
+					err,
+					"error parsing client-config.json for client %q",
+					instance.InstanceName,
+				)
+			}
+
+			genDir := filepath.Join(h.CodeGenTargetPath(), instance.Directory, "mock-client")
+
+			importPath := instance.PackageInfo.GeneratedPackagePath
+			if instance.ClassType == "custom" {
+				importPath = mc.Config.CustomImportPath
+				if importPath == "" {
+					return errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
+				}
+			}
+
+			// generate mock client
+			mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
+			if err != nil {
 				return errors.Wrapf(
 					err,
 					"error generating mocks for client %q",
 					instance.InstanceName,
 				)
 			}
+			files[filepath.Join(genDir, "mock_client.go")] = mock
 
-			if err := bin.AugmentMockWithFixture(instance, clientInterface); err != nil {
-				return errors.Wrapf(
-					err,
-					"error generating mock client with fixtures for client %q",
-					instance.InstanceName,
-				)
+			// generate fixture types and augmented mock client
+			f := mc.Config.Fixture
+			if f != nil && f.Scenarios != nil {
+				types, augMock, err := bin.AugmentMockWithFixture(importPath, f, clientInterface)
+				if err != nil {
+					return errors.Wrapf(
+						err,
+						"error generating mock client with fixtures for client %q",
+						instance.InstanceName,
+					)
+				}
+
+				files[filepath.Join(genDir, "types.go")] = types
+				files[filepath.Join(genDir, "mock_client_with_fixture.go")] = augMock
+			}
+
+			for p, data := range files {
+				if err := writeAndFormat(p, data); err != nil {
+					return err
+				}
 			}
 
 			fmt.Printf(
@@ -144,4 +209,19 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 		"LeafWithFixture": leafWithFixture,
 	}
 	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
+}
+
+// writeAndFormat writes the data to given file path, creates path if it does not exist and formats the file
+func writeAndFormat(path string, data []byte) error {
+	if err := writeFile(path, data); err != nil {
+		return errors.Wrapf(
+			err,
+			"Error writing to file %q",
+			path,
+		)
+	}
+	if err := FormatGoFile(path); err != nil {
+		return err
+	}
+	return nil
 }

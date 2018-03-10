@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"bytes"
-	"encoding/json"
 	"go/token"
 	"os"
 	"os/exec"
@@ -48,6 +47,8 @@ type MockgenBin struct {
 	// Bin is the absolute path to the mockgen binary built from vendor
 	Bin string
 
+	// projRoot is the absolute path of the project, it is also where the vendor directory is
+	projRoot  string
 	pkgHelper *PackageHelper
 	tmpl      *Template
 }
@@ -59,8 +60,10 @@ func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
 	if pkgRoot == exampleGatewayPkg {
 		pkgRoot = zanzibarPkg
 	}
+	projRoot := filepath.Join(os.Getenv("GOPATH"), "src", pkgRoot)
+
 	// we assume that the vendor directory is flattened as Glide does
-	mockgenDir := path.Join(os.Getenv("GOPATH"), "src", pkgRoot, "vendor", mockgenPkg)
+	mockgenDir := path.Join(projRoot, "vendor", mockgenPkg)
 	if _, err := os.Stat(mockgenDir); err != nil {
 		return nil, errors.Wrapf(
 			err, "error finding mockgen package in the vendor dir: %q does not exist", mockgenDir,
@@ -92,111 +95,37 @@ func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
 	return &MockgenBin{
 		Bin: path.Join(mockgenDir, mockgenBin),
 
+		projRoot:  projRoot,
 		pkgHelper: h,
 		tmpl:      t,
 	}, nil
 }
 
-// GenMock generates mocks for given module instance, dest is the file path relative to
-// the instance's generated package dir, pkg is the package name of the generated mocks,
-// and intf is the interface to generate mock for
-func (m MockgenBin) GenMock(instance *ModuleInstance, dest, pkg, intf string) error {
-	importPath := instance.PackageInfo.GeneratedPackagePath
-	if instance.ClassType == "custom" {
-		importPath = instance.PackageInfo.PackagePath
-	}
-
-	genDir := path.Join(os.Getenv("GOPATH"), "src")
-	genDir = path.Join(genDir, instance.PackageInfo.GeneratedPackagePath, path.Dir(dest))
-	genDest := path.Join(genDir, path.Base(dest))
-	if _, err := os.Stat(genDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(genDir, os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	cmd := exec.Command(m.Bin, "-destination", genDest, "-package", pkg, importPath, intf)
-	cmd.Dir = genDir
-
+// GenMock generates mocks for given module instance, pkg is the package name of the generated mocks,
+// and intf is the interface name to generate mock for
+func (m MockgenBin) GenMock(importPath, pkg, intf string) ([]byte, error) {
+	cmd := exec.Command(m.Bin, "-package", pkg, importPath, intf)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return errors.Wrapf(
+		return nil, errors.Wrapf(
 			err,
-			"error running command %q in %s: %s",
+			"error running command %q: %s",
 			strings.Join(cmd.Args, " "),
-			genDir,
 			stderr.String(),
 		)
 	}
 
-	return nil
+	return stdout.Bytes(), nil
 }
 
-// helper struct to pull out the fixture config
-type moduleConfig struct {
-	Config *config `json:"config"`
-}
-
-// config is the struct corresponding to the config field in client-config.json
-type config struct {
-	CustomImportPath string   `json:"customImportPath"`
-	Fixture          *Fixture `json:"fixture"`
-}
-
-// Fixture specifies client fixture import path and all scenarios
-type Fixture struct {
-	// ImportPath is the package where the user-defined Fixture global variable is contained.
-	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
-	ImportPath string `json:"importPath"`
-	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
-	Scenarios map[string][]string `json:"scenarios"`
-}
-
-// Validate the fixture configuration
-func (f *Fixture) Validate(exposedMethods map[string]interface{}) error {
-	if f.ImportPath == "" {
-		return errors.New("fixture importPath is empty")
-	}
-	for method := range f.Scenarios {
-		if _, ok := exposedMethods[method]; !ok {
-			return errors.Errorf("method %q is not an exposed method", method)
-		}
-	}
-	return nil
-}
-
-// AugmentMockWithFixture generates mocks with fixture for given module instance's interface
-func (m MockgenBin) AugmentMockWithFixture(instance *ModuleInstance, intf string) error {
-	var mc moduleConfig
-	if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
-		return errors.Wrapf(
-			err,
-			"error parsing client-config.json for client %q",
-			instance.InstanceName,
-		)
-	}
-
-	if mc.Config == nil || mc.Config.Fixture == nil || mc.Config.Fixture.Scenarios == nil {
-		return nil
-	}
-
-	importPath := instance.PackageInfo.GeneratedPackagePath
-	if instance.ClassType == "custom" {
-		importPath = mc.Config.CustomImportPath
-		if importPath == "" {
-			return errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
-		}
-	}
-
-	appRoot := filepath.Join(os.Getenv("GOPATH"), "src", m.pkgHelper.PackageRoot())
-	pkg, err := ReflectInterface(appRoot, importPath, []string{intf})
+// AugmentMockWithFixture generates mocks with fixture for the interface in the given importPath
+func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf string) (types, mock []byte, err error) {
+	pkg, err := ReflectInterface(m.projRoot, importPath, []string{intf})
 	if err != nil {
-		return err
+		return
 	}
-
-	fixture := mc.Config.Fixture
 
 	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
 	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
@@ -204,19 +133,17 @@ func (m MockgenBin) AugmentMockWithFixture(instance *ModuleInstance, intf string
 		methodsMap[m.Name] = m
 		validationMap[m.Name] = struct{}{}
 	}
-	if err := fixture.Validate(validationMap); err != nil {
-		return errors.Wrapf(
-			err,
-			"invalid fixture config for client %q",
-			instance.InstanceName,
-		)
+
+	if err = f.Validate(validationMap); err != nil {
+		err = errors.Wrap(err, "invalid fixture config")
+		return
 	}
 
 	// sort methods in given fixture config for predictable fixture type generation
-	numMethods := len(fixture.Scenarios)
+	numMethods := len(f.Scenarios)
 	sortedMethods := make([]string, numMethods, numMethods)
 	i := 0
-	for name := range fixture.Scenarios {
+	for name := range f.Scenarios {
 		sortedMethods[i] = name
 		i++
 	}
@@ -285,46 +212,22 @@ func (m MockgenBin) AugmentMockWithFixture(instance *ModuleInstance, intf string
 	data := map[string]interface{}{
 		"Imports": pkgPathToAlias,
 		"Methods": methods,
-		"Fixture": fixture,
+		"Fixture": f,
 	}
-	types, err := m.tmpl.ExecTemplate("client_fixture_types.tmpl", data, m.pkgHelper)
+	types, err = m.tmpl.ExecTemplate("fixture_types.tmpl", data, m.pkgHelper)
 	if err != nil {
-		return err
+		return
 	}
-	mock, err := m.tmpl.ExecTemplate("client_mock.tmpl", data, m.pkgHelper)
+	mock, err = m.tmpl.ExecTemplate("augmented_mock.tmpl", data, m.pkgHelper)
 	if err != nil {
-		return err
+		types = nil
+		return
 	}
-
-	buildPath := filepath.Join(m.pkgHelper.CodeGenTargetPath(), instance.Directory)
-	typesPath := filepath.Join(buildPath, "mock-client/types.go")
-	mockPath := filepath.Join(buildPath, "mock-client/mock_client_with_fixture.go")
-	if err := writeAndFormat(typesPath, types); err != nil {
-		return err
-	}
-	if err := writeAndFormat(mockPath, mock); err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
 type reflectMethod struct {
 	Name                string
 	In, Out             map[string]string
 	InString, OutString string
-}
-
-func writeAndFormat(path string, data []byte) error {
-	if err := writeFile(path, data); err != nil {
-		return errors.Wrapf(
-			err,
-			"Error writing to file %q",
-			path,
-		)
-	}
-	if err := FormatGoFile(path); err != nil {
-		return err
-	}
-	return nil
 }

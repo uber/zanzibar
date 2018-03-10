@@ -40,10 +40,10 @@ type reflectData struct {
 }
 
 // ReflectInterface uses reflection to obtain interface information identified by symbols in given import path
-// appRoot is the root dir where mockgen is installed as a vendor package
-func ReflectInterface(appRoot string, importPath string, symbols []string) (*model.Package, error) {
+// projRoot is the root dir where mockgen is installed as a vendor package
+func ReflectInterface(projRoot string, importPath string, symbols []string) (*model.Package, error) {
 	// We use TempDir instead of TempFile so we can control the filename.
-	tmpDir, err := ioutil.TempDir(appRoot, "gomock_reflect_")
+	tmpDir, err := ioutil.TempDir(projRoot, "gomock_reflect_")
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func ReflectInterface(appRoot string, importPath string, symbols []string) (*mod
 	// Run it
 	var stdout, stderr bytes.Buffer
 	cmd := exec.Command(progPath)
-	cmd.Dir = appRoot
+	cmd.Dir = projRoot
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
