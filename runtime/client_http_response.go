@@ -156,7 +156,7 @@ func (res *ClientHTTPResponse) finish() {
 	}
 
 	// write logs
-	res.req.Logger.Info(
+	res.req.Logger.Debug(
 		"Finished an outgoing client HTTP request",
 		clientHTTPLogFields(res.req, res)...,
 	)
