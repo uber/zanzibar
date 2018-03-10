@@ -1,34 +1,28 @@
-{{- /* template to render client fixture type code */ -}}
-{{- $instance := .Instance }}
-{{- $scenariosMap := .Fixture.Scenarios }}
+{{- /* template to render fixture type code for custom client */ -}}
+{{- $imports := .Imports}}
+{{- $methods := .Methods}}
+{{- $scenariosMap := .Fixture.Scenarios}}
 package clientmock
 
+{{if (len $imports)}}
 import (
-	"context"
-
-	{{range $idx, $pkg := .IncludedPackages -}}
-	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
-	{{end}}
+	{{- range $path, $alias := $imports}}
+	{{$alias}} "{{$path}}"
+	{{- end}}
 )
+{{end}}
 
-{{- $clientID := .ClientID -}}
-{{$exposedMethods := .ExposedMethods}}
-
-// ClientFixture defines the client fixture type for {{$clientID}}
+// ClientFixture defines the client fixture type
 type ClientFixture struct {
-{{- range $svc := .Services -}}
-{{range .Methods}}
-{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
-{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if (index $scenariosMap $methodName) -}}
+{{- range $method := $methods}}
+{{$methodName := $method.Name -}}
 {{$methodName}} *{{$methodName}}Scenarios
-{{- end -}}
-{{- end -}}
 {{- end -}}
 }
 
-{{range $methodName, $scenarios := $scenariosMap -}}
-{{$methodName := pascal $methodName -}}
+{{range $method := $methods}}
+{{$methodName := $method.Name -}}
+{{$scenarios := index $scenariosMap $methodName -}}
 // {{$methodName}}Scenarios defines all fixture scenarios for {{$methodName}}
 type {{$methodName}}Scenarios struct {
 {{range $scenario := $scenarios -}}
@@ -37,35 +31,22 @@ type {{$methodName}}Scenarios struct {
 }
 {{end -}}
 
-{{- range $svc := .Services -}}
-{{range .Methods}}
-{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
-{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-{{- if (index $scenariosMap $methodName) -}}
+
+{{- range $method := $methods}}
+{{$methodName := $method.Name -}}
 // {{$methodName}}Fixture defines the fixture type for {{$methodName}}
 type {{$methodName}}Fixture struct {
-	Arg0 context.Context
-	Arg1 map[string]string
-	{{if ne .RequestType "" -}}
-	Arg2 {{.RequestType}}
-	{{end}}
+	{{- range $argName, $argType := $method.In}}
+	{{title $argName}} {{$argType}}
+	{{- end}}
 
 	// Arg{n}Any indicates the nth argument could be gomock.Any
-	Arg0Any bool
-	Arg1Any bool
-	{{if ne .RequestType "" -}}
-	Arg2Any bool
-	{{end}}
+	{{- range $argName, $argType := $method.In}}
+	{{title $argName}}Any bool
+	{{- end}}
 
-	{{if ne .ResponseType "" -}}
-	Ret0 {{.ResponseType}}
-	Ret1 map[string]string
-	Ret2 error
-	{{else -}}
-	Ret0 map[string]string
-	Ret1 error
-	{{end -}}
+	{{range $retName, $retType := $method.Out}}
+	{{title $retName}} {{$retType}}
+	{{- end}}
 }
-{{- end -}}
-{{- end -}}
-{{- end -}}
+{{- end}}

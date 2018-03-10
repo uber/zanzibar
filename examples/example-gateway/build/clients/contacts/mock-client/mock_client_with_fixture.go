@@ -66,19 +66,25 @@ func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
 func (s *SaveContactsMock) Success() {
 	f := s.scenarios.Success
 
-	var arg0, arg1, arg2 interface{}
+	var arg0 interface{}
 	arg0 = f.Arg0
 	if f.Arg0Any {
 		arg0 = gomock.Any()
 	}
+	var arg1 interface{}
 	arg1 = f.Arg1
 	if f.Arg1Any {
 		arg1 = gomock.Any()
 	}
+	var arg2 interface{}
 	arg2 = f.Arg2
 	if f.Arg2Any {
 		arg2 = gomock.Any()
 	}
 
-	s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(f.Ret0, f.Ret1, f.Ret2)
+	ret0 := f.Ret0
+	ret1 := f.Ret1
+	ret2 := f.Ret2
+
+	s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2)
 }

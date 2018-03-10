@@ -21,17 +21,11 @@
 package codegen
 
 import (
-	"encoding/json"
 	"fmt"
-	"go/token"
-	"os"
 	"path"
 	"path/filepath"
-	"sort"
-	"strconv"
-	"strings"
 
-	"github.com/golang/mock/mockgen/model"
+	"encoding/json"
 	"github.com/pkg/errors"
 )
 
@@ -39,7 +33,7 @@ const clientInterface = "Client"
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
 func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
-	bin, err := NewMockgenBin(h.PackageRoot())
+	bin, err := NewMockgenBin(h, t)
 	if err != nil {
 		return nil, errors.Wrap(err, "error building mockgen binary")
 	}
@@ -52,7 +46,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 				instance,
 				"mock-client/mock_client.go",
 				"clientmock",
-				"Client",
+				clientInterface,
 			); err != nil {
 				return errors.Wrapf(
 					err,
@@ -61,7 +55,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 				)
 			}
 
-			if err := genMockClientWithFixtureCustom(instance, h, t); err != nil {
+			if err := bin.AugmentMockWithFixture(instance, clientInterface); err != nil {
 				return errors.Wrapf(
 					err,
 					"error generating mock client with fixtures for client %q",
@@ -80,179 +74,6 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		}
 		return nil
 	}, nil
-}
-
-type clientConfig struct {
-	Config *config `json:"config"`
-}
-
-type config struct {
-	CustomImportPath string   `json:"customImportPath"`
-	Fixture          *Fixture `json:"fixture"`
-}
-
-func genMockClientWithFixtureCustom(instance *ModuleInstance, h *PackageHelper, t *Template) error {
-	var cc clientConfig
-	if err := json.Unmarshal(instance.JSONFileRaw, &cc); err != nil {
-		return errors.Wrapf(
-			err,
-			"error parsing client-config.json for client %q",
-			instance.InstanceName,
-		)
-	}
-
-	if cc.Config == nil || cc.Config.Fixture == nil || cc.Config.Fixture.Scenarios == nil {
-		return nil
-	}
-
-	//importPath := instance.PackageInfo.GeneratedPackagePath
-	var importPath string
-	if instance.ClassType == "custom" {
-		importPath = cc.Config.CustomImportPath
-		if importPath == "" {
-			return errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
-		}
-	} else {
-		return nil
-	}
-
-	appRoot := filepath.Join(os.Getenv("GOPATH"), "src", h.PackageRoot())
-	pkg, err := ReflectInterface(appRoot, importPath, []string{clientInterface})
-	if err != nil {
-		return err
-	}
-
-	fixture := cc.Config.Fixture
-
-	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
-	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
-	for _, m := range pkg.Interfaces[0].Methods {
-		methodsMap[m.Name] = m
-		validationMap[m.Name] = struct{}{}
-	}
-	if err := fixture.Validate(validationMap); err != nil {
-		return errors.Wrapf(
-			err,
-			"invalid fixture config for client %q",
-			instance.InstanceName,
-		)
-	}
-
-	// sort methods in given fixture config for predictable fixture type generation
-	numMethods := len(fixture.Scenarios)
-	sortedMethods := make([]string, numMethods, numMethods)
-	i := 0
-	for name := range fixture.Scenarios {
-		sortedMethods[i] = name
-		i++
-	}
-	sort.Strings(sortedMethods)
-
-	exposedMethods := make([]*model.Method, numMethods, numMethods)
-	for i, methodName := range sortedMethods {
-		exposedMethods[i] = methodsMap[methodName]
-	}
-
-	imports := pkg.Imports()
-
-	// Sort keys to make import alias generation predictable
-	sortedPaths := make([]string, len(imports), len(imports))
-	j := 0
-	for pth := range imports {
-		sortedPaths[i] = pth
-		j++
-	}
-	sort.Strings(sortedPaths)
-
-	pkgPathToAlias := make(map[string]string, len(imports))
-	usedAliases := make(map[string]bool, len(imports))
-	for _, pkgPath := range sortedPaths {
-		base := camelCase(path.Base(pkgPath))
-		pkgAlias := base
-		i := 0
-		for usedAliases[pkgAlias] || token.Lookup(pkgAlias).IsKeyword() {
-			pkgAlias = base + strconv.Itoa(i)
-			i++
-		}
-
-		pkgPathToAlias[pkgPath] = pkgAlias
-		usedAliases[pkgAlias] = true
-	}
-
-	methods := make([]*reflectMethod, len(exposedMethods))
-	for i, m := range exposedMethods {
-		numIn := len(m.In)
-		in := make(map[string]string, numIn)
-		inString := make([]string, numIn, numIn)
-		for i, param := range m.In {
-			arg := "arg" + strconv.Itoa(i)
-			in[arg] = param.Type.String(pkgPathToAlias, "")
-			inString[i] = arg
-		}
-
-		numOut := len(m.Out)
-		out := make(map[string]string, numOut)
-		outString := make([]string, numOut, numOut)
-		for i, param := range m.Out {
-			ret := "ret" + strconv.Itoa(i)
-			out[ret] = param.Type.String(pkgPathToAlias, "")
-			outString[i] = ret
-		}
-
-		methods[i] = &reflectMethod{
-			Name:      m.Name,
-			In:        in,
-			Out:       out,
-			InString:  strings.Join(inString, " ,"),
-			OutString: strings.Join(outString, " ,"),
-		}
-	}
-
-	data := map[string]interface{}{
-		"Imports": pkgPathToAlias,
-		"Methods": methods,
-		"Fixture": fixture,
-	}
-	types, err := t.ExecTemplate("client_fixture_types_custom.tmpl", data, h)
-	if err != nil {
-		return err
-	}
-	mock, err := t.ExecTemplate("client_mock_custom.tmpl", data, h)
-	if err != nil {
-		return err
-	}
-
-	buildPath := filepath.Join(h.CodeGenTargetPath(), instance.Directory)
-	typesPath := filepath.Join(buildPath, "mock-client/types.go")
-	mockPath := filepath.Join(buildPath, "mock-client/mock_client_with_fixture.go")
-	if err := writeAndFormat(typesPath, types); err != nil {
-		return err
-	}
-	if err := writeAndFormat(mockPath, mock); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type reflectMethod struct {
-	Name                string
-	In, Out             map[string]string
-	InString, OutString string
-}
-
-func writeAndFormat(path string, data []byte) error {
-	if err := writeFile(path, data); err != nil {
-		return errors.Wrapf(
-			err,
-			"Error writing to file %q",
-			path,
-		)
-	}
-	if err := FormatGoFile(path); err != nil {
-		return err
-	}
-	return nil
 }
 
 // ServiceMockGenHook returns a PostGenHook to generate server mocks
@@ -306,9 +127,16 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
 	leafWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
-		spec, ok := leaf.genSpec.(*ClientSpec)
-		if ok && spec.Fixture != nil {
-			leafWithFixture[leaf.InstanceName] = spec.Fixture.ImportPath
+		var mc moduleConfig
+		if err := json.Unmarshal(leaf.JSONFileRaw, &mc); err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"error parsing client-config.json for client %q",
+				instance.InstanceName,
+			)
+		}
+		if mc.Config != nil && mc.Config.Fixture != nil {
+			leafWithFixture[leaf.InstanceName] = mc.Config.Fixture.ImportPath
 		}
 	}
 	data := map[string]interface{}{

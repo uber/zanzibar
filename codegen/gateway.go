@@ -96,8 +96,6 @@ type ClientSpec struct {
 	// SidecarRouter indicates the client uses the given sidecar router to
 	// to communicate with downstream service, it's not relevant to custom clients.
 	SidecarRouter string
-	// Fixture is the fixture configuration for the client
-	Fixture *Fixture
 }
 
 // ModuleClassConfig represents the generic JSON config for
@@ -117,39 +115,10 @@ type ClientClassConfig struct {
 	Dependencies Dependencies           `json:"dependencies"`
 }
 
-// helper struct to pull out the fixture config
-type clientClassConfigFixture struct {
-	Config struct {
-		Fixture *Fixture `json:"fixture"`
-	} `json:"config"`
-}
-
 // Dependencies lists all dependencies of a module
 type Dependencies struct {
 	Client []string `json:"client"`
 	//	Service []string `json:"service"`  // example extension
-}
-
-// Fixture specifies client fixture import path and all scenarios
-type Fixture struct {
-	// ImportPath is the package where the user-defined Fixture global variable is contained.
-	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
-	ImportPath string `json:"importPath"`
-	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
-	Scenarios map[string][]string `json:"scenarios"`
-}
-
-// Validate the fixture configuration
-func (f *Fixture) Validate(exposedMethods map[string]interface{}) error {
-	if f.ImportPath == "" {
-		return errors.New("fixture importPath is empty")
-	}
-	for method := range f.Scenarios {
-		if _, ok := exposedMethods[method]; !ok {
-			return errors.Errorf("method %q is not an exposed method", method)
-		}
-	}
-	return nil
 }
 
 // MiddlewareConfigConfig is the inner config object as prescribed by module_system json conventions
@@ -267,7 +236,6 @@ func NewCustomClientSpec(
 		}
 	}
 
-	// TODO: fixture for custom client
 	clientSpec := &ClientSpec{
 		JSONFile:           instance.JSONFileName,
 		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
@@ -349,25 +317,6 @@ func newClientSpec(
 			)
 		}
 		reversed[v] = key
-	}
-
-	if _, ok := clientConfig.Config["fixture"]; ok {
-		config := &clientClassConfigFixture{}
-		if err := json.Unmarshal(instance.JSONFileRaw, config); err != nil {
-			return nil, errors.Errorf(
-				"could not parse fixture config in client config: %s",
-				instance.JSONFileName,
-			)
-
-		}
-
-		fixture := config.Config.Fixture
-		if err := fixture.Validate(exposedMethods); err != nil {
-			return nil, errors.Wrapf(
-				err, "invalid fixture config in client config: %s", instance.JSONFileName,
-			)
-		}
-		cspec.Fixture = fixture
 	}
 
 	return cspec, nil

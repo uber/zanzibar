@@ -132,17 +132,18 @@ func main() {
 		Name: path.Base({{printf "%q" .ImportPath}}),
 	}
 
+	stderr := os.Stderr
 	for _, it := range its {
 		intf, err := model.InterfaceFromInterfaceType(it.typ)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Reflection: %v\n", err)
+			fmt.Fprintf(stderr, "Reflection: %v\n", err)
 			os.Exit(1)
 		}
 		intf.Name = it.sym
 		pkg.Interfaces = append(pkg.Interfaces, intf)
 	}
 	if err := gob.NewEncoder(os.Stdout).Encode(pkg); err != nil {
-		fmt.Fprintf(os.Stderr, "gob encode: %v\n", err)
+		fmt.Fprintf(stderr, "gob encode: %v\n", err)
 		os.Exit(1)
 	}
 }

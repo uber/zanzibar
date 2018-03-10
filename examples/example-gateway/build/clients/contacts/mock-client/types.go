@@ -24,12 +24,12 @@
 package clientmock
 
 import (
-	"context"
+	context "context"
 
-	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	contacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
 )
 
-// ClientFixture defines the client fixture type for contacts
+// ClientFixture defines the client fixture type
 type ClientFixture struct {
 	SaveContacts *SaveContactsScenarios
 }
@@ -43,14 +43,14 @@ type SaveContactsScenarios struct {
 type SaveContactsFixture struct {
 	Arg0 context.Context
 	Arg1 map[string]string
-	Arg2 *clientsContactsContacts.SaveContactsRequest
+	Arg2 *contacts.SaveContactsRequest
 
 	// Arg{n}Any indicates the nth argument could be gomock.Any
 	Arg0Any bool
 	Arg1Any bool
 	Arg2Any bool
 
-	Ret0 *clientsContactsContacts.SaveContactsResponse
+	Ret0 *contacts.SaveContactsResponse
 	Ret1 map[string]string
 	Ret2 error
 }

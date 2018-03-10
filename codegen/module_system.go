@@ -423,7 +423,6 @@ func (g *HTTPClientGenerator) Generate(
 		ExposedMethods:   exposedMethods,
 		// TODO: http client integration with sidecar router
 		SidecarRouter: clientSpec.SidecarRouter,
-		Fixture:       clientSpec.Fixture,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -465,24 +464,6 @@ func (g *HTTPClientGenerator) Generate(
 
 	if dependencies != nil {
 		files["module/dependencies.go"] = dependencies
-	}
-
-	if clientMeta.Fixture != nil {
-		fixtureTypes, mockClient, err := generateMockClientWithFixture(
-			clientMeta,
-			g.packageHelper,
-			g.templates,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error generating mock client with fixture for %q %q",
-				instance.ClassName,
-				instance.InstanceName,
-			)
-		}
-		files["mock-client/types.go"] = fixtureTypes
-		files["mock-client/mock_client_with_fixture.go"] = mockClient
 	}
 
 	return &BuildResult{
@@ -543,7 +524,6 @@ func (g *TChannelClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
 		SidecarRouter:    clientSpec.SidecarRouter,
-		Fixture:          clientSpec.Fixture,
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -602,24 +582,6 @@ func (g *TChannelClientGenerator) Generate(
 		files["module/dependencies.go"] = dependencies
 	}
 
-	if clientMeta.Fixture != nil {
-		fixtureTypes, mockClient, err := generateMockClientWithFixture(
-			clientMeta,
-			g.packageHelper,
-			g.templates,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error generating mock client with fixture for %q %q",
-				instance.ClassName,
-				instance.InstanceName,
-			)
-		}
-		files["mock-client/types.go"] = fixtureTypes
-		files["mock-client/mock_client_with_fixture.go"] = mockClient
-	}
-
 	return &BuildResult{
 		Files: files,
 		Spec:  clientSpec,
@@ -659,30 +621,6 @@ func hasMethod(cspec *ClientSpec, thriftMethod string) bool {
 
 	}
 	return false
-}
-
-func generateMockClientWithFixture(
-	data *ClientMeta,
-	packageHelper *PackageHelper,
-	template *Template,
-) (types []byte, mock []byte, err error) {
-	types, err = template.ExecTemplate(
-		"client_fixture_types.tmpl",
-		data,
-		packageHelper,
-	)
-	if err != nil {
-		return
-	}
-	mock, err = template.ExecTemplate(
-		"client_mock.tmpl",
-		data,
-		packageHelper,
-	)
-	if err != nil {
-		types = nil
-	}
-	return
 }
 
 /*
