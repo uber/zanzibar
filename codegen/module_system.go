@@ -197,7 +197,7 @@ type ClientTestFixture struct {
 	ClientResHeaders FixtureBlob     `json:"clientResHeaders"`
 }
 
-// NewDefaultModuleSystemWithMockHook reates a fresh instance of the default zanzibar
+// NewDefaultModuleSystemWithMockHook creates a fresh instance of the default zanzibar
 // module system (clients, endpoints, services) with a post build hook to generate client and service mocks
 func NewDefaultModuleSystemWithMockHook(
 	h *PackageHelper,
