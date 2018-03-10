@@ -93,7 +93,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
 	//	defer cancel()
 	//}
-	ctx := r.Context()
+	ctx := withRequestFields(r.Context())
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush()

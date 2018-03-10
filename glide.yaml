@@ -50,3 +50,5 @@ import:
   version: feef008d51ad2b3778f85d387ccf91735543008d
 - package: github.com/golang/mock
   version: master
+- package: github.com/pborman/uuid
+  version: ^1.1.0
