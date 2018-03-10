@@ -203,15 +203,16 @@ func NewDefaultModuleSystemWithMockHook(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	clientMockGenHook, err := ClientMockGenHook(h)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating client mock gen hook")
-	}
-
 	t, err := NewDefaultTemplate()
 	if err != nil {
 		return nil, err
 	}
+
+	clientMockGenHook, err := ClientMockGenHook(h, t)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating client mock gen hook")
+	}
+
 	serviceMockGenHook := ServiceMockGenHook(h, t)
 
 	allHooks := append([]PostGenHook{clientMockGenHook, serviceMockGenHook}, hooks...)
@@ -744,8 +745,6 @@ func (g *CustomClientGenerator) Generate(
 	if dependencies != nil {
 		files["module/dependencies.go"] = dependencies
 	}
-
-	// TODO: generate mock client with fixture for custom client
 
 	return &BuildResult{
 		Files: files,

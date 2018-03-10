@@ -1,0 +1,52 @@
+{{- /* template to render fixture type code for custom client */ -}}
+{{- $imports := .Imports}}
+{{- $methods := .Methods}}
+{{- $scenariosMap := .Fixture.Scenarios}}
+package clientmock
+
+{{if (len $imports)}}
+import (
+	{{- range $path, $alias := $imports}}
+	{{$alias}} "{{$path}}"
+	{{- end}}
+)
+{{end}}
+
+// ClientFixture defines the client fixture type
+type ClientFixture struct {
+{{- range $method := $methods}}
+{{$methodName := $method.Name -}}
+{{$methodName}} *{{$methodName}}Scenarios
+{{- end -}}
+}
+
+{{range $method := $methods}}
+{{$methodName := $method.Name -}}
+{{$scenarios := index $scenariosMap $methodName -}}
+// {{$methodName}}Scenarios defines all fixture scenarios for {{$methodName}}
+type {{$methodName}}Scenarios struct {
+{{range $scenario := $scenarios -}}
+{{pascal $scenario}} *{{$methodName}}Fixture `scenario:"{{$scenario}}"`
+{{end -}}
+}
+{{end -}}
+
+
+{{- range $method := $methods}}
+{{$methodName := $method.Name -}}
+// {{$methodName}}Fixture defines the fixture type for {{$methodName}}
+type {{$methodName}}Fixture struct {
+	{{- range $argName, $argType := $method.In}}
+	{{title $argName}} {{$argType}}
+	{{- end}}
+
+	// Arg{n}Any indicates the nth argument could be gomock.Any
+	{{- range $argName, $argType := $method.In}}
+	{{title $argName}}Any bool
+	{{- end}}
+
+	{{range $retName, $retType := $method.Out}}
+	{{title $retName}} {{$retType}}
+	{{- end}}
+}
+{{- end}}

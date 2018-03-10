@@ -47,6 +47,8 @@ const (
 
 const configSuffix = "-config.json"
 
+const genFormattor = "Generating %12s %12s %-30s in %-50s %d/%d\n"
+
 // NewModuleSystem returns a new module system
 func NewModuleSystem(postGenHook ...PostGenHook) *ModuleSystem {
 	return &ModuleSystem{
@@ -888,7 +890,7 @@ func (system *ModuleSystem) GenerateBuild(
 				classInstance.Directory,
 			)
 			fmt.Printf(
-				"Generating %12s %12s %-30s in %-50s %d/%d\n",
+				genFormattor,
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
