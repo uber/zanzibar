@@ -197,19 +197,34 @@ type ClientTestFixture struct {
 	ClientResHeaders FixtureBlob     `json:"clientResHeaders"`
 }
 
-// NewDefaultModuleSystem creates a fresh instance of the default zanzibar
-// module system (clients, endpoints, services) with a post build hook to generate client mocks
-func NewDefaultModuleSystem(
+// NewDefaultModuleSystemWithMockHook reates a fresh instance of the default zanzibar
+// module system (clients, endpoints, services) with a post build hook to generate client and service mocks
+func NewDefaultModuleSystemWithMockHook(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	clienMockGenHook, err := ClientMockGenHook(h)
+	clientMockGenHook, err := ClientMockGenHook(h)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating client mock gen hook")
 	}
 
-	allHooks := append([]PostGenHook{clienMockGenHook}, hooks...)
-	system := NewModuleSystem(allHooks...)
+	t, err := NewDefaultTemplate()
+	if err != nil {
+		return nil, err
+	}
+	serviceMockGenHook := ServiceMockGenHook(h, t)
+
+	allHooks := append([]PostGenHook{clientMockGenHook, serviceMockGenHook}, hooks...)
+	return NewDefaultModuleSystem(h, allHooks...)
+}
+
+// NewDefaultModuleSystem creates a fresh instance of the default zanzibar
+// module system (clients, endpoints, services)
+func NewDefaultModuleSystem(
+	h *PackageHelper,
+	hooks ...PostGenHook,
+) (*ModuleSystem, error) {
+	system := NewModuleSystem(hooks...)
 
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {
@@ -1077,19 +1092,6 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	mockService, err := generator.templates.ExecTemplate(
-		"service_mock.tmpl",
-		instance,
-		generator.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service mock_service.go for %s",
-			instance.InstanceName,
-		)
-	}
-
 	// generate main.go
 	main, err := generator.templates.ExecTemplate(
 		"main.tmpl",
@@ -1144,26 +1146,11 @@ func (generator *GatewayServiceGenerator) Generate(
 		)
 	}
 
-	mockInitializer, err := GenerateMockInitializer(
-		instance,
-		generator.packageHelper,
-		generator.templates,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error generating service mock initializer for %s",
-			instance.InstanceName,
-		)
-	}
-
 	files := map[string][]byte{
-		"service.go":                   service,
-		"main/main.go":                 main,
-		"main/main_test.go":            mainTest,
-		"module/init.go":               initializer,
-		"mock-service/mock_init.go":    mockInitializer,
-		"mock-service/mock_service.go": mockService,
+		"service.go":        service,
+		"main/main.go":      main,
+		"main/main_test.go": mainTest,
+		"module/init.go":    initializer,
 	}
 
 	if dependencies != nil {
@@ -1271,30 +1258,6 @@ func GenerateInitializer(
 	return template.ExecTemplate(
 		"module_initializer.tmpl",
 		instance,
-		packageHelper,
-	)
-}
-
-// GenerateMockInitializer is like GenerateInitializer but with leaf nodes being mocks.
-func GenerateMockInitializer(
-	instance *ModuleInstance,
-	packageHelper *PackageHelper,
-	template *Template,
-) ([]byte, error) {
-	leafWithFixture := map[string]string{}
-	for _, leaf := range instance.RecursiveDependencies["client"] {
-		spec, ok := leaf.genSpec.(*ClientSpec)
-		if ok && spec.Fixture != nil {
-			leafWithFixture[leaf.InstanceName] = spec.Fixture.ImportPath
-		}
-	}
-	data := map[string]interface{}{
-		"Instance":        instance,
-		"LeafWithFixture": leafWithFixture,
-	}
-	return template.ExecTemplate(
-		"module_mock_initializer.tmpl",
-		data,
 		packageHelper,
 	)
 }

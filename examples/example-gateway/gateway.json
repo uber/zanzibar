@@ -11,5 +11,7 @@
 	"middlewareConfig": "./middlewares",
 	"copyrightHeader": "./copyright_header.txt",
 
-	"annotationPrefix": "zanzibar"
+	"annotationPrefix": "zanzibar",
+
+	"genMock": true
 }

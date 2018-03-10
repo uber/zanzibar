@@ -32,8 +32,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 )
 
-const templateDir = "./codegen/templates/*.tmpl"
-
 type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
@@ -95,7 +93,16 @@ func main() {
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),
 	)
 
-	moduleSystem, err := codegen.NewDefaultModuleSystem(packageHelper)
+	genMock := config.ContainsKey("genMock")
+	if genMock {
+		genMock = config.MustGetBoolean("genMock")
+	}
+	var moduleSystem *codegen.ModuleSystem
+	if genMock {
+		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper)
+	} else {
+		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper)
+	}
 	checkError(
 		err, fmt.Sprintf("Error creating module system %s", configRoot),
 	)
