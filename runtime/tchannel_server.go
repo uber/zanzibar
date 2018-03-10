@@ -158,6 +158,8 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
+	ctx = withRequestFields(ctx)
+
 	s.RLock()
 	e, ok := s.endpoints[method]
 	s.RUnlock()
