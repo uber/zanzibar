@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"sync"
 
 	"encoding/json"
 	"github.com/pkg/errors"
@@ -75,114 +76,151 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		fmt.Println("Generating client mocks:")
 		mockCount := len(instances["client"])
 		files := make(map[string][]byte)
+		ec := make(chan error, mockCount)
+		var wg sync.WaitGroup
+		wg.Add(mockCount)
 		for i, instance := range instances["client"] {
-			var mc moduleConfig
-			if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
-				return errors.Wrapf(
-					err,
-					"error parsing client-config.json for client %q",
-					instance.InstanceName,
-				)
-			}
+			go func(instance *ModuleInstance, i int) {
+				defer wg.Done()
 
-			genDir := filepath.Join(h.CodeGenTargetPath(), instance.Directory, "mock-client")
-
-			importPath := instance.PackageInfo.GeneratedPackagePath
-			if instance.ClassType == "custom" {
-				importPath = mc.Config.CustomImportPath
-				if importPath == "" {
-					return errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
-				}
-			}
-
-			// generate mock client
-			mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
-			if err != nil {
-				return errors.Wrapf(
-					err,
-					"error generating mocks for client %q",
-					instance.InstanceName,
-				)
-			}
-			files[filepath.Join(genDir, "mock_client.go")] = mock
-
-			// generate fixture types and augmented mock client
-			f := mc.Config.Fixture
-			if f != nil && f.Scenarios != nil {
-				types, augMock, err := bin.AugmentMockWithFixture(importPath, f, clientInterface)
-				if err != nil {
-					return errors.Wrapf(
+				var mc moduleConfig
+				if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
+					ec <- errors.Wrapf(
 						err,
-						"error generating mock client with fixtures for client %q",
+						"error parsing client-config.json for client %q",
 						instance.InstanceName,
 					)
+					return
 				}
 
-				files[filepath.Join(genDir, "types.go")] = types
-				files[filepath.Join(genDir, "mock_client_with_fixture.go")] = augMock
-			}
+				buildDir := h.CodeGenTargetPath()
+				genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
-			for p, data := range files {
-				if err := writeAndFormat(p, data); err != nil {
-					return err
+				importPath := instance.PackageInfo.GeneratedPackagePath
+				if instance.ClassType == "custom" {
+					importPath = mc.Config.CustomImportPath
+					if importPath == "" {
+						ec <- errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
+						return
+					}
 				}
-			}
 
-			fmt.Printf(
-				genFormattor,
-				"mock",
-				instance.ClassName,
-				instance.InstanceName,
-				path.Join(path.Base(h.CodeGenTargetPath()), instance.Directory, "mock-client"),
-				i+1, mockCount,
-			)
+				// generate mock client
+				mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
+				if err != nil {
+					ec <- errors.Wrapf(
+						err,
+						"error generating mocks for client %q",
+						instance.InstanceName,
+					)
+					return
+				}
+				files[filepath.Join(genDir, "mock_client.go")] = mock
+
+				// generate fixture types and augmented mock client
+				f := mc.Config.Fixture
+				if f != nil && f.Scenarios != nil {
+					types, augMock, err := bin.AugmentMockWithFixture(importPath, f, clientInterface)
+					if err != nil {
+						ec <- errors.Wrapf(
+							err,
+							"error generating mock client with fixtures for client %q",
+							instance.InstanceName,
+						)
+						return
+					}
+
+					files[filepath.Join(genDir, "types.go")] = types
+					files[filepath.Join(genDir, "mock_client_with_fixture.go")] = augMock
+				}
+
+				fmt.Printf(
+					genFormattor,
+					"mock",
+					instance.ClassName,
+					instance.InstanceName,
+					path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
+					i+1, mockCount,
+				)
+			}(instance, i)
+		}
+		wg.Wait()
+
+		select {
+		case err := <-ec:
+			return err
+		default:
+		}
+
+		for p, data := range files {
+			if err := writeAndFormat(p, data); err != nil {
+				return err
+			}
 		}
 		return nil
 	}, nil
 }
 
-// ServiceMockGenHook returns a PostGenHook to generate server mocks
+// ServiceMockGenHook returns a PostGenHook to generate service mocks
 func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
 		fmt.Println("Generating service mocks:")
 		mockCount := len(instances["service"])
+		files := make(map[string][]byte)
+		ec := make(chan error, mockCount)
+		var wg sync.WaitGroup
+		wg.Add(mockCount)
 		for i, instance := range instances["service"] {
-			mockInit, err := generateMockInitializer(instance, h, t)
-			if err != nil {
-				return errors.Wrapf(
-					err,
-					"Error generating service mock_init.go for %s",
-					instance.InstanceName,
-				)
-			}
-			mockService, err := t.ExecTemplate("service_mock.tmpl", instance, h)
-			if err != nil {
-				return errors.Wrapf(
-					err,
-					"Error generating service mock_service.go for %s",
-					instance.InstanceName,
-				)
-			}
+			go func(instance *ModuleInstance, i int) {
+				defer wg.Done()
 
-			buildPath := filepath.Join(h.CodeGenTargetPath(), instance.Directory)
-			mockInitPath := filepath.Join(buildPath, "mock-service/mock_init.go")
-			mockServicePath := filepath.Join(buildPath, "mock-service/mock_service.go")
+				buildDir := h.CodeGenTargetPath()
+				genDir := filepath.Join(buildDir, instance.Directory, "mock-service")
 
-			if err := writeAndFormat(mockInitPath, mockInit); err != nil {
+				mockInit, err := generateMockInitializer(instance, h, t)
+				if err != nil {
+					ec <- errors.Wrapf(
+						err,
+						"Error generating service mock_init.go for %s",
+						instance.InstanceName,
+					)
+					return
+				}
+				files[filepath.Join(genDir, "mock_init.go")] = mockInit
+
+				mockService, err := t.ExecTemplate("service_mock.tmpl", instance, h)
+				if err != nil {
+					ec <- errors.Wrapf(
+						err,
+						"Error generating service mock_service.go for %s",
+						instance.InstanceName,
+					)
+					return
+				}
+				files[filepath.Join(genDir, "mock_service.go")] = mockService
+
+				fmt.Printf(
+					genFormattor,
+					"mock",
+					instance.ClassName,
+					instance.InstanceName,
+					path.Join(path.Base(buildDir), instance.Directory, "mock-service"),
+					i+1, mockCount,
+				)
+			}(instance, i)
+		}
+		wg.Wait()
+
+		select {
+		case err := <-ec:
+			return err
+		default:
+		}
+
+		for p, data := range files {
+			if err := writeAndFormat(p, data); err != nil {
 				return err
 			}
-			if err := writeAndFormat(mockServicePath, mockService); err != nil {
-				return err
-			}
-
-			fmt.Printf(
-				genFormattor,
-				"mock",
-				instance.ClassName,
-				instance.InstanceName,
-				path.Join(path.Base(h.CodeGenTargetPath()), instance.Directory, "mock-service"),
-				i+1, mockCount,
-			)
 		}
 		return nil
 	}
