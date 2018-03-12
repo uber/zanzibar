@@ -258,8 +258,5 @@ func writeAndFormat(path string, data []byte) error {
 			path,
 		)
 	}
-	if err := FormatGoFile(path); err != nil {
-		return err
-	}
-	return nil
+	return FormatGoFile(path)
 }
