@@ -89,9 +89,9 @@ func (h *BarNormalHandler) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
 
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarNormalEndpoint{

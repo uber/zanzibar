@@ -432,8 +432,11 @@ func (h *{{$handlerName}}) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
+	{{if ne .RequestType ""}}
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	{{- end -}}
+
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var headerOk bool
 	var headerValue string
@@ -694,7 +697,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10757, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10823, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

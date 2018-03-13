@@ -129,8 +129,11 @@ func (h *{{$handlerName}}) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
+	{{if ne .RequestType ""}}
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	{{- end -}}
+
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var headerOk bool
 	var headerValue string

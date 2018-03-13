@@ -86,9 +86,9 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
 
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	var headerOk bool
 	var headerValue string
 	headerValue, headerOk = req.Header.Get("X-Token")

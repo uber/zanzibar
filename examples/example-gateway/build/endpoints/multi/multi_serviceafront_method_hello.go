@@ -26,7 +26,6 @@ package multiendpoint
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -75,7 +74,6 @@ func (h *ServiceAFrontHelloHandler) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
 
 	req.Logger.Debug("Endpoint request to downstream", zfields...)

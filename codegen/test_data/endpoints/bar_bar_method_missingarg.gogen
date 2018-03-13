@@ -25,7 +25,6 @@ package barendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -76,7 +75,6 @@ func (h *BarMissingArgHandler) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
 
 	req.Logger.Debug("Endpoint request to downstream", zfields...)

@@ -25,7 +25,6 @@ package googlenowendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -76,7 +75,6 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	// log endpoint request to downstream services
 	zfields := []zapcore.Field{
 		zap.String("endpoint", h.endpoint.EndpointName),
-		zap.String("body", fmt.Sprintf("%#v", requestBody)),
 	}
 
 	var headerOk bool
