@@ -75,8 +75,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	return func(instances map[string][]*ModuleInstance) error {
 		fmt.Println("Generating client mocks:")
 		mockCount := len(instances["client"])
-		files := make(map[string][]byte)
 		ec := make(chan error, mockCount)
+		var files sync.Map
 		var wg sync.WaitGroup
 		wg.Add(mockCount)
 		for i, instance := range instances["client"] {
@@ -115,7 +115,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					)
 					return
 				}
-				files[filepath.Join(genDir, "mock_client.go")] = mock
+				files.Store(filepath.Join(genDir, "mock_client.go"), mock)
 
 				// generate fixture types and augmented mock client
 				f := mc.Config.Fixture
@@ -130,8 +130,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 						return
 					}
 
-					files[filepath.Join(genDir, "types.go")] = types
-					files[filepath.Join(genDir, "mock_client_with_fixture.go")] = augMock
+					files.Store(filepath.Join(genDir, "types.go"), types)
+					files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
 				}
 
 				fmt.Printf(
@@ -152,12 +152,15 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		default:
 		}
 
-		for p, data := range files {
-			if err := writeAndFormat(p, data); err != nil {
-				return err
+		var err error
+		files.Range(func(p, data interface{}) bool {
+			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+				return false
 			}
-		}
-		return nil
+			return true
+		})
+
+		return err
 	}, nil
 }
 
@@ -166,8 +169,8 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
 		fmt.Println("Generating service mocks:")
 		mockCount := len(instances["service"])
-		files := make(map[string][]byte)
 		ec := make(chan error, mockCount)
+		var files sync.Map
 		var wg sync.WaitGroup
 		wg.Add(mockCount)
 		for i, instance := range instances["service"] {
@@ -186,7 +189,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 					)
 					return
 				}
-				files[filepath.Join(genDir, "mock_init.go")] = mockInit
+				files.Store(filepath.Join(genDir, "mock_init.go"), mockInit)
 
 				mockService, err := t.ExecTemplate("service_mock.tmpl", instance, h)
 				if err != nil {
@@ -197,7 +200,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 					)
 					return
 				}
-				files[filepath.Join(genDir, "mock_service.go")] = mockService
+				files.Store(filepath.Join(genDir, "mock_service.go"), mockService)
 
 				fmt.Printf(
 					genFormattor,
@@ -217,12 +220,15 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		default:
 		}
 
-		for p, data := range files {
-			if err := writeAndFormat(p, data); err != nil {
-				return err
+		var err error
+		files.Range(func(p, data interface{}) bool {
+			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+				return false
 			}
-		}
-		return nil
+			return true
+		})
+
+		return err
 	}
 }
 
