@@ -25,10 +25,12 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
@@ -83,6 +85,20 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 	if xUUIDValueExists {
 		requestBody.UserUUID = ptr.String(xUUIDValue)
 	}
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+		zap.String("body", fmt.Sprintf("%#v", requestBody)),
+	}
+
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Uuid", headerValue))
+	}
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgWithHeadersEndpoint{
 		Clients: h.Clients,

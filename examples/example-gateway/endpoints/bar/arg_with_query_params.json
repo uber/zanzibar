@@ -10,6 +10,9 @@
 	"clientMethod": "ArgWithQueryParams",
 	"testFixtures": {},
 	"middlewares": [],
-	"reqHeaderMap": {},
+	"reqHeaderMap": {
+		"X-Uuid": "X-Uuid",
+		"X-Token": "X-Token"
+	},
 	"resHeaderMap": {}
 }

@@ -25,9 +25,11 @@ package googlenowendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
@@ -77,6 +79,20 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+		zap.String("body", fmt.Sprintf("%#v", requestBody)),
+	}
+
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Uuid", headerValue))
+	}
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := GoogleNowAddCredentialsEndpoint{
 		Clients: h.Clients,

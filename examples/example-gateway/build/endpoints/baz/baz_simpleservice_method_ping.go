@@ -25,9 +25,11 @@ package bazendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
@@ -70,6 +72,14 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+		zap.String("body", fmt.Sprintf("%#v", requestBody)),
+	}
+
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := SimpleServicePingEndpoint{
 		Clients: h.Clients,

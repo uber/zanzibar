@@ -25,10 +25,12 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
@@ -205,6 +207,14 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		}
 		requestBody.AnOptFloat64 = ptr.Float64(anOptFloat64Query)
 	}
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+		zap.String("body", fmt.Sprintf("%#v", requestBody)),
+	}
+
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgWithManyQueryParamsEndpoint{
 		Clients: h.Clients,
