@@ -123,7 +123,6 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		var wg sync.WaitGroup
 		ic := make(chan *ModuleInstance)
 		ec := make(chan error, mockCount)
-		wg.Add(mockCount)
 
 		// cap the num of goroutines to num of CPU, because
 		// bin.GenMock in each goroutine starts a sub process
@@ -131,6 +130,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		if n > mockCount {
 			n = mockCount
 		}
+		wg.Add(n)
+
 		for i := 0; i < n; i++ {
 			go func() {
 				defer wg.Done()
