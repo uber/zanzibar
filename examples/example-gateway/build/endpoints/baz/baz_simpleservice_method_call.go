@@ -25,10 +25,12 @@ package bazendpoint
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
@@ -92,6 +94,25 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		body := endpointsBazBaz.UUID(xUUIDValue)
 		requestBody.TestUUID = &body
 	}
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+	}
+
+	// TODO: potential perf issue, use zap.Object lazy serialization
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Token")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Token", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("X-Uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Uuid", headerValue))
+	}
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := SimpleServiceCallEndpoint{
 		Clients: h.Clients,

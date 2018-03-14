@@ -25,9 +25,11 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
@@ -83,6 +85,15 @@ func (h *BarNormalHandler) HandleRequest(
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+	}
+
+	// TODO: potential perf issue, use zap.Object lazy serialization
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarNormalEndpoint{
 		Clients: h.Clients,

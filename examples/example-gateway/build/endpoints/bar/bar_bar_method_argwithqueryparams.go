@@ -25,10 +25,12 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
@@ -92,6 +94,25 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
 
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+	}
+
+	// TODO: potential perf issue, use zap.Object lazy serialization
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Token")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Token", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("X-Uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Uuid", headerValue))
+	}
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
+
 	workflow := BarArgWithQueryParamsEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
@@ -125,6 +146,17 @@ func (w BarArgWithQueryParamsEndpoint) Handle(
 	clientRequest := convertToArgWithQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
+
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
+	}
+	h, ok = reqHeaders.Get("X-Uuid")
+	if ok {
+		clientHeaders["X-Uuid"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithQueryParams(
 		ctx, clientHeaders, clientRequest,

@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 )
@@ -69,6 +70,13 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+
+	// log endpoint request to downstream services
+	zfields := []zapcore.Field{
+		zap.String("endpoint", h.endpoint.EndpointName),
+	}
+
+	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := ServiceBFrontHelloEndpoint{
 		Clients: h.Clients,
