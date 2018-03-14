@@ -226,6 +226,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -597,7 +598,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10889, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

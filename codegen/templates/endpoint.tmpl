@@ -24,6 +24,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
