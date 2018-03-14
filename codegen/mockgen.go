@@ -128,7 +128,7 @@ func (b byMethodName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byMethodName) Less(i, j int) bool { return b[i].Name < b[j].Name }
 
 // AugmentMockWithFixture generates mocks with fixture for the interface in the given package
-func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf string) (types, mock []byte, err error) {
+func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf string) ([]byte, []byte, error) {
 	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
 	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
 	for _, m := range pkg.Interfaces[0].Methods {
@@ -136,9 +136,8 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf 
 		validationMap[m.Name] = struct{}{}
 	}
 
-	if err = f.Validate(validationMap); err != nil {
-		err = errors.Wrap(err, "invalid fixture config")
-		return
+	if err := f.Validate(validationMap); err != nil {
+		return nil, nil, errors.Wrap(err, "invalid fixture config")
 	}
 
 	exposedMethods := make([]*model.Method, 0, len(f.Scenarios))
@@ -184,16 +183,15 @@ func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf 
 		"Methods": methods,
 		"Fixture": f,
 	}
-	types, err = m.tmpl.ExecTemplate("fixture_types.tmpl", data, m.pkgHelper)
+	types, err := m.tmpl.ExecTemplate("fixture_types.tmpl", data, m.pkgHelper)
 	if err != nil {
-		return
+		return nil, nil, err
 	}
-	mock, err = m.tmpl.ExecTemplate("augmented_mock.tmpl", data, m.pkgHelper)
+	mock, err := m.tmpl.ExecTemplate("augmented_mock.tmpl", data, m.pkgHelper)
 	if err != nil {
-		types = nil
-		return
+		return nil, nil, err
 	}
-	return
+	return types, mock, nil
 }
 
 type reflectMethod struct {
