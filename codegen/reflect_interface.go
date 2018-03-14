@@ -35,13 +35,13 @@ import (
 )
 
 type reflectData struct {
-	ImportPath string
-	Symbols    []string
+	PathAliasMap  map[string]string
+	PathSymbolMap map[string]string
 }
 
-// ReflectInterface uses reflection to obtain interface information identified by symbols in given import path
+// ReflectInterface uses reflection to obtain interface information for each path symbol pair in the pathSympolMap
 // projRoot is the root dir where mockgen is installed as a vendor package
-func ReflectInterface(projRoot, importPath string, symbols []string) (*model.Package, error) {
+func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[string]*model.Package, error) {
 	// We use TempDir instead of TempFile so we can control the filename.
 	tmpDir, err := ioutil.TempDir(projRoot, "gomock_reflect_")
 	if err != nil {
@@ -57,11 +57,15 @@ func ReflectInterface(projRoot, importPath string, symbols []string) (*model.Pac
 	}
 
 	// Generate program
-	var program bytes.Buffer
-	data := reflectData{
-		ImportPath: importPath,
-		Symbols:    symbols,
+	paths := make(map[string]bool, len(pathSymbolMap))
+	for p := range pathSymbolMap {
+		paths[p] = true
 	}
+	data := reflectData{
+		PathAliasMap:  uniqueAlias(paths),
+		PathSymbolMap: pathSymbolMap,
+	}
+	var program bytes.Buffer
 	if err := reflectProgram.Execute(&program, &data); err != nil {
 		return nil, err
 	}
@@ -91,46 +95,50 @@ func ReflectInterface(projRoot, importPath string, symbols []string) (*model.Pac
 		return nil, errors.Wrap(err, stderr.String())
 	}
 
-	var pkg model.Package
-	if err := gob.NewDecoder(&stdout).Decode(&pkg); err != nil {
+	var pkgs map[string]*model.Package
+	if err := gob.NewDecoder(&stdout).Decode(&pkgs); err != nil {
 		return nil, err
 	}
-	return &pkg, nil
+	return pkgs, nil
 }
 
 // This program reflects on an interface value, and prints the
 // gob encoding of a model.Package to standard output.
 // JSON doesn't work because of the model.Type interface.
 var reflectProgram = template.Must(template.New("program").Parse(`
+{{$pathAliasMap := .PathAliasMap}}
+{{$pathSymbolMap := .PathSymbolMap}}
 package main
 
 import (
 	"encoding/gob"
 	"fmt"
 	"os"
-	"path"
 	"reflect"
 
 	"github.com/golang/mock/mockgen/model"
 
-	pkg_ {{printf "%q" .ImportPath}}
+	{{range $importPath, $alias := $pathAliasMap}}
+	{{$alias}} "{{$importPath}}"
+	{{end}}
 )
 
 func main() {
 	its := []struct{
-		sym string
-		typ reflect.Type
+		path, sym string
+		typ 	  reflect.Type
 	}{
-		{{range .Symbols}}
-		{ {{printf "%q" .}}, reflect.TypeOf((*pkg_.{{.}})(nil)).Elem()},
+		{{range $importPath, $symbol := $pathSymbolMap}}
+		{"{{$importPath}}", "{{$symbol}}", reflect.TypeOf((*{{index $pathAliasMap $importPath}}.{{$symbol}})(nil)).Elem()},
 		{{end}}
 	}
-	pkg := &model.Package{
-		// NOTE: This behaves contrary to documented behaviour if the
-		// package name is not the final component of the import path.
-		// The reflect package doesn't expose the package name, though.
-		Name: path.Base({{printf "%q" .ImportPath}}),
+
+	pkgs := make(map[string]*model.Package, {{len $pathSymbolMap}})
+	{{range $importPath, $symbol := $pathSymbolMap}}
+	pkgs["{{$importPath}}"] = &model.Package{
+		Name: "{{index $pathAliasMap $importPath}}",
 	}
+	{{end}}
 
 	stderr := os.Stderr
 	for _, it := range its {
@@ -140,9 +148,9 @@ func main() {
 			os.Exit(1)
 		}
 		intf.Name = it.sym
-		pkg.Interfaces = append(pkg.Interfaces, intf)
+		pkgs[it.path].Interfaces = []*model.Interface{intf}
 	}
-	if err := gob.NewEncoder(os.Stdout).Encode(pkg); err != nil {
+	if err := gob.NewEncoder(os.Stdout).Encode(pkgs); err != nil {
 		fmt.Fprintf(stderr, "gob encode: %v\n", err)
 		os.Exit(1)
 	}

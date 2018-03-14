@@ -127,13 +127,8 @@ func (b byMethodName) Len() int           { return len(b) }
 func (b byMethodName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byMethodName) Less(i, j int) bool { return b[i].Name < b[j].Name }
 
-// AugmentMockWithFixture generates mocks with fixture for the interface in the given importPath
-func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf string) (types, mock []byte, err error) {
-	pkg, err := ReflectInterface(m.projRoot, importPath, []string{intf})
-	if err != nil {
-		return
-	}
-
+// AugmentMockWithFixture generates mocks with fixture for the interface in the given package
+func (m MockgenBin) AugmentMockWithFixture(pkg *model.Package, f *Fixture, intf string) (types, mock []byte, err error) {
 	methodsMap := make(map[string]*model.Method, len(pkg.Interfaces[0].Methods))
 	validationMap := make(map[string]interface{}, len(pkg.Interfaces[0].Methods))
 	for _, m := range pkg.Interfaces[0].Methods {
@@ -154,22 +149,7 @@ func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf s
 	// sort methods in given fixture config for predictable fixture type generation
 	sort.Sort(byMethodName(exposedMethods))
 
-	imports := pkg.Imports()
-	pkgPathToAlias := make(map[string]string, len(imports))
-	usedAliases := make(map[string]bool, len(imports))
-	for pkgPath := range imports {
-		base := camelCase(path.Base(pkgPath))
-		pkgAlias := base
-		i := 0
-		for usedAliases[pkgAlias] || token.Lookup(pkgAlias).IsKeyword() {
-			pkgAlias = base + strconv.Itoa(i)
-			i++
-		}
-
-		pkgPathToAlias[pkgPath] = pkgAlias
-		usedAliases[pkgAlias] = true
-	}
-
+	pkgPathToAlias := uniqueAlias(pkg.Imports())
 	methods := make([]*reflectMethod, 0, len(exposedMethods))
 	for _, m := range exposedMethods {
 		numIn := len(m.In)
@@ -220,4 +200,23 @@ type reflectMethod struct {
 	Name                string
 	In, Out             map[string]string
 	InString, OutString string
+}
+
+// uniqueAlias returns a map of import path to alias where the aliases are unique
+func uniqueAlias(importPaths map[string]bool) map[string]string {
+	pkgPathToAlias := make(map[string]string, len(importPaths))
+	usedAliases := make(map[string]bool, len(importPaths))
+	for pkgPath := range importPaths {
+		base := camelCase(path.Base(pkgPath))
+		pkgAlias := base
+		i := 0
+		for usedAliases[pkgAlias] || token.Lookup(pkgAlias).IsKeyword() {
+			pkgAlias = base + strconv.Itoa(i)
+			i++
+		}
+
+		pkgPathToAlias[pkgPath] = pkgAlias
+		usedAliases[pkgAlias] = true
+	}
+	return pkgPathToAlias
 }

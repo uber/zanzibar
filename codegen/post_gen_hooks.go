@@ -25,8 +25,10 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/pkg/errors"
 )
@@ -77,72 +79,118 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	}
 
 	return func(instances map[string][]*ModuleInstance) error {
-		mockCount := len(instances["client"])
+		clientInstances := instances["client"]
+		mockCount := len(clientInstances)
 		fmt.Printf("Generating %d client mocks:\n", mockCount)
-		ec := make(chan error, mockCount)
+
+		importPathMap := make(map[string]string, mockCount)
+		fixtureMap := make(map[string]*Fixture, mockCount)
+		pathSymbolMap := make(map[string]string)
+		for _, instance := range clientInstances {
+			key := instance.ClassType + instance.InstanceName
+			var mc moduleConfig
+			if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
+				return errors.Wrapf(
+					err,
+					"error parsing client-config.json for client %q",
+					instance.InstanceName,
+				)
+			}
+
+			importPath := instance.PackageInfo.GeneratedPackagePath
+			if instance.ClassType == custom {
+				importPath = mc.Config.CustomImportPath
+			}
+
+			importPathMap[key] = importPath
+
+			// gather all modules that need to generate fixture types
+			f := mc.Config.Fixture
+			if f != nil && f.Scenarios != nil {
+				pathSymbolMap[importPath] = clientInterface
+				fixtureMap[key] = f
+			}
+		}
+
+		// only run reflect program once to gather interface info for all clients
+		pkgs, err := ReflectInterface(bin.projRoot, pathSymbolMap)
+		if err != nil {
+			return errors.Wrap(err, "error parsing Client interfaces")
+		}
+
+		var idx int32 = 1
 		var files sync.Map
 		var wg sync.WaitGroup
+		ic := make(chan *ModuleInstance)
+		ec := make(chan error, mockCount)
 		wg.Add(mockCount)
-		for i, instance := range instances["client"] {
-			go func(instance *ModuleInstance, i int) {
+
+		// cap the num of goroutines to num of CPU, because
+		// bin.GenMock in each goroutine starts a sub process
+		n := runtime.GOMAXPROCS(0)
+		if n > mockCount {
+			n = mockCount
+		}
+		for i := 0; i < n; i++ {
+			go func() {
 				defer wg.Done()
 
-				var mc moduleConfig
-				if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
-					ec <- errors.Wrapf(
-						err,
-						"error parsing client-config.json for client %q",
-						instance.InstanceName,
-					)
-					return
-				}
+				for {
+					instance, ok := <-ic
+					if !ok {
+						return
+					}
 
-				buildDir := h.CodeGenTargetPath()
-				genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
+					key := instance.ClassType + instance.InstanceName
+					buildDir := h.CodeGenTargetPath()
+					genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
-				importPath := instance.PackageInfo.GeneratedPackagePath
-				if instance.ClassType == custom {
-					importPath = mc.Config.CustomImportPath
-				}
+					importPath := importPathMap[key]
 
-				// generate mock client
-				mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
-				if err != nil {
-					ec <- errors.Wrapf(
-						err,
-						"error generating mocks for client %q",
-						instance.InstanceName,
-					)
-					return
-				}
-				files.Store(filepath.Join(genDir, "mock_client.go"), mock)
-
-				// generate fixture types and augmented mock client
-				f := mc.Config.Fixture
-				if f != nil && f.Scenarios != nil {
-					types, augMock, err := bin.AugmentMockWithFixture(importPath, f, clientInterface)
+					// generate mock client, this starts a sub process
+					mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
 					if err != nil {
 						ec <- errors.Wrapf(
 							err,
-							"error generating fixture types for client %q",
+							"error generating mocks for client %q",
 							instance.InstanceName,
 						)
 						return
 					}
+					files.Store(filepath.Join(genDir, "mock_client.go"), mock)
 
-					files.Store(filepath.Join(genDir, "types.go"), types)
-					files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
+					// generate fixture types and augmented mock client
+					if f, ok := fixtureMap[key]; ok {
+						types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterface)
+						if err != nil {
+							ec <- errors.Wrapf(
+								err,
+								"error generating fixture types for client %q",
+								instance.InstanceName,
+							)
+							return
+						}
+
+						files.Store(filepath.Join(genDir, "types.go"), types)
+						files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
+					}
+
+					printGenLine(
+						"mock",
+						instance.ClassName,
+						instance.InstanceName,
+						path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
+						int(atomic.LoadInt32(&idx)), mockCount,
+					)
+					atomic.AddInt32(&idx, 1)
 				}
-
-				printGenLine(
-					"mock",
-					instance.ClassName,
-					instance.InstanceName,
-					path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
-					i+1, mockCount,
-				)
-			}(instance, i)
+			}()
 		}
+
+		for _, instance := range clientInstances {
+			ic <- instance
+		}
+		close(ic)
 		wg.Wait()
 
 		select {
@@ -160,7 +208,6 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		default:
 		}
 
-		var err error
 		files.Range(func(p, data interface{}) bool {
 			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
 				return false
