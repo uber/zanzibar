@@ -25,7 +25,6 @@ package barendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
@@ -91,7 +90,7 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	var headerOk bool
 	var headerValue string
 	headerValue, headerOk = req.Header.Get("X-Uuid")

@@ -25,7 +25,6 @@ package googlenowendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -85,7 +84,7 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	var headerOk bool
 	var headerValue string
 	headerValue, headerOk = req.Header.Get("X-Uuid")

@@ -25,7 +25,6 @@ package bazendpoint
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -100,7 +99,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	var headerOk bool
 	var headerValue string
 	headerValue, headerOk = req.Header.Get("X-Token")

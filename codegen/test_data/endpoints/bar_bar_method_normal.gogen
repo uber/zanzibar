@@ -25,7 +25,6 @@ package barendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -91,7 +90,7 @@ func (h *BarNormalHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarNormalEndpoint{

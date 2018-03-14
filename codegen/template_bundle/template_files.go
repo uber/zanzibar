@@ -434,7 +434,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 	{{if ne .RequestType ""}}
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	{{- end -}}
 
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
@@ -697,7 +697,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10823, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10812, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

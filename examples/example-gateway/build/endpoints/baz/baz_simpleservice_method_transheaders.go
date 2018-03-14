@@ -25,7 +25,6 @@ package bazendpoint
 
 import (
 	"context"
-	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -86,7 +85,7 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := SimpleServiceTransHeadersEndpoint{

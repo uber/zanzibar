@@ -131,7 +131,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 	{{if ne .RequestType ""}}
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	{{- end -}}
 
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
