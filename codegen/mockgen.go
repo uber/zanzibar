@@ -120,6 +120,13 @@ func (m MockgenBin) GenMock(importPath, pkg, intf string) ([]byte, error) {
 	return stdout.Bytes(), nil
 }
 
+// byMethodName implements sort.Interface for []*modelMethod based on the Name field
+type byMethodName []*model.Method
+
+func (b byMethodName) Len() int           { return len(b) }
+func (b byMethodName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b byMethodName) Less(i, j int) bool { return b[i].Name < b[j].Name }
+
 // AugmentMockWithFixture generates mocks with fixture for the interface in the given importPath
 func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf string) (types, mock []byte, err error) {
 	pkg, err := ReflectInterface(m.projRoot, importPath, []string{intf})
@@ -139,35 +146,18 @@ func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf s
 		return
 	}
 
-	// sort methods in given fixture config for predictable fixture type generation
-	numMethods := len(f.Scenarios)
-	sortedMethods := make([]string, numMethods, numMethods)
-	i := 0
+	exposedMethods := make([]*model.Method, 0, len(f.Scenarios))
 	for name := range f.Scenarios {
-		sortedMethods[i] = name
-		i++
+		exposedMethods = append(exposedMethods, methodsMap[name])
 	}
-	sort.Strings(sortedMethods)
 
-	exposedMethods := make([]*model.Method, numMethods, numMethods)
-	for i, methodName := range sortedMethods {
-		exposedMethods[i] = methodsMap[methodName]
-	}
+	// sort methods in given fixture config for predictable fixture type generation
+	sort.Sort(byMethodName(exposedMethods))
 
 	imports := pkg.Imports()
-
-	// Sort keys to make import alias generation predictable
-	sortedPaths := make([]string, len(imports), len(imports))
-	j := 0
-	for pth := range imports {
-		sortedPaths[j] = pth
-		j++
-	}
-	sort.Strings(sortedPaths)
-
 	pkgPathToAlias := make(map[string]string, len(imports))
 	usedAliases := make(map[string]bool, len(imports))
-	for _, pkgPath := range sortedPaths {
+	for pkgPath := range imports {
 		base := camelCase(path.Base(pkgPath))
 		pkgAlias := base
 		i := 0
@@ -180,33 +170,33 @@ func (m MockgenBin) AugmentMockWithFixture(importPath string, f *Fixture, intf s
 		usedAliases[pkgAlias] = true
 	}
 
-	methods := make([]*reflectMethod, len(exposedMethods))
-	for i, m := range exposedMethods {
+	methods := make([]*reflectMethod, 0, len(exposedMethods))
+	for _, m := range exposedMethods {
 		numIn := len(m.In)
 		in := make(map[string]string, numIn)
-		inString := make([]string, numIn, numIn)
+		inString := make([]string, 0, numIn)
 		for i, param := range m.In {
 			arg := "arg" + strconv.Itoa(i)
 			in[arg] = param.Type.String(pkgPathToAlias, "")
-			inString[i] = arg
+			inString = append(inString, arg)
 		}
 
 		numOut := len(m.Out)
 		out := make(map[string]string, numOut)
-		outString := make([]string, numOut, numOut)
+		outString := make([]string, 0, numOut)
 		for i, param := range m.Out {
 			ret := "ret" + strconv.Itoa(i)
 			out[ret] = param.Type.String(pkgPathToAlias, "")
-			outString[i] = ret
+			outString = append(outString, ret)
 		}
 
-		methods[i] = &reflectMethod{
+		methods = append(methods, &reflectMethod{
 			Name:      m.Name,
 			In:        in,
 			Out:       out,
 			InString:  strings.Join(inString, " ,"),
 			OutString: strings.Join(outString, " ,"),
-		}
+		})
 	}
 
 	data := map[string]interface{}{
