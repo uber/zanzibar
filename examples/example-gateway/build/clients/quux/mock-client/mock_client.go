@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 )
 
 // MockClient is a mock of Client interface
@@ -31,6 +32,28 @@ func NewMockClient(ctrl *gomock.Controller) *MockClient {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
+}
+
+// DropMessages mocks base method
+func (m *MockClient) DropMessages(arg0, arg1 *base.Message) {
+	m.ctrl.Call(m, "DropMessages", arg0, arg1)
+}
+
+// DropMessages indicates an expected call of DropMessages
+func (mr *MockClientMockRecorder) DropMessages(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropMessages", reflect.TypeOf((*MockClient)(nil).DropMessages), arg0, arg1)
+}
+
+// EchoMessage mocks base method
+func (m *MockClient) EchoMessage(arg0 *base.Message) *base.Message {
+	ret := m.ctrl.Call(m, "EchoMessage", arg0)
+	ret0, _ := ret[0].(*base.Message)
+	return ret0
+}
+
+// EchoMessage indicates an expected call of EchoMessage
+func (mr *MockClientMockRecorder) EchoMessage(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoMessage", reflect.TypeOf((*MockClient)(nil).EchoMessage), arg0)
 }
 
 // EchoString mocks base method

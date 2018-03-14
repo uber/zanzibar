@@ -28,8 +28,8 @@ import (
 // Client is a custom client that does nothing yet
 type Client interface {
 	EchoString(string) string
-	//EchoMessage(m *base.Message) *base.Message
-	//DropMessages(m1, m2 *base.Message)
+	EchoMessage(m *base.Message) *base.Message
+	DropMessages(m1, m2 *base.Message)
 }
 
 type quux struct{}
@@ -40,15 +40,10 @@ func NewClient(deps *module.Dependencies) Client {
 }
 
 // EchoString ...
-func (c *quux) EchoString(s string) string {
-	return s
-}
+func (c *quux) EchoString(s string) string { return s }
 
 // EchoMessage ...
-func (c *quux) EchoMessage(m *base.Message) *base.Message {
-	return m
-}
+func (c *quux) EchoMessage(m *base.Message) *base.Message { return m }
 
 // DropMessage ...
-func (c *quux) DropMessages(m1, m2 *base.Message) {
-}
+func (c *quux) DropMessages(m1, m2 *base.Message) {}
