@@ -447,6 +447,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		zfields = append(zfields, zap.String("{{$k}}", headerValue))
 	}
 	{{- end}}
+	// TODO: potential perf issue, use zap.Object lazy serialization
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := {{$workflow}}{
@@ -697,7 +698,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10812, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10878, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

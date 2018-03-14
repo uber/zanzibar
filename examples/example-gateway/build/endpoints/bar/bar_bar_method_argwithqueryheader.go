@@ -85,6 +85,7 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 	}
 
 	zfields = append(zfields, zap.String("body", requestBody.String()))
+	// TODO: potential perf issue, use zap.Object lazy serialization
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgWithQueryHeaderEndpoint{

@@ -77,6 +77,7 @@ func (h *BarMissingArgHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
+	// TODO: potential perf issue, use zap.Object lazy serialization
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarMissingArgEndpoint{
