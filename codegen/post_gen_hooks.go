@@ -21,16 +21,20 @@
 package codegen
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 
-	"encoding/json"
 	"github.com/pkg/errors"
 )
 
-const clientInterface = "Client"
+const (
+	clientInterface = "Client"
+	custom          = "custom"
+)
 
 // helper struct to pull out the fixture config
 type moduleConfig struct {
@@ -73,8 +77,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	}
 
 	return func(instances map[string][]*ModuleInstance) error {
-		fmt.Println("Generating client mocks:")
 		mockCount := len(instances["client"])
+		fmt.Printf("Generating %d client mocks:\n", mockCount)
 		ec := make(chan error, mockCount)
 		var files sync.Map
 		var wg sync.WaitGroup
@@ -97,12 +101,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 				genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
 				importPath := instance.PackageInfo.GeneratedPackagePath
-				if instance.ClassType == "custom" {
+				if instance.ClassType == custom {
 					importPath = mc.Config.CustomImportPath
-					if importPath == "" {
-						ec <- errors.Errorf("custom client %q must have customImportPath", instance.ClassName)
-						return
-					}
 				}
 
 				// generate mock client
@@ -124,7 +124,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					if err != nil {
 						ec <- errors.Wrapf(
 							err,
-							"error generating mock client with fixtures for client %q",
+							"error generating fixture types for client %q",
 							instance.InstanceName,
 						)
 						return
@@ -134,8 +134,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 					files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
 				}
 
-				fmt.Printf(
-					genFormattor,
+				printGenLine(
 					"mock",
 					instance.ClassName,
 					instance.InstanceName,
@@ -148,7 +147,16 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 		select {
 		case err := <-ec:
-			return err
+			close(ec)
+			errs := []string{err.Error()}
+			for e := range ec {
+				errs = append(errs, e.Error())
+			}
+			return errors.Errorf(
+				"encountered %d errors when generating mock clients:\n%s",
+				len(errs),
+				strings.Join(errs, "\n"),
+			)
 		default:
 		}
 
@@ -167,8 +175,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 // ServiceMockGenHook returns a PostGenHook to generate service mocks
 func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 	return func(instances map[string][]*ModuleInstance) error {
-		fmt.Println("Generating service mocks:")
 		mockCount := len(instances["service"])
+		fmt.Printf("Generating %d service mocks:\n", mockCount)
 		ec := make(chan error, mockCount)
 		var files sync.Map
 		var wg sync.WaitGroup
@@ -202,8 +210,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				}
 				files.Store(filepath.Join(genDir, "mock_service.go"), mockService)
 
-				fmt.Printf(
-					genFormattor,
+				printGenLine(
 					"mock",
 					instance.ClassName,
 					instance.InstanceName,
@@ -216,7 +223,16 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 		select {
 		case err := <-ec:
-			return err
+			close(ec)
+			errs := []string{err.Error()}
+			for e := range ec {
+				errs = append(errs, e.Error())
+			}
+			return errors.Errorf(
+				"encountered %d errors when generating mock services:\n%s",
+				len(errs),
+				strings.Join(errs, "\n"),
+			)
 		default:
 		}
 
