@@ -435,7 +435,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{if ne .RequestType ""}}
 	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", requestBody.String()))
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	{{- end -}}
 
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
@@ -698,7 +698,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10878, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10889, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

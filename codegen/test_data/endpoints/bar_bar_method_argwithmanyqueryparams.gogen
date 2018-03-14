@@ -25,6 +25,7 @@ package barendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
@@ -213,7 +214,7 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	}
 
 	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", requestBody.String()))
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgWithManyQueryParamsEndpoint{

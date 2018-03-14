@@ -25,6 +25,7 @@ package googlenowendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -85,7 +86,7 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 
 	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", requestBody.String()))
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	var headerOk bool
 	var headerValue string
 	headerValue, headerOk = req.Header.Get("X-Uuid")

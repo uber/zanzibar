@@ -25,6 +25,7 @@ package contactsendpoint
 
 import (
 	"context"
+	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -84,7 +85,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	}
 
 	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", requestBody.String()))
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := customContacts.SaveContactsEndpoint{

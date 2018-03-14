@@ -132,7 +132,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 	{{if ne .RequestType ""}}
 	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", requestBody.String()))
+	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	{{- end -}}
 
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
