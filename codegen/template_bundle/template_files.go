@@ -434,6 +434,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 	{{if ne .RequestType ""}}
+	// TODO: potential perf issue, use zap.Object lazy serialization
 	zfields = append(zfields, zap.String("body", requestBody.String()))
 	{{- end -}}
 
@@ -447,7 +448,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		zfields = append(zfields, zap.String("{{$k}}", headerValue))
 	}
 	{{- end}}
-	// TODO: potential perf issue, use zap.Object lazy serialization
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := {{$workflow}}{

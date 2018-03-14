@@ -81,8 +81,8 @@ func (h *BarArgNotStructHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
-	zfields = append(zfields, zap.String("body", requestBody.String()))
 	// TODO: potential perf issue, use zap.Object lazy serialization
+	zfields = append(zfields, zap.String("body", requestBody.String()))
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgNotStructEndpoint{

@@ -87,6 +87,7 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
+	// TODO: potential perf issue, use zap.Object lazy serialization
 	zfields = append(zfields, zap.String("body", requestBody.String()))
 	var headerOk bool
 	var headerValue string
@@ -98,7 +99,6 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Uuid", headerValue))
 	}
-	// TODO: potential perf issue, use zap.Object lazy serialization
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarTooManyArgsEndpoint{
