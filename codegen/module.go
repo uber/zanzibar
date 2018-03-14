@@ -887,8 +887,7 @@ func (system *ModuleSystem) GenerateBuild(
 				filepath.Base(targetGenDir),
 				classInstance.Directory,
 			)
-			fmt.Printf(
-				"Generating %12s %12s %-30s in %-50s %d/%d\n",
+			printGenLine(
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
@@ -972,6 +971,21 @@ func (system *ModuleSystem) GenerateBuild(
 	}
 
 	return resolvedModules, nil
+}
+
+func printGenLine(
+	classType, className, instanceName, buildPath string,
+	idx, count int,
+) {
+	fmt.Printf(
+		"Generating %12s %12s %-30s in %-50s %d/%d\n",
+		classType,
+		className,
+		instanceName,
+		buildPath,
+		idx,
+		count,
+	)
 }
 
 // FormatGoFile reformat the go file imports

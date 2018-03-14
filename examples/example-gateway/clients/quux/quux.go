@@ -21,12 +21,15 @@
 package quux
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 )
 
 // Client is a custom client that does nothing yet
 type Client interface {
-	Echo(string) string
+	EchoString(string) string
+	EchoMessage(m *base.Message) *base.Message
+	DropMessages(m1, m2 *base.Message)
 }
 
 type quux struct{}
@@ -36,6 +39,11 @@ func NewClient(deps *module.Dependencies) Client {
 	return &quux{}
 }
 
-func (c *quux) Echo(s string) string {
-	return s
-}
+// EchoString ...
+func (c *quux) EchoString(s string) string { return s }
+
+// EchoMessage ...
+func (c *quux) EchoMessage(m *base.Message) *base.Message { return m }
+
+// DropMessage ...
+func (c *quux) DropMessages(m1, m2 *base.Message) {}

@@ -47,23 +47,23 @@ func (m *MockClientWithFixture) EXPECT() {
 	panic("should not call EXPECT directly.")
 }
 
-// SaveContactsMock mocks the SaveContacts method
-type SaveContactsMock struct {
-	scenarios  *SaveContactsScenarios
+// EchoStringMock mocks the EchoString method
+type EchoStringMock struct {
+	scenarios  *EchoStringScenarios
 	mockClient *MockClient
 }
 
-// ExpectSaveContacts returns an object that allows the caller to choose expected scenario for SaveContacts
-func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
-	return &SaveContactsMock{
-		scenarios:  m.fixture.SaveContacts,
+// ExpectEchoString returns an object that allows the caller to choose expected scenario for EchoString
+func (m *MockClientWithFixture) ExpectEchoString() *EchoStringMock {
+	return &EchoStringMock{
+		scenarios:  m.fixture.EchoString,
 		mockClient: m.MockClient,
 	}
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package
-// github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
-func (s *SaveContactsMock) Success() {
+// github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
+func (s *EchoStringMock) Success() {
 	f := s.scenarios.Success
 
 	var arg0 interface{}
@@ -71,20 +71,8 @@ func (s *SaveContactsMock) Success() {
 	if f.Arg0Any {
 		arg0 = gomock.Any()
 	}
-	var arg1 interface{}
-	arg1 = f.Arg1
-	if f.Arg1Any {
-		arg1 = gomock.Any()
-	}
-	var arg2 interface{}
-	arg2 = f.Arg2
-	if f.Arg2Any {
-		arg2 = gomock.Any()
-	}
 
 	ret0 := f.Ret0
-	ret1 := f.Ret1
-	ret2 := f.Ret2
 
-	s.mockClient.EXPECT().SaveContacts(arg0, arg1, arg2).Return(ret0, ret1, ret2)
+	s.mockClient.EXPECT().EchoString(arg0).Return(ret0)
 }

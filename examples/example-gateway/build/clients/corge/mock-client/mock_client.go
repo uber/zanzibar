@@ -6,9 +6,10 @@ package clientmock
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	corge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
-	reflect "reflect"
 )
 
 // MockClient is a mock of Client interface

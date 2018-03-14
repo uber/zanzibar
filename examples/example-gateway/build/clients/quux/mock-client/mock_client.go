@@ -5,8 +5,10 @@
 package clientmock
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
 )
 
 // MockClient is a mock of Client interface
@@ -32,14 +34,36 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// Echo mocks base method
-func (m *MockClient) Echo(arg0 string) string {
-	ret := m.ctrl.Call(m, "Echo", arg0)
+// DropMessages mocks base method
+func (m *MockClient) DropMessages(arg0, arg1 *base.Message) {
+	m.ctrl.Call(m, "DropMessages", arg0, arg1)
+}
+
+// DropMessages indicates an expected call of DropMessages
+func (mr *MockClientMockRecorder) DropMessages(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropMessages", reflect.TypeOf((*MockClient)(nil).DropMessages), arg0, arg1)
+}
+
+// EchoMessage mocks base method
+func (m *MockClient) EchoMessage(arg0 *base.Message) *base.Message {
+	ret := m.ctrl.Call(m, "EchoMessage", arg0)
+	ret0, _ := ret[0].(*base.Message)
+	return ret0
+}
+
+// EchoMessage indicates an expected call of EchoMessage
+func (mr *MockClientMockRecorder) EchoMessage(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoMessage", reflect.TypeOf((*MockClient)(nil).EchoMessage), arg0)
+}
+
+// EchoString mocks base method
+func (m *MockClient) EchoString(arg0 string) string {
+	ret := m.ctrl.Call(m, "EchoString", arg0)
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Echo indicates an expected call of Echo
-func (mr *MockClientMockRecorder) Echo(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Echo", reflect.TypeOf((*MockClient)(nil).Echo), arg0)
+// EchoString indicates an expected call of EchoString
+func (mr *MockClientMockRecorder) EchoString(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0)
 }
