@@ -112,9 +112,13 @@ func (m *mockService) Start() {
 
 // Stop stops the mock server
 func (m *mockService) Stop() {
+	// m.ctrl.Finish() calls runtime.Goexit() on errors
+	// put it in defer so cleanup is always done
+	defer func(){
+		m.server.Close()
+		m.started = false
+	}()
 	m.ctrl.Finish()
-	m.server.Close()
-	m.started = false
 }
 
 // {{$mockType}} returns the mock nodes
