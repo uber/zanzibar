@@ -15,7 +15,7 @@ func TestSaveContactsCall(t *testing.T) {
 	ms.Start()
 	defer ms.Stop()
 
-	ms.MockClientNodes().Contacts.ExpectSaveContacts().Success()
+	ms.MockClients().Contacts.ExpectSaveContacts().Success()
 
 	endpointReqeust := &endpointContacts.SaveContactsRequest{
 		Contacts: []*endpointContacts.Contact{},

@@ -34,7 +34,7 @@ func TestBazCall(t *testing.T) {
 
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClientNodes().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(

@@ -78,6 +78,12 @@ import (
 type MockClientWithFixture struct {
 	*MockClient
 	fixture *ClientFixture
+
+	{{range $method := $methods}}
+	{{$methodName := $method.Name -}}
+	{{$methodMockType := printf "%sMock" $methodName -}}
+	{{camel $methodMockType}} *{{$methodMockType}}
+	{{- end}}
 }
 
 // New creates a new mock instance
@@ -98,6 +104,7 @@ func (m *MockClientWithFixture) EXPECT() {
 {{range $method := $methods}}
 {{$methodName := $method.Name -}}
 {{$methodMockType := printf "%sMock" $methodName -}}
+{{$methodMockField := camel $methodMockType -}}
 {{$methodScenarios := index $scenarios $methodName -}}
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
@@ -107,10 +114,13 @@ type {{$methodMockType}} struct {
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
 // {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
 func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
-	return &{{$methodMockType}}{
-		scenarios:  m.fixture.{{$methodName}},
-		mockClient: m.MockClient,
+	if m.{{$methodMockField}} == nil {
+		m.{{$methodMockField}} = &{{$methodMockType}}{
+			scenarios:  m.fixture.{{$methodName}},
+			mockClient: m.MockClient,
+		}
 	}
+	return m.{{$methodMockField}}
 }
 
 {{- range $scenario := $methodScenarios -}}
@@ -148,7 +158,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2171, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2491, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1900,6 +1910,7 @@ func serviceTmpl() (*asset, error) {
 var _service_mockTmpl = []byte(`{{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
+{{- $mock := printf "Mock%ss" (title $leafClass) -}}
 
 package {{$instance.PackageInfo.GeneratedPackageAlias}}mock
 
@@ -1936,7 +1947,7 @@ type MockService interface {
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
-	{{$mockType}}() *{{$mockType}}
+	{{$mock}}() *{{$mockType}}
 	Start()
 	Stop()
 }
@@ -1945,7 +1956,7 @@ type mockService struct {
 	started        bool
 	server         *zanzibar.Gateway
 	ctrl           *gomock.Controller
-	{{camel $mockType}}    *{{$mockType}}
+	{{camel $mock}}    *{{$mockType}}
 	httpClient     *http.Client
 	tChannelClient zanzibar.TChannelCaller
 }
@@ -1995,7 +2006,7 @@ func MustCreateTestService(t *testing.T) MockService {
 	return &mockService{
 		server:         		server,
 		ctrl:                   ctrl,
-		{{camel $mockType}}:    mockNodes,
+		{{camel $mock}}:        mockNodes,
 		httpClient:     		httpClient,
 		tChannelClient: 		tchannelClient,
 	}
@@ -2020,9 +2031,9 @@ func (m *mockService) Stop() {
 	m.ctrl.Finish()
 }
 
-// {{$mockType}} returns the mock nodes
-func (m *mockService) {{$mockType}}() *{{$mockType}} {
-	return m.{{camel $mockType}}
+// {{$mock}} returns the mock {{$leafClass}}s
+func (m *mockService) {{$mock}}() *{{$mockType}} {
+	return m.{{camel $mock}}
 }
 
 // MakeHTTPRequest makes a HTTP request to the mock server
@@ -2080,7 +2091,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4162, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

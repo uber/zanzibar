@@ -23,14 +23,34 @@
 
 package clientmock
 
+import (
+	base "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
+)
+
 // ClientFixture defines the client fixture type
 type ClientFixture struct {
-	EchoString *EchoStringScenarios
+	EchoMessage *EchoMessageScenarios
+	EchoString  *EchoStringScenarios
+}
+
+// EchoMessageScenarios defines all fixture scenarios for EchoMessage
+type EchoMessageScenarios struct {
+	Success *EchoMessageFixture `scenario:"success"`
 }
 
 // EchoStringScenarios defines all fixture scenarios for EchoString
 type EchoStringScenarios struct {
 	Success *EchoStringFixture `scenario:"success"`
+}
+
+// EchoMessageFixture defines the fixture type for EchoMessage
+type EchoMessageFixture struct {
+	Arg0 *base.Message
+
+	// Arg{n}Any indicates the nth argument could be gomock.Any
+	Arg0Any bool
+
+	Ret0 *base.Message
 }
 
 // EchoStringFixture defines the fixture type for EchoString
