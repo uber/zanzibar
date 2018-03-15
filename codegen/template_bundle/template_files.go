@@ -78,6 +78,12 @@ import (
 type MockClientWithFixture struct {
 	*MockClient
 	fixture *ClientFixture
+
+	{{range $method := $methods}}
+	{{$methodName := $method.Name -}}
+	{{$methodMockType := printf "%sMock" $methodName -}}
+	{{camel $methodMockType}} *{{$methodMockType}}
+	{{- end}}
 }
 
 // New creates a new mock instance
@@ -98,6 +104,7 @@ func (m *MockClientWithFixture) EXPECT() {
 {{range $method := $methods}}
 {{$methodName := $method.Name -}}
 {{$methodMockType := printf "%sMock" $methodName -}}
+{{$methodMockField := camel $methodMockType -}}
 {{$methodScenarios := index $scenarios $methodName -}}
 // {{$methodMockType}} mocks the {{$methodName}} method
 type {{$methodMockType}} struct {
@@ -107,10 +114,13 @@ type {{$methodMockType}} struct {
 {{$methodMockMethod := printf "Expect%s" $methodName -}}
 // {{$methodMockMethod}} returns an object that allows the caller to choose expected scenario for {{$methodName}}
 func (m *MockClientWithFixture) {{$methodMockMethod}}() *{{$methodMockType}} {
-	return &{{$methodMockType}}{
-		scenarios:  m.fixture.{{$methodName}},
-		mockClient: m.MockClient,
+	if m.{{$methodMockField}} == nil {
+		m.{{$methodMockField}} = &{{$methodMockType}}{
+			scenarios:  m.fixture.{{$methodName}},
+			mockClient: m.MockClient,
+		}
 	}
+	return m.{{$methodMockField}}
 }
 
 {{- range $scenario := $methodScenarios -}}
@@ -148,7 +158,7 @@ func augmented_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2171, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "augmented_mock.tmpl", size: 2491, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
