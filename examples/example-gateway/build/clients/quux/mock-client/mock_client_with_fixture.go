@@ -31,6 +31,9 @@ import (
 type MockClientWithFixture struct {
 	*MockClient
 	fixture *ClientFixture
+
+	echoMessageMock *EchoMessageMock
+	echoStringMock  *EchoStringMock
 }
 
 // New creates a new mock instance
@@ -47,6 +50,39 @@ func (m *MockClientWithFixture) EXPECT() {
 	panic("should not call EXPECT directly.")
 }
 
+// EchoMessageMock mocks the EchoMessage method
+type EchoMessageMock struct {
+	scenarios  *EchoMessageScenarios
+	mockClient *MockClient
+}
+
+// ExpectEchoMessage returns an object that allows the caller to choose expected scenario for EchoMessage
+func (m *MockClientWithFixture) ExpectEchoMessage() *EchoMessageMock {
+	if m.echoMessageMock == nil {
+		m.echoMessageMock = &EchoMessageMock{
+			scenarios:  m.fixture.EchoMessage,
+			mockClient: m.MockClient,
+		}
+	}
+	return m.echoMessageMock
+}
+
+// Success sets the expected scenario as defined in the concrete fixture package
+// github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture
+func (s *EchoMessageMock) Success() {
+	f := s.scenarios.Success
+
+	var arg0 interface{}
+	arg0 = f.Arg0
+	if f.Arg0Any {
+		arg0 = gomock.Any()
+	}
+
+	ret0 := f.Ret0
+
+	s.mockClient.EXPECT().EchoMessage(arg0).Return(ret0)
+}
+
 // EchoStringMock mocks the EchoString method
 type EchoStringMock struct {
 	scenarios  *EchoStringScenarios
@@ -55,10 +91,13 @@ type EchoStringMock struct {
 
 // ExpectEchoString returns an object that allows the caller to choose expected scenario for EchoString
 func (m *MockClientWithFixture) ExpectEchoString() *EchoStringMock {
-	return &EchoStringMock{
-		scenarios:  m.fixture.EchoString,
-		mockClient: m.MockClient,
+	if m.echoStringMock == nil {
+		m.echoStringMock = &EchoStringMock{
+			scenarios:  m.fixture.EchoString,
+			mockClient: m.MockClient,
+		}
 	}
+	return m.echoStringMock
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package

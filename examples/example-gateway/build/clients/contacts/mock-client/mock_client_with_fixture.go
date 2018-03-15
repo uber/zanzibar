@@ -31,6 +31,8 @@ import (
 type MockClientWithFixture struct {
 	*MockClient
 	fixture *ClientFixture
+
+	saveContactsMock *SaveContactsMock
 }
 
 // New creates a new mock instance
@@ -55,10 +57,13 @@ type SaveContactsMock struct {
 
 // ExpectSaveContacts returns an object that allows the caller to choose expected scenario for SaveContacts
 func (m *MockClientWithFixture) ExpectSaveContacts() *SaveContactsMock {
-	return &SaveContactsMock{
-		scenarios:  m.fixture.SaveContacts,
-		mockClient: m.MockClient,
+	if m.saveContactsMock == nil {
+		m.saveContactsMock = &SaveContactsMock{
+			scenarios:  m.fixture.SaveContacts,
+			mockClient: m.MockClient,
+		}
 	}
+	return m.saveContactsMock
 }
 
 // Success sets the expected scenario as defined in the concrete fixture package

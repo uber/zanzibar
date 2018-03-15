@@ -8,6 +8,9 @@
 			"scenarios": {
 				"EchoString":[
 					"success"
+				],
+				"EchoMessage":[
+					"success"
 				]
 			}
 		}
