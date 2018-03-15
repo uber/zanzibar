@@ -2011,9 +2011,13 @@ func (m *mockService) Start() {
 
 // Stop stops the mock server
 func (m *mockService) Stop() {
+	// m.ctrl.Finish() calls runtime.Goexit() on errors
+	// put it in defer so cleanup is always done
+	defer func(){
+		m.server.Close()
+		m.started = false
+	}()
 	m.ctrl.Finish()
-	m.server.Close()
-	m.started = false
 }
 
 // {{$mockType}} returns the mock nodes
@@ -2076,7 +2080,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4041, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4162, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
