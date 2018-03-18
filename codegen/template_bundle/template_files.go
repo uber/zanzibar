@@ -215,10 +215,12 @@ var _endpointTmpl = []byte(`{{/* template to render gateway http endpoint code *
 package {{$instance.PackageInfo.PackageName}}
 
 {{- $workflow := .WorkflowName }}
-{{- $reqHeaderMap := .ReqHeaderMap }}
-{{- $reqHeaderMapKeys := .ReqHeaderMapKeys }}
-{{- $resHeaderMap := .ResHeaderMap }}
-{{- $resHeaderMapKeys := .ResHeaderMapKeys }}
+{{- $reqHeaderMap := .ReqHeaders }}
+{{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
+{{- $resHeaderMap := .ResHeaders }}
+{{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
@@ -310,8 +312,8 @@ func (h *{{$handlerName}}) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	{{- if .ReqHeaders -}}
-	if !req.CheckHeaders({{.ReqHeaders | printf "%#v" }}) {
+	{{- if $reqHeaderRequiredKeys -}}
+	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
 		return
 	}
 	{{- end -}}
@@ -471,7 +473,8 @@ func (w {{$workflow}}) Handle(
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
 	if ok {
-		clientHeaders["{{index $reqHeaderMap $k}}"] = h
+		{{- $typedHeader := index $reqHeaderMap $k -}}
+		clientHeaders["{{$typedHeader.TransformTo}}"] = h
 	}
 	{{- end}}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
@@ -551,7 +554,8 @@ func (w {{$workflow}}) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 	{{range $i, $k := $resHeaderMapKeys}}
-	resHeaders.Set("{{index $resHeaderMap $k}}", cliRespHeaders["{{$k}}"])
+	{{- $resHeaderVal := index $resHeaderMap $k}}
+	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
 	{{- end}}
 
 	{{if eq .ResponseType "" -}}
@@ -608,7 +612,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 11145, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -700,13 +704,13 @@ import (
 
 {{- $clientID := .ClientID }}
 {{- $relativePathToRoot := .RelativePathToRoot}}
+{{- $headers := .ReqHeaders }}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $headers := .ReqHeaders }}
 
 
 {{range $testName, $testFixture := $.TestFixtures}}
@@ -858,6 +862,7 @@ import (
 )
 
 {{- $clientName := camel .ClientName -}}
+{{- $headers := .ReqHeaders }}
 
 {{with .Method -}}
 {{- $responseType := .ResponseType -}}
@@ -867,7 +872,6 @@ import (
 {{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $headers := .ReqHeaders -}}
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $testName, $testFixture := $.TestFixtures}}
@@ -992,7 +996,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4513, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4512, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

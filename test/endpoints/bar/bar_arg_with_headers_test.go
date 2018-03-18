@@ -154,7 +154,7 @@ func TestBarWithHeadersTransformFailWithoutHeaders(t *testing.T) {
 	}
 
 	assert.Equal(t, string(respBytes), compactStr(`{
-		"error":"Missing mandatory header: x-uuid"
+		"error":"Missing mandatory header: X-Uuid"
 	}`))
 }
 

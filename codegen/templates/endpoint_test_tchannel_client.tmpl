@@ -24,6 +24,7 @@ import (
 )
 
 {{- $clientName := camel .ClientName -}}
+{{- $headers := .ReqHeaders }}
 
 {{with .Method -}}
 {{- $responseType := .ResponseType -}}
@@ -33,7 +34,6 @@ import (
 {{- $clientMethodName := $clientMethod.Name -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $headers := .ReqHeaders -}}
 {{- $counter := printf "test%sCounter" $clientMethodName -}}
 
 {{range $testName, $testFixture := $.TestFixtures}}

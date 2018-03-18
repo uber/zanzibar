@@ -17,13 +17,13 @@ import (
 
 {{- $clientID := .ClientID }}
 {{- $relativePathToRoot := .RelativePathToRoot}}
+{{- $headers := .ReqHeaders }}
 {{with .Method -}}
 {{- $clientPackage := .Downstream.PackageName -}}
 {{- $clientMethod := .DownstreamMethod -}}
 {{- $clientMethodName := $clientMethod.Name | title -}}
 {{- $clientMethodRequestType := fullTypeName  ($clientMethod).RequestType ($clientPackage) -}}
 {{- $clientMethodResponseType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $headers := .ReqHeaders }}
 
 
 {{range $testName, $testFixture := $.TestFixtures}}

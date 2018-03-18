@@ -75,6 +75,7 @@ func convertThriftPathToRelative(m *codegen.ModuleSpec) {
 	index := strings.LastIndex(m.ThriftFile, "zanzibar")
 	m.ThriftFile = m.ThriftFile[index:]
 
+	m.CompiledModule = nil
 	for _, service := range m.Services {
 		service.CompileSpec = nil
 		service.ThriftFile = service.ThriftFile[index:]

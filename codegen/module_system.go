@@ -31,19 +31,21 @@ import (
 
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
-	Instance           *ModuleInstance
-	Spec               *EndpointSpec
-	GatewayPackageName string
-	IncludedPackages   []GoPackageImport
-	Method             *MethodSpec
-	ClientName         string
-	ClientID           string
-	ClientMethodName   string
-	WorkflowName       string
-	ReqHeaderMap       map[string]string
-	ReqHeaderMapKeys   []string
-	ResHeaderMap       map[string]string
-	ResHeaderMapKeys   []string
+	Instance               *ModuleInstance
+	Spec                   *EndpointSpec
+	GatewayPackageName     string
+	IncludedPackages       []GoPackageImport
+	Method                 *MethodSpec
+	ClientName             string
+	ClientID               string
+	ClientMethodName       string
+	WorkflowName           string
+	ReqHeaders             map[string]*TypedHeader
+	ReqHeadersKeys         []string
+	ReqRequiredHeadersKeys []string
+	ResHeaders             map[string]*TypedHeader
+	ResHeadersKeys         []string
+	ResRequiredHeadersKeys []string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -64,6 +66,8 @@ type EndpointTestMeta struct {
 	Instance           *ModuleInstance
 	Method             *MethodSpec
 	TestFixtures       map[string]*EndpointTestFixture `json:"testFixtures"`
+	ReqHeaders         map[string]*TypedHeader
+	ResHeaders         map[string]*TypedHeader
 	ClientName         string
 	ClientID           string
 	RelativePathToRoot string
@@ -884,19 +888,21 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
-		Instance:           instance,
-		Spec:               e,
-		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
-		IncludedPackages:   includedPackages,
-		Method:             method,
-		ReqHeaderMap:       reqHeaderMap,
-		ReqHeaderMapKeys:   reqHeaderMapKeys,
-		ResHeaderMap:       e.ResHeaderMap,
-		ResHeaderMapKeys:   e.ResHeaderMapKeys,
-		ClientID:           clientID,
-		ClientName:         clientName,
-		ClientMethodName:   e.ClientMethod,
-		WorkflowName:       workflowName,
+		Instance:               instance,
+		Spec:                   e,
+		GatewayPackageName:     g.packageHelper.GoGatewayPackageName(),
+		IncludedPackages:       includedPackages,
+		Method:                 method,
+		ReqHeaders:             e.ReqHeaders,
+		ReqHeadersKeys:         sortedHeaders(e.ReqHeaders, false),
+		ReqRequiredHeadersKeys: sortedHeaders(e.ReqHeaders, true),
+		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
+		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
+		ResHeaders:             e.ResHeaders,
+		ClientID:               clientID,
+		ClientName:             clientName,
+		ClientMethodName:       e.ClientMethod,
+		WorkflowName:           workflowName,
 	}
 
 	var endpoint []byte
@@ -962,6 +968,8 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		Instance:     instance,
 		Method:       method,
 		TestFixtures: e.TestFixtures,
+		ReqHeaders:   e.ReqHeaders,
+		ResHeaders:   e.ResHeaders,
 		ClientID:     e.ClientSpec.ClientID,
 	}
 

@@ -1,5 +1,7 @@
 namespace java com.uber.zanzibar.clients.googlenow
 
+include "../models/meta.thrift"
+
 // Service specification for generating Google Now client.
 service GoogleNow {
     void addCredentials(
@@ -8,16 +10,15 @@ service GoogleNow {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/googlenow/add-credentials"
         zanzibar.http.status = "202"
-        zanzibar.http.reqHeaders = "x-uuid,x-token"
-        zanzibar.http.resHeaders = "x-uuid"
+        zanzibar.http.req.metadata = "meta.UUIDOnly,meta.TokenOnly"
+        zanzibar.http.res.metadata = "meta.UUIDOnly"
     )
     void checkCredentials(
     ) (
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/googlenow/check-credentials"
         zanzibar.http.status = "202"
-        // comma sparated list for required headers
-        zanzibar.http.reqHeaders = "x-uuid,x-token"
-        zanzibar.http.resHeaders = "x-uuid"
+        zanzibar.http.req.metadata = "meta.UUIDOnly,meta.TokenOnly"
+        zanzibar.http.res.metadata = "meta.UUIDOnly"
     )
 }

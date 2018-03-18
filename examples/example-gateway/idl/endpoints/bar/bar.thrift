@@ -1,6 +1,7 @@
 namespace java com.uber.zanzibar.clients.bar
 
 include "../foo/foo.thrift"
+include "../models/meta.thrift"
 
 typedef string UUID
 typedef i64 (json.type = 'Date') Timestamp
@@ -105,8 +106,8 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/too-many-args-path"
         zanzibar.http.status = "200"
-        zanzibar.http.reqHeaders = "x-uuid,x-token"
-        zanzibar.http.resHeaders = "x-uuid,x-token"
+        zanzibar.http.req.metadata = "meta.Grault"
+        zanzibar.http.res.metadata = "meta.Grault"
     )
     void argNotStruct (
         1: required string request
@@ -116,7 +117,6 @@ service Bar {
         zanzibar.http.method = "POST"
         zanzibar.http.path = "/bar/arg-not-struct-path"
         zanzibar.http.status = "200"
-        zanzibar.meta = "SomeMeta"
         zanzibar.handler = "bar.baz"
     )
 
@@ -128,8 +128,8 @@ service Bar {
         )
     ) (
         zanzibar.http.method = "POST"
-        zanzibar.http.reqHeaders = "x-uuid"
         zanzibar.http.path = "/bar/argWithHeaders"
+        zanzibar.http.req.metadata = "meta.UUIDOnly"
         zanzibar.http.status = "200"
     )
 
@@ -140,6 +140,7 @@ service Bar {
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"
         zanzibar.http.status = "200"
+        zanzibar.http.req.metadata = "meta.Grault"
     )
 
     BarResponse argWithNestedQueryParams(

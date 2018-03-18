@@ -10,7 +10,8 @@
 			"silly_noop.json",
 			"trans.json",
 			"trans-headers.json",
-			"trans-headers-type.json"
+			"trans-headers-type.json",
+			"header-schema.json"
 		]
 	},
 	"dependencies": {
