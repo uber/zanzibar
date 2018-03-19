@@ -28,9 +28,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
-	"strings"
-
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
@@ -578,6 +577,35 @@ func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*Endpoin
 	return ret, err
 }
 
+func loadHeadersFromConfig(endpointConfigObj map[string]interface{}, key string) ([]string, map[string]string, error) {
+	headers, ok := endpointConfigObj[key]
+	if !ok {
+		return nil, nil, errors.Errorf("Unable to parse %s", key)
+	}
+	retHeadersMap := make(map[string]string)
+	castMap := headers.(map[string]interface{})
+	for key, value := range castMap {
+		switch value := value.(type) {
+		case string:
+			retHeadersMap[key] = value
+		default:
+			return nil, nil, errors.Errorf(
+				"Unable to parse string %s in headers %s",
+				value,
+				retHeadersMap,
+			)
+		}
+	}
+	retHeaderMapKeys := make([]string, len(retHeadersMap))
+	i := 0
+	for k := range retHeadersMap {
+		retHeaderMapKeys[i] = k
+		i++
+	}
+	sort.Strings(retHeaderMapKeys)
+	return retHeaderMapKeys, retHeadersMap, nil
+}
+
 func augmentHTTPEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[string]interface{},
@@ -688,72 +716,24 @@ func augmentHTTPEndpointSpec(
 			PrettyOptions: prettyOpts,
 		})
 	}
+
 	espec.Middlewares = middlewares
 
-	reqHeaderMap := make(map[string]string)
-	m, ok := endpointConfigObj["reqHeaderMap"]
-	if !ok {
-		return nil, errors.Errorf(
-			"Unable to parse reqHeaderMap %s",
-			reqHeaderMap,
-		)
+	// load request headers
+	reqHeaderMapKeys, reqHeaderMap, err := loadHeadersFromConfig(endpointConfigObj, "reqHeaderMap")
+	if err != nil {
+		return nil, err
 	}
-	// Do a deep cast to enforce a string -> string map
-	castMap := m.(map[string]interface{})
-	for key, value := range castMap {
-		switch value := value.(type) {
-		case string:
-			reqHeaderMap[key] = value
-		default:
-			return nil, errors.Errorf(
-				"Unable to parse string %s in reqHeaderMap %s",
-				value,
-				reqHeaderMap,
-			)
-		}
-	}
-	reqHeaderMapKeys := make([]string, len(reqHeaderMap))
-	i := 0
-	for k := range reqHeaderMap {
-		reqHeaderMapKeys[i] = k
-		i++
-	}
-	sort.Strings(reqHeaderMapKeys)
 	espec.ReqHeaderMap = reqHeaderMap
 	espec.ReqHeaderMapKeys = reqHeaderMapKeys
 
-	resHeaderMap := make(map[string]string)
-	m2, ok := endpointConfigObj["resHeaderMap"]
-	if !ok {
-		return nil, errors.Errorf(
-			"Unable to parse resHeaderMap %s",
-			resHeaderMap,
-		)
+	// load response headers
+	resHeaderMapKeys, resHeaderMap, err := loadHeadersFromConfig(endpointConfigObj, "resHeaderMap")
+	if err != nil {
+		return nil, err
 	}
-	// Do a deep cast to enforce a string -> string map
-	castMap = m2.(map[string]interface{})
-	for key, value := range castMap {
-		switch value := value.(type) {
-		case string:
-			resHeaderMap[key] = value
-		default:
-			return nil, errors.Errorf(
-				"Unable to parse string %s in resHeaderMap %s",
-				value,
-				resHeaderMap,
-			)
-		}
-	}
-	resHeaderMapKeys := make([]string, len(resHeaderMap))
-	i = 0
-	for k := range resHeaderMap {
-		resHeaderMapKeys[i] = k
-		i++
-	}
-	sort.Strings(resHeaderMapKeys)
 	espec.ResHeaderMap = resHeaderMap
 	espec.ResHeaderMapKeys = resHeaderMapKeys
-
 	return espec, nil
 }
 
