@@ -61,7 +61,13 @@ func TestExceptionValidation(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	method.ExceptionsIndex = map[string]codegen.ExceptionSpec{"test": {}}
-	err = m.SetDownstream("Bar", "argNotStruct", clientSpec, "argNotStruct", nil, nil, nil, pkgHelper)
+	e := &codegen.EndpointSpec{
+		ThriftServiceName: "Bar",
+		ThriftMethodName:  "argNotStruct",
+		ClientSpec:        clientSpec,
+		ClientMethod:      "argNotStruct",
+	}
+	err = m.SetDownstream(e, pkgHelper)
 	assert.NotNil(t, err)
 }
 

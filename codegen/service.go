@@ -167,43 +167,45 @@ func NewServiceSpec(
 
 // SetDownstream ...
 func (ms *ModuleSpec) SetDownstream(
-	serviceName string,
-	methodName string,
-	clientSpec *ClientSpec,
-	clientMethod string,
-	headersPropagate map[string]FieldMapperEntry,
-	reqTransforms map[string]FieldMapperEntry,
-	respTransforms map[string]FieldMapperEntry,
+	e *EndpointSpec,
 	h *PackageHelper,
 ) error {
-	var service *ServiceSpec
+	var (
+		service *ServiceSpec
+		method  *MethodSpec
+
+		serviceName  = e.ThriftServiceName
+		methodName   = e.ThriftMethodName
+		clientSpec   = e.ClientSpec
+		clientMethod = e.ClientMethod
+
+		// TODO: move generated middlewares out of zanzibar
+		headersPropagate = e.HeadersPropagate
+		reqTransforms    = e.ReqTransforms
+		respTransforms   = e.RespTransforms
+	)
 	for _, v := range ms.Services {
 		if v.Name == serviceName {
 			service = v
 			break
 		}
 	}
-
 	if service == nil {
 		return errors.Errorf(
 			"Module does not have service %q\n", serviceName,
 		)
 	}
-
-	var method *MethodSpec
 	for _, v := range service.Methods {
 		if v.Name == methodName {
 			method = v
 			break
 		}
 	}
-
 	if method == nil {
 		return errors.Errorf(
 			"Service %q does not have method %q\n", serviceName, methodName,
 		)
 	}
-
 	serviceMethod, ok := clientSpec.ExposedMethods[clientMethod]
 	if !ok {
 		return errors.Errorf("Client %q does not expose method %q", clientSpec.ClientName, clientMethod)

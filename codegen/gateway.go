@@ -887,10 +887,7 @@ func (e *EndpointSpec) SetDownstream(
 
 	e.ClientSpec = clientSpec
 
-	return e.ModuleSpec.SetDownstream(
-		e.ThriftServiceName, e.ThriftMethodName,
-		clientSpec, e.ClientMethod, e.HeadersPropagate, e.ReqTransforms, e.RespTransforms, h,
-	)
+	return e.ModuleSpec.SetDownstream(e, h)
 }
 
 // EndpointClassConfig represents the specific config for
