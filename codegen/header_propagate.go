@@ -21,11 +21,12 @@
 package codegen
 
 import (
+	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
-	"sort"
 )
 
 // HeaderPropagator generates function propagates endpoint request
@@ -75,25 +76,56 @@ func (hp *HeaderPropagator) Propagate(
 			return err
 		}
 
-		// TODO support more primitive types
-		// currently we only support string, and struct that can
-		// convert string, for example: typedef string UUID
-		// future support:
-		// e.g: -H "version: 3.0" -> int64(3)
+		arrs := typeSwitch(key, gotype, field)
+		hp.append(arrs...)
 
-		assignedVal := "key"
-		if gotype != "string" {
-			assignedVal = gotype + "(key)"
-		}
-
-		if !field.Required {
-			hp.appendf(`in.%s = &%s`, key, assignedVal)
-		} else {
-			hp.appendf(`in.%s = %s`, key, assignedVal)
-		}
 		hp.append("}")
 	}
 	return nil
+}
+
+// typeSwitch supports primary type parsing for headers
+func typeSwitch(key, gotype string, field *compile.FieldSpec) []string {
+	var (
+		ret       = []string{}
+		typeParse string
+		typeCast  string
+		assignVal = "key"
+	)
+	switch gotype {
+	case "bool":
+		typeParse = "strconv.ParseBool(key)"
+		assignVal = "v"
+	case "int32":
+		typeParse = "strconv.ParseInt(key, 10, 32)"
+		assignVal = "val"
+		typeCast = "val := int32(v)\n"
+	case "int64":
+		typeParse = "strconv.ParseInt(key, 10, 64)"
+		assignVal = "v"
+	case "float64":
+		typeParse = "strconv.ParseFloat(key, 64)"
+		assignVal = "v"
+	case "string":
+	default:
+		typeCast = "val := " + gotype + "(key)\n"
+		assignVal = "val"
+	}
+	if len(typeParse) > 0 {
+		ret = append(ret, fmt.Sprintf("if v, err := %s; err == nil {\n", typeParse))
+	}
+	if len(typeCast) > 0 {
+		ret = append(ret, typeCast)
+	}
+	if !field.Required {
+		ret = append(ret, fmt.Sprintf("in.%s = &%s\n", key, assignVal))
+	} else {
+		ret = append(ret, fmt.Sprintf("in.%s = %s\n", key, assignVal))
+	}
+	if len(typeParse) > 0 {
+		ret = append(ret, "}\n")
+	}
+	return ret
 }
 
 // init optional field that could be nil on field assign path

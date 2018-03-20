@@ -327,16 +327,6 @@ func (v *SecondService_EchoDouble_Result) String() string {
 	return fmt.Sprintf("SecondService_EchoDouble_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _Double_EqualsPtr(lhs, rhs *float64) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 // Equals returns true if all the fields of this SecondService_EchoDouble_Result match the
 // provided SecondService_EchoDouble_Result.
 //

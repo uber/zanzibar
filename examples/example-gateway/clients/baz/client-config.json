@@ -27,6 +27,7 @@
 			"TestUUID": "SimpleService::testUuid",
 			"Trans": "SimpleService::trans",
 			"TransHeaders": "SimpleService::transHeaders",
+			"TransHeadersType": "SimpleService::transHeadersType",
 			"URLTest": "SimpleService::urlTest"
 		}
 	}
