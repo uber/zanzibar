@@ -168,18 +168,17 @@ func TestTypeDefString(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	s := `
-		if key,ok := headers.Get("content-type"); ok {
+		if key,ok := headers.Get("content-type"); ok{
 			val := structs.UUID(key)
 			in.One=val
 		}
-		if key,ok := headers.Get("auth"); ok {
+		if key,ok := headers.Get("auth"); ok{
 			val := structs.UUID(key)
-			in.Three = &val
+			in.Three=&val
 		}
-		if key,ok := headers.Get("auth"); ok {
-			in.Two = &key
-		}
-	`
+		if key,ok := headers.Get("auth"); ok{
+			in.Two=&key
+		}`
 	assert.Equal(t, strip(s), strip(lines))
 }
 
@@ -330,62 +329,61 @@ func TestPrimaryType(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	s := `
-		if key,ok := headers.Get("x-bool") ; ok {
-			if v,err := strconv.ParseBool(key) ; err == nil {
-				in.B1=v
+		if key, ok := headers.Get("x-bool"); ok {
+			if v, err := strconv.ParseBool(key); err == nil {
+				in.B1 = v
 			}
 		}
-		if key,ok := headers.Get("x-bool") ; ok {
-			if v,err := strconv.ParseBool(key) ; err == nil {
-				in.B2=&v
+		if key, ok := headers.Get("x-bool"); ok {
+			if v, err := strconv.ParseBool(key); err == nil {
+				in.B2 = &v
 			}
 		}
-		if key,ok := headers.Get("x-float") ; ok {
-			if v,err := strconv.ParseFloat(key,64) ; err == nil {
-				in.F1=v
+		if key, ok := headers.Get("x-float"); ok {
+			if v, err := strconv.ParseFloat(key, 64); err == nil {
+				in.F1 = v
 			}
 		}
-		if key,ok := headers.Get("x-float") ; ok {
-			if v,err := strconv.ParseFloat(key,64) ; err == nil {
-				in.F2=&v
+		if key, ok := headers.Get("x-float"); ok {
+			if v, err := strconv.ParseFloat(key, 64); err == nil {
+				in.F2 = &v
 			}
 		}
-		if key,ok := headers.Get("x-int") ; ok {
-			if v,err := strconv.ParseInt(key,10,32) ; err == nil {
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key, 10, 32); err == nil {
 				val := int32(v)
-				in.I1=val
+				in.I1 = val
 			}
 		}
-		if key,ok := headers.Get("x-int") ; ok {
-			if v,err := strconv.ParseInt(key,10,32) ; err == nil {
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key, 10, 32); err == nil {
 				val := int32(v)
-				in.I2=&val
+				in.I2 = &val
 			}
 		}
-		if key,ok := headers.Get("x-int") ; ok {
-			if v,err := strconv.ParseInt(key,10,64) ; err == nil {
-				in.I3=v
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key, 10, 64); err == nil {
+				in.I3 = v
 			}
 		}
-		if key,ok := headers.Get("x-int") ; ok {
-			if v,err := strconv.ParseInt(key,10,64) ; err == nil {
-				in.I4=&v
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key, 10, 64); err == nil {
+				in.I4 = &v
 			}
 		}
-		if key,ok := headers.Get("x-string") ; ok {
-			in.S1=key
+		if key, ok := headers.Get("x-string"); ok {
+			in.S1 = key
 		}
-		if key,ok := headers.Get("x-string") ; ok {
-			in.S2=&key
+		if key, ok := headers.Get("x-string"); ok {
+			in.S2 = &key
 		}
-		if key,ok := headers.Get("x-string") ; ok {
+		if key, ok := headers.Get("x-string"); ok {
 			val := structs.UUID(key)
-			in.U1=val
+			in.U1 = val
 		}
-		if key,ok := headers.Get("x-string") ; ok {
+		if key, ok := headers.Get("x-string"); ok {
 			val := structs.UUID(key)
-			in.U2=&val
-		}
-	`
+			in.U2 = &val
+		}`
 	assert.Equal(t, strip(s), strip(lines))
 }

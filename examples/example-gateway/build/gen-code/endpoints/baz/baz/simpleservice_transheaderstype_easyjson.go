@@ -48,7 +48,7 @@ func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Success == nil {
 					out.Success = new(TransHeader)
 				}
-				(*out.Success).UnmarshalEasyJSON(in)
+				easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, &*out.Success)
 			}
 		case "authErr":
 			if in.IsNull() {
@@ -58,7 +58,7 @@ func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.AuthErr == nil {
 					out.AuthErr = new(AuthErr)
 				}
-				(*out.AuthErr).UnmarshalEasyJSON(in)
+				easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, &*out.AuthErr)
 			}
 		case "otherAuthErr":
 			if in.IsNull() {
@@ -68,7 +68,7 @@ func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.OtherAuthErr == nil {
 					out.OtherAuthErr = new(OtherAuthErr)
 				}
-				(*out.OtherAuthErr).UnmarshalEasyJSON(in)
+				easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in, &*out.OtherAuthErr)
 			}
 		default:
 			in.SkipRecursive()
@@ -93,7 +93,7 @@ func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Success == nil {
 			out.RawString("null")
 		} else {
-			(*in.Success).MarshalEasyJSON(out)
+			easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
 		}
 	}
 	if in.AuthErr != nil {
@@ -105,7 +105,7 @@ func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.AuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.AuthErr).MarshalEasyJSON(out)
+			easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
 		}
 	}
 	if in.OtherAuthErr != nil {
@@ -117,7 +117,7 @@ func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.OtherAuthErr == nil {
 			out.RawString("null")
 		} else {
-			(*in.OtherAuthErr).MarshalEasyJSON(out)
+			easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *in.OtherAuthErr)
 		}
 	}
 	out.RawByte('}')
@@ -145,6 +145,137 @@ func (v *SimpleService_TransHeadersType_Result) UnmarshalJSON(data []byte) error
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_TransHeadersType_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceTransHeadersType(l, v)
+}
+func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in *jlexer.Lexer, out *OtherAuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out *jwriter.Writer, in OtherAuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
+}
+func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in *jlexer.Lexer, out *AuthErr) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	var MessageSet bool
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "message":
+			out.Message = string(in.String())
+			MessageSet = true
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+	if !MessageSet {
+		in.AddError(fmt.Errorf("key 'message' is required"))
+	}
+}
+func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out *jwriter.Writer, in AuthErr) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"message\":")
+	out.String(string(in.Message))
+	out.RawByte('}')
+}
+func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *TransHeader) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out *jwriter.Writer, in TransHeader) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	out.RawByte('}')
 }
 func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceTransHeadersType1(in *jlexer.Lexer, out *SimpleService_TransHeadersType_Args) {
 	isTopLevel := in.IsStart()
@@ -174,7 +305,7 @@ func easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Req == nil {
 					out.Req = new(TransHeader)
 				}
-				(*out.Req).UnmarshalEasyJSON(in)
+				easyjson77db7ff2DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, &*out.Req)
 			}
 			ReqSet = true
 		default:
@@ -202,7 +333,7 @@ func easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	if in.Req == nil {
 		out.RawString("null")
 	} else {
-		(*in.Req).MarshalEasyJSON(out)
+		easyjson77db7ff2EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Req)
 	}
 	out.RawByte('}')
 }
