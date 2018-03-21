@@ -292,6 +292,12 @@ func TestPrimaryType(t *testing.T) {
 	propagateMap["I4"] = codegen.FieldMapperEntry{
 		QualifiedName: "x-int",
 	}
+	propagateMap["I5"] = codegen.FieldMapperEntry{
+		QualifiedName: "x-int",
+	}
+	propagateMap["I6"] = codegen.FieldMapperEntry{
+		QualifiedName: "x-int",
+	}
 	propagateMap["B1"] = codegen.FieldMapperEntry{
 		QualifiedName: "x-bool",
 	}
@@ -323,6 +329,8 @@ func TestPrimaryType(t *testing.T) {
 			10: optional bool b2
 			11: required double f1
 			12: optional double f2
+			13: required i16 i5
+			15: optional i16 i6
 		}`,
 		propagateMap,
 		&naivePackageNameResolver{},
@@ -331,59 +339,69 @@ func TestPrimaryType(t *testing.T) {
 	s := `
 		if key, ok := headers.Get("x-bool"); ok {
 			if v, err := strconv.ParseBool(key); err == nil {
-				in.B1 = v
+				in.B1=v
 			}
 		}
 		if key, ok := headers.Get("x-bool"); ok {
 			if v, err := strconv.ParseBool(key); err == nil {
-				in.B2 = &v
+				in.B2=&v
 			}
 		}
 		if key, ok := headers.Get("x-float"); ok {
-			if v, err := strconv.ParseFloat(key, 64); err == nil {
-				in.F1 = v
+			if v, err := strconv.ParseFloat(key,64); err == nil {
+				in.F1=v
 			}
 		}
 		if key, ok := headers.Get("x-float"); ok {
-			if v, err := strconv.ParseFloat(key, 64); err == nil {
-				in.F2 = &v
+			if v, err := strconv.ParseFloat(key,64); err == nil {
+				in.F2=&v
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
-			if v, err := strconv.ParseInt(key, 10, 32); err == nil {
-				val := int32(v)
-				in.I1 = val
+			if v, err := strconv.ParseInt(key,10,32); err == nil {
+				val:=int32(v)
+				in.I1=val
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
-			if v, err := strconv.ParseInt(key, 10, 32); err == nil {
-				val := int32(v)
-				in.I2 = &val
+			if v, err := strconv.ParseInt(key,10,32); err == nil {
+				val:=int32(v)
+				in.I2=&val
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
-			if v, err := strconv.ParseInt(key, 10, 64); err == nil {
-				in.I3 = v
+			if v, err := strconv.ParseInt(key,10,64); err == nil {
+				in.I3=v
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
-			if v, err := strconv.ParseInt(key, 10, 64); err == nil {
-				in.I4 = &v
+			if v, err := strconv.ParseInt(key,10,64); err == nil {
+				in.I4=&v
+			}
+		}
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key,10,16); err == nil {
+				in.I5=v
+			}
+		}
+		if key, ok := headers.Get("x-int"); ok {
+			if v, err := strconv.ParseInt(key,10,16); err == nil {
+				in.I6=&v
 			}
 		}
 		if key, ok := headers.Get("x-string"); ok {
-			in.S1 = key
+			in.S1=key
 		}
 		if key, ok := headers.Get("x-string"); ok {
-			in.S2 = &key
+			in.S2=&key
 		}
 		if key, ok := headers.Get("x-string"); ok {
-			val := structs.UUID(key)
-			in.U1 = val
+			val:=structs.UUID(key)
+			in.U1=val
 		}
 		if key, ok := headers.Get("x-string"); ok {
-			val := structs.UUID(key)
-			in.U2 = &val
+			val:=structs.UUID(key)
+			in.U2=&val
 		}`
 	assert.Equal(t, strip(s), strip(lines))
 }

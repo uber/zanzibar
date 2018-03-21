@@ -96,6 +96,9 @@ func typeSwitch(key, gotype string, field *compile.FieldSpec) []string {
 	case "bool":
 		typeParse = "strconv.ParseBool(key)"
 		assignVal = "v"
+	case "int16":
+		typeParse = "strconv.ParseInt(key, 10, 16)"
+		assignVal = "v"
 	case "int32":
 		typeParse = "strconv.ParseInt(key, 10, 32)"
 		assignVal = "val"
