@@ -252,16 +252,18 @@ func (w {{$workflow}}) Handle(
 	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
 	{{end}}
 	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
 	var h string
-	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
 	if ok {
 		clientHeaders["{{index $reqHeaderMap $k}}"] = h
 	}
 	{{- end}}
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
