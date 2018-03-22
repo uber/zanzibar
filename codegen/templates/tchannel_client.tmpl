@@ -140,9 +140,12 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		useAltSc := strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true")
-		success, respHeaders, err := c.client.Call(
-			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, useAltSc,
+		caller := c.client.Call
+		if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+			caller = c.client.CallThruAltChannel
+		}
+		success, respHeaders, err := caller(
+			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
 
 		if err == nil && !success {
