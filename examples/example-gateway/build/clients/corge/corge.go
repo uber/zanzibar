@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -60,6 +61,14 @@ func NewClient(deps *module.Dependencies) Client {
 	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	var scAltName string
+	if deps.Default.Config.ContainsKey("test.clients.overrideService") {
+		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	}
+
 	timeout := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.corge.timeout"),
 	)
@@ -82,6 +91,7 @@ func NewClient(deps *module.Dependencies) Client {
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
 		},
 	)
 
@@ -106,7 +116,11 @@ func (c *corgeClient) EchoString(
 
 	logger := c.client.Loggers["Corge::echoString"]
 
-	success, respHeaders, err := c.client.Call(
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
 		ctx, "Corge", "echoString", reqHeaders, args, &result,
 	)
 

@@ -134,12 +134,16 @@ func (w BarArgWithHeadersEndpoint) Handle(
 	clientRequest := convertToArgWithHeadersClientRequest(r)
 
 	clientHeaders := map[string]string{}
-
 	var ok bool
 	var h string
+
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
+	}
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
 	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithHeaders(

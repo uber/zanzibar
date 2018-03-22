@@ -126,6 +126,13 @@ func (w BarHelloWorldEndpoint) Handle(
 ) (string, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Bar.Hello(
 		ctx, clientHeaders,

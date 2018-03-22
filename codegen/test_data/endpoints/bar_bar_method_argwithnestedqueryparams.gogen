@@ -194,6 +194,13 @@ func (w BarArgWithNestedQueryParamsEndpoint) Handle(
 	clientRequest := convertToArgWithNestedQueryParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithNestedQueryParams(
 		ctx, clientHeaders, clientRequest,

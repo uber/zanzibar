@@ -135,6 +135,13 @@ func (w SimpleServiceCompareEndpoint) Handle(
 	clientRequest := convertToCompareClientRequest(r)
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Baz.Compare(
 		ctx, clientHeaders, clientRequest,

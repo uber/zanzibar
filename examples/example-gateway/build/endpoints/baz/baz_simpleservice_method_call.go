@@ -157,9 +157,9 @@ func (w SimpleServiceCallEndpoint) Handle(
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
-
 	var ok bool
 	var h string
+
 	h, ok = reqHeaders.Get("X-Token")
 	if ok {
 		clientHeaders["X-Token"] = h
@@ -167,6 +167,10 @@ func (w SimpleServiceCallEndpoint) Handle(
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
+	}
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
 	}
 
 	cliRespHeaders, err := w.Clients.Baz.Call(

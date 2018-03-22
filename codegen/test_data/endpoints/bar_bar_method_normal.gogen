@@ -138,6 +138,13 @@ func (w BarNormalEndpoint) Handle(
 	clientRequest := convertToNormalClientRequest(r)
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Bar.Normal(
 		ctx, clientHeaders, clientRequest,

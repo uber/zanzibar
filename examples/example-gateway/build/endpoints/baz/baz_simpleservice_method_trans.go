@@ -135,6 +135,13 @@ func (w SimpleServiceTransEndpoint) Handle(
 	clientRequest := convertToTransClientRequest(r)
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Baz.Trans(
 		ctx, clientHeaders, clientRequest,

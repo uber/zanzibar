@@ -126,6 +126,13 @@ func (w SimpleServiceSillyNoopEndpoint) Handle(
 ) (zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	_, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)
 

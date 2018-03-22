@@ -128,6 +128,13 @@ func (w BarArgNotStructEndpoint) Handle(
 	clientRequest := convertToArgNotStructClientRequest(r)
 
 	clientHeaders := map[string]string{}
+	var ok bool
+	var h string
+
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 
 	_, err := w.Clients.Bar.ArgNotStruct(
 		ctx, clientHeaders, clientRequest,

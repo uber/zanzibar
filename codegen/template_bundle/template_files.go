@@ -464,16 +464,18 @@ func (w {{$workflow}}) Handle(
 	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
 	{{end}}
 	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
 	var h string
-	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
 	if ok {
 		clientHeaders["{{index $reqHeaderMap $k}}"] = h
 	}
 	{{- end}}
+	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	if ok {
+		clientHeaders["X-Test-Override-Service"] = h
+	}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
@@ -608,7 +610,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10973, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2140,6 +2142,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -2197,6 +2200,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	var scAltName string
+	if deps.Default.Config.ContainsKey("test.clients.overrideService") {
+		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	}
+
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
@@ -2228,6 +2239,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
 		},
 	)
 
@@ -2264,7 +2276,11 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		success, respHeaders, err := c.client.Call(
+		caller := c.client.Call
+		if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+			caller = c.client.CallThruAltChannel
+		}
+		success, respHeaders, err := caller(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
 
@@ -2312,7 +2328,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5100, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5588, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
