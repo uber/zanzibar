@@ -464,18 +464,16 @@ func (w {{$workflow}}) Handle(
 	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
 	{{end}}
 	clientHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
 	var h string
+	{{- end -}}
 	{{range $i, $k := $reqHeaderMapKeys}}
 	h, ok = reqHeaders.Get("{{$k}}")
 	if ok {
 		clientHeaders["{{index $reqHeaderMap $k}}"] = h
 	}
 	{{- end}}
-	h, ok = reqHeaders.Get("X-Test-Override-Service")
-	if ok {
-		clientHeaders["X-Test-Override-Service"] = h
-	}
 	{{if and (eq $clientReqType "") (eq $clientResType "")}}
 		{{if (eq (len $resHeaderMap) 0) -}}
 		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
@@ -610,7 +608,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 10973, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 10916, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2161,6 +2159,7 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+{{- $stagingReqHeader := .StagingReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2286,7 +2285,7 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
 		success, respHeaders, err := caller(
@@ -2337,7 +2336,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6228, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -112,6 +112,10 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Uuid", headerValue))
 	}
+	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
+	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := SimpleServiceCallEndpoint{
@@ -157,9 +161,9 @@ func (w SimpleServiceCallEndpoint) Handle(
 	clientRequest := convertToCallClientRequest(r)
 
 	clientHeaders := map[string]string{}
+
 	var ok bool
 	var h string
-
 	h, ok = reqHeaders.Get("X-Token")
 	if ok {
 		clientHeaders["X-Token"] = h
@@ -168,9 +172,9 @@ func (w SimpleServiceCallEndpoint) Handle(
 	if ok {
 		clientHeaders["X-Uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
-		clientHeaders["X-Test-Override-Service"] = h
+		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
 
 	cliRespHeaders, err := w.Clients.Baz.Call(

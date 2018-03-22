@@ -256,7 +256,7 @@ func (c *bazClient) EchoBinary(
 	logger := c.client.Loggers["SecondService::echoBinary"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -293,7 +293,7 @@ func (c *bazClient) EchoBool(
 	logger := c.client.Loggers["SecondService::echoBool"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -330,7 +330,7 @@ func (c *bazClient) EchoDouble(
 	logger := c.client.Loggers["SecondService::echoDouble"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -367,7 +367,7 @@ func (c *bazClient) EchoEnum(
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -404,7 +404,7 @@ func (c *bazClient) EchoI16(
 	logger := c.client.Loggers["SecondService::echoI16"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -441,7 +441,7 @@ func (c *bazClient) EchoI32(
 	logger := c.client.Loggers["SecondService::echoI32"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -478,7 +478,7 @@ func (c *bazClient) EchoI64(
 	logger := c.client.Loggers["SecondService::echoI64"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -515,7 +515,7 @@ func (c *bazClient) EchoI8(
 	logger := c.client.Loggers["SecondService::echoI8"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -552,7 +552,7 @@ func (c *bazClient) EchoString(
 	logger := c.client.Loggers["SecondService::echoString"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -589,7 +589,7 @@ func (c *bazClient) EchoStringList(
 	logger := c.client.Loggers["SecondService::echoStringList"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -626,7 +626,7 @@ func (c *bazClient) EchoStringMap(
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -663,7 +663,7 @@ func (c *bazClient) EchoStringSet(
 	logger := c.client.Loggers["SecondService::echoStringSet"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -700,7 +700,7 @@ func (c *bazClient) EchoStructList(
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -737,7 +737,7 @@ func (c *bazClient) EchoStructSet(
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -774,7 +774,7 @@ func (c *bazClient) EchoTypedef(
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -810,7 +810,7 @@ func (c *bazClient) Call(
 	logger := c.client.Loggers["SimpleService::call"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -845,7 +845,7 @@ func (c *bazClient) Compare(
 	logger := c.client.Loggers["SimpleService::compare"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -886,7 +886,7 @@ func (c *bazClient) Ping(
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -922,7 +922,7 @@ func (c *bazClient) DeliberateDiffNoop(
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -958,7 +958,7 @@ func (c *bazClient) TestUUID(
 
 	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -991,7 +991,7 @@ func (c *bazClient) Trans(
 	logger := c.client.Loggers["SimpleService::trans"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1032,7 +1032,7 @@ func (c *bazClient) TransHeaders(
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1072,7 +1072,7 @@ func (c *bazClient) URLTest(
 
 	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(

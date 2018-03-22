@@ -53,6 +53,8 @@ type PackageHelper struct {
 	annotationPrefix string
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
+	// Use staging client when this header is set as "true"
+	stagingReqHeader string
 }
 
 // NewPackageHelper creates a package helper.
@@ -66,6 +68,7 @@ func NewPackageHelper(
 	relTargetGenDir string,
 	copyrightHeader string,
 	annotationPrefix string,
+	stagingReqHeader string,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
@@ -93,6 +96,7 @@ func NewPackageHelper(
 		copyrightHeader:     copyrightHeader,
 		middlewareSpecs:     middlewareSpecs,
 		annotationPrefix:    annotationPrefix,
+		stagingReqHeader:    stagingReqHeader,
 	}
 	return p, nil
 }
@@ -206,4 +210,10 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 		return "", nil
 	}
 	return GoType(p, typeSpec)
+}
+
+// StagingReqHeader returns the header name that will be checked to determine
+// if a request should go to the staging downstream client
+func (p PackageHelper) StagingReqHeader() string {
+	return p.stagingReqHeader
 }

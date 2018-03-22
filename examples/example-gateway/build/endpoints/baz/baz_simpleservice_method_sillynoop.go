@@ -78,6 +78,12 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 		zap.String("endpoint", h.endpoint.EndpointName),
 	}
 
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
+	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := SimpleServiceSillyNoopEndpoint{
@@ -126,12 +132,12 @@ func (w SimpleServiceSillyNoopEndpoint) Handle(
 ) (zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
+
 	var ok bool
 	var h string
-
-	h, ok = reqHeaders.Get("X-Test-Override-Service")
+	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
-		clientHeaders["X-Test-Override-Service"] = h
+		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
 
 	_, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)

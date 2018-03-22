@@ -50,7 +50,7 @@ type TChannelClientOption struct {
 	MethodNames map[string]string
 
 	// An alternate subchannel that can optionally be used to make a TChannel call
-	// instead; allows the service name to be overridden when a "X-Test-Override-Service"
+	// instead; e.g. can allow the service to be overridden when a "X-Zanzibar-Use-Staging"
 	// header is present
 	AltSubchannelName string
 }

@@ -25,6 +25,7 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+{{- $stagingReqHeader := .StagingReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -150,7 +151,7 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
 		success, respHeaders, err := caller(

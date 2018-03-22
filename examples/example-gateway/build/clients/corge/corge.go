@@ -126,7 +126,7 @@ func (c *corgeClient) EchoString(
 	logger := c.client.Loggers["Corge::echoString"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true") {
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
