@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -63,6 +64,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	var scAltName string
+	if deps.Default.Config.ContainsKey("test.clients.overrideService") {
+		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+	}
+
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
@@ -94,6 +103,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
 		},
 	)
 
@@ -130,8 +140,9 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
+		useAltSc := strings.EqualFold(reqHeaders["X-Test-Override-Service"], "true")
 		success, respHeaders, err := c.client.Call(
-			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result, useAltSc,
 		)
 
 		if err == nil && !success {
