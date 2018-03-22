@@ -170,10 +170,17 @@ func NewClient(deps *module.Dependencies) Client {
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	var scAltName string
-	if deps.Default.Config.ContainsKey("test.clients.overrideService.name") {
-		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService.name")
-		ipAlt := deps.Default.Config.MustGetString("test.clients.overrideService.ip")
-		portAlt := deps.Default.Config.MustGetInt("test.clients.overrideService.port")
+	if deps.Default.Config.ContainsKey("clients.baz.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.baz.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.baz.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.baz.staging.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	} else if deps.Default.Config.ContainsKey("clients.all.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.all.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.all.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.all.staging.port")
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))

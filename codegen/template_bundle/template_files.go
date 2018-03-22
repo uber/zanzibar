@@ -2201,10 +2201,17 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	var scAltName string
-	if deps.Default.Config.ContainsKey("test.clients.overrideService.name") {
-		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService.name")
-		ipAlt := deps.Default.Config.MustGetString("test.clients.overrideService.ip")
-		portAlt := deps.Default.Config.MustGetInt("test.clients.overrideService.port")
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	} else if deps.Default.Config.ContainsKey("clients.all.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.all.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.all.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.all.staging.port")
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
@@ -2330,7 +2337,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5765, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6228, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
