@@ -2201,11 +2201,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
 	var scAltName string
-	if deps.Default.Config.ContainsKey("test.clients.overrideService") {
-		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService")
+	if deps.Default.Config.ContainsKey("test.clients.overrideService.name") {
+		scAltName = deps.Default.Config.MustGetString("test.clients.overrideService.name")
+		ipAlt := deps.Default.Config.MustGetString("test.clients.overrideService.ip")
+		portAlt := deps.Default.Config.MustGetInt("test.clients.overrideService.port")
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
-		scAlt.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
 
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
@@ -2328,7 +2330,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5588, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5765, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
