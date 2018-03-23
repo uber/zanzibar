@@ -266,6 +266,27 @@ func TestNested(t *testing.T) {
 	assert.Equal(t, strip(s), strip(lines))
 }
 
+func TestBytePanic(t *testing.T) {
+	defer func() {
+		r := recover()
+		assert.NotNil(t, r)
+	}()
+	propagateMap := make(map[string]codegen.FieldMapperEntry)
+	propagateMap["One"] = codegen.FieldMapperEntry{
+		QualifiedName: "content-type",
+		Override:      true,
+	}
+	_, _ = propagateHeaders(
+		[]string{"content-type", "auth"},
+		"Bar",
+		`struct Bar {
+			1: required byte one
+		}`,
+		propagateMap,
+		&naivePackageNameResolver{},
+	)
+}
+
 func TestPrimaryType(t *testing.T) {
 	propagateMap := make(map[string]codegen.FieldMapperEntry)
 	propagateMap["U1"] = codegen.FieldMapperEntry{
@@ -381,11 +402,13 @@ func TestPrimaryType(t *testing.T) {
 		}
 		if key, ok := headers.Get("x-int"); ok {
 			if v, err := strconv.ParseInt(key,10,16); err == nil {
+				val:=int16(v)
 				in.I5=v
 			}
 		}
 		if key, ok := headers.Get("x-int"); ok {
 			if v, err := strconv.ParseInt(key,10,16); err == nil {
+				val:=int16(v)
 				in.I6=&v
 			}
 		}

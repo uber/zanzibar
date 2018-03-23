@@ -93,12 +93,15 @@ func typeSwitch(key, gotype string, field *compile.FieldSpec) []string {
 		assignVal = "key"
 	)
 	switch gotype {
+	case "int8":
+		panic(fmt.Sprintf("type byte is note supported for field %q", field.Name))
 	case "bool":
 		typeParse = "strconv.ParseBool(key)"
 		assignVal = "v"
 	case "int16":
 		typeParse = "strconv.ParseInt(key, 10, 16)"
 		assignVal = "v"
+		typeCast = "val := int16(v)\n"
 	case "int32":
 		typeParse = "strconv.ParseInt(key, 10, 32)"
 		assignVal = "val"
