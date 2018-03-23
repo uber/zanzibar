@@ -1078,7 +1078,11 @@ func (c *bazClient) TransHeadersType(
 
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
-	success, respHeaders, err := c.client.Call(
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
 		ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
 	)
 
