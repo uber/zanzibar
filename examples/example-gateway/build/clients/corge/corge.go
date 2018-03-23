@@ -69,10 +69,10 @@ func NewClient(deps *module.Dependencies) Client {
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.all.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.all.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.all.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.all.staging.port")
+	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
