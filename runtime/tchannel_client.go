@@ -48,12 +48,18 @@ type TChannelClientOption struct {
 	// has a methodMap of map[string]string{"Foo::bar":"Bar"}, then one can do
 	// `FooClient.Bar()` to issue a RPC to Thrift service `Foo`'s `bar` method.
 	MethodNames map[string]string
+
+	// An alternate subchannel that can optionally be used to make a TChannel call
+	// instead; e.g. can allow the service to be overridden when a "X-Zanzibar-Use-Staging"
+	// header is present
+	AltSubchannelName string
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
+	scAlt             *tchannel.SubChannel
 	serviceName       string
 	ClientID          string
 	methodNames       map[string]string
@@ -106,7 +112,7 @@ func NewTChannelClient(
 		metrics[serviceMethod] = NewOutboundTChannelMetrics(scopes[serviceMethod])
 	}
 
-	return &TChannelClient{
+	client := &TChannelClient{
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
 		serviceName:       opt.ServiceName,
@@ -119,6 +125,11 @@ func NewTChannelClient(
 		Scopes:            scopes,
 		metrics:           metrics,
 	}
+	if opt.AltSubchannelName != "" {
+		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
+	}
+
+	return client
 }
 
 // Call makes a RPC call to the given service.
@@ -139,7 +150,28 @@ func (c *TChannelClient) Call(
 		metrics:       c.metrics[serviceMethod],
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp)
+	return c.call(ctx, call, reqHeaders, req, resp, false)
+}
+
+// CallThruAltChannel makes a RPC call using a configured alternate channel
+func (c *TChannelClient) CallThruAltChannel(
+	ctx context.Context,
+	thriftService, methodName string,
+	reqHeaders map[string]string,
+	req, resp RWTStruct,
+) (success bool, resHeaders map[string]string, err error) {
+	serviceMethod := thriftService + "::" + methodName
+
+	call := &tchannelOutboundCall{
+		client:        c,
+		methodName:    c.methodNames[serviceMethod],
+		serviceMethod: serviceMethod,
+		reqHeaders:    reqHeaders,
+		logger:        c.Loggers[serviceMethod],
+		metrics:       c.metrics[serviceMethod],
+	}
+
+	return c.call(ctx, call, reqHeaders, req, resp, true)
 }
 
 func (c *TChannelClient) call(
@@ -147,6 +179,7 @@ func (c *TChannelClient) call(
 	call *tchannelOutboundCall,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
+	useAltSubchannel bool,
 ) (success bool, resHeaders map[string]string, err error) {
 	defer func() { call.finish(err) }()
 	call.start()
@@ -166,7 +199,15 @@ func (c *TChannelClient) call(
 	err = c.ch.RunWithRetry(ctx, func(ctx netContext.Context, rs *tchannel.RequestState) (cerr error) {
 		call.resHeaders, call.success = nil, false
 
-		call.call, cerr = c.sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
+		sc := c.sc
+		if useAltSubchannel {
+			if c.scAlt == nil {
+				return errors.Errorf("alternate subchannel not configured for %s", call.client.ClientID)
+			}
+			sc = c.scAlt
+		}
+
+		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 			Format:       tchannel.Thrift,
 			RequestState: rs,
 		})

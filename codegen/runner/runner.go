@@ -78,6 +78,11 @@ func main() {
 		copyright = []byte("")
 	}
 
+	stagingReqHeader := "X-Zanzibar-Use-Staging"
+	if config.ContainsKey("stagingReqHeader") {
+		stagingReqHeader = config.MustGetString("stagingReqHeader")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		config.MustGetString("managedThriftFolder"),
@@ -88,6 +93,7 @@ func main() {
 		config.MustGetString("targetGenDir"),
 		string(copyright),
 		config.MustGetString("annotationPrefix"),
+		stagingReqHeader,
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),

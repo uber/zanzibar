@@ -100,6 +100,10 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Uuid", headerValue))
 	}
+	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
+	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarTooManyArgsEndpoint{
@@ -162,6 +166,10 @@ func (w BarTooManyArgsEndpoint) Handle(
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h
+	}
+	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
+	if ok {
+		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
 
 	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(

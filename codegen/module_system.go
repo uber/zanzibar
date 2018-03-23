@@ -524,6 +524,7 @@ func (g *TChannelClientGenerator) Generate(
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
 		SidecarRouter:    clientSpec.SidecarRouter,
+		StagingReqHeader: g.packageHelper.StagingReqHeader(),
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -874,6 +875,13 @@ func (g *EndpointGenerator) generateEndpointFile(
 		clientName = e.ClientSpec.ClientName
 	}
 
+	reqHeaderMap := make(map[string]string)
+	for k, v := range e.ReqHeaderMap {
+		reqHeaderMap[k] = v
+	}
+	reqHeaderMap[g.packageHelper.StagingReqHeader()] = g.packageHelper.StagingReqHeader()
+	reqHeaderMapKeys := append(e.ReqHeaderMapKeys, g.packageHelper.StagingReqHeader())
+
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:           instance,
@@ -881,8 +889,8 @@ func (g *EndpointGenerator) generateEndpointFile(
 		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
 		IncludedPackages:   includedPackages,
 		Method:             method,
-		ReqHeaderMap:       e.ReqHeaderMap,
-		ReqHeaderMapKeys:   e.ReqHeaderMapKeys,
+		ReqHeaderMap:       reqHeaderMap,
+		ReqHeaderMapKeys:   reqHeaderMapKeys,
 		ResHeaderMap:       e.ResHeaderMap,
 		ResHeaderMapKeys:   e.ResHeaderMapKeys,
 		ClientID:           clientID,
@@ -1214,6 +1222,7 @@ type ClientMeta struct {
 	ExposedMethods   map[string]string
 	SidecarRouter    string
 	Fixture          *Fixture
+	StagingReqHeader string
 }
 
 func findMethod(

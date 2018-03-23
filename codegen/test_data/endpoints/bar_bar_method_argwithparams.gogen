@@ -90,6 +90,12 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 
 	// TODO: potential perf issue, use zap.Object lazy serialization
 	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
+	var headerOk bool
+	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
+	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	workflow := BarArgWithParamsEndpoint{
@@ -125,6 +131,13 @@ func (w BarArgWithParamsEndpoint) Handle(
 	clientRequest := convertToArgWithParamsClientRequest(r)
 
 	clientHeaders := map[string]string{}
+
+	var ok bool
+	var h string
+	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
+	if ok {
+		clientHeaders["X-Zanzibar-Use-Staging"] = h
+	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithParams(
 		ctx, clientHeaders, clientRequest,

@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -60,6 +61,23 @@ func NewClient(deps *module.Dependencies) Client {
 	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	var scAltName string
+	if deps.Default.Config.ContainsKey("clients.corge.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.corge.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.corge.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.corge.staging.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	}
+
 	timeout := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.corge.timeout"),
 	)
@@ -82,6 +100,7 @@ func NewClient(deps *module.Dependencies) Client {
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
 		},
 	)
 
@@ -106,7 +125,11 @@ func (c *corgeClient) EchoString(
 
 	logger := c.client.Loggers["Corge::echoString"]
 
-	success, respHeaders, err := c.client.Call(
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
 		ctx, "Corge", "echoString", reqHeaders, args, &result,
 	)
 

@@ -2140,6 +2140,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -2158,6 +2159,7 @@ import (
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
+{{- $stagingReqHeader := .StagingReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2197,6 +2199,23 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	var scAltName string
+	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
+		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
+		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
+		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+
+		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
+		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
+	}
+
 	{{/* TODO: (lu) maybe set these at per method level */ -}}
 	timeout := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
@@ -2228,6 +2247,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			Timeout:           timeout,
 			TimeoutPerAttempt: timeoutPerAttempt,
 			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
 		},
 	)
 
@@ -2264,7 +2284,11 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		success, respHeaders, err := c.client.Call(
+		caller := c.client.Call
+		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
+			caller = c.client.CallThruAltChannel
+		}
+		success, respHeaders, err := caller(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
 
@@ -2312,7 +2336,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 5100, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
