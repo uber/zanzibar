@@ -552,3 +552,334 @@ func (v *UUID) FromWire(w wire.Value) error {
 func (lhs UUID) Equals(rhs UUID) bool {
 	return (lhs == rhs)
 }
+
+type TransHeaderType struct {
+	B1 bool     `json:"b1,required"`
+	I1 *int32   `json:"i1,omitempty"`
+	I2 int64    `json:"i2,required"`
+	F3 *float64 `json:"f3,omitempty"`
+	U4 UUID     `json:"u4,required"`
+	U5 *UUID    `json:"u5,omitempty"`
+	S6 string   `json:"s6,required"`
+}
+
+// ToWire translates a TransHeaderType struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *TransHeaderType) ToWire() (wire.Value, error) {
+	var (
+		fields [7]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueBool(v.B1), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.I1 != nil {
+		w, err = wire.NewValueI32(*(v.I1)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	w, err = wire.NewValueI64(v.I2), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 3, Value: w}
+	i++
+	if v.F3 != nil {
+		w, err = wire.NewValueDouble(*(v.F3)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 4, Value: w}
+		i++
+	}
+
+	w, err = v.U4.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 5, Value: w}
+	i++
+	if v.U5 != nil {
+		w, err = v.U5.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 6, Value: w}
+		i++
+	}
+
+	w, err = wire.NewValueString(v.S6), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 7, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
+}
+
+// FromWire deserializes a TransHeaderType struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a TransHeaderType struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v TransHeaderType
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *TransHeaderType) FromWire(w wire.Value) error {
+	var err error
+
+	b1IsSet := false
+
+	i2IsSet := false
+
+	u4IsSet := false
+
+	s6IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBool {
+				v.B1, err = field.Value.GetBool(), error(nil)
+				if err != nil {
+					return err
+				}
+				b1IsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TI32 {
+				var x int32
+				x, err = field.Value.GetI32(), error(nil)
+				v.I1 = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 3:
+			if field.Value.Type() == wire.TI64 {
+				v.I2, err = field.Value.GetI64(), error(nil)
+				if err != nil {
+					return err
+				}
+				i2IsSet = true
+			}
+		case 4:
+			if field.Value.Type() == wire.TDouble {
+				var x float64
+				x, err = field.Value.GetDouble(), error(nil)
+				v.F3 = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 5:
+			if field.Value.Type() == wire.TBinary {
+				v.U4, err = _UUID_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				u4IsSet = true
+			}
+		case 6:
+			if field.Value.Type() == wire.TBinary {
+				var x UUID
+				x, err = _UUID_Read(field.Value)
+				v.U5 = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 7:
+			if field.Value.Type() == wire.TBinary {
+				v.S6, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				s6IsSet = true
+			}
+		}
+	}
+
+	if !b1IsSet {
+		return errors.New("field B1 of TransHeaderType is required")
+	}
+
+	if !i2IsSet {
+		return errors.New("field I2 of TransHeaderType is required")
+	}
+
+	if !u4IsSet {
+		return errors.New("field U4 of TransHeaderType is required")
+	}
+
+	if !s6IsSet {
+		return errors.New("field S6 of TransHeaderType is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a TransHeaderType
+// struct.
+func (v *TransHeaderType) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [7]string
+	i := 0
+	fields[i] = fmt.Sprintf("B1: %v", v.B1)
+	i++
+	if v.I1 != nil {
+		fields[i] = fmt.Sprintf("I1: %v", *(v.I1))
+		i++
+	}
+	fields[i] = fmt.Sprintf("I2: %v", v.I2)
+	i++
+	if v.F3 != nil {
+		fields[i] = fmt.Sprintf("F3: %v", *(v.F3))
+		i++
+	}
+	fields[i] = fmt.Sprintf("U4: %v", v.U4)
+	i++
+	if v.U5 != nil {
+		fields[i] = fmt.Sprintf("U5: %v", *(v.U5))
+		i++
+	}
+	fields[i] = fmt.Sprintf("S6: %v", v.S6)
+	i++
+
+	return fmt.Sprintf("TransHeaderType{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _I32_EqualsPtr(lhs, rhs *int32) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _Double_EqualsPtr(lhs, rhs *float64) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this TransHeaderType match the
+// provided TransHeaderType.
+//
+// This function performs a deep comparison.
+func (v *TransHeaderType) Equals(rhs *TransHeaderType) bool {
+	if !(v.B1 == rhs.B1) {
+		return false
+	}
+	if !_I32_EqualsPtr(v.I1, rhs.I1) {
+		return false
+	}
+	if !(v.I2 == rhs.I2) {
+		return false
+	}
+	if !_Double_EqualsPtr(v.F3, rhs.F3) {
+		return false
+	}
+	if !(v.U4 == rhs.U4) {
+		return false
+	}
+	if !_UUID_EqualsPtr(v.U5, rhs.U5) {
+		return false
+	}
+	if !(v.S6 == rhs.S6) {
+		return false
+	}
+
+	return true
+}
+
+// GetI1 returns the value of I1 if it is set or its
+// zero value if it is unset.
+func (v *TransHeaderType) GetI1() (o int32) {
+	if v.I1 != nil {
+		return *v.I1
+	}
+
+	return
+}
+
+// GetF3 returns the value of F3 if it is set or its
+// zero value if it is unset.
+func (v *TransHeaderType) GetF3() (o float64) {
+	if v.F3 != nil {
+		return *v.F3
+	}
+
+	return
+}
+
+// GetU5 returns the value of U5 if it is set or its
+// zero value if it is unset.
+func (v *TransHeaderType) GetU5() (o UUID) {
+	if v.U5 != nil {
+		return *v.U5
+	}
+
+	return
+}

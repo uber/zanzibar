@@ -967,6 +967,63 @@ func (h *SimpleServiceTransHeadersHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
+// SimpleServiceTransHeadersTypeFunc is the handler function for "transHeadersType" method of thrift service "SimpleService".
+type SimpleServiceTransHeadersTypeFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_TransHeadersType_Args,
+) (*clientsBazBaz.TransHeaderType, map[string]string, error)
+
+// NewSimpleServiceTransHeadersTypeHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceTransHeadersTypeHandler(f SimpleServiceTransHeadersTypeFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceTransHeadersTypeHandler{f}
+}
+
+// SimpleServiceTransHeadersTypeHandler handles the "transHeadersType" method call of thrift service "SimpleService".
+type SimpleServiceTransHeadersTypeHandler struct {
+	transheaderstype SimpleServiceTransHeadersTypeFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceTransHeadersTypeHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_TransHeadersType_Args
+	var res clientsBazBaz.SimpleService_TransHeadersType_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.transheaderstype(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for transHeadersType returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		case *clientsBazBaz.OtherAuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for transHeadersType returned non-nil error type *OtherAuthErr but nil value",
+				)
+			}
+			res.OtherAuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
 // SimpleServiceURLTestFunc is the handler function for "urlTest" method of thrift service "SimpleService".
 type SimpleServiceURLTestFunc func(
 	ctx context.Context,

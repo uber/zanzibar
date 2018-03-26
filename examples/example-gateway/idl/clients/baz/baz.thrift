@@ -14,6 +14,16 @@ struct BazRequest {
     3: required i32 i3
 }
 
+struct transHeaderType {
+    1: required bool b1
+    2: optional i32 i1
+    3: required i64 i2
+    4: optional double f3
+    5: required UUID u4
+    6: optional UUID u5
+    7: required string s6
+}
+
 exception AuthErr {
     1: required string message
 }
@@ -41,6 +51,13 @@ service SimpleService {
 
     base.TransHeaders transHeaders(
         1: required base.TransHeaders req
+    ) throws (
+        1: AuthErr authErr
+        2: OtherAuthErr otherAuthErr
+    )
+
+    transHeaderType transHeadersType(
+        1: required transHeaderType req
     ) throws (
         1: AuthErr authErr
         2: OtherAuthErr otherAuthErr

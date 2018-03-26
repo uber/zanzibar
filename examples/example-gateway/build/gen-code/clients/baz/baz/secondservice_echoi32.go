@@ -327,16 +327,6 @@ func (v *SecondService_EchoI32_Result) String() string {
 	return fmt.Sprintf("SecondService_EchoI32_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _I32_EqualsPtr(lhs, rhs *int32) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 // Equals returns true if all the fields of this SecondService_EchoI32_Result match the
 // provided SecondService_EchoI32_Result.
 //

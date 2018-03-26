@@ -77,6 +77,19 @@ service SimpleService {
       zanzibar.http.reqHeaders = "x-uuid,x-token"
   )
 
+
+  TransHeader transHeadersType(
+      1: required TransHeader req
+  ) throws (
+      1: AuthErr authErr (zanzibar.http.status = "401")
+      2: OtherAuthErr otherAuthErr (zanzibar.http.status = "403")
+  ) (
+      zanzibar.http.status = "200"
+      zanzibar.http.method = "POST"
+      zanzibar.http.path = "/baz/trans-header-type"
+      zanzibar.http.reqHeaders = "x-boolean,x-int,x-float,x-string"
+  )
+
   // no response body
   void call(
     1: required BazRequest arg

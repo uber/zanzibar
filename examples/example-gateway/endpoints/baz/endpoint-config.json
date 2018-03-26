@@ -9,7 +9,8 @@
 			"ping.json",
 			"silly_noop.json",
 			"trans.json",
-			"trans-headers.json"
+			"trans-headers.json",
+			"trans-headers-type.json"
 		]
 	},
 	"dependencies": {

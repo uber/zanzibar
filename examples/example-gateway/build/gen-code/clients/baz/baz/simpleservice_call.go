@@ -77,12 +77,6 @@ func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
 	return &v, err
 }
 
-func _UUID_1_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
-}
-
 // FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
@@ -128,7 +122,7 @@ func (v *SimpleService_Call_Args) FromWire(w wire.Value) error {
 		case 3:
 			if field.Value.Type() == wire.TBinary {
 				var x UUID
-				x, err = _UUID_1_Read(field.Value)
+				x, err = _UUID_Read(field.Value)
 				v.TestUUID = &x
 				if err != nil {
 					return err
@@ -168,16 +162,6 @@ func (v *SimpleService_Call_Args) String() string {
 	return fmt.Sprintf("SimpleService_Call_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _UUID_1_EqualsPtr(lhs, rhs *UUID) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 // Equals returns true if all the fields of this SimpleService_Call_Args match the
 // provided SimpleService_Call_Args.
 //
@@ -189,7 +173,7 @@ func (v *SimpleService_Call_Args) Equals(rhs *SimpleService_Call_Args) bool {
 	if !_I64_EqualsPtr(v.I64Optional, rhs.I64Optional) {
 		return false
 	}
-	if !_UUID_1_EqualsPtr(v.TestUUID, rhs.TestUUID) {
+	if !_UUID_EqualsPtr(v.TestUUID, rhs.TestUUID) {
 		return false
 	}
 

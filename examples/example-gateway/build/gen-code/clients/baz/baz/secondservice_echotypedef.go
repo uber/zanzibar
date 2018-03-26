@@ -51,7 +51,7 @@ func (v *SecondService_EchoTypedef_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _UUID_Read(w wire.Value) (base.UUID, error) {
+func _UUID_1_Read(w wire.Value) (base.UUID, error) {
 	var x base.UUID
 	err := x.FromWire(w)
 	return x, err
@@ -83,7 +83,7 @@ func (v *SecondService_EchoTypedef_Args) FromWire(w wire.Value) error {
 		switch field.ID {
 		case 1:
 			if field.Value.Type() == wire.TBinary {
-				v.Arg, err = _UUID_Read(field.Value)
+				v.Arg, err = _UUID_1_Read(field.Value)
 				if err != nil {
 					return err
 				}
@@ -296,7 +296,7 @@ func (v *SecondService_EchoTypedef_Result) FromWire(w wire.Value) error {
 		case 0:
 			if field.Value.Type() == wire.TBinary {
 				var x base.UUID
-				x, err = _UUID_Read(field.Value)
+				x, err = _UUID_1_Read(field.Value)
 				v.Success = &x
 				if err != nil {
 					return err
@@ -334,7 +334,7 @@ func (v *SecondService_EchoTypedef_Result) String() string {
 	return fmt.Sprintf("SecondService_EchoTypedef_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _UUID_EqualsPtr(lhs, rhs *base.UUID) bool {
+func _UUID_1_EqualsPtr(lhs, rhs *base.UUID) bool {
 	if lhs != nil && rhs != nil {
 
 		x := *lhs
@@ -349,7 +349,7 @@ func _UUID_EqualsPtr(lhs, rhs *base.UUID) bool {
 //
 // This function performs a deep comparison.
 func (v *SecondService_EchoTypedef_Result) Equals(rhs *SecondService_EchoTypedef_Result) bool {
-	if !_UUID_EqualsPtr(v.Success, rhs.Success) {
+	if !_UUID_1_EqualsPtr(v.Success, rhs.Success) {
 		return false
 	}
 

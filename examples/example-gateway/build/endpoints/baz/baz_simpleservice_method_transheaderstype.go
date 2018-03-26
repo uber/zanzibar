@@ -26,57 +26,57 @@ package bazendpoint
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
-// SimpleServiceTransHeadersHandler is the handler for "/baz/trans-headers"
-type SimpleServiceTransHeadersHandler struct {
+// SimpleServiceTransHeadersTypeHandler is the handler for "/baz/trans-header-type"
+type SimpleServiceTransHeadersTypeHandler struct {
 	Clients  *module.ClientDependencies
 	endpoint *zanzibar.RouterEndpoint
 }
 
-// NewSimpleServiceTransHeadersHandler creates a handler
-func NewSimpleServiceTransHeadersHandler(deps *module.Dependencies) *SimpleServiceTransHeadersHandler {
-	handler := &SimpleServiceTransHeadersHandler{
+// NewSimpleServiceTransHeadersTypeHandler creates a handler
+func NewSimpleServiceTransHeadersTypeHandler(deps *module.Dependencies) *SimpleServiceTransHeadersTypeHandler {
+	handler := &SimpleServiceTransHeadersTypeHandler{
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
-		"baz", "transHeaders",
+		"baz", "transHeadersType",
 		handler.HandleRequest,
 	)
 	return handler
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *SimpleServiceTransHeadersHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceTransHeadersTypeHandler) Register(g *zanzibar.Gateway) error {
 	g.HTTPRouter.Register(
-		"POST", "/baz/trans-headers",
+		"POST", "/baz/trans-header-type",
 		h.endpoint,
 	)
 	// TODO: register should return errors on route conflicts
 	return nil
 }
 
-// HandleRequest handles "/baz/trans-headers".
-func (h *SimpleServiceTransHeadersHandler) HandleRequest(
+// HandleRequest handles "/baz/trans-header-type".
+func (h *SimpleServiceTransHeadersTypeHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+	if !req.CheckHeaders([]string{"x-boolean", "x-int", "x-float", "x-string"}) {
 		return
 	}
-	var requestBody endpointsBazBaz.SimpleService_TransHeaders_Args
+	var requestBody endpointsBazBaz.SimpleService_TransHeadersType_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
 	}
@@ -96,7 +96,7 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServiceTransHeadersEndpoint{
+	workflow := SimpleServiceTransHeadersTypeEndpoint{
 		Clients: h.Clients,
 		Logger:  req.Logger,
 		Request: req,
@@ -128,22 +128,22 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 	res.WriteJSON(200, cliRespHeaders, response)
 }
 
-// SimpleServiceTransHeadersEndpoint calls thrift client Baz.TransHeaders
-type SimpleServiceTransHeadersEndpoint struct {
+// SimpleServiceTransHeadersTypeEndpoint calls thrift client Baz.TransHeadersType
+type SimpleServiceTransHeadersTypeEndpoint struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 	Request *zanzibar.ServerHTTPRequest
 }
 
 // Handle calls thrift client.
-func (w SimpleServiceTransHeadersEndpoint) Handle(
+func (w SimpleServiceTransHeadersTypeEndpoint) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_TransHeaders_Args,
+	r *endpointsBazBaz.SimpleService_TransHeadersType_Args,
 ) (*endpointsBazBaz.TransHeader, zanzibar.Header, error) {
-	clientRequest := convertToTransHeadersClientRequest(r)
+	clientRequest := convertToTransHeadersTypeClientRequest(r)
 
-	clientRequest = propagateHeadersTransHeadersClientRequests(clientRequest, reqHeaders)
+	clientRequest = propagateHeadersTransHeadersTypeClientRequests(clientRequest, reqHeaders)
 
 	clientHeaders := map[string]string{}
 
@@ -154,7 +154,7 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
 
-	clientRespBody, _, err := w.Clients.Baz.TransHeaders(
+	clientRespBody, _, err := w.Clients.Baz.TransHeadersType(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -162,7 +162,7 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 		switch errValue := err.(type) {
 
 		case *clientsBazBaz.AuthErr:
-			serverErr := convertTransHeadersAuthErr(
+			serverErr := convertTransHeadersTypeAuthErr(
 				errValue,
 			)
 			// TODO(sindelar): Consider returning partial headers
@@ -170,7 +170,7 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 			return nil, nil, serverErr
 
 		case *clientsBazBaz.OtherAuthErr:
-			serverErr := convertTransHeadersOtherAuthErr(
+			serverErr := convertTransHeadersTypeOtherAuthErr(
 				errValue,
 			)
 			// TODO(sindelar): Consider returning partial headers
@@ -195,15 +195,15 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
-	response := convertSimpleServiceTransHeadersClientResponse(clientRespBody)
+	response := convertSimpleServiceTransHeadersTypeClientResponse(clientRespBody)
 	return response, resHeaders, nil
 }
 
-func convertToTransHeadersClientRequest(in *endpointsBazBaz.SimpleService_TransHeaders_Args) *clientsBazBaz.SimpleService_TransHeaders_Args {
-	out := &clientsBazBaz.SimpleService_TransHeaders_Args{}
+func convertToTransHeadersTypeClientRequest(in *endpointsBazBaz.SimpleService_TransHeadersType_Args) *clientsBazBaz.SimpleService_TransHeadersType_Args {
+	out := &clientsBazBaz.SimpleService_TransHeadersType_Args{}
 
 	if in.Req != nil {
-		out.Req = &clientsBazBase.TransHeaders{}
+		out.Req = &clientsBazBaz.TransHeaderType{}
 	} else {
 		out.Req = nil
 	}
@@ -211,14 +211,14 @@ func convertToTransHeadersClientRequest(in *endpointsBazBaz.SimpleService_TransH
 	return out
 }
 
-func convertTransHeadersAuthErr(
+func convertTransHeadersTypeAuthErr(
 	clientError *clientsBazBaz.AuthErr,
 ) *endpointsBazBaz.AuthErr {
 	// TODO: Add error fields mapping here.
 	serverError := &endpointsBazBaz.AuthErr{}
 	return serverError
 }
-func convertTransHeadersOtherAuthErr(
+func convertTransHeadersTypeOtherAuthErr(
 	clientError *clientsBazBaz.OtherAuthErr,
 ) *endpointsBazBaz.OtherAuthErr {
 	// TODO: Add error fields mapping here.
@@ -226,115 +226,71 @@ func convertTransHeadersOtherAuthErr(
 	return serverError
 }
 
-func convertSimpleServiceTransHeadersClientResponse(in *clientsBazBase.TransHeaders) *endpointsBazBaz.TransHeader {
+func convertSimpleServiceTransHeadersTypeClientResponse(in *clientsBazBaz.TransHeaderType) *endpointsBazBaz.TransHeader {
 	out := &endpointsBazBaz.TransHeader{}
 
 	return out
 }
 
-func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_TransHeaders_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeaders_Args {
-	if key, ok := headers.Get("x-token"); ok {
+func propagateHeadersTransHeadersTypeClientRequests(in *clientsBazBaz.SimpleService_TransHeadersType_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeadersType_Args {
+	if key, ok := headers.Get("x-boolean"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W1 == nil {
-			in.Req.W1 = &clientsBazBase.Wrapped{}
+		if v, err := strconv.ParseBool(key); err == nil {
+			in.Req.B1 = v
 		}
-		if in.Req.W1.N1 == nil {
-			in.Req.W1.N1 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W1.N1.Token = &key
 
 	}
-	if key, ok := headers.Get("x-uuid"); ok {
+	if key, ok := headers.Get("x-float"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W1 == nil {
-			in.Req.W1 = &clientsBazBase.Wrapped{}
+		if v, err := strconv.ParseFloat(key, 64); err == nil {
+			in.Req.F3 = &v
 		}
-		if in.Req.W1.N1 == nil {
-			in.Req.W1.N1 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W1.N1.UUID = key
 
 	}
-	if key, ok := headers.Get("x-token"); ok {
+	if key, ok := headers.Get("x-int"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W1 == nil {
-			in.Req.W1 = &clientsBazBase.Wrapped{}
+		if v, err := strconv.ParseInt(key, 10, 32); err == nil {
+			val := int32(v)
+			in.Req.I1 = &val
 		}
-		if in.Req.W1.N2 == nil {
-			in.Req.W1.N2 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W1.N2.Token = &key
 
 	}
-	if key, ok := headers.Get("x-uuid"); ok {
+	if key, ok := headers.Get("x-int"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W1 == nil {
-			in.Req.W1 = &clientsBazBase.Wrapped{}
+		if v, err := strconv.ParseInt(key, 10, 64); err == nil {
+			in.Req.I2 = v
 		}
-		if in.Req.W1.N2 == nil {
-			in.Req.W1.N2 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W1.N2.UUID = key
 
 	}
-	if key, ok := headers.Get("x-token"); ok {
+	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W2 == nil {
-			in.Req.W2 = &clientsBazBase.Wrapped{}
-		}
-		if in.Req.W2.N1 == nil {
-			in.Req.W2.N1 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W2.N1.Token = &key
+		in.Req.S6 = key
 
 	}
-	if key, ok := headers.Get("x-uuid"); ok {
+	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W2 == nil {
-			in.Req.W2 = &clientsBazBase.Wrapped{}
-		}
-		if in.Req.W2.N1 == nil {
-			in.Req.W2.N1 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W2.N1.UUID = key
+		val := clientsBazBaz.UUID(key)
+		in.Req.U4 = val
 
 	}
-	if key, ok := headers.Get("x-token"); ok {
+	if key, ok := headers.Get("x-string"); ok {
 		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
+			in.Req = &clientsBazBaz.TransHeaderType{}
 		}
-		if in.Req.W2 == nil {
-			in.Req.W2 = &clientsBazBase.Wrapped{}
-		}
-		if in.Req.W2.N2 == nil {
-			in.Req.W2.N2 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W2.N2.Token = &key
-
-	}
-	if key, ok := headers.Get("x-uuid"); ok {
-		if in.Req == nil {
-			in.Req = &clientsBazBase.TransHeaders{}
-		}
-		if in.Req.W2 == nil {
-			in.Req.W2 = &clientsBazBase.Wrapped{}
-		}
-		if in.Req.W2.N2 == nil {
-			in.Req.W2.N2 = &clientsBazBase.NestHeaders{}
-		}
-		in.Req.W2.N2.UUID = key
+		val := clientsBazBaz.UUID(key)
+		in.Req.U5 = &val
 
 	}
 	return in
