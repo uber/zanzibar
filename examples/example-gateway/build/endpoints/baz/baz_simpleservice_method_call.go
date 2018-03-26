@@ -73,9 +73,6 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
 	var requestBody endpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -140,7 +137,6 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 		}
 
 	}
-	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
 }

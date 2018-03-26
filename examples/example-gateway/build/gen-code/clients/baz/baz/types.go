@@ -412,6 +412,82 @@ func (v *Fruit) UnmarshalJSON(text []byte) error {
 	}
 }
 
+type HeaderSchema struct {
+}
+
+// ToWire translates a HeaderSchema struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *HeaderSchema) ToWire() (wire.Value, error) {
+	var (
+		fields [0]wire.Field
+		i      int = 0
+	)
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a HeaderSchema struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a HeaderSchema struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v HeaderSchema
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *HeaderSchema) FromWire(w wire.Value) error {
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a HeaderSchema
+// struct.
+func (v *HeaderSchema) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [0]string
+	i := 0
+
+	return fmt.Sprintf("HeaderSchema{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this HeaderSchema match the
+// provided HeaderSchema.
+//
+// This function performs a deep comparison.
+func (v *HeaderSchema) Equals(rhs *HeaderSchema) bool {
+
+	return true
+}
+
 type OtherAuthErr struct {
 	Message string `json:"message,required"`
 }

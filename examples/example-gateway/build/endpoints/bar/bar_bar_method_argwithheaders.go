@@ -73,7 +73,7 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid"}) {
+	if !req.CheckHeaders([]string{"X-Uuid"}) {
 		return
 	}
 	var requestBody endpointsBarBar.Bar_ArgWithHeaders_Args

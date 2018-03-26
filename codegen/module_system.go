@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.uber.org/thriftrw/compile"
 )
 
 // EndpointMeta saves meta data used to render an endpoint.
@@ -879,12 +880,16 @@ func (g *EndpointGenerator) generateEndpointFile(
 		clientName = e.ClientSpec.ClientName
 	}
 
-	reqHeaderMap := make(map[string]string)
-	for k, v := range e.ReqHeaderMap {
-		reqHeaderMap[k] = v
+	// allow configured header to pass down to switch downstream service dynmamic
+	reqHeaders := e.ReqHeaders
+	if reqHeaders == nil {
+		reqHeaders = make(map[string]*TypedHeader)
 	}
-	reqHeaderMap[g.packageHelper.StagingReqHeader()] = g.packageHelper.StagingReqHeader()
-	reqHeaderMapKeys := append(e.ReqHeaderMapKeys, g.packageHelper.StagingReqHeader())
+	reqHeaders[g.packageHelper.StagingReqHeader()] = &TypedHeader{
+		Name:        g.packageHelper.StagingReqHeader(),
+		TransformTo: g.packageHelper.StagingReqHeader(),
+		Field:       &compile.FieldSpec{Required: false},
+	}
 
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
@@ -893,9 +898,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 		GatewayPackageName:     g.packageHelper.GoGatewayPackageName(),
 		IncludedPackages:       includedPackages,
 		Method:                 method,
-		ReqHeaders:             e.ReqHeaders,
-		ReqHeadersKeys:         sortedHeaders(e.ReqHeaders, false),
-		ReqRequiredHeadersKeys: sortedHeaders(e.ReqHeaders, true),
+		ReqHeaders:             reqHeaders,
+		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
+		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
 		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
 		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
 		ResHeaders:             e.ResHeaders,

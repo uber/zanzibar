@@ -73,9 +73,6 @@ func (h *SimpleServiceTransHeadersTypeHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-boolean", "x-int", "x-float", "x-string"}) {
-		return
-	}
 	var requestBody endpointsBazBaz.SimpleService_TransHeadersType_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
