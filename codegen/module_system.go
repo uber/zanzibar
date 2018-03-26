@@ -22,8 +22,8 @@ package codegen
 
 import (
 	"encoding/json"
-	"path/filepath"
 	"net/textproto"
+	"path/filepath"
 	"sort"
 	"strings"
 
