@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -594,7 +595,7 @@ func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (m
 	for key, val := range headers.(map[string]interface{}) {
 		switch value := val.(type) {
 		case string:
-			headersMap[key] = value
+			headersMap[textproto.CanonicalMIMEHeaderKey(key)] = textproto.CanonicalMIMEHeaderKey(value)
 		default:
 			return nil, errors.Errorf(
 				"unable to parse string %q in headers %q", value, headers)
@@ -663,7 +664,7 @@ func resolveHeaders(
 			return err
 		}
 		for hk, hv := range typedHeaders {
-			headersMap[hk] = hv
+			headersMap[textproto.CanonicalMIMEHeaderKey(hk)] = hv
 		}
 	}
 	// apply header transform
@@ -714,13 +715,14 @@ func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHea
 			return nil, errors.Errorf("unable to find typedHeaders %q", structName)
 		}
 		for _, field := range typeStruct.Fields {
-			headerKey := loadHeaderKeyFromField(field)
-			if headerKey == nil {
+			hk := loadHeaderKeyFromField(field)
+			if hk == nil {
 				return nil, errors.Errorf("unable to find header key %q", field.Name)
 			}
-			typedHeaders[*headerKey] = &TypedHeader{
-				Name:        *headerKey,
-				TransformTo: *headerKey,
+			headerKey := textproto.CanonicalMIMEHeaderKey(*hk)
+			typedHeaders[headerKey] = &TypedHeader{
+				Name:        headerKey,
+				TransformTo: headerKey,
 				Field:       field,
 			}
 		}

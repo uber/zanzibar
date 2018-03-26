@@ -23,6 +23,7 @@ package codegen
 import (
 	"encoding/json"
 	"path/filepath"
+	"net/textproto"
 	"sort"
 	"strings"
 
@@ -885,9 +886,10 @@ func (g *EndpointGenerator) generateEndpointFile(
 	if reqHeaders == nil {
 		reqHeaders = make(map[string]*TypedHeader)
 	}
-	reqHeaders[g.packageHelper.StagingReqHeader()] = &TypedHeader{
-		Name:        g.packageHelper.StagingReqHeader(),
-		TransformTo: g.packageHelper.StagingReqHeader(),
+	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.StagingReqHeader())
+	reqHeaders[shk] = &TypedHeader{
+		Name:        shk,
+		TransformTo: shk,
 		Field:       &compile.FieldSpec{Required: false},
 	}
 

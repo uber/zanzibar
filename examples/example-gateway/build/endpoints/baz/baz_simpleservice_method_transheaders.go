@@ -87,17 +87,17 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	var headerOk bool
 	var headerValue string
+	headerValue, headerOk = req.Header.Get("Token")
+	if headerOk {
+		zfields = append(zfields, zap.String("Token", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("Uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("Uuid", headerValue))
+	}
 	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("token")
-	if headerOk {
-		zfields = append(zfields, zap.String("token", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("uuid")
-	if headerOk {
-		zfields = append(zfields, zap.String("uuid", headerValue))
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
@@ -154,17 +154,17 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 
 	var ok bool
 	var h string
+	h, ok = reqHeaders.Get("Token")
+	if ok {
+		clientHeaders["Token"] = h
+	}
+	h, ok = reqHeaders.Get("Uuid")
+	if ok {
+		clientHeaders["Uuid"] = h
+	}
 	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-	h, ok = reqHeaders.Get("token")
-	if ok {
-		clientHeaders["token"] = h
-	}
-	h, ok = reqHeaders.Get("uuid")
-	if ok {
-		clientHeaders["uuid"] = h
 	}
 
 	clientRespBody, _, err := w.Clients.Baz.TransHeaders(

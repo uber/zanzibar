@@ -72,7 +72,7 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"auth", "content-type"}) {
+	if !req.CheckHeaders([]string{"Auth", "Content-Type"}) {
 		return
 	}
 	var requestBody endpointsBazBaz.SimpleService_HeaderSchema_Args
@@ -89,6 +89,14 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	var headerOk bool
 	var headerValue string
+	headerValue, headerOk = req.Header.Get("Auth")
+	if headerOk {
+		zfields = append(zfields, zap.String("Auth", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("Content-Type")
+	if headerOk {
+		zfields = append(zfields, zap.String("Content-Type", headerValue))
+	}
 	headerValue, headerOk = req.Header.Get("X-Token")
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Token", headerValue))
@@ -100,14 +108,6 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("auth")
-	if headerOk {
-		zfields = append(zfields, zap.String("auth", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("content-type")
-	if headerOk {
-		zfields = append(zfields, zap.String("content-type", headerValue))
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
@@ -162,6 +162,14 @@ func (w SimpleServiceHeaderSchemaEndpoint) Handle(
 
 	var ok bool
 	var h string
+	h, ok = reqHeaders.Get("Auth")
+	if ok {
+		clientHeaders["Auth"] = h
+	}
+	h, ok = reqHeaders.Get("Content-Type")
+	if ok {
+		clientHeaders["Content-Type"] = h
+	}
 	h, ok = reqHeaders.Get("X-Token")
 	if ok {
 		clientHeaders["X-Token"] = h
@@ -173,14 +181,6 @@ func (w SimpleServiceHeaderSchemaEndpoint) Handle(
 	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-	h, ok = reqHeaders.Get("auth")
-	if ok {
-		clientHeaders["auth"] = h
-	}
-	h, ok = reqHeaders.Get("content-type")
-	if ok {
-		clientHeaders["content-type"] = h
 	}
 
 	clientRespBody, _, err := w.Clients.Baz.HeaderSchema(
