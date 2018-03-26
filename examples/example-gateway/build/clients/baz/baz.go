@@ -128,6 +128,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBase.BazResponse, map[string]string, error)
+	HeaderSchema(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_HeaderSchema_Args,
+	) (*clientsBazBaz.HeaderSchema, map[string]string, error)
 	Ping(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -216,6 +221,7 @@ func NewClient(deps *module.Dependencies) Client {
 		"SecondService::echoTypedef":      "EchoTypedef",
 		"SimpleService::call":             "Call",
 		"SimpleService::compare":          "Compare",
+		"SimpleService::headerSchema":     "HeaderSchema",
 		"SimpleService::ping":             "Ping",
 		"SimpleService::sillyNoop":        "DeliberateDiffNoop",
 		"SimpleService::testUuid":         "TestUUID",
@@ -874,6 +880,47 @@ func (c *bazClient) Compare(
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+	if err != nil {
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
+	}
+	return resp, respHeaders, err
+}
+
+// HeaderSchema is a client RPC call for method "SimpleService::headerSchema"
+func (c *bazClient) HeaderSchema(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_HeaderSchema_Args,
+) (*clientsBazBaz.HeaderSchema, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_HeaderSchema_Result
+	var resp *clientsBazBaz.HeaderSchema
+
+	logger := c.client.Loggers["SimpleService::headerSchema"]
+
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		case result.OtherAuthErr != nil:
+			err = result.OtherAuthErr
+		default:
+			err = errors.New("bazClient received no result or unknown exception for HeaderSchema")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}

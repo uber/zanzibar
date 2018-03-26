@@ -75,9 +75,6 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
 	var requestBody endpointsBarBar.Bar_TooManyArgs_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -134,7 +131,6 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		}
 
 	}
-	// TODO(sindelar): implement check headers on response
 	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)

@@ -31,6 +31,9 @@ import (
 
 // ModuleSpec collects the service specifications from thrift file.
 type ModuleSpec struct {
+	// CompiledModule is the resolved module from thrift file
+	// that will contain modules and typedefs not directly mounted on AST
+	CompiledModule *compile.Module `json:"omitempty"`
 	// Source thrift file to generate the code.
 	ThriftFile string
 	// Whether the ThriftFile should have annotations or not
@@ -81,10 +84,11 @@ func NewModuleSpec(
 	}
 
 	moduleSpec := &ModuleSpec{
-		WantAnnot:   wantAnnot,
-		IsEndpoint:  isEndpoint,
-		ThriftFile:  module.ThriftPath,
-		PackageName: packageName(module.GetName()),
+		CompiledModule: module,
+		WantAnnot:      wantAnnot,
+		IsEndpoint:     isEndpoint,
+		ThriftFile:     module.ThriftPath,
+		PackageName:    packageName(module.GetName()),
 	}
 	if err := moduleSpec.AddServices(module, packageHelper); err != nil {
 		return nil, err
@@ -246,14 +250,13 @@ func (ms *ModuleSpec) SetDownstream(
 	}
 
 	if method.Downstream != nil && len(headersPropagate) > 0 {
-
 		downstreamMethod, err := findMethodByName(method.Name, method.Downstream.Services)
 		if err != nil {
 			return err
 		}
 		downstreamSpec := downstreamMethod.CompiledThriftSpec
 
-		err = method.setHeaderPropagator(method.ReqHeaders, downstreamSpec, headersPropagate, h, downstreamMethod)
+		err = method.setHeaderPropagator(sortedHeaders(e.ReqHeaders, false), downstreamSpec, headersPropagate, h, downstreamMethod)
 		if err != nil {
 			return err
 		}

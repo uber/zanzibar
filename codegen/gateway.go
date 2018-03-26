@@ -28,18 +28,23 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
-	"strings"
-
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/compile"
 )
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
 	return zanzibar.GetDirnameFromRuntimeCaller(file)
 }
+
+const (
+	reqHeaders = "reqHeaderMap"
+	resHeaders = "resHeaderMap"
+)
 
 var mandatoryClientFields = []string{
 	"thriftFile",
@@ -347,6 +352,14 @@ func newMiddlewareSpec(cfg *MiddlewareConfig) *MiddlewareSpec {
 	}
 }
 
+// TypedHeader is typed header for headers resolved
+// from header schema
+type TypedHeader struct {
+	Name        string
+	TransformTo string
+	Field       *compile.FieldSpec
+}
+
 // EndpointSpec holds information about each endpoint in the
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
@@ -387,18 +400,10 @@ type EndpointSpec struct {
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
 	RespTransforms map[string]FieldMapperEntry
-
-	// ReqHeaderMap, maps headers from server to client.
-	// Keeps keys in a sorted array so that golden files have
-	// deterministic orderings
-	ReqHeaderMap     map[string]string
-	ReqHeaderMapKeys []string
-	// ResHeaderMap, maps headers from client to server.
-	// Keeps keys in a sorted array so that golden files have
-	// deterministic orderings
-	ResHeaderMap     map[string]string
-	ResHeaderMapKeys []string
-
+	// ReqHeaders maps headers from server to client
+	ReqHeaders map[string]*TypedHeader
+	// ResHeaders maps headers from client to server
+	ResHeaders map[string]*TypedHeader
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
@@ -578,12 +583,171 @@ func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*Endpoin
 	return ret, err
 }
 
+func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (map[string]string, error) {
+	// TODO define endpointConfigObj to avoid type assertion
+
+	headers, ok := endpointCfgObj[key]
+	if !ok {
+		return nil, errors.Errorf("unable to parse %q", key)
+	}
+	headersMap := make(map[string]string)
+	for key, val := range headers.(map[string]interface{}) {
+		switch value := val.(type) {
+		case string:
+			headersMap[key] = value
+		default:
+			return nil, errors.Errorf(
+				"unable to parse string %q in headers %q", value, headers)
+		}
+	}
+	return headersMap, nil
+}
+
+func sortedHeaders(headerMap map[string]*TypedHeader, filterRequired bool) []string {
+	var sortedArr = []string{}
+	for k, v := range headerMap {
+		if !filterRequired {
+			sortedArr = append(sortedArr, k)
+		} else if v.Field.Required {
+			sortedArr = append(sortedArr, k)
+		}
+	}
+	sort.Strings(sortedArr)
+	return sortedArr
+}
+
+func resolveHeaders(
+	espec *EndpointSpec,
+	endpointConfigObj map[string]interface{},
+	key string,
+) error {
+	var (
+		keyMap = map[string]string{
+			reqHeaders: "http.req.metadata",
+			resHeaders: "http.res.metadata",
+		}
+		headersMap    = make(map[string]*TypedHeader)
+		headerModels  []string
+		annotationKey = keyMap[key]
+	)
+	defer func() {
+		if key == reqHeaders {
+			espec.ReqHeaders = headersMap
+		} else {
+			espec.ResHeaders = headersMap
+		}
+	}()
+	transformMap, err := loadHeadersFromConfig(endpointConfigObj, key)
+	if err != nil {
+		return err
+	}
+	method, err := findMethodByName(espec.ThriftMethodName, espec.ModuleSpec.Services)
+	if err != nil {
+		return err
+	}
+	for ak, av := range method.CompiledThriftSpec.Annotations {
+		if strings.HasSuffix(ak, annotationKey) {
+			headerModels = strings.Split(av, ",")
+			break
+		}
+	}
+	if len(headerModels) < 1 && len(transformMap) > 0 {
+		return errors.Errorf("header models %q unconfigured for transform", key)
+	}
+	if len(headerModels) < 1 {
+		return nil
+	}
+	for _, m := range headerModels {
+		typedHeaders, err := resolveHeaderModels(espec.ModuleSpec, m)
+		if err != nil {
+			return err
+		}
+		for hk, hv := range typedHeaders {
+			headersMap[hk] = hv
+		}
+	}
+	// apply header transform
+	for k, v := range transformMap {
+		typedHeader, ok := headersMap[k]
+		if !ok {
+			return errors.Errorf("unable to find header %q to transform", k)
+		}
+		typedHeader.TransformTo = v
+	}
+	return nil
+}
+
+func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHeader, error) {
+	const (
+		headerPreix   = "headers"
+		httpRefSuffix = "http.ref"
+	)
+	loadModuleFromInclude := func(moduleName string) *compile.Module {
+		for pkgKey, pkg := range ms.CompiledModule.Includes {
+			if pkgKey == moduleName {
+				return pkg.Module
+			}
+		}
+		return nil
+	}
+	loadHeaderKeyFromField := func(field *compile.FieldSpec) *string {
+		for ak, av := range field.Annotations {
+			if avs := strings.Split(av, "."); len(avs) == 2 &&
+				avs[0] == headerPreix &&
+				strings.HasSuffix(ak, httpRefSuffix) {
+				headerKey := avs[1]
+				return &headerKey
+			}
+		}
+		return nil
+	}
+	loadHeadersFromCompiledModule := func(module *compile.Module, structName string) (map[string]*TypedHeader, error) {
+		var typeStruct *compile.StructSpec
+		var typedHeaders = make(map[string]*TypedHeader)
+		for tk, tv := range module.Types {
+			if ts, ok := tv.(*compile.StructSpec); tk == structName && ok {
+				typeStruct = ts
+				break
+			}
+		}
+		if typeStruct == nil {
+			return nil, errors.Errorf("unable to find typedHeaders %q", structName)
+		}
+		for _, field := range typeStruct.Fields {
+			headerKey := loadHeaderKeyFromField(field)
+			if headerKey == nil {
+				return nil, errors.Errorf("unable to find header key %q", field.Name)
+			}
+			typedHeaders[*headerKey] = &TypedHeader{
+				Name:        *headerKey,
+				TransformTo: *headerKey,
+				Field:       field,
+			}
+		}
+		return typedHeaders, nil
+	}
+	switch paths := strings.Split(modelPath, "."); len(paths) {
+	case 2:
+		moduleName := paths[0]
+		structName := paths[1]
+		module := loadModuleFromInclude(moduleName)
+		if module == nil {
+			return nil, errors.Errorf("missing module spec %q", moduleName)
+		}
+		return loadHeadersFromCompiledModule(module, structName)
+	default:
+		// TODO case 1:
+		// default header schema path to .
+		return nil, errors.Errorf(
+			"malformed header model %q, expecting <module>.<struct>", modelPath)
+	}
+}
+
 func augmentHTTPEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
-
 	testFixtures, err := testFixtures(endpointConfigObj)
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to parse test cases")
@@ -688,71 +852,18 @@ func augmentHTTPEndpointSpec(
 			PrettyOptions: prettyOpts,
 		})
 	}
+
 	espec.Middlewares = middlewares
 
-	reqHeaderMap := make(map[string]string)
-	m, ok := endpointConfigObj["reqHeaderMap"]
-	if !ok {
-		return nil, errors.Errorf(
-			"Unable to parse reqHeaderMap %s",
-			reqHeaderMap,
-		)
+	// augment request headers
+	if err := resolveHeaders(espec, endpointConfigObj, reqHeaders); err != nil {
+		return nil, err
 	}
-	// Do a deep cast to enforce a string -> string map
-	castMap := m.(map[string]interface{})
-	for key, value := range castMap {
-		switch value := value.(type) {
-		case string:
-			reqHeaderMap[key] = value
-		default:
-			return nil, errors.Errorf(
-				"Unable to parse string %s in reqHeaderMap %s",
-				value,
-				reqHeaderMap,
-			)
-		}
-	}
-	reqHeaderMapKeys := make([]string, len(reqHeaderMap))
-	i := 0
-	for k := range reqHeaderMap {
-		reqHeaderMapKeys[i] = k
-		i++
-	}
-	sort.Strings(reqHeaderMapKeys)
-	espec.ReqHeaderMap = reqHeaderMap
-	espec.ReqHeaderMapKeys = reqHeaderMapKeys
 
-	resHeaderMap := make(map[string]string)
-	m2, ok := endpointConfigObj["resHeaderMap"]
-	if !ok {
-		return nil, errors.Errorf(
-			"Unable to parse resHeaderMap %s",
-			resHeaderMap,
-		)
+	// augment response headers
+	if err := resolveHeaders(espec, endpointConfigObj, resHeaders); err != nil {
+		return nil, err
 	}
-	// Do a deep cast to enforce a string -> string map
-	castMap = m2.(map[string]interface{})
-	for key, value := range castMap {
-		switch value := value.(type) {
-		case string:
-			resHeaderMap[key] = value
-		default:
-			return nil, errors.Errorf(
-				"Unable to parse string %s in resHeaderMap %s",
-				value,
-				resHeaderMap,
-			)
-		}
-	}
-	resHeaderMapKeys := make([]string, len(resHeaderMap))
-	i = 0
-	for k := range resHeaderMap {
-		resHeaderMapKeys[i] = k
-		i++
-	}
-	sort.Strings(resHeaderMapKeys)
-	espec.ResHeaderMap = resHeaderMap
-	espec.ResHeaderMapKeys = resHeaderMapKeys
 
 	return espec, nil
 }

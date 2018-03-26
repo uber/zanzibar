@@ -27,23 +27,26 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.uber.org/thriftrw/compile"
 )
 
 // EndpointMeta saves meta data used to render an endpoint.
 type EndpointMeta struct {
-	Instance           *ModuleInstance
-	Spec               *EndpointSpec
-	GatewayPackageName string
-	IncludedPackages   []GoPackageImport
-	Method             *MethodSpec
-	ClientName         string
-	ClientID           string
-	ClientMethodName   string
-	WorkflowName       string
-	ReqHeaderMap       map[string]string
-	ReqHeaderMapKeys   []string
-	ResHeaderMap       map[string]string
-	ResHeaderMapKeys   []string
+	Instance               *ModuleInstance
+	Spec                   *EndpointSpec
+	GatewayPackageName     string
+	IncludedPackages       []GoPackageImport
+	Method                 *MethodSpec
+	ClientName             string
+	ClientID               string
+	ClientMethodName       string
+	WorkflowName           string
+	ReqHeaders             map[string]*TypedHeader
+	ReqHeadersKeys         []string
+	ReqRequiredHeadersKeys []string
+	ResHeaders             map[string]*TypedHeader
+	ResHeadersKeys         []string
+	ResRequiredHeadersKeys []string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -64,6 +67,8 @@ type EndpointTestMeta struct {
 	Instance           *ModuleInstance
 	Method             *MethodSpec
 	TestFixtures       map[string]*EndpointTestFixture `json:"testFixtures"`
+	ReqHeaders         map[string]*TypedHeader
+	ResHeaders         map[string]*TypedHeader
 	ClientName         string
 	ClientID           string
 	RelativePathToRoot string
@@ -875,28 +880,34 @@ func (g *EndpointGenerator) generateEndpointFile(
 		clientName = e.ClientSpec.ClientName
 	}
 
-	reqHeaderMap := make(map[string]string)
-	for k, v := range e.ReqHeaderMap {
-		reqHeaderMap[k] = v
+	// allow configured header to pass down to switch downstream service dynmamic
+	reqHeaders := e.ReqHeaders
+	if reqHeaders == nil {
+		reqHeaders = make(map[string]*TypedHeader)
 	}
-	reqHeaderMap[g.packageHelper.StagingReqHeader()] = g.packageHelper.StagingReqHeader()
-	reqHeaderMapKeys := append(e.ReqHeaderMapKeys, g.packageHelper.StagingReqHeader())
+	reqHeaders[g.packageHelper.StagingReqHeader()] = &TypedHeader{
+		Name:        g.packageHelper.StagingReqHeader(),
+		TransformTo: g.packageHelper.StagingReqHeader(),
+		Field:       &compile.FieldSpec{Required: false},
+	}
 
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
-		Instance:           instance,
-		Spec:               e,
-		GatewayPackageName: g.packageHelper.GoGatewayPackageName(),
-		IncludedPackages:   includedPackages,
-		Method:             method,
-		ReqHeaderMap:       reqHeaderMap,
-		ReqHeaderMapKeys:   reqHeaderMapKeys,
-		ResHeaderMap:       e.ResHeaderMap,
-		ResHeaderMapKeys:   e.ResHeaderMapKeys,
-		ClientID:           clientID,
-		ClientName:         clientName,
-		ClientMethodName:   e.ClientMethod,
-		WorkflowName:       workflowName,
+		Instance:               instance,
+		Spec:                   e,
+		GatewayPackageName:     g.packageHelper.GoGatewayPackageName(),
+		IncludedPackages:       includedPackages,
+		Method:                 method,
+		ReqHeaders:             reqHeaders,
+		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
+		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
+		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
+		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
+		ResHeaders:             e.ResHeaders,
+		ClientID:               clientID,
+		ClientName:             clientName,
+		ClientMethodName:       e.ClientMethod,
+		WorkflowName:           workflowName,
 	}
 
 	var endpoint []byte
@@ -962,6 +973,8 @@ func (g *EndpointGenerator) generateEndpointTestFile(
 		Instance:     instance,
 		Method:       method,
 		TestFixtures: e.TestFixtures,
+		ReqHeaders:   e.ReqHeaders,
+		ResHeaders:   e.ResHeaders,
 		ClientID:     e.ClientSpec.ClientID,
 	}
 

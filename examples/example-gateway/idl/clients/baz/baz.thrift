@@ -23,6 +23,7 @@ struct transHeaderType {
     6: optional UUID u5
     7: required string s6
 }
+struct HeaderSchema {}
 
 exception AuthErr {
     1: required string message
@@ -58,6 +59,13 @@ service SimpleService {
 
     transHeaderType transHeadersType(
         1: required transHeaderType req
+    ) throws (
+        1: AuthErr authErr
+        2: OtherAuthErr otherAuthErr
+    )
+
+    HeaderSchema headerSchema(
+        1: required HeaderSchema req
     ) throws (
         1: AuthErr authErr
         2: OtherAuthErr otherAuthErr

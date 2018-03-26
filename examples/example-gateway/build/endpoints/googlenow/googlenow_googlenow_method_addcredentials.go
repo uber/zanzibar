@@ -72,7 +72,7 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
+	if !req.CheckHeaders([]string{"X-Token", "X-Uuid"}) {
 		return
 	}
 	var requestBody endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args
@@ -89,6 +89,10 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
 	var headerOk bool
 	var headerValue string
+	headerValue, headerOk = req.Header.Get("X-Token")
+	if headerOk {
+		zfields = append(zfields, zap.String("X-Token", headerValue))
+	}
 	headerValue, headerOk = req.Header.Get("X-Uuid")
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Uuid", headerValue))
@@ -111,7 +115,6 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 		return
 
 	}
-	// TODO(sindelar): implement check headers on response
 
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
 }
@@ -135,6 +138,10 @@ func (w GoogleNowAddCredentialsEndpoint) Handle(
 
 	var ok bool
 	var h string
+	h, ok = reqHeaders.Get("X-Token")
+	if ok {
+		clientHeaders["X-Token"] = h
+	}
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
 		clientHeaders["X-Uuid"] = h

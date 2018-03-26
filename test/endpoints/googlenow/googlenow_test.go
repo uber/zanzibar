@@ -39,7 +39,7 @@ import (
 
 var benchBytes = []byte("{\"authCode\":\"abcdef\"}")
 var noAuthCodeBytes = []byte("{}")
-var headers map[string]string = map[string]string{
+var headers = map[string]string{
 	"X-Uuid":  "uuid",
 	"X-Token": "token",
 }
@@ -442,7 +442,7 @@ func TestGoogleNowMissingHeaders(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		`{"error":"Missing mandatory header: x-uuid"}`,
+		`{"error":"Missing mandatory header: X-Token"}`,
 		string(respBytes),
 	)
 }
@@ -490,7 +490,7 @@ func TestAddCredentialsMissingOneHeader(t *testing.T) {
 	}
 
 	assert.Equal(t,
-		`{"error":"Missing mandatory header: x-token"}`,
+		`{"error":"Missing mandatory header: X-Token"}`,
 		string(respBytes),
 	)
 }
@@ -518,7 +518,7 @@ func TestAddCredentialsHeaderMapping(t *testing.T) {
 			// Verify non-proxy headers aren't sent
 			assert.Equal(
 				t,
-				"",
+				"token",
 				r.Header.Get("X-Token"))
 			w.Header().Set("X-Uuid", "uuid")
 

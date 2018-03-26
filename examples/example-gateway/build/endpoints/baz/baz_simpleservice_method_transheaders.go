@@ -73,9 +73,6 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	if !req.CheckHeaders([]string{"x-uuid", "x-token"}) {
-		return
-	}
 	var requestBody endpointsBazBaz.SimpleService_TransHeaders_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return
@@ -93,6 +90,14 @@ func (h *SimpleServiceTransHeadersHandler) HandleRequest(
 	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
 	if headerOk {
 		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("token")
+	if headerOk {
+		zfields = append(zfields, zap.String("token", headerValue))
+	}
+	headerValue, headerOk = req.Header.Get("uuid")
+	if headerOk {
+		zfields = append(zfields, zap.String("uuid", headerValue))
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
@@ -152,6 +157,14 @@ func (w SimpleServiceTransHeadersEndpoint) Handle(
 	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
+	}
+	h, ok = reqHeaders.Get("token")
+	if ok {
+		clientHeaders["token"] = h
+	}
+	h, ok = reqHeaders.Get("uuid")
+	if ok {
+		clientHeaders["uuid"] = h
 	}
 
 	clientRespBody, _, err := w.Clients.Baz.TransHeaders(

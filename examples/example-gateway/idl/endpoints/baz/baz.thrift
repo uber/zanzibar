@@ -1,5 +1,7 @@
 namespace java com.uber.zanzibar.clients.baz
 
+include "../models/meta.thrift"
+
 typedef string UUID
 
 struct BazRequest {
@@ -20,6 +22,8 @@ struct TransStruct {
 }
 
 struct TransHeader {}
+
+struct HeaderSchema {}
 
 struct BazResponse {
   1: required string message
@@ -74,7 +78,19 @@ service SimpleService {
       zanzibar.http.status = "200"
       zanzibar.http.method = "POST"
       zanzibar.http.path = "/baz/trans-headers"
-      zanzibar.http.reqHeaders = "x-uuid,x-token"
+      zanzibar.http.req.metadata = "meta.Garply"
+  )
+
+  HeaderSchema headerSchema(
+      1: required HeaderSchema req
+  ) throws (
+      1: AuthErr authErr (zanzibar.http.status = "401")
+      2: OtherAuthErr otherAuthErr (zanzibar.http.status = "403")
+  ) (
+      zanzibar.http.status = "200"
+      zanzibar.http.method = "POST"
+      zanzibar.http.path = "/baz/header-schema"
+      zanzibar.http.req.metadata = "meta.Grault,meta.Fred"
   )
 
 
@@ -102,8 +118,8 @@ service SimpleService {
     zanzibar.http.method = "POST"
     zanzibar.http.path = "/baz/call"
     zanzibar.handler = "baz.call"
-    zanzibar.http.reqHeaders = "x-uuid,x-token"
-    zanzibar.http.resHeaders = "some-res-header"
+    zanzibar.http.req.metadata = "meta.Grault"
+    zanzibar.http.res.metadata = "meta.Thud"
   )
 
   // no request body

@@ -724,6 +724,63 @@ func (h *SimpleServiceCompareHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
+// SimpleServiceHeaderSchemaFunc is the handler function for "headerSchema" method of thrift service "SimpleService".
+type SimpleServiceHeaderSchemaFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_HeaderSchema_Args,
+) (*clientsBazBaz.HeaderSchema, map[string]string, error)
+
+// NewSimpleServiceHeaderSchemaHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceHeaderSchemaHandler(f SimpleServiceHeaderSchemaFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceHeaderSchemaHandler{f}
+}
+
+// SimpleServiceHeaderSchemaHandler handles the "headerSchema" method call of thrift service "SimpleService".
+type SimpleServiceHeaderSchemaHandler struct {
+	headerschema SimpleServiceHeaderSchemaFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceHeaderSchemaHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_HeaderSchema_Args
+	var res clientsBazBaz.SimpleService_HeaderSchema_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.headerschema(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for headerSchema returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		case *clientsBazBaz.OtherAuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for headerSchema returned non-nil error type *OtherAuthErr but nil value",
+				)
+			}
+			res.OtherAuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
 // SimpleServicePingFunc is the handler function for "ping" method of thrift service "SimpleService".
 type SimpleServicePingFunc func(
 	ctx context.Context,

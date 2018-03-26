@@ -1,4 +1,5 @@
 {
+	"omitempty": null,
 	"ThriftFile": "zanzibar/examples/example-gateway/idl/clients/bar/bar.thrift",
 	"WantAnnot": true,
 	"IsEndpoint": false,
