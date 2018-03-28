@@ -11,7 +11,7 @@
 	"testFixtures": {},
 	"middlewares": [],
 	"reqHeaderMap": {
-		"X-Uuid": "X-Uuid"
+		"X-Uuid": "x-uuid"
 	},
 	"resHeaderMap": {}
 }
