@@ -595,7 +595,7 @@ func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (m
 	for key, val := range headers.(map[string]interface{}) {
 		switch value := val.(type) {
 		case string:
-			headersMap[textproto.CanonicalMIMEHeaderKey(key)] = textproto.CanonicalMIMEHeaderKey(value)
+			headersMap[textproto.CanonicalMIMEHeaderKey(key)] = value
 		default:
 			return nil, errors.Errorf(
 				"unable to parse string %q in headers %q", value, headers)

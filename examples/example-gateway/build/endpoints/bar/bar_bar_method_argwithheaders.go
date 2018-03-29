@@ -143,7 +143,7 @@ func (w BarArgWithHeadersEndpoint) Handle(
 	var h string
 	h, ok = reqHeaders.Get("X-Uuid")
 	if ok {
-		clientHeaders["X-Uuid"] = h
+		clientHeaders["x-uuid"] = h
 	}
 	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
