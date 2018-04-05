@@ -1088,7 +1088,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 			if field.Required {
 				statements.appendf("if r%s == nil {", longFieldName)
-				// TODO: generate correct number of nils...
 				statements.append("\treturn nil, nil, errors.New(")
 				statements.appendf("\t\t\"The field %s is required\",",
 					longFieldName,
@@ -1115,6 +1114,11 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
 			hasQueryFields = true
+		}
+
+		if _, ok := realType.(*compile.ListSpec); ok {
+			// TODO: Return encoding statements for list-type
+			return false
 		}
 
 		if field.Required {
@@ -1215,6 +1219,11 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 
 		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
 		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
+			return false
+		}
+
+		if _, ok := realType.(*compile.ListSpec); ok {
+			// TODO: Return decoding statements for list-type
 			return false
 		}
 
