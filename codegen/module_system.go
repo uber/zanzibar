@@ -41,7 +41,7 @@ type EndpointMeta struct {
 	ClientName             string
 	ClientID               string
 	ClientMethodName       string
-	WorkflowName           string
+	WorkflowPkg            string
 	ReqHeaders             map[string]*TypedHeader
 	ReqHeadersKeys         []string
 	ReqRequiredHeadersKeys []string
@@ -860,6 +860,10 @@ func (g *EndpointGenerator) generateEndpointFile(
 	}
 
 	includedPackages := m.IncludedPackages
+	includedPackages = append(includedPackages, GoPackageImport{
+		PackageName: instance.PackageInfo.GeneratedPackagePath + "/workflow",
+		AliasName:   "workflow",
+	})
 	if e.WorkflowImportPath != "" {
 		includedPackages = append(includedPackages, GoPackageImport{
 			PackageName: e.WorkflowImportPath,
@@ -867,12 +871,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 		})
 	}
 
-	var workflowName string
-	if method.Downstream != nil {
-		workflowName = strings.Title(thriftServiceName) + strings.Title(method.Name) + "Endpoint"
-	} else {
-		workflowName = "custom" + strings.Title(m.PackageName) + "." +
-			strings.Title(method.Name) + "Endpoint"
+	workflowPkg := "workflow"
+	if method.Downstream == nil {
+		workflowPkg = "custom" + strings.Title(m.PackageName)
 	}
 
 	clientID := e.ClientID
@@ -909,7 +910,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ClientID:               clientID,
 		ClientName:             clientName,
 		ClientMethodName:       e.ClientMethod,
-		WorkflowName:           workflowName,
+		WorkflowPkg:            workflowPkg,
 	}
 
 	var endpoint []byte
@@ -935,6 +936,12 @@ func (g *EndpointGenerator) generateEndpointFile(
 	}
 
 	out[endpointFilePath] = endpoint
+
+	workflow, err := g.templates.ExecTemplate("workflow.tmpl", meta, g.packageHelper)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error executing workflow template")
+	}
+	out["workflow/"+endpointFilePath] = workflow
 
 	return meta, nil
 }

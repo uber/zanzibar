@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	workflow "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/.tmp_gen/endpoints/bar/module"
@@ -87,13 +87,9 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := BarHelloWorldEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewBarHelloWorldWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -116,77 +112,4 @@ func (h *BarHelloWorldHandler) HandleRequest(
 		return
 	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
-}
-
-// BarHelloWorldEndpoint calls thrift client Bar.Hello
-type BarHelloWorldEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w BarHelloWorldEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (string, zanzibar.Header, error) {
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Bar.Hello(
-		ctx, clientHeaders,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		case *clientsBarBar.BarException:
-			serverErr := convertHelloWorldBarException(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return "", nil, serverErr
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Bar"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return "", nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertBarHelloWorldClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertHelloWorldBarException(
-	clientError *clientsBarBar.BarException,
-) *endpointsBarBar.BarException {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBarBar.BarException{}
-	return serverError
-}
-
-func convertBarHelloWorldClientResponse(in string) string {
-	out := in
-
-	return out
 }

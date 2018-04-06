@@ -30,8 +30,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
@@ -85,13 +84,9 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServicePingEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewSimpleServicePingWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
@@ -99,63 +94,4 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
-}
-
-// SimpleServicePingEndpoint calls thrift client Baz.Ping
-type SimpleServicePingEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w SimpleServicePingEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (*endpointsBazBaz.BazResponse, zanzibar.Header, error) {
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Baz.Ping(
-		ctx, clientHeaders,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Baz"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertSimpleServicePingClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertSimpleServicePingClientResponse(in *clientsBazBase.BazResponse) *endpointsBazBaz.BazResponse {
-	out := &endpointsBazBaz.BazResponse{}
-
-	out.Message = string(in.Message)
-
-	return out
 }

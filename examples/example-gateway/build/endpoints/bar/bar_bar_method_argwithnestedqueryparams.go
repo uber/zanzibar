@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -167,13 +167,9 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := BarArgWithNestedQueryParamsEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewBarArgWithNestedQueryParamsWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
@@ -182,124 +178,4 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
-}
-
-// BarArgWithNestedQueryParamsEndpoint calls thrift client Bar.ArgWithNestedQueryParams
-type BarArgWithNestedQueryParamsEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w BarArgWithNestedQueryParamsEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args,
-) (*endpointsBarBar.BarResponse, zanzibar.Header, error) {
-	clientRequest := convertToArgWithNestedQueryParamsClientRequest(r)
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Bar.ArgWithNestedQueryParams(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Bar"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertBarArgWithNestedQueryParamsClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithNestedQueryParams_Args) *clientsBarBar.Bar_ArgWithNestedQueryParams_Args {
-	out := &clientsBarBar.Bar_ArgWithNestedQueryParams_Args{}
-
-	if in.Request != nil {
-		out.Request = &clientsBarBar.QueryParamsStruct{}
-		out.Request.Name = string(in.Request.Name)
-		out.Request.UserUUID = (*string)(in.Request.UserUUID)
-		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
-		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
-	} else {
-		out.Request = nil
-	}
-	if in.Opt != nil {
-		out.Opt = &clientsBarBar.QueryParamsOptsStruct{}
-		out.Opt.Name = string(in.Opt.Name)
-		out.Opt.UserUUID = (*string)(in.Opt.UserUUID)
-		out.Opt.AuthUUID = (*string)(in.Opt.AuthUUID)
-		out.Opt.AuthUUID2 = (*string)(in.Opt.AuthUUID2)
-	} else {
-		out.Opt = nil
-	}
-
-	return out
-}
-
-func convertBarArgWithNestedQueryParamsClientResponse(in *clientsBarBar.BarResponse) *endpointsBarBar.BarResponse {
-	out := &endpointsBarBar.BarResponse{}
-
-	out.StringField = string(in.StringField)
-	out.IntWithRange = int32(in.IntWithRange)
-	out.IntWithoutRange = int32(in.IntWithoutRange)
-	out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
-	for key1, value2 := range in.MapIntWithRange {
-		out.MapIntWithRange[endpointsBarBar.UUID(key1)] = int32(value2)
-	}
-	out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
-	for key3, value4 := range in.MapIntWithoutRange {
-		out.MapIntWithoutRange[key3] = int32(value4)
-	}
-	out.BinaryField = []byte(in.BinaryField)
-	var convertBarResponseHelper5 func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse)
-	convertBarResponseHelper5 = func(in *clientsBarBar.BarResponse) (out *endpointsBarBar.BarResponse) {
-		if in != nil {
-			out = &endpointsBarBar.BarResponse{}
-			out.StringField = string(in.StringField)
-			out.IntWithRange = int32(in.IntWithRange)
-			out.IntWithoutRange = int32(in.IntWithoutRange)
-			out.MapIntWithRange = make(map[endpointsBarBar.UUID]int32, len(in.MapIntWithRange))
-			for key6, value7 := range in.MapIntWithRange {
-				out.MapIntWithRange[endpointsBarBar.UUID(key6)] = int32(value7)
-			}
-			out.MapIntWithoutRange = make(map[string]int32, len(in.MapIntWithoutRange))
-			for key8, value9 := range in.MapIntWithoutRange {
-				out.MapIntWithoutRange[key8] = int32(value9)
-			}
-			out.BinaryField = []byte(in.BinaryField)
-			out.NextResponse = convertBarResponseHelper5(in.NextResponse)
-		} else {
-			out = nil
-		}
-		return
-	}
-	out.NextResponse = convertBarResponseHelper5(in.NextResponse)
-
-	return out
 }

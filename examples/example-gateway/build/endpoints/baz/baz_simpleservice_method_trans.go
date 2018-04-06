@@ -31,8 +31,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
@@ -93,13 +92,9 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServiceTransEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewSimpleServiceTransWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -123,159 +118,4 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
-}
-
-// SimpleServiceTransEndpoint calls thrift client Baz.Trans
-type SimpleServiceTransEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w SimpleServiceTransEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_Trans_Args,
-) (*endpointsBazBaz.TransStruct, zanzibar.Header, error) {
-	clientRequest := convertToTransClientRequest(r)
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Baz.Trans(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		case *clientsBazBaz.AuthErr:
-			serverErr := convertTransAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, serverErr
-
-		case *clientsBazBaz.OtherAuthErr:
-			serverErr := convertTransOtherAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, serverErr
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Baz"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertSimpleServiceTransClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertToTransClientRequest(in *endpointsBazBaz.SimpleService_Trans_Args) *clientsBazBaz.SimpleService_Trans_Args {
-	out := &clientsBazBaz.SimpleService_Trans_Args{}
-
-	if in.Arg1 != nil {
-		out.Arg1 = &clientsBazBase.TransStruct{}
-		out.Arg1.Message = string(in.Arg1.Message)
-		if in.Arg1.Driver != nil {
-			out.Arg1.Driver = &clientsBazBase.NestedStruct{}
-			out.Arg1.Driver.Msg = string(in.Arg1.Driver.Msg)
-			out.Arg1.Driver.Check = (*int32)(in.Arg1.Driver.Check)
-		} else {
-			out.Arg1.Driver = nil
-		}
-		if in.Arg1.Rider != nil {
-			out.Arg1.Rider = &clientsBazBase.NestedStruct{}
-			out.Arg1.Rider.Msg = string(in.Arg1.Rider.Msg)
-			out.Arg1.Rider.Check = (*int32)(in.Arg1.Rider.Check)
-		} else {
-			out.Arg1.Rider = nil
-		}
-	} else {
-		out.Arg1 = nil
-	}
-	if in.Arg2 != nil {
-		out.Arg2 = &clientsBazBase.TransStruct{}
-		out.Arg2.Message = string(in.Arg2.Message)
-		if in.Arg2.Driver != nil {
-			out.Arg2.Driver = &clientsBazBase.NestedStruct{}
-			out.Arg2.Driver.Msg = string(in.Arg2.Driver.Msg)
-			out.Arg2.Driver.Check = (*int32)(in.Arg2.Driver.Check)
-		} else {
-			out.Arg2.Driver = nil
-		}
-		if in.Arg2.Rider != nil {
-			out.Arg2.Rider = &clientsBazBase.NestedStruct{}
-			if in.Arg1 != nil && in.Arg1.Driver != nil {
-				out.Arg2.Rider.Msg = string(in.Arg1.Driver.Msg)
-			}
-			out.Arg2.Rider.Check = (*int32)(in.Arg2.Rider.Check)
-		} else {
-			out.Arg2.Rider = nil
-		}
-	} else {
-		out.Arg2 = nil
-	}
-
-	return out
-}
-
-func convertTransAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
-	return serverError
-}
-func convertTransOtherAuthErr(
-	clientError *clientsBazBaz.OtherAuthErr,
-) *endpointsBazBaz.OtherAuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.OtherAuthErr{}
-	return serverError
-}
-
-func convertSimpleServiceTransClientResponse(in *clientsBazBase.TransStruct) *endpointsBazBaz.TransStruct {
-	out := &endpointsBazBaz.TransStruct{}
-
-	out.Message = string(in.Message)
-	if in.Driver != nil {
-		out.Driver = &endpointsBazBaz.NestedStruct{}
-		out.Driver.Msg = string(in.Driver.Msg)
-		out.Driver.Check = (*int32)(in.Driver.Check)
-	} else {
-		out.Driver = nil
-	}
-	if in.Rider != nil {
-		out.Rider = &endpointsBazBaz.NestedStruct{}
-		out.Rider.Msg = string(in.Message)
-		out.Rider.Check = (*int32)(in.Rider.Check)
-	} else {
-		out.Rider = nil
-	}
-
-	return out
 }

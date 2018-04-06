@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
@@ -115,13 +115,9 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServiceCallEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewSimpleServiceCallWorkflow(h.Clients, req.Logger)
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -139,99 +135,4 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
-}
-
-// SimpleServiceCallEndpoint calls thrift client Baz.Call
-type SimpleServiceCallEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w SimpleServiceCallEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_Call_Args,
-) (zanzibar.Header, error) {
-	clientRequest := convertToCallClientRequest(r)
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Token")
-	if ok {
-		clientHeaders["X-Token"] = h
-	}
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		clientHeaders["X-Uuid"] = h
-	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	cliRespHeaders, err := w.Clients.Baz.Call(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		case *clientsBazBaz.AuthErr:
-			serverErr := convertCallAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, serverErr
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Baz"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
-
-	return resHeaders, nil
-}
-
-func convertToCallClientRequest(in *endpointsBazBaz.SimpleService_Call_Args) *clientsBazBaz.SimpleService_Call_Args {
-	out := &clientsBazBaz.SimpleService_Call_Args{}
-
-	if in.Arg != nil {
-		out.Arg = &clientsBazBaz.BazRequest{}
-		out.Arg.B1 = bool(in.Arg.B1)
-		out.Arg.S2 = string(in.Arg.S2)
-		out.Arg.I3 = int32(in.Arg.I3)
-	} else {
-		out.Arg = nil
-	}
-	out.I64Optional = (*int64)(in.I64Optional)
-	out.TestUUID = (*clientsBazBaz.UUID)(in.TestUUID)
-
-	return out
-}
-
-func convertCallAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
-	return serverError
 }

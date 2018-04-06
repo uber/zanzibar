@@ -32,6 +32,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 )
 
@@ -84,13 +86,9 @@ func (h *ServiceAFrontHelloHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := ServiceAFrontHelloEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewServiceAFrontHelloWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
@@ -103,61 +101,4 @@ func (h *ServiceAFrontHelloHandler) HandleRequest(
 		return
 	}
 	res.WriteJSONBytes(200, cliRespHeaders, bytes)
-}
-
-// ServiceAFrontHelloEndpoint calls thrift client Multi.HelloA
-type ServiceAFrontHelloEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w ServiceAFrontHelloEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (string, zanzibar.Header, error) {
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Multi.HelloA(
-		ctx, clientHeaders,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Multi"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return "", nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertServiceABackHelloClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertServiceABackHelloClientResponse(in string) string {
-	out := in
-
-	return out
 }

@@ -31,7 +31,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
@@ -111,13 +111,9 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServiceHeaderSchemaEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewSimpleServiceHeaderSchemaWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -141,122 +137,4 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	}
 
 	res.WriteJSON(200, cliRespHeaders, response)
-}
-
-// SimpleServiceHeaderSchemaEndpoint calls thrift client Baz.HeaderSchema
-type SimpleServiceHeaderSchemaEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w SimpleServiceHeaderSchemaEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r *endpointsBazBaz.SimpleService_HeaderSchema_Args,
-) (*endpointsBazBaz.HeaderSchema, zanzibar.Header, error) {
-	clientRequest := convertToHeaderSchemaClientRequest(r)
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("Auth")
-	if ok {
-		clientHeaders["Auth"] = h
-	}
-	h, ok = reqHeaders.Get("Content-Type")
-	if ok {
-		clientHeaders["Content-Type"] = h
-	}
-	h, ok = reqHeaders.Get("X-Token")
-	if ok {
-		clientHeaders["X-Token"] = h
-	}
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		clientHeaders["X-Uuid"] = h
-	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	clientRespBody, _, err := w.Clients.Baz.HeaderSchema(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		case *clientsBazBaz.AuthErr:
-			serverErr := convertHeaderSchemaAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, serverErr
-
-		case *clientsBazBaz.OtherAuthErr:
-			serverErr := convertHeaderSchemaOtherAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, serverErr
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Baz"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	response := convertSimpleServiceHeaderSchemaClientResponse(clientRespBody)
-	return response, resHeaders, nil
-}
-
-func convertToHeaderSchemaClientRequest(in *endpointsBazBaz.SimpleService_HeaderSchema_Args) *clientsBazBaz.SimpleService_HeaderSchema_Args {
-	out := &clientsBazBaz.SimpleService_HeaderSchema_Args{}
-
-	if in.Req != nil {
-		out.Req = &clientsBazBaz.HeaderSchema{}
-	} else {
-		out.Req = nil
-	}
-
-	return out
-}
-
-func convertHeaderSchemaAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
-	return serverError
-}
-func convertHeaderSchemaOtherAuthErr(
-	clientError *clientsBazBaz.OtherAuthErr,
-) *endpointsBazBaz.OtherAuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.OtherAuthErr{}
-	return serverError
-}
-
-func convertSimpleServiceHeaderSchemaClientResponse(in *clientsBazBaz.HeaderSchema) *endpointsBazBaz.HeaderSchema {
-	out := &endpointsBazBaz.HeaderSchema{}
-
-	return out
 }
