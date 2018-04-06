@@ -30,8 +30,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
@@ -86,13 +85,9 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := SimpleServiceSillyNoopEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewSimpleServiceSillyNoopWorkflow(h.Clients, req.Logger)
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		switch errValue := err.(type) {
 
@@ -116,83 +111,4 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(204, cliRespHeaders, nil)
-}
-
-// SimpleServiceSillyNoopEndpoint calls thrift client Baz.DeliberateDiffNoop
-type SimpleServiceSillyNoopEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w SimpleServiceSillyNoopEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	_, err := w.Clients.Baz.DeliberateDiffNoop(ctx, clientHeaders)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		case *clientsBazBaz.AuthErr:
-			serverErr := convertSillyNoopAuthErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, serverErr
-
-		case *clientsBazBase.ServerErr:
-			serverErr := convertSillyNoopServerErr(
-				errValue,
-			)
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, serverErr
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "Baz"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	return resHeaders, nil
-}
-
-func convertSillyNoopAuthErr(
-	clientError *clientsBazBaz.AuthErr,
-) *endpointsBazBaz.AuthErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.AuthErr{}
-	return serverError
-}
-func convertSillyNoopServerErr(
-	clientError *clientsBazBase.ServerErr,
-) *endpointsBazBaz.ServerErr {
-	// TODO: Add error fields mapping here.
-	serverError := &endpointsBazBaz.ServerErr{}
-	return serverError
 }

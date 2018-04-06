@@ -30,6 +30,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
@@ -93,13 +95,9 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := GoogleNowCheckCredentialsEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewGoogleNowCheckCredentialsWorkflow(h.Clients, req.Logger)
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
@@ -107,62 +105,4 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
-}
-
-// GoogleNowCheckCredentialsEndpoint calls thrift client GoogleNow.CheckCredentials
-type GoogleNowCheckCredentialsEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w GoogleNowCheckCredentialsEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Token")
-	if ok {
-		clientHeaders["X-Token"] = h
-	}
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		clientHeaders["X-Uuid"] = h
-	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "GoogleNow"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
-
-	return resHeaders, nil
 }

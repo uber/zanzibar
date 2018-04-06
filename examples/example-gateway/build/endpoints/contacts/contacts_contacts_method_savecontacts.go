@@ -94,13 +94,9 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := customContacts.SaveContactsEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := customContacts.NewContactsSaveContactsWorkflow(h.Clients, req.Logger)
 
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return

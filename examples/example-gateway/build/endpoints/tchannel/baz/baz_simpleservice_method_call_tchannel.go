@@ -86,10 +86,7 @@ func (h *SimpleServiceCallHandler) Handle(
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
-	workflow := customBaz.CallEndpoint{
-		Clients: h.Clients,
-		Logger:  h.endpoint.Logger,
-	}
+	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Clients, h.endpoint.Logger)
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
@@ -128,4 +125,13 @@ func (h *SimpleServiceCallHandler) Handle(
 	}
 
 	return err == nil, &res, resHeaders, nil
+}
+
+// SimpleServiceCallWorkflow defines the interface for SimpleServiceCallHandler workflow
+type SimpleServiceCallWorkflow interface {
+	Handle(
+		ctx context.Context,
+		reqHeaders zanzibar.Header,
+		r *endpointsTchannelBazBaz.SimpleService_Call_Args,
+	) (zanzibar.Header, error)
 }

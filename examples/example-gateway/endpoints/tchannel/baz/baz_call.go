@@ -24,20 +24,33 @@ import (
 	"context"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
 	clientBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	"github.com/uber/zanzibar/runtime"
+
 	"go.uber.org/zap"
 )
 
-// CallEndpoint ...
-type CallEndpoint struct {
+// NewSimpleServiceCallWorkflow ...
+func NewSimpleServiceCallWorkflow(
+	clients *module.ClientDependencies,
+	logger *zap.Logger,
+) workflow.SimpleServiceCallWorkflow {
+	return &Workflow{
+		Clients: clients,
+		Logger:  logger,
+	}
+}
+
+// Workflow ...
+type Workflow struct {
 	Clients *module.ClientDependencies
 	Logger  *zap.Logger
 }
 
 // Handle ...
-func (w CallEndpoint) Handle(
+func (w Workflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_Call_Args,

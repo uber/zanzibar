@@ -18,10 +18,12 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-{{$workflow := .WorkflowName -}}
-{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
-{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-{{$genCodePkg := .Method.GenCodePkgName -}}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $handlerName := printf "%sHandler"  $serviceMethod }}
+{{- $genCodePkg := .Method.GenCodePkgName }}
+{{- $workflowPkg := .WorkflowPkg }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
@@ -78,10 +80,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{end -}}
 
-	workflow := {{$workflow}}{
-		Clients: h.Clients,
-		Logger:  h.endpoint.Logger,
-	}
+	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Clients, h.endpoint.Logger)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
@@ -144,6 +143,30 @@ func (h *{{$handlerName}}) Handle(
 	{{- end}}
 
 	return err == nil, &res, resHeaders, nil
+}
+
+// {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
+type {{$workflowInterface}} interface {
+Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error)
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error)
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{- end}}
 }
 
 {{end -}}

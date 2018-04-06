@@ -20,6 +20,7 @@
 // codegen/templates/tchannel_client.tmpl
 // codegen/templates/tchannel_client_test_server.tmpl
 // codegen/templates/tchannel_endpoint.tmpl
+// codegen/templates/workflow.tmpl
 // DO NOT EDIT!
 
 package templates
@@ -214,7 +215,6 @@ var _endpointTmpl = []byte(`{{/* template to render gateway http endpoint code *
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
 
-{{- $workflow := .WorkflowName }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
@@ -223,12 +223,13 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
-{{- $handlerName := printf "%sHandler"  $serviceMethod }}
-{{- $responseType := .Method.ResponseType }}
+{{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
 {{- $handleId := .Spec.HandleID }}
 {{- $middlewares := .Spec.Middlewares }}
+{{- $workflowPkg := .WorkflowPkg }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 
 import (
 	"context"
@@ -362,20 +363,16 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- end}}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := {{$workflow}}{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Clients, req.Logger)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
@@ -420,186 +417,6 @@ func (h *{{$handlerName}}) HandleRequest(
 }
 
 {{end -}}
-
-{{- if .Method.Downstream }}
-{{- $method := .Method -}}
-{{- with .Method -}}
-{{- $methodName := title .Name }}
-{{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientMethod := .DownstreamMethod -}}
-{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
-{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientExceptions := .DownstreamMethod.Exceptions -}}
-
-// {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
-type {{$workflow}} struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w {{$workflow}}) Handle(
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
-{{else if eq .RequestType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error) {
-{{else if eq .ResponseType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) (zanzibar.Header, error) {
-{{else}}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error) {
-{{- end}}
-	{{- if ne .RequestType "" -}}
-	clientRequest := convertTo{{title .Name}}ClientRequest(r)
-	{{end}}
-	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
-	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
-	{{end}}
-	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
-	var ok bool
-	var h string
-	{{- end -}}
-	{{range $i, $k := $reqHeaderMapKeys}}
-	h, ok = reqHeaders.Get("{{$k}}")
-	if ok {
-		{{- $typedHeader := index $reqHeaderMap $k -}}
-		clientHeaders["{{$typedHeader.TransformTo}}"] = h
-	}
-	{{- end}}
-	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
-		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
-		{{- end }}
-	{{else if eq $clientReqType ""}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
-		)
-		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
-		)
-		{{- end }}
-	{{else if eq $clientResType ""}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{- end }}
-	{{else}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{- end }}
-	{{end -}}
-
-	{{- $responseType := .ResponseType }}
-	if err != nil {
-		switch errValue := err.(type) {
-			{{range $idx, $cException := $clientExceptions}}
-			case *{{$cException.Type}}:
-				serverErr := convert{{$methodName}}{{title $cException.Name}}(
-					errValue,
-				)
-				// TODO(sindelar): Consider returning partial headers
-				{{if eq $responseType ""}}
-				return nil, serverErr
-				{{else if eq $responseType "string" }}
-				return "", nil, serverErr
-				{{else}}
-				return nil, nil, serverErr
-				{{end}}
-			{{end}}
-			default:
-				w.Logger.Warn("Could not make client request",
-					zap.Error(errValue),
-					zap.String("client", "{{$clientName}}"),
-				)
-
-				// TODO(sindelar): Consider returning partial headers
-				{{if eq $responseType ""}}
-				return nil, err
-				{{else if eq $responseType "string" }}
-				return "", nil, err
-				{{else}}
-				return nil, nil, err
-				{{end}}
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-	{{range $i, $k := $resHeaderMapKeys}}
-	{{- $resHeaderVal := index $resHeaderMap $k}}
-	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
-	{{- end}}
-
-	{{if eq .ResponseType "" -}}
-	return resHeaders, nil
-	{{- else -}}
-	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-	return response, resHeaders, nil
-	{{- end -}}
-}
-
-{{if and (ne .RequestType "") (ne $clientReqType "") -}}
-{{ range $key, $line := $method.ConvertRequestGoStatements -}}
-{{$line}}
-{{ end }}
-{{end -}}
-
-{{- $exceptionIndex := .ExceptionsIndex }}
-{{range $idx, $cException := $clientExceptions}}
-{{- $sException := index $exceptionIndex $cException.Name -}}
-
-func convert{{$methodName}}{{title $cException.Name}}(
-	clientError *{{$cException.Type}},
-) *{{$sException.Type}} {
-	// TODO: Add error fields mapping here.
-	serverError := &{{$sException.Type}}{}
-	return serverError
-}
-{{end}}
-
-{{if and (ne .ResponseType "") (ne $clientResType "") -}}
-{{ range $key, $line := $method.ConvertResponseGoStatements -}}
-{{$line}}
-{{ end }}
-
-{{end -}}
-
-{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
-{{ range $key, $line := $method.PropagateHeadersGoStatements -}}
-{{$line}}
-{{ end }}
-{{end -}}
-
-{{end -}}
-{{end -}}
 `)
 
 func endpointTmplBytes() ([]byte, error) {
@@ -612,7 +429,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 11145, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 5740, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2484,10 +2301,12 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
-{{$workflow := .WorkflowName -}}
-{{$serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) -}}
-{{$handlerName := printf "%sHandler"  $serviceMethod -}}
-{{$genCodePkg := .Method.GenCodePkgName -}}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $handlerName := printf "%sHandler"  $serviceMethod }}
+{{- $genCodePkg := .Method.GenCodePkgName }}
+{{- $workflowPkg := .WorkflowPkg }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
@@ -2544,10 +2363,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{end -}}
 
-	workflow := {{$workflow}}{
-		Clients: h.Clients,
-		Logger:  h.endpoint.Logger,
-	}
+	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Clients, h.endpoint.Logger)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
@@ -2612,6 +2428,30 @@ func (h *{{$handlerName}}) Handle(
 	return err == nil, &res, resHeaders, nil
 }
 
+// {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
+type {{$workflowInterface}} interface {
+Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error)
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error)
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{- end}}
+}
+
 {{end -}}
 `)
 
@@ -2625,7 +2465,271 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 4593, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5355, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _workflowTmpl = []byte(`{{/* template to render gateway workflow interface code */ -}}
+{{- $instance := .Instance }}
+package workflow
+
+{{- $reqHeaderMap := .ReqHeaders }}
+{{- $reqHeaderMapKeys := .ReqHeadersKeys }}
+{{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
+{{- $resHeaderMap := .ResHeaders }}
+{{- $resHeaderMapKeys := .ResHeadersKeys }}
+{{- $clientName := title .ClientName }}
+{{- $clientMethodName := title .ClientMethodName }}
+{{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $workflowStruct := camel $workflowInterface }}
+
+import (
+	"context"
+
+	zanzibar "github.com/uber/zanzibar/runtime"
+
+	{{range $idx, $pkg := .IncludedPackages -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end -}}
+
+	{{if .Method.Downstream }}
+	{{- range $idx, $pkg := .Method.Downstream.IncludedPackages -}}
+	{{$file := basePath $pkg.PackageName -}}
+	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
+	{{end}}
+	{{- end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+)
+
+{{with .Method -}}
+// {{$workflowInterface}} defines the interface for {{$serviceMethod}} workflow
+type {{$workflowInterface}} interface {
+Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error)
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error)
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error)
+{{- end}}
+}
+
+{{end -}}
+
+{{- if .Method.Downstream }}
+{{- $method := .Method -}}
+{{- with .Method -}}
+{{- $methodName := title .Name }}
+{{- $clientPackage := .Downstream.PackageName -}}
+{{- $clientMethod := .DownstreamMethod -}}
+{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
+{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
+{{- $clientExceptions := .DownstreamMethod.Exceptions -}}
+
+// New{{$workflowInterface}} creates a workflow
+func New{{$workflowInterface}}(clients *module.ClientDependencies, logger *zap.Logger) {{$workflowInterface}} {
+	return &{{$workflowStruct}}{
+		Clients: clients,
+		Logger:  logger,
+	}
+}
+
+// {{$workflowStruct}} calls thrift client {{$clientName}}.{{$clientMethodName}}
+type {{$workflowStruct}} struct {
+	Clients *module.ClientDependencies
+	Logger  *zap.Logger
+}
+
+// Handle calls thrift client.
+func (w {{$workflowStruct}}) Handle(
+{{- if and (eq .RequestType "") (eq .ResponseType "") }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) (zanzibar.Header, error) {
+{{else if eq .RequestType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{else if eq .ResponseType "" }}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) (zanzibar.Header, error) {
+{{else}}
+	ctx context.Context,
+	reqHeaders zanzibar.Header,
+	r {{.RequestType}},
+) ({{.ResponseType}}, zanzibar.Header, error) {
+{{- end}}
+	{{- if ne .RequestType "" -}}
+	clientRequest := convertTo{{title .Name}}ClientRequest(r)
+	{{end}}
+	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
+	{{end}}
+	clientHeaders := map[string]string{}
+	{{if (ne (len $reqHeaderMapKeys) 0) }}
+	var ok bool
+	var h string
+	{{- end -}}
+	{{range $i, $k := $reqHeaderMapKeys}}
+	h, ok = reqHeaders.Get("{{$k}}")
+	if ok {
+		{{- $typedHeader := index $reqHeaderMap $k -}}
+		clientHeaders["{{$typedHeader.TransformTo}}"] = h
+	}
+	{{- end}}
+	{{if and (eq $clientReqType "") (eq $clientResType "")}}
+		{{if (eq (len $resHeaderMap) 0) -}}
+		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		{{else}}
+		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
+		{{- end }}
+	{{else if eq $clientReqType ""}}
+		{{if (eq (len $resHeaderMap) 0) -}}
+		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders,
+		)
+		{{else}}
+		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders,
+		)
+		{{- end }}
+	{{else if eq $clientResType ""}}
+		{{if (eq (len $resHeaderMap) 0) -}}
+		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{else}}
+		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{- end }}
+	{{else}}
+		{{if (eq (len $resHeaderMap) 0) -}}
+		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{else}}
+		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
+			ctx, clientHeaders, clientRequest,
+		)
+		{{- end }}
+	{{end -}}
+
+	{{- $responseType := .ResponseType }}
+	if err != nil {
+		switch errValue := err.(type) {
+			{{range $idx, $cException := $clientExceptions}}
+			case *{{$cException.Type}}:
+				serverErr := convert{{$methodName}}{{title $cException.Name}}(
+					errValue,
+				)
+				// TODO(sindelar): Consider returning partial headers
+				{{if eq $responseType ""}}
+				return nil, serverErr
+				{{else if eq $responseType "string" }}
+				return "", nil, serverErr
+				{{else}}
+				return nil, nil, serverErr
+				{{end}}
+			{{end}}
+			default:
+				w.Logger.Warn("Could not make client request",
+					zap.Error(errValue),
+					zap.String("client", "{{$clientName}}"),
+				)
+
+				// TODO(sindelar): Consider returning partial headers
+				{{if eq $responseType ""}}
+				return nil, err
+				{{else if eq $responseType "string" }}
+				return "", nil, err
+				{{else}}
+				return nil, nil, err
+				{{end}}
+		}
+	}
+
+	// Filter and map response headers from client to server response.
+
+	// TODO: Add support for TChannel Headers with a switch here
+	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{range $i, $k := $resHeaderMapKeys}}
+	{{- $resHeaderVal := index $resHeaderMap $k}}
+	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
+	{{- end}}
+
+	{{if eq .ResponseType "" -}}
+	return resHeaders, nil
+	{{- else -}}
+	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
+	return response, resHeaders, nil
+	{{- end -}}
+}
+
+{{if and (ne .RequestType "") (ne $clientReqType "") -}}
+{{ range $key, $line := $method.ConvertRequestGoStatements -}}
+{{$line}}
+{{ end }}
+{{end -}}
+
+{{- $exceptionIndex := .ExceptionsIndex }}
+{{range $idx, $cException := $clientExceptions}}
+{{- $sException := index $exceptionIndex $cException.Name -}}
+
+func convert{{$methodName}}{{title $cException.Name}}(
+	clientError *{{$cException.Type}},
+) *{{$sException.Type}} {
+	// TODO: Add error fields mapping here.
+	serverError := &{{$sException.Type}}{}
+	return serverError
+}
+{{end}}
+
+{{if and (ne .ResponseType "") (ne $clientResType "") -}}
+{{ range $key, $line := $method.ConvertResponseGoStatements -}}
+{{$line}}
+{{ end }}
+
+{{end -}}
+
+{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
+{{ range $key, $line := $method.PropagateHeadersGoStatements -}}
+{{$line}}
+{{ end }}
+{{end -}}
+
+{{end -}}
+{{end -}}
+`)
+
+func workflowTmplBytes() ([]byte, error) {
+	return _workflowTmpl, nil
+}
+
+func workflowTmpl() (*asset, error) {
+	bytes, err := workflowTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7335, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2702,6 +2806,7 @@ var _bindata = map[string]func() (*asset, error){
 	"tchannel_client.tmpl":               tchannel_clientTmpl,
 	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
 	"tchannel_endpoint.tmpl":             tchannel_endpointTmpl,
+	"workflow.tmpl":                      workflowTmpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -2765,6 +2870,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"tchannel_client.tmpl":               {tchannel_clientTmpl, map[string]*bintree{}},
 	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},
 	"tchannel_endpoint.tmpl":             {tchannel_endpointTmpl, map[string]*bintree{}},
+	"workflow.tmpl":                      {workflowTmpl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

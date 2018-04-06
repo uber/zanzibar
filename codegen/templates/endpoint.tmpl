@@ -2,7 +2,6 @@
 {{- $instance := .Instance }}
 package {{$instance.PackageInfo.PackageName}}
 
-{{- $workflow := .WorkflowName }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
@@ -11,12 +10,13 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $resHeaderRequiredKeys := .ResRequiredHeadersKeys }}
 {{- $clientName := title .ClientName }}
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
-{{- $handlerName := printf "%sHandler"  $serviceMethod }}
-{{- $responseType := .Method.ResponseType }}
+{{- $handlerName := printf "%sHandler" $serviceMethod }}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
 {{- $handleId := .Spec.HandleID }}
 {{- $middlewares := .Spec.Middlewares }}
+{{- $workflowPkg := .WorkflowPkg }}
+{{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 
 import (
 	"context"
@@ -150,20 +150,16 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- end}}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := {{$workflow}}{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Clients, req.Logger)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .RequestType ""}}
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	{{else if eq .ResponseType ""}}
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{else}}
-	response, cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{end -}}
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
@@ -207,184 +203,4 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{- end }}
 }
 
-{{end -}}
-
-{{- if .Method.Downstream }}
-{{- $method := .Method -}}
-{{- with .Method -}}
-{{- $methodName := title .Name }}
-{{- $clientPackage := .Downstream.PackageName -}}
-{{- $clientMethod := .DownstreamMethod -}}
-{{- $clientReqType := fullTypeName ($clientMethod).RequestType ($clientPackage) -}}
-{{- $clientResType := fullTypeName  ($clientMethod).ResponseType ($clientPackage) -}}
-{{- $clientExceptions := .DownstreamMethod.Exceptions -}}
-
-// {{$workflow}} calls thrift client {{$clientName}}.{{$clientMethodName}}
-type {{$workflow}} struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w {{$workflow}}) Handle(
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error) {
-{{else if eq .RequestType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error) {
-{{else if eq .ResponseType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) (zanzibar.Header, error) {
-{{else}}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error) {
-{{- end}}
-	{{- if ne .RequestType "" -}}
-	clientRequest := convertTo{{title .Name}}ClientRequest(r)
-	{{end}}
-	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
-	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
-	{{end}}
-	clientHeaders := map[string]string{}
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
-	var ok bool
-	var h string
-	{{- end -}}
-	{{range $i, $k := $reqHeaderMapKeys}}
-	h, ok = reqHeaders.Get("{{$k}}")
-	if ok {
-		{{- $typedHeader := index $reqHeaderMap $k -}}
-		clientHeaders["{{$typedHeader.TransformTo}}"] = h
-	}
-	{{- end}}
-	{{if and (eq $clientReqType "") (eq $clientResType "")}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
-		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(ctx, clientHeaders)
-		{{- end }}
-	{{else if eq $clientReqType ""}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
-		)
-		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders,
-		)
-		{{- end }}
-	{{else if eq $clientResType ""}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		_, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{else}}
-		cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{- end }}
-	{{else}}
-		{{if (eq (len $resHeaderMap) 0) -}}
-		clientRespBody, _, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{else}}
-		clientRespBody, cliRespHeaders, err := w.Clients.{{$clientName}}.{{$clientMethodName}}(
-			ctx, clientHeaders, clientRequest,
-		)
-		{{- end }}
-	{{end -}}
-
-	{{- $responseType := .ResponseType }}
-	if err != nil {
-		switch errValue := err.(type) {
-			{{range $idx, $cException := $clientExceptions}}
-			case *{{$cException.Type}}:
-				serverErr := convert{{$methodName}}{{title $cException.Name}}(
-					errValue,
-				)
-				// TODO(sindelar): Consider returning partial headers
-				{{if eq $responseType ""}}
-				return nil, serverErr
-				{{else if eq $responseType "string" }}
-				return "", nil, serverErr
-				{{else}}
-				return nil, nil, serverErr
-				{{end}}
-			{{end}}
-			default:
-				w.Logger.Warn("Could not make client request",
-					zap.Error(errValue),
-					zap.String("client", "{{$clientName}}"),
-				)
-
-				// TODO(sindelar): Consider returning partial headers
-				{{if eq $responseType ""}}
-				return nil, err
-				{{else if eq $responseType "string" }}
-				return "", nil, err
-				{{else}}
-				return nil, nil, err
-				{{end}}
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-	{{range $i, $k := $resHeaderMapKeys}}
-	{{- $resHeaderVal := index $resHeaderMap $k}}
-	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
-	{{- end}}
-
-	{{if eq .ResponseType "" -}}
-	return resHeaders, nil
-	{{- else -}}
-	response := convert{{.DownstreamService}}{{title .Name}}ClientResponse(clientRespBody)
-	return response, resHeaders, nil
-	{{- end -}}
-}
-
-{{if and (ne .RequestType "") (ne $clientReqType "") -}}
-{{ range $key, $line := $method.ConvertRequestGoStatements -}}
-{{$line}}
-{{ end }}
-{{end -}}
-
-{{- $exceptionIndex := .ExceptionsIndex }}
-{{range $idx, $cException := $clientExceptions}}
-{{- $sException := index $exceptionIndex $cException.Name -}}
-
-func convert{{$methodName}}{{title $cException.Name}}(
-	clientError *{{$cException.Type}},
-) *{{$sException.Type}} {
-	// TODO: Add error fields mapping here.
-	serverError := &{{$sException.Type}}{}
-	return serverError
-}
-{{end}}
-
-{{if and (ne .ResponseType "") (ne $clientResType "") -}}
-{{ range $key, $line := $method.ConvertResponseGoStatements -}}
-{{$line}}
-{{ end }}
-
-{{end -}}
-
-{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
-{{ range $key, $line := $method.PropagateHeadersGoStatements -}}
-{{$line}}
-{{ end }}
-{{end -}}
-
-{{end -}}
 {{end -}}

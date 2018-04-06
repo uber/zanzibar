@@ -31,7 +31,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
@@ -103,13 +103,9 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
-	workflow := GoogleNowAddCredentialsEndpoint{
-		Clients: h.Clients,
-		Logger:  req.Logger,
-		Request: req,
-	}
+	w := workflow.NewGoogleNowAddCredentialsWorkflow(h.Clients, req.Logger)
 
-	cliRespHeaders, err := workflow.Handle(ctx, req.Header, &requestBody)
+	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {
 		res.SendError(500, "Unexpected server error", err)
 		return
@@ -117,74 +113,4 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 
 	res.WriteJSONBytes(202, cliRespHeaders, nil)
-}
-
-// GoogleNowAddCredentialsEndpoint calls thrift client GoogleNow.AddCredentials
-type GoogleNowAddCredentialsEndpoint struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
-	Request *zanzibar.ServerHTTPRequest
-}
-
-// Handle calls thrift client.
-func (w GoogleNowAddCredentialsEndpoint) Handle(
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args,
-) (zanzibar.Header, error) {
-	clientRequest := convertToAddCredentialsClientRequest(r)
-
-	clientHeaders := map[string]string{}
-
-	var ok bool
-	var h string
-	h, ok = reqHeaders.Get("X-Token")
-	if ok {
-		clientHeaders["X-Token"] = h
-	}
-	h, ok = reqHeaders.Get("X-Uuid")
-	if ok {
-		clientHeaders["X-Uuid"] = h
-	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
-
-	cliRespHeaders, err := w.Clients.GoogleNow.AddCredentials(
-		ctx, clientHeaders, clientRequest,
-	)
-
-	if err != nil {
-		switch errValue := err.(type) {
-
-		default:
-			w.Logger.Warn("Could not make client request",
-				zap.Error(errValue),
-				zap.String("client", "GoogleNow"),
-			)
-
-			// TODO(sindelar): Consider returning partial headers
-
-			return nil, err
-
-		}
-	}
-
-	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
-	resHeaders := zanzibar.ServerHTTPHeader{}
-
-	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
-
-	return resHeaders, nil
-}
-
-func convertToAddCredentialsClientRequest(in *endpointsGooglenowGooglenow.GoogleNow_AddCredentials_Args) *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args {
-	out := &clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args{}
-
-	out.AuthCode = string(in.AuthCode)
-
-	return out
 }
