@@ -29,9 +29,10 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SimpleServiceHeaderSchemaWorkflow defines the interface for SimpleServiceHeaderSchema workflow

@@ -29,9 +29,10 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarHelloWorldWorkflow defines the interface for BarHelloWorld workflow

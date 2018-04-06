@@ -28,6 +28,8 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 	{{- end}}
+
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
 
 {{with .Method -}}
