@@ -165,6 +165,7 @@ service Bar {
     BarResponse argWithQueryParams(
         1: required string name
         2: optional string userUUID
+        3: optional list<string> tags
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"

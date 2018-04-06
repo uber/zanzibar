@@ -14,9 +14,36 @@ import (
 //
 // The arguments for argWithQueryParams are sent and received over the wire as this struct.
 type Bar_ArgWithQueryParams_Args struct {
-	Name     string  `json:"name,required"`
-	UserUUID *string `json:"userUUID,omitempty"`
+	Name     string   `json:"name,required"`
+	UserUUID *string  `json:"userUUID,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
 }
+
+type _List_String_ValueList []string
+
+func (v _List_String_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := wire.NewValueString(x), error(nil)
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_String_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_String_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_List_String_ValueList) Close() {}
 
 // ToWire translates a Bar_ArgWithQueryParams_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
@@ -35,7 +62,7 @@ type Bar_ArgWithQueryParams_Args struct {
 //   }
 func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -55,8 +82,34 @@ func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 2, Value: w}
 		i++
 	}
+	if v.Tags != nil {
+		w, err = wire.NewValueList(_List_String_ValueList(v.Tags)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _List_String_Read(l wire.ValueList) ([]string, error) {
+	if l.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+
+	o := make([]string, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := x.GetString(), error(nil)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
 }
 
 // FromWire deserializes a Bar_ArgWithQueryParams_Args struct from its Thrift-level
@@ -101,6 +154,14 @@ func (v *Bar_ArgWithQueryParams_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 3:
+			if field.Value.Type() == wire.TList {
+				v.Tags, err = _List_String_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -118,7 +179,7 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
@@ -126,8 +187,27 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 		fields[i] = fmt.Sprintf("UserUUID: %v", *(v.UserUUID))
 		i++
 	}
+	if v.Tags != nil {
+		fields[i] = fmt.Sprintf("Tags: %v", v.Tags)
+		i++
+	}
 
 	return fmt.Sprintf("Bar_ArgWithQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_String_Equals(lhs, rhs []string) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !(lv == rv) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Equals returns true if all the fields of this Bar_ArgWithQueryParams_Args match the
@@ -139,6 +219,9 @@ func (v *Bar_ArgWithQueryParams_Args) Equals(rhs *Bar_ArgWithQueryParams_Args) b
 		return false
 	}
 	if !_String_EqualsPtr(v.UserUUID, rhs.UserUUID) {
+		return false
+	}
+	if !((v.Tags == nil && rhs.Tags == nil) || (v.Tags != nil && rhs.Tags != nil && _List_String_Equals(v.Tags, rhs.Tags))) {
 		return false
 	}
 
@@ -179,6 +262,7 @@ var Bar_ArgWithQueryParams_Helper = struct {
 	Args func(
 		name string,
 		userUUID *string,
+		tags []string,
 	) *Bar_ArgWithQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -220,10 +304,12 @@ func init() {
 	Bar_ArgWithQueryParams_Helper.Args = func(
 		name string,
 		userUUID *string,
+		tags []string,
 	) *Bar_ArgWithQueryParams_Args {
 		return &Bar_ArgWithQueryParams_Args{
 			Name:     name,
 			UserUUID: userUUID,
+			Tags:     tags,
 		}
 	}
 
