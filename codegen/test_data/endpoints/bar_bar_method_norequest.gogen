@@ -73,17 +73,17 @@ func (h *BarNoRequestHandler) HandleRequest(
 ) {
 
 	// log endpoint request to downstream services
-	zfields := []zapcore.Field{
-		zap.String("endpoint", h.endpoint.EndpointName),
+	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		for _, k := range req.Header.Keys() {
+			if val, ok := req.Header.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
-
-	var headerOk bool
-	var headerValue string
-	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
-	if headerOk {
-		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
-	}
-	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	w := workflow.NewBarNoRequestWorkflow(h.Clients, req.Logger)
 

@@ -25,6 +25,7 @@ package bazendpoint
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -81,39 +82,41 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 	}
 
 	// log endpoint request to downstream services
-	zfields := []zapcore.Field{
-		zap.String("endpoint", h.endpoint.EndpointName),
+	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", req.GetRawBody())))
+		for _, k := range req.Header.Keys() {
+			if val, ok := req.Header.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
-
-	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
-	var headerOk bool
-	var headerValue string
-	headerValue, headerOk = req.Header.Get("Auth")
-	if headerOk {
-		zfields = append(zfields, zap.String("Auth", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("Content-Type")
-	if headerOk {
-		zfields = append(zfields, zap.String("Content-Type", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("X-Token")
-	if headerOk {
-		zfields = append(zfields, zap.String("X-Token", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("X-Uuid")
-	if headerOk {
-		zfields = append(zfields, zap.String("X-Uuid", headerValue))
-	}
-	headerValue, headerOk = req.Header.Get("X-Zanzibar-Use-Staging")
-	if headerOk {
-		zfields = append(zfields, zap.String("X-Zanzibar-Use-Staging", headerValue))
-	}
-	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	w := workflow.NewSimpleServiceHeaderSchemaWorkflow(h.Clients, req.Logger)
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+
+	// log downstream response to endpoint
+	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		if response != nil {
+			if body, err := json.Marshal(response); err == nil {
+				zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
+			}
+		}
+		for _, k := range cliRespHeaders.Keys() {
+			if val, ok := cliRespHeaders.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		req.Logger.Debug("downstream service response", zfields...)
+	}
+
 	if err != nil {
 		switch errValue := err.(type) {
 
