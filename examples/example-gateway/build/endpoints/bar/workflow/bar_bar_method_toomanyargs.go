@@ -27,7 +27,6 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooBaseBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/base/base"
@@ -36,6 +35,7 @@ import (
 	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	"go.uber.org/zap"
 )
 
 // BarTooManyArgsWorkflow defines the interface for BarTooManyArgs workflow

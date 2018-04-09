@@ -27,12 +27,12 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	"go.uber.org/zap"
 )
 
 // GoogleNowAddCredentialsWorkflow defines the interface for GoogleNowAddCredentials workflow

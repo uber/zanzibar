@@ -27,9 +27,9 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
+	"go.uber.org/zap"
 )
 
 // ServiceAFrontHelloWorkflow defines the interface for ServiceAFrontHello workflow

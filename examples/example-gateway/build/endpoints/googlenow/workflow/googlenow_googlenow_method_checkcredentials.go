@@ -27,9 +27,9 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	"go.uber.org/zap"
 )
 
 // GoogleNowCheckCredentialsWorkflow defines the interface for GoogleNowCheckCredentials workflow
