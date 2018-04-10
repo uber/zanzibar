@@ -163,10 +163,8 @@ func (h *{{$handlerName}}) HandleRequest(
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
 		{{- if ne .ResponseType ""}}
-		if response != nil {
-			if body, err := json.Marshal(response); err == nil {
-				zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
-			}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
 		}
 		{{- end}}
 		for _, k := range cliRespHeaders.Keys() {

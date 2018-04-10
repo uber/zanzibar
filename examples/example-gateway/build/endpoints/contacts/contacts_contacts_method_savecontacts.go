@@ -103,10 +103,8 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
-		if response != nil {
-			if body, err := json.Marshal(response); err == nil {
-				zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
-			}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
 		}
 		for _, k := range cliRespHeaders.Keys() {
 			if val, ok := cliRespHeaders.Get(k); ok {

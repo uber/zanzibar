@@ -376,10 +376,8 @@ func (h *{{$handlerName}}) HandleRequest(
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
 		{{- if ne .ResponseType ""}}
-		if response != nil {
-			if body, err := json.Marshal(response); err == nil {
-				zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
-			}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
 		}
 		{{- end}}
 		for _, k := range cliRespHeaders.Keys() {
@@ -446,7 +444,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6250, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6220, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
