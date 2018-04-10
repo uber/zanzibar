@@ -233,6 +233,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
@@ -343,25 +344,20 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{end}}
 
 	// log endpoint request to downstream services
-	zfields := []zapcore.Field{
-		zap.String("endpoint", h.endpoint.EndpointName),
+	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		{{- if ne .RequestType ""}}
+		zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", req.GetRawBody())))
+		{{- end}}
+		for _, k := range req.Header.Keys() {
+			if val, ok := req.Header.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
-	{{if ne .RequestType ""}}
-	// TODO: potential perf issue, use zap.Object lazy serialization
-	zfields = append(zfields, zap.String("body", fmt.Sprintf("%#v", requestBody)))
-	{{- end -}}
-
-	{{if (ne (len $reqHeaderMapKeys) 0) }}
-	var headerOk bool
-	var headerValue string
-	{{- end -}}
-	{{range $i, $k := $reqHeaderMapKeys}}
-	headerValue, headerOk = req.Header.Get("{{$k}}")
-	if headerOk {
-		zfields = append(zfields, zap.String("{{$k}}", headerValue))
-	}
-	{{- end}}
-	req.Logger.Debug("Endpoint request to downstream", zfields...)
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Clients, req.Logger)
 
@@ -373,6 +369,25 @@ func (h *{{$handlerName}}) HandleRequest(
 	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	{{else}}
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
+
+	// log downstream response to endpoint
+	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+		zfields := []zapcore.Field{
+			zap.String("endpoint", h.endpoint.EndpointName),
+		}
+		{{- if ne .ResponseType ""}}
+		if body, err := json.Marshal(response); err == nil {
+			zfields = append(zfields, zap.String("body", fmt.Sprintf("%s", body)))
+		}
+		{{- end}}
+		for _, k := range cliRespHeaders.Keys() {
+			if val, ok := cliRespHeaders.Get(k); ok {
+				zfields = append(zfields, zap.String(k, val))
+			}
+		}
+		req.Logger.Debug("downstream service response", zfields...)
+	}
+
 	{{end -}}
 	if err != nil {
 		{{- if eq (len .Exceptions) 0 -}}
@@ -429,7 +444,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 5740, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6220, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2502,6 +2517,7 @@ import (
 	{{- end}}
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	"go.uber.org/zap"
 )
 
 {{with .Method -}}
@@ -2729,7 +2745,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7335, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7354, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

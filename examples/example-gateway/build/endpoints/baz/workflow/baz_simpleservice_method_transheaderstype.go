@@ -28,12 +28,12 @@ import (
 	"strconv"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
+	"go.uber.org/zap"
 )
 
 // SimpleServiceTransHeadersTypeWorkflow defines the interface for SimpleServiceTransHeadersType workflow

@@ -27,12 +27,12 @@ import (
 	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	"go.uber.org/zap"
 )
 
 // BarNormalWorkflow defines the interface for BarNormal workflow

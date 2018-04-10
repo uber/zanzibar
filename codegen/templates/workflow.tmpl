@@ -30,6 +30,7 @@ import (
 	{{- end}}
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	"go.uber.org/zap"
 )
 
 {{with .Method -}}
