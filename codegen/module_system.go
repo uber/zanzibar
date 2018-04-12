@@ -219,9 +219,14 @@ func NewDefaultModuleSystemWithMockHook(
 		return nil, errors.Wrap(err, "error creating client mock gen hook")
 	}
 
+	workflowMockGenHook := WorkflowMockGenHook(h, t)
 	serviceMockGenHook := ServiceMockGenHook(h, t)
 
-	allHooks := append([]PostGenHook{clientMockGenHook, serviceMockGenHook}, hooks...)
+	allHooks := append([]PostGenHook{
+		clientMockGenHook,
+		workflowMockGenHook,
+		serviceMockGenHook,
+	}, hooks...)
 	return NewDefaultModuleSystem(h, allHooks...)
 }
 

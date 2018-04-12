@@ -226,11 +226,12 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		mockCount := len(instances["service"])
 		fmt.Printf("Generating %d service mocks:\n", mockCount)
 		ec := make(chan error, mockCount)
+		var idx int32 = 1
 		var files sync.Map
 		var wg sync.WaitGroup
 		wg.Add(mockCount)
-		for i, instance := range instances["service"] {
-			go func(instance *ModuleInstance, i int) {
+		for _, instance := range instances["service"] {
+			go func(instance *ModuleInstance) {
 				defer wg.Done()
 
 				buildDir := h.CodeGenTargetPath()
@@ -263,9 +264,10 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 					instance.ClassName,
 					instance.InstanceName,
 					path.Join(path.Base(buildDir), instance.Directory, "mock-service"),
-					i+1, mockCount,
+					int(atomic.LoadInt32(&idx)), mockCount,
 				)
-			}(instance, i)
+				atomic.AddInt32(&idx, 1)
+			}(instance)
 		}
 		wg.Wait()
 
@@ -298,7 +300,20 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 // generateMockInitializer generates code to initialize modules with leaf nodes being mocks
 func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
-	leafWithFixture := map[string]string{}
+	leafWithFixture, err := findClientsWithFixture(instance)
+	if err != nil {
+		return nil, err
+	}
+	data := map[string]interface{}{
+		"Instance":        instance,
+		"LeafWithFixture": leafWithFixture,
+	}
+	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
+}
+
+// findClientsWithFixture finds the given module's dependent clients that have fixture config
+func findClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
+	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
 		var mc moduleConfig
 		if err := json.Unmarshal(leaf.JSONFileRaw, &mc); err != nil {
@@ -309,14 +324,10 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 			)
 		}
 		if mc.Config != nil && mc.Config.Fixture != nil {
-			leafWithFixture[leaf.InstanceName] = mc.Config.Fixture.ImportPath
+			clientsWithFixture[leaf.InstanceName] = mc.Config.Fixture.ImportPath
 		}
 	}
-	data := map[string]interface{}{
-		"Instance":        instance,
-		"LeafWithFixture": leafWithFixture,
-	}
-	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
+	return clientsWithFixture, nil
 }
 
 // writeAndFormat writes the data to given file path, creates path if it does not exist and formats the file
@@ -329,4 +340,163 @@ func writeAndFormat(path string, data []byte) error {
 		)
 	}
 	return FormatGoFile(path)
+}
+
+// WorkflowMockGenHook returns a PostGenHook to generate endpoint workflow mocks
+func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
+	return func(instances map[string][]*ModuleInstance) error {
+		errChanSize := 0
+		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
+		for _, instance := range instances["endpoint"] {
+			endpointSpecs := instance.genSpec.([]*EndpointSpec)
+			for _, endpointSpec := range endpointSpecs {
+				if endpointSpec.WorkflowType == "custom" {
+					shouldGenMap[instance] = endpointSpecs
+					errChanSize += len(endpointSpecs)
+					break
+				}
+			}
+		}
+
+		genEndpointCount := len(shouldGenMap)
+		if genEndpointCount == 0 {
+			return nil
+		}
+		errChanSize += genEndpointCount
+
+		fmt.Printf("Generating %d endpoint mocks:\n", genEndpointCount)
+		ec := make(chan error, errChanSize)
+		var idx int32 = 1
+		var files sync.Map
+		var wg sync.WaitGroup
+		for instance, endpointSpecs := range shouldGenMap {
+			wg.Add(1)
+			go func(instance *ModuleInstance, endpointSpecs []*EndpointSpec) {
+				defer wg.Done()
+
+				buildDir := h.CodeGenTargetPath()
+				genDir := filepath.Join(buildDir, instance.Directory, "mock-workflow")
+
+				cwf, err := findClientsWithFixture(instance)
+				if err != nil {
+					ec <- errors.Wrapf(
+						err,
+						"Error generating mock endpoint %s",
+						instance.InstanceName,
+					)
+					return
+				}
+
+				var subWg sync.WaitGroup
+
+				subWg.Add(1)
+				go func() {
+					defer subWg.Done()
+
+					mockClientsType, err := generateEndpointMockClientsType(instance, cwf, h, t)
+					if err != nil {
+						ec <- errors.Wrapf(
+							err,
+							"Error generating mock clients type.go for endpoint %s",
+							instance.InstanceName,
+						)
+						return
+					}
+					files.Store(filepath.Join(genDir, "type.go"), mockClientsType)
+				}()
+
+				for _, endpointSpec := range endpointSpecs {
+					if endpointSpec.WorkflowType != "custom" {
+						continue
+					}
+
+					subWg.Add(1)
+
+					go func(espec *EndpointSpec) {
+						defer subWg.Done()
+
+						mockWorkflow, err := generateMockWorkflow(espec, instance, cwf, h, t)
+						if err != nil {
+							ec <- errors.Wrapf(
+								err,
+								"Error generating mock workflow for %s",
+								instance.InstanceName,
+							)
+							return
+						}
+						filename := strings.ToLower(espec.ThriftServiceName) + "_" +
+							strings.ToLower(espec.ThriftMethodName) + "_workflow_mock.go"
+						files.Store(filepath.Join(genDir, filename), mockWorkflow)
+					}(endpointSpec)
+				}
+
+				subWg.Wait()
+				printGenLine(
+					"mock",
+					instance.ClassName,
+					instance.InstanceName,
+					path.Join(path.Base(buildDir), instance.Directory, "mock-workflow"),
+					int(atomic.LoadInt32(&idx)), genEndpointCount,
+				)
+				atomic.AddInt32(&idx, 1)
+			}(instance, endpointSpecs)
+		}
+		wg.Wait()
+
+		select {
+		case err := <-ec:
+			close(ec)
+			errs := []string{err.Error()}
+			for e := range ec {
+				errs = append(errs, e.Error())
+			}
+			return errors.Errorf(
+				"encountered %d errors when generating mock endpoint workflows:\n%s",
+				len(errs),
+				strings.Join(errs, "\n"),
+			)
+		default:
+		}
+
+		var err error
+
+		files.Range(func(p, data interface{}) bool {
+			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+				return false
+			}
+			return true
+		})
+
+		return err
+	}
+}
+
+// generateMockWorkflow generates an initializer that creates an endpoint workflow with mock clients
+func generateMockWorkflow(
+	espec *EndpointSpec,
+	instance *ModuleInstance,
+	clientsWithFixture map[string]string,
+	h *PackageHelper,
+	t *Template,
+) ([]byte, error) {
+	data := map[string]interface{}{
+		"Instance":           instance,
+		"EndpointSpec":       espec,
+		"ClientsWithFixture": clientsWithFixture,
+	}
+	return t.ExecTemplate("workflow_mock.tmpl", data, h)
+}
+
+// generateEndpointMockClientsType generates the type that contains mock clients for the endpoint
+func generateEndpointMockClientsType(
+	instance *ModuleInstance,
+	clientsWithFixture map[string]string,
+	h *PackageHelper,
+	t *Template,
+) ([]byte, error) {
+	data := map[string]interface{}{
+		"Instance":           instance,
+		"ClientsWithFixture": clientsWithFixture,
+	}
+	return t.ExecTemplate("workflow_mock_clients_type.tmpl", data, h)
 }

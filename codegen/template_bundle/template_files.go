@@ -21,6 +21,8 @@
 // codegen/templates/tchannel_client_test_server.tmpl
 // codegen/templates/tchannel_endpoint.tmpl
 // codegen/templates/workflow.tmpl
+// codegen/templates/workflow_mock.tmpl
+// codegen/templates/workflow_mock_clients_type.tmpl
 // DO NOT EDIT!
 
 package templates
@@ -2750,6 +2752,112 @@ func workflowTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _workflow_mockTmpl = []byte(`{{$instance := .Instance -}}
+{{$espec := .EndpointSpec -}}
+{{$clientsWithFixture := .ClientsWithFixture -}}
+{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+{{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
+{{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
+package mock{{lower $instance.InstanceName}}workflow
+
+import (
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"go.uber.org/zap"
+
+	{{range $idx, $moduleInstance := $clientDeps -}}
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{if (index $clientsWithFixture $moduleInstance.InstanceName) -}}
+	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $clientsWithFixture $moduleInstance.InstanceName}}"
+	{{- end }}
+	{{- end }}
+	{{$instance.PackageInfo.PackageAlias}} "{{$instance.PackageInfo.PackagePath}}"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
+)
+
+// New{{$workflowInterface}}Mock creates a workflow with mock clients
+func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *MockClients) {
+	ctrl := gomock.NewController(t)
+	mockClients := &MockClients{
+		{{- range $idx, $moduleInstance := $clientDeps -}}
+		{{- $pkgInfo := $moduleInstance.PackageInfo }}
+		{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
+		{{- else }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.NewMockClient(ctrl),
+		{{- end }}
+		{{- end }}
+	}
+
+	w := {{$instance.PackageInfo.PackageAlias}}.New{{$workflowInterface}}(
+		&module.ClientDependencies{
+			{{- range $idx, $moduleInstance := $clientDeps -}}
+			{{- $pkgInfo := $moduleInstance.PackageInfo }}
+			{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
+			{{- end }}
+		},
+		zap.NewNop(),
+	)
+
+	return w, mockClients
+}`)
+
+func workflow_mockTmplBytes() ([]byte, error) {
+	return _workflow_mockTmpl, nil
+}
+
+func workflow_mockTmpl() (*asset, error) {
+	bytes, err := workflow_mockTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2086, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
+{{$clientsWithFixture := .ClientsWithFixture -}}
+{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+package mock{{lower $instance.InstanceName}}workflow
+
+import (
+	{{range $idx, $moduleInstance := $clientDeps -}}
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{end}}
+)
+
+// MockClients contains mock client dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type MockClients struct {
+	{{range $idx, $moduleInstance := $clientDeps -}}
+	{{- $pkgInfo := $moduleInstance.PackageInfo }}
+	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
+	{{- else }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}
+	{{- end }}
+	{{- end }}
+}
+`)
+
+func workflow_mock_clients_typeTmplBytes() ([]byte, error) {
+	return _workflow_mock_clients_typeTmpl, nil
+}
+
+func workflow_mock_clients_typeTmpl() (*asset, error) {
+	bytes, err := workflow_mock_clients_typeTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 949, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -2823,6 +2931,8 @@ var _bindata = map[string]func() (*asset, error){
 	"tchannel_client_test_server.tmpl":   tchannel_client_test_serverTmpl,
 	"tchannel_endpoint.tmpl":             tchannel_endpointTmpl,
 	"workflow.tmpl":                      workflowTmpl,
+	"workflow_mock.tmpl":                 workflow_mockTmpl,
+	"workflow_mock_clients_type.tmpl":    workflow_mock_clients_typeTmpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -2887,6 +2997,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"tchannel_client_test_server.tmpl":   {tchannel_client_test_serverTmpl, map[string]*bintree{}},
 	"tchannel_endpoint.tmpl":             {tchannel_endpointTmpl, map[string]*bintree{}},
 	"workflow.tmpl":                      {workflowTmpl, map[string]*bintree{}},
+	"workflow_mock.tmpl":                 {workflow_mockTmpl, map[string]*bintree{}},
+	"workflow_mock_clients_type.tmpl":    {workflow_mock_clients_typeTmpl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

@@ -1,0 +1,22 @@
+{{$instance := .Instance -}}
+{{$clientsWithFixture := .ClientsWithFixture -}}
+{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+package mock{{lower $instance.InstanceName}}workflow
+
+import (
+	{{range $idx, $moduleInstance := $clientDeps -}}
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{end}}
+)
+
+// MockClients contains mock client dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type MockClients struct {
+	{{range $idx, $moduleInstance := $clientDeps -}}
+	{{- $pkgInfo := $moduleInstance.PackageInfo }}
+	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
+	{{- else }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}
+	{{- end }}
+	{{- end }}
+}
