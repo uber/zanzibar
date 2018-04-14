@@ -4,7 +4,7 @@
 {{$clientDeps := index $instance.ResolvedDependencies "client" -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
-package mock{{lower $instance.InstanceName}}workflow
+package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
 	"testing"
