@@ -1,7 +1,7 @@
 {{$instance := .Instance -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
 {{$clientDeps := index $instance.ResolvedDependencies "client" -}}
-package mock{{lower $instance.InstanceName}}workflow
+package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
 	{{range $idx, $moduleInstance := $clientDeps -}}
