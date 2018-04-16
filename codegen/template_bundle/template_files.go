@@ -279,7 +279,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
@@ -446,7 +446,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6220, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6241, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1526,6 +1526,7 @@ func InitializeDependencies(
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:  g.Logger,
 		Scope:   g.AllHostScope,
+		Tracer:  g.Tracer,
 		Config:  g.Config,
 		Channel: g.Channel,
 	}
@@ -1559,7 +1560,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2216, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2237, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
