@@ -50,9 +50,10 @@ type RouterEndpoint struct {
 	EndpointName string
 	HandlerName  string
 	HandlerFn    HandlerFn
-	logger       *zap.Logger
-	metrics      *InboundHTTPMetrics
-	tracer       opentracing.Tracer
+
+	logger  *zap.Logger
+	metrics *InboundHTTPMetrics
+	tracer  opentracing.Tracer
 }
 
 // NewRouterEndpoint creates an endpoint with all the necessary data

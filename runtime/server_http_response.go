@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -34,15 +33,16 @@ import (
 
 // ServerHTTPResponse struct manages request
 type ServerHTTPResponse struct {
+	Request    *ServerHTTPRequest
+	StatusCode int
+
 	responseWriter    http.ResponseWriter
-	Request           *ServerHTTPRequest
 	flushed           bool
 	finished          bool
 	finishTime        time.Time
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
 	pendingStatusCode int
-	StatusCode        int
 	logger            *zap.Logger
 	err               error
 }
@@ -99,7 +99,7 @@ func (res *ServerHTTPResponse) finish() {
 		res.Request.metrics.Success.Inc(1)
 	}
 
-	span := opentracing.SpanFromContext(res.Request.httpRequest.Context())
+	span := res.Request.GetSpan()
 	if span != nil {
 		span.Finish()
 	}

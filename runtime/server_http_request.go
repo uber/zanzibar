@@ -21,7 +21,6 @@
 package zanzibar
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -40,14 +39,17 @@ import (
 
 // ServerHTTPRequest struct manages request
 type ServerHTTPRequest struct {
-	httpRequest  *http.Request
-	res          *ServerHTTPResponse
-	started      bool
-	startTime    time.Time
-	metrics      *InboundHTTPMetrics
-	tracer       opentracing.Tracer
-	queryValues  url.Values
-	parseFailed  bool
+	httpRequest *http.Request
+	res         *ServerHTTPResponse
+	started     bool
+	startTime   time.Time
+	metrics     *InboundHTTPMetrics
+	tracer      opentracing.Tracer
+	span        opentracing.Span
+	queryValues url.Values
+	parseFailed bool
+	rawBody     []byte
+
 	Logger       *zap.Logger
 	EndpointName string
 	HandlerName  string
@@ -55,7 +57,6 @@ type ServerHTTPRequest struct {
 	Method       string
 	Params       httprouter.Params
 	Header       Header
-	rawBody      []byte
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -66,17 +67,18 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
-		httpRequest:  r,
-		queryValues:  nil,
+		httpRequest: r,
+		queryValues: nil,
+		metrics:     endpoint.metrics,
+		tracer:      endpoint.tracer,
+
 		Logger:       endpoint.logger,
-		metrics:      endpoint.metrics,
 		EndpointName: endpoint.EndpointName,
 		HandlerName:  endpoint.HandlerName,
 		URL:          r.URL,
 		Method:       r.Method,
 		Params:       params,
 		Header:       NewServerHTTPHeader(r.Header),
-		tracer:       endpoint.tracer,
 	}
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
@@ -101,24 +103,23 @@ func (req *ServerHTTPRequest) start() {
 	req.metrics.Recvd.Inc(1)
 
 	if req.tracer != nil {
-		// TODO better operation name   normalized path  etc.
-		opName := fmt.Sprintf("%s %s.%s", req.Method, req.EndpointName, req.HandlerName)
+		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)
+		urlTag := opentracing.Tag{Key: "URL", Value: req.URL}
+		MethodTag := opentracing.Tag{Key: "Method", Value: req.Method}
 		carrier := opentracing.HTTPHeadersCarrier(req.httpRequest.Header)
 		spanContext, err := req.tracer.Extract(opentracing.HTTPHeaders, carrier)
 		var span opentracing.Span
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
+				/* coverage ignore next line */
 				req.Logger.Warn("Error Extracting Trace Headers", zap.Error(err))
 			}
-			span = req.tracer.StartSpan(opName)
-
+			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
-			span = req.tracer.StartSpan(opName, ext.RPCServerOption(spanContext))
+			span = req.tracer.StartSpan(opName, urlTag, MethodTag, ext.RPCServerOption(spanContext))
 		}
-		newCtx := opentracing.ContextWithSpan(req.httpRequest.Context(), span)
-		req.httpRequest = req.httpRequest.WithContext(newCtx)
+		req.span = span
 	}
-
 }
 
 // CheckHeaders verifies that request contains required headers.
@@ -478,7 +479,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 	return true
 }
 
-// GetContext returns the http request Context
-func (req *ServerHTTPRequest) GetContext() context.Context {
-	return req.httpRequest.Context()
+// GetSpan returns the http request span
+func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
+	return req.span
 }

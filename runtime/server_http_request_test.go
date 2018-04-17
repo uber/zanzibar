@@ -31,10 +31,9 @@ import (
 	"bytes"
 
 	"github.com/buger/jsonparser"
-	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -819,7 +818,7 @@ func TestSpanCreated(t *testing.T) {
 				req *zanzibar.ServerHTTPRequest,
 				res *zanzibar.ServerHTTPResponse,
 			) {
-				span := opentracing.SpanFromContext(req.GetContext())
+				span := req.GetSpan()
 				assert.NotNil(t, span)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
