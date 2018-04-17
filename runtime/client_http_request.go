@@ -24,9 +24,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -151,7 +153,12 @@ func (req *ClientHTTPRequest) WriteJSON(
 func (req *ClientHTTPRequest) Do(
 	ctx context.Context,
 ) (*ClientHTTPResponse, error) {
+	opName := fmt.Sprintf("%s.%s", req.ClientID, req.MethodName)
+	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
+	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
+	span, ctx := opentracing.StartSpanFromContext(ctx, opName, urlTag, methodTag)
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
+	span.Finish()
 	if err != nil {
 		req.Logger.Error("Could not make outbound request", zap.Error(err))
 		return nil, err

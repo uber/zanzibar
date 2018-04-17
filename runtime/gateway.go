@@ -503,7 +503,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	if err != nil {
 		return errors.Wrapf(err, "error initializing Jaeger tracer client")
 	}
-	// opentracing.SetGlobalTracer(tracer)
+	opentracing.SetGlobalTracer(tracer)
 	gateway.Tracer = tracer
 	gateway.tracerCloser = closer
 	return nil
