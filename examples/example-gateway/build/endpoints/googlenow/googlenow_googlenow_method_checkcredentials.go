@@ -26,6 +26,7 @@ package googlenowendpoint
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -88,6 +89,9 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	}
 
 	w := workflow.NewGoogleNowCheckCredentialsWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {

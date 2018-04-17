@@ -26,6 +26,7 @@ package bazendpoint
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -86,6 +87,9 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	}
 
 	w := workflow.NewSimpleServiceSillyNoopWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {

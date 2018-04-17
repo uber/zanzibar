@@ -239,6 +239,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
@@ -362,6 +363,9 @@ func (h *{{$handlerName}}) HandleRequest(
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	cliRespHeaders, err := w.Handle(ctx, req.Header)
@@ -446,7 +450,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6241, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6373, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
