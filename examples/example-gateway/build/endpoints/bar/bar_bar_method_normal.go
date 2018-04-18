@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -52,7 +53,7 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.Example.NewMiddlewareHandle(
@@ -102,6 +103,9 @@ func (h *BarNormalHandler) HandleRequest(
 	}
 
 	w := workflow.NewBarNormalWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 

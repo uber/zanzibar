@@ -26,6 +26,7 @@ package barendpoint
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -48,7 +49,7 @@ func NewBarNoRequestHandler(deps *module.Dependencies) *BarNoRequestHandler {
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "noRequest",
 		handler.HandleRequest,
 	)
@@ -86,6 +87,9 @@ func (h *BarNoRequestHandler) HandleRequest(
 	}
 
 	w := workflow.NewBarNoRequestWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {

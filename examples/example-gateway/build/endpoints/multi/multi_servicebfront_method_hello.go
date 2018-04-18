@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -49,7 +50,7 @@ func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHello
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"multi", "helloB",
 		handler.HandleRequest,
 	)
@@ -87,6 +88,9 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 	}
 
 	w := workflow.NewServiceBFrontHelloWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {

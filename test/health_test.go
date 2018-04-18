@@ -112,7 +112,7 @@ func TestHealthMetrics(t *testing.T) {
 	defer gateway.Close()
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
-	numMetrics := 5
+	numMetrics := 9
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
 	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
@@ -124,7 +124,7 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 5 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 9 metrics")
 	names := []string{
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",

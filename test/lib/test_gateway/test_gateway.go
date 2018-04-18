@@ -250,7 +250,6 @@ func CreateGateway(
 		testGateway.setupTracing()
 		composedConfig["jaeger.disabled"] = false
 		composedConfig["jaeger.reporter.hostport"] = testGateway.JaegerAgent.SpanServerAddr()
-		composedConfig["jaeger.sampler.type"] = "const"
 		composedConfig["jaeger.sampler.param"] = 1
 	}
 

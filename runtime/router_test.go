@@ -53,6 +53,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -68,6 +69,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"bar", "bar",
 			func(
 				ctx context.Context,
@@ -190,6 +192,7 @@ func TestRouterPanic(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
 			func(
 				ctx context.Context,
@@ -250,6 +253,7 @@ func TestRouterPanicObject(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
 			func(
 				ctx context.Context,
@@ -310,6 +314,7 @@ func TestRouterPanicNilPointer(t *testing.T) {
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
 			func(
 				ctx context.Context,

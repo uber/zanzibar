@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -50,7 +51,7 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"baz", "call",
 		handler.HandleRequest,
 	)
@@ -107,6 +108,9 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	}
 
 	w := workflow.NewSimpleServiceCallWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {

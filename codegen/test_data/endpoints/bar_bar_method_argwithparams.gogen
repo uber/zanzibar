@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -50,7 +51,7 @@ func NewBarArgWithParamsHandler(deps *module.Dependencies) *BarArgWithParamsHand
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "argWithParams",
 		handler.HandleRequest,
 	)
@@ -99,6 +100,9 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 	}
 
 	w := workflow.NewBarArgWithParamsWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 

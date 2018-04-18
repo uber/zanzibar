@@ -26,6 +26,7 @@ package bazendpoint
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -47,7 +48,7 @@ func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHa
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"baz", "ping",
 		handler.HandleRequest,
 	)
@@ -85,6 +86,9 @@ func (h *SimpleServicePingHandler) HandleRequest(
 	}
 
 	w := workflow.NewSimpleServicePingWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header)
 	if err != nil {

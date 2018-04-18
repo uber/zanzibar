@@ -100,6 +100,7 @@ type Gateway struct {
 type DefaultDependencies struct {
 	Logger  *zap.Logger
 	Scope   tally.Scope
+	Tracer  opentracing.Tracer
 	Config  *StaticConfig
 	Channel *tchannel.Channel
 }
@@ -236,7 +237,7 @@ func (gateway *Gateway) registerPredefined() {
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
 	gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
-		gateway.Logger, gateway.AllHostScope,
+		gateway.Logger, gateway.AllHostScope, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
 	))
@@ -502,7 +503,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	if err != nil {
 		return errors.Wrapf(err, "error initializing Jaeger tracer client")
 	}
-	// opentracing.SetGlobalTracer(tracer)
+	opentracing.SetGlobalTracer(tracer)
 	gateway.Tracer = tracer
 	gateway.tracerCloser = closer
 	return nil

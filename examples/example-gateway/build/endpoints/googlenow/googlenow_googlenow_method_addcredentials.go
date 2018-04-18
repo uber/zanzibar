@@ -27,6 +27,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -49,7 +50,7 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"googlenow", "addCredentials",
 		handler.HandleRequest,
 	)
@@ -95,6 +96,9 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 	}
 
 	w := workflow.NewGoogleNowAddCredentialsWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 	if err != nil {

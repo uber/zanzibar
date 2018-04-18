@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/opentracing/opentracing-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -50,7 +51,7 @@ func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveCont
 		Clients: deps.Client,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"contacts", "saveContacts",
 		handler.HandleRequest,
 	)
@@ -95,6 +96,9 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	}
 
 	w := customContacts.NewContactsSaveContactsWorkflow(h.Clients, req.Logger)
+	if span := req.GetSpan(); span != nil {
+		ctx = opentracing.ContextWithSpan(ctx, span)
+	}
 
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 

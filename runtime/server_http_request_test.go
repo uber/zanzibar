@@ -33,7 +33,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/stretchr/testify/assert"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
@@ -62,6 +62,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	endpoint := zanzibar.NewRouterEndpoint(
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.AllHostScope,
+		bgateway.ActualGateway.Tracer,
 		"foo", "foo",
 		func(
 			ctx context.Context,
@@ -123,6 +124,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -182,6 +184,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -238,6 +241,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -294,6 +298,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -350,6 +355,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -406,6 +412,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -462,6 +469,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -518,6 +526,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -574,6 +583,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -630,6 +640,7 @@ func TestFailingGetQueryValues(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -688,6 +699,7 @@ func TestGetQueryValues(t *testing.T) {
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -748,6 +760,7 @@ func TestPeekBody(t *testing.T) {
 		"POST", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -769,6 +782,44 @@ func TestPeekBody(t *testing.T) {
 				assert.NoError(t, err, "do not expect error")
 				assert.Equal(t, []byte(`result`), value)
 				assert.Equal(t, vType, jsonparser.String)
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("POST", "/foo?foo=bar", nil, bytes.NewReader([]byte(`{"arg1":{"b1":{"c1":"result"}}}`)))
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.Equal(t, "200 OK", resp.Status)
+}
+
+func TestSpanCreated(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"POST", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				span := req.GetSpan()
+				assert.NotNil(t, span)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
 		),

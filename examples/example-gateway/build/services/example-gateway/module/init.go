@@ -96,6 +96,7 @@ func InitializeDependencies(
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:  g.Logger,
 		Scope:   g.AllHostScope,
+		Tracer:  g.Tracer,
 		Config:  g.Config,
 		Channel: g.Channel,
 	}
