@@ -300,7 +300,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 // generateMockInitializer generates code to initialize modules with leaf nodes being mocks
 func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
-	leafWithFixture, err := findClientsWithFixture(instance)
+	leafWithFixture, err := FindClientsWithFixture(instance)
 	if err != nil {
 		return nil, err
 	}
@@ -311,8 +311,8 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
 }
 
-// findClientsWithFixture finds the given module's dependent clients that have fixture config
-func findClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
+// FindClientsWithFixture finds the given module's dependent clients that have fixture config
+func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
 	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
 		var mc moduleConfig
@@ -377,7 +377,7 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				buildDir := h.CodeGenTargetPath()
 				genDir := filepath.Join(buildDir, instance.Directory, "mock-workflow")
 
-				cwf, err := findClientsWithFixture(instance)
+				cwf, err := FindClientsWithFixture(instance)
 				if err != nil {
 					ec <- errors.Wrapf(
 						err,
