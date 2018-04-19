@@ -73,7 +73,7 @@ var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 
 // LintAcronym correct the naming for initialisms
 func LintAcronym(key string) string {
-	key = pascalCase(key)
+	key = PascalCase(key)
 	for k := range CommonInitialisms {
 		initial := string(k[0]) + strings.ToLower(k[1:])
 		if strings.Contains(key, initial) {
@@ -95,7 +95,8 @@ func startsWithInitialism(s string) string {
 	return initialism
 }
 
-func camelCase(src string) string {
+// CamelCase converts the given string to camel case
+func CamelCase(src string) string {
 	byteSrc := []byte(src)
 	chunks := camelingRegex.FindAll(byteSrc, -1)
 	for idx, val := range chunks {
@@ -130,7 +131,8 @@ func ensureGolangAncronymCasing(segment []byte) []byte {
 	return segment
 }
 
-func pascalCase(src string) string {
+// PascalCase converts the given string to pascal case
+func PascalCase(src string) string {
 	byteSrc := []byte(src)
 	chunks := camelingRegex.FindAll(byteSrc, -1)
 	for idx, val := range chunks {

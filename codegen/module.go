@@ -787,8 +787,8 @@ func readPackageInfo(
 	jsonConfig *JSONClassConfig,
 	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
-	qualifiedClassName := strings.Title(camelCase(className))
-	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
+	qualifiedClassName := strings.Title(CamelCase(className))
+	qualifiedInstanceName := strings.Title(CamelCase(jsonConfig.Name))
 	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
 
 	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)

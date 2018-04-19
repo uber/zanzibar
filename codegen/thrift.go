@@ -109,7 +109,7 @@ func goCustomType(p PackageNameResolver, spec compile.TypeSpec) (string, error) 
 		return "", errors.Wrapf(err, "failed to get package for custom type (%T) %v", spec, spec)
 	}
 
-	return pkg + "." + pascalCase(spec.ThriftName()), nil
+	return pkg + "." + PascalCase(spec.ThriftName()), nil
 }
 
 // IsStructType returns true if the given thrift type is struct, false otherwise.
@@ -210,7 +210,7 @@ func walkFieldGroupsInternal(
 		case *compile.EnumSpec:
 		case *compile.StructSpec:
 			bail := walkFieldGroupsInternal(
-				goPrefix+"."+pascalCase(field.Name),
+				goPrefix+"."+PascalCase(field.Name),
 				thriftPrefix+"."+field.Name,
 				t.Fields,
 				visitField,
