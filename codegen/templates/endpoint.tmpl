@@ -17,6 +17,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $traceKey := .TraceKey }}
 
 import (
 	"context"
@@ -175,6 +176,9 @@ func (h *{{$handlerName}}) HandleRequest(
 			if val, ok := cliRespHeaders.Get(k); ok {
 				zfields = append(zfields, zap.String(k, val))
 			}
+		}
+		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
+			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
 		req.Logger.Debug("downstream service response", zfields...)
 	}

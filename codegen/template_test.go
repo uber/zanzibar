@@ -70,6 +70,7 @@ func TestGenerateBar(t *testing.T) {
 		testCopyrightHeader,
 		"zanzibar",
 		"X-Zanzibar-Use-Staging",
+		"trace-key",
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {
 		return

@@ -130,6 +130,9 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
+		if traceKey, ok := req.Header.Get("trace-key"); ok {
+			zfields = append(zfields, zap.String("trace-key", traceKey))
+		}
 		req.Logger.Debug("downstream service response", zfields...)
 	}
 

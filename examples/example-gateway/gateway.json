@@ -12,6 +12,6 @@
 	"copyrightHeader": "./copyright_header.txt",
 
 	"annotationPrefix": "zanzibar",
-
+	"trace-key": "x-trace-id",
 	"genMock": true
 }
