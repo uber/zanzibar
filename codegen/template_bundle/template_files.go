@@ -2760,7 +2760,7 @@ func workflowTmpl() (*asset, error) {
 var _workflow_mockTmpl = []byte(`{{$instance := .Instance -}}
 {{$espec := .EndpointSpec -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
@@ -2819,14 +2819,14 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2094, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2095, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
@@ -2858,7 +2858,7 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 957, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 958, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
