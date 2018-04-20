@@ -1,7 +1,7 @@
 {{$instance := .Instance -}}
 {{$espec := .EndpointSpec -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.ResolvedDependencies "client" -}}
+{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow

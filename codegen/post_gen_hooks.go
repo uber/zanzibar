@@ -176,7 +176,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 						files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
 					}
 
-					printGenLine(
+					PrintGenLine(
 						"mock",
 						instance.ClassName,
 						instance.InstanceName,
@@ -210,7 +210,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		}
 
 		files.Range(func(p, data interface{}) bool {
-			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
 				return false
 			}
 			return true
@@ -259,7 +259,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				}
 				files.Store(filepath.Join(genDir, "mock_service.go"), mockService)
 
-				printGenLine(
+				PrintGenLine(
 					"mock",
 					instance.ClassName,
 					instance.InstanceName,
@@ -288,7 +288,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 		var err error
 		files.Range(func(p, data interface{}) bool {
-			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
 				return false
 			}
 			return true
@@ -300,7 +300,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 
 // generateMockInitializer generates code to initialize modules with leaf nodes being mocks
 func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
-	leafWithFixture, err := findClientsWithFixture(instance)
+	leafWithFixture, err := FindClientsWithFixture(instance)
 	if err != nil {
 		return nil, err
 	}
@@ -311,8 +311,8 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
 }
 
-// findClientsWithFixture finds the given module's dependent clients that have fixture config
-func findClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
+// FindClientsWithFixture finds the given module's dependent clients that have fixture config
+func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
 	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
 		var mc moduleConfig
@@ -330,8 +330,8 @@ func findClientsWithFixture(instance *ModuleInstance) (map[string]string, error)
 	return clientsWithFixture, nil
 }
 
-// writeAndFormat writes the data to given file path, creates path if it does not exist and formats the file
-func writeAndFormat(path string, data []byte) error {
+// WriteAndFormat writes the data (Go code) to given file path, creates path if it does not exist and formats the file using gofmt
+func WriteAndFormat(path string, data []byte) error {
 	if err := writeFile(path, data); err != nil {
 		return errors.Wrapf(
 			err,
@@ -377,7 +377,7 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				buildDir := h.CodeGenTargetPath()
 				genDir := filepath.Join(buildDir, instance.Directory, "mock-workflow")
 
-				cwf, err := findClientsWithFixture(instance)
+				cwf, err := FindClientsWithFixture(instance)
 				if err != nil {
 					ec <- errors.Wrapf(
 						err,
@@ -431,7 +431,7 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				}
 
 				subWg.Wait()
-				printGenLine(
+				PrintGenLine(
 					"mock",
 					instance.ClassName,
 					instance.InstanceName,
@@ -461,7 +461,7 @@ func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 		var err error
 
 		files.Range(func(p, data interface{}) bool {
-			if err = writeAndFormat(p.(string), data.([]byte)); err != nil {
+			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
 				return false
 			}
 			return true

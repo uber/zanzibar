@@ -205,7 +205,7 @@ func uniqueAlias(importPaths map[string]bool) map[string]string {
 	pkgPathToAlias := make(map[string]string, len(importPaths))
 	usedAliases := make(map[string]bool, len(importPaths))
 	for pkgPath := range importPaths {
-		base := camelCase(path.Base(pkgPath))
+		base := CamelCase(path.Base(pkgPath))
 		pkgAlias := base
 		i := 0
 		for usedAliases[pkgAlias] || token.Lookup(pkgAlias).IsKeyword() {

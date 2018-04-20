@@ -168,7 +168,7 @@ func (p PackageHelper) TypePackageName(thrift string) (string, error) {
 	thriftSegment := thrift[idx+len(p.thriftRootDir)+1 : len(thrift)-7]
 
 	thriftPackageName := strings.Replace(thriftSegment, "/", "_", -1)
-	return camelCase(thriftPackageName), nil
+	return CamelCase(thriftPackageName), nil
 }
 
 func (p PackageHelper) getRelativeFileName(thrift string) (string, error) {

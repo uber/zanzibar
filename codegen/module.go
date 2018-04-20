@@ -787,8 +787,8 @@ func readPackageInfo(
 	jsonConfig *JSONClassConfig,
 	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
-	qualifiedClassName := strings.Title(camelCase(className))
-	qualifiedInstanceName := strings.Title(camelCase(jsonConfig.Name))
+	qualifiedClassName := strings.Title(CamelCase(className))
+	qualifiedInstanceName := strings.Title(CamelCase(jsonConfig.Name))
 	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
 
 	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
@@ -887,7 +887,7 @@ func (system *ModuleSystem) GenerateBuild(
 				filepath.Base(targetGenDir),
 				classInstance.Directory,
 			)
-			printGenLine(
+			PrintGenLine(
 				classInstance.ClassType,
 				classInstance.ClassName,
 				classInstance.InstanceName,
@@ -973,7 +973,8 @@ func (system *ModuleSystem) GenerateBuild(
 	return resolvedModules, nil
 }
 
-func printGenLine(
+// PrintGenLine prints the module generation process to stdout
+func PrintGenLine(
 	classType, className, instanceName, buildPath string,
 	idx, count int,
 ) {

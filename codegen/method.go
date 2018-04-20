@@ -478,7 +478,7 @@ func (ms *MethodSpec) findParamsAnnotation(
 	) bool {
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param == "params."+paramName[1:] {
-				identifier = goPrefix + "." + pascalCase(field.Name)
+				identifier = goPrefix + "." + PascalCase(field.Name)
 				required = field.Required
 				return true
 			}
@@ -551,7 +551,7 @@ func findStructs(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longFieldName := goPrefix + "." + PascalCase(field.Name)
 
 		if _, ok := realType.(*compile.StructSpec); ok {
 			typeName, err := GoType(packageHelper, realType)
@@ -592,7 +592,7 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longFieldName := goPrefix + "." + PascalCase(field.Name)
 
 		// If the type is a struct then we cannot really do anything
 		if _, ok := realType.(*compile.StructSpec); ok {
@@ -620,7 +620,7 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				camelHeaderName := camelCase(headerName)
+				camelHeaderName := CamelCase(headerName)
 
 				fieldThriftType, err := GoType(packageHelper, field.Type)
 				if err != nil {
@@ -628,7 +628,7 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 					return true
 				}
 
-				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
+				bodyIdentifier := goPrefix + "." + PascalCase(field.Name)
 
 				seenCount := headersMap[camelHeaderName]
 				var variableName string
@@ -747,7 +747,7 @@ func (ms *MethodSpec) setResponseHeaderFields(
 			if param[0:8] == "headers." {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
-					FieldIdentifier: goPrefix + "." + pascalCase(field.Name),
+					FieldIdentifier: goPrefix + "." + PascalCase(field.Name),
 					IsPointer:       !field.Required,
 				}
 			}
@@ -771,7 +771,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longFieldName := goPrefix + "." + PascalCase(field.Name)
 
 		// If the type is a struct then we cannot really do anything
 		if _, ok := realType.(*compile.StructSpec); ok {
@@ -788,7 +788,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
 			if param[0:8] == "headers." {
 				headerName := param[8:]
-				bodyIdentifier := goPrefix + "." + pascalCase(field.Name)
+				bodyIdentifier := goPrefix + "." + PascalCase(field.Name)
 				var headerNameValuePair string
 				if field.Required {
 					// Note header values are always string
@@ -912,7 +912,7 @@ func (ms *MethodSpec) setHeaderPropagator(
 	hp := NewHeaderPropagator(h)
 	hp.append(
 		"func propagateHeaders",
-		pascalCase(ms.Name),
+		PascalCase(ms.Name),
 		"ClientRequests(in ",
 		downstreamMethod.RequestType,
 		", headers zanzibar.Header) ",
@@ -948,7 +948,7 @@ func (ms *MethodSpec) setTypeConverters(
 
 	typeConverter.append(
 		"func convertTo",
-		pascalCase(ms.Name),
+		PascalCase(ms.Name),
 		"ClientRequest(in ", ms.RequestType, ") ", downstreamMethod.RequestType, "{")
 
 	typeConverter.append("out := &", downstreamMethod.ShortRequestType, "{}\n")
@@ -974,7 +974,7 @@ func (ms *MethodSpec) setTypeConverters(
 
 	respConverter.append(
 		"func convert",
-		pascalCase(ms.DownstreamService), pascalCase(ms.Name),
+		PascalCase(ms.DownstreamService), PascalCase(ms.Name),
 		"ClientResponse(in ", downstreamMethod.ResponseType, ") ", ms.ResponseType, "{")
 	var respFields, downstreamRespFields []*compile.FieldSpec
 	switch respType.(type) {
@@ -1074,7 +1074,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longFieldName := goPrefix + "." + PascalCase(field.Name)
 
 		if len(stack) > 0 {
 			if !strings.HasPrefix(longFieldName, stack[len(stack)-1]) {
@@ -1110,7 +1110,7 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
-		identifierName := camelCase(longQueryName) + "Query"
+		identifierName := CamelCase(longQueryName) + "Query"
 
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
@@ -1172,7 +1172,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		realType := compile.RootTypeSpec(field.Type)
-		longFieldName := goPrefix + "." + pascalCase(field.Name)
+		longFieldName := goPrefix + "." + PascalCase(field.Name)
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 
 		if len(stack) > 0 {
@@ -1211,14 +1211,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			return false
 		}
 
-		identifierName := camelCase(longQueryName) + "Query"
+		identifierName := CamelCase(longQueryName) + "Query"
 
 		httpRefAnnotation := field.Annotations[ms.annotations.HTTPRef]
 		if httpRefAnnotation != "" && !strings.HasPrefix(httpRefAnnotation, "query") {
 			return false
 		}
 
-		okIdentifierName := camelCase(longQueryName) + "Ok"
+		okIdentifierName := CamelCase(longQueryName) + "Ok"
 		if field.Required {
 			statements.appendf("%s := req.CheckQueryValue(%q)",
 				okIdentifierName, longQueryName,

@@ -75,6 +75,7 @@ func InitializeDependenciesMock(
 		Scope:   g.AllHostScope,
 		Config:  g.Config,
 		Channel: g.Channel,
+		Tracer:  g.Tracer,
 	}
 
 	mockClientNodes := &MockClientNodes{

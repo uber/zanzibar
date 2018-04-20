@@ -329,7 +329,7 @@ func (c *TypeConverter) genConverterForList(
 			toField.Required,
 			fromFieldType.ValueSpec,
 			valID,
-			keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
+			keyPrefix+PascalCase(toField.Name)+"["+indexID+"]",
 			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
 			nestedIndent,
 			nil,
@@ -355,7 +355,7 @@ func (c *TypeConverter) genConverterForList(
 				toField.Required,
 				overriddenFieldType.ValueSpec,
 				valID,
-				keyPrefix+pascalCase(toField.Name)+"["+indexID+"]",
+				keyPrefix+PascalCase(toField.Name)+"["+indexID+"]",
 				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
 				nestedIndent,
 				nil,
@@ -475,7 +475,7 @@ func (c *TypeConverter) genConverterForMap(
 			toField.Required,
 			fromFieldType.ValueSpec,
 			valID,
-			keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
+			keyPrefix+PascalCase(toField.Name)+"["+keyID+"]",
 			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
 			nestedIndent,
 			nil,
@@ -502,7 +502,7 @@ func (c *TypeConverter) genConverterForMap(
 				toField.Required,
 				overriddenFieldType.ValueSpec,
 				valID,
-				keyPrefix+pascalCase(toField.Name)+"["+keyID+"]",
+				keyPrefix+PascalCase(toField.Name)+"["+keyID+"]",
 				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
 				nestedIndent,
 				nil,
@@ -562,7 +562,7 @@ func (c *TypeConverter) genStructConverter(
 			}
 		}
 
-		toSubIdentifier := keyPrefix + pascalCase(toField.Name)
+		toSubIdentifier := keyPrefix + PascalCase(toField.Name)
 		toIdentifier := "out." + toSubIdentifier
 		overriddenIdentifier := ""
 		fromIdentifier := ""
@@ -589,7 +589,7 @@ func (c *TypeConverter) genStructConverter(
 					if !transformFrom.Field.Required {
 						overriddenField = fromField
 						overriddenIdentifier = "in." + fromPrefix +
-							pascalCase(overriddenField.Name)
+							PascalCase(overriddenField.Name)
 					}
 					// If override is true and the new field is required,
 					// there's a default instantiation value and will always
@@ -658,7 +658,7 @@ func (c *TypeConverter) genStructConverter(
 
 		if fromIdentifier == "" && fromField != nil {
 			// should we set this if no fromField ??
-			fromIdentifier = "in." + fromPrefix + pascalCase(fromField.Name)
+			fromIdentifier = "in." + fromPrefix + PascalCase(fromField.Name)
 		}
 
 		if prevKeyPrefixes == nil {
@@ -704,7 +704,7 @@ func (c *TypeConverter) genStructConverter(
 			)
 			if fromField != nil {
 				stFromType = fromField.Type
-				stFromPrefix = keyPrefix + pascalCase(fromField.Name)
+				stFromPrefix = keyPrefix + PascalCase(fromField.Name)
 
 				fromTypeName, _ = c.getIdentifierName(stFromType)
 			}
@@ -716,7 +716,7 @@ func (c *TypeConverter) genStructConverter(
 
 			if converterMethodName, ok := c.convStructMap[toFieldType.Name]; ok {
 				// the converter for this struct has already been generated, so just use it
-				c.append(indent, "out.", keyPrefix+pascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
+				c.append(indent, "out.", keyPrefix+PascalCase(toField.Name), " = ", converterMethodName, "(", fromIdentifier, ")")
 			} else if c.useRecurGen && fromTypeName != "" {
 				// generate a callable converter inside function literal
 				err = c.genConverterForStructWrapped(
@@ -738,7 +738,7 @@ func (c *TypeConverter) genStructConverter(
 					toField.Required,
 					stFromType,
 					fromIdentifier,
-					keyPrefix+pascalCase(toField.Name),
+					keyPrefix+PascalCase(toField.Name),
 					stFromPrefix,
 					indent,
 					fieldMap,
@@ -851,7 +851,7 @@ func addSpecToMap(
 ) map[string]FieldMapperEntry {
 	for k, v := range overrideMap {
 		for _, spec := range fields {
-			fieldQualName := prefix + pascalCase(spec.Name)
+			fieldQualName := prefix + PascalCase(spec.Name)
 			if v.QualifiedName == fieldQualName {
 				v.Field = spec
 				overrideMap[k] = v
