@@ -232,6 +232,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $traceKey := .TraceKey }}
 
 import (
 	"context"
@@ -391,6 +392,9 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
+		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
+			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
+		}
 		req.Logger.Debug("downstream service response", zfields...)
 	}
 
@@ -450,7 +454,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6373, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6534, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
