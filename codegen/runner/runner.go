@@ -94,6 +94,7 @@ func main() {
 		string(copyright),
 		config.MustGetString("annotationPrefix"),
 		stagingReqHeader,
+		config.MustGetString("traceKey"),
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),

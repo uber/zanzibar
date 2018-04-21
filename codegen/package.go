@@ -55,6 +55,8 @@ type PackageHelper struct {
 	middlewareSpecs map[string]*MiddlewareSpec
 	// Use staging client when this header is set as "true"
 	stagingReqHeader string
+	// traceKey is the key for uniq trace id that identifies request / response pair
+	traceKey string
 }
 
 // NewPackageHelper creates a package helper.
@@ -69,6 +71,7 @@ func NewPackageHelper(
 	copyrightHeader string,
 	annotationPrefix string,
 	stagingReqHeader string,
+	traceKey string,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
@@ -97,6 +100,7 @@ func NewPackageHelper(
 		middlewareSpecs:     middlewareSpecs,
 		annotationPrefix:    annotationPrefix,
 		stagingReqHeader:    stagingReqHeader,
+		traceKey:            traceKey,
 	}
 	return p, nil
 }

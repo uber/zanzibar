@@ -119,6 +119,9 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
+		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
+			zfields = append(zfields, zap.String("x-trace-id", traceKey))
+		}
 		req.Logger.Debug("downstream service response", zfields...)
 	}
 
