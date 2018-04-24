@@ -82,6 +82,14 @@ func main() {
 	if config.ContainsKey("stagingReqHeader") {
 		stagingReqHeader = config.MustGetString("stagingReqHeader")
 	}
+	defaultReqHeaderMap := make(map[string]string)
+	defaultResHeaderMap := make(map[string]string)
+	if config.ContainsKey("defaultReqHeaderMap") {
+		config.MustGetStruct("defaultReqHeaderMap", &defaultReqHeaderMap)
+	}
+	if config.ContainsKey("defaultResHeaderMap") {
+		config.MustGetStruct("defaultResHeaderMap", &defaultResHeaderMap)
+	}
 
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
@@ -95,6 +103,8 @@ func main() {
 		config.MustGetString("annotationPrefix"),
 		stagingReqHeader,
 		config.MustGetString("traceKey"),
+		defaultReqHeaderMap,
+		defaultResHeaderMap,
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),

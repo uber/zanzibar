@@ -13,5 +13,12 @@
 
 	"annotationPrefix": "zanzibar",
 	"traceKey": "x-trace-id",
-	"genMock": true
+	"genMock": true,
+
+	"defaultReqHeaderMap": {
+		"x-trace-id": "x-trace-id"
+	},
+	"defaultResHeaderMap": {
+		"x-trace-id": "x-trace-id"
+	}
 }
