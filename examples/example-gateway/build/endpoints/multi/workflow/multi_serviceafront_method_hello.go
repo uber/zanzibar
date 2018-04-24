@@ -68,8 +68,12 @@ func (w serviceAFrontHelloWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
-	clientRespBody, _, err := w.Clients.Multi.HelloA(
+	clientRespBody, cliRespHeaders, err := w.Clients.Multi.HelloA(
 		ctx, clientHeaders,
 	)
 
@@ -93,6 +97,8 @@ func (w serviceAFrontHelloWorkflow) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	response := convertServiceABackHelloClientResponse(clientRespBody)
 	return response, resHeaders, nil

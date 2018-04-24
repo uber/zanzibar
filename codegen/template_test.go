@@ -71,6 +71,8 @@ func TestGenerateBar(t *testing.T) {
 		"zanzibar",
 		"X-Zanzibar-Use-Staging",
 		"trace-key",
+		nil,
+		nil,
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {
 		return

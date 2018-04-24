@@ -82,6 +82,10 @@ func (w simpleServiceCallWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
 	cliRespHeaders, err := w.Clients.Baz.Call(
 		ctx, clientHeaders, clientRequest,
@@ -117,6 +121,7 @@ func (w simpleServiceCallWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	resHeaders.Set("Some-Res-Header", cliRespHeaders["Some-Res-Header"])
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	return resHeaders, nil
 }

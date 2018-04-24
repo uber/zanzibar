@@ -75,8 +75,12 @@ func (w simpleServiceCompareWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
-	clientRespBody, _, err := w.Clients.Baz.Compare(
+	clientRespBody, cliRespHeaders, err := w.Clients.Baz.Compare(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -116,6 +120,8 @@ func (w simpleServiceCompareWorkflow) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	response := convertSimpleServiceCompareClientResponse(clientRespBody)
 	return response, resHeaders, nil

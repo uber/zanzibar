@@ -891,7 +891,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 	reqHeaders := make(map[string]*TypedHeader)
 	// forward default request headers
 	// header "src" from endpoint becomes header "target" in client
-	// "src" is matched case-insensitively, but "target" casing will be preserved
 	for src, target := range g.packageHelper.DefaultReqHeaderMap() {
 		reqHeaders[src] = &TypedHeader{
 			Name:        src,
@@ -914,7 +913,6 @@ func (g *EndpointGenerator) generateEndpointFile(
 	resHeaders := make(map[string]*TypedHeader)
 	// forward default response headers
 	// header "src" from client becomes header "target" to endpoint
-	// "src" is matched case-insensitively, but "target" casing will be preserved
 	for src, target := range g.packageHelper.DefaultResHeaderMap() {
 		// need to canonicalize to match library output
 		h := textproto.CanonicalMIMEHeaderKey(src)
