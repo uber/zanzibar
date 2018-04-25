@@ -66,7 +66,6 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 	r *endpointsBazBaz.SimpleService_TransHeaders_Args,
 ) (*endpointsBazBaz.TransHeader, zanzibar.Header, error) {
 	clientRequest := convertToTransHeadersClientRequest(r)
-
 	clientRequest = propagateHeadersTransHeadersClientRequests(clientRequest, reqHeaders)
 
 	clientHeaders := map[string]string{}
@@ -165,6 +164,9 @@ func convertSimpleServiceTransHeadersClientResponse(in *clientsBazBase.TransHead
 }
 
 func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_TransHeaders_Args, headers zanzibar.Header) *clientsBazBaz.SimpleService_TransHeaders_Args {
+	if in == nil {
+		in = &clientsBazBaz.SimpleService_TransHeaders_Args{}
+	}
 	if key, ok := headers.Get("x-token"); ok {
 		if in.Req == nil {
 			in.Req = &clientsBazBase.TransHeaders{}

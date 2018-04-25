@@ -10,6 +10,184 @@ import (
 	"strings"
 )
 
+type Dgx struct {
+	S1 string `json:"s1,required"`
+	I2 int32  `json:"i2,required"`
+	B3 *bool  `json:"b3,omitempty"`
+}
+
+// ToWire translates a Dgx struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Dgx) ToWire() (wire.Value, error) {
+	var (
+		fields [3]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.S1), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	w, err = wire.NewValueI32(v.I2), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 2, Value: w}
+	i++
+	if v.B3 != nil {
+		w, err = wire.NewValueBool(*(v.B3)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Dgx struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Dgx struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Dgx
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Dgx) FromWire(w wire.Value) error {
+	var err error
+
+	s1IsSet := false
+	i2IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.S1, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				s1IsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TI32 {
+				v.I2, err = field.Value.GetI32(), error(nil)
+				if err != nil {
+					return err
+				}
+				i2IsSet = true
+			}
+		case 3:
+			if field.Value.Type() == wire.TBool {
+				var x bool
+				x, err = field.Value.GetBool(), error(nil)
+				v.B3 = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !s1IsSet {
+		return errors.New("field S1 of Dgx is required")
+	}
+
+	if !i2IsSet {
+		return errors.New("field I2 of Dgx is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Dgx
+// struct.
+func (v *Dgx) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [3]string
+	i := 0
+	fields[i] = fmt.Sprintf("S1: %v", v.S1)
+	i++
+	fields[i] = fmt.Sprintf("I2: %v", v.I2)
+	i++
+	if v.B3 != nil {
+		fields[i] = fmt.Sprintf("B3: %v", *(v.B3))
+		i++
+	}
+
+	return fmt.Sprintf("Dgx{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _Bool_EqualsPtr(lhs, rhs *bool) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+// Equals returns true if all the fields of this Dgx match the
+// provided Dgx.
+//
+// This function performs a deep comparison.
+func (v *Dgx) Equals(rhs *Dgx) bool {
+	if !(v.S1 == rhs.S1) {
+		return false
+	}
+	if !(v.I2 == rhs.I2) {
+		return false
+	}
+	if !_Bool_EqualsPtr(v.B3, rhs.B3) {
+		return false
+	}
+
+	return true
+}
+
+// GetB3 returns the value of B3 if it is set or its
+// zero value if it is unset.
+func (v *Dgx) GetB3() (o bool) {
+	if v.B3 != nil {
+		return *v.B3
+	}
+
+	return
+}
+
 type Fred struct {
 	ContentType string `json:"contentType,required"`
 	Auth        string `json:"auth,required"`

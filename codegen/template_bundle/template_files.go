@@ -2607,9 +2607,15 @@ func (w {{$workflowStruct}}) Handle(
 	{{- if ne .RequestType "" -}}
 	clientRequest := convertTo{{title .Name}}ClientRequest(r)
 	{{end}}
+
 	{{- if len $method.PropagateHeadersGoStatements | ne 0 }}
-	clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
+		{{- if ne .RequestType "" -}}
+			clientRequest = propagateHeaders{{title .Name}}ClientRequests(clientRequest, reqHeaders)
+		{{- else -}}
+			clientRequest := propagateHeaders{{title .Name}}ClientRequests(nil, reqHeaders)
+		{{end}}
 	{{end}}
+
 	clientHeaders := map[string]string{}
 	{{if (ne (len $reqHeaderMapKeys) 0) }}
 	var ok bool
@@ -2757,7 +2763,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7354, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7498, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -919,6 +919,11 @@ func (ms *MethodSpec) setHeaderPropagator(
 		downstreamMethod.RequestType,
 		"{",
 	)
+
+	hp.append("if in == nil {")
+	hp.append(fmt.Sprintf(`in = %s{}`, strings.Replace(downstreamMethod.RequestType, "*", "&", 1)))
+	hp.append("}")
+
 	err := hp.Propagate(reqHeaders, downstreamStructType, headersPropagate)
 	if err != nil {
 		return err

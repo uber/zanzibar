@@ -69,6 +69,15 @@ service SimpleService {
       zanzibar.handler = "baz.trans"
   )
 
+  TransHeader transHeadersNoReq() throws (
+      1: AuthErr authErr (zanzibar.http.status = "401")
+  ) (
+      zanzibar.http.status = "200"
+      zanzibar.http.method = "POST"
+      zanzibar.http.path = "/baz/trans-headers-no-req"
+      zanzibar.http.req.metadata = "meta.Dgx"
+  )
+
   TransHeader transHeaders(
       1: required TransHeader req
   ) throws (

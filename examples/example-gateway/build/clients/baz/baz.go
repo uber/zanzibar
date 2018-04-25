@@ -155,6 +155,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_TransHeaders_Args,
 	) (*clientsBazBase.TransHeaders, map[string]string, error)
+	TransHeadersNoReq(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+	) (*clientsBazBase.TransHeaders, map[string]string, error)
 	TransHeadersType(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -204,31 +209,32 @@ func NewClient(deps *module.Dependencies) Client {
 	)
 
 	methodNames := map[string]string{
-		"SecondService::echoBinary":       "EchoBinary",
-		"SecondService::echoBool":         "EchoBool",
-		"SecondService::echoDouble":       "EchoDouble",
-		"SecondService::echoEnum":         "EchoEnum",
-		"SecondService::echoI16":          "EchoI16",
-		"SecondService::echoI32":          "EchoI32",
-		"SecondService::echoI64":          "EchoI64",
-		"SecondService::echoI8":           "EchoI8",
-		"SecondService::echoString":       "EchoString",
-		"SecondService::echoStringList":   "EchoStringList",
-		"SecondService::echoStringMap":    "EchoStringMap",
-		"SecondService::echoStringSet":    "EchoStringSet",
-		"SecondService::echoStructList":   "EchoStructList",
-		"SecondService::echoStructSet":    "EchoStructSet",
-		"SecondService::echoTypedef":      "EchoTypedef",
-		"SimpleService::call":             "Call",
-		"SimpleService::compare":          "Compare",
-		"SimpleService::headerSchema":     "HeaderSchema",
-		"SimpleService::ping":             "Ping",
-		"SimpleService::sillyNoop":        "DeliberateDiffNoop",
-		"SimpleService::testUuid":         "TestUUID",
-		"SimpleService::trans":            "Trans",
-		"SimpleService::transHeaders":     "TransHeaders",
-		"SimpleService::transHeadersType": "TransHeadersType",
-		"SimpleService::urlTest":          "URLTest",
+		"SecondService::echoBinary":        "EchoBinary",
+		"SecondService::echoBool":          "EchoBool",
+		"SecondService::echoDouble":        "EchoDouble",
+		"SecondService::echoEnum":          "EchoEnum",
+		"SecondService::echoI16":           "EchoI16",
+		"SecondService::echoI32":           "EchoI32",
+		"SecondService::echoI64":           "EchoI64",
+		"SecondService::echoI8":            "EchoI8",
+		"SecondService::echoString":        "EchoString",
+		"SecondService::echoStringList":    "EchoStringList",
+		"SecondService::echoStringMap":     "EchoStringMap",
+		"SecondService::echoStringSet":     "EchoStringSet",
+		"SecondService::echoStructList":    "EchoStructList",
+		"SecondService::echoStructSet":     "EchoStructSet",
+		"SecondService::echoTypedef":       "EchoTypedef",
+		"SimpleService::call":              "Call",
+		"SimpleService::compare":           "Compare",
+		"SimpleService::headerSchema":      "HeaderSchema",
+		"SimpleService::ping":              "Ping",
+		"SimpleService::sillyNoop":         "DeliberateDiffNoop",
+		"SimpleService::testUuid":          "TestUUID",
+		"SimpleService::trans":             "Trans",
+		"SimpleService::transHeaders":      "TransHeaders",
+		"SimpleService::transHeadersNoReq": "TransHeadersNoReq",
+		"SimpleService::transHeadersType":  "TransHeadersType",
+		"SimpleService::urlTest":           "URLTest",
 	}
 
 	client := zanzibar.NewTChannelClient(
@@ -1108,6 +1114,45 @@ func (c *bazClient) TransHeaders(
 	}
 
 	resp, err = clientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
+	if err != nil {
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
+	}
+	return resp, respHeaders, err
+}
+
+// TransHeadersNoReq is a client RPC call for method "SimpleService::transHeadersNoReq"
+func (c *bazClient) TransHeadersNoReq(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+) (*clientsBazBase.TransHeaders, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_TransHeadersNoReq_Result
+	var resp *clientsBazBase.TransHeaders
+
+	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
+
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		default:
+			err = errors.New("bazClient received no result or unknown exception for TransHeadersNoReq")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}
