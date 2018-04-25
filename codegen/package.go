@@ -57,6 +57,10 @@ type PackageHelper struct {
 	stagingReqHeader string
 	// traceKey is the key for uniq trace id that identifies request / response pair
 	traceKey string
+	// A map of default headers that all endpoints will forward to their clients
+	defaultReqHeaderMap map[string]string
+	// A map of default headers that all clients will forward back to their endpoints
+	defaultResHeaderMap map[string]string
 }
 
 // NewPackageHelper creates a package helper.
@@ -72,6 +76,8 @@ func NewPackageHelper(
 	annotationPrefix string,
 	stagingReqHeader string,
 	traceKey string,
+	defaultReqHeaderMap map[string]string,
+	defaultResHeaderMap map[string]string,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
@@ -101,6 +107,8 @@ func NewPackageHelper(
 		annotationPrefix:    annotationPrefix,
 		stagingReqHeader:    stagingReqHeader,
 		traceKey:            traceKey,
+		defaultReqHeaderMap: defaultReqHeaderMap,
+		defaultResHeaderMap: defaultResHeaderMap,
 	}
 	return p, nil
 }
@@ -220,4 +228,16 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 // if a request should go to the staging downstream client
 func (p PackageHelper) StagingReqHeader() string {
 	return p.stagingReqHeader
+}
+
+// DefaultReqHeaderMap returns a map of default headers to be forwarded
+// from the endpoint to client
+func (p PackageHelper) DefaultReqHeaderMap() map[string]string {
+	return p.defaultReqHeaderMap
+}
+
+// DefaultResHeaderMap returns a map of default headers to be forwarded
+// from client to endpoint
+func (p PackageHelper) DefaultResHeaderMap() map[string]string {
+	return p.defaultResHeaderMap
 }

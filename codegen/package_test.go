@@ -75,6 +75,8 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		"zanzibar",
 		"X-Zanzibar-Use-Staging",
 		"trace-key",
+		nil,
+		nil,
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {
 		return nil

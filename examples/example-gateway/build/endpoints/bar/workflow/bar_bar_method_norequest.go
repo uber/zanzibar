@@ -71,8 +71,12 @@ func (w barNoRequestWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
-	clientRespBody, _, err := w.Clients.Bar.NoRequest(
+	clientRespBody, cliRespHeaders, err := w.Clients.Bar.NoRequest(
 		ctx, clientHeaders,
 	)
 
@@ -104,6 +108,8 @@ func (w barNoRequestWorkflow) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	response := convertBarNoRequestClientResponse(clientRespBody)
 	return response, resHeaders, nil

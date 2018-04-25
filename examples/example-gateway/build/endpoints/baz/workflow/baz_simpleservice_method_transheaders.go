@@ -84,8 +84,12 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
-	clientRespBody, _, err := w.Clients.Baz.TransHeaders(
+	clientRespBody, cliRespHeaders, err := w.Clients.Baz.TransHeaders(
 		ctx, clientHeaders, clientRequest,
 	)
 
@@ -125,6 +129,8 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	response := convertSimpleServiceTransHeadersClientResponse(clientRespBody)
 	return response, resHeaders, nil

@@ -71,8 +71,12 @@ func (w barHelloWorldWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
-	clientRespBody, _, err := w.Clients.Bar.Hello(
+	clientRespBody, cliRespHeaders, err := w.Clients.Bar.Hello(
 		ctx, clientHeaders,
 	)
 
@@ -104,6 +108,8 @@ func (w barHelloWorldWorkflow) Handle(
 
 	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
+
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 
 	response := convertBarHelloWorldClientResponse(clientRespBody)
 	return response, resHeaders, nil

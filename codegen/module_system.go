@@ -888,16 +888,43 @@ func (g *EndpointGenerator) generateEndpointFile(
 		clientName = e.ClientSpec.ClientName
 	}
 
-	// allow configured header to pass down to switch downstream service dynmamic
-	reqHeaders := e.ReqHeaders
-	if reqHeaders == nil {
-		reqHeaders = make(map[string]*TypedHeader)
+	reqHeaders := make(map[string]*TypedHeader)
+	// forward default request headers
+	// header "src" from endpoint becomes header "target" in client
+	for src, target := range g.packageHelper.DefaultReqHeaderMap() {
+		reqHeaders[src] = &TypedHeader{
+			Name:        src,
+			TransformTo: target,
+			Field:       &compile.FieldSpec{Required: false},
+		}
 	}
-	shk := textproto.CanonicalMIMEHeaderKey(g.packageHelper.StagingReqHeader())
+	// forward endpoint-specific request headers
+	for k, v := range e.ReqHeaders {
+		reqHeaders[k] = v
+	}
+	// allow configured header to pass down to switch downstream service dynamically
+	shk := g.packageHelper.StagingReqHeader()
 	reqHeaders[shk] = &TypedHeader{
 		Name:        shk,
 		TransformTo: shk,
 		Field:       &compile.FieldSpec{Required: false},
+	}
+
+	resHeaders := make(map[string]*TypedHeader)
+	// forward default response headers
+	// header "src" from client becomes header "target" to endpoint
+	for src, target := range g.packageHelper.DefaultResHeaderMap() {
+		// need to canonicalize to match library output
+		h := textproto.CanonicalMIMEHeaderKey(src)
+		resHeaders[h] = &TypedHeader{
+			Name:        h,
+			TransformTo: target,
+			Field:       &compile.FieldSpec{Required: false},
+		}
+	}
+	// forward endpoint-specific response headers
+	for k, v := range e.ResHeaders {
+		resHeaders[k] = v
 	}
 
 	// TODO: http client needs to support multiple thrift services
@@ -910,9 +937,9 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ReqHeaders:             reqHeaders,
 		ReqHeadersKeys:         sortedHeaders(reqHeaders, false),
 		ReqRequiredHeadersKeys: sortedHeaders(reqHeaders, true),
-		ResHeadersKeys:         sortedHeaders(e.ResHeaders, false),
-		ResRequiredHeadersKeys: sortedHeaders(e.ResHeaders, true),
-		ResHeaders:             e.ResHeaders,
+		ResHeadersKeys:         sortedHeaders(resHeaders, false),
+		ResRequiredHeadersKeys: sortedHeaders(resHeaders, true),
+		ResHeaders:             resHeaders,
 		ClientID:               clientID,
 		ClientName:             clientName,
 		ClientMethodName:       e.ClientMethod,

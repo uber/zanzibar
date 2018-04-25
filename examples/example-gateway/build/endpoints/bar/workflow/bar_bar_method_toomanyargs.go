@@ -85,6 +85,10 @@ func (w barTooManyArgsWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h
 	}
+	h, ok = reqHeaders.Get("x-trace-id")
+	if ok {
+		clientHeaders["x-trace-id"] = h
+	}
 
 	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,
@@ -128,6 +132,7 @@ func (w barTooManyArgsWorkflow) Handle(
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
+	resHeaders.Set("x-trace-id", cliRespHeaders["X-Trace-Id"])
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
 	response := convertBarTooManyArgsClientResponse(clientRespBody)
