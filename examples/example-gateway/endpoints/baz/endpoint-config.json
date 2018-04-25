@@ -11,6 +11,7 @@
 			"trans.json",
 			"trans-headers.json",
 			"trans-headers-type.json",
+			"trans-headers-no-req.json",
 			"header-schema.json"
 		]
 	},

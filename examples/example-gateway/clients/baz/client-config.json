@@ -28,6 +28,7 @@
 			"Trans": "SimpleService::trans",
 			"TransHeaders": "SimpleService::transHeaders",
 			"TransHeadersType": "SimpleService::transHeadersType",
+			"TransHeadersNoReq": "SimpleService::transHeadersNoReq",
 			"HeaderSchema": "SimpleService::headerSchema",
 			"URLTest": "SimpleService::urlTest"
 		}

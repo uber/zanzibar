@@ -355,6 +355,20 @@ func (mr *MockClientMockRecorder) TransHeaders(arg0, arg1, arg2 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransHeaders", reflect.TypeOf((*MockClient)(nil).TransHeaders), arg0, arg1, arg2)
 }
 
+// TransHeadersNoReq mocks base method
+func (m *MockClient) TransHeadersNoReq(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersNoReq_Args) (*base.TransHeaders, map[string]string, error) {
+	ret := m.ctrl.Call(m, "TransHeadersNoReq", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*base.TransHeaders)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// TransHeadersNoReq indicates an expected call of TransHeadersNoReq
+func (mr *MockClientMockRecorder) TransHeadersNoReq(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransHeadersNoReq", reflect.TypeOf((*MockClient)(nil).TransHeadersNoReq), arg0, arg1, arg2)
+}
+
 // TransHeadersType mocks base method
 func (m *MockClient) TransHeadersType(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_TransHeadersType_Args) (*baz.TransHeaderType, map[string]string, error) {
 	ret := m.ctrl.Call(m, "TransHeadersType", arg0, arg1, arg2)

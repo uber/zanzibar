@@ -33,3 +33,9 @@ struct TokenOnly {
 struct UUIDOnly {
     1: required string UUID (zanzibar.http.ref = "headers.X-Uuid")
 }
+
+struct Dgx {
+    1: required string s1 (zanzibar.http.ref = "headers.s1")
+    2: required i32 i2 (zanzibar.http.ref = "headers.i2")
+    3: optional bool b3 (zanzibar.http.ref = "headers.b3")
+}

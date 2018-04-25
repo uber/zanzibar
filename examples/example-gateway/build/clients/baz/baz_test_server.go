@@ -1024,6 +1024,56 @@ func (h *SimpleServiceTransHeadersHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
+// SimpleServiceTransHeadersNoReqFunc is the handler function for "transHeadersNoReq" method of thrift service "SimpleService".
+type SimpleServiceTransHeadersNoReqFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_TransHeadersNoReq_Args,
+) (*clientsBazBase.TransHeaders, map[string]string, error)
+
+// NewSimpleServiceTransHeadersNoReqHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceTransHeadersNoReqHandler(f SimpleServiceTransHeadersNoReqFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceTransHeadersNoReqHandler{f}
+}
+
+// SimpleServiceTransHeadersNoReqHandler handles the "transHeadersNoReq" method call of thrift service "SimpleService".
+type SimpleServiceTransHeadersNoReqHandler struct {
+	transheadersnoreq SimpleServiceTransHeadersNoReqFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceTransHeadersNoReqHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_TransHeadersNoReq_Args
+	var res clientsBazBaz.SimpleService_TransHeadersNoReq_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.transheadersnoreq(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for transHeadersNoReq returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
 // SimpleServiceTransHeadersTypeFunc is the handler function for "transHeadersType" method of thrift service "SimpleService".
 type SimpleServiceTransHeadersTypeFunc func(
 	ctx context.Context,

@@ -50,6 +50,15 @@ service SimpleService {
         2: OtherAuthErr otherAuthErr
     )
 
+    base.TransHeaders transHeadersNoReq(
+        1: required base.NestedStruct req
+        2: optional string s2
+        3: required i32 i3
+        4: optional bool b4
+    ) throws (
+        1: AuthErr authErr
+    )
+
     base.TransHeaders transHeaders(
         1: required base.TransHeaders req
     ) throws (

@@ -37,27 +37,29 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SimpleServiceCallHandler:             NewSimpleServiceCallHandler(deps),
-		SimpleServiceCompareHandler:          NewSimpleServiceCompareHandler(deps),
-		SimpleServicePingHandler:             NewSimpleServicePingHandler(deps),
-		SimpleServiceSillyNoopHandler:        NewSimpleServiceSillyNoopHandler(deps),
-		SimpleServiceTransHandler:            NewSimpleServiceTransHandler(deps),
-		SimpleServiceTransHeadersHandler:     NewSimpleServiceTransHeadersHandler(deps),
-		SimpleServiceTransHeadersTypeHandler: NewSimpleServiceTransHeadersTypeHandler(deps),
-		SimpleServiceHeaderSchemaHandler:     NewSimpleServiceHeaderSchemaHandler(deps),
+		SimpleServiceCallHandler:              NewSimpleServiceCallHandler(deps),
+		SimpleServiceCompareHandler:           NewSimpleServiceCompareHandler(deps),
+		SimpleServicePingHandler:              NewSimpleServicePingHandler(deps),
+		SimpleServiceSillyNoopHandler:         NewSimpleServiceSillyNoopHandler(deps),
+		SimpleServiceTransHandler:             NewSimpleServiceTransHandler(deps),
+		SimpleServiceTransHeadersHandler:      NewSimpleServiceTransHeadersHandler(deps),
+		SimpleServiceTransHeadersTypeHandler:  NewSimpleServiceTransHeadersTypeHandler(deps),
+		SimpleServiceTransHeadersNoReqHandler: NewSimpleServiceTransHeadersNoReqHandler(deps),
+		SimpleServiceHeaderSchemaHandler:      NewSimpleServiceHeaderSchemaHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	SimpleServiceCallHandler             *SimpleServiceCallHandler
-	SimpleServiceCompareHandler          *SimpleServiceCompareHandler
-	SimpleServicePingHandler             *SimpleServicePingHandler
-	SimpleServiceSillyNoopHandler        *SimpleServiceSillyNoopHandler
-	SimpleServiceTransHandler            *SimpleServiceTransHandler
-	SimpleServiceTransHeadersHandler     *SimpleServiceTransHeadersHandler
-	SimpleServiceTransHeadersTypeHandler *SimpleServiceTransHeadersTypeHandler
-	SimpleServiceHeaderSchemaHandler     *SimpleServiceHeaderSchemaHandler
+	SimpleServiceCallHandler              *SimpleServiceCallHandler
+	SimpleServiceCompareHandler           *SimpleServiceCompareHandler
+	SimpleServicePingHandler              *SimpleServicePingHandler
+	SimpleServiceSillyNoopHandler         *SimpleServiceSillyNoopHandler
+	SimpleServiceTransHandler             *SimpleServiceTransHandler
+	SimpleServiceTransHeadersHandler      *SimpleServiceTransHeadersHandler
+	SimpleServiceTransHeadersTypeHandler  *SimpleServiceTransHeadersTypeHandler
+	SimpleServiceTransHeadersNoReqHandler *SimpleServiceTransHeadersNoReqHandler
+	SimpleServiceHeaderSchemaHandler      *SimpleServiceHeaderSchemaHandler
 }
 
 // Register registers the endpoint handlers with the gateway
@@ -90,9 +92,13 @@ func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
 	if err6 != nil {
 		return err6
 	}
-	err7 := handlers.SimpleServiceHeaderSchemaHandler.Register(gateway)
+	err7 := handlers.SimpleServiceTransHeadersNoReqHandler.Register(gateway)
 	if err7 != nil {
 		return err7
+	}
+	err8 := handlers.SimpleServiceHeaderSchemaHandler.Register(gateway)
+	if err8 != nil {
+		return err8
 	}
 	return nil
 }
