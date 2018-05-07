@@ -1,5 +1,5 @@
-hash: 64ca5bc644c90e95fcd9c892bc7ea94e0df42b8e9f29da81a250c9c184fa90f9
-updated: 2018-03-09T17:09:31.818929-08:00
+hash: f0c2d3e1bb717112a25602da3ca48352e6a3ae7b6da379b1fb466bfb6f489668
+updated: 2018-05-07T12:03:27.856116112-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -24,9 +24,10 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 58cd061d09382b6011f84c1291ebe50ef2e25bab
+  version: 22bbf0ddf08105dfa364d0a2fa619dfa71014af5
   subpackages:
   - gomock
+  - mockgen/model
 - name: github.com/jessevdk/go-flags
   version: f88afde2fa19a30cf50ba4b05b3d13bc6bae3079
 - name: github.com/julienschmidt/httprouter
@@ -109,7 +110,17 @@ imports:
 - name: github.com/xeipuuv/gojsonschema
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
-  version: 8474b86a5a6f79c443ce4b2992817ff32cf208b8
+  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+- name: go.uber.org/dig
+  version: d100de9c8cc8358591507951141bc107713ba671
+  subpackages:
+  - internal/digreflect
+- name: go.uber.org/fx
+  version: ed7e99834c0a7099c6cb6434fe5a7b007ac00db9
+  subpackages:
+  - internal/fxlog
+  - internal/fxreflect
+  - internal/lifecycle
 - name: go.uber.org/multierr
   version: a3d1fc1f1316d4132fc61f4ea1159ae0613fb474
 - name: go.uber.org/thriftrw
@@ -138,7 +149,7 @@ imports:
   - version
   - wire
 - name: go.uber.org/zap
-  version: 35aad584952c3e7020db7b839f6b102de6271f89
+  version: eeedf312bc6c57391d84767a4cd413f02a917974
   subpackages:
   - buffer
   - internal/bufferpool
@@ -147,7 +158,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: d25186b37f34ebdbbea8f488ef055638dfab272d
+  version: cbb82b59bc5199680c5bf34109e12097095dca9b
   subpackages:
   - context
 testImports: []
