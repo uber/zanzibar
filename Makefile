@@ -188,9 +188,9 @@ $(EXAMPLE_SERVICES): $(GO_FILES)
 
 run-%: $(EXAMPLE_SERVICES_DIR)%/
 	cd "$(EXAMPLE_BASE_DIR)"; \
-		UBER_ENVIRONMENT=production \
+		UBER_ENVIRONMENT=development \
 		CONFIG_DIR=./config \
-		./bin/$* --config="config/production.json;"
+		./bin/$* --config="config/test.json;"
 
 
 .PHONY: bins

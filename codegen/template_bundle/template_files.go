@@ -1207,6 +1207,7 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
+	"go.uber.org/fx"
 
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
@@ -1278,6 +1279,13 @@ func readFlags() {
 }
 
 func main() {
+	app := fx.New(
+		fx.Invoke(zanzibarMain),
+	)
+	app.Run()
+}
+
+func zanzibarMain() {
 	readFlags()
 	server, err := createGateway()
 	if err != nil {
@@ -1303,7 +1311,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1977, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 2077, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

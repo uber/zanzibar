@@ -28,6 +28,7 @@ import (
 	"runtime"
 	"strings"
 
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/config"
@@ -118,6 +119,13 @@ func readFlags() {
 }
 
 func main() {
+	app := fx.New(
+		fx.Invoke(zanzibarMain),
+	)
+	app.Run()
+}
+
+func zanzibarMain() {
 	readFlags()
 	server, err := createGateway()
 	if err != nil {
