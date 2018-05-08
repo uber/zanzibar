@@ -33,8 +33,6 @@ import (
 type PackageHelper struct {
 	// The project package name
 	packageRoot string
-	// The filepath inside idl that belongs to this repo.
-	managedThriftFolder string
 	// The absolute root dir path for all configs, i.e., clients, endpoints, idl, etc
 	configRoot string
 	// The absolute root directory containing thrift files
@@ -62,7 +60,6 @@ type PackageHelper struct {
 // NewPackageHelper creates a package helper.
 func NewPackageHelper(
 	packageRoot string,
-	managedThriftFolder string,
 	configRoot string,
 	middlewareConfig string,
 	relThriftRootDir string,
@@ -89,18 +86,17 @@ func NewPackageHelper(
 	}
 
 	p := &PackageHelper{
-		packageRoot:         packageRoot,
-		managedThriftFolder: managedThriftFolder,
-		configRoot:          absConfigRoot,
-		thriftRootDir:       filepath.Join(absConfigRoot, relThriftRootDir),
-		genCodePackage:      genCodePackage,
-		goGatewayNamespace:  goGatewayNamespace,
-		targetGenDir:        filepath.Join(absConfigRoot, relTargetGenDir),
-		copyrightHeader:     copyrightHeader,
-		middlewareSpecs:     middlewareSpecs,
-		annotationPrefix:    annotationPrefix,
-		stagingReqHeader:    stagingReqHeader,
-		traceKey:            traceKey,
+		packageRoot:        packageRoot,
+		configRoot:         absConfigRoot,
+		thriftRootDir:      filepath.Join(absConfigRoot, relThriftRootDir),
+		genCodePackage:     genCodePackage,
+		goGatewayNamespace: goGatewayNamespace,
+		targetGenDir:       filepath.Join(absConfigRoot, relTargetGenDir),
+		copyrightHeader:    copyrightHeader,
+		middlewareSpecs:    middlewareSpecs,
+		annotationPrefix:   annotationPrefix,
+		stagingReqHeader:   stagingReqHeader,
+		traceKey:           traceKey,
 	}
 	return p, nil
 }

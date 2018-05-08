@@ -61,7 +61,6 @@ func TestGenerateBar(t *testing.T) {
 
 	packageHelper, err := codegen.NewPackageHelper(
 		"github.com/uber/zanzibar/examples/example-gateway",
-		"github.com/uber/zanzibar",
 		absGatewayPath,
 		"middlewares",
 		"./idl",

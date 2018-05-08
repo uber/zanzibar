@@ -65,7 +65,6 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 
 	h, err := codegen.NewPackageHelper(
 		"github.com/uber/zanzibar/examples/example-gateway",
-		"github.com/uber/zanzibar",
 		absGatewayPath,
 		"middlewares",
 		"./idl",

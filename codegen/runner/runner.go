@@ -85,7 +85,6 @@ func main() {
 
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
-		config.MustGetString("managedThriftFolder"),
 		configRoot,
 		config.MustGetString("middlewareConfig"),
 		config.MustGetString("thriftRootDir"),
