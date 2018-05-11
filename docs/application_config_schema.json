@@ -1,0 +1,95 @@
+{
+	"$id": "application config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"packageRoot": {
+			"type": "string",
+			"description": "The application package root",
+			"examples": [
+				"github.com/uber/zanzibar/examples/example-gateway"
+			]
+		},
+		"thriftRootDir": {
+			"type": "string",
+			"description": "The path of idl directory, relative to application root directory",
+			"examples": [
+				"./idl"
+			]
+		},
+		"genCodePackage": {
+			"type": "string",
+			"description": "The package path for thriftrw and easyjson generated structs and (de)serializers",
+			"examples": [
+				"github.com/uber/zanzibar/examples/example-gateway/build/gen-code"
+			]
+		},
+		"targetGenDir": {
+			"type": "The directory path of all generated code, relative to application root directory",
+			"description": "An explanation about the purpose of this instance.",
+			"examples": [
+				"./build"
+			]
+		},
+		"clientConfig": {
+			"type": "string",
+			"description": "The directory for client module configs, relative to application root directory",
+			"examples": [
+				"./clients"
+			]
+		},
+		"endpointConfig": {
+			"type": "string",
+			"description": "The directory for endpoint module configs, relative to application root directory",
+			"examples": [
+				"./endpoints"
+			]
+		},
+		"middlewareConfig": {
+			"type": "string",
+			"description": "The directory for middleware module configs, relative to application root directory",
+			"examples": [
+				"./middlewares"
+			]
+		},
+		"copyrightHeader": {
+			"type": "string",
+			"description": "The path of copyright header file, relative to application root directory",
+			"examples": [
+				"./copyright_header.txt"
+			]
+		},
+		"annotationPrefix": {
+			"type": "string",
+			"description": "The prefix for HTTP annotations in Thrift files",
+			"examples": [
+				"zanzibar"
+			]
+		},
+		"traceKey": {
+			"type": "string",
+			"description": "The name of the generated trace header",
+			"examples": [
+				"x-trace-id"
+			]
+		},
+		"genMock": {
+			"type": "boolean",
+			"description": "Whether to generate mocks during code generation",
+			"examples": [
+				true
+			]
+		}
+	},
+	"required": [
+		"packageRoot",
+		"thriftRootDir",
+		"genCodePackage",
+		"targetGenDir",
+		"middlewareConfig",
+		"copyrightHeader",
+		"annotationPrefix",
+		"traceKey",
+		"genMock"
+	]
+}

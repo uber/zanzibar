@@ -1,0 +1,45 @@
+{
+	"$id": "service config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"name": {
+			"type": "string",
+			"description": "Name of the service",
+			"examples": [
+				"example-gateway"
+			]
+		},
+		"type": {
+			"type": "string",
+			"description": "Type of the service, currently the only valid type is gateway",
+			"examples": [
+				"gateway"
+			]
+		},
+		"config": {
+			"type": "object"
+		},
+		"dependencies": {
+			"type": "object",
+			"properties": {
+				"endpoint": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Endpoints the service depends on",
+						"examples": [
+							"bar"
+						]
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"type",
+		"config",
+		"dependencies"
+	]
+}

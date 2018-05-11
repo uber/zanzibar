@@ -1,0 +1,105 @@
+{
+	"$id": "endpoint method config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"endpointType": {
+			"type": "string",
+			"description": "Endpoint protocol type, either http or tchannel",
+			"enum": [
+				"http",
+				"tchannel"
+			],
+			"examples": [
+				"http"
+			]
+		},
+		"endpointId": {
+			"type": "string",
+			"description": "Name of the endpoint",
+			"examples": [
+				"bar"
+			]
+		},
+		"handleId": {
+			"type": "string",
+			"description": "Name of the method",
+			"examples": [
+				"helloWorld"
+			]
+		},
+		"thriftFile": {
+			"type": "string",
+			"description": "Path to endpoint thrift file, relative to idl path",
+			"examples": [
+				"endpoints/bar/bar.thrift"
+			]
+		},
+		"thriftFileSha": {
+			"type": "string",
+			"description": "Sha of the thrift file, reserved but currently not used",
+			"examples": [
+				"{{placeholder}}"
+			]
+		},
+		"thriftMethodName": {
+			"type": "string",
+			"description": "Thrift method name, in format of service::method",
+			"examples": [
+				"Bar::helloWorld"
+			]
+		},
+		"workflowType": {
+			"type": "string",
+			"description": "Workflow type, either httpClient, tchannelClient or custom",
+			"enum": [
+				"custom",
+				"httpClient",
+				"tchannelClient"
+			],
+			"examples": [
+				"custom"
+			]
+		},
+		"workflowImportPath": {
+			"type": "string",
+			"description": "Workflow import path if workflow type is custom",
+			"examples": [
+				"github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+			]
+		},
+		"clientId": {
+			"type": "string",
+			"description": "Client ID if workflow is to proxy client",
+			"examples": [
+				"bar"
+			]
+		},
+		"clientMethod": {
+			"type": "string",
+			"description": "Client method if workflow is to proxy client",
+			"examples": [
+				"Hello"
+			]
+		},
+		"middlewares": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"description": "Middlewares the endpoint method depends on",
+				"examples": [
+					"example"
+				]
+			}
+		}
+	},
+	"required": [
+		"endpointType",
+		"endpointId",
+		"handleId",
+		"thriftFile",
+		"thriftFileSha",
+		"thriftMethodName",
+		"workflowType"
+	]
+}

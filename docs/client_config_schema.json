@@ -1,0 +1,92 @@
+{
+	"$id": "client config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"name": {
+			"type": "string",
+			"description": "Client name",
+			"examples": [
+				"contacts"
+			]
+		},
+		"type": {
+			"type": "string",
+			"description": "Client type, either http, tchannel or custom",
+			"enum": [
+				"http",
+				"tchannel",
+				"custom"
+			],
+			"examples": [
+				"http"
+			]
+		},
+		"config": {
+			"type": "object",
+			"properties": {
+				"thriftFile": {
+					"type": "string",
+					"description": "Path to client thrift file, relative to idl path",
+					"examples": [
+						"clients/contacts/contacts.thrift"
+					]
+				},
+				"thriftFileSha": {
+					"type": "string",
+					"description": "Sha of the thrift file, reserved but currently not used",
+					"examples": [
+						"{{placeholder}}"
+					]
+				},
+				"exposedMethods": {
+					"type": "object",
+					"description": "The thrift methods exposed on the client in Go, key is method name in Go, value is thrift method in form of service::method",
+					"examples": [
+						"{\"SaveContacts\": \"Contacts::saveContacts\"}"
+					]
+				},
+				"fixture": {
+					"type": "object",
+					"properties": {
+						"importPath": {
+							"type": "string",
+							"description": "Package import path for concrete fixtures",
+							"examples": [
+								"github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
+							]
+						},
+						"scenarios": {
+							"type": "object",
+							"description": "Fixture scenarios, key is client method name, value is a list of string indicating different scenarios",
+							"examples": [
+								"{\"SaveContacts\": [\"success\"]}"
+							]
+						}
+					}
+				}
+			}
+		},
+		"dependencies": {
+			"type": "object",
+			"properties": {
+				"client": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Name of the client this client depends on",
+						"examples": [
+							"foo"
+						]
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"type",
+		"config",
+		"dependencies"
+	]
+}
