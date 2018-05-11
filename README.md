@@ -19,6 +19,7 @@ Modules are the components that a Zanzibar application is made of. A module belo
 `ModuleClass` abstracts the functionality of a specific class of components. Zanzibar predefines a few module classes, i.e., `client`, `endpoint`, `middleware` and `service`. Each represents a corresponding abstraction:
 
 ModuleClass | Abstraction
+----------- | -----------
 client | clients to communicate with downstreams, e.g., database clients and RPC clients
 endpoint | application interfaces exposed to upstreams
 middleware | common functionality that has less to do with business logic, e.g., rate limiting middleware
@@ -48,6 +49,7 @@ Zanzibar also constructs a full global dependency graph for a given set of modul
 To establish and enforce abstraction boundaries, dependency rules at `ModuleClass` level are necessary. Zanzibar predefines the following dependency rules for built module classes:
 
 ModuleClass | DependsOn | DependedBy
+----------- | --------- | ----------
 client | N/A | middleware, endpoint
 middleware | client | endpoint
 endpoint | client, middleware | service
