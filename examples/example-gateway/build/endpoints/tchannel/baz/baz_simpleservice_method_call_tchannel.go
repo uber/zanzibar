@@ -91,8 +91,10 @@ func (h *SimpleServiceCallHandler) Handle(
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	resHeaders := map[string]string{}
-	for _, key := range wfResHeaders.Keys() {
-		resHeaders[key], _ = wfResHeaders.Get(key)
+	if wfResHeaders != nil {
+		for _, key := range wfResHeaders.Keys() {
+			resHeaders[key], _ = wfResHeaders.Get(key)
+		}
 	}
 
 	if err != nil {
@@ -117,11 +119,13 @@ func (h *SimpleServiceCallHandler) Handle(
 			)
 		}
 	}
-	if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
-		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) missing response headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
+	if wfResHeaders != nil {
+		if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
+			return false, nil, nil, errors.Wrapf(
+				err, "%s.%s (%s) missing response headers",
+				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+			)
+		}
 	}
 
 	return err == nil, &res, resHeaders, nil

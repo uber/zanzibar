@@ -2403,8 +2403,10 @@ func (h *{{$handlerName}}) Handle(
 	{{end}}
 
 	resHeaders := map[string]string{}
-	for _, key := range wfResHeaders.Keys() {
-		resHeaders[key], _ = wfResHeaders.Get(key)
+	if wfResHeaders != nil {
+		for _, key := range wfResHeaders.Keys() {
+			resHeaders[key], _ = wfResHeaders.Get(key)
+		}
 	}
 
 	{{if eq (len .Exceptions) 0 -}}
@@ -2444,11 +2446,13 @@ func (h *{{$handlerName}}) Handle(
 	{{end}}
 
 	{{- if .ResHeaders}}
-	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
-		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) missing response headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
+	if wfResHeaders != nil {
+		if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+			return false, nil, nil, errors.Wrapf(
+				err, "%s.%s (%s) missing response headers",
+				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+			)
+		}
 	}
 	{{- end}}
 
@@ -2492,7 +2496,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5355, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5422, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

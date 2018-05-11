@@ -18,8 +18,9 @@ func TestBazCall(t *testing.T) {
 
 	// fixtures
 	reqHeaders := map[string]string{
-		"x-token": "token",
-		"x-uuid":  "uuid",
+		"x-token":               "token",
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "false",
 	}
 	args := &baz.SimpleService_Call_Args{
 		Arg: &baz.BazRequest{
@@ -45,4 +46,22 @@ func TestBazCall(t *testing.T) {
 	}
 	assert.True(t, success)
 	assert.Equal(t, expectedHeaders, resHeaders)
+
+	reqHeaders = map[string]string{
+		"x-token":               "token",
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "true",
+	}
+
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+		Return(map[string]string{"some-res-header": "something"}, nil)
+
+	success, resHeaders, err = ms.MakeTChannelRequest(
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+	)
+	if !assert.NoError(t, err, "got tchannel error") {
+		return
+	}
+	assert.True(t, success)
+	assert.Nil(t, resHeaders)
 }
