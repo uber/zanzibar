@@ -23,24 +23,30 @@ ModuleClass | Abstraction
 client | clients to communicate with downstreams, e.g., database clients and RPC clients
 endpoint | application interfaces exposed to upstreams
 middleware | common functionality that has less to do with business logic, e.g., rate limiting middleware
-servcie | high level appliation abstraction, e.g., a demo service that prints "Hello World!"
+servcie | a collection of endponts that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
 
 #### Type
-The module `type` differentiates module instances of the same `ModuleClass` with further classification.
+The module `type` differentiates module instances of the same `ModuleClass` with further classification. Types are somewhat arbitrary as they are not necessarily abstractions but indications about how Zanzibar should treat the modules.
+##### Client
+A client module could be of type `http`, `tchannel` or `custom`, where `http` or `tchannel` means Zanzibar will generate a client with given configuration that speaks that protocol while `custom` means the client is fully provided and Zanzibar will use it as is without code generation. In other words, `http` and `tchannel` clients are configuration driven (no user code) whereas `custom` clients are user-defined and can be "smart clients".
+##### Endpoint
+An `endpoint` module could also be of type `http` or `tchannel`, which determines the protocol that the endpoint will be made available to invoke externally via the Zanzibar router. While `endpoint` modules do not have `custom` type, each method of an `endpoint` module has a `workflowType` that indicates the type of workflow the endpoint method fulfills. The builtin workflow type is `httpClient`, `tchannelClient` and `custom`, where `httpClient` and `tchannelClient` means the endpoint method workflow is to proxy to a client, and `custom` means the workflow is fulfilled by user code, see more in [Custom Workflow](#custom-workflow).
 
-For example, a client module could be of type `http`, `tchannel` or `custom`, where `http` or `tchannel` means Zanziabr will generate a client with given configuration that speaks that protocol while `custom` means the client is fully provided and Zanzibar will use it as is without code generation.
+ Note that workflow type is likely to be deprecated in the future so that proxy to a client will be no longer a builtin option.
 
-An `endpoint` module could also be of type `http` or `tchannel`, which represents the endpoint's runtime protocol. While `endpoint` modules do not have `custom` type, each method of an `endpoint` module has a `workflowType` that indicates the type of workflow the endpoint method fulfills. The builtin workflow type is `httpClient`, `tchannelClient` and `custom`, where `httpClient` and `tchannelClient` means the endpoint method workflow is to proxy to a client, and `custom` means the workflow is fulfilled by user code, see more in [Custom Workflow](#custom-workflow). **Note** that workflow type is likely to be deprecated in the future so that proxy to a client will be no longer a builtin option.
+##### Middleware
+The builtin type of middleware module is `default`.
 
-The builtin type of middleware module is `default` and the builtin service type is `gateway` (`default` is probably a better name, up to change in the future). As you maybe already noticed, the types are somewhat arbitrary as they are not necessarily abstractions but indications about how Zanzibar should treat the modules.
+##### Service
+The builtin service type is `gateway` (it is likely to change in the future, because `default` is probably a better name).
 
-Note that the module classes and types mentioned above are builtin in the sense that Zanzibar knows how to treat a module with given builtin classes and types. We can always easily extend by defining arbitrary module classs and types as long as we register appropriate module generators to the module system.
+**Note** Zanzibar has support for user-defined module classes and module types in case the builtin types are not sufficient. The preferred way of extending Zanzibar is through user defined module classes and module types.
 
-#### Dependency
+#### Dependency Injection
 Module dependencies describe the relationships among various modules. The dependency relationship is critical to correctly assemble the modules to a full application.
 
 ##### Dependency Injection
-A module is expected to define its immediate or direct dependencies. Zanzibar generates a moudle constructor with depedent modules as parameters, and passes the dependencies to the constructor during initilizaiton.
+A module is expected to define its immediate or direct dependencies. Zanzibar generates a module constructor with dependent modules as parameters, and passes the dependencies to the constructor during initilizaiton.
 
 ##### Module Initialization
 Zanzibar also constructs a full global dependency graph for a given set of modules. This graph is used to initialize modules in the correct order, e.g. leaf modules are initialized first and then passed to the constructors of parent modules for initialization.
@@ -55,17 +61,17 @@ middleware | client | endpoint
 endpoint | client, middleware | service
 servcie | endpoint | N/A
 
-This table exhausts the possible immediate or direct dependency relationships among builtin module classes. Take endpoint module class for example, an endpoint module can depend on client or middleware modules but not endpoint or servcie modules. The resoning for such rules aligns with the abstractions of the module classes represent.
+This table exhausts the possible immediate or direct dependency relationships among builtin module classes. Take endpoint module class for example, an endpoint module can depend on client or middleware modules but not endpoint or servcie modules. The reasoning for such rules aligns with the abstractions the module classes represent.
 
 The `ModuleClass` struct has `DependsOn` and `DependedBy` public fields, which makes it simple to extend the dependency rules with custom module class, e.g., we can define a custom module class `task` that abstracts common business workflow by setting its `DependsOn` field to client and `DependedBy` field to endpoint.
 
 ### Config
-Configurations are the interface that developers interact with when using the Zanzibar framework, they make up most of Zazibar's API. Various configurarions contain essential meta information of a Zanziabr application and its components. They are source of truth of the application.
+Configurations are the interface that developers interact with when using the Zanzibar framework, they make up most of Zazibar's API. Various configurarions contain essential meta information of a Zanzibar application and its components. They are source of truth of the application.
 
 **Note**: Currently configurations are in JSON, we plan to migrate to YAML.
 
 #### Config Layout
-Because configurations are the core of a Zanzibar application, we create a root directory to host configuration files when starting a Zanziabr application. There are a few typical directories and files under the root directory. Take [example-gateway](https://github.com/uber/zanzibar/tree/master/examples/example-gateway) for example:
+Because configurations are the core of a Zanzibar application, we create a root directory to host configuration files when starting a Zanzibar application. There are a few typical directories and files under the root directory. Take [example-gateway](https://github.com/uber/zanzibar/tree/master/examples/example-gateway) for example:
 ```
 example-gateway                 # root directory
 ├── bin                         # directory for generated application binaries
@@ -76,7 +82,7 @@ example-gateway                 # root directory
 │   ├── gen-code                # generated structs and (de)serializers by Thrift compiler
 │   ├── middlewares             # generated module initializers for middlewares
 │   └── services                # generated mocks and module intialziers for services
-├── build.json                  # config file for Zanziabr code generation, see below for details
+├── build.json                  # config file for Zanzibar code generation, see below for details
 ├── clients                     # config directory for modules of client module class
 │   └── bar                     # config directory for a client named 'bar'
 ├── config                      # config directory for application runtime properties
@@ -198,7 +204,7 @@ endpoints/multi
 The reason for such layout is to avoid a large endpoint-config.json file when an endpoint has many methods.
 
 #### Application Config
-Besides the module configs, Zanzibar also expects a JSON file that configures necessary properties to boostrap the code generation process of a Zanzibar application. The schema for application config is defined [here](https://github.com/uber/zanzibar/tree/master/docs/application_cofnig_schema.json).
+Besides the module configs, Zanzibar also expects a JSON file that configures necessary properties to boostrap the code generation process of a Zanzibar application. The schema for application config is defined [here](https://github.com/uber/zanzibar/tree/master/docs/application_config_schema.json).
 
 Unlike the module configs, there is no restriction on how this config file should be named. It can be named `{$appName}.json` or `build.json` as it is in [example-gateway](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/build.json), as long as it is passed correctly as an argument to the code generation [runner](https://github.com/uber/zanzibar/blob/master/codegen/runner/runner.go).
 
@@ -206,7 +212,7 @@ Unlike the module configs, there is no restriction on how this config file shoul
 Zanzibar provides HTTP and TChannel runtime components for both clients and servers. Once all the configs are properly defined, Zanzibar is able to parse the config files and generate code and wire it up with the runime components to produce a full application. All generated code is placed in the `build` directory.
 
 #### Go Structs and (de)serializers
-Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanziabr Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints/bar/bar.thrift) as specified in [hello.json](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.json#L5). The data types in such thrift files must have their equivalents in Go.
+Zanzibar expects non-custom clients and endpoints to define their interfaces using Thrift ([Zanzibar Thrift file semantics](https://github.com/uber/zanzibar/blob/master/docs/thrift.md)). For example, the `bar` endpoint defines its interfaces using the [bar.thrift](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/idl/endpoints/bar/bar.thrift) as specified in [hello.json](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/endpoints/bar/hello.json#L5). The data types in such thrift files must have their equivalents in Go.
 
 - For tchannel clients/endpoints, network communication is Thrift over TChannel. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and thrift (de)serializers;
 - For http clients/endpoints, network communication is JSON over HTTP. Zanzibar uses [thriftrw](https://github.com/thriftrw/thriftrw-go) to generate Go structs and then uses [easyjson](https://github.com/mailru/easyjson) to generate JSON (de)serializers.
@@ -262,7 +268,7 @@ Note the above script will be abstracted for easier usage in the future.
 Zanzibar comes with builtin integration testing frameworks to help test business logic with ease. Setting [genMock](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/build.json#L16) to true will trigger Zanzibar to generate mock client, workflow and servcie constructors. The mock clients, being the leaf nodes in the dependency graph, are wired with the rest modules to create a testing application, which you can test against by setting expectations of the mock clients. The generated test helpers make writing tests straightforward and concise.
 
 #### Entry Points
-Currently Zanziabr provides two entry points to write integration tests: service and endpoint.
+Currently Zanzibar provides two entry points to write integration tests: service and endpoint.
 ##### Service
 Service level integration testing treats your application as a black box. Zanzibar starts a local server for your application and you write tests by sending requests to the server and verify the response is expected.
 ```go
@@ -371,7 +377,7 @@ To extend Zanzibar with new module class or type is simply to extend each of its
 
 The same idea applies for adding new types of an existing module class.
 #### PostGenHook
-Zanzibar provides post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module.go#L68) which has access to the meta information of all modules. You can do whatever (mutating the input is probably not a good idea) suits your needs within a post-generation hook. Zanziabr invokes post-generation hooks as the very last step of code generation. In fact, mocks are all generated via post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module_system.go#L226).
+Zanzibar provides post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module.go#L68) which has access to the meta information of all modules. You can do whatever (mutating the input is probably not a good idea) suits your needs within a post-generation hook. Zanzibar invokes post-generation hooks as the very last step of code generation. In fact, mocks are all generated via post-generation [hooks](https://github.com/uber/zanzibar/blob/master/codegen/module_system.go#L226).
 
 ## Development
 ### Installation
