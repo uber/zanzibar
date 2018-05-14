@@ -13,6 +13,4 @@ end=`date +%s`
 runtime=$((end - start))
 echo "Generated build : +$runtime"
 
-#bash ./codegen/runner/post-steps.sh "$PREFIX" "$PREFIX/build"
-
 rm .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
