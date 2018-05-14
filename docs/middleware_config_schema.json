@@ -1,0 +1,61 @@
+{
+	"$id": "middleware config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"name": {
+			"type": "string",
+			"description": "Name of the middleware",
+			"examples": [
+				"example"
+			]
+		},
+		"type": {
+			"type": "string",
+			"description": "Type of the middleware, currently only valid type is default",
+			"examples": [
+				"default"
+			]
+		},
+		"dependencies": {
+			"type": "object",
+			"properties": {
+				"client": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Name of the client this middleware depends on",
+						"examples": [
+							"baz"
+						]
+					}
+				}
+			}
+		},
+		"config": {
+			"type": "object",
+			"properties": {
+				"schema": {
+					"type": "string",
+					"description": "Path to the schema of the middleware, relative to middleware module config directory",
+					"examples": [
+						"./middlewares/example/example_schema.json"
+					]
+				},
+				"path": {
+					"type": "string",
+					"description": "Package path to import the middleware",
+					"examples": [
+						"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+					]
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"type",
+		"config",
+		"dependencies"
+	]
+}

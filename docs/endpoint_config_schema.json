@@ -1,0 +1,78 @@
+{
+	"$id": "endpoint config",
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"properties": {
+		"name": {
+			"type": "string",
+			"description": "Endpoint name",
+			"examples": [
+				"bar"
+			]
+		},
+		"type": {
+			"type": "string",
+			"description": "Endpoint protocol, either http or tchannel",
+			"enum": [
+				"http",
+				"tchannel"
+			],
+			"examples": [
+				"http"
+			]
+		},
+		"config": {
+			"type": "object",
+			"properties": {
+				"rateLimit": {
+					"type": "integer",
+					"description": "How many requests per second are allowed",
+					"examples": [
+						100
+					]
+				},
+				"endpoints": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Name of the method config json file",
+						"examples": [
+							"hello.json"
+						]
+					}
+				}
+			}
+		},
+		"dependencies": {
+			"type": "object",
+			"properties": {
+				"client": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "The name of a client this endpoint depends on",
+						"examples": [
+							"bar"
+						]
+					}
+				},
+				"middleware": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "The name of a middleware this endpoint depends on",
+						"examples": [
+							"example"
+						]
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"type",
+		"config",
+		"dependencies"
+	]
+}
