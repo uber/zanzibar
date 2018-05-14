@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/thriftrw/wire"
 	"math"
 	"strconv"
@@ -125,7 +126,7 @@ func (v *BarException) Error() string {
 }
 
 type BarRequest struct {
-	StringField string    `json:"stringField,required"`
+	StringField *string   `json:"stringField,omitempty"`
 	BoolField   bool      `json:"boolField,required"`
 	BinaryField []byte    `json:"binaryField,required"`
 	Timestamp   Timestamp `json:"timestamp,required"`
@@ -156,12 +157,17 @@ func (v *BarRequest) ToWire() (wire.Value, error) {
 		err    error
 	)
 
-	w, err = wire.NewValueString(v.StringField), error(nil)
-	if err != nil {
-		return w, err
+	if v.StringField == nil {
+		v.StringField = ptr.String("abc")
 	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
+	{
+		w, err = wire.NewValueString(*(v.StringField)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
 
 	w, err = wire.NewValueBool(v.BoolField), error(nil)
 	if err != nil {
@@ -241,7 +247,6 @@ func _Long_Read(w wire.Value) (Long, error) {
 func (v *BarRequest) FromWire(w wire.Value) error {
 	var err error
 
-	stringFieldIsSet := false
 	boolFieldIsSet := false
 	binaryFieldIsSet := false
 	timestampIsSet := false
@@ -252,11 +257,13 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		switch field.ID {
 		case 1:
 			if field.Value.Type() == wire.TBinary {
-				v.StringField, err = field.Value.GetString(), error(nil)
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.StringField = &x
 				if err != nil {
 					return err
 				}
-				stringFieldIsSet = true
+
 			}
 		case 2:
 			if field.Value.Type() == wire.TBool {
@@ -301,8 +308,8 @@ func (v *BarRequest) FromWire(w wire.Value) error {
 		}
 	}
 
-	if !stringFieldIsSet {
-		return errors.New("field StringField of BarRequest is required")
+	if v.StringField == nil {
+		v.StringField = ptr.String("abc")
 	}
 
 	if !boolFieldIsSet {
@@ -337,8 +344,10 @@ func (v *BarRequest) String() string {
 
 	var fields [6]string
 	i := 0
-	fields[i] = fmt.Sprintf("StringField: %v", v.StringField)
-	i++
+	if v.StringField != nil {
+		fields[i] = fmt.Sprintf("StringField: %v", *(v.StringField))
+		i++
+	}
 	fields[i] = fmt.Sprintf("BoolField: %v", v.BoolField)
 	i++
 	fields[i] = fmt.Sprintf("BinaryField: %v", v.BinaryField)
@@ -353,12 +362,22 @@ func (v *BarRequest) String() string {
 	return fmt.Sprintf("BarRequest{%v}", strings.Join(fields[:i], ", "))
 }
 
+func _String_EqualsPtr(lhs, rhs *string) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
 // Equals returns true if all the fields of this BarRequest match the
 // provided BarRequest.
 //
 // This function performs a deep comparison.
 func (v *BarRequest) Equals(rhs *BarRequest) bool {
-	if !(v.StringField == rhs.StringField) {
+	if !_String_EqualsPtr(v.StringField, rhs.StringField) {
 		return false
 	}
 	if !(v.BoolField == rhs.BoolField) {
@@ -378,6 +397,16 @@ func (v *BarRequest) Equals(rhs *BarRequest) bool {
 	}
 
 	return true
+}
+
+// GetStringField returns the value of StringField if it is set or its
+// zero value if it is unset.
+func (v *BarRequest) GetStringField() (o string) {
+	if v.StringField != nil {
+		return *v.StringField
+	}
+	o = "abc"
+	return
 }
 
 type BarResponse struct {
@@ -1246,16 +1275,6 @@ func (v *QueryParamsOptsStruct) String() string {
 	}
 
 	return fmt.Sprintf("QueryParamsOptsStruct{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
 }
 
 // Equals returns true if all the fields of this QueryParamsOptsStruct match the
