@@ -95,7 +95,7 @@ lint: check-licence eclint-check
 # 	@[ ! -s deps.log ]
 
 .PHONY: generate
-generate:
+generate: example_gateway_incremental_thriftrw
 	@go get -u github.com/jteeuwen/go-bindata/...
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl
@@ -287,3 +287,20 @@ jenkins-test:
 jenkins:
 	$(MAKE) jenkins-install
 	$(MAKE) jenkins-test
+
+# Incremental builds
+EXAMPLE_GATEWAY_THRIFTRW_SRCS_EXHAUSTIVE := $(shell find examples/example-gateway/idl/ | grep thrift$)
+EXAMPLE_GATEWAY_THRIFTRW_TYPESGO := $(patsubst examples/example-gateway/idl/%.thrift,examples/example-gateway/build/gen-code/%/types.go,$(EXAMPLE_GATEWAY_THRIFTRW_SRCS_EXHAUSTIVE))
+
+.PHONY: example_gateway_incremental_thriftrw
+example_gateway_incremental_thriftrw: $(EXAMPLE_GATEWAY_THRIFTRW_TYPESGO)
+
+vendor/go.uber.org/thriftrw/thriftrw:
+	go build -o vendor/go.uber.org/thriftrw/thriftrw vendor/go.uber.org/thriftrw/main.go
+
+examples/example-gateway/build/gen-code:
+	mkdir -p examples/example-gateway/build/gen-code
+
+# NOTE: If the example-gateway was using IDL tool rather than checked-in IDL files, we might want a dependency on meta.json to capture transitive thrift-to-thrift dependencies.
+examples/example-gateway/build/gen-code/%/types.go: examples/example-gateway/idl/%.thrift examples/example-gateway/build/gen-code vendor/go.uber.org/thriftrw/thriftrw
+	vendor/go.uber.org/thriftrw/thriftrw --out="examples/example-gateway/build/gen-code" --no-embed-idl --thrift-root="./examples/example-gateway/idl" "$<"

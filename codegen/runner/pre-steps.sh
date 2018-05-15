@@ -52,18 +52,7 @@ fi
 start=$(date +%s)
 echo "$start" > .TMP_ZANZIBAR_TIMESTAMP_FILE.txt
 
-go build -o "$THRIFTRW_BINARY" "$THRIFTRW_MAIN_FILE"
-end=$(date +%s)
-runtime=$((end-start))
-echo "Compiled thriftrw : +$runtime"
-
 echo "Generating Go code from Thrift files"
-mkdir -p "$BUILD_DIR/gen-code"
-for tfile in ${THRIFTRW_SRCS}; do
-	"$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
-		--no-embed-idl \
-		--thrift-root="$CONFIG_DIR/idl" "$tfile"
-done
 gofmt -w "$BUILD_DIR/gen-code/"
 
 end=$(date +%s)
