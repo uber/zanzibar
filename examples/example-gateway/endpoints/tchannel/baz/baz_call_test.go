@@ -59,9 +59,9 @@ func TestBazCall(t *testing.T) {
 	success, resHeaders, err = ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,
 	)
-	if !assert.NoError(t, err, "got tchannel error") {
+	if !assert.Error(t, err, "got tchannel error") {
 		return
 	}
-	assert.True(t, success)
+	assert.False(t, success)
 	assert.Nil(t, resHeaders)
 }

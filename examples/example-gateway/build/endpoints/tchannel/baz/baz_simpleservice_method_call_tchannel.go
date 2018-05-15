@@ -119,13 +119,18 @@ func (h *SimpleServiceCallHandler) Handle(
 			)
 		}
 	}
-	if wfResHeaders != nil {
-		if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
-			return false, nil, nil, errors.Wrapf(
-				err, "%s.%s (%s) missing response headers",
-				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-			)
-		}
+	if wfResHeaders == nil {
+		return false, nil, nil, errors.Errorf(
+			"%s.%s (%s) missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
+	}
+
+	if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
+		return false, nil, nil, errors.Wrapf(
+			err, "%s.%s (%s) missing response headers",
+			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
+		)
 	}
 
 	return err == nil, &res, resHeaders, nil
