@@ -25,6 +25,7 @@ package baztchannelendpoint
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -120,7 +121,11 @@ func (h *SimpleServiceCallHandler) Handle(
 		}
 	}
 	if wfResHeaders == nil {
-		return false, nil, nil, errors.Errorf(
+		return false, nil, nil, errors.Wrapf(
+			errors.Errorf(
+				"Missing mandatory headers: %s",
+				strings.Join([]string{"some-res-header"}, ", "),
+			),
 			"%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)

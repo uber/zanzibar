@@ -137,7 +137,11 @@ func (h *{{$handlerName}}) Handle(
 
 	{{- if .ResHeaders}}
 	if wfResHeaders == nil {
-		return false, nil, nil, errors.Errorf(
+		return false, nil, nil, errors.Wrapf(
+			errors.Errorf(
+				"Missing mandatory headers: %s",
+				strings.Join({{.ResHeaders | printf "%#v" }}, ", "),
+			),
 			"%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
