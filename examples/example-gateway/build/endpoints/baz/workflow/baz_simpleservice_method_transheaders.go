@@ -245,6 +245,15 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		in.Req.W2.N1.UUID = key
 
 	}
+	if in.Req == nil {
+		in.Req = &clientsBazBase.TransHeaders{}
+	}
+	if in.Req.W2 == nil {
+		in.Req.W2 = &clientsBazBase.Wrapped{}
+	}
+	if in.Req.W2.N2 == nil {
+		in.Req.W2.N2 = &clientsBazBase.NestHeaders{}
+	}
 	key := "header"
 	in.Req.W2.N2.FixValue = &key
 

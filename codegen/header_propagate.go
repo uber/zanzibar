@@ -71,6 +71,10 @@ func (hp *HeaderPropagator) Propagate(
 		}
 
 		if val.StaticValue != "" {
+			// patch optional params along the path
+			if err := hp.initNilOpt(key, toFields); err != nil {
+				return err
+			}
 			hp.appendf(`key := "%s"`, val.StaticValue)
 			arrs := typeSwitch(key, gotype, field)
 			hp.append(arrs...)

@@ -112,7 +112,8 @@
 									},
 									"n2": {
 										"uuid": "uuid",
-										"token": "token"
+										"token": "token",
+										"fixValue": "header"
 									}
 								}
 							}
@@ -139,7 +140,8 @@
 								},
 								"n2": {
 									"uuid": "uuid",
-									"token": "token"
+									"token": "token",
+									"fixValue": "header"
 								}
 							}
 						}

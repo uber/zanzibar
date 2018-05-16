@@ -65,7 +65,7 @@ func TestTransHeadersSuccessfulRequestOKResponse(t *testing.T) {
 
 		var res clientsBazBase.TransHeaders
 
-		clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}}}`)
+		clientResponse := []byte(`{"w1":{"n1":{"token":"token","uuid":"uuid"},"n2":{"token":"token","uuid":"uuid"}},"w2":{"n1":{"token":"token","uuid":"uuid"},"n2":{"fixValue":"header","token":"token","uuid":"uuid"}}}`)
 		err := json.Unmarshal(clientResponse, &res)
 		if err != nil {
 			t.Fatal("cant't unmarshal client response json to client response struct")
