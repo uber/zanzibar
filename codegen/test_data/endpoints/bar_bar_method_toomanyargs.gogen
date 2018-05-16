@@ -42,14 +42,14 @@ import (
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
 type BarTooManyArgsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarTooManyArgsHandler creates a handler
 func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler {
 	handler := &BarTooManyArgsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -94,7 +94,8 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarTooManyArgsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarTooManyArgsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
