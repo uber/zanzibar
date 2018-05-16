@@ -36,12 +36,25 @@ type HeaderPropagator struct {
 	Helper PackageNameResolver
 }
 
+const (
+	staticValue = "static"
+	fromValue   = "from"
+)
+
 // NewHeaderPropagator returns an instance of HeaderPropagator
 func NewHeaderPropagator(h PackageNameResolver) *HeaderPropagator {
 	return &HeaderPropagator{
 		LineBuilder: LineBuilder{},
 		Helper:      h,
 	}
+}
+
+// convert from either `value` or `from` to the `to` field
+func assignApproach(entry FieldMapperEntry) string {
+	if entry.StaticValue != "" {
+		return staticValue
+	}
+	return fromValue
 }
 
 // Propagate assigns header value to downstream client request fields
@@ -70,7 +83,8 @@ func (hp *HeaderPropagator) Propagate(
 				val.QualifiedName, field.Name)
 		}
 
-		if val.StaticValue != "" {
+		switch assignApproach(val) {
+		case staticValue:
 			// patch optional params along the path
 			if err := hp.initNilOpt(key, toFields); err != nil {
 				return err
@@ -78,19 +92,16 @@ func (hp *HeaderPropagator) Propagate(
 			hp.appendf(`key := "%s"`, val.StaticValue)
 			arrs := typeSwitch(key, gotype, field)
 			hp.append(arrs...)
-			continue
+		case fromValue:
+			hp.appendf(`if key, ok := headers.Get("%s"); ok {`, val.QualifiedName)
+			// patch optional params along the path
+			if err := hp.initNilOpt(key, toFields); err != nil {
+				return err
+			}
+			arrs := typeSwitch(key, gotype, field)
+			hp.append(arrs...)
+			hp.append("}")
 		}
-
-		hp.appendf(`if key, ok := headers.Get("%s"); ok {`, val.QualifiedName)
-		// patch optional params along the path
-		if err := hp.initNilOpt(key, toFields); err != nil {
-			return err
-		}
-
-		arrs := typeSwitch(key, gotype, field)
-		hp.append(arrs...)
-
-		hp.append("}")
 	}
 	return nil
 }
