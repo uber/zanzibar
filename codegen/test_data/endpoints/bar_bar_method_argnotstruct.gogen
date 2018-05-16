@@ -92,7 +92,6 @@ func (h *BarArgNotStructHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	h.Dependencies.Default.Logger = req.Logger
 	w := workflow.NewBarArgNotStructWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)

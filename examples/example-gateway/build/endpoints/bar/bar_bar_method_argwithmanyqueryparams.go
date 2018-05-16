@@ -224,7 +224,6 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	h.Dependencies.Default.Logger = req.Logger
 	w := workflow.NewBarArgWithManyQueryParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)

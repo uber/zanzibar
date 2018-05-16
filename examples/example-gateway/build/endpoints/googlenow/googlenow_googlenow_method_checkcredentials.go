@@ -88,7 +88,6 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	h.Dependencies.Default.Logger = req.Logger
 	w := workflow.NewGoogleNowCheckCredentialsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)

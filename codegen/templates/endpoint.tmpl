@@ -148,7 +148,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	h.Dependencies.Default.Logger = req.Logger
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)

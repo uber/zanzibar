@@ -168,7 +168,6 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	h.Dependencies.Default.Logger = req.Logger
 	w := workflow.NewBarArgWithNestedQueryParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
