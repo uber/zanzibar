@@ -44,6 +44,10 @@
 					{
 						"from": "x-token",
 						"to": "Req.W2.N2.Token"
+					},
+					{
+						"value": "header",
+						"to": "Req.W2.N2.FixValue"
 					}
 				]
 			}
@@ -108,7 +112,8 @@
 									},
 									"n2": {
 										"uuid": "uuid",
-										"token": "token"
+										"token": "token",
+										"fixValue": "header"
 									}
 								}
 							}
@@ -135,7 +140,8 @@
 								},
 								"n2": {
 									"uuid": "uuid",
-									"token": "token"
+									"token": "token",
+									"fixValue": "header"
 								}
 							}
 						}

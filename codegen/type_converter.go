@@ -837,6 +837,7 @@ func (c *TypeConverter) GenStructConverter(
 // converting and overriding fields.
 type FieldMapperEntry struct {
 	QualifiedName string //
+	StaticValue   string // store the constant value for parameter input
 	Field         *compile.FieldSpec
 
 	Override      bool
