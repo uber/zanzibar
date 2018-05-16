@@ -45,10 +45,10 @@ type BarArgWithQueryHeaderWorkflow interface {
 }
 
 // NewBarArgWithQueryHeaderWorkflow creates a workflow
-func NewBarArgWithQueryHeaderWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarArgWithQueryHeaderWorkflow {
+func NewBarArgWithQueryHeaderWorkflow(deps *module.Dependencies) BarArgWithQueryHeaderWorkflow {
 	return &barArgWithQueryHeaderWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

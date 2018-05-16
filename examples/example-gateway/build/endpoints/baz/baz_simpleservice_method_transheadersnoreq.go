@@ -39,14 +39,14 @@ import (
 
 // SimpleServiceTransHeadersNoReqHandler is the handler for "/baz/trans-headers-no-req"
 type SimpleServiceTransHeadersNoReqHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceTransHeadersNoReqHandler creates a handler
 func NewSimpleServiceTransHeadersNoReqHandler(deps *module.Dependencies) *SimpleServiceTransHeadersNoReqHandler {
 	handler := &SimpleServiceTransHeadersNoReqHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -89,7 +89,8 @@ func (h *SimpleServiceTransHeadersNoReqHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServiceTransHeadersNoReqWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServiceTransHeadersNoReqWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

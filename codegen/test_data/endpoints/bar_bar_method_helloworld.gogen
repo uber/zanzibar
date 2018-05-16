@@ -41,14 +41,14 @@ import (
 
 // BarHelloWorldHandler is the handler for "/bar/hello"
 type BarHelloWorldHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarHelloWorldHandler creates a handler
 func NewBarHelloWorldHandler(deps *module.Dependencies) *BarHelloWorldHandler {
 	handler := &BarHelloWorldHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -88,7 +88,8 @@ func (h *BarHelloWorldHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarHelloWorldWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarHelloWorldWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

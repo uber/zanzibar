@@ -46,10 +46,10 @@ type SimpleServiceTransWorkflow interface {
 }
 
 // NewSimpleServiceTransWorkflow creates a workflow
-func NewSimpleServiceTransWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServiceTransWorkflow {
+func NewSimpleServiceTransWorkflow(deps *module.Dependencies) SimpleServiceTransWorkflow {
 	return &simpleServiceTransWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

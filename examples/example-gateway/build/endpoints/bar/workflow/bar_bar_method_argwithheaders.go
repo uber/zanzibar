@@ -45,10 +45,10 @@ type BarArgWithHeadersWorkflow interface {
 }
 
 // NewBarArgWithHeadersWorkflow creates a workflow
-func NewBarArgWithHeadersWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarArgWithHeadersWorkflow {
+func NewBarArgWithHeadersWorkflow(deps *module.Dependencies) BarArgWithHeadersWorkflow {
 	return &barArgWithHeadersWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

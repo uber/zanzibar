@@ -40,14 +40,14 @@ import (
 
 // BarArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
 type BarArgNotStructHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgNotStructHandler creates a handler
 func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandler {
 	handler := &BarArgNotStructHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -92,7 +92,8 @@ func (h *BarArgNotStructHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgNotStructWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarArgNotStructWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

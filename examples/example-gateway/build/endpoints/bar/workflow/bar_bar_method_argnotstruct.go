@@ -45,10 +45,10 @@ type BarArgNotStructWorkflow interface {
 }
 
 // NewBarArgNotStructWorkflow creates a workflow
-func NewBarArgNotStructWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarArgNotStructWorkflow {
+func NewBarArgNotStructWorkflow(deps *module.Dependencies) BarArgNotStructWorkflow {
 	return &barArgNotStructWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

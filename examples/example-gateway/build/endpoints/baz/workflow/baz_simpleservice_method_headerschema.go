@@ -45,10 +45,10 @@ type SimpleServiceHeaderSchemaWorkflow interface {
 }
 
 // NewSimpleServiceHeaderSchemaWorkflow creates a workflow
-func NewSimpleServiceHeaderSchemaWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServiceHeaderSchemaWorkflow {
+func NewSimpleServiceHeaderSchemaWorkflow(deps *module.Dependencies) SimpleServiceHeaderSchemaWorkflow {
 	return &simpleServiceHeaderSchemaWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

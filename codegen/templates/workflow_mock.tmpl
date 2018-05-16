@@ -37,14 +37,26 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 		{{- end }}
 	}
 
+	mockClientDependencies := &module.ClientDependencies{
+		{{- range $idx, $moduleInstance := $clientDeps -}}
+		{{- $pkgInfo := $moduleInstance.PackageInfo }}
+		{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
+		{{- end }}
+	}
+
 	w := {{$instance.PackageInfo.PackageAlias}}.New{{$workflowInterface}}(
-		&module.ClientDependencies{
-			{{- range $idx, $moduleInstance := $clientDeps -}}
-			{{- $pkgInfo := $moduleInstance.PackageInfo }}
-			{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
-			{{- end }}
+		&module.Dependencies{
+			Default: &zanzibar.DefaultDependencies {
+				Logger: zap.NewNop(),
+				Scope:  nil,
+				Tracer:  nil,
+				Config: nil,
+				Channel:nil,
+			},
+			{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+			{{$classType | pascal}}: mockClientDependencies,
+			{{end -}}
 		},
-		zap.NewNop(),
 	)
 
 	return w, mockClients

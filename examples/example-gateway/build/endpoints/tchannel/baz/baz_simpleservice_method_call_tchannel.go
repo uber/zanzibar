@@ -40,7 +40,7 @@ import (
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHandler {
 	handler := &SimpleServiceCallHandler{
-		Clients: deps.Client,
+		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
@@ -52,7 +52,7 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 
 // SimpleServiceCallHandler is the handler for "SimpleService::Call".
 type SimpleServiceCallHandler struct {
-	Clients  *module.ClientDependencies
+	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
 }
 
@@ -87,7 +87,7 @@ func (h *SimpleServiceCallHandler) Handle(
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
-	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Clients, h.endpoint.Logger)
+	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Deps)
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 

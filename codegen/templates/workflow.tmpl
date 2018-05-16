@@ -71,10 +71,10 @@ Handle(
 {{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // New{{$workflowInterface}} creates a workflow
-func New{{$workflowInterface}}(clients *module.ClientDependencies, logger *zap.Logger) {{$workflowInterface}} {
+func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
 	return &{{$workflowStruct}}{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

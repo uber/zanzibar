@@ -45,10 +45,10 @@ type BarArgWithParamsWorkflow interface {
 }
 
 // NewBarArgWithParamsWorkflow creates a workflow
-func NewBarArgWithParamsWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarArgWithParamsWorkflow {
+func NewBarArgWithParamsWorkflow(deps *module.Dependencies) BarArgWithParamsWorkflow {
 	return &barArgWithParamsWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

@@ -34,12 +34,11 @@ import (
 
 // NewSimpleServiceCallWorkflow ...
 func NewSimpleServiceCallWorkflow(
-	clients *module.ClientDependencies,
-	logger *zap.Logger,
+	deps *module.Dependencies,
 ) workflow.SimpleServiceCallWorkflow {
 	return &Workflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

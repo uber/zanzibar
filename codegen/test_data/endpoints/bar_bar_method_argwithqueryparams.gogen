@@ -42,14 +42,14 @@ import (
 
 // BarArgWithQueryParamsHandler is the handler for "/bar/argWithQueryParams"
 type BarArgWithQueryParamsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithQueryParamsHandler creates a handler
 func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQueryParamsHandler {
 	handler := &BarArgWithQueryParamsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -110,7 +110,8 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithQueryParamsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarArgWithQueryParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

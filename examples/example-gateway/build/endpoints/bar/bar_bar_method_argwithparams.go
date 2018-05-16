@@ -41,14 +41,14 @@ import (
 
 // BarArgWithParamsHandler is the handler for "/bar/argWithParams/:uuid/segment/:user-uuid"
 type BarArgWithParamsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithParamsHandler creates a handler
 func NewBarArgWithParamsHandler(deps *module.Dependencies) *BarArgWithParamsHandler {
 	handler := &BarArgWithParamsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -99,7 +99,8 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithParamsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarArgWithParamsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

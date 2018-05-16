@@ -48,10 +48,10 @@ type BarTooManyArgsWorkflow interface {
 }
 
 // NewBarTooManyArgsWorkflow creates a workflow
-func NewBarTooManyArgsWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarTooManyArgsWorkflow {
+func NewBarTooManyArgsWorkflow(deps *module.Dependencies) BarTooManyArgsWorkflow {
 	return &barTooManyArgsWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

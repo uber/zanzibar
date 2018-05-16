@@ -35,6 +35,7 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 	baztchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
@@ -45,12 +46,22 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 		Quux: quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
 	}
 
+	mockClientDependencies := &module.ClientDependencies{
+		Baz:  mockClients.Baz,
+		Quux: mockClients.Quux,
+	}
+
 	w := baztchannelendpointstatic.NewSimpleServiceCallWorkflow(
-		&module.ClientDependencies{
-			Baz:  mockClients.Baz,
-			Quux: mockClients.Quux,
+		&module.Dependencies{
+			Default: &zanzibar.DefaultDependencies{
+				Logger:  zap.NewNop(),
+				Scope:   nil,
+				Tracer:  nil,
+				Config:  nil,
+				Channel: nil,
+			},
+			Client: mockClientDependencies,
 		},
-		zap.NewNop(),
 	)
 
 	return w, mockClients

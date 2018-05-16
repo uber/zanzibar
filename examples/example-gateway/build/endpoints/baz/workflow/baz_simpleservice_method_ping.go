@@ -44,10 +44,10 @@ type SimpleServicePingWorkflow interface {
 }
 
 // NewSimpleServicePingWorkflow creates a workflow
-func NewSimpleServicePingWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServicePingWorkflow {
+func NewSimpleServicePingWorkflow(deps *module.Dependencies) SimpleServicePingWorkflow {
 	return &simpleServicePingWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

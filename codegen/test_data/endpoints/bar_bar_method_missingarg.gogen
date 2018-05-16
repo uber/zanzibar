@@ -39,14 +39,14 @@ import (
 
 // BarMissingArgHandler is the handler for "/bar/missing-arg-path"
 type BarMissingArgHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarMissingArgHandler creates a handler
 func NewBarMissingArgHandler(deps *module.Dependencies) *BarMissingArgHandler {
 	handler := &BarMissingArgHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -86,7 +86,8 @@ func (h *BarMissingArgHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarMissingArgWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarMissingArgWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

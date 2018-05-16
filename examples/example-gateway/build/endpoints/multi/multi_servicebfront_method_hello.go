@@ -40,14 +40,14 @@ import (
 
 // ServiceBFrontHelloHandler is the handler for "/multi/serviceB_f/hello"
 type ServiceBFrontHelloHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewServiceBFrontHelloHandler creates a handler
 func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHelloHandler {
 	handler := &ServiceBFrontHelloHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -87,7 +87,8 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewServiceBFrontHelloWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewServiceBFrontHelloWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

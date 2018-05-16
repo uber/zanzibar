@@ -45,10 +45,10 @@ type SimpleServiceSillyNoopWorkflow interface {
 }
 
 // NewSimpleServiceSillyNoopWorkflow creates a workflow
-func NewSimpleServiceSillyNoopWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServiceSillyNoopWorkflow {
+func NewSimpleServiceSillyNoopWorkflow(deps *module.Dependencies) SimpleServiceSillyNoopWorkflow {
 	return &simpleServiceSillyNoopWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 
