@@ -41,10 +41,10 @@ type ServiceAFrontHelloWorkflow interface {
 }
 
 // NewServiceAFrontHelloWorkflow creates a workflow
-func NewServiceAFrontHelloWorkflow(clients *module.ClientDependencies, logger *zap.Logger) ServiceAFrontHelloWorkflow {
+func NewServiceAFrontHelloWorkflow(deps *module.Dependencies) ServiceAFrontHelloWorkflow {
 	return &serviceAFrontHelloWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

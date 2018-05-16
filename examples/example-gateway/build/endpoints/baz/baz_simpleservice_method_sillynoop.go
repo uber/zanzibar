@@ -39,14 +39,14 @@ import (
 
 // SimpleServiceSillyNoopHandler is the handler for "/baz/silly-noop"
 type SimpleServiceSillyNoopHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceSillyNoopHandler creates a handler
 func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceSillyNoopHandler {
 	handler := &SimpleServiceSillyNoopHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -86,7 +86,8 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServiceSillyNoopWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServiceSillyNoopWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

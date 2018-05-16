@@ -38,14 +38,14 @@ import (
 
 // GoogleNowCheckCredentialsHandler is the handler for "/googlenow/check-credentials"
 type GoogleNowCheckCredentialsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewGoogleNowCheckCredentialsHandler creates a handler
 func NewGoogleNowCheckCredentialsHandler(deps *module.Dependencies) *GoogleNowCheckCredentialsHandler {
 	handler := &GoogleNowCheckCredentialsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -88,7 +88,8 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewGoogleNowCheckCredentialsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewGoogleNowCheckCredentialsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

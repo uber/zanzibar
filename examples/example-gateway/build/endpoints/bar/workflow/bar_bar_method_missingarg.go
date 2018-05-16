@@ -44,10 +44,10 @@ type BarMissingArgWorkflow interface {
 }
 
 // NewBarMissingArgWorkflow creates a workflow
-func NewBarMissingArgWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarMissingArgWorkflow {
+func NewBarMissingArgWorkflow(deps *module.Dependencies) BarMissingArgWorkflow {
 	return &barMissingArgWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

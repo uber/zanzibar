@@ -44,10 +44,10 @@ type BarHelloWorldWorkflow interface {
 }
 
 // NewBarHelloWorldWorkflow creates a workflow
-func NewBarHelloWorldWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarHelloWorldWorkflow {
+func NewBarHelloWorldWorkflow(deps *module.Dependencies) BarHelloWorldWorkflow {
 	return &barHelloWorldWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

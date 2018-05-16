@@ -44,10 +44,10 @@ type BarNoRequestWorkflow interface {
 }
 
 // NewBarNoRequestWorkflow creates a workflow
-func NewBarNoRequestWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarNoRequestWorkflow {
+func NewBarNoRequestWorkflow(deps *module.Dependencies) BarNoRequestWorkflow {
 	return &barNoRequestWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

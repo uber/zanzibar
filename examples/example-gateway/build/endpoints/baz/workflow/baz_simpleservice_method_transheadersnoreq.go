@@ -46,10 +46,10 @@ type SimpleServiceTransHeadersNoReqWorkflow interface {
 }
 
 // NewSimpleServiceTransHeadersNoReqWorkflow creates a workflow
-func NewSimpleServiceTransHeadersNoReqWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServiceTransHeadersNoReqWorkflow {
+func NewSimpleServiceTransHeadersNoReqWorkflow(deps *module.Dependencies) SimpleServiceTransHeadersNoReqWorkflow {
 	return &simpleServiceTransHeadersNoReqWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

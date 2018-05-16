@@ -46,10 +46,10 @@ type SimpleServiceCompareWorkflow interface {
 }
 
 // NewSimpleServiceCompareWorkflow creates a workflow
-func NewSimpleServiceCompareWorkflow(clients *module.ClientDependencies, logger *zap.Logger) SimpleServiceCompareWorkflow {
+func NewSimpleServiceCompareWorkflow(deps *module.Dependencies) SimpleServiceCompareWorkflow {
 	return &simpleServiceCompareWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

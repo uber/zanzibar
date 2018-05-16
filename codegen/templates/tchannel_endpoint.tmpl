@@ -28,7 +28,7 @@ import (
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
-		Clients: deps.Client,
+		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
@@ -40,7 +40,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
 type {{$handlerName}} struct {
-	Clients  *module.ClientDependencies
+	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
 }
 
@@ -80,7 +80,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{end -}}
 
-	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Clients, h.endpoint.Logger)
+	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)

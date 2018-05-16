@@ -45,10 +45,10 @@ type BarArgWithNestedQueryParamsWorkflow interface {
 }
 
 // NewBarArgWithNestedQueryParamsWorkflow creates a workflow
-func NewBarArgWithNestedQueryParamsWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarArgWithNestedQueryParamsWorkflow {
+func NewBarArgWithNestedQueryParamsWorkflow(deps *module.Dependencies) BarArgWithNestedQueryParamsWorkflow {
 	return &barArgWithNestedQueryParamsWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

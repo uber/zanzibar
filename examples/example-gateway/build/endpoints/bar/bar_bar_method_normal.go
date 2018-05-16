@@ -43,14 +43,14 @@ import (
 
 // BarNormalHandler is the handler for "/bar/bar-path"
 type BarNormalHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarNormalHandler creates a handler
 func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 	handler := &BarNormalHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -102,7 +102,8 @@ func (h *BarNormalHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarNormalWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarNormalWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

@@ -41,10 +41,10 @@ type GoogleNowCheckCredentialsWorkflow interface {
 }
 
 // NewGoogleNowCheckCredentialsWorkflow creates a workflow
-func NewGoogleNowCheckCredentialsWorkflow(clients *module.ClientDependencies, logger *zap.Logger) GoogleNowCheckCredentialsWorkflow {
+func NewGoogleNowCheckCredentialsWorkflow(deps *module.Dependencies) GoogleNowCheckCredentialsWorkflow {
 	return &googleNowCheckCredentialsWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

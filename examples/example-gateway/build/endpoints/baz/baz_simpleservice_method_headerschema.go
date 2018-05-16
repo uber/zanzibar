@@ -41,14 +41,14 @@ import (
 
 // SimpleServiceHeaderSchemaHandler is the handler for "/baz/header-schema"
 type SimpleServiceHeaderSchemaHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceHeaderSchemaHandler creates a handler
 func NewSimpleServiceHeaderSchemaHandler(deps *module.Dependencies) *SimpleServiceHeaderSchemaHandler {
 	handler := &SimpleServiceHeaderSchemaHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -96,7 +96,8 @@ func (h *SimpleServiceHeaderSchemaHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServiceHeaderSchemaWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServiceHeaderSchemaWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

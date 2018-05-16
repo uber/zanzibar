@@ -40,14 +40,14 @@ import (
 
 // GoogleNowAddCredentialsHandler is the handler for "/googlenow/add-credentials"
 type GoogleNowAddCredentialsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewGoogleNowAddCredentialsHandler creates a handler
 func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddCredentialsHandler {
 	handler := &GoogleNowAddCredentialsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -95,7 +95,8 @@ func (h *GoogleNowAddCredentialsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewGoogleNowAddCredentialsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewGoogleNowAddCredentialsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

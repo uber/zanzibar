@@ -42,14 +42,14 @@ import (
 
 // BarArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
 type BarArgWithHeadersHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithHeadersHandler creates a handler
 func NewBarArgWithHeadersHandler(deps *module.Dependencies) *BarArgWithHeadersHandler {
 	handler := &BarArgWithHeadersHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -102,7 +102,8 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithHeadersWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewBarArgWithHeadersWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

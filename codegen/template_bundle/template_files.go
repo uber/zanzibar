@@ -271,14 +271,14 @@ import (
 
 // {{$handlerName}} is the handler for "{{.HTTPPath}}"
 type {{$handlerName}} struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
 }
 
 // New{{$handlerName}} creates a handler
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -363,7 +363,8 @@ func (h *{{$handlerName}}) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
@@ -454,7 +455,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6534, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6573, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2338,7 +2339,7 @@ import (
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
-		Clients: deps.Client,
+		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
@@ -2350,7 +2351,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // {{$handlerName}} is the handler for "{{.ThriftService}}::{{.Name}}".
 type {{$handlerName}} struct {
-	Clients  *module.ClientDependencies
+	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
 }
 
@@ -2390,7 +2391,7 @@ func (h *{{$handlerName}}) Handle(
 	}
 	{{end -}}
 
-	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Clients, h.endpoint.Logger)
+	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
 	{{if and (eq .RequestType "") (eq .ResponseType "")}}
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders)
@@ -2492,7 +2493,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5355, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5317, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2570,10 +2571,10 @@ Handle(
 {{- $clientExceptions := .DownstreamMethod.Exceptions -}}
 
 // New{{$workflowInterface}} creates a workflow
-func New{{$workflowInterface}}(clients *module.ClientDependencies, logger *zap.Logger) {{$workflowInterface}} {
+func New{{$workflowInterface}}(deps *module.Dependencies) {{$workflowInterface}} {
 	return &{{$workflowStruct}}{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 
@@ -2763,7 +2764,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7498, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2807,14 +2808,26 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 		{{- end }}
 	}
 
+	mockClientDependencies := &module.ClientDependencies{
+		{{- range $idx, $moduleInstance := $clientDeps -}}
+		{{- $pkgInfo := $moduleInstance.PackageInfo }}
+		{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
+		{{- end }}
+	}
+
 	w := {{$instance.PackageInfo.PackageAlias}}.New{{$workflowInterface}}(
-		&module.ClientDependencies{
-			{{- range $idx, $moduleInstance := $clientDeps -}}
-			{{- $pkgInfo := $moduleInstance.PackageInfo }}
-			{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
-			{{- end }}
+		&module.Dependencies{
+			Default: &zanzibar.DefaultDependencies {
+				Logger: zap.NewNop(),
+				Scope:  nil,
+				Tracer:  nil,
+				Config: nil,
+				Channel:nil,
+			},
+			{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
+			{{$classType | pascal}}: mockClientDependencies,
+			{{end -}}
 		},
-		zap.NewNop(),
 	)
 
 	return w, mockClients
@@ -2830,7 +2843,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2095, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

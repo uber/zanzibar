@@ -41,14 +41,14 @@ import (
 
 // ContactsSaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
 type ContactsSaveContactsHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewContactsSaveContactsHandler creates a handler
 func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveContactsHandler {
 	handler := &ContactsSaveContactsHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -95,7 +95,8 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := customContacts.NewContactsSaveContactsWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := customContacts.NewContactsSaveContactsWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

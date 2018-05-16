@@ -38,14 +38,14 @@ import (
 
 // SimpleServicePingHandler is the handler for "/baz/ping"
 type SimpleServicePingHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServicePingHandler creates a handler
 func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHandler {
 	handler := &SimpleServicePingHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -85,7 +85,8 @@ func (h *SimpleServicePingHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServicePingWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServicePingWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

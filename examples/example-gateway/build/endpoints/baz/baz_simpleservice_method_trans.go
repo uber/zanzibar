@@ -41,14 +41,14 @@ import (
 
 // SimpleServiceTransHandler is the handler for "/baz/trans"
 type SimpleServiceTransHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceTransHandler creates a handler
 func NewSimpleServiceTransHandler(deps *module.Dependencies) *SimpleServiceTransHandler {
 	handler := &SimpleServiceTransHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -93,7 +93,8 @@ func (h *SimpleServiceTransHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServiceTransWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServiceTransWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

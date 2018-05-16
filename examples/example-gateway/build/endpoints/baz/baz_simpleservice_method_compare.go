@@ -41,14 +41,14 @@ import (
 
 // SimpleServiceCompareHandler is the handler for "/baz/compare"
 type SimpleServiceCompareHandler struct {
-	Clients  *module.ClientDependencies
-	endpoint *zanzibar.RouterEndpoint
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceCompareHandler creates a handler
 func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCompareHandler {
 	handler := &SimpleServiceCompareHandler{
-		Clients: deps.Client,
+		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
@@ -93,7 +93,8 @@ func (h *SimpleServiceCompareHandler) HandleRequest(
 		req.Logger.Debug("endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewSimpleServiceCompareWorkflow(h.Clients, req.Logger)
+	h.Dependencies.Default.Logger = req.Logger
+	w := workflow.NewSimpleServiceCompareWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}

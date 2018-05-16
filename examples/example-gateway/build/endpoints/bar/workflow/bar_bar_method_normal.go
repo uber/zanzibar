@@ -45,10 +45,10 @@ type BarNormalWorkflow interface {
 }
 
 // NewBarNormalWorkflow creates a workflow
-func NewBarNormalWorkflow(clients *module.ClientDependencies, logger *zap.Logger) BarNormalWorkflow {
+func NewBarNormalWorkflow(deps *module.Dependencies) BarNormalWorkflow {
 	return &barNormalWorkflow{
-		Clients: clients,
-		Logger:  logger,
+		Clients: deps.Client,
+		Logger:  deps.Default.Logger,
 	}
 }
 

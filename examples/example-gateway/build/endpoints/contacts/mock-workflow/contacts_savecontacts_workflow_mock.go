@@ -34,6 +34,7 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	contactsendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // NewContactsSaveContactsWorkflowMock creates a workflow with mock clients
@@ -43,11 +44,21 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 		Contacts: contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
 	}
 
+	mockClientDependencies := &module.ClientDependencies{
+		Contacts: mockClients.Contacts,
+	}
+
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(
-		&module.ClientDependencies{
-			Contacts: mockClients.Contacts,
+		&module.Dependencies{
+			Default: &zanzibar.DefaultDependencies{
+				Logger:  zap.NewNop(),
+				Scope:   nil,
+				Tracer:  nil,
+				Config:  nil,
+				Channel: nil,
+			},
+			Client: mockClientDependencies,
 		},
-		zap.NewNop(),
 	)
 
 	return w, mockClients

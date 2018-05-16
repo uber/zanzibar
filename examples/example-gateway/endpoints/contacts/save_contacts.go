@@ -14,12 +14,11 @@ import (
 
 // NewContactsSaveContactsWorkflow ...
 func NewContactsSaveContactsWorkflow(
-	clients *module.ClientDependencies,
-	logger *zap.Logger,
+	clients *module.Dependencies,
 ) workflow.ContactsSaveContactsWorkflow {
 	return &SaveContactsEndpoint{
-		Clients: clients,
-		Logger:  logger,
+		Clients: clients.Client,
+		Logger:  clients.Default.Logger,
 	}
 }
 
