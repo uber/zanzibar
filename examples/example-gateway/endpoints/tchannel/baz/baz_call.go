@@ -81,5 +81,12 @@ func (w Workflow) Handle(
 			return respHeaders, err
 		}
 	}
+
+	if val, ok := clientReqHeaders["x-nil-response-header"]; ok {
+		if "true" == val {
+			return nil, nil
+		}
+	}
+
 	return respHeaders, nil
 }
