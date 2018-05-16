@@ -20,6 +20,7 @@ struct TransStruct {
 struct NestHeaders {
     1: required string UUID
     2: optional string token
+    3: optional string fixValue
 }
 
 struct Wrapped {

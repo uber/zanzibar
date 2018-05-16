@@ -117,8 +117,9 @@ func (v *BazResponse) Equals(rhs *BazResponse) bool {
 }
 
 type NestHeaders struct {
-	UUID  string  `json:"UUID,required"`
-	Token *string `json:"token,omitempty"`
+	UUID     string  `json:"UUID,required"`
+	Token    *string `json:"token,omitempty"`
+	FixValue *string `json:"fixValue,omitempty"`
 }
 
 // ToWire translates a NestHeaders struct into a Thrift-level intermediate
@@ -138,7 +139,7 @@ type NestHeaders struct {
 //   }
 func (v *NestHeaders) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -156,6 +157,14 @@ func (v *NestHeaders) ToWire() (wire.Value, error) {
 			return w, err
 		}
 		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+	if v.FixValue != nil {
+		w, err = wire.NewValueString(*(v.FixValue)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 3, Value: w}
 		i++
 	}
 
@@ -204,6 +213,16 @@ func (v *NestHeaders) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 3:
+			if field.Value.Type() == wire.TBinary {
+				var x string
+				x, err = field.Value.GetString(), error(nil)
+				v.FixValue = &x
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -221,12 +240,16 @@ func (v *NestHeaders) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	fields[i] = fmt.Sprintf("UUID: %v", v.UUID)
 	i++
 	if v.Token != nil {
 		fields[i] = fmt.Sprintf("Token: %v", *(v.Token))
+		i++
+	}
+	if v.FixValue != nil {
+		fields[i] = fmt.Sprintf("FixValue: %v", *(v.FixValue))
 		i++
 	}
 
@@ -254,6 +277,9 @@ func (v *NestHeaders) Equals(rhs *NestHeaders) bool {
 	if !_String_EqualsPtr(v.Token, rhs.Token) {
 		return false
 	}
+	if !_String_EqualsPtr(v.FixValue, rhs.FixValue) {
+		return false
+	}
 
 	return true
 }
@@ -263,6 +289,16 @@ func (v *NestHeaders) Equals(rhs *NestHeaders) bool {
 func (v *NestHeaders) GetToken() (o string) {
 	if v.Token != nil {
 		return *v.Token
+	}
+
+	return
+}
+
+// GetFixValue returns the value of FixValue if it is set or its
+// zero value if it is unset.
+func (v *NestHeaders) GetFixValue() (o string) {
+	if v.FixValue != nil {
+		return *v.FixValue
 	}
 
 	return

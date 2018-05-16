@@ -70,6 +70,13 @@ func (hp *HeaderPropagator) Propagate(
 				val.QualifiedName, field.Name)
 		}
 
+		if val.StaticValue != "" {
+			hp.appendf(`key := "%s"`, val.StaticValue)
+			arrs := typeSwitch(key, gotype, field)
+			hp.append(arrs...)
+			continue
+		}
+
 		hp.appendf(`if key, ok := headers.Get("%s"); ok {`, val.QualifiedName)
 		// patch optional params along the path
 		if err := hp.initNilOpt(key, toFields); err != nil {

@@ -245,6 +245,9 @@ func propagateHeadersTransHeadersClientRequests(in *clientsBazBaz.SimpleService_
 		in.Req.W2.N1.UUID = key
 
 	}
+	key := "header"
+	in.Req.W2.N2.FixValue = &key
+
 	if key, ok := headers.Get("x-token"); ok {
 		if in.Req == nil {
 			in.Req = &clientsBazBase.TransHeaders{}

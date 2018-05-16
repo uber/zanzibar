@@ -882,12 +882,6 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 	dest := make(map[string]string)
 	for _, propagate := range propagates {
 		propagateMap := propagate.(map[string]interface{})
-		fromField, ok := propagateMap["from"].(string)
-		if !ok {
-			return nil, errors.New(
-				"propagate middleware found with no source field",
-			)
-		}
 		toField, ok := propagateMap["to"].(string)
 		if !ok {
 			return nil, errors.New(
@@ -901,6 +895,22 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 			)
 		}
 		dest[toField] = toField
+
+		fromField, ok := propagateMap["from"].(string)
+		if !ok {
+			// if not set as "from", there could be fixed value
+			value, ok := propagateMap["value"].(string)
+			if ok {
+				fieldMap[toField] = FieldMapperEntry{
+					StaticValue: value,
+				}
+				continue
+			}
+			return nil, errors.New(
+				"propagate middleware found with no source field",
+			)
+		}
+
 		fieldMap[toField] = FieldMapperEntry{
 			QualifiedName: fromField,
 		}

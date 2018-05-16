@@ -44,6 +44,10 @@
 					{
 						"from": "x-token",
 						"to": "Req.W2.N2.Token"
+					},
+					{
+						"value": "header",
+						"to": "Req.W2.N2.FixValue"
 					}
 				]
 			}
