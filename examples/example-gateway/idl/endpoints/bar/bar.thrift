@@ -13,7 +13,7 @@ enum Fruit {
 }
 
 struct BarRequest {
-    1: required string stringField
+    1: required string stringField = "abc"
     2: required bool boolField
     3: required binary binaryField
     4: required Timestamp timestamp

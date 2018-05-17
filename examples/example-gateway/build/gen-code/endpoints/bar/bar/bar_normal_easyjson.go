@@ -471,7 +471,6 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		in.Skip()
 		return
 	}
-	var StringFieldSet bool
 	var BoolFieldSet bool
 	var BinaryFieldSet bool
 	var TimestampSet bool
@@ -488,8 +487,15 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 		switch key {
 		case "stringField":
-			out.StringField = string(in.String())
-			StringFieldSet = true
+			if in.IsNull() {
+				in.Skip()
+				out.StringField = nil
+			} else {
+				if out.StringField == nil {
+					out.StringField = new(string)
+				}
+				*out.StringField = string(in.String())
+			}
 		case "boolField":
 			out.BoolField = bool(in.Bool())
 			BoolFieldSet = true
@@ -525,9 +531,6 @@ func easyjsonBea79dfbDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	if isTopLevel {
 		in.Consumed()
 	}
-	if !StringFieldSet {
-		in.AddError(fmt.Errorf("key 'stringField' is required"))
-	}
 	if !BoolFieldSet {
 		in.AddError(fmt.Errorf("key 'boolField' is required"))
 	}
@@ -548,12 +551,18 @@ func easyjsonBea79dfbEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	if in.StringField != nil {
+		if !first {
+			out.RawByte(',')
+		}
+		first = false
+		out.RawString("\"stringField\":")
+		if in.StringField == nil {
+			out.RawString("null")
+		} else {
+			out.String(string(*in.StringField))
+		}
 	}
-	first = false
-	out.RawString("\"stringField\":")
-	out.String(string(in.StringField))
 	if !first {
 		out.RawByte(',')
 	}
