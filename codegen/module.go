@@ -43,6 +43,8 @@ const (
 	SingleModule moduleClassType = iota
 	// MultiModule defines a module class type with multiple nested directories
 	MultiModule moduleClassType = iota
+
+	serializedModuleTreePath = "zanzibar.tree"
 )
 
 const configSuffix = "-config.json"
@@ -866,6 +868,15 @@ func (system *ModuleSystem) GenerateBuild(
 
 	if err != nil {
 		return nil, err
+	}
+
+	serializedModules, err := json.Marshal(resolvedModules)
+	if err != nil {
+		return nil, errors.Wrap(err, "error serializing module tree")
+	}
+	err = writeFile(filepath.Join(targetGenDir, serializedModuleTreePath), serializedModules)
+	if err != nil {
+		return nil, errors.Wrap(err, "error writing serialized module tree")
 	}
 
 	moduleCount := 0

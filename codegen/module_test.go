@@ -27,6 +27,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/pkg/errors"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -167,6 +169,13 @@ func TestExampleService(t *testing.T) {
 
 	currentDir := getTestDirName()
 	testServiceDir := path.Join(currentDir, "test-service")
+
+	defer func() {
+		err := os.Remove(path.Join(testServiceDir, "build", serializedModuleTreePath))
+		if err != nil {
+			panic(errors.Wrap(err, "error removing serialized module tree"))
+		}
+	}()
 
 	// TODO: this should return a collection of errors if they occur
 	instances, err := moduleSystem.GenerateBuild(
