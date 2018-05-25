@@ -472,10 +472,7 @@ func (c *TypeConverter) genConverterForMap(
 		toFieldKeyID := keyID
 
 		toTypeKeyName := keyType
-		fromTypeKeyName, err := c.getGoTypeName(fromFieldType.KeySpec)
-		if err != nil {
-			return err
-		}
+		fromTypeKeyName, _ := c.getGoTypeName(fromFieldType.KeySpec)
 		if fromTypeKeyName != toTypeKeyName {
 			toFieldKeyID = toTypeKeyName + "(" + keyID + ")"
 		}
