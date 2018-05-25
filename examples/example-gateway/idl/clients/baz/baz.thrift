@@ -33,7 +33,38 @@ exception OtherAuthErr {
   1: required string message
 }
 
+struct Recur3 {
+    1: required UUID field31
+}
+
+struct Recur2 {
+    1: required Recur3 field21
+    2: optional Recur3 field22
+}
+
+struct Recur1 {
+    1: required map<UUID, Recur2> field1
+}
+
+struct Profile {
+    1: required Recur1 recur1
+}
+
+struct GetProfileRequest {
+    1: required UUID target
+}
+
+struct GetProfileResponse {
+    1: required list<Profile> payloads
+}
+
 service SimpleService {
+    GetProfileResponse getProfile(
+        1: required GetProfileRequest request
+    ) throws (
+        1: AuthErr authErr
+    )
+
     base.BazResponse compare(
         1: required BazRequest arg1
         2: required BazRequest arg2

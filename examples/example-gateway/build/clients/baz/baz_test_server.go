@@ -724,6 +724,56 @@ func (h *SimpleServiceCompareHandler) Handle(
 	return err == nil, &res, respHeaders, nil
 }
 
+// SimpleServiceGetProfileFunc is the handler function for "getProfile" method of thrift service "SimpleService".
+type SimpleServiceGetProfileFunc func(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_GetProfile_Args,
+) (*clientsBazBaz.GetProfileResponse, map[string]string, error)
+
+// NewSimpleServiceGetProfileHandler wraps a handler function so it can be registered with a thrift server.
+func NewSimpleServiceGetProfileHandler(f SimpleServiceGetProfileFunc) zanzibar.TChannelHandler {
+	return &SimpleServiceGetProfileHandler{f}
+}
+
+// SimpleServiceGetProfileHandler handles the "getProfile" method call of thrift service "SimpleService".
+type SimpleServiceGetProfileHandler struct {
+	getprofile SimpleServiceGetProfileFunc
+}
+
+// Handle parses request from wire value and calls corresponding handler function.
+func (h *SimpleServiceGetProfileHandler) Handle(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var req clientsBazBaz.SimpleService_GetProfile_Args
+	var res clientsBazBaz.SimpleService_GetProfile_Result
+
+	if err := req.FromWire(*wireValue); err != nil {
+		return false, nil, nil, err
+	}
+	r, respHeaders, err := h.getprofile(ctx, reqHeaders, &req)
+
+	if err != nil {
+		switch v := err.(type) {
+		case *clientsBazBaz.AuthErr:
+			if v == nil {
+				return false, nil, nil, errors.New(
+					"Handler for getProfile returned non-nil error type *AuthErr but nil value",
+				)
+			}
+			res.AuthErr = v
+		default:
+			return false, nil, nil, err
+		}
+	} else {
+		res.Success = r
+	}
+
+	return err == nil, &res, respHeaders, nil
+}
+
 // SimpleServiceHeaderSchemaFunc is the handler function for "headerSchema" method of thrift service "SimpleService".
 type SimpleServiceHeaderSchemaFunc func(
 	ctx context.Context,

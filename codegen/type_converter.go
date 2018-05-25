@@ -469,14 +469,27 @@ func (c *TypeConverter) genConverterForMap(
 			)
 		}
 
+		toFieldKeyID := keyID
+
+		toTypeKeyName := keyType
+		fromTypeKeyName, err := c.getGoTypeName(fromFieldType.KeySpec)
+		if err != nil {
+			return err
+		}
+		if fromTypeKeyName != toTypeKeyName {
+			toFieldKeyID = toTypeKeyName + "(" + keyID + ")"
+		}
+		toKeyPrefix := keyPrefix + PascalCase(toField.Name) + "[" + toFieldKeyID + "]"
+		fromKeyPrefix := trimAnyPrefix(fromIdentifier, "in.", "inOriginal.") + "[" + keyID + "]"
+
 		err = c.genConverterForStruct(
 			toField.Name,
 			valueStruct,
 			toField.Required,
 			fromFieldType.ValueSpec,
 			valID,
-			keyPrefix+PascalCase(toField.Name)+"["+keyID+"]",
-			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
+			toKeyPrefix,
+			fromKeyPrefix,
 			nestedIndent,
 			nil,
 			nil,
@@ -698,13 +711,13 @@ func (c *TypeConverter) genStructConverter(
 
 		case *compile.StructSpec:
 			var (
-				stFromPrefix = keyPrefix
+				stFromPrefix = fromPrefix
 				stFromType   compile.TypeSpec
 				fromTypeName string
 			)
 			if fromField != nil {
 				stFromType = fromField.Type
-				stFromPrefix = keyPrefix + PascalCase(fromField.Name)
+				stFromPrefix = fromPrefix + PascalCase(fromField.Name)
 
 				fromTypeName, _ = c.getIdentifierName(stFromType)
 			}

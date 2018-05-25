@@ -77,12 +77,6 @@ func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
 	return &v, err
 }
 
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
-}
-
 // FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
