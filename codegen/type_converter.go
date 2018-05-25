@@ -184,9 +184,9 @@ func (c *TypeConverter) genConverterForStruct(
 		if keyPrefix != "" {
 			keyPrefix += "."
 		}
-		if fromPrefix != "" {
-			fromPrefix += "."
-		}
+		// if fromPrefix != "" {
+		// fromPrefix += "."
+		// }
 
 		// recursive call
 		err := c.genStructConverter(
