@@ -2876,6 +2876,75 @@ func TestConverterRecursiveStructWithToReqMissingError(t *testing.T) {
 	assert.Equal(t, "required toField eight does not have a valid fromField mapping", err.Error())
 }
 
+func TestConverterMapTypeDef(t *testing.T) {
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`
+		typedef string UUIDFoo
+		typedef string UUIDBar
+
+		struct RecurFoo2 {
+			1: required UUIDFoo field1
+		}
+		
+		struct RecurBar2 {
+			1: required UUIDBar field1
+		}
+
+		struct RecurFoo1 {
+			1: required map<UUIDFoo, RecurFoo2> field1
+		}
+		
+		struct RecurBar1 {
+			1: required map<UUIDBar, RecurBar2> field1
+		}
+
+		struct ProfileFoo {
+			1: required RecurFoo1 field1
+		}
+		struct ProfileBar {
+			2: required RecurBar1 field1
+		}
+
+ 		struct Foo {
+ 			1: required list<ProfileFoo> one
+ 		}
+
+ 		struct Bar {
+			1: required list<ProfileBar> one
+ 		}`,
+		nil,
+		nil,
+	)
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make([]*structs.ProfileBar, len(in.One))
+	for index1, value2 := range in.One {
+		if value2 != nil {
+			out.One[index1] = &structs.ProfileBar{}
+			if in.One[index1].Field1 != nil {
+				out.One[index1].Field1 = &structs.RecurBar1{}
+	out.One[index1].Field1.Field1 = make(map[structs.UUIDBar]*structs.RecurBar2, len(in.One[index1].Field1.Field1))
+	for key3, value4 := range in.One[index1].Field1.Field1 {
+					if value4 != nil {
+						out.One[index1].Field1.Field1[structs.UUIDBar(key3)] = &structs.RecurBar2{}
+						if in.One[index1] != nil && in.One[index1].Field1 != nil && in.One[index1].Field1.Field1[key3] != nil {
+							out.One[index1].Field1.Field1[structs.UUIDBar(key3)].Field1 = structs.UUIDBar(in.One[index1].Field1.Field1[key3].Field1)
+						}
+					} else {
+						out.One[index1].Field1.Field1[structs.UUIDBar(key3)] = nil
+					}
+	}
+			} else {
+				out.One[index1].Field1 = nil
+			}
+		} else {
+			out.One[index1] = nil
+		}
+	}
+	`), lines)
+}
+
 // can't really use field map to reassign recursive struct values
 func TestConverterRecursiveStructWithFieldMap(t *testing.T) {
 	fieldMap := make(map[string]codegen.FieldMapperEntry)
