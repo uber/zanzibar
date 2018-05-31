@@ -22,6 +22,7 @@ package zanzibar_test
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -360,6 +361,68 @@ func TestResponsePeekBodyError(t *testing.T) {
 				_, _, err := res.PeekBody("Token2")
 				assert.Error(t, err)
 				assert.Equal(t, "Key path not found", err.Error())
+			},
+		),
+	)
+
+	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, resp.StatusCode, 200)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(
+		t,
+		`{"Client":{"Token":"myClientToken"},"Token":"myToken"}`,
+		string(bytes),
+	)
+}
+
+func TestPendingResponseBody(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				obj := &MyBody{
+					Token: "myToken",
+					Client: MyBodyClient{
+						Token: "myClientToken",
+					},
+				}
+				bytes, err := json.Marshal(obj)
+				statusCode := 200
+				assert.NoError(t, err)
+				res.WriteJSON(statusCode, nil, obj)
+
+				pendingBytes, pendingObj, pendingStatusCode := res.GetPendingResponse()
+				assert.Equal(t, bytes, pendingBytes)
+				assert.Equal(t, obj, pendingObj)
+				assert.Equal(t, statusCode, pendingStatusCode)
+
 			},
 		),
 	)
