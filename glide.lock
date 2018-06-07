@@ -1,5 +1,5 @@
-hash: 64ca5bc644c90e95fcd9c892bc7ea94e0df42b8e9f29da81a250c9c184fa90f9
-updated: 2018-03-09T17:09:31.818929-08:00
+hash: 7303679efb1f7033fee56547687aadc15f002f22775f8a63d2247a2c6db025f5
+updated: 2018-06-07T14:59:18.53255-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -15,8 +15,6 @@ imports:
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
-- name: github.com/facebookgo/clock
-  version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - name: github.com/fatih/structtag
   version: da3d9ab5b78fdc25d3a7614853b085200bd10da9
 - name: github.com/go-validator/validator
@@ -24,15 +22,18 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 58cd061d09382b6011f84c1291ebe50ef2e25bab
+  version: 22bbf0ddf08105dfa364d0a2fa619dfa71014af5
   subpackages:
   - gomock
+  - mockgen/model
 - name: github.com/jessevdk/go-flags
   version: f88afde2fa19a30cf50ba4b05b3d13bc6bae3079
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
+- name: github.com/kisielk/errcheck
+  version: 4f638ae6fe63ac7e89149052aaa2ac1ae3ec5111
 - name: github.com/mailru/easyjson
   version: 4d347d79dea0067c945f374f990601decb08abb5
   subpackages:
@@ -69,7 +70,7 @@ imports:
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
-  version: 522328b48efad0c6034dba92bf39228694e9d31f
+  version: 79f2a33b0e55b1255ffbbaf824dcafb09ff34dda
   subpackages:
   - m3
   - m3/customtransports
@@ -109,7 +110,7 @@ imports:
 - name: github.com/xeipuuv/gojsonschema
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
-  version: 8474b86a5a6f79c443ce4b2992817ff32cf208b8
+  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
 - name: go.uber.org/multierr
   version: a3d1fc1f1316d4132fc61f4ea1159ae0613fb474
 - name: go.uber.org/thriftrw
@@ -138,7 +139,7 @@ imports:
   - version
   - wire
 - name: go.uber.org/zap
-  version: 35aad584952c3e7020db7b839f6b102de6271f89
+  version: eeedf312bc6c57391d84767a4cd413f02a917974
   subpackages:
   - buffer
   - internal/bufferpool
@@ -147,7 +148,11 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: d25186b37f34ebdbbea8f488ef055638dfab272d
+  version: 1e491301e022f8f977054da4c2d852decd59571f
   subpackages:
   - context
+- name: honnef.co/go/tools
+  version: 8ed405e85c65fb38745a8eafe01ee9590523f172
+  subpackages:
+  - cmd/staticcheck
 testImports: []
