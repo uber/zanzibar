@@ -1,5 +1,5 @@
-hash: 7303679efb1f7033fee56547687aadc15f002f22775f8a63d2247a2c6db025f5
-updated: 2018-06-07T14:59:18.53255-07:00
+hash: f566572dffb3c5ee5ca19ea83402ef59990aa3ac45b3751f49e65a1f5c731972
+updated: 2018-06-08T12:03:30.294061-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -34,6 +34,8 @@ imports:
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/kisielk/errcheck
   version: 4f638ae6fe63ac7e89149052aaa2ac1ae3ec5111
+- name: github.com/kisielk/gotool
+  version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
   version: 4d347d79dea0067c945f374f990601decb08abb5
   subpackages:
