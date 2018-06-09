@@ -283,6 +283,6 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 
 // GetPendingResponse lets you read the pending body bytes, obj and status code
 // which isn't sent back yet.
-func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, interface{}, int) {
-	return res.pendingBodyBytes, res.pendingBodyObj, res.pendingStatusCode
+func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
+	return res.pendingBodyBytes, res.pendingStatusCode
 }
