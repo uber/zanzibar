@@ -418,9 +418,8 @@ func TestPendingResponseBody(t *testing.T) {
 				assert.NoError(t, err)
 				res.WriteJSON(statusCode, nil, obj)
 
-				pendingBytes, pendingObj, pendingStatusCode := res.GetPendingResponse()
+				pendingBytes, pendingStatusCode := res.GetPendingResponse()
 				assert.Equal(t, bytes, pendingBytes)
-				assert.Equal(t, obj, pendingObj)
 				assert.Equal(t, statusCode, pendingStatusCode)
 
 			},
