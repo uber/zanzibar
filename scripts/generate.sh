@@ -2,6 +2,11 @@
 
 set -e
 
+function cleanup {
+	rm -f $PREFIX/build/zanzibar.tree
+}
+trap cleanup EXIT
+
 PREFIX=examples/example-gateway
 ANNOPREFIX=${1:-zanzibar}
 
