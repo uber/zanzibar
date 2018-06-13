@@ -30,7 +30,8 @@
 			"TransHeadersType": "SimpleService::transHeadersType",
 			"TransHeadersNoReq": "SimpleService::transHeadersNoReq",
 			"HeaderSchema": "SimpleService::headerSchema",
-			"URLTest": "SimpleService::urlTest"
+			"URLTest": "SimpleService::urlTest",
+			"GetProfile": "SimpleService::getProfile"
 		}
 	}
 }

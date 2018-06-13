@@ -412,6 +412,295 @@ func (v *Fruit) UnmarshalJSON(text []byte) error {
 	}
 }
 
+type GetProfileRequest struct {
+	Target UUID `json:"target,required"`
+}
+
+// ToWire translates a GetProfileRequest struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *GetProfileRequest) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = v.Target.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _UUID_Read(w wire.Value) (UUID, error) {
+	var x UUID
+	err := x.FromWire(w)
+	return x, err
+}
+
+// FromWire deserializes a GetProfileRequest struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a GetProfileRequest struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v GetProfileRequest
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *GetProfileRequest) FromWire(w wire.Value) error {
+	var err error
+
+	targetIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Target, err = _UUID_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				targetIsSet = true
+			}
+		}
+	}
+
+	if !targetIsSet {
+		return errors.New("field Target of GetProfileRequest is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a GetProfileRequest
+// struct.
+func (v *GetProfileRequest) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Target: %v", v.Target)
+	i++
+
+	return fmt.Sprintf("GetProfileRequest{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this GetProfileRequest match the
+// provided GetProfileRequest.
+//
+// This function performs a deep comparison.
+func (v *GetProfileRequest) Equals(rhs *GetProfileRequest) bool {
+	if !(v.Target == rhs.Target) {
+		return false
+	}
+
+	return true
+}
+
+type GetProfileResponse struct {
+	Payloads []*Profile `json:"payloads,required"`
+}
+
+type _List_Profile_ValueList []*Profile
+
+func (v _List_Profile_ValueList) ForEach(f func(wire.Value) error) error {
+	for i, x := range v {
+		if x == nil {
+			return fmt.Errorf("invalid [%v]: value is nil", i)
+		}
+		w, err := x.ToWire()
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_Profile_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_Profile_ValueList) ValueType() wire.Type {
+	return wire.TStruct
+}
+
+func (_List_Profile_ValueList) Close() {}
+
+// ToWire translates a GetProfileResponse struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *GetProfileResponse) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Payloads == nil {
+		return w, errors.New("field Payloads of GetProfileResponse is required")
+	}
+	w, err = wire.NewValueList(_List_Profile_ValueList(v.Payloads)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Profile_Read(w wire.Value) (*Profile, error) {
+	var v Profile
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _List_Profile_Read(l wire.ValueList) ([]*Profile, error) {
+	if l.ValueType() != wire.TStruct {
+		return nil, nil
+	}
+
+	o := make([]*Profile, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := _Profile_Read(x)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
+}
+
+// FromWire deserializes a GetProfileResponse struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a GetProfileResponse struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v GetProfileResponse
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *GetProfileResponse) FromWire(w wire.Value) error {
+	var err error
+
+	payloadsIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TList {
+				v.Payloads, err = _List_Profile_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				payloadsIsSet = true
+			}
+		}
+	}
+
+	if !payloadsIsSet {
+		return errors.New("field Payloads of GetProfileResponse is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a GetProfileResponse
+// struct.
+func (v *GetProfileResponse) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Payloads: %v", v.Payloads)
+	i++
+
+	return fmt.Sprintf("GetProfileResponse{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_Profile_Equals(lhs, rhs []*Profile) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Equals returns true if all the fields of this GetProfileResponse match the
+// provided GetProfileResponse.
+//
+// This function performs a deep comparison.
+func (v *GetProfileResponse) Equals(rhs *GetProfileResponse) bool {
+	if !_List_Profile_Equals(v.Payloads, rhs.Payloads) {
+		return false
+	}
+
+	return true
+}
+
 type HeaderSchema struct {
 }
 
@@ -598,6 +887,564 @@ func (v *OtherAuthErr) Error() string {
 	return v.String()
 }
 
+type Profile struct {
+	Recur1 *Recur1 `json:"recur1,required"`
+}
+
+// ToWire translates a Profile struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Profile) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Recur1 == nil {
+		return w, errors.New("field Recur1 of Profile is required")
+	}
+	w, err = v.Recur1.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Recur1_Read(w wire.Value) (*Recur1, error) {
+	var v Recur1
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a Profile struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Profile struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Profile
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Profile) FromWire(w wire.Value) error {
+	var err error
+
+	recur1IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.Recur1, err = _Recur1_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				recur1IsSet = true
+			}
+		}
+	}
+
+	if !recur1IsSet {
+		return errors.New("field Recur1 of Profile is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Profile
+// struct.
+func (v *Profile) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Recur1: %v", v.Recur1)
+	i++
+
+	return fmt.Sprintf("Profile{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Profile match the
+// provided Profile.
+//
+// This function performs a deep comparison.
+func (v *Profile) Equals(rhs *Profile) bool {
+	if !v.Recur1.Equals(rhs.Recur1) {
+		return false
+	}
+
+	return true
+}
+
+type Recur1 struct {
+	Field1 map[UUID]*Recur2 `json:"field1,required"`
+}
+
+type _Map_UUID_Recur2_MapItemList map[UUID]*Recur2
+
+func (m _Map_UUID_Recur2_MapItemList) ForEach(f func(wire.MapItem) error) error {
+	for k, v := range m {
+		if v == nil {
+			return fmt.Errorf("invalid [%v]: value is nil", k)
+		}
+		kw, err := k.ToWire()
+		if err != nil {
+			return err
+		}
+
+		vw, err := v.ToWire()
+		if err != nil {
+			return err
+		}
+		err = f(wire.MapItem{Key: kw, Value: vw})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m _Map_UUID_Recur2_MapItemList) Size() int {
+	return len(m)
+}
+
+func (_Map_UUID_Recur2_MapItemList) KeyType() wire.Type {
+	return wire.TBinary
+}
+
+func (_Map_UUID_Recur2_MapItemList) ValueType() wire.Type {
+	return wire.TStruct
+}
+
+func (_Map_UUID_Recur2_MapItemList) Close() {}
+
+// ToWire translates a Recur1 struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Recur1) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Field1 == nil {
+		return w, errors.New("field Field1 of Recur1 is required")
+	}
+	w, err = wire.NewValueMap(_Map_UUID_Recur2_MapItemList(v.Field1)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Recur2_Read(w wire.Value) (*Recur2, error) {
+	var v Recur2
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _Map_UUID_Recur2_Read(m wire.MapItemList) (map[UUID]*Recur2, error) {
+	if m.KeyType() != wire.TBinary {
+		return nil, nil
+	}
+
+	if m.ValueType() != wire.TStruct {
+		return nil, nil
+	}
+
+	o := make(map[UUID]*Recur2, m.Size())
+	err := m.ForEach(func(x wire.MapItem) error {
+		k, err := _UUID_Read(x.Key)
+		if err != nil {
+			return err
+		}
+
+		v, err := _Recur2_Read(x.Value)
+		if err != nil {
+			return err
+		}
+
+		o[k] = v
+		return nil
+	})
+	m.Close()
+	return o, err
+}
+
+// FromWire deserializes a Recur1 struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Recur1 struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Recur1
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Recur1) FromWire(w wire.Value) error {
+	var err error
+
+	field1IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TMap {
+				v.Field1, err = _Map_UUID_Recur2_Read(field.Value.GetMap())
+				if err != nil {
+					return err
+				}
+				field1IsSet = true
+			}
+		}
+	}
+
+	if !field1IsSet {
+		return errors.New("field Field1 of Recur1 is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Recur1
+// struct.
+func (v *Recur1) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Field1: %v", v.Field1)
+	i++
+
+	return fmt.Sprintf("Recur1{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _Map_UUID_Recur2_Equals(lhs, rhs map[UUID]*Recur2) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for lk, lv := range lhs {
+		rv, ok := rhs[lk]
+		if !ok {
+			return false
+		}
+		if !lv.Equals(rv) {
+			return false
+		}
+	}
+	return true
+}
+
+// Equals returns true if all the fields of this Recur1 match the
+// provided Recur1.
+//
+// This function performs a deep comparison.
+func (v *Recur1) Equals(rhs *Recur1) bool {
+	if !_Map_UUID_Recur2_Equals(v.Field1, rhs.Field1) {
+		return false
+	}
+
+	return true
+}
+
+type Recur2 struct {
+	Field21 *Recur3 `json:"field21,required"`
+	Field22 *Recur3 `json:"field22,omitempty"`
+}
+
+// ToWire translates a Recur2 struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Recur2) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Field21 == nil {
+		return w, errors.New("field Field21 of Recur2 is required")
+	}
+	w, err = v.Field21.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+	if v.Field22 != nil {
+		w, err = v.Field22.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Recur3_Read(w wire.Value) (*Recur3, error) {
+	var v Recur3
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a Recur2 struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Recur2 struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Recur2
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Recur2) FromWire(w wire.Value) error {
+	var err error
+
+	field21IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.Field21, err = _Recur3_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				field21IsSet = true
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Field22, err = _Recur3_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	if !field21IsSet {
+		return errors.New("field Field21 of Recur2 is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Recur2
+// struct.
+func (v *Recur2) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	fields[i] = fmt.Sprintf("Field21: %v", v.Field21)
+	i++
+	if v.Field22 != nil {
+		fields[i] = fmt.Sprintf("Field22: %v", v.Field22)
+		i++
+	}
+
+	return fmt.Sprintf("Recur2{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Recur2 match the
+// provided Recur2.
+//
+// This function performs a deep comparison.
+func (v *Recur2) Equals(rhs *Recur2) bool {
+	if !v.Field21.Equals(rhs.Field21) {
+		return false
+	}
+	if !((v.Field22 == nil && rhs.Field22 == nil) || (v.Field22 != nil && rhs.Field22 != nil && v.Field22.Equals(rhs.Field22))) {
+		return false
+	}
+
+	return true
+}
+
+type Recur3 struct {
+	Field31 UUID `json:"field31,required"`
+}
+
+// ToWire translates a Recur3 struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *Recur3) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = v.Field31.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+// FromWire deserializes a Recur3 struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a Recur3 struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v Recur3
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *Recur3) FromWire(w wire.Value) error {
+	var err error
+
+	field31IsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Field31, err = _UUID_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				field31IsSet = true
+			}
+		}
+	}
+
+	if !field31IsSet {
+		return errors.New("field Field31 of Recur3 is required")
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a Recur3
+// struct.
+func (v *Recur3) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [1]string
+	i := 0
+	fields[i] = fmt.Sprintf("Field31: %v", v.Field31)
+	i++
+
+	return fmt.Sprintf("Recur3{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this Recur3 match the
+// provided Recur3.
+//
+// This function performs a deep comparison.
+func (v *Recur3) Equals(rhs *Recur3) bool {
+	if !(v.Field31 == rhs.Field31) {
+		return false
+	}
+
+	return true
+}
+
 type UUID string
 
 // ToWire translates UUID into a Thrift-level intermediate
@@ -715,12 +1562,6 @@ func (v *TransHeaderType) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
 }
 
 // FromWire deserializes a TransHeaderType struct from its Thrift-level

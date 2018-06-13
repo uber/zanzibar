@@ -12,7 +12,8 @@
 			"trans-headers.json",
 			"trans-headers-type.json",
 			"trans-headers-no-req.json",
-			"header-schema.json"
+			"header-schema.json",
+			"get-profile.json"
 		]
 	},
 	"dependencies": {

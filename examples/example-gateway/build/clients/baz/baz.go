@@ -128,6 +128,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SimpleService_Compare_Args,
 	) (*clientsBazBase.BazResponse, map[string]string, error)
+	GetProfile(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBazBaz.SimpleService_GetProfile_Args,
+	) (*clientsBazBaz.GetProfileResponse, map[string]string, error)
 	HeaderSchema(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -226,6 +231,7 @@ func NewClient(deps *module.Dependencies) Client {
 		"SecondService::echoTypedef":       "EchoTypedef",
 		"SimpleService::call":              "Call",
 		"SimpleService::compare":           "Compare",
+		"SimpleService::getProfile":        "GetProfile",
 		"SimpleService::headerSchema":      "HeaderSchema",
 		"SimpleService::ping":              "Ping",
 		"SimpleService::sillyNoop":         "DeliberateDiffNoop",
@@ -886,6 +892,45 @@ func (c *bazClient) Compare(
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
+	if err != nil {
+		logger.Warn("Unable to unwrap client response", zap.Error(err))
+	}
+	return resp, respHeaders, err
+}
+
+// GetProfile is a client RPC call for method "SimpleService::getProfile"
+func (c *bazClient) GetProfile(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	args *clientsBazBaz.SimpleService_GetProfile_Args,
+) (*clientsBazBaz.GetProfileResponse, map[string]string, error) {
+	var result clientsBazBaz.SimpleService_GetProfile_Result
+	var resp *clientsBazBaz.GetProfileResponse
+
+	logger := c.client.Loggers["SimpleService::getProfile"]
+
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
+	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
+	)
+
+	if err == nil && !success {
+		switch {
+		case result.AuthErr != nil:
+			err = result.AuthErr
+		default:
+			err = errors.New("bazClient received no result or unknown exception for GetProfile")
+		}
+	}
+	if err != nil {
+		logger.Warn("TChannel client call returned error", zap.Error(err))
+		return resp, nil, err
+	}
+
+	resp, err = clientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
 		logger.Warn("Unable to unwrap client response", zap.Error(err))
 	}

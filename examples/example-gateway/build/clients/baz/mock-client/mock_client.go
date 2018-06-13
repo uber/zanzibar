@@ -286,6 +286,20 @@ func (mr *MockClientMockRecorder) EchoTypedef(arg0, arg1, arg2 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoTypedef", reflect.TypeOf((*MockClient)(nil).EchoTypedef), arg0, arg1, arg2)
 }
 
+// GetProfile mocks base method
+func (m *MockClient) GetProfile(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_GetProfile_Args) (*baz.GetProfileResponse, map[string]string, error) {
+	ret := m.ctrl.Call(m, "GetProfile", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*baz.GetProfileResponse)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetProfile indicates an expected call of GetProfile
+func (mr *MockClientMockRecorder) GetProfile(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProfile", reflect.TypeOf((*MockClient)(nil).GetProfile), arg0, arg1, arg2)
+}
+
 // HeaderSchema mocks base method
 func (m *MockClient) HeaderSchema(arg0 context.Context, arg1 map[string]string, arg2 *baz.SimpleService_HeaderSchema_Args) (*baz.HeaderSchema, map[string]string, error) {
 	ret := m.ctrl.Call(m, "HeaderSchema", arg0, arg1, arg2)
