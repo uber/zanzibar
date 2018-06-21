@@ -2784,9 +2784,13 @@ func workflowTmpl() (*asset, error) {
 var _workflow_mockTmpl = []byte(`{{$instance := .Instance -}}
 {{$espec := .EndpointSpec -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
+{{$leafWithFixture := .ClientsWithFixture -}}
+{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$mockType := printf "Mock%sNodes" (title $leafClass) -}}
+{{$classPkg := "module" -}}
+
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
@@ -2794,55 +2798,96 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"go.uber.org/zap"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
-	{{range $idx, $moduleInstance := $clientDeps -}}
-	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
-	{{if (index $clientsWithFixture $moduleInstance.InstanceName) -}}
-	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $clientsWithFixture $moduleInstance.InstanceName}}"
-	{{- end }}
-	{{- end }}
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType $leafClass -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}}mock "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
+	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
+	{{end -}}
+	{{else -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end -}}
 	{{$instance.PackageInfo.PackageAlias}} "{{$instance.PackageInfo.PackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
 )
 
+{{range $idx, $className := $instance.DependencyOrder -}}
+{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
+// {{$className}}DependenciesNodes contains {{$className}} dependencies
+type {{$className}}DependenciesNodes struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}
+
+
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
-func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *MockClients) {
+func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
 	ctrl := gomock.NewController(t)
-	mockClients := &MockClients{
-		{{- range $idx, $moduleInstance := $clientDeps -}}
-		{{- $pkgInfo := $moduleInstance.PackageInfo }}
-		{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
-		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
-		{{- else }}
-		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}.NewMockClient(ctrl),
-		{{- end }}
-		{{- end }}
+
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies {
+		Logger: zap.NewNop(),
 	}
 
-	mockClientDependencies := &module.ClientDependencies{
-		{{- range $idx, $moduleInstance := $clientDeps -}}
-		{{- $pkgInfo := $moduleInstance.PackageInfo }}
-		{{$pkgInfo.QualifiedInstanceName}}: mockClients.{{$pkgInfo.QualifiedInstanceName}},
+	{{range $idx, $className := $instance.DependencyOrder}}
+	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
+	{{- $initializedDeps := printf "initialized%sDependencies" (title $className) }}
+	{{$initializedDeps}} := &{{$className}}DependenciesNodes{}
+	{{if eq $className $leafClass -}}
+	{{camel $mockType}} := &{{$mockType}}{
+		{{- range $idx, $dependency := $moduleInstances}}
+		{{- $pkgInfo := $dependency.PackageInfo }}
+		{{- if (index $leafWithFixture $dependency.InstanceName) }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}mock.New(ctrl, fixture{{$pkgInfo.ImportPackageAlias}}.Fixture),
+		{{- else }}
+		{{$pkgInfo.QualifiedInstanceName}}: {{$pkgInfo.GeneratedPackageAlias}}mock.NewMock{{title $className}}(ctrl),
+		{{- end }}
 		{{- end }}
 	}
+	{{- range $idx, $dependency := $moduleInstances}}
+	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{camel $mockType}}.{{$pkgInfo.QualifiedInstanceName}}
+	{{- end }}
+	{{else -}}
+	{{- range $idx, $dependency := $moduleInstances}}
+	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	Default: initializedDefaultDependencies,
+	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
+	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
+		{{- range $idy, $subDependency := $moduleInstances}}
+		{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+		{{- end}}
+	},
+	{{- end}}
+})
+{{- end}}
+	{{end}}
+	{{end}}
 
 	w := {{$instance.PackageInfo.PackageAlias}}.New{{$workflowInterface}}(
-		&module.Dependencies{
-			Default: &zanzibar.DefaultDependencies {
-				Logger: zap.NewNop(),
-				Scope:  nil,
-				Tracer:  nil,
-				Config: nil,
-				Channel:nil,
+		&{{$classPkg}}.Dependencies{
+			Default: initializedDefaultDependencies,
+			{{- range $className, $moduleInstances := $instance.ResolvedDependencies}}
+			{{$className | pascal}}: &{{$classPkg}}.{{$className | pascal}}Dependencies{
+				{{- range $idy, $subDependency := $moduleInstances}}
+				{{$subDependency.PackageInfo.QualifiedInstanceName}}: initialized{{$className | pascal}}Dependencies.{{$subDependency.PackageInfo.QualifiedInstanceName}},
+				{{- end}}
 			},
-			{{range $classType, $moduleInstances := $instance.ResolvedDependencies -}}
-			{{$classType | pascal}}: mockClientDependencies,
-			{{end -}}
+			{{- end}}
 		},
 	)
 
-	return w, mockClients
+	return w, {{camel $mockType}}
 }`)
 
 func workflow_mockTmplBytes() ([]byte, error) {
@@ -2855,25 +2900,27 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 2416, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
+{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
+{{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
-	{{range $idx, $moduleInstance := $clientDeps -}}
-	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{range $idx, $moduleInstance := $mockDeps -}}
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
 	{{end}}
 )
 
-// MockClients contains mock client dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
-type MockClients struct {
-	{{range $idx, $moduleInstance := $clientDeps -}}
+// {{$typeName}} contains mock {{$leafClass}} dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type {{$typeName}} struct {
+	{{range $idx, $moduleInstance := $mockDeps -}}
 	{{- $pkgInfo := $moduleInstance.PackageInfo }}
 	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
 	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
@@ -2894,7 +2941,7 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 958, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1087, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
