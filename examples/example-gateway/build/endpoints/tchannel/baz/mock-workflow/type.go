@@ -28,8 +28,8 @@ import (
 	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 )
 
-// MockClients contains mock client dependencies for the bazTChannel endpoint module
-type MockClients struct {
+// MockClientNodes contains mock client dependencies for the bazTChannel endpoint module
+type MockClientNodes struct {
 	Baz  *bazclientgenerated.MockClient
 	Quux *quuxclientgenerated.MockClientWithFixture
 }

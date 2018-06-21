@@ -27,42 +27,50 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
+	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 	baztchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Baz  bazclientgenerated.Client
+	Quux quuxclientstatic.Client
+}
+
 // NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
-func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallWorkflow, *MockClients) {
+func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallWorkflow, *MockClientNodes) {
 	ctrl := gomock.NewController(t)
-	mockClients := &MockClients{
-		Baz:  bazclientgenerated.NewMockClient(ctrl),
-		Quux: quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
+
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger: zap.NewNop(),
 	}
 
-	mockClientDependencies := &module.ClientDependencies{
-		Baz:  mockClients.Baz,
-		Quux: mockClients.Quux,
+	initializedClientDependencies := &clientDependenciesNodes{}
+	mockClientNodes := &MockClientNodes{
+		Baz:  bazclientgeneratedmock.NewMockClient(ctrl),
+		Quux: quuxclientgeneratedmock.New(ctrl, fixturequuxclientstatic.Fixture),
 	}
+	initializedClientDependencies.Baz = mockClientNodes.Baz
+	initializedClientDependencies.Quux = mockClientNodes.Quux
 
 	w := baztchannelendpointstatic.NewSimpleServiceCallWorkflow(
 		&module.Dependencies{
-			Default: &zanzibar.DefaultDependencies{
-				Logger:  zap.NewNop(),
-				Scope:   nil,
-				Tracer:  nil,
-				Config:  nil,
-				Channel: nil,
+			Default: initializedDefaultDependencies,
+			Client: &module.ClientDependencies{
+				Baz:  initializedClientDependencies.Baz,
+				Quux: initializedClientDependencies.Quux,
 			},
-			Client: mockClientDependencies,
 		},
 	)
 
-	return w, mockClients
+	return w, mockClientNodes
 }

@@ -27,39 +27,44 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
+	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
+	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	contactsendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Contacts contactsclientgenerated.Client
+}
+
 // NewContactsSaveContactsWorkflowMock creates a workflow with mock clients
-func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveContactsWorkflow, *MockClients) {
+func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveContactsWorkflow, *MockClientNodes) {
 	ctrl := gomock.NewController(t)
-	mockClients := &MockClients{
-		Contacts: contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
+
+	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		Logger: zap.NewNop(),
 	}
 
-	mockClientDependencies := &module.ClientDependencies{
-		Contacts: mockClients.Contacts,
+	initializedClientDependencies := &clientDependenciesNodes{}
+	mockClientNodes := &MockClientNodes{
+		Contacts: contactsclientgeneratedmock.New(ctrl, fixturecontactsclientgenerated.Fixture),
 	}
+	initializedClientDependencies.Contacts = mockClientNodes.Contacts
 
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(
 		&module.Dependencies{
-			Default: &zanzibar.DefaultDependencies{
-				Logger:  zap.NewNop(),
-				Scope:   nil,
-				Tracer:  nil,
-				Config:  nil,
-				Channel: nil,
+			Default: initializedDefaultDependencies,
+			Client: &module.ClientDependencies{
+				Contacts: initializedClientDependencies.Contacts,
 			},
-			Client: mockClientDependencies,
 		},
 	)
 
-	return w, mockClients
+	return w, mockClientNodes
 }
