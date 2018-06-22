@@ -27,7 +27,7 @@ import (
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 )
 
-// MockClients contains mock client dependencies for the contacts endpoint module
-type MockClients struct {
+// MockClientNodes contains mock client dependencies for the contacts endpoint module
+type MockClientNodes struct {
 	Contacts *contactsclientgenerated.MockClientWithFixture
 }

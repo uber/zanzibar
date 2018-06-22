@@ -1,17 +1,19 @@
 {{$instance := .Instance -}}
 {{$clientsWithFixture := .ClientsWithFixture -}}
-{{$clientDeps := index $instance.RecursiveDependencies "client" -}}
+{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
+{{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
-	{{range $idx, $moduleInstance := $clientDeps -}}
-	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
+	{{range $idx, $moduleInstance := $mockDeps -}}
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
 	{{end}}
 )
 
-// MockClients contains mock client dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
-type MockClients struct {
-	{{range $idx, $moduleInstance := $clientDeps -}}
+// {{$typeName}} contains mock {{$leafClass}} dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
+type {{$typeName}} struct {
+	{{range $idx, $moduleInstance := $mockDeps -}}
 	{{- $pkgInfo := $moduleInstance.PackageInfo }}
 	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
 	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
