@@ -49,6 +49,8 @@ import (
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
+	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
+	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -73,7 +75,8 @@ type ClientDependenciesNodes struct {
 
 // MiddlewareDependenciesNodes contains middleware dependencies
 type MiddlewareDependenciesNodes struct {
-	Example examplemiddlewaregenerated.Middleware
+	Example         examplemiddlewaregenerated.Middleware
+	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -130,6 +133,9 @@ func InitializeDependencies(
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
+	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
@@ -153,6 +159,9 @@ func InitializeDependencies(
 		Client: &baztchannelendpointmodule.ClientDependencies{
 			Baz:  initializedClientDependencies.Baz,
 			Quux: initializedClientDependencies.Quux,
+		},
+		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
+			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
 		},
 	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{

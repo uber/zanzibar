@@ -564,10 +564,7 @@ func NewEndpointSpec(
 		ClientMethod:       clientMethod,
 	}
 
-	if endpointType == "tchannel" {
-		return espec, nil
-	}
-	return augmentHTTPEndpointSpec(espec, endpointConfigObj, midSpecs)
+	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs)
 }
 
 func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
@@ -745,17 +742,11 @@ func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHea
 	}
 }
 
-func augmentHTTPEndpointSpec(
+func augmentEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
-	testFixtures, err := testFixtures(endpointConfigObj)
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to parse test cases")
-	}
-	espec.TestFixtures = testFixtures
-
 	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 	if !ok {
 		return nil, errors.Errorf(
@@ -856,15 +847,22 @@ func augmentHTTPEndpointSpec(
 	}
 
 	espec.Middlewares = middlewares
+	if "http" == endpointConfigObj["endpointType"] {
+		testFixtures, err := testFixtures(endpointConfigObj)
+		if err != nil {
+			return nil, errors.Wrap(err, "Unable to parse test cases")
+		}
+		espec.TestFixtures = testFixtures
 
-	// augment request headers
-	if err := resolveHeaders(espec, endpointConfigObj, reqHeaders); err != nil {
-		return nil, err
-	}
+		// augment request headers
+		if err := resolveHeaders(espec, endpointConfigObj, reqHeaders); err != nil {
+			return nil, err
+		}
 
-	// augment response headers
-	if err := resolveHeaders(espec, endpointConfigObj, resHeaders); err != nil {
-		return nil, err
+		// augment response headers
+		if err := resolveHeaders(espec, endpointConfigObj, resHeaders); err != nil {
+			return nil, err
+		}
 	}
 
 	return espec, nil

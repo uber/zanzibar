@@ -1,6 +1,6 @@
 {
 	"name": "example",
-	"type": "default",
+	"type": "http",
 	"dependencies": {
 		"client": [
 			"baz"

@@ -1,6 +1,6 @@
 {
 	"name": "example_reader",
-	"type": "default",
+	"type": "http",
 	"dependencies": {},
 	"config": {
 		"schema": "./middlewares/example_reader/example_reader_schema.json",

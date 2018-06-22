@@ -11,6 +11,7 @@
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
 // codegen/templates/middleware.tmpl
+// codegen/templates/middleware_tchannel.tmpl
 // codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
 // codegen/templates/module_mock_initializer.tmpl
@@ -1449,6 +1450,51 @@ func middlewareTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _middleware_tchannelTmpl = []byte(`{{$instance := . -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	zanzibar "github.com/uber/zanzibar/runtime"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	handle "{{index .Config "path"}}"
+)
+
+// Middleware is a container for module.Deps and factory for MiddlewareHandle
+type Middleware struct {
+	Deps *module.Dependencies
+}
+
+// NewMiddleware is a factory method for the struct
+func NewMiddleware(deps *module.Dependencies) Middleware {
+	return Middleware {
+		Deps: deps,
+	}
+}
+
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
+	return handle.NewMiddleware(m.Deps, o)
+}
+
+
+`)
+
+func middleware_tchannelTmplBytes() ([]byte, error) {
+	return _middleware_tchannelTmpl, nil
+}
+
+func middleware_tchannelTmpl() (*asset, error) {
+	bytes, err := middleware_tchannelTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "middleware_tchannel.tmpl", size: 726, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _module_class_initializerTmpl = []byte(`{{- $className := index . 0 }}
 {{- $instance := index . 1 }}
 
@@ -2313,6 +2359,7 @@ var _tchannel_endpointTmpl = []byte(`{{- /* template to render edge gateway tcha
 {{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
+{{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
 
@@ -2324,6 +2371,12 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end -}}
+
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	{{$middleware.Name}} "{{$middleware.ImportPath}}"
+	{{- end}}
+	{{- end}}
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -2343,7 +2396,21 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		handler,
+		{{ if len $middlewares | ne 0 -}}
+			zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+			{{range $idx, $middleware := $middlewares -}}
+				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
+					{{$middleware.Name}}.Options{
+					{{range $key, $value := $middleware.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
+				),
+			{{end -}}
+			}, handler),
+		{{- else -}}
+			handler,
+		{{- end}}
 	)
 	return handler
 }
@@ -2505,7 +2572,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 5650, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 6280, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3009,6 +3076,7 @@ var _bindata = map[string]func() (*asset, error){
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
 	"middleware.tmpl":                    middlewareTmpl,
+	"middleware_tchannel.tmpl":           middleware_tchannelTmpl,
 	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
 	"module_mock_initializer.tmpl":       module_mock_initializerTmpl,
@@ -3075,6 +3143,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
 	"middleware.tmpl":                    {middlewareTmpl, map[string]*bintree{}},
+	"middleware_tchannel.tmpl":           {middleware_tchannelTmpl, map[string]*bintree{}},
 	"module_class_initializer.tmpl":      {module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
 	"module_mock_initializer.tmpl":       {module_mock_initializerTmpl, map[string]*bintree{}},

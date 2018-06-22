@@ -35,6 +35,8 @@ import (
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
+	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
+	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 	baztchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
@@ -44,6 +46,11 @@ import (
 type clientDependenciesNodes struct {
 	Baz  bazclientgenerated.Client
 	Quux quuxclientstatic.Client
+}
+
+// middlewareDependenciesNodes contains middleware dependencies
+type middlewareDependenciesNodes struct {
+	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
 }
 
 // NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
@@ -62,12 +69,21 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Quux = mockClientNodes.Quux
 
+	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
+
+	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := baztchannelendpointstatic.NewSimpleServiceCallWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
 				Baz:  initializedClientDependencies.Baz,
 				Quux: initializedClientDependencies.Quux,
+			},
+			Middleware: &module.MiddlewareDependencies{
+				ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
 			},
 		},
 	)
