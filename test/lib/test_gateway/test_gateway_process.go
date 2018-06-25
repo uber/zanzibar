@@ -23,7 +23,7 @@ package testgateway
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -148,68 +148,78 @@ func addJSONLine(gateway *ChildProcessGateway, line string) {
 }
 
 func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) error {
-	line1, err := reader.ReadString('\n')
-	if err != nil {
-		return err
+	var msg string
+	var httpFound, tchannelFound []string
+	for {
+		line, err := reader.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+
+		if line[0] == '{' {
+			addJSONLine(testGateway, line)
+			msg += line
+		}
+
+		printJSONLine(line)
+
+		if httpFound == nil {
+
+			httpFound = realHTTPAddrRegex.FindStringSubmatch(line)
+			if httpFound != nil {
+
+				testGateway.RealHTTPAddr = httpFound[1]
+				indexOfSep := strings.LastIndex(testGateway.RealHTTPAddr, ":")
+				if indexOfSep != -1 {
+					host := testGateway.RealHTTPAddr[0:indexOfSep]
+					port := testGateway.RealHTTPAddr[indexOfSep+1:]
+					portNum, err := strconv.Atoi(port)
+
+					testGateway.RealHTTPHost = host
+					if err != nil {
+						testGateway.RealHTTPPort = -1
+					} else {
+						testGateway.RealHTTPPort = portNum
+					}
+				} else {
+					httpFound = nil
+				}
+			}
+
+		}
+
+		if tchannelFound == nil {
+			tchannelFound = realTChannelAddrRegex.FindStringSubmatch(line)
+
+			if tchannelFound != nil {
+				testGateway.RealTChannelAddr = tchannelFound[1]
+				indexOfSep := strings.LastIndex(testGateway.RealTChannelAddr, ":")
+				if indexOfSep != -1 {
+					host := testGateway.RealTChannelAddr[0:indexOfSep]
+					port := testGateway.RealTChannelAddr[indexOfSep+1:]
+					portNum, err := strconv.Atoi(port)
+
+					testGateway.RealTChannelHost = host
+					if err != nil {
+						testGateway.RealTChannelPort = -1
+					} else {
+						testGateway.RealTChannelPort = portNum
+					}
+				} else {
+					tchannelFound = nil
+				}
+			}
+		}
+		if httpFound != nil && tchannelFound != nil {
+			return nil
+		}
 	}
 
-	if line1[0] == '{' {
-		addJSONLine(testGateway, line1)
-	}
-
-	printJSONLine(line1)
-
-	m := realHTTPAddrRegex.FindStringSubmatch(line1)
-	if m == nil {
+	if httpFound == nil || tchannelFound == nil {
 		return &MalformedStdoutError{
 			Type:       "malformed.stdout",
-			StdoutLine: line1,
-			Message: fmt.Sprintf(
-				"Could not find RealHTTPAddr in server stdout: %s",
-				line1,
-			),
-		}
-	}
-
-	testGateway.RealHTTPAddr = m[1]
-	indexOfSep := strings.LastIndex(testGateway.RealHTTPAddr, ":")
-	if indexOfSep != -1 {
-		host := testGateway.RealHTTPAddr[0:indexOfSep]
-		port := testGateway.RealHTTPAddr[indexOfSep+1:]
-		portNum, err := strconv.Atoi(port)
-
-		testGateway.RealHTTPHost = host
-		if err != nil {
-			testGateway.RealHTTPPort = -1
-		} else {
-			testGateway.RealHTTPPort = portNum
-		}
-	}
-
-	m = realTChannelAddrRegex.FindStringSubmatch(line1)
-	if m == nil {
-		return &MalformedStdoutError{
-			Type:       "malformed.stdout",
-			StdoutLine: line1,
-			Message: fmt.Sprintf(
-				"Could not find RealTChannelAddr in server stdout: %s",
-				line1,
-			),
-		}
-	}
-
-	testGateway.RealTChannelAddr = m[1]
-	indexOfSep = strings.LastIndex(testGateway.RealTChannelAddr, ":")
-	if indexOfSep != -1 {
-		host := testGateway.RealTChannelAddr[0:indexOfSep]
-		port := testGateway.RealTChannelAddr[indexOfSep+1:]
-		portNum, err := strconv.Atoi(port)
-
-		testGateway.RealTChannelHost = host
-		if err != nil {
-			testGateway.RealTChannelPort = -1
-		} else {
-			testGateway.RealTChannelPort = portNum
+			StdoutLine: msg,
+			Message:    "Could not find real http/tchannle address in server stdout",
 		}
 	}
 
