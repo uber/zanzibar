@@ -131,4 +131,3 @@ func (m *MiddlewareTchannelStack) Handle(
 
 	return ok, res, resHeaders, err
 }
-

@@ -21,8 +21,8 @@
 package exampletchannel
 
 import (
-	"errors"
 	"context"
+	"errors"
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	"github.com/uber/zanzibar/runtime"
@@ -34,11 +34,15 @@ type exampleTchannelMiddleware struct {
 	options Options
 }
 
-type Foo_Result struct {
+// FooResult is an example of ThriftRW
+type FooResult struct {
 	Success string `json:"success,omitempty"`
 }
 
-func (v Foo_Result) ToWire() (wire.Value, error) {
+// ToWire translates a FooResult struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v FooResult) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -56,7 +60,10 @@ func (v Foo_Result) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func (v Foo_Result) FromWire(w wire.Value) error {
+// FromWire deserializes a FooResult struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v FooResult) FromWire(w wire.Value) error {
 	var err error
 
 	stringFieldIsSet := false
