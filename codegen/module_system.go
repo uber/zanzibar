@@ -1197,7 +1197,7 @@ func (g *MiddlewareGenerator) Generate(
 }
 
 func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, out map[string][]byte) error {
-	templateName := "middleware.tmpl"
+	templateName := "middleware_http.tmpl"
 	if instance.ClassType == "tchannel" {
 		templateName = "middleware_tchannel.tmpl"
 	}

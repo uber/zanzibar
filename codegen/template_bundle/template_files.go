@@ -10,7 +10,7 @@
 // codegen/templates/http_client.tmpl
 // codegen/templates/main.tmpl
 // codegen/templates/main_test.tmpl
-// codegen/templates/middleware.tmpl
+// codegen/templates/middleware_http.tmpl
 // codegen/templates/middleware_tchannel.tmpl
 // codegen/templates/module_class_initializer.tmpl
 // codegen/templates/module_initializer.tmpl
@@ -1405,7 +1405,7 @@ func main_testTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _middlewareTmpl = []byte(`{{$instance := . -}}
+var _middleware_httpTmpl = []byte(`{{$instance := . -}}
 
 package {{$instance.PackageInfo.PackageName}}
 
@@ -1435,17 +1435,17 @@ func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareHa
 
 `)
 
-func middlewareTmplBytes() ([]byte, error) {
-	return _middlewareTmpl, nil
+func middleware_httpTmplBytes() ([]byte, error) {
+	return _middleware_httpTmpl, nil
 }
 
-func middlewareTmpl() (*asset, error) {
-	bytes, err := middlewareTmplBytes()
+func middleware_httpTmpl() (*asset, error) {
+	bytes, err := middleware_httpTmplBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "middleware.tmpl", size: 718, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "middleware_http.tmpl", size: 718, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3075,7 +3075,7 @@ var _bindata = map[string]func() (*asset, error){
 	"http_client.tmpl":                   http_clientTmpl,
 	"main.tmpl":                          mainTmpl,
 	"main_test.tmpl":                     main_testTmpl,
-	"middleware.tmpl":                    middlewareTmpl,
+	"middleware_http.tmpl":               middleware_httpTmpl,
 	"middleware_tchannel.tmpl":           middleware_tchannelTmpl,
 	"module_class_initializer.tmpl":      module_class_initializerTmpl,
 	"module_initializer.tmpl":            module_initializerTmpl,
@@ -3142,7 +3142,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"http_client.tmpl":                   {http_clientTmpl, map[string]*bintree{}},
 	"main.tmpl":                          {mainTmpl, map[string]*bintree{}},
 	"main_test.tmpl":                     {main_testTmpl, map[string]*bintree{}},
-	"middleware.tmpl":                    {middlewareTmpl, map[string]*bintree{}},
+	"middleware_http.tmpl":               {middleware_httpTmpl, map[string]*bintree{}},
 	"middleware_tchannel.tmpl":           {middleware_tchannelTmpl, map[string]*bintree{}},
 	"module_class_initializer.tmpl":      {module_class_initializerTmpl, map[string]*bintree{}},
 	"module_initializer.tmpl":            {module_initializerTmpl, map[string]*bintree{}},
