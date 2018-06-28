@@ -122,11 +122,13 @@ func (m *MiddlewareTchannelStack) Handle(
 	}
 
 	ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
+	val, error := res.ToWire()
+	if error != nil {
+		return ok, res, resHeaders, err
+	}
+
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
-		val, error := res.ToWire()
-		if error != nil {
-			res = m.middlewares[i].HandleResponse(ctx, &val, shared)
-		}
+		res = m.middlewares[i].HandleResponse(ctx, &val, shared)
 	}
 
 	return ok, res, resHeaders, err

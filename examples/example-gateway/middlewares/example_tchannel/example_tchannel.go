@@ -45,7 +45,6 @@ type FooResult struct {
 func (v FooResult) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
-		i      int = 0
 		w      wire.Value
 		err    error
 	)
@@ -54,10 +53,9 @@ func (v FooResult) ToWire() (wire.Value, error) {
 	if err != nil {
 		return w, err
 	}
-	fields[i] = wire.Field{ID: 1, Value: w}
-	i++
+	fields[0] = wire.Field{ID: 1, Value: w}
 
-	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:1]}), nil
 }
 
 // FromWire deserializes a FooResult struct from its Thrift-level
@@ -124,7 +122,7 @@ func (m *exampleTchannelMiddleware) HandleResponse(
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
 ) zanzibar.RWTStruct {
-	var res Foo_Result
+	var res FooResult
 	res.Success = "Foo_Success"
 	return res
 }
