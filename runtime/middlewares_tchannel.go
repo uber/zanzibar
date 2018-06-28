@@ -57,13 +57,12 @@ type MiddlewareTchannelHandle interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 		wireValue *wire.Value,
-		shared TchannelSharedState) (bool, map[string]string)
+		shared TchannelSharedState) bool
 
 	// implement HandleResponse for your middleware. Return false
 	// if the handler writes to the response body.
 	HandleResponse(
 		ctx context.Context,
-		resHeaders map[string]string,
 		wireValue *wire.Value,
 		shared TchannelSharedState) RWTStruct
 
@@ -106,40 +105,30 @@ func (m *MiddlewareTchannelStack) Handle(
 	var res RWTStruct
 	var ok bool
 
-	resHeaders := map[string]string{}
 	shared := NewTchannelSharedState(m.middlewares)
 	for i := 0; i < len(m.middlewares); i++ {
-		ok, mResHeaders := m.middlewares[i].HandleRequest(ctx, reqHeaders, wireValue, shared)
-		addHeader(resHeaders, mResHeaders)
+		ok := m.middlewares[i].HandleRequest(ctx, reqHeaders, wireValue, shared)
 
 		// If a middleware errors and writes to the response header
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the middlewares seen so far.
 		if ok == false {
 			for j := i; j >= 0; j-- {
-				res = m.middlewares[j].HandleResponse(ctx, resHeaders, wireValue, shared)
+				res = m.middlewares[j].HandleResponse(ctx, wireValue, shared)
 			}
 
-			return ok, res, resHeaders, nil
+			return ok, res, nil, nil
 		}
 	}
 
-	ok, res, hResHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
-	addHeader(resHeaders, hResHeaders)
+	ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
 	for i := len(m.middlewares) - 1; i >= 0; i-- {
 		val, error := res.ToWire()
 		if error != nil {
-			res = m.middlewares[i].HandleResponse(ctx, resHeaders, &val, shared)
+			res = m.middlewares[i].HandleResponse(ctx, &val, shared)
 		}
 	}
 
 	return ok, res, resHeaders, err
 }
 
-func addHeader(to map[string]string, from map[string]string) {
-	if from != nil {
-		for key, value := range from {
-			to[key] = value
-		}
-	}
-}

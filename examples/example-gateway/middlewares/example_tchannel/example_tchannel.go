@@ -60,13 +60,12 @@ func (m *exampleTchannelMiddleware) HandleRequest(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
-) (bool, map[string]string) {
-	return true, map[string]string{}
+) bool {
+	return true
 }
 
 func (m *exampleTchannelMiddleware) HandleResponse(
 	ctx context.Context,
-	resHeaders map[string]string,
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
 ) zanzibar.RWTStruct {
