@@ -22,7 +22,6 @@ package exampletchannel
 
 import (
 	"context"
-	"errors"
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	"github.com/uber/zanzibar/runtime"
@@ -32,58 +31,6 @@ import (
 type exampleTchannelMiddleware struct {
 	deps    *module.Dependencies
 	options Options
-}
-
-// FooResult is an example of ThriftRW
-type FooResult struct {
-	Success string `json:"success,omitempty"`
-}
-
-// ToWire translates a FooResult struct into a Thrift-level intermediate
-// representation. This intermediate representation may be serialized
-// into bytes using a ThriftRW protocol implementation.
-func (v FooResult) ToWire() (wire.Value, error) {
-	var (
-		fields [1]wire.Field
-		w      wire.Value
-		err    error
-	)
-
-	w, err = wire.NewValueString(v.Success), error(nil)
-	if err != nil {
-		return w, err
-	}
-	fields[0] = wire.Field{ID: 1, Value: w}
-
-	return wire.NewValueStruct(wire.Struct{Fields: fields[:1]}), nil
-}
-
-// FromWire deserializes a FooResult struct from its Thrift-level
-// representation. The Thrift-level representation may be obtained
-// from a ThriftRW protocol implementation.
-func (v FooResult) FromWire(w wire.Value) error {
-	var err error
-
-	stringFieldIsSet := false
-
-	for _, field := range w.GetStruct().Fields {
-		switch field.ID {
-		case 1:
-			if field.Value.Type() == wire.TBinary {
-				v.Success, err = field.Value.GetString(), error(nil)
-				if err != nil {
-					return err
-				}
-				stringFieldIsSet = true
-			}
-		}
-	}
-
-	if !stringFieldIsSet {
-		return errors.New("field StringField of Success is required")
-	}
-
-	return nil
 }
 
 // Options for middleware configuration
@@ -113,18 +60,16 @@ func (m *exampleTchannelMiddleware) HandleRequest(
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
-) bool {
-	return true
+) (bool, error) {
+	return true, nil
 }
 
 func (m *exampleTchannelMiddleware) HandleResponse(
 	ctx context.Context,
-	wireValue *wire.Value,
+	rwt zanzibar.RWTStruct,
 	shared zanzibar.TchannelSharedState,
 ) zanzibar.RWTStruct {
-	var res FooResult
-	res.Success = "Foo_Success"
-	return res
+	return rwt
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
