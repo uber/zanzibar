@@ -21,6 +21,7 @@
 package exampletchannel
 
 import (
+	"errors"
 	"context"
 	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
@@ -31,6 +32,53 @@ import (
 type exampleTchannelMiddleware struct {
 	deps    *module.Dependencies
 	options Options
+}
+
+type Foo_Result struct {
+	Success string `json:"success,omitempty"`
+}
+
+func (v Foo_Result) ToWire() (wire.Value, error) {
+	var (
+		fields [1]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	w, err = wire.NewValueString(v.Success), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 1, Value: w}
+	i++
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func (v Foo_Result) FromWire(w wire.Value) error {
+	var err error
+
+	stringFieldIsSet := false
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TBinary {
+				v.Success, err = field.Value.GetString(), error(nil)
+				if err != nil {
+					return err
+				}
+				stringFieldIsSet = true
+			}
+		}
+	}
+
+	if !stringFieldIsSet {
+		return errors.New("field StringField of Success is required")
+	}
+
+	return nil
 }
 
 // Options for middleware configuration
@@ -69,7 +117,9 @@ func (m *exampleTchannelMiddleware) HandleResponse(
 	wireValue *wire.Value,
 	shared zanzibar.TchannelSharedState,
 ) zanzibar.RWTStruct {
-	return nil
+	var res Foo_Result
+	res.Success = "Foo_Success"
+	return res
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
