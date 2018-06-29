@@ -747,106 +747,109 @@ func augmentEndpointSpec(
 	endpointConfigObj map[string]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
-	endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
-	if !ok {
-		return nil, errors.Errorf(
-			"Unable to parse middlewares field",
-		)
-	}
-	var middlewares []MiddlewareSpec
-	for _, middleware := range endpointMids {
-		middlewareObj, ok := middleware.(map[string]interface{})
+	if _, ok := endpointConfigObj["middlewares"]; ok {
+		endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 		if !ok {
 			return nil, errors.Errorf(
-				"Unable to parse middleware %s",
-				middlewareObj,
+				"Unable to parse middlewares field",
 			)
 		}
-		name, ok := middlewareObj["name"].(string)
-		if !ok {
-			return nil, errors.Errorf(
-				"Unable to parse \"name\" field in middleware %s",
-				middlewareObj,
-			)
-		}
-		// req/res transform middleware set type converter
-		if name == "transformRequest" {
-			reqTransforms, err := setTransformMiddleware(middlewareObj)
-			if err != nil {
-				return nil, err
+		var middlewares []MiddlewareSpec
+		for _, middleware := range endpointMids {
+			middlewareObj, ok := middleware.(map[string]interface{})
+			if !ok {
+				return nil, errors.Errorf(
+					"Unable to parse middleware %s",
+					middlewareObj,
+				)
 			}
-			espec.ReqTransforms = reqTransforms
-			continue
-		}
-		if name == "transformResponse" {
-			resTransforms, err := setTransformMiddleware(middlewareObj)
-			if err != nil {
-				return nil, err
+			name, ok := middlewareObj["name"].(string)
+			if !ok {
+				return nil, errors.Errorf(
+					"Unable to parse \"name\" field in middleware %s",
+					middlewareObj,
+				)
 			}
-			espec.RespTransforms = resTransforms
-			continue
-		}
-		// req header propagate middleware set headersPropagator
-		if name == "headersPropagate" {
-			headersPropagate, err := setPropagateMiddleware(middlewareObj)
-			if err != nil {
-				return nil, err
-			}
-			espec.HeadersPropagate = headersPropagate
-			continue
-		}
-		// Verify the middleware name is defined.
-		if midSpecs[name] == nil {
-			return nil, errors.Errorf(
-				"middlewares config %q not found.", name,
-			)
-		}
-		// TODO(sindelar): Validate Options against middleware spec and support
-		// nested typed objects.
-		opts, ok := middlewareObj["options"].(map[string]interface{})
-		if !ok {
-			opts = make(map[string]interface{})
-		}
-
-		prettyOpts := map[string]string{}
-		for key, value := range opts {
-			rValue := reflect.ValueOf(value)
-			kind := rValue.Kind()
-
-			if kind == reflect.Slice && rValue.Len() > 0 {
-				rType := rValue.Type()
-				rElemType := rType.Elem()
-				elemTypeString := rElemType.String()
-				if rElemType.Kind() == reflect.Interface {
-					rFirstValue := rValue.Index(0)
-					rRawFirstValue := rFirstValue.Interface()
-
-					elemTypeString = reflect.TypeOf(rRawFirstValue).String()
+			// req/res transform middleware set type converter
+			if name == "transformRequest" {
+				reqTransforms, err := setTransformMiddleware(middlewareObj)
+				if err != nil {
+					return nil, err
 				}
+				espec.ReqTransforms = reqTransforms
+				continue
+			}
+			if name == "transformResponse" {
+				resTransforms, err := setTransformMiddleware(middlewareObj)
+				if err != nil {
+					return nil, err
+				}
+				espec.RespTransforms = resTransforms
+				continue
+			}
+			// req header propagate middleware set headersPropagator
+			if name == "headersPropagate" {
+				headersPropagate, err := setPropagateMiddleware(middlewareObj)
+				if err != nil {
+					return nil, err
+				}
+				espec.HeadersPropagate = headersPropagate
+				continue
+			}
+			// Verify the middleware name is defined.
+			if midSpecs[name] == nil {
+				return nil, errors.Errorf(
+					"middlewares config %q not found.", name,
+				)
+			}
+			// TODO(sindelar): Validate Options against middleware spec and support
+			// nested typed objects.
+			opts, ok := middlewareObj["options"].(map[string]interface{})
+			if !ok {
+				opts = make(map[string]interface{})
+			}
 
-				str := fmt.Sprintf("[]%s{", elemTypeString)
-				for i := 0; i < rValue.Len(); i++ {
-					str += fmt.Sprintf("%#v", rValue.Index(i))
-					if i != rValue.Len()-1 {
-						str += ","
+			prettyOpts := map[string]string{}
+			for key, value := range opts {
+				rValue := reflect.ValueOf(value)
+				kind := rValue.Kind()
+
+				if kind == reflect.Slice && rValue.Len() > 0 {
+					rType := rValue.Type()
+					rElemType := rType.Elem()
+					elemTypeString := rElemType.String()
+					if rElemType.Kind() == reflect.Interface {
+						rFirstValue := rValue.Index(0)
+						rRawFirstValue := rFirstValue.Interface()
+
+						elemTypeString = reflect.TypeOf(rRawFirstValue).String()
 					}
+
+					str := fmt.Sprintf("[]%s{", elemTypeString)
+					for i := 0; i < rValue.Len(); i++ {
+						str += fmt.Sprintf("%#v", rValue.Index(i))
+						if i != rValue.Len()-1 {
+							str += ","
+						}
+					}
+					str += "}"
+					prettyOpts[key] = str
+				} else {
+					prettyOpts[key] = fmt.Sprintf("%#v", rValue)
 				}
-				str += "}"
-				prettyOpts[key] = str
-			} else {
-				prettyOpts[key] = fmt.Sprintf("%#v", rValue)
 			}
+
+			middlewares = append(middlewares, MiddlewareSpec{
+				Name:          name,
+				ImportPath:    midSpecs[name].ImportPath,
+				Options:       opts,
+				PrettyOptions: prettyOpts,
+			})
 		}
 
-		middlewares = append(middlewares, MiddlewareSpec{
-			Name:          name,
-			ImportPath:    midSpecs[name].ImportPath,
-			Options:       opts,
-			PrettyOptions: prettyOpts,
-		})
+		espec.Middlewares = middlewares
 	}
 
-	espec.Middlewares = middlewares
 	if "http" == endpointConfigObj["endpointType"] {
 		testFixtures, err := testFixtures(endpointConfigObj)
 		if err != nil {
