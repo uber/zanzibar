@@ -295,7 +295,17 @@ func NewDefaultModuleSystem(
 		)
 	}
 
-	if err := system.RegisterClassType("middleware", "default", &MiddlewareGenerator{
+	if err := system.RegisterClassType("middleware", "http", &MiddlewareGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway middleware class type",
+		)
+	}
+
+	if err := system.RegisterClassType("middleware", "tchannel", &MiddlewareGenerator{
 		templates:     tmpl,
 		packageHelper: h,
 	}); err != nil {
@@ -1187,10 +1197,16 @@ func (g *MiddlewareGenerator) Generate(
 }
 
 func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, out map[string][]byte) error {
-	bytes, err := g.templates.ExecTemplate("middleware.tmpl", instance, g.packageHelper)
+	templateName := "middleware_http.tmpl"
+	if instance.ClassType == "tchannel" {
+		templateName = "middleware_tchannel.tmpl"
+	}
+
+	bytes, err := g.templates.ExecTemplate(templateName, instance, g.packageHelper)
 	if err != nil {
 		return err
 	}
+
 	out[instance.InstanceName+".go"] = bytes
 	return nil
 }

@@ -1,0 +1,9 @@
+{
+	"name": "example_tchannel",
+	"type": "tchannel",
+	"dependencies": {},
+	"config": {
+		"schema": "./middlewares/example_tchannel/example_tchannel_schema.json",
+		"path": "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
+	}
+}

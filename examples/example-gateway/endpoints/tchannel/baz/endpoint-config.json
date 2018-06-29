@@ -11,6 +11,9 @@
 		"client": [
 			"baz",
 			"quux"
+		],
+		"middleware": [
+			"example_tchannel"
 		]
 	}
 }

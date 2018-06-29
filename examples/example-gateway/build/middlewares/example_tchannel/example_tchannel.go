@@ -21,30 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package exampletchannelmiddleware
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
-	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
-
+	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
+	handle "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the bazTChannel endpoint module
-type Dependencies struct {
-	Default    *zanzibar.DefaultDependencies
-	Client     *ClientDependencies
-	Middleware *MiddlewareDependencies
+// Middleware is a container for module.Deps and factory for MiddlewareHandle
+type Middleware struct {
+	Deps *module.Dependencies
 }
 
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Baz  bazclientgenerated.Client
-	Quux quuxclientstatic.Client
+// NewMiddleware is a factory method for the struct
+func NewMiddleware(deps *module.Dependencies) Middleware {
+	return Middleware{
+		Deps: deps,
+	}
 }
 
-// MiddlewareDependencies contains middleware dependencies
-type MiddlewareDependencies struct {
-	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
+	return handle.NewMiddleware(m.Deps, o)
 }

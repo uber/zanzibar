@@ -1,0 +1,28 @@
+{{$instance := . -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	zanzibar "github.com/uber/zanzibar/runtime"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	handle "{{index .Config "path"}}"
+)
+
+// Middleware is a container for module.Deps and factory for MiddlewareHandle
+type Middleware struct {
+	Deps *module.Dependencies
+}
+
+// NewMiddleware is a factory method for the struct
+func NewMiddleware(deps *module.Dependencies) Middleware {
+	return Middleware {
+		Deps: deps,
+	}
+}
+
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
+	return handle.NewMiddleware(m.Deps, o)
+}
+
+

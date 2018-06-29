@@ -3,6 +3,7 @@
 {{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
+{{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
 
@@ -14,6 +15,12 @@ import (
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end -}}
+
+	{{- if len $middlewares | ne 0 }}
+	{{- range $idx, $middleware := $middlewares }}
+	{{$middleware.Name}} "{{$middleware.ImportPath}}"
+	{{- end}}
+	{{- end}}
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -33,7 +40,21 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		handler,
+		{{ if len $middlewares | ne 0 -}}
+			zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+			{{range $idx, $middleware := $middlewares -}}
+				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
+					{{$middleware.Name}}.Options{
+					{{range $key, $value := $middleware.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
+				),
+			{{end -}}
+			}, handler),
+		{{- else -}}
+			handler,
+		{{- end}}
 	)
 	return handler
 }
