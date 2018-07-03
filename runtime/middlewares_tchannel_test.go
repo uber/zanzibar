@@ -173,7 +173,7 @@ func TestTchannelMiddlewareRequestAbort(t *testing.T) {
 
 	middles := []zanzibar.MiddlewareTchannelHandle{mid1, mid2}
 	middlewareStack := zanzibar.NewTchannelStack(middles, mockTHandler)
-	middlewareStack.Handle(nil, map[string]string{}, nil)
+	middlewareStack.Handle(context.Background(), map[string]string{}, nil)
 
 	assert.Equal(t, mid1.reqCounter, 1)
 	assert.Equal(t, mid1.resCounter, 0)
