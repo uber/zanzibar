@@ -88,7 +88,7 @@ func TestTchannelHandlers(t *testing.T) {
 	assert.Nil(t, resHeaders)
 }
 
-// Ensures that a middleware can read state from a middeware earlier in the stack.
+// Ensures that a tchannel middleware can read state from a tchannel middeware earlier in the stack.
 func TestTchannelMiddlewareSharedStateSet(t *testing.T) {
 	ex := exampletchannel.NewMiddleware(
 		nil,
@@ -105,9 +105,10 @@ func TestTchannelMiddlewareSharedStateSet(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareTchannelHandle{ex, exTchannel}
-
+	middlewareStack := zanzibar.NewTchannelStack(middles, nil)
+	middlewares := middlewareStack.TchannelMiddlewares()
+	assert.Equal(t, 2, len(middlewares))
 	ss := zanzibar.NewTchannelSharedState(middles)
-
 	ss.SetTchannelState(ex, "foo")
 	assert.Equal(t, ss.GetTchannelState("example_tchannel").(string), "foo")
 }
