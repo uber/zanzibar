@@ -25,11 +25,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mcuadros/go-jsonschema-generator"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/wire"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
@@ -111,4 +113,70 @@ func TestTchannelMiddlewareSharedStateSet(t *testing.T) {
 	ss := zanzibar.NewTchannelSharedState(middles)
 	ss.SetTchannelState(ex, "foo")
 	assert.Equal(t, ss.GetTchannelState("example_tchannel").(string), "foo")
+}
+
+type countTchannelMiddleware struct {
+	name       string
+	reqCounter int
+	resCounter int
+	reqBail    bool
+}
+
+type mockTchannelHandler struct {
+	name string
+}
+
+func (c *countTchannelMiddleware) HandleRequest(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+	shared zanzibar.TchannelSharedState,
+) (bool, error) {
+	c.reqCounter++
+	return c.reqBail, nil
+}
+
+func (c *countTchannelMiddleware) HandleResponse(
+	ctx context.Context,
+	rwt zanzibar.RWTStruct,
+	shared zanzibar.TchannelSharedState,
+) zanzibar.RWTStruct {
+	c.resCounter++
+	return rwt
+}
+
+func (c *countTchannelMiddleware) JSONSchema() *jsonschema.Document {
+	return nil
+}
+
+func (c *countTchannelMiddleware) Name() string {
+	return c.name
+}
+
+func (c *mockTchannelHandler) Handle(ctx context.Context, reqHeaders map[string]string, wireValue *wire.Value) (success bool, resp zanzibar.RWTStruct, respHeaders map[string]string, err error) {
+	return true, nil, map[string]string{}, err
+}
+
+// Ensures that a tchannel middleware stack can correctly return all of its handlers.
+func TestTchannelMiddlewareRequestAbort(t *testing.T) {
+	mid1 := &countTchannelMiddleware{
+		name: "mid1",
+	}
+	mid2 := &countTchannelMiddleware{
+		name:    "mid2",
+		reqBail: true,
+	}
+
+	mockTHandler := &mockTchannelHandler{
+		name: "mockTHandler",
+	}
+
+	middles := []zanzibar.MiddlewareTchannelHandle{mid1, mid2}
+	middlewareStack := zanzibar.NewTchannelStack(middles, mockTHandler)
+	middlewareStack.Handle(nil, map[string]string{}, nil)
+
+	assert.Equal(t, mid1.reqCounter, 1)
+	assert.Equal(t, mid1.resCounter, 0)
+	assert.Equal(t, mid2.reqCounter, 0)
+	assert.Equal(t, mid2.resCounter, 0)
 }
