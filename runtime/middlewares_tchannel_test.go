@@ -26,8 +26,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	"github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // Ensures that a middleware stack can correctly return all of its handlers.
@@ -84,4 +86,28 @@ func TestTchannelHandlers(t *testing.T) {
 
 	assert.False(t, success)
 	assert.Nil(t, resHeaders)
+}
+
+// Ensures that a middleware can read state from a middeware earlier in the stack.
+func TestTchannelMiddlewareSharedStateSet(t *testing.T) {
+	ex := exampletchannel.NewMiddleware(
+		nil,
+		exampletchannel.Options{
+			Foo: "test_state",
+		},
+	)
+
+	exTchannel := exampletchannel.NewMiddleware(
+		nil,
+		exampletchannel.Options{
+			Foo: "foo",
+		},
+	)
+
+	middles := []zanzibar.MiddlewareTchannelHandle{ex, exTchannel}
+
+	ss := zanzibar.NewTchannelSharedState(middles)
+
+	ss.SetTchannelState(ex, "foo")
+	assert.Equal(t, ss.GetTchannelState("example_tchannel").(string), "foo")
 }
