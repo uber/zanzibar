@@ -193,6 +193,10 @@ func (c *TChannelClient) call(
 	if c.routingKey != nil {
 		ctxBuilder.SetRoutingKey(*c.routingKey)
 	}
+	rd, ok := ctx.Value("rd").(string)
+	if ok {
+		ctxBuilder.SetRoutingDelegate(rd)
+	}
 	ctx, cancel := ctxBuilder.Build()
 	defer cancel()
 
