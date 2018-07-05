@@ -936,6 +936,7 @@ import (
 {{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+{{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -965,8 +966,13 @@ type {{$clientName}} struct {
 
 // {{$exportName}} returns a new http client.
 func {{$exportName}}(deps *module.Dependencies) Client {
+	{{if $sidecarRouter -}}
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.http.port")
+	{{else -}}
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	{{end -}}
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 	defaultHeaders := make(map[string]string)
@@ -1190,7 +1196,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7332, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7590, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
