@@ -35,6 +35,8 @@
 	"serviceName": "example-gateway",
 	"sidecarRouter.default.http.ip": "127.0.0.1",
 	"sidecarRouter.default.http.port": 4999,
+	"sidecarRouter.default.http.calleeHeader": "RPC-Service",
+	"sidecarRouter.default.http.callerHeader": "RPC-Caller",
 	"sidecarRouter.default.tchannel.ip": "127.0.0.1",
 	"sidecarRouter.default.tchannel.port": 5000,
 	"tchannel.port": 7784,
