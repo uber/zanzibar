@@ -125,8 +125,8 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		// Temporarily log during the development cycle
 		// TODO: Add a gateway level configurable body unmarshaller
 		// to extract only non-PII info.
-		zap.ByteString("Request Body", req.rawBody),
-		zap.ByteString("Response Body", res.pendingBodyBytes),
+		// zap.ByteString("Request Body", req.rawBody),
+		// zap.ByteString("Response Body", res.pendingBodyBytes),
 	}
 
 	if res.err != nil {
