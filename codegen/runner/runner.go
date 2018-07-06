@@ -83,6 +83,11 @@ func main() {
 		stagingReqHeader = config.MustGetString("stagingReqHeader")
 	}
 
+	deputyReqHeader := "x-deputy-forwarded"
+	if config.ContainsKey("deputyReqHeader") {
+		deputyReqHeader = config.MustGetString("deputyReqHeader")
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		configRoot,
@@ -93,6 +98,7 @@ func main() {
 		string(copyright),
 		config.MustGetString("annotationPrefix"),
 		stagingReqHeader,
+		deputyReqHeader,
 		config.MustGetString("traceKey"),
 	)
 	checkError(

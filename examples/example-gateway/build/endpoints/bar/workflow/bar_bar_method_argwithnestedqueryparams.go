@@ -70,6 +70,10 @@ func (w barArgWithNestedQueryParamsWorkflow) Handle(
 
 	var ok bool
 	var h string
+	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
+	if ok {
+		clientHeaders["X-Deputy-Forwarded"] = h
+	}
 	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
 	if ok {
 		clientHeaders["X-Zanzibar-Use-Staging"] = h

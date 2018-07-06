@@ -125,13 +125,25 @@ func (c *corgeClient) EchoString(
 
 	logger := c.client.Loggers["Corge::echoString"]
 
-	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
-		caller = c.client.CallThruAltChannel
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
+	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
+		caller := c.client.CallToHostPort
+		success, respHeaders, err = caller(
+			ctx, "Corge", "echoString", hostPort, reqHeaders, args, &result, useAltChannel,
+		)
+	} else {
+		caller := c.client.Call
+		if useAltChannel {
+			caller = c.client.CallThruAltChannel
+		}
+
+		success, respHeaders, err = caller(
+			ctx, "Corge", "echoString", reqHeaders, args, &result,
+		)
 	}
-	success, respHeaders, err := caller(
-		ctx, "Corge", "echoString", reqHeaders, args, &result,
-	)
 
 	if err == nil && !success {
 		switch {
