@@ -2054,6 +2054,7 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 {{- $stagingReqHeader := .StagingReqHeader}}
+{{- $deputyReqHeader := .DeputyReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2178,13 +2179,25 @@ type {{$clientName}} struct {
 			args := &{{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Args{}
 		{{end -}}
 
-		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
-			caller = c.client.CallThruAltChannel
+		var success bool
+		var respHeaders map[string]string
+		var err error
+		useAltChannel := strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true")
+		if hostPort, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
+			caller := c.client.CallToHostPort
+			success, respHeaders, err = caller(
+            	ctx, "{{$svc.Name}}", "{{.Name}}", hostPort, reqHeaders, args, &result, useAltChannel,
+      		)
+		} else {
+			caller := c.client.Call
+			if useAltChannel {
+            	caller = c.client.CallThruAltChannel
+            }
+
+            success, respHeaders, err = caller(
+            	ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+            )
 		}
-		success, respHeaders, err := caller(
-			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-		)
 
 		if err == nil && !success {
 			switch {
@@ -2230,7 +2243,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6733, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

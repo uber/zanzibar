@@ -99,5 +99,5 @@ func (r *RawTChannelClient) Call(
 		call.metrics = r.tc.metrics[serviceMethod]
 	}
 
-	return r.tc.call(ctx, call, reqHeaders, req, resp, false)
+	return r.tc.call(ctx, call, reqHeaders, req, resp, false, "")
 }
