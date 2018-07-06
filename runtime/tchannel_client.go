@@ -132,6 +132,13 @@ func NewTChannelClient(
 	return client
 }
 
+// SetSubAltChannel set the client scAlt channel
+func (c *TChannelClient) SetSubAltChannel(AltSubchannelName string) {
+	if AltSubchannelName != "" {
+		c.scAlt = c.ch.GetSubChannel(AltSubchannelName)
+	}
+}
+
 // Call makes a RPC call to the given service.
 func (c *TChannelClient) Call(
 	ctx context.Context,

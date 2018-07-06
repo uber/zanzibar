@@ -126,9 +126,13 @@ func (c *corgeClient) EchoString(
 	logger := c.client.Loggers["Corge::echoString"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if channelName, ok := reqHeaders["x-deputy-forwarded"]; ok {
+		c.client.SetSubAltChannel(channelName)
+		caller = c.client.CallThruAltChannel
+	} else if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
+
 	success, respHeaders, err := caller(
 		ctx, "Corge", "echoString", reqHeaders, args, &result,
 	)
