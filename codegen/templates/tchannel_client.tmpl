@@ -26,6 +26,7 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 {{- $stagingReqHeader := .StagingReqHeader}}
+{{- $deputyReqHeader := .DeputyReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -151,9 +152,13 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
+		if channelName, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
+			c.client.SetSubAltChannel(channelName)
+			caller = c.client.CallThruAltChannel
+		} else if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
+
 		success, respHeaders, err := caller(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)

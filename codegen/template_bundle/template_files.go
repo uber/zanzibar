@@ -2054,6 +2054,7 @@ import (
 {{- $exportName := .ExportName}}
 {{- $sidecarRouter := .SidecarRouter}}
 {{- $stagingReqHeader := .StagingReqHeader}}
+{{- $deputyReqHeader := .DeputyReqHeader}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -2179,9 +2180,13 @@ type {{$clientName}} struct {
 		{{end -}}
 
 		caller := c.client.Call
-		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
+		if channelName, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
+			c.client.SetSubAltChannel(channelName)
+			caller = c.client.CallThruAltChannel
+		} else if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
+
 		success, respHeaders, err := caller(
 			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
 		)
@@ -2230,7 +2235,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6469, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
