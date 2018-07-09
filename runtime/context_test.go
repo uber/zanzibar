@@ -52,3 +52,21 @@ func TestGetRequestUUIDFromCtx(t *testing.T) {
 	requestUUID = GetRequestUUIDFromCtx(context.TODO())
 	assert.Nil(t, requestUUID)
 }
+
+func TestWithRoutingDelegate(t *testing.T) {
+	expected := "somewhere"
+	ctx := WithRoutingDelegate(context.TODO(), expected)
+	rd := ctx.Value(routingDelegateKey)
+	routingDelegate, ok := rd.(string)
+
+	assert.True(t, ok)
+	assert.Equal(t, routingDelegate, expected)
+}
+
+func TestGetRoutingDelegateFromCtx(t *testing.T) {
+	expected := "somewhere"
+	ctx := WithRoutingDelegate(context.TODO(), expected)
+	rd := GetRoutingDelegateFromCtx(ctx)
+
+	assert.Equal(t, expected, rd)
+}
