@@ -2186,17 +2186,17 @@ type {{$clientName}} struct {
 		if hostPort, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
 			caller := c.client.CallToHostPort
 			success, respHeaders, err = caller(
-            	ctx, "{{$svc.Name}}", "{{.Name}}", hostPort, reqHeaders, args, &result, useAltChannel,
-      		)
+				ctx, "{{$svc.Name}}", "{{.Name}}", hostPort, reqHeaders, args, &result, useAltChannel,
+			)
 		} else {
 			caller := c.client.Call
 			if useAltChannel {
-            	caller = c.client.CallThruAltChannel
-            }
+				caller = c.client.CallThruAltChannel
+			}
 
-            success, respHeaders, err = caller(
-            	ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-            )
+			success, respHeaders, err = caller(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			)
 		}
 
 		if err == nil && !success {
@@ -2243,7 +2243,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6733, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6674, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
