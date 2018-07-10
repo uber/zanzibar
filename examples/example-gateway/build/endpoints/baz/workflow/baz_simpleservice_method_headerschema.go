@@ -78,6 +78,10 @@ func (w simpleServiceHeaderSchemaWorkflow) Handle(
 	if ok {
 		clientHeaders["Content-Type"] = h
 	}
+	h, ok = reqHeaders.Get("X-Deputy-Forwarded")
+	if ok {
+		clientHeaders["X-Deputy-Forwarded"] = h
+	}
 	h, ok = reqHeaders.Get("X-Token")
 	if ok {
 		clientHeaders["X-Token"] = h

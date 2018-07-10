@@ -150,7 +150,7 @@ func (c *TChannelClient) Call(
 		metrics:       c.metrics[serviceMethod],
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp, false)
+	return c.call(ctx, call, reqHeaders, req, resp, false, "")
 }
 
 // CallThruAltChannel makes a RPC call using a configured alternate channel
@@ -171,7 +171,29 @@ func (c *TChannelClient) CallThruAltChannel(
 		metrics:       c.metrics[serviceMethod],
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp, true)
+	return c.call(ctx, call, reqHeaders, req, resp, true, "")
+}
+
+// CallToHostPort makes a RPC call using a dedicated hostport
+func (c *TChannelClient) CallToHostPort(
+	ctx context.Context,
+	thriftService, methodName, hostPort string,
+	reqHeaders map[string]string,
+	req, resp RWTStruct,
+	useAltSubchannel bool,
+) (success bool, resHeaders map[string]string, err error) {
+	serviceMethod := thriftService + "::" + methodName
+
+	call := &tchannelOutboundCall{
+		client:        c,
+		methodName:    c.methodNames[serviceMethod],
+		serviceMethod: serviceMethod,
+		reqHeaders:    reqHeaders,
+		logger:        c.Loggers[serviceMethod],
+		metrics:       c.metrics[serviceMethod],
+	}
+
+	return c.call(ctx, call, reqHeaders, req, resp, useAltSubchannel, hostPort)
 }
 
 func (c *TChannelClient) call(
@@ -180,6 +202,7 @@ func (c *TChannelClient) call(
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
 	useAltSubchannel bool,
+	hostport string,
 ) (success bool, resHeaders map[string]string, err error) {
 	defer func() { call.finish(err) }()
 	call.start()
@@ -207,10 +230,20 @@ func (c *TChannelClient) call(
 			sc = c.scAlt
 		}
 
-		call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
-			Format:       tchannel.Thrift,
-			RequestState: rs,
-		})
+		if hostport != "" {
+			p := sc.Peers().Add(hostport)
+			call.call, cerr = p.BeginCall(ctx, sc.ServiceName(), call.serviceMethod, &tchannel.CallOptions{
+				Format:       tchannel.Thrift,
+				RequestState: rs,
+			})
+			defer sc.Peers().Remove(hostport)
+		} else {
+			call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
+				Format:       tchannel.Thrift,
+				RequestState: rs,
+			})
+		}
+
 		if cerr != nil {
 			LogErrorWarnTimeout(call.logger, err, "Could not begin outbound request")
 			return errors.Wrapf(

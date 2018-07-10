@@ -547,6 +547,7 @@ func (g *TChannelClientGenerator) Generate(
 		ExposedMethods:   exposedMethods,
 		SidecarRouter:    clientSpec.SidecarRouter,
 		StagingReqHeader: g.packageHelper.StagingReqHeader(),
+		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -909,7 +910,12 @@ func (g *EndpointGenerator) generateEndpointFile(
 		TransformTo: shk,
 		Field:       &compile.FieldSpec{Required: false},
 	}
-
+	shk = textproto.CanonicalMIMEHeaderKey(g.packageHelper.DeputyReqHeader())
+	reqHeaders[shk] = &TypedHeader{
+		Name:        shk,
+		TransformTo: shk,
+		Field:       &compile.FieldSpec{Required: false},
+	}
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:               instance,
@@ -1268,6 +1274,7 @@ type ClientMeta struct {
 	SidecarRouter    string
 	Fixture          *Fixture
 	StagingReqHeader string
+	DeputyReqHeader  string
 }
 
 func findMethod(
