@@ -245,6 +245,10 @@ func (c *TChannelClient) call(
 				delete(c.selectedPeers, hostport)
 			}()
 		} else {
+			if rs.SelectedPeers == nil {
+				rs.SelectedPeers = map[string]struct{}{}
+			}
+
 			for k, v := range c.selectedPeers {
 				rs.SelectedPeers[k] = v
 			}
