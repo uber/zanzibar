@@ -245,6 +245,10 @@ func (c *TChannelClient) call(
 				delete(c.selectedPeers, hostport)
 			}()
 		} else {
+			if rs.SelectedPeers == nil {
+				rs.SelectedPeers = c.selectedPeers
+			}
+
 			call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 				Format:       tchannel.Thrift,
 				RequestState: rs,
