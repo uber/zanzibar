@@ -113,6 +113,7 @@ func NewTChannelClient(
 		metrics[serviceMethod] = NewOutboundTChannelMetrics(scopes[serviceMethod])
 	}
 
+	
 	client := &TChannelClient{
 		ch:                ch,
 		sc:                ch.GetSubChannel(opt.ServiceName),
