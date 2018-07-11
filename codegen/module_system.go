@@ -443,8 +443,7 @@ func (g *HTTPClientGenerator) Generate(
 		IncludedPackages: clientSpec.ModuleSpec.IncludedPackages,
 		ClientID:         clientSpec.ClientID,
 		ExposedMethods:   exposedMethods,
-		// TODO: http client integration with sidecar router
-		SidecarRouter: clientSpec.SidecarRouter,
+		SidecarRouter:    clientSpec.SidecarRouter,
 	}
 
 	client, err := g.templates.ExecTemplate(

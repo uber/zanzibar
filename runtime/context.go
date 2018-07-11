@@ -29,7 +29,8 @@ import (
 type contextFieldKey string
 
 const (
-	requestUUIDKey = contextFieldKey("requestUUID")
+	requestUUIDKey     = contextFieldKey("requestUUID")
+	routingDelegateKey = contextFieldKey("rd")
 )
 
 // withRequestFields annotates zanzibar request context to context.Context. In
@@ -47,4 +48,20 @@ func GetRequestUUIDFromCtx(ctx context.Context) uuid.UUID {
 		return uuid
 	}
 	return nil
+}
+
+// WithRoutingDelegate adds the tchannel routing delegate information in the
+// request context.
+func WithRoutingDelegate(ctx context.Context, rd string) context.Context {
+	return context.WithValue(ctx, routingDelegateKey, rd)
+}
+
+// GetRoutingDelegateFromCtx returns the tchannel routing delegate info
+// extracted from context.
+func GetRoutingDelegateFromCtx(ctx context.Context) string {
+	if val := ctx.Value(routingDelegateKey); val != nil {
+		rd, _ := val.(string)
+		return rd
+	}
+	return ""
 }
