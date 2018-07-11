@@ -1,0 +1,12 @@
+{
+	"name": "corge-http",
+	"type": "http",
+	"config": {
+		"thriftFile": "clients/corge/corge.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"EchoString": "Corge::echoString"
+		},
+		"sidecarRouter": "default"
+	}
+}

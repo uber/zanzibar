@@ -936,6 +936,7 @@ import (
 {{$exposedMethods := .ExposedMethods -}}
 {{- $clientName := printf "%sClient" (camel $clientID) }}
 {{- $exportName := .ExportName}}
+{{- $sidecarRouter := .SidecarRouter}}
 
 // Client defines {{$clientID}} client interface.
 type Client interface {
@@ -961,12 +962,28 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+
+	{{if $sidecarRouter -}}
+	calleeHeader string
+	callerHeader string
+	callerName   string
+	calleeName   string
+	{{end -}}
 }
 
 // {{$exportName}} returns a new http client.
 func {{$exportName}}(deps *module.Dependencies) Client {
+	{{if $sidecarRouter -}}
+	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.ip")
+	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.http.port")
+	callerHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.callerHeader")
+	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
+	callerName := deps.Default.Config.MustGetString("serviceName")
+	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	{{else -}}
 	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
 	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	{{end -}}
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
 	defaultHeaders := make(map[string]string)
@@ -976,6 +993,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
+		{{if $sidecarRouter -}}
+		callerHeader: callerHeader,
+		calleeHeader: calleeHeader,
+		callerName: callerName,
+		calleeName: calleeName,
+		{{end -}}
 		httpClient: zanzibar.NewHTTPClient(
 			deps.Default.Logger, deps.Default.Scope,
 			"{{$clientID}}",
@@ -1021,6 +1044,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{$line}}
 	{{end -}}
 	{{- end}}
+
+	{{if $sidecarRouter -}}
+	headers[c.callerHeader] = c.callerName
+	headers[c.calleeHeader] = c.calleeName
+	{{end}}
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL
@@ -1190,7 +1218,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7332, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8336, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
