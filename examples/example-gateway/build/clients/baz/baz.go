@@ -279,25 +279,13 @@ func (c *bazClient) EchoBinary(
 
 	logger := c.client.Loggers["SecondService::echoBinary"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBinary", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -328,25 +316,13 @@ func (c *bazClient) EchoBool(
 
 	logger := c.client.Loggers["SecondService::echoBool"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBool", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoBool", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -377,25 +353,13 @@ func (c *bazClient) EchoDouble(
 
 	logger := c.client.Loggers["SecondService::echoDouble"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoDouble", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -426,25 +390,13 @@ func (c *bazClient) EchoEnum(
 
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoEnum", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -475,25 +427,13 @@ func (c *bazClient) EchoI16(
 
 	logger := c.client.Loggers["SecondService::echoI16"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI16", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoI16", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -524,25 +464,13 @@ func (c *bazClient) EchoI32(
 
 	logger := c.client.Loggers["SecondService::echoI32"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI32", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoI32", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -573,25 +501,13 @@ func (c *bazClient) EchoI64(
 
 	logger := c.client.Loggers["SecondService::echoI64"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI64", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoI64", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -622,25 +538,13 @@ func (c *bazClient) EchoI8(
 
 	logger := c.client.Loggers["SecondService::echoI8"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI8", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoI8", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -671,25 +575,13 @@ func (c *bazClient) EchoString(
 
 	logger := c.client.Loggers["SecondService::echoString"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoString", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoString", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoString", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -720,25 +612,13 @@ func (c *bazClient) EchoStringList(
 
 	logger := c.client.Loggers["SecondService::echoStringList"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringList", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -769,25 +649,13 @@ func (c *bazClient) EchoStringMap(
 
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringMap", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -818,25 +686,13 @@ func (c *bazClient) EchoStringSet(
 
 	logger := c.client.Loggers["SecondService::echoStringSet"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringSet", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -867,25 +723,13 @@ func (c *bazClient) EchoStructList(
 
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructList", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -916,25 +760,13 @@ func (c *bazClient) EchoStructSet(
 
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructSet", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -965,25 +797,13 @@ func (c *bazClient) EchoTypedef(
 
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoTypedef", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1013,25 +833,13 @@ func (c *bazClient) Call(
 
 	logger := c.client.Loggers["SimpleService::call"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "call", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "call", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "call", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1060,25 +868,13 @@ func (c *bazClient) Compare(
 
 	logger := c.client.Loggers["SimpleService::compare"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "compare", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "compare", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "compare", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1113,25 +909,13 @@ func (c *bazClient) GetProfile(
 
 	logger := c.client.Loggers["SimpleService::getProfile"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "getProfile", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1164,25 +948,13 @@ func (c *bazClient) HeaderSchema(
 
 	logger := c.client.Loggers["SimpleService::headerSchema"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "headerSchema", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1217,25 +989,13 @@ func (c *bazClient) Ping(
 	logger := c.client.Loggers["SimpleService::ping"]
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "ping", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "ping", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "ping", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1265,25 +1025,13 @@ func (c *bazClient) DeliberateDiffNoop(
 	logger := c.client.Loggers["SimpleService::sillyNoop"]
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "sillyNoop", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1313,25 +1061,13 @@ func (c *bazClient) TestUUID(
 	logger := c.client.Loggers["SimpleService::testUuid"]
 
 	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "testUuid", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1358,25 +1094,13 @@ func (c *bazClient) Trans(
 
 	logger := c.client.Loggers["SimpleService::trans"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "trans", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "trans", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "trans", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1411,25 +1135,13 @@ func (c *bazClient) TransHeaders(
 
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeaders", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1464,25 +1176,13 @@ func (c *bazClient) TransHeadersNoReq(
 
 	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersNoReq", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1515,25 +1215,13 @@ func (c *bazClient) TransHeadersType(
 
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersType", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
@@ -1567,25 +1255,13 @@ func (c *bazClient) URLTest(
 	logger := c.client.Loggers["SimpleService::urlTest"]
 
 	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
-	var success bool
-	var respHeaders map[string]string
-	var err error
-	useAltChannel := strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true")
-	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
-		caller := c.client.CallToHostPort
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "urlTest", hostPort, reqHeaders, args, &result, useAltChannel,
-		)
-	} else {
-		caller := c.client.Call
-		if useAltChannel {
-			caller = c.client.CallThruAltChannel
-		}
-
-		success, respHeaders, err = caller(
-			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
-		)
+	caller := c.client.Call
+	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+		caller = c.client.CallThruAltChannel
 	}
+	success, respHeaders, err := caller(
+		ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
+	)
 
 	if err == nil && !success {
 		switch {
