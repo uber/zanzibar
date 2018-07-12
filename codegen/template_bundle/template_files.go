@@ -2414,6 +2414,9 @@ import (
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{$deputyReqHeader := .DeputyReqHeader}}
+{{- $clientID := .ClientID -}}
+{{- $exposedMethods := .ExposedMethods -}}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -2484,6 +2487,12 @@ func (h *{{$handlerName}}) Handle(
 		)
 	}
 	{{end -}}
+
+	if hostPort, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
+		if hostPort != "" {
+			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
+		}
+	}
 
 	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
@@ -2563,6 +2572,60 @@ func (h *{{$handlerName}}) Handle(
 	return err == nil, &res, resHeaders, nil
 }
 
+// redirectToDeputy sends the request to deputy hostPort
+func (h *{{$handlerName}}) redirectToDeputy(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	hostPort string,
+	req *{{unref .RequestType}},
+	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var routingKey string
+	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
+		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
+	}
+
+	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
+	timeout := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
+	)
+
+	timeoutPerAttempt := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
+	)
+
+	methodNames := map[string]string{
+    	{{range $svc := .Services -}}
+    	{{range .Methods -}}
+    	{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
+    	{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
+    		{{if $methodName -}}
+    		"{{$serviceMethod}}": "{{$methodName}}",
+    		{{end -}}
+    	{{ end -}}
+    	{{ end -}}
+    }
+
+	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	client := zanzibar.NewTChannelClient(
+		h.Deps.Default.Channel,
+		h.Deps.Default.Logger,
+		h.Deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			ClientID:           "{{$clientID}}",
+			MethodNames:       methodNames,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
+		},
+	)
+
+	success, respHeaders, err := client.CallToHostPort(ctx, "TinCup", "getExchangeRate", hostPort, reqHeaders, req, res, false)
+	return success, res, respHeaders, err
+}
+
+
 // {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
 type {{$workflowInterface}} interface {
 Handle(
@@ -2600,7 +2663,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 6280, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8342, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

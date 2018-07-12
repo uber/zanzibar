@@ -49,6 +49,7 @@ type EndpointMeta struct {
 	ResHeadersKeys         []string
 	ResRequiredHeadersKeys []string
 	TraceKey               string
+	DeputyReqHeader        string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -933,6 +934,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		ClientMethodName:       e.ClientMethod,
 		WorkflowPkg:            workflowPkg,
 		TraceKey:               g.packageHelper.traceKey,
+		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
 	}
 
 	var endpoint []byte

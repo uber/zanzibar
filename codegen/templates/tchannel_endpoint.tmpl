@@ -30,8 +30,9 @@ import (
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
-{{- $deputyReqHeader := .DeputyReqHeader}}
+{{$deputyReqHeader := .DeputyReqHeader}}
 {{- $clientID := .ClientID -}}
+{{- $exposedMethods := .ExposedMethods -}}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -236,7 +237,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "{{$svc.Name}}", "{{.Name}}", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.CallToHostPort(ctx, "TinCup", "getExchangeRate", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
 
