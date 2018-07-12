@@ -2488,13 +2488,14 @@ func (h *{{$handlerName}}) Handle(
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
-	{{end -}}
+
 
 	if hostPort, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
 		if hostPort != "" {
 			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
 		}
 	}
+	{{end -}}
 
 	workflow := {{if $workflowPkg}}{{$workflowPkg}}.{{end}}New{{$workflowInterface}}(h.Deps)
 
@@ -2574,6 +2575,7 @@ func (h *{{$handlerName}}) Handle(
 	return err == nil, &res, resHeaders, nil
 }
 
+{{if ne .RequestType "" -}}
 // redirectToDeputy sends the request to deputy hostPort
 func (h *{{$handlerName}}) redirectToDeputy(
 	ctx context.Context,
@@ -2618,7 +2620,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
-
+{{end -}}
 
 // {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
 type {{$workflowInterface}} interface {
@@ -2657,7 +2659,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8129, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8167, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

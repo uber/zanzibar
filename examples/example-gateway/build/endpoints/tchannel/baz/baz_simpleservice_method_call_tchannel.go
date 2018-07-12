@@ -98,12 +98,12 @@ func (h *SimpleServiceCallHandler) Handle(
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
+
 	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
 		if hostPort != "" {
 			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
 		}
 	}
-
 	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Deps)
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
