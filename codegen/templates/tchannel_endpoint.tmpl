@@ -211,7 +211,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"{{.ThriftServiceName}}": "{{title .Name}}",
+		"{{.ThriftService}}::{{.Name}}": "{{title .Name}}",
 	}
 
 	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -229,7 +229,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "TinCup", "getExchangeRate", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{.Method.Name}}", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
 

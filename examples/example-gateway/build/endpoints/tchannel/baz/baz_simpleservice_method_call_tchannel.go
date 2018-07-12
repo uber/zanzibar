@@ -197,7 +197,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "TinCup", "getExchangeRate", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.CallToHostPort(ctx, "SimpleService", "Call", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
 

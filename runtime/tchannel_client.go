@@ -31,6 +31,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	netContext "golang.org/x/net/context"
+	"sync"
 )
 
 // TChannelClientOption is used when creating a new TChannelClient
@@ -61,6 +62,7 @@ type TChannelClient struct {
 	sc                *tchannel.SubChannel
 	scAlt             *tchannel.SubChannel
 	selectedPeers     map[string]struct{}
+	mutex             sync.RWMutex
 	serviceName       string
 	ClientID          string
 	methodNames       map[string]string
@@ -237,7 +239,14 @@ func (c *TChannelClient) call(
 		}
 
 		if hostport != "" {
-			c.selectedPeers[hostport] = struct{}{}
+			var exist bool
+			c.mutex.Lock()
+			// if hostport is NOT in original peerlist, add it to pre-selected peers to avoid being picking up by subchannel
+			peers := sc.Peers().Copy()
+			if _, exist = peers[hostport]; !exist {
+				c.selectedPeers[hostport] = struct{}{}
+			}
+
 			p := sc.Peers().Add(hostport)
 			call.call, cerr = p.BeginCall(ctx, sc.ServiceName(), call.serviceMethod, &tchannel.CallOptions{
 				Format:       tchannel.Thrift,
@@ -245,8 +254,13 @@ func (c *TChannelClient) call(
 			})
 
 			defer func() {
-				sc.Peers().Remove(hostport)
-				delete(c.selectedPeers, hostport)
+				// if hostport is NOT in original peerlist, this hostport is called only by this request
+				if !exist {
+					sc.Peers().Remove(hostport)
+					delete(c.selectedPeers, hostport)
+				}
+
+				c.mutex.Unlock()
 			}()
 		} else {
 			if rs.SelectedPeers == nil {
