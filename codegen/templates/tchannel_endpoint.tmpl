@@ -26,12 +26,13 @@ import (
 )
 
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $methodName := .Method.Name }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 {{- $deputyReqHeader := .DeputyReqHeader}}
-{{- $clientID := .ClientID -}}
+{{- $clientID := .ClientID }}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -210,7 +211,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"{{.ThriftService}}::{{.Name}}": "{{title .Name}}",
+		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
 	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -228,7 +229,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{.Method.Name}}", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
 

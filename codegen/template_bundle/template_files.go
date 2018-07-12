@@ -2410,12 +2410,13 @@ import (
 )
 
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $methodName := .Method.Name }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 {{- $deputyReqHeader := .DeputyReqHeader}}
-{{- $clientID := .ClientID -}}
+{{- $clientID := .ClientID }}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -2594,7 +2595,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"{{.ThriftService}}::{{.Name}}": "{{title .Name}}",
+		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
 	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -2612,7 +2613,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{.Method.Name}}", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
 	return success, res, respHeaders, err
 }
 
@@ -2654,7 +2655,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8048, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8081, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
