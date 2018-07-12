@@ -32,7 +32,7 @@ import (
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 {{- $deputyReqHeader := .DeputyReqHeader}}
-{{$clientID := .ClientID -}}
+{{- $clientID := .ClientID }}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.

@@ -2416,7 +2416,7 @@ import (
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
 {{- $deputyReqHeader := .DeputyReqHeader}}
-{{$clientID := .ClientID -}}
+{{- $clientID := .ClientID }}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -2655,7 +2655,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8080, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8081, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
