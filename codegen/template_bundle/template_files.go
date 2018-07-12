@@ -2414,9 +2414,9 @@ import (
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
-{{$deputyReqHeader := .DeputyReqHeader}}
+{{- $deputyReqHeader := .DeputyReqHeader}}
+{{- $methodName := .Method}}
 {{- $clientID := .ClientID -}}
-{{- $exposedMethods := .ExposedMethods -}}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -2595,16 +2595,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-    	{{range $svc := .Services -}}
-    	{{range .Methods -}}
-    	{{$serviceMethod := printf "%s::%s" $svc.Name .Name -}}
-    	{{$methodName := (title (index $exposedMethods $serviceMethod)) -}}
-    		{{if $methodName -}}
-    		"{{$serviceMethod}}": "{{$methodName}}",
-    		{{end -}}
-    	{{ end -}}
-    	{{ end -}}
-    }
+		"{{.ThriftService}}::{{.Name}}": "{{title .Name}}",
+	}
 
 	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 	client := zanzibar.NewTChannelClient(
@@ -2663,7 +2655,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8342, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8064, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -26,8 +26,10 @@ package baztchannelendpoint
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
+	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
@@ -38,9 +40,7 @@ import (
 	example_tchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
-)
-
-// NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
+) // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHandler {
 	handler := &SimpleServiceCallHandler{
 		Deps: deps,
@@ -96,6 +96,12 @@ func (h *SimpleServiceCallHandler) Handle(
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
 	}
+	if hostPort, ok := reqHeaders["x-deputy-forwarded"]; ok {
+		if hostPort != "" {
+			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
+		}
+	}
+
 	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Deps)
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
@@ -148,6 +154,51 @@ func (h *SimpleServiceCallHandler) Handle(
 	}
 
 	return err == nil, &res, resHeaders, nil
+}
+
+// redirectToDeputy sends the request to deputy hostPort
+func (h *SimpleServiceCallHandler) redirectToDeputy(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	hostPort string,
+	req *endpointsTchannelBazBaz.SimpleService_Call_Args,
+	res *endpointsTchannelBazBaz.SimpleService_Call_Result,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var routingKey string
+	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
+		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
+	}
+
+	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
+	timeout := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
+	)
+
+	timeoutPerAttempt := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
+	)
+
+	methodNames := map[string]string{
+		"SimpleService::Call": "Call",
+	}
+
+	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	client := zanzibar.NewTChannelClient(
+		h.Deps.Default.Channel,
+		h.Deps.Default.Logger,
+		h.Deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			ClientID:          "",
+			MethodNames:       methodNames,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
+		},
+	)
+
+	success, respHeaders, err := client.CallToHostPort(ctx, "TinCup", "getExchangeRate", hostPort, reqHeaders, req, res, false)
+	return success, res, respHeaders, err
 }
 
 // SimpleServiceCallWorkflow defines the interface for SimpleServiceCallHandler workflow
