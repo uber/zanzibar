@@ -211,7 +211,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"{{.ThriftService}}::{{.Name}}": "{{title .Name}}",
+		"{{.ThriftServiceName}}": "{{title .Name}}",
 	}
 
 	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
