@@ -1870,6 +1870,7 @@ type MockService interface {
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
 	{{$mock}}() *{{$mockType}}
+	GetHostPort() string
 	Start()
 	Stop()
 }
@@ -2001,6 +2002,11 @@ func (m *mockService) MakeTChannelRequest(
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
 }
+
+// GetHostPort returns RealTChannelAddr
+func (m *mockService) GetHostPort() (string) {
+	return m.server.RealTChannelAddr
+}
 `)
 
 func service_mockTmplBytes() ([]byte, error) {
@@ -2013,7 +2019,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4351, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
