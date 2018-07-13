@@ -56,7 +56,6 @@ type MockService interface {
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
 	MockClients() *MockClientNodes
-	GetHostPort() string
 	Start()
 	Stop()
 }
@@ -187,9 +186,4 @@ func (m *mockService) MakeTChannelRequest(
 	sc := m.server.Channel.GetSubChannel(m.server.ServiceName)
 	sc.Peers().Add(m.server.RealTChannelAddr)
 	return m.tChannelClient.Call(ctx, thriftService, method, headers, req, res)
-}
-
-// GetHostPort returns RealTChannelAddr
-func (m *mockService) GetHostPort() string {
-	return m.server.RealTChannelAddr
 }
