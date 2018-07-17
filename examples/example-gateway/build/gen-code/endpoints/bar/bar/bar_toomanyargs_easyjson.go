@@ -87,40 +87,34 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Success != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.Success)
+			out.RawString(prefix)
 		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.Success)
 	}
 	if in.BarException != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"barException\":")
-		if in.BarException == nil {
-			out.RawString("null")
+		const prefix string = ",\"barException\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar1(out, *in.BarException)
+			out.RawString(prefix)
 		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar1(out, *in.BarException)
 	}
 	if in.FooException != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooException\":")
-		if in.FooException == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooException\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooFoo(out, *in.FooException)
+			out.RawString(prefix)
 		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooFoo(out, *in.FooException)
 	}
 	out.RawByte('}')
 }
@@ -188,12 +182,16 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"teapot\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Teapot))
 	}
-	first = false
-	out.RawString("\"teapot\":")
-	out.String(string(in.Teapot))
 	out.RawByte('}')
 }
 func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar1(in *jlexer.Lexer, out *BarException) {
@@ -236,12 +234,16 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"stringField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.StringField))
 	}
-	first = false
-	out.RawString("\"stringField\":")
-	out.String(string(in.StringField))
 	out.RawByte('}')
 }
 func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(in *jlexer.Lexer, out *BarResponse) {
@@ -370,83 +372,107 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"stringField\":")
-	out.String(string(in.StringField))
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"intWithRange\":")
-	out.Int32(int32(in.IntWithRange))
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"intWithoutRange\":")
-	out.Int32(int32(in.IntWithoutRange))
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"mapIntWithRange\":")
-	if in.MapIntWithRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v4First := true
-		for v4Name, v4Value := range in.MapIntWithRange {
-			if !v4First {
-				out.RawByte(',')
-			}
-			v4First = false
-			out.String(string(v4Name))
-			out.RawByte(':')
-			out.Int32(int32(v4Value))
-		}
-		out.RawByte('}')
-	}
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"mapIntWithoutRange\":")
-	if in.MapIntWithoutRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v5First := true
-		for v5Name, v5Value := range in.MapIntWithoutRange {
-			if !v5First {
-				out.RawByte(',')
-			}
-			v5First = false
-			out.String(string(v5Name))
-			out.RawByte(':')
-			out.Int32(int32(v5Value))
-		}
-		out.RawByte('}')
-	}
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"binaryField\":")
-	out.Base64Bytes(in.BinaryField)
-	if in.NextResponse != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"nextResponse\":")
-		if in.NextResponse == nil {
-			out.RawString("null")
+	{
+		const prefix string = ",\"stringField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.NextResponse)
+			out.RawString(prefix)
 		}
+		out.String(string(in.StringField))
+	}
+	{
+		const prefix string = ",\"intWithRange\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(in.IntWithRange))
+	}
+	{
+		const prefix string = ",\"intWithoutRange\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(in.IntWithoutRange))
+	}
+	{
+		const prefix string = ",\"mapIntWithRange\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.MapIntWithRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v4First := true
+			for v4Name, v4Value := range in.MapIntWithRange {
+				if v4First {
+					v4First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v4Name))
+				out.RawByte(':')
+				out.Int32(int32(v4Value))
+			}
+			out.RawByte('}')
+		}
+	}
+	{
+		const prefix string = ",\"mapIntWithoutRange\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.MapIntWithoutRange == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v5First := true
+			for v5Name, v5Value := range in.MapIntWithoutRange {
+				if v5First {
+					v5First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v5Name))
+				out.RawByte(':')
+				out.Int32(int32(v5Value))
+			}
+			out.RawByte('}')
+		}
+	}
+	{
+		const prefix string = ",\"binaryField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Base64Bytes(in.BinaryField)
+	}
+	if in.NextResponse != nil {
+		const prefix string = ",\"nextResponse\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.NextResponse)
 	}
 	out.RawByte('}')
 }
@@ -508,27 +534,29 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"request\":")
-	if in.Request == nil {
-		out.RawString("null")
-	} else {
-		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.Request)
-	}
-	if in.Foo != nil {
-		if !first {
-			out.RawByte(',')
+	{
+		const prefix string = ",\"request\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		first = false
-		out.RawString("\"foo\":")
-		if in.Foo == nil {
+		if in.Request == nil {
 			out.RawString("null")
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooFoo1(out, *in.Foo)
+			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(out, *in.Request)
 		}
+	}
+	if in.Foo != nil {
+		const prefix string = ",\"foo\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooFoo1(out, *in.Foo)
 	}
 	out.RawByte('}')
 }
@@ -666,76 +694,73 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"fooString\":")
-	out.String(string(in.FooString))
-	if in.FooI32 != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooI32\":")
-		if in.FooI32 == nil {
-			out.RawString("null")
+	{
+		const prefix string = ",\"fooString\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.FooI32))
+			out.RawString(prefix)
 		}
+		out.String(string(in.FooString))
+	}
+	if in.FooI32 != nil {
+		const prefix string = ",\"fooI32\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(*in.FooI32))
 	}
 	if in.FooI16 != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooI16\":")
-		if in.FooI16 == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooI16\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int16(int16(*in.FooI16))
+			out.RawString(prefix)
 		}
+		out.Int16(int16(*in.FooI16))
 	}
 	if in.FooDouble != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooDouble\":")
-		if in.FooDouble == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooDouble\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Float64(float64(*in.FooDouble))
+			out.RawString(prefix)
 		}
+		out.Float64(float64(*in.FooDouble))
 	}
 	if in.FooBool != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooBool\":")
-		if in.FooBool == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooBool\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.FooBool))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.FooBool))
 	}
 	if len(in.FooMap) != 0 {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooMap\":")
-		if in.FooMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
+		const prefix string = ",\"fooMap\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('{')
 			v9First := true
 			for v9Name, v9Value := range in.FooMap {
-				if !v9First {
+				if v9First {
+					v9First = false
+				} else {
 					out.RawByte(',')
 				}
-				v9First = false
 				out.String(string(v9Name))
 				out.RawByte(':')
 				out.String(string(v9Value))
@@ -744,16 +769,14 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 	}
 	if in.Message != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"message\":")
-		if in.Message == nil {
-			out.RawString("null")
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooBaseBase(out, *in.Message)
+			out.RawString(prefix)
 		}
+		easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsFooBaseBase(out, *in.Message)
 	}
 	out.RawByte('}')
 }
@@ -797,12 +820,16 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"body\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Body))
 	}
-	first = false
-	out.RawString("\"body\":")
-	out.String(string(in.Body))
 	out.RawByte('}')
 }
 func easyjson87e68f88DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar2(in *jlexer.Lexer, out *BarRequest) {
@@ -891,41 +918,65 @@ func easyjson87e68f88EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"stringField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.StringField))
 	}
-	first = false
-	out.RawString("\"stringField\":")
-	out.String(string(in.StringField))
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"boolField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.BoolField))
 	}
-	first = false
-	out.RawString("\"boolField\":")
-	out.Bool(bool(in.BoolField))
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"binaryField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Base64Bytes(in.BinaryField)
 	}
-	first = false
-	out.RawString("\"binaryField\":")
-	out.Base64Bytes(in.BinaryField)
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.Timestamp).MarshalJSON())
 	}
-	first = false
-	out.RawString("\"timestamp\":")
-	out.Raw((in.Timestamp).MarshalJSON())
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"enumField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.EnumField).MarshalJSON())
 	}
-	first = false
-	out.RawString("\"enumField\":")
-	out.Raw((in.EnumField).MarshalJSON())
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"longField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.LongField).MarshalJSON())
 	}
-	first = false
-	out.RawString("\"longField\":")
-	out.Raw((in.LongField).MarshalJSON())
 	out.RawByte('}')
 }

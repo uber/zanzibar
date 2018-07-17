@@ -62,11 +62,13 @@ func easyjsonC805b38cEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if len(in.Success) != 0 {
-		if !first {
-			out.RawByte(',')
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		first = false
-		out.RawString("\"success\":")
 		out.Base64Bytes(in.Success)
 	}
 	out.RawByte('}')
@@ -140,12 +142,16 @@ func easyjsonC805b38cEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"arg\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Base64Bytes(in.Arg)
 	}
-	first = false
-	out.RawString("\"arg\":")
-	out.Base64Bytes(in.Arg)
 	out.RawByte('}')
 }
 

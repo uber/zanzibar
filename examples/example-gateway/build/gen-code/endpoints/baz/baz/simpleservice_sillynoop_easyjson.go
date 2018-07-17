@@ -75,28 +75,24 @@ func easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.AuthErr != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"authErr\":")
-		if in.AuthErr == nil {
-			out.RawString("null")
+		const prefix string = ",\"authErr\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.AuthErr)
+			out.RawString(prefix)
 		}
+		easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.AuthErr)
 	}
 	if in.ServerErr != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"serverErr\":")
-		if in.ServerErr == nil {
-			out.RawString("null")
+		const prefix string = ",\"serverErr\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.ServerErr)
+			out.RawString(prefix)
 		}
+		easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.ServerErr)
 	}
 	out.RawByte('}')
 }
@@ -164,12 +160,16 @@ func easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 func easyjson29c9c5f5DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *AuthErr) {
@@ -212,12 +212,16 @@ func easyjson29c9c5f5EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 func easyjson29c9c5f5DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceSillyNoop1(in *jlexer.Lexer, out *SimpleService_SillyNoop_Args) {

@@ -75,28 +75,24 @@ func easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Success != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
+			out.RawString(prefix)
 		}
+		easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
 	}
 	if in.AuthErr != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"authErr\":")
-		if in.AuthErr == nil {
-			out.RawString("null")
+		const prefix string = ",\"authErr\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
+			out.RawString(prefix)
 		}
+		easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
 	}
 	out.RawByte('}')
 }
@@ -164,12 +160,16 @@ func easyjsonEcca83c7EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 func easyjsonEcca83c7DecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *TransHeader) {

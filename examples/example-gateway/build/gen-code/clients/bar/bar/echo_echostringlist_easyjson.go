@@ -78,14 +78,14 @@ func easyjsonF0b33cEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCode
 	first := true
 	_ = first
 	if len(in.Success) != 0 {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('[')
 			for v2, v3 := range in.Success {
 				if v2 > 0 {
@@ -183,22 +183,26 @@ func easyjsonF0b33cEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCode
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"arg\":")
-	if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v5, v6 := range in.Arg {
-			if v5 > 0 {
-				out.RawByte(',')
-			}
-			out.String(string(v6))
+	{
+		const prefix string = ",\"arg\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte(']')
+		if in.Arg == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v5, v6 := range in.Arg {
+				if v5 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v6))
+			}
+			out.RawByte(']')
+		}
 	}
 	out.RawByte('}')
 }

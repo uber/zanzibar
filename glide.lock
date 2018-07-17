@@ -1,5 +1,5 @@
-hash: f566572dffb3c5ee5ca19ea83402ef59990aa3ac45b3751f49e65a1f5c731972
-updated: 2018-06-08T12:03:30.294061-07:00
+hash: bdac29f13714dca549136acfd32a2a1cc5f7fbe28753495b57baeb302f76ecf6
+updated: 2018-07-17T16:33:18.283268-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 22bbf0ddf08105dfa364d0a2fa619dfa71014af5
+  version: 8b2eeeb0ca5f56c78bec5efde9c4a21d9201126c
   subpackages:
   - gomock
   - mockgen/model
@@ -37,7 +37,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 4d347d79dea0067c945f374f990601decb08abb5
+  version: 8b799c424f57fa123fc63a99d6383bc6e4c02578
   subpackages:
   - bootstrap
   - buffer
@@ -92,7 +92,7 @@ imports:
   - thrift-gen/zipkincore
   - utils
 - name: github.com/uber/jaeger-lib
-  version: 7f95f4f7e80028096410abddaae2556e4c61b59f
+  version: 34d9cc24e47ab70783050b52f79c06eb3ac850ba
   subpackages:
   - metrics
   - metrics/tally
@@ -150,7 +150,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 1e491301e022f8f977054da4c2d852decd59571f
+  version: afe8f62b1d6bbd81f31868121a50b06d8188e1f9
   subpackages:
   - context
 - name: honnef.co/go/tools
