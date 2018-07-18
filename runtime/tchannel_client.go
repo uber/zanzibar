@@ -267,10 +267,12 @@ func (c *TChannelClient) call(
 				rs.SelectedPeers = map[string]struct{}{}
 			}
 
+			c.mutex.RLock()
 			for k, v := range c.selectedPeers {
 				rs.SelectedPeers[k] = v
 			}
 
+			c.mutex.RUnlock()
 			call.call, cerr = sc.BeginCall(ctx, call.serviceMethod, &tchannel.CallOptions{
 				Format:       tchannel.Thrift,
 				RequestState: rs,
