@@ -25,6 +25,7 @@ import (
 	"net/http"
 
 	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
 )
 
 const (
@@ -68,6 +69,13 @@ var knownMetrics = []string{
 	outboundCallsSystemErrors,
 	outboundCallsErrors,
 	outboundCallsStatus,
+}
+
+var knownTchannelErrors = map[tchannel.SystemErrCode]bool{
+	tchannel.ErrCodeTimeout:    true,
+	tchannel.ErrCodeBadRequest: true,
+	tchannel.ErrCodeProtocol:   true,
+	tchannel.ErrCodeCancelled:  true,
 }
 
 var knownStatusCodes = map[int]bool{
@@ -147,8 +155,8 @@ type commonMetrics struct {
 
 type tchannelMetrics struct {
 	commonMetrics
-	AppErrors    tally.Counter // [inbound|outbound].calls.app-errors
-	SystemErrors tally.Counter // [inbound|outbound].calls.system-errors
+	AppErrors    tally.Counter          // [inbound|outbound].calls.app-errors
+	SystemErrors map[byte]tally.Counter // [inbound|outbound].calls.system-errors*
 }
 
 type httpMetrics struct {
@@ -204,7 +212,14 @@ func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
 	metrics.Latency = scope.Timer(inboundCallsLatency)
 	metrics.Success = scope.Counter(inboundCallsSuccess)
 	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
-	metrics.SystemErrors = scope.Counter(inboundCallsSystemErrors)
+	metrics.SystemErrors = map[byte]tally.Counter{
+		byte(tchannel.ErrCodeInvalid): scope.Counter(inboundCallsSystemErrors),
+	}
+	for errorCode := range knownTchannelErrors {
+		metrics.SystemErrors[byte(errorCode)] = scope.Tagged(map[string]string{
+			"error": errorCode.MetricsKey(),
+		}).Counter(outboundCallsSystemErrors)
+	}
 	return &metrics
 }
 
@@ -231,6 +246,13 @@ func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
 	metrics.Latency = scope.Timer(outboundCallsLatency)
 	metrics.Success = scope.Counter(outboundCallsSuccess)
 	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
-	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
+	metrics.SystemErrors = map[byte]tally.Counter{
+		byte(tchannel.ErrCodeInvalid): scope.Counter(inboundCallsSystemErrors),
+	}
+	for errorCode := range knownTchannelErrors {
+		metrics.SystemErrors[byte(errorCode)] = scope.Tagged(map[string]string{
+			"error": errorCode.MetricsKey(),
+		}).Counter(outboundCallsSystemErrors)
+	}
 	return &metrics
 }

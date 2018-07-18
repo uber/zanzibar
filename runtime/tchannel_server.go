@@ -234,7 +234,12 @@ func (c *tchannelInboundCall) finish(err error) {
 
 	// emit metrics
 	if err != nil {
-		c.endpoint.metrics.SystemErrors.Inc(1)
+		tcause := tchannel.GetSystemErrorCode(errors.Cause(err))
+		if terr, ok := c.endpoint.metrics.SystemErrors[byte(tcause)]; ok {
+			terr.Inc(1)
+		} else { // default system-error metrics without error detail tagging
+			c.endpoint.metrics.SystemErrors[0x00].Inc(1)
+		}
 	} else if !c.success {
 		c.endpoint.metrics.AppErrors.Inc(1)
 	} else {

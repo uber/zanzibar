@@ -127,11 +127,19 @@ func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger 
 // https://github.com/uber/tchannel-node/blob/master/errors.js#L907-L930
 func LogErrorWarnTimeout(logger *zap.Logger, err error, msg string) {
 	if err != nil {
-		if errors.Cause(err) == context.Canceled || errors.Cause(err) == context.DeadlineExceeded ||
-			tchannel.GetSystemErrorCode(errors.Cause(err)) == tchannel.ErrCodeTimeout {
+		if IsTimeout(err) {
 			logger.Warn(msg, zap.Error(err))
 		} else {
 			logger.Error(msg, zap.Error(err))
 		}
 	}
+}
+
+// IsTimeout return true if error caused by timeout
+func IsTimeout(err error) bool {
+	cause := errors.Cause(err)
+	return cause == context.Canceled ||
+		cause == context.DeadlineExceeded ||
+		tchannel.GetSystemErrorCode(
+			errors.Cause(err)) == tchannel.ErrCodeTimeout
 }
