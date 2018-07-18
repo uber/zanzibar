@@ -75,21 +75,22 @@ func easyjsonA149064aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if len(in.Success) != 0 {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('{')
 			v2First := true
 			for v2Name, v2Value := range in.Success {
-				if !v2First {
+				if v2First {
+					v2First = false
+				} else {
 					out.RawByte(',')
 				}
-				v2First = false
 				out.String(string(v2Name))
 				out.RawByte(':')
 				easyjsonA149064aEncode(out, v2Value)
@@ -216,26 +217,31 @@ func easyjsonA149064aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"arg\":")
-	if in.Arg == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v4First := true
-		for v4Name, v4Value := range in.Arg {
-			if !v4First {
-				out.RawByte(',')
-			}
-			v4First = false
-			out.String(string(v4Name))
-			out.RawByte(':')
-			easyjsonA149064aEncode(out, v4Value)
+	{
+		const prefix string = ",\"arg\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte('}')
+		if in.Arg == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v4First := true
+			for v4Name, v4Value := range in.Arg {
+				if v4First {
+					v4First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v4Name))
+				out.RawByte(':')
+				easyjsonA149064aEncode(out, v4Value)
+			}
+			out.RawByte('}')
+		}
 	}
 	out.RawByte('}')
 }

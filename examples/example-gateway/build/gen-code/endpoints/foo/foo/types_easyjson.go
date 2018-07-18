@@ -132,76 +132,73 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"fooString\":")
-	out.String(string(in.FooString))
-	if in.FooI32 != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooI32\":")
-		if in.FooI32 == nil {
-			out.RawString("null")
+	{
+		const prefix string = ",\"fooString\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.FooI32))
+			out.RawString(prefix)
 		}
+		out.String(string(in.FooString))
+	}
+	if in.FooI32 != nil {
+		const prefix string = ",\"fooI32\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(*in.FooI32))
 	}
 	if in.FooI16 != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooI16\":")
-		if in.FooI16 == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooI16\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int16(int16(*in.FooI16))
+			out.RawString(prefix)
 		}
+		out.Int16(int16(*in.FooI16))
 	}
 	if in.FooDouble != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooDouble\":")
-		if in.FooDouble == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooDouble\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Float64(float64(*in.FooDouble))
+			out.RawString(prefix)
 		}
+		out.Float64(float64(*in.FooDouble))
 	}
 	if in.FooBool != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooBool\":")
-		if in.FooBool == nil {
-			out.RawString("null")
+		const prefix string = ",\"fooBool\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.FooBool))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.FooBool))
 	}
 	if len(in.FooMap) != 0 {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fooMap\":")
-		if in.FooMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
+		const prefix string = ",\"fooMap\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('{')
 			v2First := true
 			for v2Name, v2Value := range in.FooMap {
-				if !v2First {
+				if v2First {
+					v2First = false
+				} else {
 					out.RawByte(',')
 				}
-				v2First = false
 				out.String(string(v2Name))
 				out.RawByte(':')
 				out.String(string(v2Value))
@@ -210,16 +207,14 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 	}
 	if in.Message != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"message\":")
-		if in.Message == nil {
-			out.RawString("null")
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			(*in.Message).MarshalEasyJSON(out)
+			out.RawString(prefix)
 		}
+		(*in.Message).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -291,16 +286,14 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Name != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"name\":")
-		if in.Name == nil {
-			out.RawString("null")
+		const prefix string = ",\"name\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.Name))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.Name))
 	}
 	out.RawByte('}')
 }
@@ -368,12 +361,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"teapot\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Teapot))
 	}
-	first = false
-	out.RawString("\"teapot\":")
-	out.String(string(in.Teapot))
 	out.RawByte('}')
 }
 

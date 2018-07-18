@@ -65,16 +65,14 @@ func easyjson82fab59aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.BarException != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"barException\":")
-		if in.BarException == nil {
-			out.RawString("null")
+		const prefix string = ",\"barException\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjson82fab59aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.BarException)
+			out.RawString(prefix)
 		}
+		easyjson82fab59aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBar(out, *in.BarException)
 	}
 	out.RawByte('}')
 }
@@ -142,12 +140,16 @@ func easyjson82fab59aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"stringField\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.StringField))
 	}
-	first = false
-	out.RawString("\"stringField\":")
-	out.String(string(in.StringField))
 	out.RawByte('}')
 }
 func easyjson82fab59aDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBarBarBarArgNotStruct1(in *jlexer.Lexer, out *Bar_ArgNotStruct_Args) {
@@ -190,12 +192,16 @@ func easyjson82fab59aEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"request\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Request))
 	}
-	first = false
-	out.RawString("\"request\":")
-	out.String(string(in.Request))
 	out.RawByte('}')
 }
 

@@ -75,28 +75,24 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Success != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
+			out.RawString(prefix)
 		}
+		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
 	}
 	if in.AuthErr != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"authErr\":")
-		if in.AuthErr == nil {
-			out.RawString("null")
+		const prefix string = ",\"authErr\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
+			out.RawString(prefix)
 		}
+		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
 	}
 	out.RawByte('}')
 }
@@ -164,12 +160,16 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *GetProfileResponse) {
@@ -241,26 +241,30 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"payloads\":")
-	if in.Payloads == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v2, v3 := range in.Payloads {
-			if v2 > 0 {
-				out.RawByte(',')
-			}
-			if v3 == nil {
-				out.RawString("null")
-			} else {
-				easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *v3)
-			}
+	{
+		const prefix string = ",\"payloads\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte(']')
+		if in.Payloads == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v2, v3 := range in.Payloads {
+				if v2 > 0 {
+					out.RawByte(',')
+				}
+				if v3 == nil {
+					out.RawString("null")
+				} else {
+					easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *v3)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	out.RawByte('}')
 }
@@ -312,15 +316,19 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"recur1\":")
-	if in.Recur1 == nil {
-		out.RawString("null")
-	} else {
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Recur1)
+	{
+		const prefix string = ",\"recur1\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Recur1 == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Recur1)
+		}
 	}
 	out.RawByte('}')
 }
@@ -390,30 +398,35 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"field1\":")
-	if in.Field1 == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v5First := true
-		for v5Name, v5Value := range in.Field1 {
-			if !v5First {
-				out.RawByte(',')
-			}
-			v5First = false
-			out.String(string(v5Name))
-			out.RawByte(':')
-			if v5Value == nil {
-				out.RawString("null")
-			} else {
-				easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(out, *v5Value)
-			}
+	{
+		const prefix string = ",\"field1\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte('}')
+		if in.Field1 == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v5First := true
+			for v5Name, v5Value := range in.Field1 {
+				if v5First {
+					v5First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v5Name))
+				out.RawByte(':')
+				if v5Value == nil {
+					out.RawString("null")
+				} else {
+					easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(out, *v5Value)
+				}
+			}
+			out.RawByte('}')
+		}
 	}
 	out.RawByte('}')
 }
@@ -480,25 +493,33 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"field21\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Field21 == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field21)
+		}
 	}
-	first = false
-	out.RawString("\"field21\":")
-	if in.Field21 == nil {
-		out.RawString("null")
-	} else {
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field21)
-	}
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"field22\":")
-	if in.Field22 == nil {
-		out.RawString("null")
-	} else {
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field22)
+	{
+		const prefix string = ",\"field22\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Field22 == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field22)
+		}
 	}
 	out.RawByte('}')
 }
@@ -542,12 +563,16 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"field31\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Field31))
 	}
-	first = false
-	out.RawString("\"field31\":")
-	out.String(string(in.Field31))
 	out.RawByte('}')
 }
 func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceGetProfile1(in *jlexer.Lexer, out *SimpleService_GetProfile_Args) {
@@ -598,15 +623,19 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"request\":")
-	if in.Request == nil {
-		out.RawString("null")
-	} else {
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(out, *in.Request)
+	{
+		const prefix string = ",\"request\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Request == nil {
+			out.RawString("null")
+		} else {
+			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(out, *in.Request)
+		}
 	}
 	out.RawByte('}')
 }
@@ -674,11 +703,15 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"target\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Target))
 	}
-	first = false
-	out.RawString("\"target\":")
-	out.String(string(in.Target))
 	out.RawByte('}')
 }

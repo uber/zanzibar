@@ -86,33 +86,39 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
-	if in.Driver != nil {
-		if !first {
-			out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		first = false
-		out.RawString("\"driver\":")
-		if in.Driver == nil {
+		out.String(string(in.Message))
+	}
+	if in.Driver != nil {
+		const prefix string = ",\"driver\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		(*in.Driver).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"rider\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Rider == nil {
 			out.RawString("null")
 		} else {
-			(*in.Driver).MarshalEasyJSON(out)
+			(*in.Rider).MarshalEasyJSON(out)
 		}
-	}
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"rider\":")
-	if in.Rider == nil {
-		out.RawString("null")
-	} else {
-		(*in.Rider).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -239,12 +245,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 
@@ -311,12 +321,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"field31\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Field31))
 	}
-	first = false
-	out.RawString("\"field31\":")
-	out.String(string(in.Field31))
 	out.RawByte('}')
 }
 
@@ -406,25 +420,33 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"field21\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Field21 == nil {
+			out.RawString("null")
+		} else {
+			(*in.Field21).MarshalEasyJSON(out)
+		}
 	}
-	first = false
-	out.RawString("\"field21\":")
-	if in.Field21 == nil {
-		out.RawString("null")
-	} else {
-		(*in.Field21).MarshalEasyJSON(out)
-	}
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"field22\":")
-	if in.Field22 == nil {
-		out.RawString("null")
-	} else {
-		(*in.Field22).MarshalEasyJSON(out)
+	{
+		const prefix string = ",\"field22\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Field22 == nil {
+			out.RawString("null")
+		} else {
+			(*in.Field22).MarshalEasyJSON(out)
+		}
 	}
 	out.RawByte('}')
 }
@@ -518,30 +540,35 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"field1\":")
-	if in.Field1 == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v2First := true
-		for v2Name, v2Value := range in.Field1 {
-			if !v2First {
-				out.RawByte(',')
-			}
-			v2First = false
-			out.String(string(v2Name))
-			out.RawByte(':')
-			if v2Value == nil {
-				out.RawString("null")
-			} else {
-				(*v2Value).MarshalEasyJSON(out)
-			}
+	{
+		const prefix string = ",\"field1\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte('}')
+		if in.Field1 == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v2First := true
+			for v2Name, v2Value := range in.Field1 {
+				if v2First {
+					v2First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v2Name))
+				out.RawByte(':')
+				if v2Value == nil {
+					out.RawString("null")
+				} else {
+					(*v2Value).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte('}')
+		}
 	}
 	out.RawByte('}')
 }
@@ -617,15 +644,19 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"recur1\":")
-	if in.Recur1 == nil {
-		out.RawString("null")
-	} else {
-		(*in.Recur1).MarshalEasyJSON(out)
+	{
+		const prefix string = ",\"recur1\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Recur1 == nil {
+			out.RawString("null")
+		} else {
+			(*in.Recur1).MarshalEasyJSON(out)
+		}
 	}
 	out.RawByte('}')
 }
@@ -693,12 +724,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 
@@ -775,23 +810,25 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"msg\":")
-	out.String(string(in.Msg))
-	if in.Check != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"check\":")
-		if in.Check == nil {
-			out.RawString("null")
+	{
+		const prefix string = ",\"msg\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.Check))
+			out.RawString(prefix)
 		}
+		out.String(string(in.Msg))
+	}
+	if in.Check != nil {
+		const prefix string = ",\"check\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(*in.Check))
 	}
 	out.RawByte('}')
 }
@@ -947,26 +984,30 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"payloads\":")
-	if in.Payloads == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v4, v5 := range in.Payloads {
-			if v4 > 0 {
-				out.RawByte(',')
-			}
-			if v5 == nil {
-				out.RawString("null")
-			} else {
-				(*v5).MarshalEasyJSON(out)
-			}
+	{
+		const prefix string = ",\"payloads\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte(']')
+		if in.Payloads == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v4, v5 := range in.Payloads {
+				if v4 > 0 {
+					out.RawByte(',')
+				}
+				if v5 == nil {
+					out.RawString("null")
+				} else {
+					(*v5).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	out.RawByte('}')
 }
@@ -1034,12 +1075,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"target\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Target))
 	}
-	first = false
-	out.RawString("\"target\":")
-	out.String(string(in.Target))
 	out.RawByte('}')
 }
 
@@ -1106,12 +1151,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 
@@ -1192,24 +1241,36 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"b1\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.B1))
 	}
-	first = false
-	out.RawString("\"b1\":")
-	out.Bool(bool(in.B1))
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"s2\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.S2))
 	}
-	first = false
-	out.RawString("\"s2\":")
-	out.String(string(in.S2))
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"i3\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int32(int32(in.I3))
 	}
-	first = false
-	out.RawString("\"i3\":")
-	out.Int32(int32(in.I3))
 	out.RawByte('}')
 }
 
@@ -1276,12 +1337,16 @@ func easyjson6601e8cdEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"message\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Message))
 	}
-	first = false
-	out.RawString("\"message\":")
-	out.String(string(in.Message))
 	out.RawByte('}')
 }
 

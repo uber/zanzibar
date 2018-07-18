@@ -64,16 +64,14 @@ func easyjson733a33aaEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Success != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.Success))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.Success))
 	}
 	out.RawByte('}')
 }

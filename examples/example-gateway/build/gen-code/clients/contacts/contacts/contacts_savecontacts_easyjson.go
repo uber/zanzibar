@@ -65,16 +65,14 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Success != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"success\":")
-		if in.Success == nil {
-			out.RawString("null")
+		const prefix string = ",\"success\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts(out, *in.Success)
+			out.RawString(prefix)
 		}
+		easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts(out, *in.Success)
 	}
 	out.RawByte('}')
 }
@@ -185,15 +183,19 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"saveContactsRequest\":")
-	if in.SaveContactsRequest == nil {
-		out.RawString("null")
-	} else {
-		easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts1(out, *in.SaveContactsRequest)
+	{
+		const prefix string = ",\"saveContactsRequest\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.SaveContactsRequest == nil {
+			out.RawString("null")
+		} else {
+			easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts1(out, *in.SaveContactsRequest)
+		}
 	}
 	out.RawByte('}')
 }
@@ -297,32 +299,40 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"userUUID\":")
-	out.String(string(in.UserUUID))
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"contacts\":")
-	if in.Contacts == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-		out.RawString("null")
-	} else {
-		out.RawByte('[')
-		for v2, v3 := range in.Contacts {
-			if v2 > 0 {
-				out.RawByte(',')
-			}
-			if v3 == nil {
-				out.RawString("null")
-			} else {
-				easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts2(out, *v3)
-			}
+	{
+		const prefix string = ",\"userUUID\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
 		}
-		out.RawByte(']')
+		out.String(string(in.UserUUID))
+	}
+	{
+		const prefix string = ",\"contacts\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Contacts == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v2, v3 := range in.Contacts {
+				if v2 > 0 {
+					out.RawByte(',')
+				}
+				if v3 == nil {
+					out.RawString("null")
+				} else {
+					easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts2(out, *v3)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	out.RawByte('}')
 }
@@ -401,14 +411,14 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if len(in.Fragments) != 0 {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"fragments\":")
-		if in.Fragments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
+		const prefix string = ",\"fragments\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('[')
 			for v5, v6 := range in.Fragments {
 				if v5 > 0 {
@@ -424,16 +434,14 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		}
 	}
 	if in.Attributes != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"attributes\":")
-		if in.Attributes == nil {
-			out.RawString("null")
+		const prefix string = ",\"attributes\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts4(out, *in.Attributes)
+			out.RawString(prefix)
 		}
+		easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeClientsContactsContacts4(out, *in.Attributes)
 	}
 	out.RawByte('}')
 }
@@ -601,160 +609,134 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.FirstName != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"firstName\":")
-		if in.FirstName == nil {
-			out.RawString("null")
+		const prefix string = ",\"firstName\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.FirstName))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.FirstName))
 	}
 	if in.LastName != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"lastName\":")
-		if in.LastName == nil {
-			out.RawString("null")
+		const prefix string = ",\"lastName\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.LastName))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.LastName))
 	}
 	if in.Nickname != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"nickname\":")
-		if in.Nickname == nil {
-			out.RawString("null")
+		const prefix string = ",\"nickname\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.Nickname))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.Nickname))
 	}
 	if in.HasPhoto != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"hasPhoto\":")
-		if in.HasPhoto == nil {
-			out.RawString("null")
+		const prefix string = ",\"hasPhoto\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.HasPhoto))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.HasPhoto))
 	}
 	if in.NumFields != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"numFields\":")
-		if in.NumFields == nil {
-			out.RawString("null")
+		const prefix string = ",\"numFields\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.NumFields))
+			out.RawString(prefix)
 		}
+		out.Int32(int32(*in.NumFields))
 	}
 	if in.TimesContacted != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"timesContacted\":")
-		if in.TimesContacted == nil {
-			out.RawString("null")
+		const prefix string = ",\"timesContacted\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.TimesContacted))
+			out.RawString(prefix)
 		}
+		out.Int32(int32(*in.TimesContacted))
 	}
 	if in.LastTimeContacted != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"lastTimeContacted\":")
-		if in.LastTimeContacted == nil {
-			out.RawString("null")
+		const prefix string = ",\"lastTimeContacted\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Int32(int32(*in.LastTimeContacted))
+			out.RawString(prefix)
 		}
+		out.Int32(int32(*in.LastTimeContacted))
 	}
 	if in.IsStarred != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"isStarred\":")
-		if in.IsStarred == nil {
-			out.RawString("null")
+		const prefix string = ",\"isStarred\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.IsStarred))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.IsStarred))
 	}
 	if in.HasCustomRingtone != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"hasCustomRingtone\":")
-		if in.HasCustomRingtone == nil {
-			out.RawString("null")
+		const prefix string = ",\"hasCustomRingtone\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.HasCustomRingtone))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.HasCustomRingtone))
 	}
 	if in.IsSendToVoicemail != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"isSendToVoicemail\":")
-		if in.IsSendToVoicemail == nil {
-			out.RawString("null")
+		const prefix string = ",\"isSendToVoicemail\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.IsSendToVoicemail))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.IsSendToVoicemail))
 	}
 	if in.HasThumbnail != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"hasThumbnail\":")
-		if in.HasThumbnail == nil {
-			out.RawString("null")
+		const prefix string = ",\"hasThumbnail\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.Bool(bool(*in.HasThumbnail))
+			out.RawString(prefix)
 		}
+		out.Bool(bool(*in.HasThumbnail))
 	}
 	if in.NamePrefix != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"namePrefix\":")
-		if in.NamePrefix == nil {
-			out.RawString("null")
+		const prefix string = ",\"namePrefix\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.NamePrefix))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.NamePrefix))
 	}
 	if in.NameSuffix != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"nameSuffix\":")
-		if in.NameSuffix == nil {
-			out.RawString("null")
+		const prefix string = ",\"nameSuffix\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.NameSuffix))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.NameSuffix))
 	}
 	out.RawByte('}')
 }
@@ -812,28 +794,24 @@ func easyjsonE3457510EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	first := true
 	_ = first
 	if in.Type != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"type\":")
-		if in.Type == nil {
-			out.RawString("null")
+		const prefix string = ",\"type\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.Type))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.Type))
 	}
 	if in.Text != nil {
-		if !first {
-			out.RawByte(',')
-		}
-		first = false
-		out.RawString("\"text\":")
-		if in.Text == nil {
-			out.RawString("null")
+		const prefix string = ",\"text\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
-			out.String(string(*in.Text))
+			out.RawString(prefix)
 		}
+		out.String(string(*in.Text))
 	}
 	out.RawByte('}')
 }

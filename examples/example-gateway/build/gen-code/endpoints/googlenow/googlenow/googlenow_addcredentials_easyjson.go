@@ -120,12 +120,16 @@ func easyjsonF4493553EncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 	out.RawByte('{')
 	first := true
 	_ = first
-	if !first {
-		out.RawByte(',')
+	{
+		const prefix string = ",\"authCode\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.AuthCode))
 	}
-	first = false
-	out.RawString("\"authCode\":")
-	out.String(string(in.AuthCode))
 	out.RawByte('}')
 }
 
