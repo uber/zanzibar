@@ -164,6 +164,7 @@ func CreateGateway(
 // Bootstrap func
 func (gateway *Gateway) Bootstrap() error {
 	// start HTTP server
+	gateway.PerHostScope.Counter("server.bootstrap").Inc(1)
 	_, err := gateway.localHTTPServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port", zap.Error(err))
