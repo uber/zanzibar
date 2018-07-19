@@ -147,7 +147,7 @@ func (res *ClientHTTPResponse) finish() {
 			zap.Int("UnknownStatusCode", res.StatusCode),
 		)
 	} else {
-		res.req.metrics.Status[res.StatusCode].Inc(1)
+		res.req.metrics.Status.IncrStatus(res.StatusCode, 1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
 		res.req.metrics.Errors.Inc(1)

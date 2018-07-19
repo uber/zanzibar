@@ -332,7 +332,7 @@ func (c *tchannelOutboundCall) finish(err error) {
 
 	// emit metrics
 	if err != nil {
-		c.metrics.SystemErrors.Inc(1)
+		c.metrics.SystemErrors.IncrErr(err, 1)
 	} else if !c.success {
 		c.metrics.AppErrors.Inc(1)
 	} else {

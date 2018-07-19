@@ -24,7 +24,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
+	"github.com/uber/tchannel-go"
 )
 
 const (
@@ -68,6 +70,13 @@ var knownMetrics = []string{
 	outboundCallsSystemErrors,
 	outboundCallsErrors,
 	outboundCallsStatus,
+}
+
+var knownTchannelErrors = map[tchannel.SystemErrCode]bool{
+	tchannel.ErrCodeTimeout:    true,
+	tchannel.ErrCodeBadRequest: true,
+	tchannel.ErrCodeProtocol:   true,
+	tchannel.ErrCodeCancelled:  true,
 }
 
 var knownStatusCodes = map[int]bool{
@@ -132,6 +141,49 @@ var knownStatusCodes = map[int]bool{
 	http.StatusNetworkAuthenticationRequired: true, // 511
 }
 
+type systemErrorMap map[tchannel.SystemErrCode]tally.Counter
+
+func newsystemErrorMap(scope tally.Scope, key string) systemErrorMap {
+	ret := make(systemErrorMap)
+	ret[tchannel.ErrCodeInvalid] = scope.Counter(key)
+	for errorCode := range knownTchannelErrors {
+		ret[errorCode] = scope.Tagged(map[string]string{
+			"error": errorCode.MetricsKey(),
+		}).Counter(key)
+	}
+	return ret
+}
+
+// IncrErr will increase according error counter
+func (sem systemErrorMap) IncrErr(err error, count int64) {
+	errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
+	counter, ok := sem[errCause]
+	if !ok {
+		counter = sem[0x00]
+	}
+	counter.Inc(count)
+}
+
+// HTTPStatusMap is statusCode -> according counter map
+type HTTPStatusMap map[int]tally.Counter
+
+func newHTTPStatusMap(scope tally.Scope, key string) HTTPStatusMap {
+	ret := make(HTTPStatusMap)
+	for statusCode := range knownStatusCodes {
+		ret[statusCode] = scope.Tagged(map[string]string{
+			"status": fmt.Sprintf("%d", statusCode),
+		}).Counter(fmt.Sprintf("%s.%d", key, statusCode))
+	}
+	return ret
+}
+
+// IncrStatus will increase according status code counter
+func (hsm HTTPStatusMap) IncrStatus(statusCode int, count int64) {
+	if counter, ok := hsm[statusCode]; ok {
+		counter.Inc(count)
+	}
+}
+
 type inboundMetrics struct {
 	Recvd tally.Counter // inbound.calls.recvd
 }
@@ -147,14 +199,14 @@ type commonMetrics struct {
 
 type tchannelMetrics struct {
 	commonMetrics
-	AppErrors    tally.Counter // [inbound|outbound].calls.app-errors
-	SystemErrors tally.Counter // [inbound|outbound].calls.system-errors
+	AppErrors    tally.Counter  // [inbound|outbound].calls.app-errors
+	SystemErrors systemErrorMap // [inbound|outbound].calls.system-errors*
 }
 
 type httpMetrics struct {
 	commonMetrics
-	Errors tally.Counter         // [inbound|outbound].calls.errors
-	Status map[int]tally.Counter // [inbound|outbound].calls.status.XXX
+	Errors tally.Counter // [inbound|outbound].calls.errors
+	Status HTTPStatusMap // [inbound|outbound].calls.status.XXX
 }
 
 // InboundHTTPMetrics ...
@@ -188,12 +240,7 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	metrics.Latency = scope.Timer(inboundCallsLatency)
 	metrics.Success = scope.Counter(inboundCallsSuccess)
 	metrics.Errors = scope.Counter(inboundCallsErrors)
-	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
-	for statusCode := range knownStatusCodes {
-		metrics.Status[statusCode] = scope.Tagged(map[string]string{
-			"status": fmt.Sprintf("%d", statusCode),
-		}).Counter(fmt.Sprintf("%s.%d", inboundCallsStatus, statusCode))
-	}
+	metrics.Status = newHTTPStatusMap(scope, inboundCallsStatus)
 	return &metrics
 }
 
@@ -204,7 +251,7 @@ func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
 	metrics.Latency = scope.Timer(inboundCallsLatency)
 	metrics.Success = scope.Counter(inboundCallsSuccess)
 	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
-	metrics.SystemErrors = scope.Counter(inboundCallsSystemErrors)
+	metrics.SystemErrors = newsystemErrorMap(scope, inboundCallsSystemErrors)
 	return &metrics
 }
 
@@ -215,12 +262,7 @@ func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
 	metrics.Latency = scope.Timer(outboundCallsLatency)
 	metrics.Success = scope.Counter(outboundCallsSuccess)
 	metrics.Errors = scope.Counter(outboundCallsErrors)
-	metrics.Status = make(map[int]tally.Counter, len(knownStatusCodes))
-	for statusCode := range knownStatusCodes {
-		metrics.Status[statusCode] = scope.Tagged(map[string]string{
-			"status": fmt.Sprintf("%d", statusCode),
-		}).Counter(fmt.Sprintf("%s.%d", outboundCallsStatus, statusCode))
-	}
+	metrics.Status = newHTTPStatusMap(scope, outboundCallsStatus)
 	return &metrics
 }
 
@@ -231,6 +273,6 @@ func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
 	metrics.Latency = scope.Timer(outboundCallsLatency)
 	metrics.Success = scope.Counter(outboundCallsSuccess)
 	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
-	metrics.SystemErrors = scope.Counter(outboundCallsSystemErrors)
+	metrics.SystemErrors = newsystemErrorMap(scope, outboundCallsSystemErrors)
 	return &metrics
 }
