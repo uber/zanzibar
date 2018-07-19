@@ -2602,7 +2602,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
-	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClient(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
@@ -2617,7 +2618,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
+	sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
 {{end -}}
@@ -2659,7 +2661,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8167, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8204, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
