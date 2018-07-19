@@ -6,10 +6,12 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
+	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -26,10 +28,13 @@ import (
 )
 
 {{- $serviceMethod := printf "%s%s" (title .Method.ThriftService) (title .Method.Name) }}
+{{- $methodName := .Method.Name }}
 {{- $handlerName := printf "%sHandler"  $serviceMethod }}
 {{- $genCodePkg := .Method.GenCodePkgName }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
+{{- $deputyReqHeader := .DeputyReqHeader}}
+{{- $clientID := .ClientID }}
 
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
@@ -98,6 +103,13 @@ func (h *{{$handlerName}}) Handle(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
 		)
+	}
+
+
+	if hostPort, ok := reqHeaders["{{$deputyReqHeader}}"]; ok {
+		if hostPort != "" {
+			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
+		}
 	}
 	{{end -}}
 
@@ -178,6 +190,53 @@ func (h *{{$handlerName}}) Handle(
 
 	return err == nil, &res, resHeaders, nil
 }
+
+{{if ne .RequestType "" -}}
+// redirectToDeputy sends the request to deputy hostPort
+func (h *{{$handlerName}}) redirectToDeputy(
+	ctx context.Context,
+	reqHeaders map[string]string,
+	hostPort string,
+	req *{{unref .RequestType}},
+	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
+) (bool, zanzibar.RWTStruct, map[string]string, error) {
+	var routingKey string
+	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
+		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
+	}
+
+	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
+	timeout := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
+	)
+
+	timeoutPerAttempt := time.Millisecond * time.Duration(
+		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
+	)
+
+	methodNames := map[string]string{
+		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
+	}
+
+	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	client := zanzibar.NewTChannelClient(
+		h.Deps.Default.Channel,
+		h.Deps.Default.Logger,
+		h.Deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       serviceName,
+			ClientID:           "{{$clientID}}",
+			MethodNames:       methodNames,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
+		},
+	)
+
+	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
+	return success, res, respHeaders, err
+}
+{{end -}}
 
 // {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
 type {{$workflowInterface}} interface {

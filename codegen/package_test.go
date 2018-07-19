@@ -73,6 +73,7 @@ func newPackageHelper(t *testing.T) *codegen.PackageHelper {
 		testCopyrightHeader,
 		"zanzibar",
 		"X-Zanzibar-Use-Staging",
+		"x-deputy-forwarded",
 		"trace-key",
 	)
 	if !assert.NoError(t, err, "failed to create package helper") {

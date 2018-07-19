@@ -53,6 +53,8 @@ type PackageHelper struct {
 	middlewareSpecs map[string]*MiddlewareSpec
 	// Use staging client when this header is set as "true"
 	stagingReqHeader string
+	// Use deputy client when this header is set
+	deputyReqHeader string
 	// traceKey is the key for uniq trace id that identifies request / response pair
 	traceKey string
 }
@@ -68,6 +70,7 @@ func NewPackageHelper(
 	copyrightHeader string,
 	annotationPrefix string,
 	stagingReqHeader string,
+	deputyReqHeader string,
 	traceKey string,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
@@ -96,6 +99,7 @@ func NewPackageHelper(
 		middlewareSpecs:    middlewareSpecs,
 		annotationPrefix:   annotationPrefix,
 		stagingReqHeader:   stagingReqHeader,
+		deputyReqHeader:    deputyReqHeader,
 		traceKey:           traceKey,
 	}
 	return p, nil
@@ -216,4 +220,10 @@ func (p PackageHelper) TypeFullName(typeSpec compile.TypeSpec) (string, error) {
 // if a request should go to the staging downstream client
 func (p PackageHelper) StagingReqHeader() string {
 	return p.stagingReqHeader
+}
+
+// DeputyReqHeader returns the header name that will be checked to determine
+// if a request should go to the deputy downstream client
+func (p PackageHelper) DeputyReqHeader() string {
+	return p.deputyReqHeader
 }
