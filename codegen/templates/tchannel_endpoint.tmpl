@@ -218,7 +218,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
-	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClient(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
@@ -233,7 +234,8 @@ func (h *{{$handlerName}}) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "{{.ThriftService}}", "{{$methodName}}", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
+	sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
 {{end -}}

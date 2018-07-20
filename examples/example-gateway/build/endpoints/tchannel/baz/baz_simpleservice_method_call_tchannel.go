@@ -184,7 +184,8 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 		"SimpleService::Call": "Call",
 	}
 
-	h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClient(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
@@ -199,7 +200,8 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.CallToHostPort(ctx, "SimpleService", "Call", hostPort, reqHeaders, req, res, false)
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "Call", reqHeaders, req, res)
+	sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
 
