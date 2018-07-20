@@ -1,4 +1,5 @@
 {
+	"env-vars-to-tag-in-root-scope": [],
 	"serviceName": "my-gateway",
 	"http.port": 1000,
 

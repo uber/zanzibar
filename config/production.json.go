@@ -68,6 +68,8 @@ var _productionJson = []byte(`{
 	"service.env.config": {},
 
 	"env": "production",
+	"env-vars-to-add-to-metrics-root-scope": [],
+
 	"useDatacenter": false,
 
 	"jaeger.disabled": false,
@@ -104,7 +106,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 713, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 760, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

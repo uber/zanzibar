@@ -2,6 +2,8 @@
 	"service.env.config": {},
 
 	"env": "production",
+	"env-vars-to-tag-in-root-scope": [],
+
 	"useDatacenter": false,
 
 	"jaeger.disabled": false,
