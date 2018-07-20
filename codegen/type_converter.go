@@ -937,6 +937,15 @@ func checkOptionalNil(
 	return ret
 }
 
+// dealing with primary type pointer formatting: (*float64)&Param -> (*float64)(&(Param))
+func formatAssign(indent, to, typeCast, from string) string {
+	if string(typeCast[len(typeCast)-1]) == "&" {
+		typeCast = typeCast[:len(typeCast)-1]
+		return fmt.Sprintf("%s%s = %s(&(%s))", indent, to, typeCast, from)
+	}
+	return fmt.Sprintf("%s%s = %s(%s)", indent, to, typeCast, from)
+}
+
 // Generate generates assignment
 func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fieldStruct, prevKeyPrefixes []string, useRecurGen bool) string {
 	var lines = make([]string, 0)
@@ -946,11 +955,11 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 			// need to nil check otherwise we could be cast or deref nil
 			lines = append(lines, indent+"if "+f.FromIdentifier+" != nil {")
 			lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
-			lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+			lines = append(lines, formatAssign(indent+"\t", f.ToIdentifier, f.TypeCast, f.FromIdentifier))
 			lines = append(lines, indent+"}")
 		} else {
 			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
-			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+			lines = append(lines, formatAssign(indent, f.ToIdentifier, f.TypeCast, f.FromIdentifier))
 		}
 		return strings.Join(lines, "\n")
 	}
@@ -963,13 +972,13 @@ func (f *FieldAssignment) Generate(indent string, uninitialized map[string]*fiel
 		}
 		if len(checks) == 0 {
 			lines = append(lines, checkOptionalNil(indent, uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
-			lines = append(lines, indent+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+			lines = append(lines, formatAssign(indent, f.ToIdentifier, f.TypeCast, f.FromIdentifier))
 			return strings.Join(lines, "\n")
 		}
 	}
 	lines = append(lines, indent+"if "+strings.Join(checks, " && ")+" {")
 	lines = append(lines, checkOptionalNil(indent+"\t", uninitialized, f.ToIdentifier, prevKeyPrefixes, useRecurGen)...)
-	lines = append(lines, indent+"\t"+f.ToIdentifier+" = "+f.TypeCast+"("+f.FromIdentifier+")")
+	lines = append(lines, formatAssign(indent+"\t", f.ToIdentifier, f.TypeCast, f.FromIdentifier))
 	lines = append(lines, indent+"}")
 	// TODO else?  log? should this silently eat intermediate nils as none-assignment,  should set nil?
 	return strings.Join(lines, "\n")

@@ -229,7 +229,7 @@ func TestConvertBoolsOptionalToRequired(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = (*bool)&(in.One)
+		out.One = (*bool)(&(in.One))
 	`), lines)
 }
 
@@ -627,7 +627,7 @@ func TestConvertTypeDefReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = (*structs.UUID)&(in.One)
+		out.One = (*structs.UUID)(&(in.One))
 		if in.Two != nil {
 			out.Two = *(in.Two)
 		}
@@ -1403,7 +1403,7 @@ func TestConvertTypeDefOptToReqWithOverride(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = (*structs.UUID)&(in.Three)
+		out.One = (*structs.UUID)(&(in.Three))
 		if in.One != nil {
 			out.One = (*structs.UUID)(in.One)
 		}
@@ -1526,8 +1526,8 @@ func TestConverterMapOverrideOptional(t *testing.T) {
 		if in.One != nil {
 			out.Two = *(in.One)
 		}
-		out.Three = (*bool)&(in.Four)
-		out.Four = (*bool)&(in.Four)
+		out.Three = (*bool)(&(in.Four))
+		out.Four = (*bool)(&(in.Four))
 		`), lines)
 }
 
@@ -1555,7 +1555,7 @@ func TestConverterMapOverrideReqToOpt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assertPrettyEqual(t, trim(`
-		out.One = (*bool)&(in.One)
+		out.One = (*bool)(&(in.One))
 		if in.Two != nil {
 			out.One = (*bool)(in.Two)
 		}
@@ -1892,7 +1892,7 @@ func TestConverterMapStructWithFieldMap(t *testing.T) {
 			if out.Five == nil {
 				out.Five = &structs.NestedFoo{}
 			}
-			out.Five.Two = (*string)&(in.Four.One)
+			out.Five.Two = (*string)(&(in.Four.One))
 		}`),
 		lines)
 }
@@ -2112,7 +2112,7 @@ func TestConverterMapStructWithSubFieldsSwap(t *testing.T) {
 			out.Four = &structs.NestedBar{}
 			out.Four.One = string(in.Four.One)
 			if in.Three != nil {
-				out.Four.Two = (*string)&(in.Three.One)
+				out.Four.Two = (*string)(&(in.Three.One))
 			}
 		} else {
 			out.Four = nil
@@ -2172,7 +2172,7 @@ func TestConverterMapStructWithSubFieldsReqToOpt(t *testing.T) {
 			out.Four = &structs.NestedBar{}
 			out.Four.One = string(in.Four.One)
 			if in.Four != nil {
-				out.Four.Two = (*string)&(in.Four.One)
+				out.Four.Two = (*string)(&(in.Four.One))
 			}
 		} else {
 			out.Four = nil
@@ -3141,7 +3141,7 @@ func TestConverterRecursiveMapStruct(t *testing.T) {
 			if outOriginal.Five == nil {
 				outOriginal.Five = &structs.NestedFoo{}
 			}
-			out.Five.Two = (*string)&(inOriginal.Four.One)
+			out.Five.Two = (*string)(&(inOriginal.Four.One))
 		}
 		var convertRecurFooHelper2 func(in *structs.RecurFoo) (out *structs.RecurFoo)
 		convertRecurFooHelper2 = func(in *structs.RecurFoo) (out *structs.RecurFoo) {
