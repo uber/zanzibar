@@ -68,7 +68,7 @@ var _productionJson = []byte(`{
 	"service.env.config": {},
 
 	"env": "production",
-	"env-vars-to-tag-in-root-scope": [],
+	"env-to-root-scope-tag": [],
 
 	"useDatacenter": false,
 
@@ -106,7 +106,7 @@ func productionJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.json", size: 752, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.json", size: 744, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

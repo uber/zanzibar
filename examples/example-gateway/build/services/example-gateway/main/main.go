@@ -34,7 +34,7 @@ import (
 	"github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	"github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
 var configFiles *string

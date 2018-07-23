@@ -2,7 +2,7 @@
 	"service.env.config": {},
 
 	"env": "production",
-	"env-vars-to-tag-in-root-scope": [],
+	"env-to-root-scope-tag": [],
 
 	"useDatacenter": false,
 

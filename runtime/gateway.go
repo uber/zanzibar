@@ -341,11 +341,13 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		"service": service,
 	}
 	// Adds in any env variable variables specified in config
-	envVarsToTagInRootScope := []string{}
-	config.MustGetStruct("env-vars-to-tag-in-root-scope", &envVarsToTagInRootScope)
-	for _, envVarName := range envVarsToTagInRootScope {
+	envToRootScopeTag := []string{}
+	config.MustGetStruct("env-to-root-scope-tag", &envToRootScopeTag)
+	for _, envVarName := range envToRootScopeTag {
 		envVarValue := os.Getenv(envVarName)
-		defaultTags[envVarName] = envVarValue
+		if envVarValue != "" {
+			defaultTags[envVarName] = envVarValue
+		}
 	}
 	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
 		tally.ScopeOptions{
