@@ -79,7 +79,7 @@ func (req *ClientHTTPRequest) start() {
 	req.startTime = time.Now()
 }
 
-// CheckHeaders verifies that the outbound request contaisn required headers
+// CheckHeaders verifies that the outbound request contains required headers
 func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 	if req.httpReq == nil {
 		/* coverage ignore next line */
@@ -89,7 +89,7 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 	actualHeaders := req.httpReq.Header
 
 	for _, headerName := range expected {
-		// TODO: case sensitivity ?
+		// headerName is case insensitive, http.Header Get canonicalize the key
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
 			req.Logger.Warn("Got outbound request without mandatory header",
