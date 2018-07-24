@@ -210,13 +210,13 @@ func TestRuntimeMetrics(t *testing.T) {
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
-	// Expect 9 runtime metrics + 1 logged metric
+	// Expect 9 runtime metrics + 2 logged metric
 	numMetrics := 11
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 10TestCallMetrics metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 11 metrics")
 	names := []string{
 		"test-gateway.test.per-worker.runtime.num-cpu",
 		"test-gateway.test.per-worker.runtime.gomaxprocs",
