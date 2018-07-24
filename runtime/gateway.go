@@ -345,9 +345,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	config.MustGetStruct("envVarsToTagInRootScope", &envVarsToTagInRootScope)
 	for _, envVarName := range envVarsToTagInRootScope {
 		envVarValue := os.Getenv(envVarName)
-		if envVarValue != "" {
-			defaultTags[envVarName] = envVarValue
-		}
+		defaultTags[envVarName] = envVarValue
 	}
 	gateway.RootScope, gateway.scopeCloser = tally.NewRootScope(
 		tally.ScopeOptions{
