@@ -14,7 +14,7 @@
 	},
 
 	"env": "test",
-	"env-to-root-scope-tag": [],
+	"envVarsToTagInRootScope": [],
 	"useDatacenter": false,
 
 	"jaeger.disabled": false,

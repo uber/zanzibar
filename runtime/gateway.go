@@ -341,9 +341,9 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		"service": service,
 	}
 	// Adds in any env variable variables specified in config
-	envToRootScopeTag := []string{}
-	config.MustGetStruct("env-to-root-scope-tag", &envToRootScopeTag)
-	for _, envVarName := range envToRootScopeTag {
+	envVarsToTagInRootScope := []string{}
+	config.MustGetStruct("envVarsToTagInRootScope", &envVarsToTagInRootScope)
+	for _, envVarName := range envVarsToTagInRootScope {
 		envVarValue := os.Getenv(envVarName)
 		if envVarValue != "" {
 			defaultTags[envVarName] = envVarValue

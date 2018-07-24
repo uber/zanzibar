@@ -68,7 +68,7 @@ var _productionJson = []byte(`{
 	"service.env.config": {},
 
 	"env": "production",
-	"env-to-root-scope-tag": [],
+	"envVarsToTagInRootScope": [],
 
 	"useDatacenter": false,
 
