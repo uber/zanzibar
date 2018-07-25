@@ -1,4 +1,5 @@
 {
+	"envVarsToTagInRootScope": [],
 	"serviceName": "my-gateway",
 	"http.port": 1000,
 

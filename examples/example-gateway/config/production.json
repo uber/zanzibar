@@ -27,6 +27,7 @@
 	"clients.multi.ip": "127.0.0.1",
 	"clients.multi.port": 4003,
 	"clients.multi.timeout": 10000,
+	"envVarsToTagInRootScope": [],
 	"http.port": 7783,
 	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
 	"logger.output": "disk",
