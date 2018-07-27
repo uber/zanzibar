@@ -173,6 +173,8 @@ func (req *ClientHTTPRequest) Do(
 }
 
 // InjectSpanToHeader will inject span to request header
+// This method is current used for unit tests
+// TODO: we need to set source and test code as same pkg name which would makes UTs easier
 func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
 	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
 	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
