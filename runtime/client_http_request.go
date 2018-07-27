@@ -172,7 +172,7 @@ func (req *ClientHTTPRequest) Do(
 	return req.res, nil
 }
 
-// InjectSpan will inject span to request header
+// InjectSpanToHeader will inject span to request header
 func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
 	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
 	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
