@@ -157,12 +157,7 @@ func (req *ClientHTTPRequest) Do(
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
 	span, ctx := opentracing.StartSpanFromContext(ctx, opName, urlTag, methodTag)
-	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
-	err := span.Tracer().Inject(span.Context(), opentracing.HTTPHeaders, carrier)
-	if err != nil {
-		req.Logger.Error("Failed to inject tracing span.", zap.Error(err))
-	}
-
+	req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
@@ -175,4 +170,15 @@ func (req *ClientHTTPRequest) Do(
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil
+}
+
+// InjectSpan will inject span to request header
+func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
+	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
+	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
+		req.Logger.Error("Failed to inject tracing span.", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
