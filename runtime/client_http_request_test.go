@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
@@ -387,4 +388,47 @@ func TestMakingClientCallWithServerError(t *testing.T) {
 	logs := bgateway.AllLogs()
 	assert.Len(t, logs["Unknown response status code"], 1)
 	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+}
+
+func TestInjectSpan(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"POST", "/bar-path",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte(r.Header.Get("Example-Header")))
+			assert.Equal(t, r.Header.Get("X-Client-ID"), "bar")
+		},
+	)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	barClient := deps.Client.Bar
+	client := barClient.HTTPClient()
+	req := zanzibar.NewClientHTTPRequest("bar", "Normal", client)
+	req.WriteJSON(
+		"POST",
+		client.BaseURL+"/bar-path",
+		map[string]string{
+			"Example-Header": "Example-Value",
+		},
+		nil,
+	)
+
+	tracer := opentracing.GlobalTracer()
+	span := tracer.StartSpan("someSpan")
+	err = req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
+	assert.NoError(t, err, "failed to inject span context")
+	err = req.InjectSpanToHeader(span, "invalid format")
+	assert.Error(t, err, "should return error")
 }

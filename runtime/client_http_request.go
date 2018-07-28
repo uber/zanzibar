@@ -157,6 +157,7 @@ func (req *ClientHTTPRequest) Do(
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
 	span, ctx := opentracing.StartSpanFromContext(ctx, opName, urlTag, methodTag)
+	req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
@@ -169,4 +170,17 @@ func (req *ClientHTTPRequest) Do(
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil
+}
+
+// InjectSpanToHeader will inject span to request header
+// This method is current used for unit tests
+// TODO: we need to set source and test code as same pkg name which would makes UTs easier
+func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format interface{}) error {
+	carrier := opentracing.HTTPHeadersCarrier(req.httpReq.Header)
+	if err := span.Tracer().Inject(span.Context(), format, carrier); err != nil {
+		req.Logger.Error("Failed to inject tracing span.", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
