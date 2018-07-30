@@ -168,23 +168,29 @@ func TestSTHAdd(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 
 	zh.Add("foo", "headOne")
-	assert.Equal(t, "headOne", zh["foo"])
+	v, ok := zh.Get("foo")
+	assert.True(t, ok)
+	assert.Equal(t, "headOne", v)
 }
 
 func TestSTHSetOverwriteOldKey(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 	zh.Set("foo", "headOne")
 
-	zh.Set("foo", "newHeader")
-	assert.Equal(t, "newHeader", zh["foo"])
+	zh.Add("foo", "newHeader")
+	v, ok := zh.Get("foo")
+	assert.True(t, ok)
+	assert.Equal(t, "newHeader", v)
 }
 
 func TestSTHSetNewKey(t *testing.T) {
 	zh := zanzibar.ServerTChannelHeader{}
 	zh.Set("bar", "otherHeader")
 
-	zh.Set("foo", "headOne")
-	assert.Equal(t, "headOne", zh["foo"])
+	zh.Add("foo", "headOne")
+	v, ok := zh.Get("foo")
+	assert.True(t, ok)
+	assert.Equal(t, "headOne", v)
 }
 
 func TestSTHMissingKey(t *testing.T) {
