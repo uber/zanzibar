@@ -262,8 +262,6 @@ func (c *tchannelInboundCall) logFields() []zapcore.Field {
 		fields = append(fields, zap.String("Response-Header-"+k, v))
 	}
 
-	// TODO: log jaeger trace span
-
 	return fields
 }
 
