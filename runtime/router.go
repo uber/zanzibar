@@ -202,7 +202,6 @@ func (router *HTTPRouter) handleNotFound(
 	r *http.Request,
 ) {
 	req := NewServerHTTPRequest(w, r, nil, router.notFoundEndpoint)
-	// TODO custom NotFound
 	http.NotFound(w, r)
 	req.res.StatusCode = http.StatusNotFound
 	req.res.finish()
@@ -213,8 +212,6 @@ func (router *HTTPRouter) handleMethodNotAllowed(
 	r *http.Request,
 ) {
 	req := NewServerHTTPRequest(w, r, nil, router.methodNotAllowedEndpoint)
-	// TODO: Remove coverage ignore when body unmarshaling supported.
-	// TODO custom MethodNotAllowed
 	http.Error(w,
 		http.StatusText(http.StatusMethodNotAllowed),
 		http.StatusMethodNotAllowed,

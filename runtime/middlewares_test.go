@@ -56,9 +56,6 @@ func TestHandlers(t *testing.T) {
 	assert.Equal(t, 1, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
-	// TODO(sindelar): Refactor. We some helpers to build zanzibar
-	// request/responses without setting up a backend and register.
-	// Currently they require endpoints to instantiate.
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,
@@ -261,9 +258,6 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	assert.Equal(t, 2, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
-	// TODO(sindelar): Refactor. We some helpers to build zanzibar
-	// request/responses without setting up a backend and register.
-	// Currently they require endpoints to instantiate.
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,
 		defaultTestOptions,

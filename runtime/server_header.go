@@ -125,6 +125,9 @@ func (zh ServerHTTPHeader) Ensure(keys []string, logger *zap.Logger) error {
 
 // ServerTChannelHeader wrapper to implement zanzibar Header interface
 // on map[string]string
+// Unlike http.Header, tchannel headers are case sensitive and should be
+// keyed with lower case. TChannel protocol does not mention header case
+// sensitivity, so it is up to implementation.
 type ServerTChannelHeader map[string]string
 
 // Get retrieves the string value stored on a given header. Bool
@@ -142,8 +145,6 @@ func (th ServerTChannelHeader) Add(key string, value string) {
 
 // Set sets a value for a given header, overwriting the previous value.
 func (th ServerTChannelHeader) Set(key string, value string) {
-	// TODO: Canonicalize strings before inserting
-	// Use textproto.CanonicalMIMEHeaderKey
 	th[key] = value
 }
 

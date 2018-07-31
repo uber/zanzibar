@@ -170,13 +170,6 @@ func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapc
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
 		zap.Int("statusCode", res.StatusCode),
-
-		// TODO: Do not log body by default because PII and bandwidth.
-		// Temporarily log during the development cycle
-		// TODO: Add a gateway level configurable body unmarshaller
-		// to extract only non-PII info.
-		zap.ByteString("Request Body", req.rawBody),
-		zap.ByteString("Response Body", res.rawResponseBytes),
 	}
 
 	for k, v := range req.httpReq.Header {

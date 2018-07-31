@@ -120,13 +120,6 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
 		zap.Int("statusCode", res.StatusCode),
-
-		// TODO: Do not log body by default because PII and bandwidth.
-		// Temporarily log during the development cycle
-		// TODO: Add a gateway level configurable body unmarshaller
-		// to extract only non-PII info.
-		// zap.ByteString("Request Body", req.rawBody),
-		// zap.ByteString("Response Body", res.pendingBodyBytes),
 	}
 
 	if res.err != nil {
@@ -148,8 +141,6 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
 		}
 	}
-
-	// TODO: log jaeger trace span
 
 	return fields
 }
@@ -186,7 +177,6 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 		}
 	}
 
-	// TODO: mark header as pending ?
 	res.responseWriter.Header().Set("content-type", "application/json")
 
 	res.pendingStatusCode = statusCode
@@ -219,7 +209,6 @@ func (res *ServerHTTPResponse) WriteJSON(
 		}
 	}
 
-	// TODO: mark header as pending ?
 	res.responseWriter.Header().
 		Set("content-type", "application/json")
 
