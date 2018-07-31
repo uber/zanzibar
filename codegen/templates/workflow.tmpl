@@ -2,6 +2,7 @@
 {{- $instance := .Instance }}
 package workflow
 
+{{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
@@ -200,9 +201,11 @@ func (w {{$workflowStruct}}) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
 	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])

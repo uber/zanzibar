@@ -123,7 +123,6 @@ func (c *multiClient) HelloA(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -174,7 +173,6 @@ func (c *multiClient) HelloB(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err

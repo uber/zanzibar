@@ -86,16 +86,12 @@ func (w serviceAFrontHelloWorkflow) Handle(
 				zap.String("client", "Multi"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return "", nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertServiceABackHelloClientResponse(clientRespBody)

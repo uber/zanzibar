@@ -90,7 +90,6 @@ func (w barArgNotStructWorkflow) Handle(
 			serverErr := convertArgNotStructBarException(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return nil, serverErr
 
@@ -100,16 +99,12 @@ func (w barArgNotStructWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	return resHeaders, nil

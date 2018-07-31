@@ -123,14 +123,12 @@ func (c *googleNowClient) AddCredentials(
 
 	switch res.StatusCode {
 	case 202:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err
 		}
 		return respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err
@@ -178,14 +176,12 @@ func (c *googleNowClient) CheckCredentials(
 
 	switch res.StatusCode {
 	case 202:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err
 		}
 		return respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err

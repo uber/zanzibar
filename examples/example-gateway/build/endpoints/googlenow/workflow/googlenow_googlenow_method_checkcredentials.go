@@ -92,18 +92,13 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 				zap.String("client", "GoogleNow"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
-
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 
 	return resHeaders, nil

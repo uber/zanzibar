@@ -138,7 +138,6 @@ func (c *corgeHTTPClient) EchoString(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
