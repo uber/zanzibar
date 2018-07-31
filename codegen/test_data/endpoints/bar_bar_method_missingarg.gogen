@@ -58,12 +58,10 @@ func NewBarMissingArgHandler(deps *module.Dependencies) *BarMissingArgHandler {
 
 // Register adds the http handler to the gateway's http router
 func (h *BarMissingArgHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"GET", "/bar/missing-arg-path",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/missing-arg-path".

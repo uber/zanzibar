@@ -60,12 +60,10 @@ func NewSimpleServiceGetProfileHandler(deps *module.Dependencies) *SimpleService
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceGetProfileHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/baz/get-profile",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/get-profile".

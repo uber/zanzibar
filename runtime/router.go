@@ -111,6 +111,7 @@ type HTTPRouter struct {
 	notFoundEndpoint         *RouterEndpoint
 	methodNotAllowedEndpoint *RouterEndpoint
 	panicCount               tally.Counter
+	routeMap                 map[string]*RouterEndpoint
 }
 
 // NewHTTPRouter allocates a HTTP router
@@ -126,6 +127,7 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 		),
 		gateway:    gateway,
 		panicCount: gateway.PerHostScope.Counter("runtime.router.panic"),
+		routeMap:   make(map[string]*RouterEndpoint),
 	}
 	router.httpRouter = &httprouter.Router{
 		// We handle trailing slash in Register() without redirect
@@ -182,11 +184,17 @@ func (router *HTTPRouter) RegisterRaw(
 func (router *HTTPRouter) Register(
 	method, urlpattern string,
 	endpoint *RouterEndpoint,
-) {
+) error {
 	canonicalPattern := urlpattern
 	if canonicalPattern[len(canonicalPattern)-1] == '/' {
 		canonicalPattern = canonicalPattern[:len(canonicalPattern)-1]
 	}
+
+	key := urlpattern + "|" + method
+	if _, ok := router.routeMap[key]; ok {
+		return fmt.Errorf("handler for '%s %s' is already registered", method, urlpattern)
+	}
+	router.routeMap[key] = endpoint
 
 	// Support trailing slash going to the same endpoint.
 	router.httpRouter.Handle(
@@ -195,6 +203,8 @@ func (router *HTTPRouter) Register(
 	router.httpRouter.Handle(
 		method, canonicalPattern+"/", endpoint.HandleRequest,
 	)
+
+	return nil
 }
 
 func (router *HTTPRouter) handleNotFound(

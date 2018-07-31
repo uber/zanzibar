@@ -59,12 +59,10 @@ func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandle
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgNotStructHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/bar/arg-not-struct-path",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/arg-not-struct-path".

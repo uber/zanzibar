@@ -60,12 +60,10 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/baz/call",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/call".
