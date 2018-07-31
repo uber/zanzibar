@@ -2605,30 +2605,6 @@ func (h *{{$handlerName}}) redirectToDeputy(
 }
 {{end -}}
 
-// {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
-type {{$workflowInterface}} interface {
-Handle(
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
-{{else if eq .RequestType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{else if eq .ResponseType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) (zanzibar.Header, error)
-{{else}}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{- end}}
-}
-
 {{end -}}
 `)
 
@@ -2642,7 +2618,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8137, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7475, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

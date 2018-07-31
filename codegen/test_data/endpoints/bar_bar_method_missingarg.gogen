@@ -105,7 +105,6 @@ func (h *BarMissingArgHandler) HandleRequest(
 		}
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

@@ -202,12 +202,3 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
-
-// SimpleServiceCallWorkflow defines the interface for SimpleServiceCallHandler workflow
-type SimpleServiceCallWorkflow interface {
-	Handle(
-		ctx context.Context,
-		reqHeaders zanzibar.Header,
-		r *endpointsTchannelBazBaz.SimpleService_Call_Args,
-	) (zanzibar.Header, error)
-}

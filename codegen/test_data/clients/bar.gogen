@@ -282,7 +282,6 @@ func (c *barClient) ArgNotStruct(
 
 	switch res.StatusCode {
 	case 200:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err
@@ -299,7 +298,6 @@ func (c *barClient) ArgNotStruct(
 		return respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return respHeaders, err
@@ -360,7 +358,6 @@ func (c *barClient) ArgWithHeaders(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -458,7 +455,6 @@ func (c *barClient) ArgWithManyQueryParams(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -549,7 +545,6 @@ func (c *barClient) ArgWithNestedQueryParams(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -605,7 +600,6 @@ func (c *barClient) ArgWithParams(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -658,7 +652,6 @@ func (c *barClient) ArgWithQueryHeader(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -720,7 +713,6 @@ func (c *barClient) ArgWithQueryParams(
 
 		return &responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -780,7 +772,6 @@ func (c *barClient) Hello(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -841,7 +832,6 @@ func (c *barClient) MissingArg(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -902,7 +892,6 @@ func (c *barClient) NoRequest(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -964,7 +953,6 @@ func (c *barClient) Normal(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1025,7 +1013,6 @@ func (c *barClient) NormalRecur(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1095,7 +1082,6 @@ func (c *barClient) TooManyArgs(
 		return defaultRes, respHeaders, &exception
 
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1152,7 +1138,6 @@ func (c *barClient) EchoBinary(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1209,7 +1194,6 @@ func (c *barClient) EchoBool(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1266,7 +1250,6 @@ func (c *barClient) EchoDouble(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1323,7 +1306,6 @@ func (c *barClient) EchoEnum(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1380,7 +1362,6 @@ func (c *barClient) EchoI16(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1437,7 +1418,6 @@ func (c *barClient) EchoI32(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1494,7 +1474,6 @@ func (c *barClient) EchoI32Map(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1551,7 +1530,6 @@ func (c *barClient) EchoI64(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1608,7 +1586,6 @@ func (c *barClient) EchoI8(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1665,7 +1642,6 @@ func (c *barClient) EchoString(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1722,7 +1698,6 @@ func (c *barClient) EchoStringList(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1779,7 +1754,6 @@ func (c *barClient) EchoStringMap(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1836,7 +1810,6 @@ func (c *barClient) EchoStringSet(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1893,7 +1866,6 @@ func (c *barClient) EchoStructList(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -1950,7 +1922,6 @@ func (c *barClient) EchoStructSet(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
@@ -2007,7 +1978,6 @@ func (c *barClient) EchoTypedef(
 
 		return responseBody, respHeaders, nil
 	default:
-		// TODO: log about unexpected body bytes?
 		_, err = res.ReadAll()
 		if err != nil {
 			return defaultRes, respHeaders, err
