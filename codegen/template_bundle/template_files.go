@@ -418,14 +418,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		{{ end }}
 	}
 
-	{{- if .ResHeaders }}
-	// TODO(sindelar): implement check headers on response
-	{{- end }}
-
-	{{- if .ResHeaderFields }}
-	// TODO(jakev): implement writing fields into response headers
-	{{- end }}
-
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else if eq .ResponseType "string" -}}
@@ -453,7 +445,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6465, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6268, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

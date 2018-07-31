@@ -69,7 +69,6 @@ func logAndWait(server *zanzibar.Gateway) {
 	// TODO: handle sigterm gracefully
 	server.Wait()
 	// TODO: emit metrics about startup.
-	// TODO: setup and configure tracing/jeager.
 }
 
 func readFlags() {

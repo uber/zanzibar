@@ -202,14 +202,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		{{ end }}
 	}
 
-	{{- if .ResHeaders }}
-	// TODO(sindelar): implement check headers on response
-	{{- end }}
-
-	{{- if .ResHeaderFields }}
-	// TODO(jakev): implement writing fields into response headers
-	{{- end }}
-
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else if eq .ResponseType "string" -}}

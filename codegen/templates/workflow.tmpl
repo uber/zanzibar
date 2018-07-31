@@ -175,7 +175,6 @@ func (w {{$workflowStruct}}) Handle(
 				serverErr := convert{{$methodName}}{{title $cException.Name}}(
 					errValue,
 				)
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, serverErr
 				{{else if eq $responseType "string" }}
@@ -190,7 +189,6 @@ func (w {{$workflowStruct}}) Handle(
 					zap.String("client", "{{$clientName}}"),
 				)
 
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
 				{{else if eq $responseType "string" }}
