@@ -141,13 +141,20 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 }
 
 // Register registers the given TChannelEndpoint.
-func (s *TChannelRouter) Register(e *TChannelEndpoint) {
+func (s *TChannelRouter) Register(e *TChannelEndpoint) error {
+	s.RLock()
+	if _, ok := s.endpoints[e.Method]; ok {
+		s.RUnlock()
+		return fmt.Errorf("handler for '%s' is already registered", e.Method)
+	}
+	s.RUnlock()
 	s.Lock()
 	s.endpoints[e.Method] = e
 	s.Unlock()
 
 	ncr := netContextRouter{router: s}
 	s.registrar.Register(ncr, e.Method)
+	return nil
 }
 
 // Handle handles an incoming TChannel call and forwards it to the correct handler.
