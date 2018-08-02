@@ -89,12 +89,10 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // Register adds the http handler to the gateway's http router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -203,14 +201,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		}
 		{{ end }}
 	}
-
-	{{- if .ResHeaders }}
-	// TODO(sindelar): implement check headers on response
-	{{- end }}
-
-	{{- if .ResHeaderFields }}
-	// TODO(jakev): implement writing fields into response headers
-	{{- end }}
 
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)

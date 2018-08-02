@@ -61,12 +61,10 @@ func NewBarArgWithHeadersHandler(deps *module.Dependencies) *BarArgWithHeadersHa
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithHeadersHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/bar/argWithHeaders",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/argWithHeaders".
@@ -133,7 +131,6 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 		return
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

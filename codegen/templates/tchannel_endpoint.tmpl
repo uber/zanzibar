@@ -72,9 +72,7 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(h.endpoint)
-	// TODO: Register should return an error for route conflicts
-	return nil
+	return g.TChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".
@@ -239,29 +237,5 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	return success, res, respHeaders, err
 }
 {{end -}}
-
-// {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
-type {{$workflowInterface}} interface {
-Handle(
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
-{{else if eq .RequestType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{else if eq .ResponseType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) (zanzibar.Header, error)
-{{else}}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{- end}}
-}
 
 {{end -}}

@@ -60,12 +60,10 @@ func NewSimpleServiceHeaderSchemaHandler(deps *module.Dependencies) *SimpleServi
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceHeaderSchemaHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/baz/header-schema",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/header-schema".

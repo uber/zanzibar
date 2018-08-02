@@ -59,12 +59,10 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 
 // Register adds the http handler to the gateway's http router
 func (h *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/googlenow/add-credentials",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/googlenow/add-credentials".

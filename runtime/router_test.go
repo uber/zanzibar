@@ -361,3 +361,53 @@ func TestRouterPanicNilPointer(t *testing.T) {
 		"runtime_test.TestRouterPanicNilPointer.func1",
 	)
 }
+func TestConflictingRoutes(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	err = bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo",
+		zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				resp *zanzibar.ServerHTTPResponse,
+			) {
+				resp.WriteJSONBytes(200, nil, []byte("foo\n"))
+			},
+		),
+	)
+	assert.Nil(t, err)
+	err = bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo",
+		zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
+			"bar", "bar",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				resp *zanzibar.ServerHTTPResponse,
+			) {
+				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
+			},
+		),
+	)
+	if assert.Error(t, err) {
+		assert.Equal(t, err.Error(), "handler for 'GET /foo' is already registered")
+	}
+}

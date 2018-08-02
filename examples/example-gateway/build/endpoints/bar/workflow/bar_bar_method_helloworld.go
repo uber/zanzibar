@@ -87,7 +87,6 @@ func (w barHelloWorldWorkflow) Handle(
 			serverErr := convertHelloWorldBarException(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return "", nil, serverErr
 
@@ -97,16 +96,12 @@ func (w barHelloWorldWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return "", nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertBarHelloWorldClientResponse(clientRespBody)

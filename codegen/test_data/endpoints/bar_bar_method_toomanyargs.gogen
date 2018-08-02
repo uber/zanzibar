@@ -61,12 +61,10 @@ func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler 
 
 // Register adds the http handler to the gateway's http router
 func (h *BarTooManyArgsHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/bar/too-many-args-path",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/too-many-args-path".
@@ -141,7 +139,6 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 		}
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

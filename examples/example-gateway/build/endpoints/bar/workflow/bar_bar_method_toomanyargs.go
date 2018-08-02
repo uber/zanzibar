@@ -101,7 +101,6 @@ func (w barTooManyArgsWorkflow) Handle(
 			serverErr := convertTooManyArgsBarException(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, serverErr
 
@@ -109,7 +108,6 @@ func (w barTooManyArgsWorkflow) Handle(
 			serverErr := convertTooManyArgsFooException(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, serverErr
 
@@ -119,18 +117,13 @@ func (w barTooManyArgsWorkflow) Handle(
 				zap.String("client", "Bar"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return nil, nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
-
 	resHeaders.Set("X-Token", cliRespHeaders["X-Token"])
 	resHeaders.Set("X-Uuid", cliRespHeaders["X-Uuid"])
 

@@ -100,7 +100,6 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 			serverErr := convertTransHeadersAuthErr(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, serverErr
 
@@ -108,7 +107,6 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 			serverErr := convertTransHeadersOtherAuthErr(
 				errValue,
 			)
-			// TODO(sindelar): Consider returning partial headers
 
 			return nil, nil, serverErr
 
@@ -118,16 +116,12 @@ func (w simpleServiceTransHeadersWorkflow) Handle(
 				zap.String("client", "Baz"),
 			)
 
-			// TODO(sindelar): Consider returning partial headers
-
 			return nil, nil, err
 
 		}
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
 	resHeaders := zanzibar.ServerHTTPHeader{}
 
 	response := convertSimpleServiceTransHeadersClientResponse(clientRespBody)

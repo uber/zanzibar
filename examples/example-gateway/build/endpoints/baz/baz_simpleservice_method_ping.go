@@ -57,12 +57,10 @@ func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHa
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServicePingHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"GET", "/baz/ping",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/ping".

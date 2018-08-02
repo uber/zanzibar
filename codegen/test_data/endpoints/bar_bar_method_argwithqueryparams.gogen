@@ -61,12 +61,10 @@ func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQuery
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"GET", "/bar/argWithQueryParams",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/argWithQueryParams".
@@ -141,7 +139,6 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		return
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

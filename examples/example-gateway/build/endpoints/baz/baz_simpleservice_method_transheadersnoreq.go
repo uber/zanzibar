@@ -58,12 +58,10 @@ func NewSimpleServiceTransHeadersNoReqHandler(deps *module.Dependencies) *Simple
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceTransHeadersNoReqHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/baz/trans-headers-no-req",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/trans-headers-no-req".

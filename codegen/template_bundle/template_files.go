@@ -305,12 +305,10 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // Register adds the http handler to the gateway's http router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "{{.HTTPPath}}".
@@ -420,14 +418,6 @@ func (h *{{$handlerName}}) HandleRequest(
 		{{ end }}
 	}
 
-	{{- if .ResHeaders }}
-	// TODO(sindelar): implement check headers on response
-	{{- end }}
-
-	{{- if .ResHeaderFields }}
-	// TODO(jakev): implement writing fields into response headers
-	{{- end }}
-
 	{{if eq .ResponseType "" -}}
 	res.WriteJSONBytes({{.OKStatusCode.Code}}, cliRespHeaders, nil)
 	{{- else if eq .ResponseType "string" -}}
@@ -455,7 +445,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6529, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6268, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1106,14 +1096,12 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if and (eq .ResponseType "") (eq (len .Exceptions) 0)}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return respHeaders, err
 			}
 			return respHeaders, nil
 		default:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return respHeaders, err
@@ -1134,7 +1122,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 
 			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
 		default:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return defaultRes, respHeaders, err
@@ -1143,7 +1130,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{else if eq .ResponseType ""}}
 	switch res.StatusCode {
 		case {{.OKStatusCode.Code}}:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return respHeaders, err
@@ -1160,7 +1146,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 			return respHeaders, &exception
 		{{end}}
 		default:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return respHeaders, err
@@ -1190,7 +1175,6 @@ func (c *{{$clientName}}) {{$methodName}}(
 			return defaultRes, respHeaders, &exception
 		{{end}}
 		default:
-			// TODO: log about unexpected body bytes?
 			_, err = res.ReadAll()
 			if err != nil {
 				return defaultRes, respHeaders, err
@@ -1204,8 +1188,8 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 }
 {{end}}
-{{end}} {{- /* <range .Methods> */ -}}
-{{end}} {{- /* <range .Services> */ -}}
+{{end}}
+{{end}}
 `)
 
 func http_clientTmplBytes() ([]byte, error) {
@@ -1218,7 +1202,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 8336, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8003, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1294,7 +1278,6 @@ func logAndWait(server *zanzibar.Gateway) {
 	// TODO: handle sigterm gracefully
 	server.Wait()
 	// TODO: emit metrics about startup.
-	// TODO: setup and configure tracing/jeager.
 }
 
 func readFlags() {
@@ -1332,7 +1315,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1977, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1931, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2456,9 +2439,7 @@ type {{$handlerName}} struct {
 
 // Register adds the tchannel handler to the gateway's tchannel router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	g.TChannelRouter.Register(h.endpoint)
-	// TODO: Register should return an error for route conflicts
-	return nil
+	return g.TChannelRouter.Register(h.endpoint)
 }
 
 // Handle handles RPC call of "{{.ThriftService}}::{{.Name}}".
@@ -2624,30 +2605,6 @@ func (h *{{$handlerName}}) redirectToDeputy(
 }
 {{end -}}
 
-// {{$workflowInterface}} defines the interface for {{$handlerName}} workflow
-type {{$workflowInterface}} interface {
-Handle(
-{{- if and (eq .RequestType "") (eq .ResponseType "") }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) (zanzibar.Header, error)
-{{else if eq .RequestType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{else if eq .ResponseType "" }}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) (zanzibar.Header, error)
-{{else}}
-	ctx context.Context,
-	reqHeaders zanzibar.Header,
-	r {{.RequestType}},
-) ({{.ResponseType}}, zanzibar.Header, error)
-{{- end}}
-}
-
 {{end -}}
 `)
 
@@ -2661,7 +2618,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8204, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7475, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2670,6 +2627,7 @@ var _workflowTmpl = []byte(`{{/* template to render gateway workflow interface c
 {{- $instance := .Instance }}
 package workflow
 
+{{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
@@ -2843,7 +2801,6 @@ func (w {{$workflowStruct}}) Handle(
 				serverErr := convert{{$methodName}}{{title $cException.Name}}(
 					errValue,
 				)
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, serverErr
 				{{else if eq $responseType "string" }}
@@ -2858,7 +2815,6 @@ func (w {{$workflowStruct}}) Handle(
 					zap.String("client", "{{$clientName}}"),
 				)
 
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
 				{{else if eq $responseType "string" }}
@@ -2870,9 +2826,11 @@ func (w {{$workflowStruct}}) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
 	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])
@@ -2932,7 +2890,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7486, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7462, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

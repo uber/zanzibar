@@ -61,12 +61,10 @@ func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWit
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithNestedQueryParamsHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"GET", "/bar/argWithNestedQueryParams",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/argWithNestedQueryParams".
@@ -199,7 +197,6 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		return
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

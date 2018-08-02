@@ -60,12 +60,10 @@ func NewBarArgWithParamsHandler(deps *module.Dependencies) *BarArgWithParamsHand
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"POST", "/bar/argWithParams/:uuid/segment/:user-uuid",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/bar/argWithParams/:uuid/segment/:user-uuid".
@@ -130,7 +128,6 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 		return
 
 	}
-	// TODO(jakev): implement writing fields into response headers
 
 	res.WriteJSON(200, cliRespHeaders, response)
 }

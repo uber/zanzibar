@@ -2,6 +2,7 @@
 {{- $instance := .Instance }}
 package workflow
 
+{{- $endpointType := .Spec.EndpointType }}
 {{- $reqHeaderMap := .ReqHeaders }}
 {{- $reqHeaderMapKeys := .ReqHeadersKeys }}
 {{- $reqHeaderRequiredKeys := .ReqRequiredHeadersKeys }}
@@ -175,7 +176,6 @@ func (w {{$workflowStruct}}) Handle(
 				serverErr := convert{{$methodName}}{{title $cException.Name}}(
 					errValue,
 				)
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, serverErr
 				{{else if eq $responseType "string" }}
@@ -190,7 +190,6 @@ func (w {{$workflowStruct}}) Handle(
 					zap.String("client", "{{$clientName}}"),
 				)
 
-				// TODO(sindelar): Consider returning partial headers
 				{{if eq $responseType ""}}
 				return nil, err
 				{{else if eq $responseType "string" }}
@@ -202,9 +201,11 @@ func (w {{$workflowStruct}}) Handle(
 	}
 
 	// Filter and map response headers from client to server response.
-
-	// TODO: Add support for TChannel Headers with a switch here
+	{{if eq $endpointType "tchannel" -}}
+	resHeaders := zanzibar.ServerTChannelHeader{}
+	{{- else -}}
 	resHeaders := zanzibar.ServerHTTPHeader{}
+	{{- end -}}
 	{{range $i, $k := $resHeaderMapKeys}}
 	{{- $resHeaderVal := index $resHeaderMap $k}}
 	resHeaders.Set("{{$resHeaderVal.TransformTo}}", cliRespHeaders["{{$k}}"])

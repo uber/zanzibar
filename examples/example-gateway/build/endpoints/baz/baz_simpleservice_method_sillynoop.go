@@ -58,12 +58,10 @@ func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceS
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceSillyNoopHandler) Register(g *zanzibar.Gateway) error {
-	g.HTTPRouter.Register(
+	return g.HTTPRouter.Register(
 		"GET", "/baz/silly-noop",
 		h.endpoint,
 	)
-	// TODO: register should return errors on route conflicts
-	return nil
 }
 
 // HandleRequest handles "/baz/silly-noop".
