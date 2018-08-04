@@ -55,23 +55,111 @@ type PackageHelper struct {
 	stagingReqHeader string
 	// Use deputy client when this header is set
 	deputyReqHeader string
-	// traceKey is the key for uniq trace id that identifies request / response pair
+	// traceKey is the key for unique trace id that identifies request / response pair
 	traceKey string
 }
 
+//NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
+func NewDefaultPackageHelperOptions() *PackageHelperOptions {
+	return &PackageHelperOptions{}
+}
+
+// PackageHelperOptions set the optional configurations for the project package.
+// Each field is optional, if not set, it is set to the corresponding default value.
+type PackageHelperOptions struct {
+	// relative path to the idl dir, defaults to "./idl"
+	RelThriftRootDir string
+	// relative path to the target dir that will contain generated code, defaults to "./build"
+	RelTargetGenDir string
+	// relative path to the middleware config dir, defaults to "./middlewares"
+	RelMiddlewareConfigDir string
+
+	// package path to the generated code, defaults to PackageRoot + "/" + RelTargetGenDir + "/gen-code"
+	GenCodePackage string
+
+	// thrift http annotation prefix, defaults to "zanzibar"
+	AnnotationPrefix string
+
+	// copyright header in generated code, defaults to ""
+	CopyrightHeader string
+	// header key to redirect client requests to staging environment, defaults to "X-Zanzibar-Use-Staging"
+	StagingReqHeader string
+	// header key to redirect client requests to local environment, defaults to "x-deputy-forwarded"
+	DeputyReqHeader string
+	// header key to uniquely identifies request/response pair, defaults to "x-trace-id"
+	TraceKey string
+}
+
+func (p *PackageHelperOptions) relTargetGenDir() string {
+	if p.RelTargetGenDir != "" {
+		return p.RelTargetGenDir
+	}
+	return "./build"
+}
+
+func (p *PackageHelperOptions) relThriftRootDir() string {
+	if p.RelThriftRootDir != "" {
+		return p.RelThriftRootDir
+	}
+	return "./idl"
+}
+
+func (p *PackageHelperOptions) relMiddlewareConfigDir() string {
+	if p.RelMiddlewareConfigDir != "" {
+		return p.RelMiddlewareConfigDir
+	}
+	return "./middlewares"
+}
+
+func (p *PackageHelperOptions) genCodePackage(packageRoot string) string {
+	if p.GenCodePackage != "" {
+		return p.GenCodePackage
+	}
+	return path.Join(packageRoot, p.relTargetGenDir(), "gen-code")
+}
+
+func (p *PackageHelperOptions) annotationPrefix() string {
+	if p.AnnotationPrefix != "" {
+		return p.AnnotationPrefix
+	}
+	return "zanzibar"
+}
+
+func (p *PackageHelperOptions) copyrightHeader() string {
+	if p.CopyrightHeader != "" {
+		return p.CopyrightHeader
+	}
+	return ""
+}
+
+func (p *PackageHelperOptions) stagingReqHeader() string {
+	if p.StagingReqHeader != "" {
+		return p.StagingReqHeader
+	}
+	return "X-Zanzibar-Use-Staging"
+}
+
+func (p *PackageHelperOptions) deputyReqHeader() string {
+	if p.DeputyReqHeader != "" {
+		return p.DeputyReqHeader
+	}
+	return "x-deputy-forwarded"
+}
+
+func (p *PackageHelperOptions) traceKey() string {
+	if p.TraceKey != "" {
+		return p.TraceKey
+	}
+	return "x-uber-id"
+}
+
 // NewPackageHelper creates a package helper.
+// packageRoot is the project root package path, configRoot is the project config dir path.
+// options can be nil, in which case all optional settings for the package are set to default values.
 func NewPackageHelper(
 	packageRoot string,
 	configRoot string,
-	middlewareConfig string,
-	relThriftRootDir string,
-	genCodePackage string,
-	relTargetGenDir string,
-	copyrightHeader string,
-	annotationPrefix string,
-	stagingReqHeader string,
-	deputyReqHeader string,
-	traceKey string,
+	options *PackageHelperOptions,
 ) (*PackageHelper, error) {
 	absConfigRoot, err := filepath.Abs(configRoot)
 	if err != nil {
@@ -80,9 +168,13 @@ func NewPackageHelper(
 		)
 	}
 
-	goGatewayNamespace := path.Join(packageRoot, relTargetGenDir)
+	if options == nil {
+		options = NewDefaultPackageHelperOptions()
+	}
 
-	middlewareSpecs, err := parseMiddlewareConfig(middlewareConfig, absConfigRoot)
+	goGatewayNamespace := path.Join(packageRoot, options.relTargetGenDir())
+
+	middlewareSpecs, err := parseMiddlewareConfig(options.relMiddlewareConfigDir(), absConfigRoot)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err, "Cannot load middlewares:")
@@ -91,16 +183,16 @@ func NewPackageHelper(
 	p := &PackageHelper{
 		packageRoot:        packageRoot,
 		configRoot:         absConfigRoot,
-		thriftRootDir:      filepath.Join(absConfigRoot, relThriftRootDir),
-		genCodePackage:     genCodePackage,
+		thriftRootDir:      filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		genCodePackage:     options.genCodePackage(packageRoot),
 		goGatewayNamespace: goGatewayNamespace,
-		targetGenDir:       filepath.Join(absConfigRoot, relTargetGenDir),
-		copyrightHeader:    copyrightHeader,
+		targetGenDir:       filepath.Join(absConfigRoot, options.relTargetGenDir()),
+		copyrightHeader:    options.copyrightHeader(),
 		middlewareSpecs:    middlewareSpecs,
-		annotationPrefix:   annotationPrefix,
-		stagingReqHeader:   stagingReqHeader,
-		deputyReqHeader:    deputyReqHeader,
-		traceKey:           traceKey,
+		annotationPrefix:   options.annotationPrefix(),
+		stagingReqHeader:   options.stagingReqHeader(),
+		deputyReqHeader:    options.deputyReqHeader(),
+		traceKey:           options.traceKey(),
 	}
 	return p, nil
 }

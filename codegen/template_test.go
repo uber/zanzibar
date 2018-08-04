@@ -59,18 +59,18 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
+	packageRoot := "github.com/uber/zanzibar/examples/example-gateway"
+	options := &codegen.PackageHelperOptions{
+		RelTargetGenDir: tmpDir,
+		CopyrightHeader: testCopyrightHeader,
+		GenCodePackage:  packageRoot + "/build/gen-code",
+		TraceKey:        "trace-key",
+	}
+
 	packageHelper, err := codegen.NewPackageHelper(
-		"github.com/uber/zanzibar/examples/example-gateway",
+		packageRoot,
 		absGatewayPath,
-		"middlewares",
-		"./idl",
-		"github.com/uber/zanzibar/examples/example-gateway/build/gen-code",
-		tmpDir,
-		testCopyrightHeader,
-		"zanzibar",
-		"X-Zanzibar-Use-Staging",
-		"x-deputy-forwarded",
-		"trace-key",
+		options,
 	)
 	if !assert.NoError(t, err, "failed to create package helper", err) {
 		return

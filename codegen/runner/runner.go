@@ -69,13 +69,15 @@ func main() {
 		err, fmt.Sprintf("can not get abs path of config dir %s", configRoot),
 	)
 
-	copyright, err := ioutil.ReadFile(filepath.Join(
-		configRoot,
-		config.MustGetString("copyrightHeader"),
-	))
-	if err != nil {
-		// Default to an empty copyright for now
-		copyright = []byte("")
+	copyright := []byte("")
+	if config.ContainsKey("copyrightHeader") {
+		bytes, err := ioutil.ReadFile(filepath.Join(
+			configRoot,
+			config.MustGetString("copyrightHeader"),
+		))
+		if err == nil {
+			copyright = bytes
+		}
 	}
 
 	stagingReqHeader := "X-Zanzibar-Use-Staging"
@@ -87,19 +89,22 @@ func main() {
 	if config.ContainsKey("deputyReqHeader") {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
+	options := &codegen.PackageHelperOptions{
+		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
+		RelTargetGenDir:        config.MustGetString("targetGenDir"),
+		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),
+		AnnotationPrefix:       config.MustGetString("annotationPrefix"),
+		GenCodePackage:         config.MustGetString("genCodePackage"),
+		CopyrightHeader:        string(copyright),
+		StagingReqHeader:       stagingReqHeader,
+		DeputyReqHeader:        deputyReqHeader,
+		TraceKey:               config.MustGetString("traceKey"),
+	}
 
 	packageHelper, err := codegen.NewPackageHelper(
 		config.MustGetString("packageRoot"),
 		configRoot,
-		config.MustGetString("middlewareConfig"),
-		config.MustGetString("thriftRootDir"),
-		config.MustGetString("genCodePackage"),
-		config.MustGetString("targetGenDir"),
-		string(copyright),
-		config.MustGetString("annotationPrefix"),
-		stagingReqHeader,
-		deputyReqHeader,
-		config.MustGetString("traceKey"),
+		options,
 	)
 	checkError(
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),
