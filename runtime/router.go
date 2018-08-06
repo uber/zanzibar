@@ -26,7 +26,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -89,7 +89,16 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	r *http.Request,
 	params httprouter.Params,
 ) {
+
+	ctx := withRequestFields(r.Context())
+	reqUUID := ""
+	if ctxUUID := GetRequestUUIDFromCtx(ctx); ctxUUID != nil {
+		reqUUID = ctxUUID.String()
+	}
 	req := NewServerHTTPRequest(w, r, params, endpoint)
+	req.Logger = req.Logger.With(
+		zap.String(string(requestUUIDKey), reqUUID),
+	)
 
 	// TODO: (lu) get timeout from endpoint config
 	//_, ok := ctx.Deadline()
@@ -98,7 +107,6 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
 	//	defer cancel()
 	//}
-	ctx := withRequestFields(r.Context())
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush()
