@@ -34,7 +34,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
 var configFiles *string
@@ -65,34 +64,6 @@ func createGateway() (*zanzibar.Gateway, error) {
 	}
 
 	return gateway, nil
-}
-
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	err0 := deps.Endpoint.Bar.Register(g)
-	if err0 != nil {
-		return err0
-	}
-	err1 := deps.Endpoint.Baz.Register(g)
-	if err1 != nil {
-		return err1
-	}
-	err2 := deps.Endpoint.BazTChannel.Register(g)
-	if err2 != nil {
-		return err2
-	}
-	err3 := deps.Endpoint.Contacts.Register(g)
-	if err3 != nil {
-		return err3
-	}
-	err4 := deps.Endpoint.Googlenow.Register(g)
-	if err4 != nil {
-		return err4
-	}
-	err5 := deps.Endpoint.Multi.Register(g)
-	if err5 != nil {
-		return err5
-	}
-	return nil
 }
 
 func logAndWait(server *zanzibar.Gateway) {
