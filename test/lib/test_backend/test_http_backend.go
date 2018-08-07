@@ -21,6 +21,7 @@
 package testbackend
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"sync"
@@ -88,7 +89,7 @@ func (backend *TestHTTPBackend) HandleFunc(
 
 // Close ...
 func (backend *TestHTTPBackend) Close() {
-	backend.Server.Close()
+	_ = backend.Server.Close(context.Background())
 	backend.WaitGroup.Wait()
 }
 

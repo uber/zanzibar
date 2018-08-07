@@ -189,7 +189,7 @@ run-%: $(EXAMPLE_SERVICES_DIR)%/
 	cd "$(EXAMPLE_BASE_DIR)"; \
 		UBER_ENVIRONMENT=production \
 		CONFIG_DIR=./config \
-		./bin/$* --config="config/production.json;"
+		./bin/$* --config="config/test.json;"
 
 
 .PHONY: bins

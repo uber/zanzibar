@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
@@ -30,6 +31,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -53,6 +55,9 @@ var levelMap = map[string]zapcore.Level{
 	"panic":  zapcore.PanicLevel,
 	"fatal":  zapcore.FatalLevel,
 }
+
+var defaultShutdownPollInterval = 500 * time.Millisecond
+var defaultCloseTimeout = 10000 * time.Millisecond
 
 // Options configures the gateway
 type Options struct {
@@ -212,6 +217,7 @@ func (gateway *Gateway) Bootstrap() error {
 		return err
 	}
 
+	gateway.PerHostScope.Counter("startup.success").Inc(1)
 	return nil
 }
 
@@ -257,16 +263,64 @@ func (gateway *Gateway) handleHealthRequest(
 	res.WriteJSONBytes(200, nil, bytes)
 }
 
-// Close the http server
+// Close all the servers, blocks until it is complete
 func (gateway *Gateway) Close() {
+	var swg sync.WaitGroup
+	ctx, cancel := context.WithTimeout(context.Background(), gateway.ShutdownTimeout())
+	defer cancel()
+
+	ec := make(chan error, 3)
+
+	if gateway.localHTTPServer != gateway.httpServer {
+		swg.Add(1)
+		go func() {
+			defer swg.Done()
+			if err := gateway.localHTTPServer.Close(ctx); err != nil {
+				ec <- errors.Wrap(err, "error shutting down local http server")
+			}
+		}()
+	}
+
+	// shutdown http server
+	swg.Add(1)
+	go func() {
+		defer swg.Done()
+		if err := gateway.httpServer.Close(ctx); err != nil {
+			ec <- errors.Wrap(err, "error shutting down http server")
+		}
+	}()
+
+	// shutdown tchannel server
+	swg.Add(1)
+	go func() {
+		defer swg.Done()
+		if err := gateway.shutdownTChannelServer(ctx); err != nil {
+			ec <- errors.Wrap(err, "error shutting down tchannel server")
+		}
+	}()
+
+	swg.Wait()
+
+	select {
+	case err := <-ec:
+		close(ec)
+		errs := []string{err.Error()}
+		for e := range ec {
+			errs = append(errs, e.Error())
+		}
+		gateway.Logger.Error(fmt.Sprintf(
+			"%d errors when shutting down the servers: %s",
+			len(errs), strings.Join(errs, ";")),
+		)
+		gateway.PerHostScope.Counter("shutdown.failure").Inc(1)
+	default:
+		gateway.Logger.Info("servers are shut down gracefully")
+		gateway.PerHostScope.Counter("shutdown.success").Inc(1)
+	}
+
 	_ = gateway.tracerCloser.Close()
 	gateway.metricsBackend.Flush()
 	_ = gateway.scopeCloser.Close()
-	if gateway.localHTTPServer != gateway.httpServer {
-		gateway.localHTTPServer.Close()
-	}
-	gateway.httpServer.Close()
-	gateway.tchannelServer.Close()
 
 	// close log files as the last step
 	if gateway.loggerFile != nil {
@@ -278,6 +332,14 @@ func (gateway *Gateway) Close() {
 	if gateway.runtimeMetrics != nil {
 		gateway.runtimeMetrics.Stop()
 	}
+}
+
+// ShutdownTimeout returns the shutdown configured timeout, which default to 10s.
+func (gateway *Gateway) ShutdownTimeout() time.Duration {
+	if gateway.Config.ContainsKey("shutdown.timeout") {
+		return time.Duration(gateway.Config.MustGetInt("shutdown.timeout")) * time.Millisecond
+	}
+	return defaultCloseTimeout
 }
 
 // InspectOrDie inspects the config for this gateway
@@ -623,4 +685,28 @@ func GetHostname() string {
 		host = "unknown"
 	}
 	return host
+}
+
+// shutdownTChannelServer gracefully shuts down the tchannel server, blocks until the shutdown is
+// complete or the timeout has reached if there is one associated with the given context
+func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
+	shutdownPollInterval := defaultShutdownPollInterval
+	if gateway.Config.ContainsKey("shutdown.pollInterval") {
+		shutdownPollInterval = time.Duration(gateway.Config.MustGetInt("shutdown.pollInterval")) * time.Millisecond
+	}
+	ticker := time.NewTicker(shutdownPollInterval)
+	defer ticker.Stop()
+
+	gateway.tchannelServer.Close()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if gateway.tchannelServer.Closed() {
+				return nil
+			}
+		}
+	}
+
 }

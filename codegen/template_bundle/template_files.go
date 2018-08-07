@@ -1215,9 +1215,11 @@ package main
 import (
 	"flag"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"go.uber.org/zap"
 
@@ -1265,9 +1267,15 @@ func logAndWait(server *zanzibar.Gateway) {
 		zap.Any("config", server.InspectOrDie()),
 	)
 
-	// TODO: handle sigterm gracefully
+	go func(){
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Close()
+		server.WaitGroup.Done()
+	}()
 	server.Wait()
-	// TODO: emit metrics about startup.
 }
 
 func readFlags() {
@@ -1305,7 +1313,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1604, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1735, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

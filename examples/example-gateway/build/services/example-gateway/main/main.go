@@ -25,8 +25,11 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"go.uber.org/zap"
 
@@ -73,9 +76,15 @@ func logAndWait(server *zanzibar.Gateway) {
 		zap.Any("config", server.InspectOrDie()),
 	)
 
-	// TODO: handle sigterm gracefully
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Close()
+		server.WaitGroup.Done()
+	}()
 	server.Wait()
-	// TODO: emit metrics about startup.
 }
 
 func readFlags() {
