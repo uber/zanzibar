@@ -1272,7 +1272,7 @@ func logAndWait(server *zanzibar.Gateway) {
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		server.WaitGroup.Add(1)
-		server.Close()
+		server.Shutdown()
 		server.WaitGroup.Done()
 	}()
 	server.Wait()
@@ -1313,7 +1313,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1735, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1738, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

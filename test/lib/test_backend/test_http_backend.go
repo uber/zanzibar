@@ -21,14 +21,13 @@
 package testbackend
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"sync"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/uber/zanzibar/runtime"
-	zap "go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 // TestHTTPBackend will pretend to be a http backend
@@ -89,7 +88,7 @@ func (backend *TestHTTPBackend) HandleFunc(
 
 // Close ...
 func (backend *TestHTTPBackend) Close() {
-	_ = backend.Server.Close(context.Background())
+	backend.Server.Close()
 	backend.WaitGroup.Wait()
 }
 

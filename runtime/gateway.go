@@ -263,8 +263,8 @@ func (gateway *Gateway) handleHealthRequest(
 	res.WriteJSONBytes(200, nil, bytes)
 }
 
-// Close all the servers, blocks until it is complete
-func (gateway *Gateway) Close() {
+// Shutdown starts the graceful shutdown, blocks until it is complete
+func (gateway *Gateway) Shutdown() {
 	var swg sync.WaitGroup
 	ctx, cancel := context.WithTimeout(context.Background(), gateway.ShutdownTimeout())
 	defer cancel()
@@ -275,7 +275,7 @@ func (gateway *Gateway) Close() {
 		swg.Add(1)
 		go func() {
 			defer swg.Done()
-			if err := gateway.localHTTPServer.Close(ctx); err != nil {
+			if err := gateway.localHTTPServer.Shutdown(ctx); err != nil {
 				ec <- errors.Wrap(err, "error shutting down local http server")
 			}
 		}()
@@ -285,7 +285,7 @@ func (gateway *Gateway) Close() {
 	swg.Add(1)
 	go func() {
 		defer swg.Done()
-		if err := gateway.httpServer.Close(ctx); err != nil {
+		if err := gateway.httpServer.Shutdown(ctx); err != nil {
 			ec <- errors.Wrap(err, "error shutting down http server")
 		}
 	}()
@@ -317,6 +317,30 @@ func (gateway *Gateway) Close() {
 		gateway.Logger.Info("servers are shut down gracefully")
 		gateway.PerHostScope.Counter("shutdown.success").Inc(1)
 	}
+
+	_ = gateway.tracerCloser.Close()
+	gateway.metricsBackend.Flush()
+	_ = gateway.scopeCloser.Close()
+
+	// close log files as the last step
+	if gateway.loggerFile != nil {
+		_ = gateway.loggerFile.Sync()
+		_ = gateway.loggerFile.Close()
+	}
+
+	// stop collecting runtime metrics
+	if gateway.runtimeMetrics != nil {
+		gateway.runtimeMetrics.Stop()
+	}
+}
+
+// Close shuts down the servers and returns immediately
+func (gateway *Gateway) Close() {
+	if gateway.localHTTPServer != gateway.httpServer {
+		gateway.localHTTPServer.Close()
+	}
+	gateway.httpServer.Close()
+	gateway.tchannelServer.Close()
 
 	_ = gateway.tracerCloser.Close()
 	gateway.metricsBackend.Flush()

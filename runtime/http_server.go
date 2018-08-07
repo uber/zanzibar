@@ -21,7 +21,6 @@
 package zanzibar
 
 import (
-	"context"
 	"net"
 	"net/http"
 	"strconv"
@@ -68,7 +67,7 @@ func (server *HTTPServer) JustListen() (net.Listener, error) {
 	return ln, nil
 }
 
-// JustServe will serve all incoming requests, blocks unless error or server is shut down
+// JustServe will serve all incoming requests
 func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 	ln := server.listeningSocket.(*net.TCPListener)
 
@@ -81,16 +80,19 @@ func (server *HTTPServer) JustServe(waitGroup *sync.WaitGroup) {
 	waitGroup.Done()
 }
 
-// Close gracefully shuts down the server, blocks until shutdown is successful or timeout
-// has reached if there is one associated with the given context.
-func (server *HTTPServer) Close(ctx context.Context) error {
+// Close the listening socket
+func (server *HTTPServer) Close() {
 	server.closing = true
 	if server.listeningSocket == nil {
 		/* coverage ignore next line */
-		return nil
+		return
 	}
 
-	return server.Shutdown(ctx)
+	err := server.listeningSocket.Close()
+	if err != nil {
+		/* coverage ignore next line */
+		server.Logger.Error("Error closing listening socket", zap.Error(err))
+	}
 }
 
 // tcpKeepAliveListener sets TCP keep-alive timeouts on accepted

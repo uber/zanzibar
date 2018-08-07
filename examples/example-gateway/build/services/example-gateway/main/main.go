@@ -81,7 +81,7 @@ func logAndWait(server *zanzibar.Gateway) {
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		server.WaitGroup.Add(1)
-		server.Close()
+		server.Shutdown()
 		server.WaitGroup.Done()
 	}()
 	server.Wait()
