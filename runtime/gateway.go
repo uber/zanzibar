@@ -303,8 +303,10 @@ func (gateway *Gateway) Shutdown() {
 
 	select {
 	case err := <-ec:
+		// close ec so that the range ec will not block forever
 		close(ec)
-		errs := []string{err.Error()}
+		errs := make([]string, 0, cap(ec))
+		errs = append(errs, err.Error())
 		for e := range ec {
 			errs = append(errs, e.Error())
 		}

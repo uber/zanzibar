@@ -22,9 +22,23 @@ package codegen
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
+	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
+	"github.com/uber/zanzibar/test/lib/util"
 )
+
+var defaultTestOptions = &testGateway.Options{
+	KnownHTTPBackends:     []string{"bar", "contacts", "google-now"},
+	KnownTChannelBackends: []string{"baz"},
+	ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+}
+var defaultTestConfig = map[string]interface{}{
+	"clients.baz.serviceName": "baz",
+}
 
 func TestHeadersPropagateMultiDest(t *testing.T) {
 	cfg := `{
@@ -47,4 +61,15 @@ func TestHeadersPropagateMultiDest(t *testing.T) {
 	assert.Nil(t, err)
 	_, err = setPropagateMiddleware(middlewareObj)
 	assert.NotNil(t, err)
+}
+
+func TestGracefulShutdown(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	assert.NoError(t, err)
+	bg := gateway.(*benchGateway.BenchGateway)
+	bg.ActualGateway.Shutdown()
 }
