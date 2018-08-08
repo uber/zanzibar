@@ -134,8 +134,8 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 		RedirectTrailingSlash:  false,
 		RedirectFixedPath:      false,
 		HandleMethodNotAllowed: true,
-		NotFound:               router.handleNotFound,
-		MethodNotAllowed:       router.handleMethodNotAllowed,
+		NotFound:               http.HandlerFunc(router.handleNotFound),
+		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
 		PanicHandler:           router.handlePanic,
 	}
 	return router

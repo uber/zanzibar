@@ -28,8 +28,9 @@ import:
   - lib/go/thrift
 - package: github.com/uber-go/tally
   version: ^3
+# update to master since the last semver release is 2 years old
 - package: github.com/julienschmidt/httprouter
-  version: v1.1
+  version: master
 - package: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - package: go.uber.org/thriftrw
