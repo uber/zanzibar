@@ -1215,9 +1215,11 @@ package main
 import (
 	"flag"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"go.uber.org/zap"
 
@@ -1258,16 +1260,6 @@ func createGateway() (*zanzibar.Gateway, error) {
 	return gateway, nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	{{- range $idx, $endpoint := (index $instance.ResolvedDependencies "endpoint") }}
-	err{{$idx}} := deps.Endpoint.{{$endpoint.PackageInfo.QualifiedInstanceName}}.Register(g)
-	if err{{$idx}} != nil {
-		return err{{$idx}}
-	}
-	{{- end}}
-	return nil
-}
-
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
@@ -1275,9 +1267,15 @@ func logAndWait(server *zanzibar.Gateway) {
 		zap.Any("config", server.InspectOrDie()),
 	)
 
-	// TODO: handle sigterm gracefully
+	go func(){
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Shutdown()
+		server.WaitGroup.Done()
+	}()
 	server.Wait()
-	// TODO: emit metrics about startup.
 }
 
 func readFlags() {
@@ -1315,7 +1313,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1931, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1738, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

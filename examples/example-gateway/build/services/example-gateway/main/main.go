@@ -25,8 +25,11 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"go.uber.org/zap"
 
@@ -34,7 +37,6 @@ import (
 	"github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )
 
 var configFiles *string
@@ -67,34 +69,6 @@ func createGateway() (*zanzibar.Gateway, error) {
 	return gateway, nil
 }
 
-func registerEndpoints(g *zanzibar.Gateway, deps *module.Dependencies) error {
-	err0 := deps.Endpoint.Bar.Register(g)
-	if err0 != nil {
-		return err0
-	}
-	err1 := deps.Endpoint.Baz.Register(g)
-	if err1 != nil {
-		return err1
-	}
-	err2 := deps.Endpoint.BazTChannel.Register(g)
-	if err2 != nil {
-		return err2
-	}
-	err3 := deps.Endpoint.Contacts.Register(g)
-	if err3 != nil {
-		return err3
-	}
-	err4 := deps.Endpoint.Googlenow.Register(g)
-	if err4 != nil {
-		return err4
-	}
-	err5 := deps.Endpoint.Multi.Register(g)
-	if err5 != nil {
-		return err5
-	}
-	return nil
-}
-
 func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started ExampleGateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
@@ -102,9 +76,15 @@ func logAndWait(server *zanzibar.Gateway) {
 		zap.Any("config", server.InspectOrDie()),
 	)
 
-	// TODO: handle sigterm gracefully
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		server.WaitGroup.Add(1)
+		server.Shutdown()
+		server.WaitGroup.Done()
+	}()
 	server.Wait()
-	// TODO: emit metrics about startup.
 }
 
 func readFlags() {

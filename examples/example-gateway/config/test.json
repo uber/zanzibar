@@ -43,5 +43,6 @@
 	"tchannel.port": 0,
 	"tchannel.processName": "example-gateway",
 	"tchannel.serviceName": "example-gateway",
-	"useDatacenter": false
+	"useDatacenter": false,
+	"shutdown.pollInterval": 10
 }
