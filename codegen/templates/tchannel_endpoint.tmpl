@@ -233,7 +233,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
-	sub.Peers().Remove(hostPort)
+	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
 {{end -}}

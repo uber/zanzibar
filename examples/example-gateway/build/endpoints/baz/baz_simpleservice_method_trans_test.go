@@ -74,10 +74,11 @@ func TestTransSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "trans", "SimpleService::trans",
 		bazclient.NewSimpleServiceTransHandler(fakeTrans),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 

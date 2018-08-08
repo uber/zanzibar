@@ -72,10 +72,11 @@ func TestPingSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "ping", "SimpleService::ping",
 		bazclient.NewSimpleServicePingHandler(fakePing),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 

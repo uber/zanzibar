@@ -59,10 +59,14 @@ func BenchmarkSillyNoop(b *testing.B) {
 		return
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "sillyNoop", "SimpleService::sillyNoop",
 		bazServer.NewSimpleServiceSillyNoopHandler(sillyNoop),
 	)
+	if err != nil {
+		b.Error("got register err: " + err.Error())
+		return
+	}
 
 	b.ResetTimer()
 

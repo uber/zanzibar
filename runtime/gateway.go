@@ -161,9 +161,9 @@ func CreateGateway(
 		return nil, err
 	}
 
-	gateway.registerPredefined()
+	err := gateway.registerPredefined()
 
-	return gateway, nil
+	return gateway, err
 }
 
 // Bootstrap func
@@ -221,7 +221,7 @@ func (gateway *Gateway) Bootstrap() error {
 	return nil
 }
 
-func (gateway *Gateway) registerPredefined() {
+func (gateway *Gateway) registerPredefined() error {
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof", pprof.Index)
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
@@ -243,11 +243,12 @@ func (gateway *Gateway) registerPredefined() {
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
-	gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
+	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
 		gateway.Logger, gateway.AllHostScope, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
 	))
+	return err
 }
 
 func (gateway *Gateway) handleHealthRequest(

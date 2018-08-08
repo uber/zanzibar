@@ -73,10 +73,14 @@ func BenchmarkCompare(b *testing.B) {
 		return
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(compare),
 	)
+	if err != nil {
+		b.Error("got register err: " + err.Error())
+		return
+	}
 
 	b.ResetTimer()
 
@@ -128,10 +132,11 @@ func TestCompare(t *testing.T) {
 		}, nil, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
+	assert.NoError(t, err)
 
 	res, err := gateway.MakeRequest(
 		"POST", "/baz/compare", nil,
@@ -177,10 +182,11 @@ func TestCompareInvalidArgs(t *testing.T) {
 		}, nil, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "compare", "SimpleService::compare",
 		bazClient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
+	assert.NoError(t, err)
 
 	res, err := gateway.MakeRequest(
 		"POST", "/baz/compare", nil,

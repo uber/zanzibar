@@ -63,10 +63,11 @@ func TestCallSuccessfulRequestOKResponse(t *testing.T) {
 		return resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazclient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 	headers["x-token"] = "token"

@@ -416,7 +416,7 @@ func TestInjectSpan(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 	req := zanzibar.NewClientHTTPRequest("bar", "Normal", client)
-	req.WriteJSON(
+	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",
 		map[string]string{
@@ -424,6 +424,7 @@ func TestInjectSpan(t *testing.T) {
 		},
 		nil,
 	)
+	assert.NoError(t, err)
 
 	tracer := opentracing.GlobalTracer()
 	span := tracer.StartSpan("someSpan")

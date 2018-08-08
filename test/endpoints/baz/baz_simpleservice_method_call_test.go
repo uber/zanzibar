@@ -66,10 +66,14 @@ func BenchmarkCall(b *testing.B) {
 		return
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazServer.NewSimpleServiceCallHandler(call),
 	)
+	if err != nil {
+		b.Error("got register err: " + err.Error())
+		return
+	}
 
 	b.ResetTimer()
 

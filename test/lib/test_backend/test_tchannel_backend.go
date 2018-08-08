@@ -102,13 +102,12 @@ func (backend *TestTChannelBackend) Bootstrap() error {
 func (backend *TestTChannelBackend) Register(
 	endpointID, handlerID, method string,
 	handler zanzibar.TChannelHandler,
-) {
-	backend.Router.Register(zanzibar.NewTChannelEndpoint(
+) error {
+	return backend.Router.Register(zanzibar.NewTChannelEndpoint(
 		zap.NewNop(), tally.NoopScope,
 		endpointID, handlerID, method,
 		handler,
 	))
-
 }
 
 // Close closes the underlying channel

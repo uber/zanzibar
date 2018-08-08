@@ -90,7 +90,10 @@ func serverTChannel(logger *zap.Logger) *testBackend.TestTChannelBackend {
 	simpleServiceCallHandler := baz.NewSimpleServiceCallHandler(handleSimpleServiceCall)
 
 	// must register handler first before bootstrap
-	tchannelBackend.Register("baz", "call", "SimpleService::call", simpleServiceCallHandler)
+	err = tchannelBackend.Register("baz", "call", "SimpleService::call", simpleServiceCallHandler)
+	if err != nil {
+		panic(err)
+	}
 
 	err = tchannelBackend.Bootstrap()
 	if err != nil {

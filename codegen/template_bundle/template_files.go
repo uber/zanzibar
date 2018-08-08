@@ -765,10 +765,11 @@ func Test{{title $testFixture.HandleID}}{{title $testFixture.TestName}}OKRespons
 		{{end -}}
 	}
 
-	gateway.TChannelBackends()["{{$clientName}}"].Register(
+	err = gateway.TChannelBackends()["{{$clientName}}"].Register(
 		"{{$testFixture.EndpointID}}", "{{$testFixture.HandleID}}", "{{$thriftService}}::{{$clientMethodName}}",
 		{{$clientPackage}}.New{{$thriftService}}{{title $clientMethodName}}Handler({{$clientFunc}}),
 	)
+	assert.NoError(t, err)
 	{{end}}
 
 	headers := map[string]string{}
@@ -829,7 +830,7 @@ func endpoint_test_tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4512, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test_tchannel_client.tmpl", size: 4542, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2598,7 +2599,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
-	sub.Peers().Remove(hostPort)
+	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
 {{end -}}
@@ -2616,7 +2617,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7475, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7479, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -68,7 +68,7 @@ func TestHandlers(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -78,6 +78,7 @@ func TestHandlers(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
+	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
@@ -155,7 +156,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -165,6 +166,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
+	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
@@ -210,7 +212,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -220,6 +222,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
+	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return
@@ -270,7 +273,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -280,6 +283,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 			middlewareStack.Handle,
 		),
 	)
+	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
 		return

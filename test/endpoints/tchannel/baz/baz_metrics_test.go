@@ -67,10 +67,11 @@ func TestCallMetrics(t *testing.T) {
 		}, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)

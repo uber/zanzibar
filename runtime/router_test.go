@@ -48,7 +48,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -64,7 +64,8 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			},
 		),
 	)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	assert.NoError(t, err)
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/bar/",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -80,6 +81,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	testRequests := []struct {
 		url      string
@@ -187,7 +189,7 @@ func TestRouterPanic(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -203,6 +205,7 @@ func TestRouterPanic(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
 	if !assert.NoError(t, err) {
@@ -248,7 +251,7 @@ func TestRouterPanicObject(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -264,6 +267,7 @@ func TestRouterPanicObject(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
 	if !assert.NoError(t, err) {
@@ -309,7 +313,7 @@ func TestRouterPanicNilPointer(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
 		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
@@ -326,6 +330,7 @@ func TestRouterPanicNilPointer(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
 	if !assert.NoError(t, err) {

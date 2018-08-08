@@ -204,10 +204,11 @@ func TestHTTPEndpointToTChannelClient(t *testing.T) {
 		return resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 	headers["x-token"] = "token"
@@ -270,10 +271,11 @@ func TestHTTPEndpointToTChannelClientWithUpstreamSpan(t *testing.T) {
 		return resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 	headers["x-token"] = "token"
@@ -369,10 +371,11 @@ func TestTChannelEndpoint(t *testing.T) {
 		}, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{

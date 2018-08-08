@@ -47,7 +47,7 @@ func TestInvalidStatusCode(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -62,6 +62,7 @@ func TestInvalidStatusCode(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -101,7 +102,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -116,6 +117,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -160,7 +162,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -175,6 +177,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -228,7 +231,7 @@ func TestResponsePeekBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -258,6 +261,7 @@ func TestResponsePeekBody(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -293,7 +297,7 @@ func TestResponseSetHeaders(t *testing.T) {
 	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -313,6 +317,7 @@ func TestResponseSetHeaders(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -340,7 +345,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -364,6 +369,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
@@ -396,7 +402,7 @@ func TestPendingResponseBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.AllHostScope,
@@ -425,6 +431,7 @@ func TestPendingResponseBody(t *testing.T) {
 			},
 		),
 	)
+	assert.NoError(t, err)
 
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
 	if !assert.NoError(t, err) {
