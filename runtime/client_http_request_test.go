@@ -100,7 +100,7 @@ func TestMakingClientWriteJSONWithBadHTTPMethod(t *testing.T) {
 		map[string]string{},
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "clientID", "DoStuff", client)
 
 	err = req.WriteJSON("@INVALIDMETHOD", "/foo", nil, nil)
 	assert.NotNil(t, err)
@@ -152,7 +152,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	res, err := req.Do(context.Background())
+	res, err := req.Do()
 	assert.NoError(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 

@@ -72,6 +72,7 @@ type TChannelClient struct {
 }
 
 type tchannelOutboundCall struct {
+	ctx           context.Context
 	client        *TChannelClient
 	call          *tchannel.OutboundCall
 	methodName    string
@@ -142,6 +143,7 @@ func (c *TChannelClient) Call(
 	serviceMethod := thriftService + "::" + methodName
 
 	call := &tchannelOutboundCall{
+		ctx:           ctx,
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
@@ -150,7 +152,7 @@ func (c *TChannelClient) Call(
 		metrics:       c.metrics[serviceMethod],
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp, false)
+	return c.call(call, reqHeaders, req, resp, false)
 }
 
 // CallThruAltChannel makes a RPC call using a configured alternate channel
@@ -163,6 +165,7 @@ func (c *TChannelClient) CallThruAltChannel(
 	serviceMethod := thriftService + "::" + methodName
 
 	call := &tchannelOutboundCall{
+		ctx:           ctx,
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
@@ -171,11 +174,10 @@ func (c *TChannelClient) CallThruAltChannel(
 		metrics:       c.metrics[serviceMethod],
 	}
 
-	return c.call(ctx, call, reqHeaders, req, resp, true)
+	return c.call(call, reqHeaders, req, resp, true)
 }
 
 func (c *TChannelClient) call(
-	ctx context.Context,
 	call *tchannelOutboundCall,
 	reqHeaders map[string]string,
 	req, resp RWTStruct,
@@ -188,12 +190,12 @@ func (c *TChannelClient) call(
 		TimeoutPerAttempt: c.timeoutPerAttempt,
 	}
 	ctxBuilder := tchannel.NewContextBuilder(c.timeout).
-		SetParentContext(ctx).
+		SetParentContext(call.ctx).
 		SetRetryOptions(&retryOpts)
 	if c.routingKey != nil {
 		ctxBuilder.SetRoutingKey(*c.routingKey)
 	}
-	rd := GetRoutingDelegateFromCtx(ctx)
+	rd := GetRoutingDelegateFromCtx(call.ctx)
 	if rd != "" {
 		ctxBuilder.SetRoutingDelegate(rd)
 	}
@@ -298,6 +300,9 @@ func (c *tchannelOutboundCall) logFields() []zapcore.Field {
 	}
 	for k, v := range c.resHeaders {
 		fields = append(fields, zap.String("Response-Header-"+k, v))
+	}
+	if v := GetRequestUUIDFromCtx(c.ctx); v != nil {
+		fields = append(fields, zap.String(string(RequestUUIDKey), v.String()))
 	}
 
 	return fields

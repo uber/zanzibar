@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -35,11 +36,13 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ServerHTTPRequest struct manages request
 type ServerHTTPRequest struct {
 	httpRequest *http.Request
+	ctx         context.Context
 	res         *ServerHTTPResponse
 	started     bool
 	startTime   time.Time
@@ -67,6 +70,7 @@ func NewServerHTTPRequest(
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
+		ctx:         withRequestFields(r.Context()),
 		httpRequest: r,
 		queryValues: nil,
 		metrics:     endpoint.metrics,
@@ -482,4 +486,29 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 // GetSpan returns the http request span
 func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
+}
+
+// GetExtendedLogFields append `context` log fields for
+// a requests during its life cycle, such fields might come
+// from context or req header
+func (req *ServerHTTPRequest) GetExtendedLogFields(fields ...zapcore.Field) []zapcore.Field {
+	// TODO: add other context or header fields
+	var (
+		ret       []zapcore.Field
+		presented = make(map[string]bool)
+	)
+	if reqUUID := GetRequestUUIDFromCtx(req.ctx); reqUUID != nil {
+		presented[string(RequestUUIDKey)] = true
+		ret = []zapcore.Field{
+			zap.String(string(RequestUUIDKey), reqUUID.String()),
+		}
+	}
+	for _, f := range fields {
+		if _, ok := presented[f.Key]; ok {
+			continue
+		}
+		presented[f.String] = true
+		ret = append(ret, f)
+	}
+	return ret
 }

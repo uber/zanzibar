@@ -29,7 +29,8 @@ import (
 type contextFieldKey string
 
 const (
-	requestUUIDKey     = contextFieldKey("requestUUID")
+	// RequestUUIDKey is the key for request UUID
+	RequestUUIDKey     = contextFieldKey("requestUUID")
 	routingDelegateKey = contextFieldKey("rd")
 )
 
@@ -37,13 +38,13 @@ const (
 // future, we can use a request context struct to add more context in terms of
 // request handler, etc if need be.
 func withRequestFields(ctx context.Context) context.Context {
-	return context.WithValue(ctx, requestUUIDKey, uuid.NewUUID())
+	return context.WithValue(ctx, RequestUUIDKey, uuid.NewUUID())
 }
 
 // GetRequestUUIDFromCtx returns the RequestUUID, if it exists on context
 // TODO: in future, we can extend this to have request object
 func GetRequestUUIDFromCtx(ctx context.Context) uuid.UUID {
-	if val := ctx.Value(requestUUIDKey); val != nil {
+	if val := ctx.Value(RequestUUIDKey); val != nil {
 		uuid, _ := val.(uuid.UUID)
 		return uuid
 	}

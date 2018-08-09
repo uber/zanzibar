@@ -57,6 +57,7 @@ type TChannelEndpoint struct {
 }
 
 type tchannelInboundCall struct {
+	ctx        context.Context
 	endpoint   *TChannelEndpoint
 	call       *tchannel.InboundCall
 	success    bool
@@ -180,12 +181,13 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	c := tchannelInboundCall{
 		endpoint: e,
 		call:     call,
+		ctx:      ctx,
 	}
 	c.start()
-	go func() { errc <- s.handle(ctx, &c) }()
+	go func() { errc <- s.handle(c.ctx, &c) }()
 	select {
-	case <-ctx.Done():
-		err = ctx.Err()
+	case <-c.ctx.Done():
+		err = c.ctx.Err()
 		if err == context.Canceled {
 			// check if context was Canceled due to handle response
 			if c.responded {
@@ -205,7 +207,7 @@ func (s *TChannelRouter) handle(
 	if err = c.readReqHeaders(ctx); err != nil {
 		return err
 	}
-	wireValue, err := c.readReqBody(ctx)
+	wireValue, err := c.readReqBody()
 	if err != nil {
 		return err
 	}
@@ -215,16 +217,16 @@ func (s *TChannelRouter) handle(
 	ctx = tchannel.ExtractInboundSpan(ctx, c.call, c.reqHeaders, tracer)
 
 	// handle request
-	resp, err := c.handle(ctx, &wireValue)
+	resp, err := c.handle(&wireValue)
 	if err != nil {
 		return err
 	}
 
 	// write response
-	if err = c.writeResHeaders(ctx); err != nil {
+	if err = c.writeResHeaders(); err != nil {
 		return err
 	}
-	if err = c.writeResBody(ctx, resp); err != nil {
+	if err = c.writeResBody(resp); err != nil {
 		return err
 	}
 
@@ -267,6 +269,9 @@ func (c *tchannelInboundCall) logFields() []zapcore.Field {
 	}
 	for k, v := range c.resHeaders {
 		fields = append(fields, zap.String("Response-Header-"+k, v))
+	}
+	if v := GetRequestUUIDFromCtx(c.ctx); v != nil {
+		fields = append(fields, zap.String(string(RequestUUIDKey), v.String()))
 	}
 
 	return fields
@@ -311,9 +316,9 @@ func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
 }
 
 // readReqBody reads request body from arg3
-func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.Value, err error) {
+func (c *tchannelInboundCall) readReqBody() (wireValue wire.Value, err error) {
 	// fail fast if timed out
-	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+	if deadline, ok := c.ctx.Deadline(); ok && time.Now().After(deadline) {
 		err = context.DeadlineExceeded
 		return
 	}
@@ -364,16 +369,16 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 }
 
 // handle tchannel server endpoint call
-func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value) (resp RWTStruct, err error) {
+func (c *tchannelInboundCall) handle(wireValue *wire.Value) (resp RWTStruct, err error) {
 	// fail fast if timed out
-	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+	if deadline, ok := c.ctx.Deadline(); ok && time.Now().After(deadline) {
 		err = context.DeadlineExceeded
 		return
 	}
 
-	c.success, resp, c.resHeaders, err = c.endpoint.Handle(ctx, c.reqHeaders, wireValue)
+	c.success, resp, c.resHeaders, err = c.endpoint.Handle(c.ctx, c.reqHeaders, wireValue)
 	if c.endpoint.callback != nil {
-		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
+		defer c.endpoint.callback(c.ctx, c.endpoint.Method, resp)
 	}
 	if err != nil {
 		LogErrorWarnTimeout(c.endpoint.Logger, err, "Unexpected tchannel system error")
@@ -390,9 +395,9 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 }
 
 // writeResHeaders writes response headers to arg2
-func (c *tchannelInboundCall) writeResHeaders(ctx context.Context) error {
+func (c *tchannelInboundCall) writeResHeaders() error {
 	// fail fast if timed out
-	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+	if deadline, ok := c.ctx.Deadline(); ok && time.Now().After(deadline) {
 		return context.DeadlineExceeded
 	}
 
@@ -420,9 +425,9 @@ func (c *tchannelInboundCall) writeResHeaders(ctx context.Context) error {
 }
 
 // writeResBody writes response body to arg3
-func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) error {
+func (c *tchannelInboundCall) writeResBody(resp RWTStruct) error {
 	// fail fast if timed out
-	if deadline, ok := ctx.Deadline(); ok && time.Now().After(deadline) {
+	if deadline, ok := c.ctx.Deadline(); ok && time.Now().After(deadline) {
 		return context.DeadlineExceeded
 	}
 
