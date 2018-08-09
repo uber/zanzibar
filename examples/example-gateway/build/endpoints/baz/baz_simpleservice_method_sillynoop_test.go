@@ -61,10 +61,11 @@ func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {
 		return resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "sillyNoop", "SimpleService::sillyNoop",
 		bazclient.NewSimpleServiceSillyNoopHandler(fakeDeliberateDiffNoop),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 

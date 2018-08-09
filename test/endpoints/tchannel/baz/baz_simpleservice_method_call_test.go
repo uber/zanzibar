@@ -64,10 +64,11 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		}, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{
@@ -174,10 +175,11 @@ func TestCallTChannelTimeout(t *testing.T) {
 			"some-res-header": "something",
 		}, nil
 	}
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "call", "SimpleService::call",
 		bazClient.NewSimpleServiceCallHandler(fakeCall),
 	)
+	assert.NoError(t, err)
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{

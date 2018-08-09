@@ -74,10 +74,11 @@ func TestCompareSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "compare", "SimpleService::compare",
 		bazclient.NewSimpleServiceCompareHandler(fakeCompare),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 

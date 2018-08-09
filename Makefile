@@ -80,7 +80,7 @@ lint: check-licence eclint-check
 	@echo "Checking errcheck..."
 	@go run vendor/github.com/kisielk/errchek/main.go $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking staticcheck..."
-	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck   vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
+	@go build -o vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck.go
 	@./vendor/honnef.co/go/tools/cmd/staticcheck/staticcheck $(PKGS) 2>&1 | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking for unresolved FIXMEs..."
 	@git grep -i fixme | grep -v -e vendor -e Makefile | $(FILTER_LINT) | tee -a lint.log

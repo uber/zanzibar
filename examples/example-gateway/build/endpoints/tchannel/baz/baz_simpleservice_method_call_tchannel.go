@@ -199,6 +199,6 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "Call", reqHeaders, req, res)
-	sub.Peers().Remove(hostPort)
+	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }

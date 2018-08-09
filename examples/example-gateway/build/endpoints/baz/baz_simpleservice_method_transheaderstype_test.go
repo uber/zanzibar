@@ -73,10 +73,11 @@ func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {
 		return &res, resHeaders, nil
 	}
 
-	gateway.TChannelBackends()["baz"].Register(
+	err = gateway.TChannelBackends()["baz"].Register(
 		"baz", "transHeadersType", "SimpleService::transHeadersType",
 		bazclient.NewSimpleServiceTransHeadersTypeHandler(fakeTransHeadersType),
 	)
+	assert.NoError(t, err)
 
 	headers := map[string]string{}
 	headers["x-boolean"] = "true"
