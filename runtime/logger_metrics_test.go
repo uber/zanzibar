@@ -21,30 +21,36 @@
 package zanzibar_test
 
 import (
-	"io/ioutil"
-	"testing"
-
+	"context"
+	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
-
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io/ioutil"
+	"testing"
 )
 
-func TestLoggingZapCore(t *testing.T) {
-	metricsScope := tally.NewTestScope("test", nil)
-
-	tempLogger := zap.New(
+func newTempLogger(scope tally.TestScope) *zap.Logger {
+	if scope == nil {
+		scope = tally.NewTestScope("test", nil)
+	}
+	return zap.New(
 		zanzibar.NewInstrumentedZapCore(
 			zapcore.NewCore(
 				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 				zapcore.AddSync(ioutil.Discard),
 				zap.DebugLevel,
 			),
-			metricsScope,
+			scope,
 		),
 	)
+}
+
+func TestLoggingZapCore(t *testing.T) {
+	metricsScope := tally.NewTestScope("test", nil)
+	tempLogger := newTempLogger(metricsScope)
 
 	tempLogger.Debug("debug msg")
 	tempLogger.Info("info msg")
@@ -73,5 +79,50 @@ func TestLoggingZapCore(t *testing.T) {
 
 	for _, key := range expectedKeys {
 		assert.Contains(t, counters, key, "should contain %s", key)
+	}
+}
+
+func BenchmarkLogger(b *testing.B) {
+	testCases := []struct {
+		label            string
+		perRequestLogger bool
+		logPerRequest    int
+		numFieldPerLog   int
+	}{
+		{"per endpoint, light log", false, 1, 1},
+		{"per endpoint, medium log", false, 10, 50},
+		{"per endpoint, heavy log", false, 20, 100},
+		{"per request, light log", true, 1, 1},
+		{"per request, medium log", true, 10, 50},
+		{"per request, heavy log", true, 20, 100},
+	}
+
+	getLogFields := func(ctx context.Context, n int) []zap.Field {
+		zfields := []zap.Field{}
+		UUID := ctx.Value("reqUUID").(uuid.UUID).String()
+		for i := 0; i < n; i++ {
+			zfields = append(zfields, zap.String("reqUUID", UUID))
+		}
+		return zfields
+	}
+
+	for _, tt := range testCases {
+		b.Run(tt.label, func(b *testing.B) { // per test cases
+			logger := newTempLogger(nil)
+			ctx := context.WithValue(context.Background(), "reqUUID", uuid.NewUUID())
+			zfields := getLogFields(ctx, tt.numFieldPerLog)
+
+			for i := 0; i < b.N; i++ { // per request
+				if tt.perRequestLogger {
+					logger = logger.With(zfields...)
+					logger.Info("test-msg")
+				} else {
+					for j := 0; j < tt.logPerRequest; j++ {
+						zfields := getLogFields(ctx, tt.numFieldPerLog)
+						logger.Info("test-msg", zfields...)
+					}
+				}
+			}
+		})
 	}
 }
