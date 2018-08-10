@@ -122,7 +122,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "{{$methodName}}", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "{{$methodName}}", c.httpClient)
 
 	{{if .ReqHeaderGoStatements }}
 	{{range $index, $line := .ReqClientHeaderGoStatements -}}
@@ -168,7 +168,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{- end}}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}

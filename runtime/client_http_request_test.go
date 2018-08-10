@@ -66,7 +66,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 		map[string]string{},
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("clientID", "DoStuff", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "clientID", "DoStuff", client)
 
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
@@ -140,7 +140,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
 
-	req := zanzibar.NewClientHTTPRequest("bar", "Normal", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "bar", "Normal", client)
 
 	err = req.WriteJSON(
 		"POST",
@@ -415,7 +415,7 @@ func TestInjectSpan(t *testing.T) {
 	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
 	barClient := deps.Client.Bar
 	client := barClient.HTTPClient()
-	req := zanzibar.NewClientHTTPRequest("bar", "Normal", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "bar", "Normal", client)
 	err = req.WriteJSON(
 		"POST",
 		client.BaseURL+"/bar-path",
