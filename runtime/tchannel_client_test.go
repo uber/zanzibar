@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -33,6 +34,7 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 	}
 	staticTestTime := time.Unix(1500000000, 0)
 	outboundCall := &tchannelOutboundCall{
+		ctx:           context.Background(),
 		methodName:    "Get",
 		serviceMethod: "Test",
 		startTime:     staticTestTime,

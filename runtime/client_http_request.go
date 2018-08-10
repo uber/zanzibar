@@ -31,11 +31,13 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ClientHTTPRequest is the struct for making client
 // requests using an outbound http client.
 type ClientHTTPRequest struct {
+	ctx            context.Context
 	ClientID       string
 	MethodName     string
 	client         *HTTPClient
@@ -51,12 +53,14 @@ type ClientHTTPRequest struct {
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest
 func NewClientHTTPRequest(
+	ctx context.Context,
 	clientID, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
 	req := &ClientHTTPRequest{
 		ClientID:       clientID,
 		MethodName:     methodName,
+		ctx:            ctx,
 		client:         client,
 		Logger:         client.loggers[methodName],
 		metrics:        client.metrics[methodName],
@@ -71,7 +75,7 @@ func NewClientHTTPRequest(
 func (req *ClientHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.Logger.Error("Cannot start ClientHTTPRequest twice")
+		req.Logger.Error("Cannot start ClientHTTPRequest twice", req.GetExtendedLogFields()...)
 		/* coverage ignore next line */
 		return
 	}
@@ -93,8 +97,7 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 		headerValue := actualHeaders.Get(headerName)
 		if headerValue == "" {
 			req.Logger.Warn("Got outbound request without mandatory header",
-				zap.String("headerName", headerName),
-			)
+				req.GetExtendedLogFields(zap.String("headerName", headerName))...)
 
 			return errors.New("Missing mandatory header: " + headerName)
 		}
@@ -114,7 +117,8 @@ func (req *ClientHTTPRequest) WriteJSON(
 	if body != nil {
 		rawBody, err := body.MarshalJSON()
 		if err != nil {
-			req.Logger.Error("Could not serialize request json", zap.Error(err))
+			req.Logger.Error("Could not serialize request json",
+				req.GetExtendedLogFields(zap.Error(httpErr))...)
 			return errors.Wrapf(
 				err, "Could not serialize %s.%s request json",
 				req.ClientID, req.MethodName,
@@ -127,7 +131,8 @@ func (req *ClientHTTPRequest) WriteJSON(
 	}
 
 	if httpErr != nil {
-		req.Logger.Error("Could not create outbound request", zap.Error(httpErr))
+		req.Logger.Error("Could not create outbound request",
+			req.GetExtendedLogFields(zap.Error(httpErr))...)
 		return errors.Wrapf(
 			httpErr, "Could not create outbound %s.%s request",
 			req.ClientID, req.MethodName,
@@ -150,24 +155,24 @@ func (req *ClientHTTPRequest) WriteJSON(
 }
 
 // Do will send the request out.
-func (req *ClientHTTPRequest) Do(
-	ctx context.Context,
-) (*ClientHTTPResponse, error) {
+func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	opName := fmt.Sprintf("%s.%s", req.ClientID, req.MethodName)
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
-	span, ctx := opentracing.StartSpanFromContext(ctx, opName, urlTag, methodTag)
+	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
 		/* coverage ignore next line */
-		req.Logger.Error("Fail to inject span to headers", zap.Error(err))
+		req.Logger.Error("Fail to inject span to headers",
+			req.GetExtendedLogFields(zap.Error(err))...)
 		/* coverage ignore next line */
 		return nil, err
 	}
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
-		req.Logger.Error("Could not make outbound request", zap.Error(err))
+		req.Logger.Error("Could not make outbound request",
+			req.GetExtendedLogFields(zap.Error(err))...)
 		return nil, err
 	}
 
@@ -189,4 +194,29 @@ func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format i
 	}
 
 	return nil
+}
+
+// GetExtendedLogFields append `context` log fields for
+// a requests during its life cycle, such fields might come
+// from context or req header
+func (req *ClientHTTPRequest) GetExtendedLogFields(fields ...zapcore.Field) []zapcore.Field {
+	// TODO: add other context or header fields
+	var (
+		ret       []zapcore.Field
+		presented = make(map[string]bool)
+	)
+	if reqUUID := GetRequestUUIDFromCtx(req.ctx); reqUUID != nil {
+		presented[string(RequestUUIDKey)] = true
+		ret = []zapcore.Field{
+			zap.String(string(RequestUUIDKey), reqUUID.String()),
+		}
+	}
+	for _, f := range fields {
+		if _, ok := presented[f.Key]; ok {
+			continue
+		}
+		presented[f.String] = true
+		ret = append(ret, f)
+	}
+	return ret
 }

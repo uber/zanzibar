@@ -21,6 +21,7 @@
 package zanzibar_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io/ioutil"
@@ -28,15 +29,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"bytes"
-
 	"github.com/buger/jsonparser"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/uber-go/tally"
 	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 	"github.com/uber/zanzibar/runtime"
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestInvalidReadAndUnmarshalBody(t *testing.T) {
@@ -843,4 +847,64 @@ func TestSpanCreated(t *testing.T) {
 		return
 	}
 	assert.Equal(t, "200 OK", resp.Status)
+}
+
+func TestGetExtendedLogFields(t *testing.T) {
+	var (
+		r, _ = http.NewRequest(
+			"GET", "/path/to/url", nil)
+		e = zanzibar.NewRouterEndpoint(
+			zap.NewNop(),
+			tally.NoopScope,
+			opentracing.NoopTracer{},
+			"dummy",
+			"dummy",
+			nil,
+		)
+		dummyReq = zanzibar.NewServerHTTPRequest(nil, r, nil, e)
+		UUID     = uuid.NewUUID()
+		ctx      = context.WithValue(context.Background(), zanzibar.RequestUUIDKey, UUID)
+	)
+	testCases := []struct {
+		label    string
+		ctx      context.Context
+		fields   []zapcore.Field
+		expected []zapcore.Field
+	}{
+		{"extract req uuid",
+			ctx,
+			[]zapcore.Field{
+				zap.String("key", "val"),
+			},
+			[]zapcore.Field{
+				zap.String(string(zanzibar.RequestUUIDKey), UUID.String()),
+				zap.String("key", "val"),
+			},
+		},
+		{"not allow override",
+			ctx,
+			[]zapcore.Field{
+
+				zap.String(string(zanzibar.RequestUUIDKey), "1-1-1-1"),
+			}, []zapcore.Field{
+				zap.String(string(zanzibar.RequestUUIDKey), UUID.String()),
+			}},
+		{
+			"no req uuid from context",
+			context.Background(),
+			[]zapcore.Field{
+				zap.String("key", "val"),
+			},
+			[]zapcore.Field{
+				zap.String("key", "val"),
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.label, func(t *testing.T) {
+			fields := dummyReq.GetExtendedLogFields(tt.ctx, tt.fields...)
+			assert.Equal(t, fields, tt.expected)
+		})
+	}
 }

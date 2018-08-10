@@ -31,7 +31,7 @@ import (
 func TestWithRequestFields(t *testing.T) {
 	ctx := withRequestFields(context.TODO())
 
-	u := ctx.Value(requestUUIDKey)
+	u := ctx.Value(RequestUUIDKey)
 	u1, ok := u.(uuid.UUID)
 
 	assert.NotNil(t, ctx)

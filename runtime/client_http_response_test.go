@@ -75,11 +75,11 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 		map[string]string{},
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "bar", "echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
-	res, err := req.Do(context.Background())
+	res, err := req.Do()
 	assert.NoError(t, err)
 
 	var resp string
@@ -131,11 +131,11 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 		map[string]string{},
 		time.Second,
 	)
-	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "bar", "echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
-	res, err := req.Do(context.Background())
+	res, err := req.Do()
 	assert.NoError(t, err)
 
 	var resp string
@@ -187,12 +187,12 @@ func TestUnknownStatusCode(t *testing.T) {
 		time.Second,
 	)
 
-	req := zanzibar.NewClientHTTPRequest("bar", "echo", client)
+	req := zanzibar.NewClientHTTPRequest(context.Background(), "bar", "echo", client)
 
 	err = req.WriteJSON("POST", baseURL+"/bar/echo", nil, myJson{})
 	assert.NoError(t, err)
 
-	res, err := req.Do(context.Background())
+	res, err := req.Do()
 	assert.NoError(t, err)
 
 	var resp string

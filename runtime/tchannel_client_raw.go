@@ -85,6 +85,7 @@ func (r *RawTChannelClient) Call(
 	serviceMethod := thriftService + "::" + methodName
 
 	call := &tchannelOutboundCall{
+		ctx:           ctx,
 		client:        r.tc,
 		methodName:    serviceMethod,
 		serviceMethod: serviceMethod,
@@ -99,5 +100,5 @@ func (r *RawTChannelClient) Call(
 		call.metrics = r.tc.metrics[serviceMethod]
 	}
 
-	return r.tc.call(ctx, call, reqHeaders, req, resp, false)
+	return r.tc.call(call, reqHeaders, req, resp, false)
 }
