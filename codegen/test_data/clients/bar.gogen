@@ -683,6 +683,14 @@ func (c *barClient) ArgWithQueryParams(
 		userUUIDQuery := *r.UserUUID
 		queryValues.Set("userUUID", userUUIDQuery)
 	}
+	if r.Foo != nil {
+		for _, value := range r.Foo {
+			queryValues.Add("foo[]", value)
+		}
+	}
+	for _, value := range r.Bar {
+		queryValues.Add("bar[]", strconv.Itoa(int(value)))
+	}
 	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)

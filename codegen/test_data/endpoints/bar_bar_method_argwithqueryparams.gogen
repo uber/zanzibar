@@ -94,6 +94,25 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
 
+	fooOk := req.HasQueryValue("foo[]")
+	if fooOk {
+		fooQuery, ok := req.GetQueryValues("foo[]")
+		if !ok {
+			return
+		}
+		requestBody.Foo = fooQuery
+	}
+
+	barOk := req.CheckQueryValue("bar[]")
+	if !barOk {
+		return
+	}
+	barQuery, ok := req.GetQueryInt8List("bar[]")
+	if !ok {
+		return
+	}
+	requestBody.Bar = barQuery
+
 	// log endpoint request to downstream services
 	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{

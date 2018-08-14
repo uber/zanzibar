@@ -66,7 +66,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"name=foo&userUUID=bar",
+				"bar%5B%5D=1&foo%5B%5D=a&foo%5B%5D=b&name=foo&userUUID=bar",
 				r.URL.RawQuery,
 			)
 
@@ -80,7 +80,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/bar/argWithQueryParams?name=foo&userUUID=bar",
+		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo[]=a&foo[]=b&bar[]=1",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -115,7 +115,7 @@ func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
 		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"name=foo&userUUID=bar",
+				"bar%5B%5D=1&foo%5B%5D=a&foo%5B%5D=b&name=foo&userUUID=bar",
 				r.URL.RawQuery,
 			)
 
@@ -129,7 +129,7 @@ func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/bar/argWithQueryParams?name=foo&userUUID=bar",
+		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo[]=a&foo[]=b&bar[]=1",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {

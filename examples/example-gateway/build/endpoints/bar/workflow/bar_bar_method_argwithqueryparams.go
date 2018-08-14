@@ -117,6 +117,14 @@ func convertToArgWithQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWithQue
 
 	out.Name = string(in.Name)
 	out.UserUUID = (*string)(in.UserUUID)
+	out.Foo = make([]string, len(in.Foo))
+	for index1, value2 := range in.Foo {
+		out.Foo[index1] = string(value2)
+	}
+	out.Bar = make([]int8, len(in.Bar))
+	for index3, value4 := range in.Bar {
+		out.Bar[index3] = int8(value4)
+	}
 
 	return out
 }
