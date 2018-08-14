@@ -208,6 +208,7 @@ func walkFieldGroupsInternal(
 		case *compile.I32Spec:
 		case *compile.I64Spec:
 		case *compile.EnumSpec:
+		case *compile.ListSpec:
 		case *compile.StructSpec:
 			bail := walkFieldGroupsInternal(
 				goPrefix+"."+PascalCase(field.Name),
@@ -222,8 +223,6 @@ func walkFieldGroupsInternal(
 		case *compile.SetSpec:
 			// TODO: implement
 		case *compile.MapSpec:
-			// TODO: implement
-		case *compile.ListSpec:
 			// TODO: implement
 		default:
 			panic("unknown Spec")

@@ -1013,7 +1013,7 @@ func (ms *MethodSpec) setTypeConverters(
 func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	var queryMethod string
 
-	switch typeSpec.(type) {
+	switch t := typeSpec.(type) {
 	case *compile.BoolSpec:
 		queryMethod = "GetQueryBool"
 	case *compile.I8Spec:
@@ -1028,6 +1028,28 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 		queryMethod = "GetQueryFloat64"
 	case *compile.StringSpec:
 		queryMethod = "GetQueryValue"
+	case *compile.ListSpec:
+		switch t.ValueSpec.(type) {
+		case *compile.BoolSpec:
+			queryMethod = "GetQueryBoolList"
+		case *compile.I8Spec:
+			queryMethod = "GetQueryInt8List"
+		case *compile.I16Spec:
+			queryMethod = "GetQueryInt16List"
+		case *compile.I32Spec:
+			queryMethod = "GetQueryInt32List"
+		case *compile.I64Spec:
+			queryMethod = "GetQueryInt64List"
+		case *compile.DoubleSpec:
+			queryMethod = "GetQueryFloat64List"
+		case *compile.StringSpec:
+			queryMethod = "GetQueryValues"
+		default:
+			panic(fmt.Sprintf(
+				"Unsupported list value type (%T) %v for query string parameter",
+				t.ValueSpec, t.ValueSpec,
+			))
+		}
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for query string parameter",
@@ -1187,6 +1209,11 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			}
 		}
 
+		_, isList := realType.(*compile.ListSpec)
+		if isList {
+			longQueryName = longQueryName + "[]"
+		}
+
 		// If the type is a struct then we cannot really do anything
 		if _, ok := realType.(*compile.StructSpec); ok {
 			// if a field is a struct then we must do a nil check
@@ -1239,7 +1266,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		}
 
 		queryMethodName := getQueryMethodForType(realType)
-		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
 			identifierName, queryMethodName, longQueryName,
@@ -1250,13 +1276,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		statements.append("}")
 
 		if field.Required {
-			statements.appendf("requestBody%s = %s",
-				longFieldName, identifierName,
-			)
+			statements.appendf("requestBody%s = %s", longFieldName, identifierName)
 		} else {
-			statements.appendf("\trequestBody%s = ptr.%s(%s)",
-				longFieldName, pointerMethod, identifierName,
-			)
+			if isList {
+				statements.appendf("requestBody%s = %s", longFieldName, identifierName)
+			} else {
+				pointerMethod := pointerMethodType(realType)
+				statements.appendf("\trequestBody%s = ptr.%s(%s)", longFieldName, pointerMethod, identifierName)
+			}
 			statements.append("}")
 		}
 

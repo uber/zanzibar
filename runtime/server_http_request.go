@@ -363,6 +363,134 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	return number, true
 }
 
+// GetQueryBoolList will return a query param as a list of boolean
+func (req *ServerHTTPRequest) GetQueryBoolList(key string) ([]bool, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]bool, len(values))
+	for i, value := range values {
+		if value == "true" {
+			ret[i] = true
+		} else if value == "false" {
+			ret[i] = false
+		} else {
+			err := &strconv.NumError{
+				Func: "ParseBool",
+				Num:  value,
+				Err:  strconv.ErrSyntax,
+			}
+			req.logAndSendQueryError(err, "bool", key, value)
+			return nil, false
+		}
+	}
+
+	return ret, true
+}
+
+// GetQueryInt8List will return a query params as list of int8
+func (req *ServerHTTPRequest) GetQueryInt8List(key string) ([]int8, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]int8, len(values))
+	for i, value := range values {
+		number, err := strconv.ParseInt(value, 10, 8)
+		if err != nil {
+			req.logAndSendQueryError(err, "int8", key, value)
+			return nil, false
+		}
+		ret[i] = int8(number)
+	}
+	return ret, true
+}
+
+// GetQueryInt16List will return a query params as list of int16
+func (req *ServerHTTPRequest) GetQueryInt16List(key string) ([]int16, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]int16, len(values))
+	for i, value := range values {
+		number, err := strconv.ParseInt(value, 10, 16)
+		if err != nil {
+			req.logAndSendQueryError(err, "int16", key, value)
+			return nil, false
+		}
+		ret[i] = int16(number)
+	}
+	return ret, true
+}
+
+// GetQueryInt32List will return a query params as list of int32
+func (req *ServerHTTPRequest) GetQueryInt32List(key string) ([]int32, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]int32, len(values))
+	for i, value := range values {
+		number, err := strconv.ParseInt(value, 10, 32)
+		if err != nil {
+			req.logAndSendQueryError(err, "int32", key, value)
+			return nil, false
+		}
+		ret[i] = int32(number)
+	}
+	return ret, true
+}
+
+// GetQueryInt64List will return a query params as list of int64
+func (req *ServerHTTPRequest) GetQueryInt64List(key string) ([]int64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]int64, len(values))
+	for i, value := range values {
+		number, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			req.logAndSendQueryError(err, "int64", key, value)
+			return nil, false
+		}
+		ret[i] = number
+	}
+	return ret, true
+}
+
+// GetQueryFloat64List will return a query params as list of float64
+func (req *ServerHTTPRequest) GetQueryFloat64List(key string) ([]float64, bool) {
+	success := req.parseQueryValues()
+	if !success {
+		return nil, false
+	}
+
+	values := req.queryValues[key]
+	ret := make([]float64, len(values))
+	for i, value := range values {
+		number, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			req.logAndSendQueryError(err, "float64", key, value)
+			return nil, false
+		}
+		ret[i] = number
+	}
+	return ret, true
+}
+
 // GetQueryValues will return all query parameters for key.
 func (req *ServerHTTPRequest) GetQueryValues(key string) ([]string, bool) {
 	success := req.parseQueryValues()
@@ -482,4 +610,17 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 // GetSpan returns the http request span
 func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
+}
+
+func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
+	req.Logger.Warn("Got request with invalid query string types",
+		zap.String("expected", expected),
+		zap.String("actual", value),
+		zap.String("key", key),
+		zap.Error(err),
+	)
+	if !req.parseFailed {
+		req.res.SendError(400, "Could not parse query string", err)
+		req.parseFailed = true
+	}
 }
