@@ -42,6 +42,7 @@ struct QueryParamsStruct {
     3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
     // TODO: validate required behaviour for headers
     4: optional string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+    5: required list<string> foo
 }
 
 struct QueryParamsOptsStruct {

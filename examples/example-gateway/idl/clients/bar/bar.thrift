@@ -53,6 +53,7 @@ struct QueryParamsStruct {
     4: optional string authUUID2 (
         zanzibar.http.ref = "query.myuuid"
     )
+    5: required list<string> foo
 }
 
 struct QueryParamsOptsStruct {

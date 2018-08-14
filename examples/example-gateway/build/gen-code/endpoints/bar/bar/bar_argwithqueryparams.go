@@ -20,32 +20,6 @@ type Bar_ArgWithQueryParams_Args struct {
 	Bar      []int8   `json:"bar,required"`
 }
 
-type _List_String_ValueList []string
-
-func (v _List_String_ValueList) ForEach(f func(wire.Value) error) error {
-	for _, x := range v {
-		w, err := wire.NewValueString(x), error(nil)
-		if err != nil {
-			return err
-		}
-		err = f(w)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v _List_String_ValueList) Size() int {
-	return len(v)
-}
-
-func (_List_String_ValueList) ValueType() wire.Type {
-	return wire.TBinary
-}
-
-func (_List_String_ValueList) Close() {}
-
 type _List_Byte_ValueList []int8
 
 func (v _List_Byte_ValueList) ForEach(f func(wire.Value) error) error {
@@ -128,24 +102,6 @@ func (v *Bar_ArgWithQueryParams_Args) ToWire() (wire.Value, error) {
 	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _List_String_Read(l wire.ValueList) ([]string, error) {
-	if l.ValueType() != wire.TBinary {
-		return nil, nil
-	}
-
-	o := make([]string, 0, l.Size())
-	err := l.ForEach(func(x wire.Value) error {
-		i, err := x.GetString(), error(nil)
-		if err != nil {
-			return err
-		}
-		o = append(o, i)
-		return nil
-	})
-	l.Close()
-	return o, err
 }
 
 func _List_Byte_Read(l wire.ValueList) ([]int8, error) {
@@ -263,21 +219,6 @@ func (v *Bar_ArgWithQueryParams_Args) String() string {
 	i++
 
 	return fmt.Sprintf("Bar_ArgWithQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _List_String_Equals(lhs, rhs []string) bool {
-	if len(lhs) != len(rhs) {
-		return false
-	}
-
-	for i, lv := range lhs {
-		rv := rhs[i]
-		if !(lv == rv) {
-			return false
-		}
-	}
-
-	return true
 }
 
 func _List_Byte_Equals(lhs, rhs []int8) bool {

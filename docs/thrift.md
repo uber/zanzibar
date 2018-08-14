@@ -172,7 +172,7 @@ how its serialized for the client ).
 	- double
 	- string
 	- list of bool, i8, i16, i32, i64, double or string
-	- struct with fields of bool, i8, i16, i32, i64, double or string
+	- struct with fields of bool, i8, i16, i32, i64, double, string, or list of bool, i8, i16, i32, i64, double or string
 
 	If the annotation is on a field of a list and that list is
 	a method argument, the URL query name will be prefixed with the

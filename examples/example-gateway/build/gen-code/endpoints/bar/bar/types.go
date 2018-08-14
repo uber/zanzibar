@@ -1310,11 +1310,38 @@ func (v *QueryParamsOptsStruct) GetAuthUUID2() (o string) {
 }
 
 type QueryParamsStruct struct {
-	Name      string  `json:"name,required"`
-	UserUUID  *string `json:"userUUID,omitempty"`
-	AuthUUID  *string `json:"authUUID,omitempty"`
-	AuthUUID2 *string `json:"authUUID2,omitempty"`
+	Name      string   `json:"name,required"`
+	UserUUID  *string  `json:"userUUID,omitempty"`
+	AuthUUID  *string  `json:"authUUID,omitempty"`
+	AuthUUID2 *string  `json:"authUUID2,omitempty"`
+	Foo       []string `json:"foo,required"`
 }
+
+type _List_String_ValueList []string
+
+func (v _List_String_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := wire.NewValueString(x), error(nil)
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_String_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_String_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_List_String_ValueList) Close() {}
 
 // ToWire translates a QueryParamsStruct struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
@@ -1333,7 +1360,7 @@ type QueryParamsStruct struct {
 //   }
 func (v *QueryParamsStruct) ToWire() (wire.Value, error) {
 	var (
-		fields [4]wire.Field
+		fields [5]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -1369,8 +1396,35 @@ func (v *QueryParamsStruct) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 4, Value: w}
 		i++
 	}
+	if v.Foo == nil {
+		return w, errors.New("field Foo of QueryParamsStruct is required")
+	}
+	w, err = wire.NewValueList(_List_String_ValueList(v.Foo)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 5, Value: w}
+	i++
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _List_String_Read(l wire.ValueList) ([]string, error) {
+	if l.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+
+	o := make([]string, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := x.GetString(), error(nil)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
 }
 
 // FromWire deserializes a QueryParamsStruct struct from its Thrift-level
@@ -1394,6 +1448,8 @@ func (v *QueryParamsStruct) FromWire(w wire.Value) error {
 	var err error
 
 	nameIsSet := false
+
+	fooIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -1435,11 +1491,23 @@ func (v *QueryParamsStruct) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 5:
+			if field.Value.Type() == wire.TList {
+				v.Foo, err = _List_String_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				fooIsSet = true
+			}
 		}
 	}
 
 	if !nameIsSet {
 		return errors.New("field Name of QueryParamsStruct is required")
+	}
+
+	if !fooIsSet {
+		return errors.New("field Foo of QueryParamsStruct is required")
 	}
 
 	return nil
@@ -1452,7 +1520,7 @@ func (v *QueryParamsStruct) String() string {
 		return "<nil>"
 	}
 
-	var fields [4]string
+	var fields [5]string
 	i := 0
 	fields[i] = fmt.Sprintf("Name: %v", v.Name)
 	i++
@@ -1468,8 +1536,25 @@ func (v *QueryParamsStruct) String() string {
 		fields[i] = fmt.Sprintf("AuthUUID2: %v", *(v.AuthUUID2))
 		i++
 	}
+	fields[i] = fmt.Sprintf("Foo: %v", v.Foo)
+	i++
 
 	return fmt.Sprintf("QueryParamsStruct{%v}", strings.Join(fields[:i], ", "))
+}
+
+func _List_String_Equals(lhs, rhs []string) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !(lv == rv) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Equals returns true if all the fields of this QueryParamsStruct match the
@@ -1487,6 +1572,9 @@ func (v *QueryParamsStruct) Equals(rhs *QueryParamsStruct) bool {
 		return false
 	}
 	if !_String_EqualsPtr(v.AuthUUID2, rhs.AuthUUID2) {
+		return false
+	}
+	if !_List_String_Equals(v.Foo, rhs.Foo) {
 		return false
 	}
 

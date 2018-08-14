@@ -499,6 +499,9 @@ func (c *barClient) ArgWithNestedQueryParams(
 		requestMyuuidQuery := *r.Request.AuthUUID2
 		queryValues.Set("request.myuuid", requestMyuuidQuery)
 	}
+	for _, value := range r.Request.Foo {
+		queryValues.Add("request.foo[]", value)
+	}
 	if r.Opt != nil {
 		optNameQuery := r.Opt.Name
 		queryValues.Set("opt.name", optNameQuery)

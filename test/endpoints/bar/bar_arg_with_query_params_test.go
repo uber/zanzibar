@@ -809,8 +809,8 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
-					"request.name=a-name&request.userUUID=a-uuid",
+				"request.authUUID=auth-uuid&request.foo%5B%5D=hi&request.myuuid=auth-uuid2"+
+					"&request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
 
@@ -825,7 +825,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
-			"request.name=a-name&request.userUUID=a-uuid",
+			"request.name=a-name&request.userUUID=a-uuid&request.foo[]=hi",
 		map[string]string{
 			"x-uuid":  "auth-uuid",
 			"x-uuid2": "auth-uuid2",
@@ -863,8 +863,8 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"opt.name=b-name&opt.userUUID=b-uuid&"+
-					"request.authUUID=auth-uuid&request.myuuid=auth-uuid2&"+
+				"opt.name=b-name&opt.userUUID=b-uuid&request.authUUID=auth-uuid&"+
+					"request.foo%5B%5D=hi&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
@@ -881,7 +881,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
 			"request.name=a-name&request.userUUID=a-uuid&"+
-			"opt.name=b-name&opt.userUUID=b-uuid",
+			"opt.name=b-name&opt.userUUID=b-uuid&request.foo[]=hi",
 		map[string]string{
 			"x-uuid":  "auth-uuid",
 			"x-uuid2": "auth-uuid2",
@@ -919,7 +919,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.name=a-name&request.userUUID=a-uuid",
+				"request.foo%5B%5D=hi&request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
 
@@ -934,7 +934,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
-			"request.name=a-name&request.userUUID=a-uuid",
+			"request.name=a-name&request.userUUID=a-uuid&request.foo[]=hi",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
