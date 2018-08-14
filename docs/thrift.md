@@ -161,7 +161,31 @@ how its serialized for the client ).
 	If the annotation is on a field of a struct and that struct is
 	a method argument, the URL query name will be prefixed with the
 	struct's field name plus ".".
-    
+
+	Following types of method params are supported in query params:
+
+	- bool
+	- i8
+	- i16
+	- i32
+	- i64
+	- double
+	- string
+	- list of bool, i8, i16, i32, i64, double or string
+	- struct with fields of bool, i8, i16, i32, i64, double or string
+
+	If the annotation is on a field of a list and that list is
+	a method argument, the URL query name will be prefixed with the
+	struct's field name plus "[]".
+
+ 	If the annotation is on a field of a struct and that struct is
+	a method argument, the URL query name will be prefixed with the
+	struct's field name plus ".".
+
+	For types beyond the above supported ones, http `POST` should be
+	used, and the method params should go into the request body instead
+	of url params.
+
  - `body.{{$fieldName}}` means that this field comes from 
 	a different field in the body. The fieldName is absolute
 	from the root of the body JSON object.
