@@ -1190,8 +1190,8 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 				statements.append("}")
 			} else {
 				encodeExpr := getQueryEncodeExpression(realType, "*r"+longFieldName)
-				statements.appendf("%s := %s", identifierName, encodeExpr)
-				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+				statements.appendf("\t%s := %s", identifierName, encodeExpr)
+				statements.appendf("\tqueryValues.Set(\"%s\", %s)", longQueryName, identifierName)
 			}
 			statements.append("}")
 		}
@@ -1305,7 +1305,7 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			statements.appendf("requestBody%s = %s", longFieldName, identifierName)
 		} else {
 			if isList {
-				statements.appendf("requestBody%s = %s", longFieldName, identifierName)
+				statements.appendf("\trequestBody%s = %s", longFieldName, identifierName)
 			} else {
 				pointerMethod := pointerMethodType(realType)
 				statements.appendf("\trequestBody%s = ptr.%s(%s)", longFieldName, pointerMethod, identifierName)
