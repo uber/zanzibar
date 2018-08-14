@@ -1065,7 +1065,7 @@ func getQueryEncodeExpression(
 ) string {
 	var encodeExpression string
 
-	switch typeSpec.(type) {
+	switch t := typeSpec.(type) {
 	case *compile.BoolSpec:
 		encodeExpression = "strconv.FormatBool(%s)"
 	case *compile.I8Spec:
@@ -1080,6 +1080,28 @@ func getQueryEncodeExpression(
 		encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
 	case *compile.StringSpec:
 		encodeExpression = "%s"
+	case *compile.ListSpec:
+		switch t.ValueSpec.(type) {
+		case *compile.BoolSpec:
+			encodeExpression = "strconv.FormatBool(%s)"
+		case *compile.I8Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I16Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I32Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I64Spec:
+			encodeExpression = "strconv.FormatInt(%s, 10)"
+		case *compile.DoubleSpec:
+			encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+		case *compile.StringSpec:
+			encodeExpression = "%s"
+		default:
+			panic(fmt.Sprintf(
+				"Unsupported list value type (%T) %v for query string parameter",
+				t.ValueSpec, t.ValueSpec,
+			))
+		}
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for query string parameter",
@@ -1138,6 +1160,10 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 		identifierName := CamelCase(longQueryName) + "Query"
+		_, isList := realType.(*compile.ListSpec)
+		if isList {
+			longQueryName = longQueryName + "[]"
+		}
 
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
@@ -1145,28 +1171,28 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		if field.Required {
-			encodeExpr := getQueryEncodeExpression(
-				realType, "r"+longFieldName,
-			)
-
-			statements.appendf("%s := %s",
-				identifierName, encodeExpr,
-			)
-			statements.appendf("queryValues.Set(\"%s\", %s)",
-				longQueryName, identifierName,
-			)
+			if isList {
+				encodeExpr := getQueryEncodeExpression(realType, "value")
+				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else {
+				encodeExpr := getQueryEncodeExpression(realType, "r"+longFieldName)
+				statements.appendf("%s := %s", identifierName, encodeExpr)
+				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+			}
 		} else {
-			encodeExpr := getQueryEncodeExpression(
-				realType, "*r"+longFieldName,
-			)
-
 			statements.appendf("if r%s != nil {", longFieldName)
-			statements.appendf("\t%s := %s",
-				identifierName, encodeExpr,
-			)
-			statements.appendf("\tqueryValues.Set(\"%s\", %s)",
-				longQueryName, identifierName,
-			)
+			if isList {
+				encodeExpr := getQueryEncodeExpression(realType, "value")
+				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else {
+				encodeExpr := getQueryEncodeExpression(realType, "*r"+longFieldName)
+				statements.appendf("%s := %s", identifierName, encodeExpr)
+				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+			}
 			statements.append("}")
 		}
 
