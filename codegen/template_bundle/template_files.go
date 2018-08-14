@@ -1852,6 +1852,7 @@ type MockService interface {
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
 	{{$mock}}() *{{$mockType}}
+	Server() *zanzibar.Gateway
 	Start()
 	Stop()
 }
@@ -1914,6 +1915,11 @@ func MustCreateTestService(t *testing.T) MockService {
 		httpClient:     		httpClient,
 		tChannelClient: 		tchannelClient,
 	}
+}
+
+// Server returns the mock server
+func (m *mockService) Server() *zanzibar.Gateway {
+	return m.server
 }
 
 // Start starts the mock server, panics if fails doing so
@@ -1995,7 +2001,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4205, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4338, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

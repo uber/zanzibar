@@ -56,6 +56,7 @@ type MockService interface {
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
 	MockClients() *MockClientNodes
+	Server() *zanzibar.Gateway
 	Start()
 	Stop()
 }
@@ -118,6 +119,11 @@ func MustCreateTestService(t *testing.T) MockService {
 		httpClient:     httpClient,
 		tChannelClient: tchannelClient,
 	}
+}
+
+// Server returns the mock server
+func (m *mockService) Server() *zanzibar.Gateway {
+	return m.server
 }
 
 // Start starts the mock server, panics if fails doing so
