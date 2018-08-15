@@ -14,20 +14,28 @@ import (
 //
 // The arguments for argWithManyQueryParams are sent and received over the wire as this struct.
 type Bar_ArgWithManyQueryParams_Args struct {
-	AStr         string   `json:"aStr,required"`
-	AnOptStr     *string  `json:"anOptStr,omitempty"`
-	ABool        bool     `json:"aBool,required"`
-	AnOptBool    *bool    `json:"anOptBool,omitempty"`
-	AInt8        int8     `json:"aInt8,required"`
-	AnOptInt8    *int8    `json:"anOptInt8,omitempty"`
-	AInt16       int16    `json:"aInt16,required"`
-	AnOptInt16   *int16   `json:"anOptInt16,omitempty"`
-	AInt32       int32    `json:"aInt32,required"`
-	AnOptInt32   *int32   `json:"anOptInt32,omitempty"`
-	AInt64       int64    `json:"aInt64,required"`
-	AnOptInt64   *int64   `json:"anOptInt64,omitempty"`
-	AFloat64     float64  `json:"aFloat64,required"`
-	AnOptFloat64 *float64 `json:"anOptFloat64,omitempty"`
+	AStr            string     `json:"aStr,required"`
+	AnOptStr        *string    `json:"anOptStr,omitempty"`
+	ABool           bool       `json:"aBool,required"`
+	AnOptBool       *bool      `json:"anOptBool,omitempty"`
+	AInt8           int8       `json:"aInt8,required"`
+	AnOptInt8       *int8      `json:"anOptInt8,omitempty"`
+	AInt16          int16      `json:"aInt16,required"`
+	AnOptInt16      *int16     `json:"anOptInt16,omitempty"`
+	AInt32          int32      `json:"aInt32,required"`
+	AnOptInt32      *int32     `json:"anOptInt32,omitempty"`
+	AInt64          int64      `json:"aInt64,required"`
+	AnOptInt64      *int64     `json:"anOptInt64,omitempty"`
+	AFloat64        float64    `json:"aFloat64,required"`
+	AnOptFloat64    *float64   `json:"anOptFloat64,omitempty"`
+	AUUID           UUID       `json:"aUUID,required"`
+	AnOptUUID       *UUID      `json:"anOptUUID,omitempty"`
+	AListUUID       []UUID     `json:"aListUUID,required"`
+	AnOptListUUID   []UUID     `json:"anOptListUUID,omitempty"`
+	AStringList     StringList `json:"aStringList,required"`
+	AnOptStringList StringList `json:"anOptStringList,omitempty"`
+	AUUIDList       UUIDList   `json:"aUUIDList,required"`
+	AnOptUUIDList   UUIDList   `json:"anOptUUIDList,omitempty"`
 }
 
 // ToWire translates a Bar_ArgWithManyQueryParams_Args struct into a Thrift-level intermediate
@@ -47,7 +55,7 @@ type Bar_ArgWithManyQueryParams_Args struct {
 //   }
 func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [14]wire.Field
+		fields [22]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -158,7 +166,85 @@ func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 		i++
 	}
 
+	w, err = v.AUUID.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 15, Value: w}
+	i++
+	if v.AnOptUUID != nil {
+		w, err = v.AnOptUUID.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 16, Value: w}
+		i++
+	}
+	if v.AListUUID == nil {
+		return w, errors.New("field AListUUID of Bar_ArgWithManyQueryParams_Args is required")
+	}
+	w, err = wire.NewValueList(_List_UUID_ValueList(v.AListUUID)), error(nil)
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 17, Value: w}
+	i++
+	if v.AnOptListUUID != nil {
+		w, err = wire.NewValueList(_List_UUID_ValueList(v.AnOptListUUID)), error(nil)
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 18, Value: w}
+		i++
+	}
+	if v.AStringList == nil {
+		return w, errors.New("field AStringList of Bar_ArgWithManyQueryParams_Args is required")
+	}
+	w, err = v.AStringList.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 19, Value: w}
+	i++
+	if v.AnOptStringList != nil {
+		w, err = v.AnOptStringList.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 20, Value: w}
+		i++
+	}
+	if v.AUUIDList == nil {
+		return w, errors.New("field AUUIDList of Bar_ArgWithManyQueryParams_Args is required")
+	}
+	w, err = v.AUUIDList.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 21, Value: w}
+	i++
+	if v.AnOptUUIDList != nil {
+		w, err = v.AnOptUUIDList.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 22, Value: w}
+		i++
+	}
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _StringList_Read(w wire.Value) (StringList, error) {
+	var x StringList
+	err := x.FromWire(w)
+	return x, err
+}
+
+func _UUIDList_Read(w wire.Value) (UUIDList, error) {
+	var x UUIDList
+	err := x.FromWire(w)
+	return x, err
 }
 
 // FromWire deserializes a Bar_ArgWithManyQueryParams_Args struct from its Thrift-level
@@ -194,6 +280,14 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 	aInt64IsSet := false
 
 	aFloat64IsSet := false
+
+	aUUIDIsSet := false
+
+	aListUUIDIsSet := false
+
+	aStringListIsSet := false
+
+	aUUIDListIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -323,6 +417,72 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 15:
+			if field.Value.Type() == wire.TBinary {
+				v.AUUID, err = _UUID_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				aUUIDIsSet = true
+			}
+		case 16:
+			if field.Value.Type() == wire.TBinary {
+				var x UUID
+				x, err = _UUID_Read(field.Value)
+				v.AnOptUUID = &x
+				if err != nil {
+					return err
+				}
+
+			}
+		case 17:
+			if field.Value.Type() == wire.TList {
+				v.AListUUID, err = _List_UUID_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+				aListUUIDIsSet = true
+			}
+		case 18:
+			if field.Value.Type() == wire.TList {
+				v.AnOptListUUID, err = _List_UUID_Read(field.Value.GetList())
+				if err != nil {
+					return err
+				}
+
+			}
+		case 19:
+			if field.Value.Type() == wire.TList {
+				v.AStringList, err = _StringList_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				aStringListIsSet = true
+			}
+		case 20:
+			if field.Value.Type() == wire.TList {
+				v.AnOptStringList, err = _StringList_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		case 21:
+			if field.Value.Type() == wire.TList {
+				v.AUUIDList, err = _UUIDList_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				aUUIDListIsSet = true
+			}
+		case 22:
+			if field.Value.Type() == wire.TList {
+				v.AnOptUUIDList, err = _UUIDList_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -354,6 +514,22 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 		return errors.New("field AFloat64 of Bar_ArgWithManyQueryParams_Args is required")
 	}
 
+	if !aUUIDIsSet {
+		return errors.New("field AUUID of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
+	if !aListUUIDIsSet {
+		return errors.New("field AListUUID of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
+	if !aStringListIsSet {
+		return errors.New("field AStringList of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
+	if !aUUIDListIsSet {
+		return errors.New("field AUUIDList of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
 	return nil
 }
 
@@ -364,7 +540,7 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [14]string
+	var fields [22]string
 	i := 0
 	fields[i] = fmt.Sprintf("AStr: %v", v.AStr)
 	i++
@@ -406,6 +582,30 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 	i++
 	if v.AnOptFloat64 != nil {
 		fields[i] = fmt.Sprintf("AnOptFloat64: %v", *(v.AnOptFloat64))
+		i++
+	}
+	fields[i] = fmt.Sprintf("AUUID: %v", v.AUUID)
+	i++
+	if v.AnOptUUID != nil {
+		fields[i] = fmt.Sprintf("AnOptUUID: %v", *(v.AnOptUUID))
+		i++
+	}
+	fields[i] = fmt.Sprintf("AListUUID: %v", v.AListUUID)
+	i++
+	if v.AnOptListUUID != nil {
+		fields[i] = fmt.Sprintf("AnOptListUUID: %v", v.AnOptListUUID)
+		i++
+	}
+	fields[i] = fmt.Sprintf("AStringList: %v", v.AStringList)
+	i++
+	if v.AnOptStringList != nil {
+		fields[i] = fmt.Sprintf("AnOptStringList: %v", v.AnOptStringList)
+		i++
+	}
+	fields[i] = fmt.Sprintf("AUUIDList: %v", v.AUUIDList)
+	i++
+	if v.AnOptUUIDList != nil {
+		fields[i] = fmt.Sprintf("AnOptUUIDList: %v", v.AnOptUUIDList)
 		i++
 	}
 
@@ -472,6 +672,16 @@ func _Double_EqualsPtr(lhs, rhs *float64) bool {
 	return lhs == nil && rhs == nil
 }
 
+func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
 // Equals returns true if all the fields of this Bar_ArgWithManyQueryParams_Args match the
 // provided Bar_ArgWithManyQueryParams_Args.
 //
@@ -517,6 +727,30 @@ func (v *Bar_ArgWithManyQueryParams_Args) Equals(rhs *Bar_ArgWithManyQueryParams
 		return false
 	}
 	if !_Double_EqualsPtr(v.AnOptFloat64, rhs.AnOptFloat64) {
+		return false
+	}
+	if !(v.AUUID == rhs.AUUID) {
+		return false
+	}
+	if !_UUID_EqualsPtr(v.AnOptUUID, rhs.AnOptUUID) {
+		return false
+	}
+	if !_List_UUID_Equals(v.AListUUID, rhs.AListUUID) {
+		return false
+	}
+	if !((v.AnOptListUUID == nil && rhs.AnOptListUUID == nil) || (v.AnOptListUUID != nil && rhs.AnOptListUUID != nil && _List_UUID_Equals(v.AnOptListUUID, rhs.AnOptListUUID))) {
+		return false
+	}
+	if !v.AStringList.Equals(rhs.AStringList) {
+		return false
+	}
+	if !((v.AnOptStringList == nil && rhs.AnOptStringList == nil) || (v.AnOptStringList != nil && rhs.AnOptStringList != nil && v.AnOptStringList.Equals(rhs.AnOptStringList))) {
+		return false
+	}
+	if !v.AUUIDList.Equals(rhs.AUUIDList) {
+		return false
+	}
+	if !((v.AnOptUUIDList == nil && rhs.AnOptUUIDList == nil) || (v.AnOptUUIDList != nil && rhs.AnOptUUIDList != nil && v.AnOptUUIDList.Equals(rhs.AnOptUUIDList))) {
 		return false
 	}
 
@@ -593,6 +827,16 @@ func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptFloat64() (o float64) {
 	return
 }
 
+// GetAnOptUUID returns the value of AnOptUUID if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptUUID() (o UUID) {
+	if v.AnOptUUID != nil {
+		return *v.AnOptUUID
+	}
+
+	return
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -629,6 +873,14 @@ var Bar_ArgWithManyQueryParams_Helper = struct {
 		anOptInt64 *int64,
 		aFloat64 float64,
 		anOptFloat64 *float64,
+		aUUID UUID,
+		anOptUUID *UUID,
+		aListUUID []UUID,
+		anOptListUUID []UUID,
+		aStringList StringList,
+		anOptStringList StringList,
+		aUUIDList UUIDList,
+		anOptUUIDList UUIDList,
 	) *Bar_ArgWithManyQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -682,22 +934,38 @@ func init() {
 		anOptInt64 *int64,
 		aFloat64 float64,
 		anOptFloat64 *float64,
+		aUUID UUID,
+		anOptUUID *UUID,
+		aListUUID []UUID,
+		anOptListUUID []UUID,
+		aStringList StringList,
+		anOptStringList StringList,
+		aUUIDList UUIDList,
+		anOptUUIDList UUIDList,
 	) *Bar_ArgWithManyQueryParams_Args {
 		return &Bar_ArgWithManyQueryParams_Args{
-			AStr:         aStr,
-			AnOptStr:     anOptStr,
-			ABool:        aBool,
-			AnOptBool:    anOptBool,
-			AInt8:        aInt8,
-			AnOptInt8:    anOptInt8,
-			AInt16:       aInt16,
-			AnOptInt16:   anOptInt16,
-			AInt32:       aInt32,
-			AnOptInt32:   anOptInt32,
-			AInt64:       aInt64,
-			AnOptInt64:   anOptInt64,
-			AFloat64:     aFloat64,
-			AnOptFloat64: anOptFloat64,
+			AStr:            aStr,
+			AnOptStr:        anOptStr,
+			ABool:           aBool,
+			AnOptBool:       anOptBool,
+			AInt8:           aInt8,
+			AnOptInt8:       anOptInt8,
+			AInt16:          aInt16,
+			AnOptInt16:      anOptInt16,
+			AInt32:          aInt32,
+			AnOptInt32:      anOptInt32,
+			AInt64:          aInt64,
+			AnOptInt64:      anOptInt64,
+			AFloat64:        aFloat64,
+			AnOptFloat64:    anOptFloat64,
+			AUUID:           aUUID,
+			AnOptUUID:       anOptUUID,
+			AListUUID:       aListUUID,
+			AnOptListUUID:   anOptListUUID,
+			AStringList:     aStringList,
+			AnOptStringList: anOptStringList,
+			AUUIDList:       aUUIDList,
+			AnOptUUIDList:   anOptUUIDList,
 		}
 	}
 

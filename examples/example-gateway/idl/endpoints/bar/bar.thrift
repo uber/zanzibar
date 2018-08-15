@@ -6,6 +6,8 @@ include "../models/meta.thrift"
 typedef string UUID
 typedef i64 (json.type = 'Date') Timestamp
 typedef i64 (json.type = "Long") Long
+typedef list<string> StringList
+typedef list<UUID> UUIDList
 
 enum Fruit {
     APPLE,
@@ -40,7 +42,6 @@ struct QueryParamsStruct {
     1: required string name
     2: optional string userUUID
     3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
-    // TODO: validate required behaviour for headers
     4: optional string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
     5: required list<string> foo
 }
@@ -139,8 +140,6 @@ service Bar {
         2: optional string userUUID
         3: optional list<string> foo
         4: required list<i8> bar
-//        5: required UUID baz
-//        6: optional UUID qux
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"
@@ -167,7 +166,6 @@ service Bar {
         zanzibar.http.status = "200"
     )
 
-    // TODO: support params annotation
     BarResponse argWithParams(
         1: required string uuid (
             zanzibar.http.ref = "params.uuid"
@@ -195,6 +193,14 @@ service Bar {
         12: optional i64 anOptInt64
         13: required double aFloat64
         14: optional double anOptFloat64
+        15: required UUID aUUID
+        16: optional UUID anOptUUID
+        17: required list<UUID> aListUUID
+        18: optional list<UUID> anOptListUUID
+        19: required StringList aStringList
+        20: optional StringList anOptStringList
+        21: required UUIDList aUUIDList
+        22: optional UUIDList anOptUUIDList
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"

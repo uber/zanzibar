@@ -208,6 +208,98 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		requestBody.AnOptFloat64 = ptr.Float64(anOptFloat64Query)
 	}
 
+	aUUIDOk := req.CheckQueryValue("aUUID")
+	if !aUUIDOk {
+		return
+	}
+	aUUIDQuery, ok := req.GetQueryValue("aUUID")
+	if !ok {
+		return
+	}
+	requestBody.AUUID = endpointsBarBar.UUID(aUUIDQuery)
+
+	anOptUUIDOk := req.HasQueryValue("anOptUUID")
+	if anOptUUIDOk {
+		anOptUUIDQuery, ok := req.GetQueryValue("anOptUUID")
+		if !ok {
+			return
+		}
+		requestBody.AnOptUUID = (*endpointsBarBar.UUID)(ptr.String(anOptUUIDQuery))
+	}
+
+	aListUUIDOk := req.CheckQueryValue("aListUUID[]")
+	if !aListUUIDOk {
+		return
+	}
+	aListUUIDQuery, ok := req.GetQueryValues("aListUUID[]")
+	if !ok {
+		return
+	}
+	aListUUIDQueryFinal := make([]endpointsBarBar.UUID, len(aListUUIDQuery))
+	for i, v := range aListUUIDQuery {
+		aListUUIDQueryFinal[i] = endpointsBarBar.UUID(v)
+	}
+	requestBody.AListUUID = aListUUIDQueryFinal
+
+	anOptListUUIDOk := req.HasQueryValue("anOptListUUID[]")
+	if anOptListUUIDOk {
+		anOptListUUIDQuery, ok := req.GetQueryValues("anOptListUUID[]")
+		if !ok {
+			return
+		}
+		anOptListUUIDQueryFinal := make([]endpointsBarBar.UUID, len(anOptListUUIDQuery))
+		for i, v := range anOptListUUIDQuery {
+			anOptListUUIDQueryFinal[i] = endpointsBarBar.UUID(v)
+		}
+		requestBody.AnOptListUUID = anOptListUUIDQueryFinal
+	}
+
+	aStringListOk := req.CheckQueryValue("aStringList[]")
+	if !aStringListOk {
+		return
+	}
+	aStringListQuery, ok := req.GetQueryValues("aStringList[]")
+	if !ok {
+		return
+	}
+	requestBody.AStringList = endpointsBarBar.StringList(aStringListQuery)
+
+	anOptStringListOk := req.HasQueryValue("anOptStringList[]")
+	if anOptStringListOk {
+		anOptStringListQuery, ok := req.GetQueryValues("anOptStringList[]")
+		if !ok {
+			return
+		}
+		requestBody.AnOptStringList = endpointsBarBar.StringList(anOptStringListQuery)
+	}
+
+	aUUIDListOk := req.CheckQueryValue("aUUIDList[]")
+	if !aUUIDListOk {
+		return
+	}
+	aUUIDListQuery, ok := req.GetQueryValues("aUUIDList[]")
+	if !ok {
+		return
+	}
+	aUUIDListQueryFinal := make([]endpointsBarBar.UUID, len(aUUIDListQuery))
+	for i, v := range aUUIDListQuery {
+		aUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
+	}
+	requestBody.AUUIDList = endpointsBarBar.UUIDList(aUUIDListQueryFinal)
+
+	anOptUUIDListOk := req.HasQueryValue("anOptUUIDList[]")
+	if anOptUUIDListOk {
+		anOptUUIDListQuery, ok := req.GetQueryValues("anOptUUIDList[]")
+		if !ok {
+			return
+		}
+		anOptUUIDListQueryFinal := make([]endpointsBarBar.UUID, len(anOptUUIDListQuery))
+		for i, v := range anOptUUIDListQuery {
+			anOptUUIDListQueryFinal[i] = endpointsBarBar.UUID(v)
+		}
+		requestBody.AnOptUUIDList = endpointsBarBar.UUIDList(anOptUUIDListQueryFinal)
+	}
+
 	// log endpoint request to downstream services
 	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{

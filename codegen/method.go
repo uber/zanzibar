@@ -1029,7 +1029,7 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	case *compile.StringSpec:
 		queryMethod = "GetQueryValue"
 	case *compile.ListSpec:
-		switch t.ValueSpec.(type) {
+		switch compile.RootTypeSpec(t.ValueSpec).(type) {
 		case *compile.BoolSpec:
 			queryMethod = "GetQueryBoolList"
 		case *compile.I8Spec:
@@ -1081,7 +1081,7 @@ func getQueryEncodeExpression(
 	case *compile.StringSpec:
 		encodeExpression = "%s"
 	case *compile.ListSpec:
-		switch t.ValueSpec.(type) {
+		switch compile.RootTypeSpec(t.ValueSpec).(type) {
 		case *compile.BoolSpec:
 			encodeExpression = "strconv.FormatBool(%s)"
 		case *compile.I8Spec:
@@ -1235,9 +1235,27 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 			}
 		}
 
-		_, isList := realType.(*compile.ListSpec)
+		var err error
+		var typedef string
+		if _, ok := field.Type.(*compile.TypedefSpec); ok {
+			typedef, err = GoType(packageHelper, field.Type)
+			if err != nil {
+				finalError = err
+				return true
+			}
+		}
+
+		var listValueTypedef string
+		t, isList := realType.(*compile.ListSpec)
 		if isList {
 			longQueryName = longQueryName + "[]"
+			if _, ok := t.ValueSpec.(*compile.TypedefSpec); ok {
+				listValueTypedef, err = GoType(packageHelper, t.ValueSpec)
+				if err != nil {
+					finalError = err
+					return true
+				}
+			}
 		}
 
 		// If the type is a struct then we cannot really do anything
@@ -1301,15 +1319,42 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		statements.append("\treturn")
 		statements.append("}")
 
-		if field.Required {
-			statements.appendf("requestBody%s = %s", longFieldName, identifierName)
-		} else {
-			if isList {
-				statements.appendf("\trequestBody%s = %s", longFieldName, identifierName)
+		target := identifierName
+
+		indent := ""
+		if !field.Required {
+			indent += "\t"
+		}
+
+		// if field is a list and list value is typedef, list values must be converted first
+		if listValueTypedef != "" {
+			target = fmt.Sprintf("%sFinal", identifierName)
+			statements.appendf(
+				"%s%s := make([]%s, len(%s))",
+				indent, target, listValueTypedef, identifierName,
+			)
+			statements.appendf("%sfor i, v := range %s {", indent, identifierName)
+			statements.appendf("%s%s[i] = %s(v)", indent+"\t", target, listValueTypedef)
+			statements.appendf("%s}", indent)
+		}
+
+		if field.Required || isList {
+			if typedef != "" {
+				statements.appendf("%srequestBody%s = %s(%s)", indent, longFieldName, typedef, target)
 			} else {
-				pointerMethod := pointerMethodType(realType)
-				statements.appendf("\trequestBody%s = ptr.%s(%s)", longFieldName, pointerMethod, identifierName)
+				statements.appendf("%srequestBody%s = %s", indent, longFieldName, target)
 			}
+
+		} else {
+			target = fmt.Sprintf("ptr.%s(%s)", pointerMethodType(realType), identifierName)
+			if typedef != "" {
+				statements.appendf("%srequestBody%s = (*%s)(%s)", indent, longFieldName, typedef, target)
+			} else {
+				statements.appendf("%srequestBody%s = %s", indent, longFieldName, target)
+			}
+		}
+
+		if !field.Required {
 			statements.append("}")
 		}
 
