@@ -499,6 +499,9 @@ func (c *barClient) ArgWithNestedQueryParams(
 		requestMyuuidQuery := *r.Request.AuthUUID2
 		queryValues.Set("request.myuuid", requestMyuuidQuery)
 	}
+	for _, value := range r.Request.Foo {
+		queryValues.Add("request.foo[]", value)
+	}
 	if r.Opt != nil {
 		optNameQuery := r.Opt.Name
 		queryValues.Set("opt.name", optNameQuery)
@@ -682,6 +685,14 @@ func (c *barClient) ArgWithQueryParams(
 	if r.UserUUID != nil {
 		userUUIDQuery := *r.UserUUID
 		queryValues.Set("userUUID", userUUIDQuery)
+	}
+	if r.Foo != nil {
+		for _, value := range r.Foo {
+			queryValues.Add("foo[]", value)
+		}
+	}
+	for _, value := range r.Bar {
+		queryValues.Add("bar[]", strconv.Itoa(int(value)))
 	}
 	fullURL += "?" + queryValues.Encode()
 

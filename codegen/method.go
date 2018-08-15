@@ -1013,7 +1013,7 @@ func (ms *MethodSpec) setTypeConverters(
 func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 	var queryMethod string
 
-	switch typeSpec.(type) {
+	switch t := typeSpec.(type) {
 	case *compile.BoolSpec:
 		queryMethod = "GetQueryBool"
 	case *compile.I8Spec:
@@ -1028,6 +1028,28 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 		queryMethod = "GetQueryFloat64"
 	case *compile.StringSpec:
 		queryMethod = "GetQueryValue"
+	case *compile.ListSpec:
+		switch t.ValueSpec.(type) {
+		case *compile.BoolSpec:
+			queryMethod = "GetQueryBoolList"
+		case *compile.I8Spec:
+			queryMethod = "GetQueryInt8List"
+		case *compile.I16Spec:
+			queryMethod = "GetQueryInt16List"
+		case *compile.I32Spec:
+			queryMethod = "GetQueryInt32List"
+		case *compile.I64Spec:
+			queryMethod = "GetQueryInt64List"
+		case *compile.DoubleSpec:
+			queryMethod = "GetQueryFloat64List"
+		case *compile.StringSpec:
+			queryMethod = "GetQueryValues"
+		default:
+			panic(fmt.Sprintf(
+				"Unsupported list value type (%T) %v for query string parameter",
+				t.ValueSpec, t.ValueSpec,
+			))
+		}
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for query string parameter",
@@ -1043,7 +1065,7 @@ func getQueryEncodeExpression(
 ) string {
 	var encodeExpression string
 
-	switch typeSpec.(type) {
+	switch t := typeSpec.(type) {
 	case *compile.BoolSpec:
 		encodeExpression = "strconv.FormatBool(%s)"
 	case *compile.I8Spec:
@@ -1058,6 +1080,28 @@ func getQueryEncodeExpression(
 		encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
 	case *compile.StringSpec:
 		encodeExpression = "%s"
+	case *compile.ListSpec:
+		switch t.ValueSpec.(type) {
+		case *compile.BoolSpec:
+			encodeExpression = "strconv.FormatBool(%s)"
+		case *compile.I8Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I16Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I32Spec:
+			encodeExpression = "strconv.Itoa(int(%s))"
+		case *compile.I64Spec:
+			encodeExpression = "strconv.FormatInt(%s, 10)"
+		case *compile.DoubleSpec:
+			encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+		case *compile.StringSpec:
+			encodeExpression = "%s"
+		default:
+			panic(fmt.Sprintf(
+				"Unsupported list value type (%T) %v for query string parameter",
+				t.ValueSpec, t.ValueSpec,
+			))
+		}
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for query string parameter",
@@ -1116,6 +1160,10 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 		identifierName := CamelCase(longQueryName) + "Query"
+		_, isList := realType.(*compile.ListSpec)
+		if isList {
+			longQueryName = longQueryName + "[]"
+		}
 
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
@@ -1123,28 +1171,28 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		}
 
 		if field.Required {
-			encodeExpr := getQueryEncodeExpression(
-				realType, "r"+longFieldName,
-			)
-
-			statements.appendf("%s := %s",
-				identifierName, encodeExpr,
-			)
-			statements.appendf("queryValues.Set(\"%s\", %s)",
-				longQueryName, identifierName,
-			)
+			if isList {
+				encodeExpr := getQueryEncodeExpression(realType, "value")
+				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else {
+				encodeExpr := getQueryEncodeExpression(realType, "r"+longFieldName)
+				statements.appendf("%s := %s", identifierName, encodeExpr)
+				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+			}
 		} else {
-			encodeExpr := getQueryEncodeExpression(
-				realType, "*r"+longFieldName,
-			)
-
 			statements.appendf("if r%s != nil {", longFieldName)
-			statements.appendf("\t%s := %s",
-				identifierName, encodeExpr,
-			)
-			statements.appendf("\tqueryValues.Set(\"%s\", %s)",
-				longQueryName, identifierName,
-			)
+			if isList {
+				encodeExpr := getQueryEncodeExpression(realType, "value")
+				statements.appendf("for _, value := range %s {", "r"+longFieldName)
+				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
+				statements.append("}")
+			} else {
+				encodeExpr := getQueryEncodeExpression(realType, "*r"+longFieldName)
+				statements.appendf("\t%s := %s", identifierName, encodeExpr)
+				statements.appendf("\tqueryValues.Set(\"%s\", %s)", longQueryName, identifierName)
+			}
 			statements.append("}")
 		}
 
@@ -1185,6 +1233,11 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 				stack = stack[:len(stack)-1]
 				statements.append("}")
 			}
+		}
+
+		_, isList := realType.(*compile.ListSpec)
+		if isList {
+			longQueryName = longQueryName + "[]"
 		}
 
 		// If the type is a struct then we cannot really do anything
@@ -1239,7 +1292,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		}
 
 		queryMethodName := getQueryMethodForType(realType)
-		pointerMethod := pointerMethodType(realType)
 
 		statements.appendf("%s, ok := req.%s(%q)",
 			identifierName, queryMethodName, longQueryName,
@@ -1250,13 +1302,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		statements.append("}")
 
 		if field.Required {
-			statements.appendf("requestBody%s = %s",
-				longFieldName, identifierName,
-			)
+			statements.appendf("requestBody%s = %s", longFieldName, identifierName)
 		} else {
-			statements.appendf("\trequestBody%s = ptr.%s(%s)",
-				longFieldName, pointerMethod, identifierName,
-			)
+			if isList {
+				statements.appendf("\trequestBody%s = %s", longFieldName, identifierName)
+			} else {
+				pointerMethod := pointerMethodType(realType)
+				statements.appendf("\trequestBody%s = ptr.%s(%s)", longFieldName, pointerMethod, identifierName)
+			}
 			statements.append("}")
 		}
 

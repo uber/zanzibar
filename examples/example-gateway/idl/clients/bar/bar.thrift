@@ -53,6 +53,7 @@ struct QueryParamsStruct {
     4: optional string authUUID2 (
         zanzibar.http.ref = "query.myuuid"
     )
+    5: required list<string> foo
 }
 
 struct QueryParamsOptsStruct {
@@ -165,6 +166,8 @@ service Bar {
     BarResponse argWithQueryParams(
         1: required string name
         2: optional string userUUID
+        3: optional list<string> foo
+        4: required list<i8> bar
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"

@@ -109,6 +109,16 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
 	}
 
+	requestFooOk := req.CheckQueryValue("request.foo[]")
+	if !requestFooOk {
+		return
+	}
+	requestFooQuery, ok := req.GetQueryValues("request.foo[]")
+	if !ok {
+		return
+	}
+	requestBody.Request.Foo = requestFooQuery
+
 	if req.HasQueryPrefix("opt") || requestBody.Opt != nil {
 		if requestBody.Opt == nil {
 			requestBody.Opt = &endpointsBarBar.QueryParamsOptsStruct{}

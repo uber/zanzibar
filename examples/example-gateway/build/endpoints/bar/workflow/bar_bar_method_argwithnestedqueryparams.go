@@ -113,6 +113,10 @@ func convertToArgWithNestedQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgW
 		out.Request.UserUUID = (*string)(in.Request.UserUUID)
 		out.Request.AuthUUID = (*string)(in.Request.AuthUUID)
 		out.Request.AuthUUID2 = (*string)(in.Request.AuthUUID2)
+		out.Request.Foo = make([]string, len(in.Request.Foo))
+		for index1, value2 := range in.Request.Foo {
+			out.Request.Foo[index1] = string(value2)
+		}
 	} else {
 		out.Request = nil
 	}

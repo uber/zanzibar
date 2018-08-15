@@ -42,6 +42,7 @@ struct QueryParamsStruct {
     3: optional string authUUID (zanzibar.http.ref="headers.x-uuid")
     // TODO: validate required behaviour for headers
     4: optional string authUUID2 (zanzibar.http.ref="headers.x-uuid2")
+    5: required list<string> foo
 }
 
 struct QueryParamsOptsStruct {
@@ -136,6 +137,10 @@ service Bar {
     BarResponse argWithQueryParams(
         1: required string name
         2: optional string userUUID
+        3: optional list<string> foo
+        4: required list<i8> bar
+//        5: required UUID baz
+//        6: optional UUID qux
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithQueryParams"
