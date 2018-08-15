@@ -1793,3 +1793,34 @@ func (v *UUIDList) FromWire(w wire.Value) error {
 func (lhs UUIDList) Equals(rhs UUIDList) bool {
 	return _List_UUID_Equals(lhs, rhs)
 }
+
+type Yo UUID
+
+// ToWire translates Yo into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v Yo) ToWire() (wire.Value, error) {
+	x := (UUID)(v)
+	return x.ToWire()
+}
+
+// String returns a readable string representation of Yo.
+func (v Yo) String() string {
+	x := (UUID)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes Yo from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *Yo) FromWire(w wire.Value) error {
+	x, err := _UUID_Read(w)
+	*v = (Yo)(x)
+	return err
+}
+
+// Equals returns true if this Yo is equal to the provided
+// Yo.
+func (lhs Yo) Equals(rhs Yo) bool {
+	return (lhs == rhs)
+}

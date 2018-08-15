@@ -300,6 +300,25 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		requestBody.AnOptUUIDList = endpointsBarBar.UUIDList(anOptUUIDListQueryFinal)
 	}
 
+	aTsOk := req.CheckQueryValue("aTs")
+	if !aTsOk {
+		return
+	}
+	aTsQuery, ok := req.GetQueryInt64("aTs")
+	if !ok {
+		return
+	}
+	requestBody.ATs = endpointsBarBar.Timestamp(aTsQuery)
+
+	anOptTsOk := req.HasQueryValue("anOptTs")
+	if anOptTsOk {
+		anOptTsQuery, ok := req.GetQueryInt64("anOptTs")
+		if !ok {
+			return
+		}
+		requestBody.AnOptTs = (*endpointsBarBar.Timestamp)(ptr.Int64(anOptTsQuery))
+	}
+
 	// log endpoint request to downstream services
 	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{

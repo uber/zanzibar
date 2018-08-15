@@ -327,16 +327,6 @@ func (v *Echo_EchoTypedef_Result) String() string {
 	return fmt.Sprintf("Echo_EchoTypedef_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 // Equals returns true if all the fields of this Echo_EchoTypedef_Result match the
 // provided Echo_EchoTypedef_Result.
 //

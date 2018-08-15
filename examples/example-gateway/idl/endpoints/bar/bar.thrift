@@ -8,6 +8,7 @@ typedef i64 (json.type = 'Date') Timestamp
 typedef i64 (json.type = "Long") Long
 typedef list<string> StringList
 typedef list<UUID> UUIDList
+typedef UUID Yo
 
 enum Fruit {
     APPLE,
@@ -201,6 +202,8 @@ service Bar {
         20: optional StringList anOptStringList
         21: required UUIDList aUUIDList
         22: optional UUIDList anOptUUIDList
+        23: required Timestamp aTs
+        24: optional Timestamp anOptTs
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"

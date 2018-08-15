@@ -1065,9 +1065,15 @@ func getQueryEncodeExpression(
 ) string {
 	var encodeExpression string
 
-	switch t := typeSpec.(type) {
+	_, isTypedef := typeSpec.(*compile.TypedefSpec)
+
+	switch t := compile.RootTypeSpec(typeSpec).(type) {
 	case *compile.BoolSpec:
-		encodeExpression = "strconv.FormatBool(%s)"
+		if isTypedef {
+			encodeExpression = "strconv.FormatBool(bool(%s))"
+		} else {
+			encodeExpression = "strconv.FormatBool(%s)"
+		}
 	case *compile.I8Spec:
 		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.I16Spec:
@@ -1075,15 +1081,32 @@ func getQueryEncodeExpression(
 	case *compile.I32Spec:
 		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.I64Spec:
-		encodeExpression = "strconv.FormatInt(%s, 10)"
+		if isTypedef {
+			encodeExpression = "strconv.FormatInt(int64(%s), 10)"
+		} else {
+			encodeExpression = "strconv.FormatInt(%s, 10)"
+		}
 	case *compile.DoubleSpec:
-		encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+		if isTypedef {
+			encodeExpression = "strconv.FormatFloat(float64(%s), 'G', -1, 64)"
+		} else {
+			encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+		}
 	case *compile.StringSpec:
-		encodeExpression = "%s"
+		if isTypedef {
+			encodeExpression = "string(%s)"
+		} else {
+			encodeExpression = "%s"
+		}
 	case *compile.ListSpec:
+		_, isValueTypedef := t.ValueSpec.(*compile.TypedefSpec)
 		switch compile.RootTypeSpec(t.ValueSpec).(type) {
 		case *compile.BoolSpec:
-			encodeExpression = "strconv.FormatBool(%s)"
+			if isValueTypedef {
+				encodeExpression = "strconv.FormatBool(bool(%s))"
+			} else {
+				encodeExpression = "strconv.FormatBool(%s)"
+			}
 		case *compile.I8Spec:
 			encodeExpression = "strconv.Itoa(int(%s))"
 		case *compile.I16Spec:
@@ -1091,11 +1114,23 @@ func getQueryEncodeExpression(
 		case *compile.I32Spec:
 			encodeExpression = "strconv.Itoa(int(%s))"
 		case *compile.I64Spec:
-			encodeExpression = "strconv.FormatInt(%s, 10)"
+			if isValueTypedef {
+				encodeExpression = "strconv.FormatInt(int64(%s), 10)"
+			} else {
+				encodeExpression = "strconv.FormatInt(%s, 10)"
+			}
 		case *compile.DoubleSpec:
-			encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+			if isValueTypedef {
+				encodeExpression = "strconv.FormatFloat(float64(%s), 'G', -1, 64)"
+			} else {
+				encodeExpression = "strconv.FormatFloat(%s, 'G', -1, 64)"
+			}
 		case *compile.StringSpec:
-			encodeExpression = "%s"
+			if isValueTypedef {
+				encodeExpression = "string(%s)"
+			} else {
+				encodeExpression = "%s"
+			}
 		default:
 			panic(fmt.Sprintf(
 				"Unsupported list value type (%T) %v for query string parameter",
@@ -1172,24 +1207,24 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 
 		if field.Required {
 			if isList {
-				encodeExpr := getQueryEncodeExpression(realType, "value")
+				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
 				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
 				statements.append("}")
 			} else {
-				encodeExpr := getQueryEncodeExpression(realType, "r"+longFieldName)
+				encodeExpr := getQueryEncodeExpression(field.Type, "r"+longFieldName)
 				statements.appendf("%s := %s", identifierName, encodeExpr)
 				statements.appendf("queryValues.Set(\"%s\", %s)", longQueryName, identifierName)
 			}
 		} else {
 			statements.appendf("if r%s != nil {", longFieldName)
 			if isList {
-				encodeExpr := getQueryEncodeExpression(realType, "value")
+				encodeExpr := getQueryEncodeExpression(field.Type, "value")
 				statements.appendf("for _, value := range %s {", "r"+longFieldName)
 				statements.appendf("\tqueryValues.Add(\"%s\", %s)", longQueryName, encodeExpr)
 				statements.append("}")
 			} else {
-				encodeExpr := getQueryEncodeExpression(realType, "*r"+longFieldName)
+				encodeExpr := getQueryEncodeExpression(field.Type, "*r"+longFieldName)
 				statements.appendf("\t%s := %s", identifierName, encodeExpr)
 				statements.appendf("\tqueryValues.Set(\"%s\", %s)", longQueryName, identifierName)
 			}

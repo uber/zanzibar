@@ -36,6 +36,8 @@ type Bar_ArgWithManyQueryParams_Args struct {
 	AnOptStringList StringList `json:"anOptStringList,omitempty"`
 	AUUIDList       UUIDList   `json:"aUUIDList,required"`
 	AnOptUUIDList   UUIDList   `json:"anOptUUIDList,omitempty"`
+	ATs             Timestamp  `json:"aTs,required"`
+	AnOptTs         *Timestamp `json:"anOptTs,omitempty"`
 }
 
 // ToWire translates a Bar_ArgWithManyQueryParams_Args struct into a Thrift-level intermediate
@@ -55,7 +57,7 @@ type Bar_ArgWithManyQueryParams_Args struct {
 //   }
 func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 	var (
-		fields [22]wire.Field
+		fields [24]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -232,6 +234,21 @@ func (v *Bar_ArgWithManyQueryParams_Args) ToWire() (wire.Value, error) {
 		i++
 	}
 
+	w, err = v.ATs.ToWire()
+	if err != nil {
+		return w, err
+	}
+	fields[i] = wire.Field{ID: 23, Value: w}
+	i++
+	if v.AnOptTs != nil {
+		w, err = v.AnOptTs.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 24, Value: w}
+		i++
+	}
+
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
@@ -288,6 +305,8 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 	aStringListIsSet := false
 
 	aUUIDListIsSet := false
+
+	aTsIsSet := false
 
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
@@ -483,6 +502,24 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 23:
+			if field.Value.Type() == wire.TI64 {
+				v.ATs, err = _Timestamp_Read(field.Value)
+				if err != nil {
+					return err
+				}
+				aTsIsSet = true
+			}
+		case 24:
+			if field.Value.Type() == wire.TI64 {
+				var x Timestamp
+				x, err = _Timestamp_Read(field.Value)
+				v.AnOptTs = &x
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -530,6 +567,10 @@ func (v *Bar_ArgWithManyQueryParams_Args) FromWire(w wire.Value) error {
 		return errors.New("field AUUIDList of Bar_ArgWithManyQueryParams_Args is required")
 	}
 
+	if !aTsIsSet {
+		return errors.New("field ATs of Bar_ArgWithManyQueryParams_Args is required")
+	}
+
 	return nil
 }
 
@@ -540,7 +581,7 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 		return "<nil>"
 	}
 
-	var fields [22]string
+	var fields [24]string
 	i := 0
 	fields[i] = fmt.Sprintf("AStr: %v", v.AStr)
 	i++
@@ -608,6 +649,12 @@ func (v *Bar_ArgWithManyQueryParams_Args) String() string {
 		fields[i] = fmt.Sprintf("AnOptUUIDList: %v", v.AnOptUUIDList)
 		i++
 	}
+	fields[i] = fmt.Sprintf("ATs: %v", v.ATs)
+	i++
+	if v.AnOptTs != nil {
+		fields[i] = fmt.Sprintf("AnOptTs: %v", *(v.AnOptTs))
+		i++
+	}
 
 	return fmt.Sprintf("Bar_ArgWithManyQueryParams_Args{%v}", strings.Join(fields[:i], ", "))
 }
@@ -673,6 +720,16 @@ func _Double_EqualsPtr(lhs, rhs *float64) bool {
 }
 
 func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
+	if lhs != nil && rhs != nil {
+
+		x := *lhs
+		y := *rhs
+		return (x == y)
+	}
+	return lhs == nil && rhs == nil
+}
+
+func _Timestamp_EqualsPtr(lhs, rhs *Timestamp) bool {
 	if lhs != nil && rhs != nil {
 
 		x := *lhs
@@ -751,6 +808,12 @@ func (v *Bar_ArgWithManyQueryParams_Args) Equals(rhs *Bar_ArgWithManyQueryParams
 		return false
 	}
 	if !((v.AnOptUUIDList == nil && rhs.AnOptUUIDList == nil) || (v.AnOptUUIDList != nil && rhs.AnOptUUIDList != nil && v.AnOptUUIDList.Equals(rhs.AnOptUUIDList))) {
+		return false
+	}
+	if !(v.ATs == rhs.ATs) {
+		return false
+	}
+	if !_Timestamp_EqualsPtr(v.AnOptTs, rhs.AnOptTs) {
 		return false
 	}
 
@@ -837,6 +900,16 @@ func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptUUID() (o UUID) {
 	return
 }
 
+// GetAnOptTs returns the value of AnOptTs if it is set or its
+// zero value if it is unset.
+func (v *Bar_ArgWithManyQueryParams_Args) GetAnOptTs() (o Timestamp) {
+	if v.AnOptTs != nil {
+		return *v.AnOptTs
+	}
+
+	return
+}
+
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
@@ -881,6 +954,8 @@ var Bar_ArgWithManyQueryParams_Helper = struct {
 		anOptStringList StringList,
 		aUUIDList UUIDList,
 		anOptUUIDList UUIDList,
+		aTs Timestamp,
+		anOptTs *Timestamp,
 	) *Bar_ArgWithManyQueryParams_Args
 
 	// IsException returns true if the given error can be thrown
@@ -942,6 +1017,8 @@ func init() {
 		anOptStringList StringList,
 		aUUIDList UUIDList,
 		anOptUUIDList UUIDList,
+		aTs Timestamp,
+		anOptTs *Timestamp,
 	) *Bar_ArgWithManyQueryParams_Args {
 		return &Bar_ArgWithManyQueryParams_Args{
 			AStr:            aStr,
@@ -966,6 +1043,8 @@ func init() {
 			AnOptStringList: anOptStringList,
 			AUUIDList:       aUUIDList,
 			AnOptUUIDList:   anOptUUIDList,
+			ATs:             aTs,
+			AnOptTs:         anOptTs,
 		}
 	}
 
