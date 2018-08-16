@@ -677,7 +677,7 @@ func (c *TypeConverter) genStructConverter(
 
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
-		switch toFieldType := toField.Type.(type) {
+		switch toFieldType := compile.RootTypeSpec(toField.Type).(type) {
 		case
 			*compile.BoolSpec,
 			*compile.I8Spec,
