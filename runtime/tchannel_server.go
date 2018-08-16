@@ -175,7 +175,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
-	ctx = withEndpointFields(ctx, e.EndpointID)
+	ctx = withEndpointField(ctx, e.EndpointID)
 
 	var err error
 	errc := make(chan error, 1)

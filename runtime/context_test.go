@@ -30,7 +30,7 @@ import (
 
 func TestWithEndpointFields(t *testing.T) {
 	expected := "someEndpoint"
-	ctx := withEndpointFields(context.TODO(), expected)
+	ctx := withEndpointField(context.TODO(), expected)
 
 	ek := ctx.Value(endpointKey)
 	endpoint, ok := ek.(string)

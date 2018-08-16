@@ -36,7 +36,7 @@ const (
 
 // withEndpointFields adds the endpoint information in the
 // request context.
-func withEndpointFields(ctx context.Context, endpoint string) context.Context {
+func withEndpointField(ctx context.Context, endpoint string) context.Context {
 	return context.WithValue(ctx, endpointKey, endpoint)
 }
 
