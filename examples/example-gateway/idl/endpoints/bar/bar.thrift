@@ -8,7 +8,6 @@ typedef i64 (json.type = 'Date') Timestamp
 typedef i64 (json.type = "Long") Long
 typedef list<string> StringList
 typedef list<UUID> UUIDList
-typedef UUID Yo
 
 enum Fruit {
     APPLE,
