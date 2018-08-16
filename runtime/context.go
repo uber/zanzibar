@@ -29,9 +29,16 @@ import (
 type contextFieldKey string
 
 const (
+	endpointKey        = contextFieldKey("endpoint")
 	requestUUIDKey     = contextFieldKey("requestUUID")
 	routingDelegateKey = contextFieldKey("rd")
 )
+
+// withEndpointFields adds the endpoint information in the
+// request context.
+func withEndpointFields(ctx context.Context, endpoint string) context.Context {
+	return context.WithValue(ctx, endpointKey, endpoint)
+}
 
 // withRequestFields annotates zanzibar request context to context.Context. In
 // future, we can use a request context struct to add more context in terms of
