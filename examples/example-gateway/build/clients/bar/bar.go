@@ -425,6 +425,42 @@ func (c *barClient) ArgWithManyQueryParams(
 		anOptFloat64Query := strconv.FormatFloat(*r.AnOptFloat64, 'G', -1, 64)
 		queryValues.Set("anOptFloat64", anOptFloat64Query)
 	}
+	aUUIDQuery := string(r.AUUID)
+	queryValues.Set("aUUID", aUUIDQuery)
+	if r.AnOptUUID != nil {
+		anOptUUIDQuery := string(*r.AnOptUUID)
+		queryValues.Set("anOptUUID", anOptUUIDQuery)
+	}
+	for _, value := range r.AListUUID {
+		queryValues.Add("aListUUID[]", string(value))
+	}
+	if r.AnOptListUUID != nil {
+		for _, value := range r.AnOptListUUID {
+			queryValues.Add("anOptListUUID[]", string(value))
+		}
+	}
+	for _, value := range r.AStringList {
+		queryValues.Add("aStringList[]", value)
+	}
+	if r.AnOptStringList != nil {
+		for _, value := range r.AnOptStringList {
+			queryValues.Add("anOptStringList[]", value)
+		}
+	}
+	for _, value := range r.AUUIDList {
+		queryValues.Add("aUUIDList[]", string(value))
+	}
+	if r.AnOptUUIDList != nil {
+		for _, value := range r.AnOptUUIDList {
+			queryValues.Add("anOptUUIDList[]", string(value))
+		}
+	}
+	aTsQuery := strconv.FormatInt(int64(r.ATs), 10)
+	queryValues.Set("aTs", aTsQuery)
+	if r.AnOptTs != nil {
+		anOptTsQuery := strconv.FormatInt(int64(*r.AnOptTs), 10)
+		queryValues.Set("anOptTs", anOptTsQuery)
+	}
 	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)

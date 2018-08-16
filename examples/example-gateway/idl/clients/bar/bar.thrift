@@ -5,6 +5,8 @@ include "../foo/foo.thrift"
 typedef string UUID
 typedef i64 (json.type = 'Date') Timestamp
 typedef i64 (json.type = "Long") Long
+typedef list<string> StringList
+typedef list<UUID> UUIDList
 
 enum Fruit {
     APPLE,
@@ -209,6 +211,16 @@ service Bar {
         12: optional i64 anOptInt64
         13: required double aFloat64
         14: optional double anOptFloat64
+        15: required UUID aUUID
+        16: optional UUID anOptUUID
+        17: required list<UUID> aListUUID
+        18: optional list<UUID> anOptListUUID
+        19: required StringList aStringList
+        20: optional StringList anOptStringList
+        21: required UUIDList aUUIDList
+        22: optional UUIDList anOptUUIDList
+        23: required Timestamp aTs
+        24: optional Timestamp anOptTs
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/bar/argWithManyQueryParams"

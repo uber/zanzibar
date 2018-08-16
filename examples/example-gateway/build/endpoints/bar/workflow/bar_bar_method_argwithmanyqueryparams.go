@@ -121,6 +121,34 @@ func convertToArgWithManyQueryParamsClientRequest(in *endpointsBarBar.Bar_ArgWit
 	out.AnOptInt64 = (*int64)(in.AnOptInt64)
 	out.AFloat64 = float64(in.AFloat64)
 	out.AnOptFloat64 = (*float64)(in.AnOptFloat64)
+	out.AUUID = clientsBarBar.UUID(in.AUUID)
+	out.AnOptUUID = (*clientsBarBar.UUID)(in.AnOptUUID)
+	out.AListUUID = make([]clientsBarBar.UUID, len(in.AListUUID))
+	for index1, value2 := range in.AListUUID {
+		out.AListUUID[index1] = clientsBarBar.UUID(value2)
+	}
+	out.AnOptListUUID = make([]clientsBarBar.UUID, len(in.AnOptListUUID))
+	for index3, value4 := range in.AnOptListUUID {
+		out.AnOptListUUID[index3] = clientsBarBar.UUID(value4)
+	}
+	out.AStringList = make([]string, len(in.AStringList))
+	for index5, value6 := range in.AStringList {
+		out.AStringList[index5] = string(value6)
+	}
+	out.AnOptStringList = make([]string, len(in.AnOptStringList))
+	for index7, value8 := range in.AnOptStringList {
+		out.AnOptStringList[index7] = string(value8)
+	}
+	out.AUUIDList = make([]clientsBarBar.UUID, len(in.AUUIDList))
+	for index9, value10 := range in.AUUIDList {
+		out.AUUIDList[index9] = clientsBarBar.UUID(value10)
+	}
+	out.AnOptUUIDList = make([]clientsBarBar.UUID, len(in.AnOptUUIDList))
+	for index11, value12 := range in.AnOptUUIDList {
+		out.AnOptUUIDList[index11] = clientsBarBar.UUID(value12)
+	}
+	out.ATs = clientsBarBar.Timestamp(in.ATs)
+	out.AnOptTs = (*clientsBarBar.Timestamp)(in.AnOptTs)
 
 	return out
 }

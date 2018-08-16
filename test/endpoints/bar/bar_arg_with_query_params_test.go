@@ -221,10 +221,10 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
-					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
-					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&"+
-					"anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&aInt64=4&aInt8=24&"+
+					"aListUUID%5B%5D=a&aListUUID%5B%5D=b&aStr=foo&aStringList%5B%5D=c&aStringList%5B%5D=d&"+
+					"aTs=11111&aUUID=someuuid&aUUIDList%5B%5D=e&aUUIDList%5B%5D=f&anOptBool=false&"+
+					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
 				r.URL.RawQuery,
 			)
 
@@ -242,7 +242,9 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
 			"aInt8=24&anOptInt8=-50&aInt16=48&anOptInt16=-100&"+
 			"aInt32=12&anOptInt32=-10&aInt64=4&anOptInt64=-1&"+
-			"aFloat64=5.1&anOptFloat64=-0.4",
+			"aFloat64=5.1&anOptFloat64=-0.4&aUUID=someuuid&"+
+			"aListUUID[]=a&aListUUID[]=b&aStringList[]=c&aStringList[]=d&"+
+			"aUUIDList[]=e&aUUIDList[]=f&aTs=11111",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -755,9 +757,11 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		"GET", "/bar/argWithManyQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&"+
-					"aInt64=4&aInt8=24&aStr=foo&anOptBool=false&"+
-					"anOptInt8=-50&anOptStr=bar",
+				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&aInt64=4&aInt8=24&"+
+					"aListUUID%5B%5D=a&aListUUID%5B%5D=b&aStr=foo&aStringList%5B%5D=c&aStringList%5B%5D=d&"+
+					"aTs=11111&aUUID=a&aUUIDList%5B%5D=e&aUUIDList%5B%5D=f&anOptBool=false&anOptInt8=-50&"+
+					"anOptListUUID%5B%5D=a&anOptListUUID%5B%5D=b&anOptStr=bar&anOptStringList%5B%5D=c&"+
+					"anOptStringList%5B%5D=d&anOptTs=1111&anOptUUID=b&anOptUUIDList%5B%5D=e&anOptUUIDList%5B%5D=f",
 				r.URL.RawQuery,
 			)
 
@@ -774,7 +778,12 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		"/bar/argWithManyQueryParams?"+
 			"aStr=foo&anOptStr=bar&aBool=true&anOptBool=false&"+
 			"aInt8=24&anOptInt8=-50&aInt16=48&"+
-			"aInt32=12&aInt64=4&aFloat64=5.1",
+			"aInt32=12&aInt64=4&aFloat64=5.1&"+
+			"aUUID=a&anOptUUID=b&"+
+			"aListUUID[]=a&aListUUID[]=b&anOptListUUID[]=a&anOptListUUID[]=b&"+
+			"aStringList[]=c&aStringList[]=d&anOptStringList[]=c&anOptStringList[]=d&"+
+			"aUUIDList[]=e&aUUIDList[]=f&anOptUUIDList[]=e&anOptUUIDList[]=f&"+
+			"aTs=11111&anOptTs=1111",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {

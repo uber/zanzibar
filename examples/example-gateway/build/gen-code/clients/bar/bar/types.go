@@ -1882,6 +1882,37 @@ func (v *QueryParamsStruct) GetAuthUUID2() (o string) {
 	return
 }
 
+type StringList []string
+
+// ToWire translates StringList into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v StringList) ToWire() (wire.Value, error) {
+	x := ([]string)(v)
+	return wire.NewValueList(_List_String_ValueList(x)), error(nil)
+}
+
+// String returns a readable string representation of StringList.
+func (v StringList) String() string {
+	x := ([]string)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes StringList from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *StringList) FromWire(w wire.Value) error {
+	x, err := _List_String_Read(w.GetList())
+	*v = (StringList)(x)
+	return err
+}
+
+// Equals returns true if this StringList is equal to the provided
+// StringList.
+func (lhs StringList) Equals(rhs StringList) bool {
+	return _List_String_Equals(lhs, rhs)
+}
+
 type Timestamp int64
 
 // ToWire translates Timestamp into a Thrift-level intermediate
@@ -1942,4 +1973,94 @@ func (v *UUID) FromWire(w wire.Value) error {
 // UUID.
 func (lhs UUID) Equals(rhs UUID) bool {
 	return (lhs == rhs)
+}
+
+type _List_UUID_ValueList []UUID
+
+func (v _List_UUID_ValueList) ForEach(f func(wire.Value) error) error {
+	for _, x := range v {
+		w, err := x.ToWire()
+		if err != nil {
+			return err
+		}
+		err = f(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v _List_UUID_ValueList) Size() int {
+	return len(v)
+}
+
+func (_List_UUID_ValueList) ValueType() wire.Type {
+	return wire.TBinary
+}
+
+func (_List_UUID_ValueList) Close() {}
+
+func _List_UUID_Read(l wire.ValueList) ([]UUID, error) {
+	if l.ValueType() != wire.TBinary {
+		return nil, nil
+	}
+
+	o := make([]UUID, 0, l.Size())
+	err := l.ForEach(func(x wire.Value) error {
+		i, err := _UUID_Read(x)
+		if err != nil {
+			return err
+		}
+		o = append(o, i)
+		return nil
+	})
+	l.Close()
+	return o, err
+}
+
+func _List_UUID_Equals(lhs, rhs []UUID) bool {
+	if len(lhs) != len(rhs) {
+		return false
+	}
+
+	for i, lv := range lhs {
+		rv := rhs[i]
+		if !(lv == rv) {
+			return false
+		}
+	}
+
+	return true
+}
+
+type UUIDList []UUID
+
+// ToWire translates UUIDList into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+func (v UUIDList) ToWire() (wire.Value, error) {
+	x := ([]UUID)(v)
+	return wire.NewValueList(_List_UUID_ValueList(x)), error(nil)
+}
+
+// String returns a readable string representation of UUIDList.
+func (v UUIDList) String() string {
+	x := ([]UUID)(v)
+	return fmt.Sprint(x)
+}
+
+// FromWire deserializes UUIDList from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+func (v *UUIDList) FromWire(w wire.Value) error {
+	x, err := _List_UUID_Read(w.GetList())
+	*v = (UUIDList)(x)
+	return err
+}
+
+// Equals returns true if this UUIDList is equal to the provided
+// UUIDList.
+func (lhs UUIDList) Equals(rhs UUIDList) bool {
+	return _List_UUID_Equals(lhs, rhs)
 }
