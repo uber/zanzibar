@@ -30,7 +30,7 @@ import (
 
 func TestWithEndpointField(t *testing.T) {
 	expected := "someEndpoint"
-	ctx := withEndpointField(context.TODO(), expected)
+	ctx := WithEndpointField(context.TODO(), expected)
 
 	ek := ctx.Value(endpointKey)
 	endpoint, ok := ek.(string)
@@ -41,7 +41,7 @@ func TestWithEndpointField(t *testing.T) {
 
 func TestGetRequestEndpointFromCtx(t *testing.T) {
 	expected := "someEndpoint"
-	ctx := withEndpointField(context.TODO(), expected)
+	ctx := WithEndpointField(context.TODO(), expected)
 	endpoint := GetRequestEndpointFromCtx(ctx)
 	assert.Equal(t, expected, endpoint)
 

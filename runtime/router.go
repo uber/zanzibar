@@ -99,7 +99,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	defer cancel()
 	//}
 	ctx := withRequestFields(r.Context())
-	ctx = withEndpointField(ctx, endpoint.EndpointName)
+	ctx = WithEndpointField(ctx, endpoint.EndpointName)
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush()
