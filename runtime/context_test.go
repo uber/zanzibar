@@ -28,6 +28,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWithEndpointFields(t *testing.T) {
+	expected := "someEndpoint"
+	ctx := withEndpointField(context.TODO(), expected)
+
+	ek := ctx.Value(endpointKey)
+	endpoint, ok := ek.(string)
+
+	assert.True(t, ok)
+	assert.Equal(t, endpoint, expected)
+}
+
 func TestWithRequestFields(t *testing.T) {
 	ctx := withRequestFields(context.TODO())
 
