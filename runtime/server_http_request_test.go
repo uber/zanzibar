@@ -1370,3 +1370,81 @@ func TestSpanCreated(t *testing.T) {
 	}
 	assert.Equal(t, "200 OK", resp.Status)
 }
+
+func TestIncomingHTTPRequestServerLog(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+	bgateway.ActualGateway.HTTPRouter.Register(
+		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.AllHostScope,
+			bgateway.ActualGateway.Tracer,
+			"foo", "foo",
+			func(
+				ctx context.Context,
+				req *zanzibar.ServerHTTPRequest,
+				res *zanzibar.ServerHTTPResponse,
+			) {
+				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
+			},
+		),
+	)
+
+	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)
+	assert.NoError(t, err)
+
+	allLogs := bgateway.AllLogs()
+	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
+
+	tags := allLogs["Finished an incoming server HTTP request"][0]
+	dynamicHeaders := []string{
+		"remoteAddr",
+		"timestamp-started",
+		"ts",
+		"hostname",
+		"host",
+		"pid",
+		"timestamp-finished",
+	}
+	for _, dynamicValue := range dynamicHeaders {
+		assert.Contains(t, tags, dynamicValue)
+		delete(tags, dynamicValue)
+	}
+
+	expectedValues := map[string]interface{}{
+		"msg":                             "Finished an incoming server HTTP request",
+		"env":                             "production",
+		"clientID":                        "baz",
+		"level":                           "info",
+		"serviceName":                     "bazService",
+		"serviceMethod":                   "SimpleService::call",
+		"methodName":                      "Call",
+		"zone":                            "unknown",
+		"service":                         "example-gateway",
+		"Request-Header-Foo-Bar":          "Baz",
+		"Request-Header-x-uuid":           "uuid",
+		"Request-Header-x-token":          "token",
+		"Response-Header-some-res-header": "something",
+		"method":                         "GET",
+		"pathname":                       "/foo?bar=bar",
+		"statusCode":                     float64(200),
+		"Response-Header-Content-Type":   "application/json",
+		"Request-Header-Accept-Encoding": "gzip",
+		"Request-Header-User-Agent":      "Go-http-client/1.1",
+		"handlerID":                      "foo",
+		"endpointID":                     "foo",
+	}
+	for actualKey, actualValue := range tags {
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	}
+}
