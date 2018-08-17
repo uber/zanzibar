@@ -40,6 +40,15 @@ func withEndpointField(ctx context.Context, endpoint string) context.Context {
 	return context.WithValue(ctx, endpointKey, endpoint)
 }
 
+// GetRequestEndpointFromCtx returns the endpoint, if it exists on context
+func GetRequestEndpointFromCtx(ctx context.Context) string {
+	if val := ctx.Value(endpointKey); val != nil {
+		endpoint, _ := val.(string)
+		return endpoint
+	}
+	return ""
+}
+
 // withRequestFields annotates zanzibar request context to context.Context. In
 // future, we can use a request context struct to add more context in terms of
 // request handler, etc if need be.
