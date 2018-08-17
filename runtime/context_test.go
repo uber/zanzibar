@@ -43,7 +43,11 @@ func TestGetRequestEndpointFromCtx(t *testing.T) {
 	expected := "someEndpoint"
 	ctx := withEndpointField(context.TODO(), expected)
 	endpoint := GetRequestEndpointFromCtx(ctx)
+	assert.Equal(t, expected, endpoint)
 
+	expected = ""
+	ctx = context.TODO()
+	endpoint = GetRequestEndpointFromCtx(ctx)
 	assert.Equal(t, expected, endpoint)
 }
 
