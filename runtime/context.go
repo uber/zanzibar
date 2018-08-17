@@ -34,9 +34,9 @@ const (
 	routingDelegateKey = contextFieldKey("rd")
 )
 
-// withEndpointFields adds the endpoint information in the
+// WithEndpointField adds the endpoint information in the
 // request context.
-func withEndpointField(ctx context.Context, endpoint string) context.Context {
+func WithEndpointField(ctx context.Context, endpoint string) context.Context {
 	return context.WithValue(ctx, endpointKey, endpoint)
 }
 
