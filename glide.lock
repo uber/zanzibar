@@ -1,5 +1,5 @@
-hash: 90ecc152536f04e2456b2e6696bb3604624ecea61a503aea5345abce5bf421b6
-updated: 2018-08-08T21:43:53.051578-07:00
+hash: 01e954b57c1610d31a26e5f2b3835f68059e33ce41b3e072b90a2bc82887fb46
+updated: 2018-08-20T17:06:12.605904-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,12 +22,12 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 5f7a43820b4647d500f43b4ffcf344eaf01bcad5
+  version: 600781dde9cca80734169b9e969d9054ccc57937
   subpackages:
   - gomock
   - mockgen/model
 - name: github.com/jessevdk/go-flags
-  version: 0648c820cd4e564706597268ae2d2c7d9e6900c6
+  version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
 - name: github.com/julienschmidt/httprouter
   version: 348b672cd90d8190f8240323e372ecd1e66b59dc
 - name: github.com/kardianos/osext
@@ -114,9 +114,9 @@ imports:
 - name: go.uber.org/atomic
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
 - name: go.uber.org/multierr
-  version: a3d1fc1f1316d4132fc61f4ea1159ae0613fb474
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
-  version: bce7fd589d505915f56a7901d8c143e1625e085c
+  version: fb439a9a7f5a388d8606aae1c1ff6654b8b67fbe
   subpackages:
   - ast
   - compile
@@ -150,7 +150,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: f9ce57c11b242f0f1599cf25c89d8cb02c45295a
+  version: aaf60122140d3fcf75376d319f0554393160eb50
   subpackages:
   - context
 - name: honnef.co/go/tools
