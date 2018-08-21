@@ -34,7 +34,7 @@ import:
 - package: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - package: go.uber.org/thriftrw
-  version: v1.8.0
+  version: v1.12.0
 - package: github.com/uber/tchannel-go
   version: 1.5.0
 - package: github.com/opentracing/opentracing-go
