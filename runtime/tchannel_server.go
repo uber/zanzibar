@@ -400,7 +400,7 @@ func (c *tchannelInboundCall) writeResHeaders(ctx context.Context) error {
 
 	twriter, err := c.call.Response().Arg2Writer()
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg3writer for inbound response")
+		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg2writer for inbound response")
 		return errors.Wrapf(err, "Could not create arg2writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
