@@ -94,7 +94,7 @@ func (c *contactsClient) SaveContacts(
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "SaveContacts", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/" + string(r.UserUUID) + "/contacts"
@@ -144,7 +144,7 @@ func (c *contactsClient) TestURLURL(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "TestURLURL", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/contacts" + "/testUrl"

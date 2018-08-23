@@ -91,7 +91,7 @@ func (c *multiClient) HelloA(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "HelloA", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloA", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceA_b" + "/hello"
@@ -141,7 +141,7 @@ func (c *multiClient) HelloB(
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "HelloB", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "HelloB", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/multi" + "/serviceB_b" + "/hello"
