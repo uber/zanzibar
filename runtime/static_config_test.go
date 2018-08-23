@@ -226,9 +226,9 @@ func TestCannotSetOnFrozenConfig(t *testing.T) {
 func TestSetConfigValue(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetConfigValueOrDie("a", []byte("a"), "string")
-	config.SetConfigValueOrDie("b", []byte("1"), "number")
-	config.SetConfigValueOrDie("c", []byte("true"), "boolean")
+	config.SetConfigValueOrDie("a", "a", "string")
+	config.SetConfigValueOrDie("b", "1", "number")
+	config.SetConfigValueOrDie("c", "true", "boolean")
 
 	assert.Panics(t, func() {
 		// wrong type
