@@ -93,7 +93,7 @@ func (c *googleNowClient) AddCredentials(
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "AddCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/add-credentials"
@@ -146,7 +146,7 @@ func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "CheckCredentials", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/check-credentials"

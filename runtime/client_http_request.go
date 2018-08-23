@@ -47,10 +47,12 @@ type ClientHTTPRequest struct {
 	metrics        *OutboundHTTPMetrics
 	rawBody        []byte
 	defaultHeaders map[string]string
+	ctx            context.Context
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest
 func NewClientHTTPRequest(
+	ctx context.Context,
 	clientID, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
@@ -61,6 +63,7 @@ func NewClientHTTPRequest(
 		Logger:         client.loggers[methodName],
 		metrics:        client.metrics[methodName],
 		defaultHeaders: client.DefaultHeaders,
+		ctx:            ctx,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()

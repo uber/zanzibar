@@ -103,7 +103,7 @@ func (c *corgeHTTPClient) EchoString(
 	r *clientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(c.clientID, "EchoString", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", c.httpClient)
 
 	headers[c.callerHeader] = c.callerName
 	headers[c.calleeHeader] = c.calleeName
