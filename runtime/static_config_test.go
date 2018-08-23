@@ -101,7 +101,7 @@ func TestPanicGetWrongTypes(t *testing.T) {
 			"a.b.c": "v",
 			"bool":  true,
 			"int":   int64(1),
-			"float": float64(1.0),
+			"float": float64(1.2),
 		},
 	)
 
@@ -115,6 +115,10 @@ func TestPanicGetWrongTypes(t *testing.T) {
 
 	assert.Panics(t, func() {
 		config.MustGetInt("a.b.c")
+	})
+
+	assert.Panics(t, func() {
+		config.MustGetInt("float")
 	})
 
 	assert.Panics(t, func() {
@@ -137,6 +141,7 @@ func TestSupportsSeedConfig(t *testing.T) {
 	assert.Equal(t, config.MustGetString("a.b.c"), "v")
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
+	assert.Equal(t, config.MustGetInt("float"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
 	assert.Equal(t, config.ContainsKey("exist"), true)
 }
@@ -221,18 +226,25 @@ func TestCannotSetOnFrozenConfig(t *testing.T) {
 func TestSetConfigValue(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetConfigValueOrDie("a", []byte("a"), "string")
-	config.SetConfigValueOrDie("b", []byte("1"), "number")
-	config.SetConfigValueOrDie("c", []byte("true"), "boolean")
+	config.SetConfigValueOrDie("a", "a", "string")
+	config.SetConfigValueOrDie("b", "1", "number")
+	config.SetConfigValueOrDie("c", "true", "boolean")
 
 	assert.Panics(t, func() {
-		config.SetConfigValueOrDie("d", []byte("unknown"), "unknown")
+		// wrong type
+		config.SetConfigValueOrDie("d", "unknown", "unknown")
+	})
+
+	assert.Panics(t, func() {
+		// parsing err
+		config.SetConfigValueOrDie("d", "d", "number")
 	})
 
 	config.Freeze()
 
 	assert.Panics(t, func() {
-		config.SetConfigValueOrDie("d", []byte("d"), "string")
+		// set after frozen
+		config.SetConfigValueOrDie("d", "d", "string")
 	})
 
 	assert.Equal(t, config.InspectOrDie(), map[string]interface{}{
@@ -303,6 +315,13 @@ func TestCanReadFromFile(t *testing.T) {
 			"int":   int64(1),
 			"float": float64(1.0),
 			"exist": "xyz",
+			"struct": map[string]interface{}{
+				"Boolean": true,
+				"Integer": int64(1),
+				"Float":   float64(1.0),
+				"String":  "Science",
+			},
+			"array": []string{"a", "b"},
 		}),
 	})
 
@@ -319,6 +338,27 @@ func TestCanReadFromFile(t *testing.T) {
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
 	assert.Equal(t, config.ContainsKey("exist"), true)
 
+	type testStruct struct {
+		Boolean bool
+		Integer int64
+		Float   float64
+		String  string
+	}
+	var actual testStruct
+	expected := testStruct{
+		Boolean: true,
+		Integer: 1,
+		Float:   1.0,
+		String:  "Science",
+	}
+	config.MustGetStruct("struct", &actual)
+	assert.Equal(t, expected, actual)
+
+	var actualArray []string
+	expectedArray := []string{"a", "b"}
+	config.MustGetStruct("array", &actualArray)
+	assert.Equal(t, expectedArray, actualArray)
+
 	closer.Close()
 }
 
@@ -329,6 +369,14 @@ func TestCanReadFromFileContents(t *testing.T) {
 		"bool":  true,
 		"int":   int64(1),
 		"float": float64(1.0),
+		"exist": "xyz",
+		"struct": map[string]interface{}{
+			"Boolean": true,
+			"Integer": int64(1),
+			"Float":   float64(1.0),
+			"String":  "Science",
+		},
+		"array": []string{"a", "b"},
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
@@ -340,6 +388,28 @@ func TestCanReadFromFileContents(t *testing.T) {
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
 	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.ContainsKey("exist"), true)
+
+	type testStruct struct {
+		Boolean bool
+		Integer int64
+		Float   float64
+		String  string
+	}
+	var actual testStruct
+	expected := testStruct{
+		Boolean: true,
+		Integer: 1,
+		Float:   1.0,
+		String:  "Science",
+	}
+	config.MustGetStruct("struct", &actual)
+	assert.Equal(t, expected, actual)
+
+	var actualArray []string
+	expectedArray := []string{"a", "b"}
+	config.MustGetStruct("array", &actualArray)
+	assert.Equal(t, expectedArray, actualArray)
 }
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
@@ -385,6 +455,23 @@ func TestReadFromSeedConfigIntoNil(t *testing.T) {
 
 	assert.Panics(t, func() {
 		config.MustGetStruct("a", nil)
+	})
+}
+
+func TestDecodeIncompatibleStruct(t *testing.T) {
+	bytes := mustMarshal(map[string]interface{}{
+		"struct": map[string]interface{}{
+			"Boolean": true,
+		},
+	})
+
+	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+		zanzibar.ConfigFileContents(bytes),
+	}, nil)
+
+	var obj []string
+	assert.Panics(t, func() {
+		config.MustGetStruct("struct", &obj)
 	})
 }
 
@@ -588,14 +675,12 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 		),
 	})
 
-	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
-		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
-		),
-	}, nil)
-
 	assert.Panics(t, func() {
-		config.InspectOrDie()
+		zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
+			zanzibar.ConfigFilePath(
+				filepath.Join(testDir, "config", "test.json"),
+			),
+		}, nil)
 	})
 
 	closer.Close()
@@ -604,7 +689,8 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 func TestReadStructIntoWrongType(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
 		"config/test.json": mustMarshal(map[string]interface{}{
-			"a": true,
+			"a":     true,
+			"array": []string{"x", "y"},
 		}),
 	})
 
@@ -620,6 +706,19 @@ func TestReadStructIntoWrongType(t *testing.T) {
 	}
 	assert.Panics(t, func() {
 		config.MustGetStruct("a", &m)
+	})
+
+	array := []int{}
+	assert.Panics(t, func() {
+		config.MustGetStruct("a", &array)
+	})
+
+	assert.Panics(t, func() {
+		config.MustGetStruct("array", &array)
+	})
+
+	assert.Panics(t, func() {
+		config.MustGetStruct("unknown", &m)
 	})
 
 	closer.Close()
@@ -703,7 +802,7 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 			"a.b.c": "v",
 			"bool":  true,
 			"int":   int64(1),
-			"float": float64(1.0),
+			"float": float64(1.2),
 		}),
 	})
 
@@ -723,6 +822,10 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 
 	assert.Panics(t, func() {
 		config.MustGetInt("a.b.c")
+	})
+
+	assert.Panics(t, func() {
+		config.MustGetInt("float")
 	})
 
 	assert.Panics(t, func() {

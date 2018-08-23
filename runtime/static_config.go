@@ -25,8 +25,9 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strconv"
 
-	"github.com/buger/jsonparser"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
@@ -37,17 +38,11 @@ const (
 	fileContentsConfigType configType = 2
 )
 
-// StaticConfigValue represents a json serialized string.
-type StaticConfigValue struct {
-	bytes    []byte
-	dataType jsonparser.ValueType
-}
-
 // StaticConfig allows accessing values out of json config files
 type StaticConfig struct {
 	seedConfig    map[string]interface{}
 	configOptions []*ConfigOption
-	configValues  map[string]StaticConfigValue
+	configValues  map[string]interface{}
 	frozen        bool
 	destroyed     bool
 }
@@ -107,7 +102,7 @@ func NewStaticConfigOrDie(
 	config := &StaticConfig{
 		configOptions: configOptions,
 		seedConfig:    map[string]interface{}{},
-		configValues:  map[string]StaticConfigValue{},
+		configValues:  map[string]interface{}{},
 	}
 
 	for key, value := range seedConfig {
@@ -130,19 +125,7 @@ func (conf *StaticConfig) MustGetBoolean(key string) bool {
 	}
 
 	if value, contains := conf.configValues[key]; contains {
-		if value.dataType != jsonparser.Boolean {
-			panic(errors.Errorf(
-				"Key (%s) is not a boolean: %s", key, string(value.bytes),
-			))
-		}
-
-		v, err := jsonparser.ParseBoolean(value.bytes)
-		if err != nil {
-			/* coverage ignore next line */
-			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
-		}
-
-		return v
+		return value.(bool)
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
@@ -159,19 +142,7 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	}
 
 	if value, contains := conf.configValues[key]; contains {
-		if value.dataType != jsonparser.Number {
-			panic(errors.Errorf(
-				"Key (%s) is not a number: %s", key, string(value.bytes),
-			))
-		}
-
-		v, err := jsonparser.ParseFloat(value.bytes)
-		if err != nil {
-			/* coverage ignore next line */
-			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
-		}
-
-		return v
+		return value.(float64)
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
@@ -184,23 +155,25 @@ func (conf *StaticConfig) MustGetInt(key string) int64 {
 	}
 
 	if value, contains := conf.seedConfig[key]; contains {
+		if v, ok := value.(float64); ok {
+			// value can be represented as an integer
+			if v != float64(int64(v)) {
+				panic(errors.Errorf("Key (%s) is a float", key))
+			}
+			return int64(v)
+		}
 		return value.(int64)
 	}
 
 	if value, contains := conf.configValues[key]; contains {
-		if value.dataType != jsonparser.Number {
-			panic(errors.Errorf(
-				"Key (%s) is not a number: %s", key, string(value.bytes),
-			))
+		if v, ok := value.(float64); ok {
+			// value can be represented as an integer
+			if v != float64(int64(v)) {
+				panic(errors.Errorf("Key (%s) is a float", key))
+			}
+			return int64(v)
 		}
-
-		v, err := jsonparser.ParseInt(value.bytes)
-		if err != nil {
-			/* coverage ignore next line */
-			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
-		}
-
-		return v
+		return value.(int64)
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
@@ -232,19 +205,7 @@ func (conf *StaticConfig) MustGetString(key string) string {
 	}
 
 	if value, contains := conf.configValues[key]; contains {
-		if value.dataType != jsonparser.String {
-			panic(errors.Errorf(
-				"Key (%s) is not a String: %s", key, string(value.bytes),
-			))
-		}
-
-		v, err := jsonparser.ParseString(value.bytes)
-		if err != nil {
-			/* coverage ignore next line */
-			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
-		}
-
-		return v
+		return value.(string)
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
@@ -252,29 +213,38 @@ func (conf *StaticConfig) MustGetString(key string) string {
 
 // MustGetStruct reads the value into an interface{} or panics.
 // Recommended that this is used with pointers to structs
-// MustGetStruct() will call json.Unmarshal(bytes, ptr) under the hood.
 func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	if conf.destroyed {
 		panic(errors.Errorf("Cannot get(%s) because destroyed", key))
 	}
 
-	if v, contains := conf.seedConfig[key]; contains {
-		rptr := reflect.ValueOf(ptr)
-		if rptr.Kind() != reflect.Ptr || rptr.IsNil() {
-			panic(errors.Errorf("Cannot GetStruct (%s) into nil ptr", key))
-		}
+	rptr := reflect.ValueOf(ptr)
+	if rptr.Kind() != reflect.Ptr || rptr.IsNil() {
+		panic(errors.Errorf("Cannot GetStruct (%s) into nil ptr", key))
+	}
 
+	if v, contains := conf.seedConfig[key]; contains {
 		rptr.Elem().Set(reflect.ValueOf(v))
 		return
 	}
 
 	if v, contains := conf.configValues[key]; contains {
-		err := json.Unmarshal(v.bytes, ptr)
-		if err != nil {
-			panic(errors.Wrapf(err, "Key (%s) is wrong type: ", key))
+		if value, ok := v.(map[string]interface{}); ok {
+			err := mapstructure.Decode(value, ptr)
+			if err != nil {
+				panic(errors.Errorf("Decoding key (%s) failed", key))
+			}
+			return
 		}
-
-		return
+		if value, ok := v.([]interface{}); ok {
+			err := mapstructure.Decode(value, ptr)
+			if err != nil {
+				panic(errors.Errorf("Decoding key (%s) failed", key))
+			}
+			return
+		}
+		panic(errors.Errorf(
+			"Key (%s) value is neither a struct nor array", key))
 	}
 
 	panic(errors.Errorf("Key (%s) not available", key))
@@ -283,27 +253,29 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 // SetConfigValueOrDie sets the static config value.
 // dataType can be a boolean, number or string.
 // SetConfigValueOrDie will panic if the config is frozen.
-func (conf *StaticConfig) SetConfigValueOrDie(key string, bytes []byte, dataType string) {
+func (conf *StaticConfig) SetConfigValueOrDie(key string, str string, dataType string) {
 	if conf.frozen {
 		panic(errors.Errorf("Cannot set(%s) because frozen", key))
 	}
 
-	var dt jsonparser.ValueType
+	var value interface{}
+	var err error
 	switch dataType {
 	case "boolean":
-		dt = jsonparser.Boolean
+		value, err = strconv.ParseBool(str)
 	case "number":
-		dt = jsonparser.Number
+		value, err = strconv.ParseFloat(str, 64)
 	case "string":
-		dt = jsonparser.String
+		value, err = str, nil
 	default:
 		panic("unknown config data type")
 	}
 
-	conf.configValues[key] = StaticConfigValue{
-		dataType: dt,
-		bytes:    bytes,
+	if err != nil {
+		panic(errors.Errorf("Parsing config value (%s) falsed", str))
 	}
+
+	conf.configValues[key] = value
 }
 
 // SetSeedOrDie a value in the config, useful for tests.
@@ -339,7 +311,7 @@ func (conf *StaticConfig) Freeze() {
 func (conf *StaticConfig) Destroy() {
 	conf.destroyed = true
 	conf.frozen = true
-	conf.configValues = map[string]StaticConfigValue{}
+	conf.configValues = map[string]interface{}{}
 	conf.seedConfig = map[string]interface{}{}
 }
 
@@ -349,31 +321,12 @@ func (conf *StaticConfig) InspectOrDie() map[string]interface{} {
 	result := map[string]interface{}{}
 
 	for k, v := range conf.configValues {
-		var jsonValue interface{}
-		var err error
-
-		switch v.dataType {
-		case jsonparser.Boolean:
-			jsonValue, err = jsonparser.ParseBoolean(v.bytes)
-		case jsonparser.String:
-			jsonValue, err = jsonparser.ParseString(v.bytes)
-		case jsonparser.Number:
-			jsonValue, err = jsonparser.ParseFloat(v.bytes)
-		default:
-			err = json.Unmarshal(v.bytes, &jsonValue)
-		}
-
-		if err != nil {
-			panic(errors.Wrapf(err, "Key (%s) is not json: ", k))
-		}
-
-		result[k] = jsonValue
+		result[k] = v
 	}
 
 	for k, v := range conf.seedConfig {
 		result[k] = v
 	}
-
 	return result
 }
 
@@ -382,8 +335,8 @@ func (conf *StaticConfig) initializeConfigValues() {
 	conf.assignConfigValues(values)
 }
 
-func (conf *StaticConfig) collectConfigMaps() []map[string]StaticConfigValue {
-	var maps = []map[string]StaticConfigValue{}
+func (conf *StaticConfig) collectConfigMaps() []map[string]interface{} {
+	var maps = []map[string]interface{}{}
 
 	for i := 0; i < len(conf.configOptions); i++ {
 		fileObject := conf.parseFile(conf.configOptions[i])
@@ -395,7 +348,7 @@ func (conf *StaticConfig) collectConfigMaps() []map[string]StaticConfigValue {
 	return maps
 }
 
-func (conf *StaticConfig) assignConfigValues(values []map[string]StaticConfigValue) {
+func (conf *StaticConfig) assignConfigValues(values []map[string]interface{}) {
 	for i := 0; i < len(values); i++ {
 		configObject := values[i]
 
@@ -407,7 +360,7 @@ func (conf *StaticConfig) assignConfigValues(values []map[string]StaticConfigVal
 
 func (conf *StaticConfig) parseFile(
 	configFile *ConfigOption,
-) map[string]StaticConfigValue {
+) map[string]interface{} {
 	var bytes []byte
 
 	switch configFile.configType {
@@ -432,25 +385,10 @@ func (conf *StaticConfig) parseFile(
 		))
 	}
 
-	var object = map[string]StaticConfigValue{}
-
-	err := jsonparser.ObjectEach(bytes, func(
-		key []byte,
-		value []byte,
-		dataType jsonparser.ValueType,
-		offset int,
-	) error {
-		object[string(key)] = StaticConfigValue{
-			bytes:    value,
-			dataType: dataType,
-		}
-		return nil
-	})
-
+	var object map[string]interface{}
+	err := json.Unmarshal(bytes, &object)
 	if err != nil {
-		// If the JSON is not valid then just panic out.
 		panic(err)
 	}
-
 	return object
 }
