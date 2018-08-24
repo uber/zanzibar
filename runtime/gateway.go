@@ -76,6 +76,7 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	Logger           *zap.Logger
+	ContextLogger    ContextLogger
 	RootScope        tally.Scope
 	AllHostScope     tally.Scope
 	PerHostScope     tally.Scope
@@ -101,9 +102,14 @@ type Gateway struct {
 	//	- process reporter ?
 }
 
-// DefaultDependencies type
+// DefaultDependencies are the common dependencies for all modules
 type DefaultDependencies struct {
-	Logger  *zap.Logger
+	// Logger is a server-scoped logger
+	Logger *zap.Logger
+
+	// ContextLogger is a logger with request-scoped log fields
+	ContextLogger ContextLogger
+
 	Scope   tally.Scope
 	Tracer  opentracing.Tracer
 	Config  *StaticConfig
@@ -545,6 +551,8 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		zap.String("service", gateway.Config.MustGetString("serviceName")),
 		zap.Int("pid", os.Getpid()),
 	)
+
+	gateway.ContextLogger = NewContextLogger(gateway.Logger)
 	return nil
 }
 

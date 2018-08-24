@@ -24,6 +24,7 @@ import (
 	"context"
 
 	"github.com/pborman/uuid"
+	"go.uber.org/zap"
 )
 
 type contextFieldKey string
@@ -32,6 +33,16 @@ const (
 	endpointKey        = contextFieldKey("endpoint")
 	requestUUIDKey     = contextFieldKey("requestUUID")
 	routingDelegateKey = contextFieldKey("rd")
+	requestLogFields   = contextFieldKey("requestLogFields")
+)
+
+const (
+	logFieldRequestMethod       = "method"
+	logFieldRequestURL          = "url"
+	logFieldRequestStartTime    = "timestamp-started"
+	logFieldRequestFinishedTime = "timestamp-finished"
+	logFieldRequestHeaderPrefix = "Request-Header"
+	logFieldResponseStatusCode  = "statusCode"
 )
 
 // WithEndpointField adds the endpoint information in the
@@ -80,4 +91,68 @@ func GetRoutingDelegateFromCtx(ctx context.Context) string {
 		return rd
 	}
 	return ""
+}
+
+// WithLogFields returns a new context with the given log fields attached to context.Context
+func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context {
+	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
+}
+
+func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
+	previousFieldsUntyped := ctx.Value(requestLogFields)
+	if previousFieldsUntyped == nil {
+		previousFieldsUntyped = []zap.Field{}
+	}
+	previousFields := previousFieldsUntyped.([]zap.Field)
+
+	fields := make([]zap.Field, 0, len(previousFields)+len(newFields))
+
+	for _, field := range previousFields {
+		fields = append(fields, field)
+	}
+	for _, field := range newFields {
+		fields = append(fields, field)
+	}
+
+	return fields
+}
+
+// ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
+type ContextLogger interface {
+	Debug(ctx context.Context, msg string, fields ...zap.Field)
+	Error(ctx context.Context, msg string, fields ...zap.Field)
+	Info(ctx context.Context, msg string, fields ...zap.Field)
+	Panic(ctx context.Context, msg string, fields ...zap.Field)
+	Warn(ctx context.Context, msg string, fields ...zap.Field)
+}
+
+// NewContextLogger returns a logger that extracts log fields a context before passing through to underlying zap logger.
+func NewContextLogger(log *zap.Logger) ContextLogger {
+	return &contextLogger{
+		log: log,
+	}
+}
+
+type contextLogger struct {
+	log *zap.Logger
+}
+
+func (c *contextLogger) Debug(ctx context.Context, msg string, userFields ...zap.Field) {
+	c.log.Debug(msg, accumulateLogFields(ctx, userFields)...)
+}
+
+func (c *contextLogger) Error(ctx context.Context, msg string, userFields ...zap.Field) {
+	c.log.Error(msg, accumulateLogFields(ctx, userFields)...)
+}
+
+func (c *contextLogger) Info(ctx context.Context, msg string, userFields ...zap.Field) {
+	c.log.Info(msg, accumulateLogFields(ctx, userFields)...)
+}
+
+func (c *contextLogger) Panic(ctx context.Context, msg string, userFields ...zap.Field) {
+	c.log.Panic(msg, accumulateLogFields(ctx, userFields)...)
+}
+
+func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.Field) {
+	c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
 }

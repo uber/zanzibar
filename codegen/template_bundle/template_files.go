@@ -1074,7 +1074,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{- end}}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
@@ -1203,7 +1203,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 8008, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8005, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1588,11 +1588,12 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:  g.Logger,
-		Scope:   g.AllHostScope,
-		Tracer:  g.Tracer,
-		Config:  g.Config,
-		Channel: g.Channel,
+		Logger:         g.Logger,
+		ContextLogger:  g.ContextLogger,
+		Scope:          g.AllHostScope,
+		Tracer:         g.Tracer,
+		Config:         g.Config,
+		Channel:        g.Channel,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -1624,7 +1625,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2237, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2307, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -97,11 +97,12 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:  g.Logger,
-		Scope:   g.AllHostScope,
-		Tracer:  g.Tracer,
-		Config:  g.Config,
-		Channel: g.Channel,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Scope:         g.AllHostScope,
+		Tracer:        g.Tracer,
+		Config:        g.Config,
+		Channel:       g.Channel,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}
