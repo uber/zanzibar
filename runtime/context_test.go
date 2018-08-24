@@ -26,6 +26,8 @@ import (
 
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestWithEndpointField(t *testing.T) {
@@ -92,4 +94,52 @@ func TestGetRoutingDelegateFromCtx(t *testing.T) {
 	rd := GetRoutingDelegateFromCtx(ctx)
 
 	assert.Equal(t, expected, rd)
+}
+
+func TestContextLogger(t *testing.T) {
+	zapLoggerCore, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	contextLogger := NewContextLogger(zapLogger)
+	ctx := context.Background()
+	ctxWithField := WithLogFields(ctx, zap.String("ctxField", "ctxValue"))
+
+	var logMessages []observer.LoggedEntry
+
+	contextLogger.Debug(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.DebugLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "ctxField")
+	assert.Equal(t, logMessages[0].Context[0].String, "ctxValue")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	contextLogger.Info(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.InfoLevel, logMessages[0].Level)
+
+	contextLogger.Warn(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.WarnLevel, logMessages[0].Level)
+
+	contextLogger.Error(ctxWithField, "msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.ErrorLevel, logMessages[0].Level)
+}
+
+func TestContextLoggerPanic(t *testing.T) {
+	defer func() {
+		err := recover()
+		assert.NotNil(t, err)
+	}()
+
+	zapNop := zap.NewNop()
+
+	contextLogger := NewContextLogger(zapNop)
+	ctx := context.Background()
+
+	contextLogger.Panic(ctx, "msg", zap.String("argField", "argValue"))
 }

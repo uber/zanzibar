@@ -155,7 +155,7 @@ func TestMakingClientCallWithHeaders(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	res, err := req.Do(context.Background())
+	res, err := req.Do()
 	assert.NoError(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 

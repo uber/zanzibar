@@ -104,7 +104,7 @@ func (c *contactsClient) SaveContacts(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -154,7 +154,7 @@ func (c *contactsClient) TestURLURL(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return defaultRes, nil, err
 	}

@@ -33,8 +33,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ClientHTTPRequest is the struct for making client
-// requests using an outbound http client.
+// ClientHTTPRequest is the struct for making a single client request using an outbound http client.
 type ClientHTTPRequest struct {
 	ClientID       string
 	MethodName     string
@@ -44,13 +43,14 @@ type ClientHTTPRequest struct {
 	started        bool
 	startTime      time.Time
 	Logger         *zap.Logger
+	ContextLogger  ContextLogger
 	metrics        *OutboundHTTPMetrics
 	rawBody        []byte
 	defaultHeaders map[string]string
 	ctx            context.Context
 }
 
-// NewClientHTTPRequest allocates a ClientHTTPRequest
+// NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
 func NewClientHTTPRequest(
 	ctx context.Context,
 	clientID, methodName string,
@@ -61,6 +61,7 @@ func NewClientHTTPRequest(
 		MethodName:     methodName,
 		client:         client,
 		Logger:         client.loggers[methodName],
+		ContextLogger:  NewContextLogger(client.loggers[methodName]),
 		metrics:        client.metrics[methodName],
 		defaultHeaders: client.DefaultHeaders,
 		ctx:            ctx,
@@ -149,17 +150,21 @@ func (req *ClientHTTPRequest) WriteJSON(
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	req.httpReq = httpReq
+	req.ctx = WithLogFields(req.ctx,
+		zap.String(logFieldRequestMethod, method),
+		zap.String(logFieldRequestURL, url),
+		zap.Time(logFieldRequestStartTime, req.startTime),
+	)
+
 	return nil
 }
 
 // Do will send the request out.
-func (req *ClientHTTPRequest) Do(
-	ctx context.Context,
-) (*ClientHTTPResponse, error) {
+func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	opName := fmt.Sprintf("%s.%s", req.ClientID, req.MethodName)
 	urlTag := opentracing.Tag{Key: "URL", Value: req.httpReq.URL}
 	methodTag := opentracing.Tag{Key: "Method", Value: req.httpReq.Method}
-	span, ctx := opentracing.StartSpanFromContext(ctx, opName, urlTag, methodTag)
+	span, ctx := opentracing.StartSpanFromContext(req.ctx, opName, urlTag, methodTag)
 	err := req.InjectSpanToHeader(span, opentracing.HTTPHeaders)
 	if err != nil {
 		/* coverage ignore next line */
@@ -167,6 +172,14 @@ func (req *ClientHTTPRequest) Do(
 		/* coverage ignore next line */
 		return nil, err
 	}
+
+	logFields := make([]zap.Field, 0, len(req.httpReq.Header))
+	for k, v := range req.httpReq.Header {
+		logFields = append(logFields, zap.String(fmt.Sprintf("%s-%s", logFieldRequestHeaderPrefix, k), v[0]))
+	}
+	ctx = WithLogFields(ctx, logFields...)
+	req.ctx = ctx
+
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {

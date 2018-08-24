@@ -156,27 +156,19 @@ func (res *ClientHTTPResponse) finish() {
 	}
 
 	// write logs
-	res.req.Logger.Info(
+	res.req.ContextLogger.Info(
+		res.req.ctx,
 		"Finished an outgoing client HTTP request",
 		clientHTTPLogFields(res.req, res)...,
 	)
-
 }
 
 func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapcore.Field {
 	fields := []zapcore.Field{
-		zap.String("method", req.httpReq.Method),
-		zap.String("url", req.httpReq.URL.String()),
-		zap.Time("timestamp-started", req.startTime),
-		zap.Time("timestamp-finished", res.finishTime),
-		zap.Int("statusCode", res.StatusCode),
+		zap.Time(logFieldRequestFinishedTime, res.finishTime),
+		zap.Int(logFieldResponseStatusCode, res.StatusCode),
 	}
 
-	for k, v := range req.httpReq.Header {
-		if len(v) > 0 {
-			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
-		}
-	}
 	for k, v := range req.res.Header {
 		if len(v) > 0 {
 			fields = append(fields, zap.String("Response-Header-"+k, v[0]))

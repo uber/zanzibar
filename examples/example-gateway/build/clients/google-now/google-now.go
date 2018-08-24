@@ -108,7 +108,7 @@ func (c *googleNowClient) AddCredentials(
 		return nil, headerErr
 	}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (c *googleNowClient) CheckCredentials(
 		return nil, headerErr
 	}
 
-	res, err := req.Do(ctx)
+	res, err := req.Do()
 	if err != nil {
 		return nil, err
 	}
