@@ -1,8 +1,8 @@
 language: go
 sudo: true
 go:
-  - 1.9.x
   - 1.10.x
+  - 1.11.x
 go_import_path: github.com/uber/zanzibar
 env:
   global:
