@@ -271,10 +271,12 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"statusCode":                     float64(200),
 		"Request-Header-Content-Type":    "application/json",
 		"Response-Header-Content-Type":   "text/plain; charset=utf-8",
+
 		"level":                      "info",
 		"methodName":                 "Normal",
 		"method":                     "POST",
 		"Request-Header-X-Client-Id": "bar",
+
 		"zone":    "unknown",
 		"service": "example-gateway",
 	}
