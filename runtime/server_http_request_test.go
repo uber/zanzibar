@@ -1435,6 +1435,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		"Request-Header-x-uuid":           "uuid",
 		"Request-Header-x-token":          "token",
 		"Response-Header-some-res-header": "something",
+
 		"method":                         "GET",
 		"pathname":                       "/foo?bar=bar",
 		"statusCode":                     float64(200),
