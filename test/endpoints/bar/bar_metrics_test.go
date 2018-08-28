@@ -180,4 +180,44 @@ func TestCallMetrics(t *testing.T) {
 	)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
 	assert.Equal(t, int64(3), value, "expected counter to be 3")
+
+	allLogs := gateway.AllLogs()
+
+	logMsgs := allLogs["Finished an outgoing client HTTP request"]
+	assert.Len(t, logMsgs, 1)
+	logMsg := logMsgs[0]
+	dynamicHeaders := []string{
+		"url",
+		"timestamp-finished",
+		"Request-Header-Uber-Trace-Id",
+		"Response-Header-Content-Length",
+		"timestamp-started",
+		"Response-Header-Date",
+		"ts",
+		"hostname",
+		"pid",
+		"requestUUID",
+	}
+	for _, dynamicValue := range dynamicHeaders {
+		assert.Contains(t, logMsg, dynamicValue)
+		delete(logMsg, dynamicValue)
+	}
+	expectedValues := map[string]interface{}{
+		"msg":                            "Finished an outgoing client HTTP request",
+		"env":                            "test",
+		"clientID":                       "bar",
+		"Response-Header-Example-Header": "Example-Value",
+		"statusCode":                     float64(200),
+		"Request-Header-Content-Type":    "application/json",
+		"Response-Header-Content-Type":   "text/plain; charset=utf-8",
+		"level":                      "info",
+		"methodName":                 "Normal",
+		"method":                     "POST",
+		"Request-Header-X-Client-Id": "bar",
+		"zone":    "unknown",
+		"service": "example-gateway",
+	}
+	for actualKey, actualValue := range logMsg {
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	}
 }

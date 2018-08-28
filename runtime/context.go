@@ -43,6 +43,7 @@ const (
 	logFieldRequestFinishedTime = "timestamp-finished"
 	logFieldRequestHeaderPrefix = "Request-Header"
 	logFieldResponseStatusCode  = "statusCode"
+	logFieldRequestUUID         = "requestUUID"
 )
 
 // WithEndpointField adds the endpoint information in the
@@ -64,7 +65,10 @@ func GetRequestEndpointFromCtx(ctx context.Context) string {
 // future, we can use a request context struct to add more context in terms of
 // request handler, etc if need be.
 func withRequestFields(ctx context.Context) context.Context {
-	return context.WithValue(ctx, requestUUIDKey, uuid.NewUUID())
+	reqUUID := uuid.NewUUID()
+	ctx = context.WithValue(ctx, requestUUIDKey, reqUUID)
+	ctx = WithLogFields(ctx, zap.String(logFieldRequestUUID, reqUUID.String()))
+	return ctx
 }
 
 // GetRequestUUIDFromCtx returns the RequestUUID, if it exists on context
