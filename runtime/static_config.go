@@ -21,7 +21,6 @@
 package zanzibar
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -29,6 +28,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type configType int
@@ -38,7 +38,7 @@ const (
 	fileContentsConfigType configType = 2
 )
 
-// StaticConfig allows accessing values out of json config files
+// StaticConfig allows accessing values out of YAML(JSON) config files
 type StaticConfig struct {
 	seedConfig    map[string]interface{}
 	configOptions []*ConfigOption
@@ -78,12 +78,12 @@ func ConfigFileContents(fileBytes []byte) *ConfigOption {
 // The later files overwrite keys from earlier files.
 //
 // The seedConfig is optional and will be used to overwrite
-// configuration json files if present.
+// configuration files if present.
 //
 // The defaultConfig is optional initial config that will be overwritten by
 // the config in the supplied files or the seed config
 //
-// The files must be a list of JSON files. Each file must be a flat object of
+// The files must be a list of YAML files. Each file must be a flat object of
 // key, value pairs. It's recommended that you use keys like:
 //
 // {
@@ -142,6 +142,9 @@ func (conf *StaticConfig) MustGetFloat(key string) float64 {
 	}
 
 	if value, contains := conf.configValues[key]; contains {
+		if v, ok := value.(int); ok {
+			return float64(v)
+		}
 		return value.(float64)
 	}
 
@@ -154,6 +157,9 @@ func mustConvertableToInt(value interface{}, key string) int64 {
 		if v != float64(int64(v)) {
 			panic(errors.Errorf("Key (%s) is a float", key))
 		}
+		return int64(v)
+	}
+	if v, ok := value.(int); ok {
 		return int64(v)
 	}
 	return value.(int64)
@@ -226,7 +232,7 @@ func (conf *StaticConfig) MustGetStruct(key string, ptr interface{}) {
 	}
 
 	if v, contains := conf.configValues[key]; contains {
-		if value, ok := v.(map[string]interface{}); ok {
+		if value, ok := v.(map[interface{}]interface{}); ok {
 			err := mapstructure.Decode(value, ptr)
 			if err != nil {
 				panic(errors.Errorf("Decoding key (%s) failed", key))
@@ -277,7 +283,7 @@ func (conf *StaticConfig) SetConfigValueOrDie(
 }
 
 // SetSeedOrDie a value in the config, useful for tests.
-// Keys you set must not exist in the JSON files.
+// Keys you set must not exist in the YAML files.
 // Set() will panic if the key exists or if frozen.
 // Strongly recommended not to be used for production code.
 func (conf *StaticConfig) SetSeedOrDie(key string, value interface{}) {
@@ -384,7 +390,7 @@ func (conf *StaticConfig) parseFile(
 	}
 
 	var object map[string]interface{}
-	err := json.Unmarshal(bytes, &object)
+	err := yaml.Unmarshal(bytes, &object)
 	if err != nil {
 		panic(err)
 	}

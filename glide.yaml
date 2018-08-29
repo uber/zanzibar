@@ -61,3 +61,5 @@ import:
   version: master
 - package: github.com/mitchellh/mapstructure
   version: master
+- package: gopkg.in/yaml.v2
+  version: master

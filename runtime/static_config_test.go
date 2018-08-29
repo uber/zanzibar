@@ -33,6 +33,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	zanzibar "github.com/uber/zanzibar/runtime"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var testDir string = getDirName()
@@ -226,9 +227,9 @@ func TestCannotSetOnFrozenConfig(t *testing.T) {
 func TestSetConfigValue(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie(nil, nil)
 
-	config.SetConfigValueOrDie("a", "a", "string")
-	config.SetConfigValueOrDie("b", "1", "number")
-	config.SetConfigValueOrDie("c", "true", "boolean")
+	config.SetConfigValueOrDie("a", []byte("a"), "string")
+	config.SetConfigValueOrDie("b", []byte("1"), "number")
+	config.SetConfigValueOrDie("c", []byte("true"), "boolean")
 
 	assert.Panics(t, func() {
 		// wrong type
@@ -254,8 +255,17 @@ func TestSetConfigValue(t *testing.T) {
 	})
 }
 
-func mustMarshal(v interface{}) []byte {
+func mustMarshalJSON(v interface{}) []byte {
 	bytes, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
+}
+
+func mustMarshalYAML(v interface{}) []byte {
+	bytes, err := yaml.Marshal(v)
 	if err != nil {
 		panic(err)
 	}
@@ -306,36 +316,16 @@ func (writer *fixtureWriter) Close() {
 	}
 }
 
-func TestCanReadFromFile(t *testing.T) {
-	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
-			"a":     "b",
-			"a.b.c": "v",
-			"bool":  true,
-			"int":   int64(1),
-			"float": float64(1.0),
-			"exist": "xyz",
-			"struct": map[string]interface{}{
-				"Boolean": true,
-				"Integer": int64(1),
-				"Float":   float64(1.0),
-				"String":  "Science",
-			},
-			"array": []string{"a", "b"},
-		}),
-	})
-
+func DoCanReadFromFileTest(t *testing.T, filePath string) {
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
-		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
-		),
+		zanzibar.ConfigFilePath(filePath),
 	}, nil)
 
 	assert.Equal(t, config.MustGetString("a"), "b")
 	assert.Equal(t, config.MustGetString("a.b.c"), "v")
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
-	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.MustGetFloat("float"), float64(1.2))
 	assert.Equal(t, config.ContainsKey("exist"), true)
 
 	type testStruct struct {
@@ -348,7 +338,7 @@ func TestCanReadFromFile(t *testing.T) {
 	expected := testStruct{
 		Boolean: true,
 		Integer: 1,
-		Float:   1.0,
+		Float:   1.2,
 		String:  "Science",
 	}
 	config.MustGetStruct("struct", &actual)
@@ -358,22 +348,64 @@ func TestCanReadFromFile(t *testing.T) {
 	expectedArray := []string{"a", "b"}
 	config.MustGetStruct("array", &actualArray)
 	assert.Equal(t, expectedArray, actualArray)
+}
 
+func TestCanReadJSONFromFile(t *testing.T) {
+	closer := WriteFixture(testDir, map[string][]byte{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
+			"a":     "b",
+			"a.b.c": "v",
+			"bool":  true,
+			"int":   int64(1),
+			"float": float64(1.2),
+			"exist": "xyz",
+			"struct": map[string]interface{}{
+				"Boolean": true,
+				"Integer": int64(1),
+				"Float":   float64(1.2),
+				"String":  "Science",
+			},
+			"array": []string{"a", "b"},
+		}),
+	})
+	DoCanReadFromFileTest(t, filepath.Join(testDir, "config", "test.json"))
+	closer.Close()
+}
+
+func TestCanReadYAMLFromFile(t *testing.T) {
+	closer := WriteFixture(testDir, map[string][]byte{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
+			"a":     "b",
+			"a.b.c": "v",
+			"bool":  true,
+			"int":   int64(1),
+			"float": float64(1.2),
+			"exist": "xyz",
+			"struct": map[string]interface{}{
+				"Boolean": true,
+				"Integer": int64(1),
+				"Float":   float64(1.2),
+				"String":  "Science",
+			},
+			"array": []string{"a", "b"},
+		}),
+	})
+	DoCanReadFromFileTest(t, filepath.Join(testDir, "config", "test.yaml"))
 	closer.Close()
 }
 
 func TestCanReadFromFileContents(t *testing.T) {
-	bytes := mustMarshal(map[string]interface{}{
+	bytes := mustMarshalJSON(map[string]interface{}{
 		"a":     "b",
 		"a.b.c": "v",
 		"bool":  true,
 		"int":   int64(1),
-		"float": float64(1.0),
+		"float": float64(1.2),
 		"exist": "xyz",
 		"struct": map[string]interface{}{
 			"Boolean": true,
 			"Integer": int64(1),
-			"Float":   float64(1.0),
+			"Float":   float64(1.2),
 			"String":  "Science",
 		},
 		"array": []string{"a", "b"},
@@ -387,7 +419,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 	assert.Equal(t, config.MustGetString("a.b.c"), "v")
 	assert.Equal(t, config.MustGetBoolean("bool"), true)
 	assert.Equal(t, config.MustGetInt("int"), int64(1))
-	assert.Equal(t, config.MustGetFloat("float"), float64(1.0))
+	assert.Equal(t, config.MustGetFloat("float"), float64(1.2))
 	assert.Equal(t, config.ContainsKey("exist"), true)
 
 	type testStruct struct {
@@ -400,7 +432,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 	expected := testStruct{
 		Boolean: true,
 		Integer: 1,
-		Float:   1.0,
+		Float:   1.2,
 		String:  "Science",
 	}
 	config.MustGetStruct("struct", &actual)
@@ -414,7 +446,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -434,7 +466,7 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 }
 
 func TestCannotSetOverValueFromFileContents(t *testing.T) {
-	bytes := mustMarshal(map[string]interface{}{
+	bytes := mustMarshalJSON(map[string]interface{}{
 		"a":     "b",
 		"a.b.c": "v",
 	})
@@ -459,7 +491,7 @@ func TestReadFromSeedConfigIntoNil(t *testing.T) {
 }
 
 func TestDecodeIncompatibleStruct(t *testing.T) {
-	bytes := mustMarshal(map[string]interface{}{
+	bytes := mustMarshalJSON(map[string]interface{}{
 		"struct": map[string]interface{}{
 			"Boolean": true,
 		},
@@ -477,7 +509,7 @@ func TestDecodeIncompatibleStruct(t *testing.T) {
 
 func TestSeedConfigOverwritesFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshalJSON(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -499,11 +531,11 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 
 func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshalJSON(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
-		"config/local.json": mustMarshal(map[string]string{
+		"config/local.json": mustMarshalJSON(map[string]string{
 			"a": "c",
 		}),
 	})
@@ -525,13 +557,13 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 
 func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshalJSON(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
 	})
 
-	bytes := mustMarshal(map[string]string{
+	bytes := mustMarshalJSON(map[string]string{
 		"a": "c",
 	})
 
@@ -550,12 +582,12 @@ func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 
 func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/local.json": mustMarshal(map[string]string{
+		"config/local.json": mustMarshalJSON(map[string]string{
 			"a": "c",
 		}),
 	})
 
-	bytes := mustMarshal(map[string]string{
+	bytes := mustMarshalJSON(map[string]string{
 		"a":     "b",
 		"a.b.c": "v",
 	})
@@ -592,11 +624,11 @@ func TestSupportsNonExistantFiles(t *testing.T) {
 
 func TestThrowsForInvalidJSONFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshalJSON(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
-		"config/local.json": []byte("{...}"),
+		"config/local.json": []byte("{{"),
 	})
 
 	assert.Panics(t, func() {
@@ -615,7 +647,7 @@ func TestThrowsForInvalidJSONFile(t *testing.T) {
 
 func TestThrowsForInvalidJSONContents(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]string{
+		"config/test.json": mustMarshalJSON(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -626,7 +658,7 @@ func TestThrowsForInvalidJSONContents(t *testing.T) {
 			zanzibar.ConfigFilePath(
 				filepath.Join(testDir, "config", "test.json"),
 			),
-			zanzibar.ConfigFileContents([]byte("{...}")),
+			zanzibar.ConfigFileContents([]byte("{{{")),
 		}, nil)
 	})
 
@@ -643,7 +675,7 @@ func TestThrowsForReadingBadFiles(t *testing.T) {
 
 func TestGetStructFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -671,7 +703,7 @@ func TestGetStructFromDisk(t *testing.T) {
 func TestInspectMalformedDataFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
 		"config/test.json": []byte(
-			"{ \"a\": { \"c\": ... }, \"b\": \"c\" }",
+			`{ "a": { "c": %%% }, "b": "c" }`,
 		),
 	})
 
@@ -688,7 +720,7 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 
 func TestReadStructIntoWrongType(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a":     true,
 			"array": []string{"x", "y"},
 		}),
@@ -726,7 +758,7 @@ func TestReadStructIntoWrongType(t *testing.T) {
 
 func TestOverwriteStructFromSeedConfig(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -761,12 +793,12 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 
 func TestInspectFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
 			"int":   int64(1),
-			"float": float64(1.0),
+			"float": float64(1.2),
 			"struct": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -784,11 +816,11 @@ func TestInspectFromFile(t *testing.T) {
 		"a":     "b",
 		"a.b.c": "v",
 		"bool":  true,
-		"float": float64(1.0),
-		"int":   float64(1),
-		"struct": map[string]interface{}{
+		"float": float64(1.2),
+		"int":   int(1),
+		"struct": map[interface{}]interface{}{
 			"Field": "a",
-			"Foo":   float64(4.0),
+			"Foo":   int(4),
 		},
 	})
 
@@ -797,7 +829,7 @@ func TestInspectFromFile(t *testing.T) {
 
 func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshal(map[string]interface{}{
+		"config/test.json": mustMarshalJSON(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -840,7 +872,7 @@ func TestStaticConfigHasOwnState(t *testing.T) {
 		"a.b.c": "v",
 		"bool":  true,
 		"int":   int64(1),
-		"float": float64(1.0),
+		"float": float64(1.2),
 	}
 
 	config1 := zanzibar.NewStaticConfigOrDie(
