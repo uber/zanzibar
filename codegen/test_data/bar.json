@@ -641,6 +641,61 @@
 					"RequestParamGoStatements": null
 				},
 				{
+					"Name": "deleteFoo",
+					"HTTPMethod": "DELETE",
+					"EndpointName": "",
+					"HTTPPath": "/bar/foo",
+					"PathSegments": [
+						{
+							"Type": "static",
+							"Text": "bar",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						},
+						{
+							"Type": "static",
+							"Text": "foo",
+							"BodyIdentifier": "",
+							"ParamName": "",
+							"Required": false
+						}
+					],
+					"IsEndpoint": false,
+					"ParseQueryParamGoStatements": null,
+					"WriteQueryParamGoStatements": null,
+					"ReqHeaderGoStatements": null,
+					"ReqClientHeaderGoStatements": null,
+					"ResHeaderFields": null,
+					"ReqHeaders": null,
+					"ResHeaders": null,
+					"RequestType": "*clientsBarBar.Bar_DeleteFoo_Args",
+					"ShortRequestType": "clientsBarBar.Bar_DeleteFoo_Args",
+					"ResponseType": "",
+					"ShortResponseType": "",
+					"OKStatusCode": {
+						"Code": 200,
+						"Message": ""
+					},
+					"Exceptions": [],
+					"ExceptionsIndex": {},
+					"ValidStatusCodes": [
+						200
+					],
+					"RequestBoxed": false,
+					"ThriftService": "Bar",
+					"GenCodePkgName": "clientsBarBar",
+					"WantAnnot": true,
+					"CompiledThriftSpec": null,
+					"Downstream": null,
+					"DownstreamService": "",
+					"DownstreamMethod": null,
+					"ConvertRequestGoStatements": null,
+					"ConvertResponseGoStatements": null,
+					"PropagateHeadersGoStatements": null,
+					"RequestParamGoStatements": null
+				},
+				{
 					"Name": "helloWorld",
 					"HTTPMethod": "GET",
 					"EndpointName": "",

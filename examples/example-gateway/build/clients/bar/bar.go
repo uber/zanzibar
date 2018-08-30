@@ -76,6 +76,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_ArgWithQueryParams_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	DeleteFoo(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_DeleteFoo_Args,
+	) (map[string]string, error)
 	Hello(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -216,6 +221,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithParams",
 				"ArgWithQueryHeader",
 				"ArgWithQueryParams",
+				"DeleteFoo",
 				"Hello",
 				"MissingArg",
 				"NoRequest",
@@ -767,6 +773,54 @@ func (c *barClient) ArgWithQueryParams(
 	}
 
 	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// DeleteFoo calls "/bar/foo" endpoint.
+func (c *barClient) DeleteFoo(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_DeleteFoo_Args,
+) (map[string]string, error) {
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "DeleteFoo", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/foo"
+
+	err := req.WriteJSON("DELETE", fullURL, headers, r)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := req.Do()
+	if err != nil {
+		return nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+		return respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return respHeaders, err
+		}
+	}
+
+	return respHeaders, &zanzibar.UnexpectedHTTPError{
 		StatusCode: res.StatusCode,
 		RawBody:    res.GetRawBody(),
 	}

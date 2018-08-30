@@ -18,6 +18,7 @@
 			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
 			"ArgWithParams": "Bar::argWithParams",
 			"Hello": "Bar::helloWorld",
+			"DeleteFoo": "Bar::deleteFoo",
 			"EchoI8": "Echo::echoI8",
 			"EchoI16": "Echo::echoI16",
 			"EchoI32": "Echo::echoI32",

@@ -226,6 +226,14 @@ service Bar {
         zanzibar.http.path = "/bar/argWithManyQueryParams"
         zanzibar.http.status = "200"
     )
+
+    void deleteFoo(
+        1: required BarRequest request
+    ) (
+       zanzibar.http.method = "DELETE"
+       zanzibar.http.path = "/bar/foo"
+       zanzibar.http.status = "200"
+    )
 }
 
 service  Echo {
