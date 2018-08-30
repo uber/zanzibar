@@ -1032,3 +1032,39 @@ func TestNormalRecur(t *testing.T) {
 	assert.Equal(t, "child", result.Nodes[1])
 	assert.Equal(t, "grandchild", result.Nodes[2])
 }
+
+func TestDeleteFoo(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"DELETE", "/bar/foo",
+		func(w http.ResponseWriter, r *http.Request) {
+			body, err := ioutil.ReadAll(r.Body)
+			assert.NoError(t, err)
+
+			err = r.Body.Close()
+			assert.NoError(t, err)
+
+			assert.JSONEq(t, `{ "request":{ "binaryField": null, "boolField": false, "enumField": "APPLE", "longField": { "high": 0, "low": 0 }, "stringField": "", "timestamp": "1970-01-01T00:00:00Z" } }`, string(body))
+		},
+	)
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bar := deps.Client.Bar
+
+	_, err = bar.DeleteFoo(
+		context.Background(),
+		map[string]string{"x-uuid": "a-uuid"},
+		&barGen.Bar_DeleteFoo_Args{Request: &barGen.BarRequest{}},
+	)
+	assert.NoError(t, err)
+}

@@ -133,6 +133,19 @@ func (mr *MockClientMockRecorder) ArgWithQueryParams(arg0, arg1, arg2 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithQueryParams", reflect.TypeOf((*MockClient)(nil).ArgWithQueryParams), arg0, arg1, arg2)
 }
 
+// DeleteFoo mocks base method
+func (m *MockClient) DeleteFoo(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_DeleteFoo_Args) (map[string]string, error) {
+	ret := m.ctrl.Call(m, "DeleteFoo", arg0, arg1, arg2)
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteFoo indicates an expected call of DeleteFoo
+func (mr *MockClientMockRecorder) DeleteFoo(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFoo", reflect.TypeOf((*MockClient)(nil).DeleteFoo), arg0, arg1, arg2)
+}
+
 // EchoBinary mocks base method
 func (m *MockClient) EchoBinary(arg0 context.Context, arg1 map[string]string, arg2 *bar.Echo_EchoBinary_Args) ([]byte, map[string]string, error) {
 	ret := m.ctrl.Call(m, "EchoBinary", arg0, arg1, arg2)
