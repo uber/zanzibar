@@ -79,7 +79,7 @@ func (h *SimpleServiceCallHandler) Handle(
 	wireValue *wire.Value,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
-	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}, h.endpoint.Logger); err != nil {
+	if err := wfReqHeaders.EnsureContext(ctx, []string{"x-uuid", "x-token"}, h.Deps.Default.ContextLogger); err != nil {
 		return false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -90,7 +90,7 @@ func (h *SimpleServiceCallHandler) Handle(
 
 	var req endpointsTchannelBazBaz.SimpleService_Call_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -116,7 +116,8 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
-			h.endpoint.Logger.Warn(
+			h.Deps.Default.ContextLogger.Warn(
+				ctx,
 				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
 				zap.Error(err),
 			)
@@ -128,7 +129,7 @@ func (h *SimpleServiceCallHandler) Handle(
 			}
 			res.AuthErr = v
 		default:
-			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, errors.Wrapf(
 				err, "%s.%s (%s) handler returned error",
 				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -146,7 +147,7 @@ func (h *SimpleServiceCallHandler) Handle(
 		)
 	}
 
-	if err := wfResHeaders.Ensure([]string{"some-res-header"}, h.endpoint.Logger); err != nil {
+	if err := wfResHeaders.EnsureContext(ctx, []string{"some-res-header"}, h.Deps.Default.ContextLogger); err != nil {
 		return false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,

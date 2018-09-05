@@ -25,6 +25,7 @@ import (
 	"net/textproto"
 	"strings"
 
+	"context"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -35,7 +36,9 @@ type Header interface {
 	Add(key string, value string)
 	Set(key string, value string)
 	Keys() []string
+	// Deprecated: Use EnsureContext instead
 	Ensure(keys []string, logger *zap.Logger) error
+	EnsureContext(ctx context.Context, keys []string, logger ContextLogger) error
 }
 
 // ServerHTTPHeader wrapper to implement zanzibar Header interface
@@ -99,7 +102,16 @@ func (zh ServerHTTPHeader) Keys() []string {
 }
 
 // Ensure returns error if the headers do not have the given keys
+//
+// Deprecated: Use EnsureContext instead
 func (zh ServerHTTPHeader) Ensure(keys []string, logger *zap.Logger) error {
+	loggerCtx := NewContextLogger(logger)
+	ctx := context.Background()
+	return zh.EnsureContext(ctx, keys, loggerCtx)
+}
+
+// EnsureContext returns error if the headers do not have the given keys
+func (zh ServerHTTPHeader) EnsureContext(ctx context.Context, keys []string, logger ContextLogger) error {
 	missing := make([]string, 0, len(keys))
 	for _, header := range keys {
 		h := textproto.CanonicalMIMEHeaderKey(header)
@@ -116,7 +128,7 @@ func (zh ServerHTTPHeader) Ensure(keys []string, logger *zap.Logger) error {
 		"Missing mandatory headers: %s",
 		strings.Join(missing, ", "),
 	)
-	logger.Warn("Missing mandatory headers",
+	logger.Warn(ctx, "Missing mandatory headers",
 		zap.Error(err),
 		zap.Strings("headers", missing),
 	)
@@ -160,7 +172,16 @@ func (th ServerTChannelHeader) Keys() []string {
 }
 
 // Ensure returns error if the headers do not have the given keys
+//
+// Deprecated: Use EnsureContext instead
 func (th ServerTChannelHeader) Ensure(keys []string, logger *zap.Logger) error {
+	loggerCtx := NewContextLogger(logger)
+	ctx := context.Background()
+	return th.EnsureContext(ctx, keys, loggerCtx)
+}
+
+// EnsureContext returns error if the headers do not have the given keys
+func (th ServerTChannelHeader) EnsureContext(ctx context.Context, keys []string, logger ContextLogger) error {
 	missing := make([]string, 0, len(keys))
 	for _, header := range keys {
 		if _, ok := th[header]; !ok {
@@ -176,7 +197,7 @@ func (th ServerTChannelHeader) Ensure(keys []string, logger *zap.Logger) error {
 		"Missing mandatory headers: %s",
 		strings.Join(missing, ", "),
 	)
-	logger.Warn("Missing mandatory headers",
+	logger.Warn(ctx, "Missing mandatory headers",
 		zap.Error(err),
 		zap.Strings("headers", missing),
 	)

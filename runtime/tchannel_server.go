@@ -50,13 +50,18 @@ type TChannelEndpoint struct {
 	EndpointID string
 	HandlerID  string
 	Method     string
-	callback   PostResponseCB
-	Logger     *zap.Logger
 	Scope      tally.Scope
-	metrics    *InboundTChannelMetrics
+
+	// Deprecated: Use contextLogger instead.
+	Logger *zap.Logger
+
+	contextLogger ContextLogger
+	callback      PostResponseCB
+	metrics       *InboundTChannelMetrics
 }
 
 type tchannelInboundCall struct {
+	ctx        context.Context
 	endpoint   *TChannelEndpoint
 	call       *tchannel.InboundCall
 	success    bool
@@ -72,7 +77,7 @@ type TChannelRouter struct {
 	sync.RWMutex
 	registrar tchannel.Registrar
 	endpoints map[string]*TChannelEndpoint
-	logger    *zap.Logger
+	logger    ContextLogger
 }
 
 // netContextRouter implements the Handler interface that consumes netContext instead of stdlib context
@@ -108,17 +113,14 @@ func NewTChannelEndpointWithPostResponseCB(
 	handler TChannelHandler,
 	callback PostResponseCB,
 ) *TChannelEndpoint {
-	logger = logger.With(
-		zap.String("endpointID", endpointID),
-		zap.String("handlerID", handlerID),
-		zap.String("method", method),
-	)
-
 	scope = scope.Tagged(map[string]string{
 		"endpoint": endpointID,
 		"handler":  handlerID,
 		"method":   method,
 	})
+
+	contextLogger := NewContextLogger(logger)
+
 	return &TChannelEndpoint{
 		TChannelHandler: handler,
 		EndpointID:      endpointID,
@@ -127,6 +129,7 @@ func NewTChannelEndpointWithPostResponseCB(
 		callback:        callback,
 		Logger:          logger,
 		Scope:           scope,
+		contextLogger:   contextLogger,
 		metrics:         NewInboundTChannelMetrics(scope),
 	}
 }
@@ -136,7 +139,7 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 	return &TChannelRouter{
 		registrar: registrar,
 		endpoints: map[string]*TChannelEndpoint{},
-		logger:    g.Logger,
+		logger:    g.ContextLogger,
 	}
 }
 
@@ -161,7 +164,7 @@ func (s *TChannelRouter) Register(e *TChannelEndpoint) error {
 func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall) {
 	method := call.MethodString()
 	if sep := strings.Index(method, "::"); sep == -1 {
-		s.logger.Error(fmt.Sprintf("Handle got call for %s which does not match the expected call format", method))
+		s.logger.Error(ctx, "Handle got call for which does not match the expected call format", zap.String(logFieldRequestMethod, method))
 		return
 	}
 
@@ -171,17 +174,25 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	e, ok := s.endpoints[method]
 	s.RUnlock()
 	if !ok {
-		s.logger.Error(fmt.Sprintf("Handle got call for %s which is not registered", method))
+		s.logger.Error(ctx, "Handle got call for method which is not registered",
+			zap.String(logFieldRequestMethod, method),
+		)
 		return
 	}
 
 	ctx = WithEndpointField(ctx, e.EndpointID)
+	ctx = WithLogFields(ctx,
+		zap.String(logFieldEndpointID, e.EndpointID),
+		zap.String(logFieldHandlerID, e.HandlerID),
+		zap.String(logFieldRequestMethod, e.Method),
+	)
 
 	var err error
 	errc := make(chan error, 1)
 	c := tchannelInboundCall{
 		endpoint: e,
 		call:     call,
+		ctx:      ctx,
 	}
 	c.start()
 	go func() { errc <- s.handle(ctx, &c) }()
@@ -252,8 +263,8 @@ func (c *tchannelInboundCall) finish(err error) {
 	c.endpoint.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
 
 	// write logs
-	LogErrorWarnTimeout(c.endpoint.Logger, err, "Thrift server error")
-	c.endpoint.Logger.Info("Finished an incoming server TChannel request", c.logFields()...)
+	LogErrorWarnTimeoutContext(c.ctx, c.endpoint.contextLogger, err, "Thrift server error")
+	c.endpoint.contextLogger.Info(c.ctx, "Finished an incoming server TChannel request", c.logFields()...)
 }
 
 func (c *tchannelInboundCall) logFields() []zapcore.Field {
@@ -283,7 +294,7 @@ func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
 
 	treader, err := c.call.Arg2Reader()
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg2reader for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not create arg2reader for inbound request")
 		return errors.Wrapf(err, "Could not create arg2reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -291,20 +302,20 @@ func (c *tchannelInboundCall) readReqHeaders(ctx context.Context) error {
 	c.reqHeaders, err = ReadHeaders(treader)
 	if err != nil {
 		_ = treader.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not read headers for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not read headers for inbound request")
 		return errors.Wrapf(err, "Could not read headers for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
 	if err := EnsureEmpty(treader, "reading request headers"); err != nil {
 		_ = treader.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not ensure arg2reader is empty for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not ensure arg2reader is empty for inbound request")
 		return errors.Wrapf(err, "Could not ensure arg2reader is empty for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
 	if err := treader.Close(); err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not close arg2reader for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not close arg2reader for inbound request")
 		return errors.Wrapf(err, "Could not close arg2reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -322,7 +333,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 
 	treader, err := c.call.Arg3Reader()
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg3reader for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not create arg3reader for inbound request")
 		err = errors.Wrapf(err, "Could not create arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -332,7 +343,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 	defer PutBuffer(buf)
 	if _, err = buf.ReadFrom(treader); err != nil {
 		_ = treader.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not read from arg3reader for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not read from arg3reader for inbound request")
 		err = errors.Wrapf(err, "Could not read from arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -340,7 +351,7 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 	}
 	wireValue, err = protocol.Binary.Decode(bytes.NewReader(buf.Bytes()), wire.TStruct)
 	if err != nil {
-		c.endpoint.Logger.Warn("Could not decode arg3 for inbound request", zap.Error(err))
+		c.endpoint.contextLogger.Warn(ctx, "Could not decode arg3 for inbound request", zap.Error(err))
 		err = errors.Wrapf(err, "Could not decode arg3 for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -348,14 +359,14 @@ func (c *tchannelInboundCall) readReqBody(ctx context.Context) (wireValue wire.V
 	}
 	if err = EnsureEmpty(treader, "reading request body"); err != nil {
 		_ = treader.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not ensure arg3reader is empty for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not ensure arg3reader is empty for inbound request")
 		err = errors.Wrapf(err, "Could not ensure arg3reader is empty for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 		return
 	}
 	if err = treader.Close(); err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not close arg3reader for inbound request")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not close arg3reader for inbound request")
 		err = errors.Wrapf(err, "Could not close arg3reader for inbound %s.%s (%s) request",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -378,13 +389,13 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 		defer c.endpoint.callback(ctx, c.endpoint.Method, resp)
 	}
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Unexpected tchannel system error")
+		LogErrorWarnTimeoutContext(c.ctx, c.endpoint.contextLogger, err, "Unexpected tchannel system error")
 		err = c.call.Response().SendSystemError(errors.New("Server Error"))
 		return
 	}
 	if !c.success {
 		if err = c.call.Response().SetApplicationError(); err != nil {
-			LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not set application error for inbound response")
+			LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not set application error for inbound response")
 			return
 		}
 	}
@@ -400,20 +411,20 @@ func (c *tchannelInboundCall) writeResHeaders(ctx context.Context) error {
 
 	twriter, err := c.call.Response().Arg2Writer()
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg2writer for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not create arg2writer for inbound response")
 		return errors.Wrapf(err, "Could not create arg2writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
 	if err = WriteHeaders(twriter, c.resHeaders); err != nil {
 		_ = twriter.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not write headers for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not write headers for inbound response")
 		return errors.Wrapf(err, "Could not write headers for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
 	if err = twriter.Close(); err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not close arg2writer for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not close arg2writer for inbound response")
 		return errors.Wrapf(err, "Could not close arg2writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -432,7 +443,7 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 	if err != nil {
 		// If we could not write the body then we should do something else instead.
 		_ = c.call.Response().SendSystemError(errors.New("Server Error"))
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not serialize arg3 for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not serialize arg3 for inbound response")
 		return errors.Wrapf(err, "Could not serialize arg3 for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -440,7 +451,7 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 
 	twriter, err := c.call.Response().Arg3Writer()
 	if err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not create arg3writer for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not create arg3writer for inbound response")
 		return errors.Wrapf(err, "Could not create arg3writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
@@ -448,14 +459,14 @@ func (c *tchannelInboundCall) writeResBody(ctx context.Context, resp RWTStruct) 
 	err = protocol.Binary.Encode(structWireValue, twriter)
 	if err != nil {
 		_ = twriter.Close()
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not write arg3 for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not write arg3 for inbound response")
 		return errors.Wrapf(err, "Could not write arg3 for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)
 	}
 	c.responded = true
 	if err = twriter.Close(); err != nil {
-		LogErrorWarnTimeout(c.endpoint.Logger, err, "Could not close arg3writer for inbound response")
+		LogErrorWarnTimeoutContext(ctx, c.endpoint.contextLogger, err, "Could not close arg3writer for inbound response")
 		return errors.Wrapf(err, "Could not close arg3writer for inbound %s.%s (%s) response",
 			c.endpoint.EndpointID, c.endpoint.HandlerID, c.endpoint.Method,
 		)

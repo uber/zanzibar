@@ -44,6 +44,8 @@ const (
 	logFieldRequestHeaderPrefix = "Request-Header"
 	logFieldResponseStatusCode  = "statusCode"
 	logFieldRequestUUID         = "requestUUID"
+	logFieldEndpointID          = "endpointID"
+	logFieldHandlerID           = "handlerID"
 )
 
 // WithEndpointField adds the endpoint information in the

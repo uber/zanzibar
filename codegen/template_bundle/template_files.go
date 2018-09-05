@@ -2455,7 +2455,7 @@ func (h *{{$handlerName}}) Handle(
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
-	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+	if err := wfReqHeaders.EnsureContext(ctx, {{.ReqHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
 		return false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing request headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2468,7 +2468,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2504,7 +2504,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = r
@@ -2514,7 +2514,8 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					h.endpoint.Logger.Warn(
+					h.Deps.Default.ContextLogger.Warn(
+						ctx,
 						"Handler returned non-nil error type *{{.Type}} but nil value",
 						zap.Error(err),
 					)
@@ -2527,7 +2528,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					h.endpoint.Logger.Warn("Handler returned error", zap.Error(err))
+					h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2550,7 +2551,7 @@ func (h *{{$handlerName}}) Handle(
 		)
 	}
 
-	if err := wfResHeaders.Ensure({{.ResHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
+	if err := wfResHeaders.EnsureContext(ctx, {{.ResHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
 		return false, nil, nil, errors.Wrapf(
 			err, "%s.%s (%s) missing response headers",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2623,7 +2624,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7479, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7595, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

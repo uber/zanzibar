@@ -37,15 +37,17 @@ func NewSimpleServiceCallWorkflow(
 	deps *module.Dependencies,
 ) workflow.SimpleServiceCallWorkflow {
 	return &Workflow{
-		Clients: deps.Client,
-		Logger:  deps.Default.Logger,
+		Clients:       deps.Client,
+		Logger:        deps.Default.Logger,
+		contextLogger: deps.Default.ContextLogger,
 	}
 }
 
 // Workflow ...
 type Workflow struct {
-	Clients *module.ClientDependencies
-	Logger  *zap.Logger
+	Clients       *module.ClientDependencies
+	Logger        *zap.Logger
+	contextLogger zanzibar.ContextLogger
 }
 
 // Handle ...
@@ -73,8 +75,8 @@ func (w Workflow) Handle(
 		case *clientBaz.AuthErr:
 			return respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			zanzibar.LogErrorWarnTimeout(
-				w.Logger, err,
+			zanzibar.LogErrorWarnTimeoutContext(
+				ctx, w.contextLogger, err,
 				"baz.Call returned error",
 			)
 			return respHeaders, err
