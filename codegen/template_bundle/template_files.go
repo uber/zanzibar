@@ -237,6 +237,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
+	"runtime/debug"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -320,7 +321,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
-			e := errors.New(fmt.Sprintf("enpoint panic: %v, stacktrace: %v", r, stacktrace))
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			req.Logger.Error(
 				"endpoint panic",
 				zap.Error(e),
@@ -459,7 +460,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6657, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6664, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -25,7 +25,6 @@ package googlenowendpoint
 
 import (
 	"context"
-	"fmt"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -75,7 +74,7 @@ func (h *GoogleNowCheckCredentialsHandler) HandleRequest(
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
-			e := errors.New(fmt.Sprintf("enpoint panic: %v, stacktrace: %v", r, stacktrace))
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			req.Logger.Error(
 				"endpoint panic",
 				zap.Error(e),
