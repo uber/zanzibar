@@ -75,7 +75,6 @@ type Gateway struct {
 	RealTChannelAddr string
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
-	Logger           *zap.Logger
 	ContextLogger    ContextLogger
 	RootScope        tally.Scope
 	AllHostScope     tally.Scope
@@ -100,11 +99,15 @@ type Gateway struct {
 	tracerCloser    io.Closer
 	//	- panic ???
 	//	- process reporter ?
+
+	// Soon to be deprecated
+	Logger *zap.Logger
 }
 
 // DefaultDependencies are the common dependencies for all modules
 type DefaultDependencies struct {
 	// Logger is a server-scoped logger
+	// Deprecated: Use ContextLogger instead.
 	Logger *zap.Logger
 
 	// ContextLogger is a logger with request-scoped log fields

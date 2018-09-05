@@ -106,6 +106,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 
 	tags := allLogs["Finished an incoming server TChannel request"][0]
 	dynamicHeaders := []string{
+		"requestUUID",
 		"timestamp-started",
 		"timestamp-finished",
 		"remoteAddr",
