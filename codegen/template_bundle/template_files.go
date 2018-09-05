@@ -317,7 +317,21 @@ func (h *{{$handlerName}}) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	{{- if $reqHeaderRequiredKeys -}}
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.New(fmt.Sprintf("enpoint panic: %v, stacktrace: %v", r, stacktrace))
+			req.Logger.Error(
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			res.SendError(500, "Unexpected server error", e)
+		}
+	}()
+
+	{{ if $reqHeaderRequiredKeys -}}
 	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
 		return
 	}
@@ -445,7 +459,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6268, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6657, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
