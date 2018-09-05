@@ -283,6 +283,9 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
 	}
+	for expectedKey, expectedValue := range expectedValues {
+		assert.Equal(t, logMsg[expectedKey], expectedValue, "unexpected header %q", expectedKey)
+	}
 }
 
 func TestMakingClientCallWithThriftException(t *testing.T) {

@@ -1422,20 +1422,11 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	}
 
 	expectedValues := map[string]interface{}{
-		"msg":                             "Finished an incoming server HTTP request",
-		"env":                             "production",
-		"clientID":                        "baz",
-		"level":                           "info",
-		"serviceName":                     "bazService",
-		"serviceMethod":                   "SimpleService::call",
-		"methodName":                      "Call",
-		"zone":                            "unknown",
-		"service":                         "example-gateway",
-		"Request-Header-Foo-Bar":          "Baz",
-		"Request-Header-x-uuid":           "uuid",
-		"Request-Header-x-token":          "token",
-		"Response-Header-some-res-header": "something",
-
+		"msg":                            "Finished an incoming server HTTP request",
+		"env":                            "production",
+		"level":                          "info",
+		"zone":                           "unknown",
+		"service":                        "example-gateway",
 		"method":                         "GET",
 		"pathname":                       "/foo?bar=bar",
 		"statusCode":                     float64(200),
@@ -1447,5 +1438,8 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	}
+	for expectedKey, expectedValue := range expectedValues {
+		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
 	}
 }

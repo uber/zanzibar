@@ -135,6 +135,9 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
 	}
+	for expectedKey, expectedValue := range expectedValues {
+		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
+	}
 
 	tags = allLogs["Finished an outgoing client TChannel request"][0]
 	dynamicHeaders = []string{
@@ -161,13 +164,15 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"methodName":                      "Call",
 		"zone":                            "unknown",
 		"service":                         "example-gateway",
-		"Request-Header-Foo-Bar":          "Baz",
 		"Request-Header-x-uuid":           "uuid",
 		"Request-Header-x-token":          "token",
 		"Response-Header-some-res-header": "something",
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	}
+	for expectedKey, expectedValue := range expectedValues {
+		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
 	}
 }
 
