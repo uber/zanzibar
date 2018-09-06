@@ -33,6 +33,7 @@ import (
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
+	panicclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic/mock-client"
 	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -46,6 +47,8 @@ import (
 	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
+	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
@@ -61,6 +64,7 @@ type MockClientNodes struct {
 	Contacts  *contactsclientgenerated.MockClientWithFixture
 	GoogleNow *googlenowclientgenerated.MockClient
 	Multi     *multiclientgenerated.MockClient
+	Panic     *panicclientgenerated.MockClient
 	Quux      *quuxclientgenerated.MockClientWithFixture
 }
 
@@ -86,6 +90,7 @@ func InitializeDependenciesMock(
 		Contacts:  contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
 		GoogleNow: googlenowclientgenerated.NewMockClient(ctrl),
 		Multi:     multiclientgenerated.NewMockClient(ctrl),
+		Panic:     panicclientgenerated.NewMockClient(ctrl),
 		Quux:      quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
@@ -95,6 +100,7 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
+	initializedClientDependencies.Panic = mockClientNodes.Panic
 	initializedClientDependencies.Quux = mockClientNodes.Quux
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
@@ -154,16 +160,23 @@ func InitializeDependenciesMock(
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
+	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &panictchannelendpointmodule.ClientDependencies{
+			Panic: initializedClientDependencies.Panic,
+		},
+	})
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &module.EndpointDependencies{
-			Bar:         initializedEndpointDependencies.Bar,
-			Baz:         initializedEndpointDependencies.Baz,
-			BazTChannel: initializedEndpointDependencies.BazTChannel,
-			Contacts:    initializedEndpointDependencies.Contacts,
-			Googlenow:   initializedEndpointDependencies.Googlenow,
-			Multi:       initializedEndpointDependencies.Multi,
+			Bar:           initializedEndpointDependencies.Bar,
+			Baz:           initializedEndpointDependencies.Baz,
+			BazTChannel:   initializedEndpointDependencies.BazTChannel,
+			Contacts:      initializedEndpointDependencies.Contacts,
+			Googlenow:     initializedEndpointDependencies.Googlenow,
+			Multi:         initializedEndpointDependencies.Multi,
+			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
 		},
 	}
 

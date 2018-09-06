@@ -82,7 +82,7 @@ func (h *SimpleServiceCallHandler) Handle(
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
-			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.endpoint.Logger.Error(
 				"endpoint panic",
 				zap.Error(e),

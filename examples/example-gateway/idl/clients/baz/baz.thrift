@@ -122,6 +122,17 @@ service SimpleService {
         zanzibar.http.resHeaders = "some-res-header"
     )
 
+    void anotherCall(
+        1: required BazRequest arg
+        2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")
+        3: optional UUID testUUID (zanzibar.http.ref = "headers.x-uuid")
+    ) throws (
+        1: AuthErr authErr
+    ) (
+        zanzibar.http.reqHeaders = "x-uuid,x-token"
+        zanzibar.http.resHeaders = "some-res-header"
+    )
+
     base.BazResponse ping() ()
 
     void sillyNoop() throws (

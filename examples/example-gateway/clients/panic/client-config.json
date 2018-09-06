@@ -1,0 +1,11 @@
+{
+	"name": "panic",
+	"type": "tchannel",
+	"config": {
+		"thriftFile": "clients/baz/baz.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"Call": "SimpleService::anotherCall"
+		}
+	}
+}

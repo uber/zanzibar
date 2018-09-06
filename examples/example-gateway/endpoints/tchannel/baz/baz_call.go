@@ -54,7 +54,6 @@ func (w Workflow) Handle(
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_Call_Args,
 ) (zanzibar.Header, error) {
-	panic("hello")
 	clientReqHeaders := make(map[string]string)
 	// passing endpoint reqHeaders to downstream client
 	for _, k := range reqHeaders.Keys() {

@@ -9,7 +9,8 @@
 			"contacts",
 			"googlenow",
 			"bazTChannel",
-			"multi"
+			"multi",
+			"panicTChannel"
 		]
 	}
 }

@@ -2393,6 +2393,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"runtime/debug"
 	"time"
 
 	"github.com/pkg/errors"
@@ -2471,7 +2472,7 @@ func (h *{{$handlerName}}) Handle(
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
-			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.endpoint.Logger.Error(
 				"endpoint panic",
 				zap.Error(e),
@@ -2654,7 +2655,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7935, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

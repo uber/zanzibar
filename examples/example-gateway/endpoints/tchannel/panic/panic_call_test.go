@@ -1,4 +1,4 @@
-package bazhandler_test
+package panichandler_test
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	ms "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/mock-service"
 )
 
-func TestBazCall(t *testing.T) {
+func TestPanicCall(t *testing.T) {
 	ms := ms.MustCreateTestService(t)
 	ms.Start()
 	defer ms.Stop()
@@ -22,7 +22,7 @@ func TestBazCall(t *testing.T) {
 		"x-uuid":                "uuid",
 		"x-nil-response-header": "false",
 	}
-	args := &baz.SimpleService_Call_Args{
+	args := &baz.SimpleService_AnotherCall_Args{
 		Arg: &baz.BazRequest{
 			B1: true,
 			S2: "hello",
@@ -34,34 +34,16 @@ func TestBazCall(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	var result baz.SimpleService_Call_Result
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	var result baz.SimpleService_AnotherCall_Result
+	ms.MockClients().Panic.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+		ctx, "SimpleService", "AnotherCall", reqHeaders, args, &result,
 	)
 	if !assert.NoError(t, err, "got tchannel error") {
 		return
 	}
 	assert.True(t, success)
 	assert.Equal(t, expectedHeaders, resHeaders)
-
-	reqHeaders = map[string]string{
-		"x-token":               "token",
-		"x-uuid":                "uuid",
-		"x-nil-response-header": "true",
-	}
-
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
-		Return(map[string]string{"some-res-header": "something"}, nil)
-
-	success, resHeaders, err = ms.MakeTChannelRequest(
-		ctx, "SimpleService", "Call", reqHeaders, args, &result,
-	)
-	if !assert.Error(t, err, "got tchannel error") {
-		return
-	}
-	assert.False(t, success)
-	assert.Nil(t, resHeaders)
 }

@@ -30,6 +30,7 @@ import (
 	googlenowendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow"
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
+	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -42,10 +43,11 @@ type Dependencies struct {
 
 // EndpointDependencies contains endpoint dependencies
 type EndpointDependencies struct {
-	Bar         barendpointgenerated.Endpoint
-	Baz         bazendpointgenerated.Endpoint
-	BazTChannel baztchannelendpointgenerated.Endpoint
-	Contacts    contactsendpointgenerated.Endpoint
-	Googlenow   googlenowendpointgenerated.Endpoint
-	Multi       multiendpointgenerated.Endpoint
+	Bar           barendpointgenerated.Endpoint
+	Baz           bazendpointgenerated.Endpoint
+	BazTChannel   baztchannelendpointgenerated.Endpoint
+	Contacts      contactsendpointgenerated.Endpoint
+	Googlenow     googlenowendpointgenerated.Endpoint
+	Multi         multiendpointgenerated.Endpoint
+	PanicTChannel panictchannelendpointgenerated.Endpoint
 }

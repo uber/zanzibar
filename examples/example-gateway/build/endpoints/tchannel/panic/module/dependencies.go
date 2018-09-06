@@ -24,7 +24,7 @@
 package module
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	panicclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -37,5 +37,5 @@ type Dependencies struct {
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
-	Baz bazclientgenerated.Client
+	Panic panicclientgenerated.Client
 }

@@ -10,16 +10,16 @@ import (
 	"strings"
 )
 
-// SimpleService_Call_Args represents the arguments for the SimpleService.Call function.
+// SimpleService_CallPanic_Args represents the arguments for the SimpleService.callPanic function.
 //
-// The arguments for Call are sent and received over the wire as this struct.
-type SimpleService_Call_Args struct {
+// The arguments for callPanic are sent and received over the wire as this struct.
+type SimpleService_CallPanic_Args struct {
 	Arg         *BazRequest `json:"arg,required"`
 	I64Optional *int64      `json:"i64Optional,omitempty"`
 	TestUUID    *UUID       `json:"testUUID,omitempty"`
 }
 
-// ToWire translates a SimpleService_Call_Args struct into a Thrift-level intermediate
+// ToWire translates a SimpleService_CallPanic_Args struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -34,7 +34,7 @@ type SimpleService_Call_Args struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
+func (v *SimpleService_CallPanic_Args) ToWire() (wire.Value, error) {
 	var (
 		fields [3]wire.Field
 		i      int = 0
@@ -43,7 +43,7 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	)
 
 	if v.Arg == nil {
-		return w, errors.New("field Arg of SimpleService_Call_Args is required")
+		return w, errors.New("field Arg of SimpleService_CallPanic_Args is required")
 	}
 	w, err = v.Arg.ToWire()
 	if err != nil {
@@ -71,11 +71,11 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
+// FromWire deserializes a SimpleService_CallPanic_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a SimpleService_Call_Args struct
+// An error is returned if we were unable to build a SimpleService_CallPanic_Args struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -83,12 +83,12 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v SimpleService_Call_Args
+//   var v SimpleService_CallPanic_Args
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *SimpleService_Call_Args) FromWire(w wire.Value) error {
+func (v *SimpleService_CallPanic_Args) FromWire(w wire.Value) error {
 	var err error
 
 	argIsSet := false
@@ -127,15 +127,15 @@ func (v *SimpleService_Call_Args) FromWire(w wire.Value) error {
 	}
 
 	if !argIsSet {
-		return errors.New("field Arg of SimpleService_Call_Args is required")
+		return errors.New("field Arg of SimpleService_CallPanic_Args is required")
 	}
 
 	return nil
 }
 
-// String returns a readable string representation of a SimpleService_Call_Args
+// String returns a readable string representation of a SimpleService_CallPanic_Args
 // struct.
-func (v *SimpleService_Call_Args) String() string {
+func (v *SimpleService_CallPanic_Args) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -153,14 +153,14 @@ func (v *SimpleService_Call_Args) String() string {
 		i++
 	}
 
-	return fmt.Sprintf("SimpleService_Call_Args{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("SimpleService_CallPanic_Args{%v}", strings.Join(fields[:i], ", "))
 }
 
-// Equals returns true if all the fields of this SimpleService_Call_Args match the
-// provided SimpleService_Call_Args.
+// Equals returns true if all the fields of this SimpleService_CallPanic_Args match the
+// provided SimpleService_CallPanic_Args.
 //
 // This function performs a deep comparison.
-func (v *SimpleService_Call_Args) Equals(rhs *SimpleService_Call_Args) bool {
+func (v *SimpleService_CallPanic_Args) Equals(rhs *SimpleService_CallPanic_Args) bool {
 	if !v.Arg.Equals(rhs.Arg) {
 		return false
 	}
@@ -176,11 +176,11 @@ func (v *SimpleService_Call_Args) Equals(rhs *SimpleService_Call_Args) bool {
 
 // GetArg returns the value of Arg if it is set or its
 // zero value if it is unset.
-func (v *SimpleService_Call_Args) GetArg() (o *BazRequest) { return v.Arg }
+func (v *SimpleService_CallPanic_Args) GetArg() (o *BazRequest) { return v.Arg }
 
 // GetI64Optional returns the value of I64Optional if it is set or its
 // zero value if it is unset.
-func (v *SimpleService_Call_Args) GetI64Optional() (o int64) {
+func (v *SimpleService_CallPanic_Args) GetI64Optional() (o int64) {
 	if v.I64Optional != nil {
 		return *v.I64Optional
 	}
@@ -190,7 +190,7 @@ func (v *SimpleService_Call_Args) GetI64Optional() (o int64) {
 
 // GetTestUUID returns the value of TestUUID if it is set or its
 // zero value if it is unset.
-func (v *SimpleService_Call_Args) GetTestUUID() (o UUID) {
+func (v *SimpleService_CallPanic_Args) GetTestUUID() (o UUID) {
 	if v.TestUUID != nil {
 		return *v.TestUUID
 	}
@@ -201,80 +201,80 @@ func (v *SimpleService_Call_Args) GetTestUUID() (o UUID) {
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
-// This will always be "Call" for this struct.
-func (v *SimpleService_Call_Args) MethodName() string {
-	return "Call"
+// This will always be "callPanic" for this struct.
+func (v *SimpleService_CallPanic_Args) MethodName() string {
+	return "callPanic"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Call for this struct.
-func (v *SimpleService_Call_Args) EnvelopeType() wire.EnvelopeType {
+func (v *SimpleService_CallPanic_Args) EnvelopeType() wire.EnvelopeType {
 	return wire.Call
 }
 
-// SimpleService_Call_Helper provides functions that aid in handling the
-// parameters and return values of the SimpleService.Call
+// SimpleService_CallPanic_Helper provides functions that aid in handling the
+// parameters and return values of the SimpleService.callPanic
 // function.
-var SimpleService_Call_Helper = struct {
-	// Args accepts the parameters of Call in-order and returns
+var SimpleService_CallPanic_Helper = struct {
+	// Args accepts the parameters of callPanic in-order and returns
 	// the arguments struct for the function.
 	Args func(
 		arg *BazRequest,
 		i64Optional *int64,
 		testUUID *UUID,
-	) *SimpleService_Call_Args
+	) *SimpleService_CallPanic_Args
 
 	// IsException returns true if the given error can be thrown
-	// by Call.
+	// by callPanic.
 	//
-	// An error can be thrown by Call only if the
+	// An error can be thrown by callPanic only if the
 	// corresponding exception type was mentioned in the 'throws'
 	// section for it in the Thrift file.
 	IsException func(error) bool
 
-	// WrapResponse returns the result struct for Call
+	// WrapResponse returns the result struct for callPanic
 	// given the error returned by it. The provided error may
-	// be nil if Call did not fail.
+	// be nil if callPanic did not fail.
 	//
-	// This allows mapping errors returned by Call into a
+	// This allows mapping errors returned by callPanic into a
 	// serializable result struct. WrapResponse returns a
 	// non-nil error if the provided error cannot be thrown by
-	// Call
+	// callPanic
 	//
-	//   err := Call(args)
-	//   result, err := SimpleService_Call_Helper.WrapResponse(err)
+	//   err := callPanic(args)
+	//   result, err := SimpleService_CallPanic_Helper.WrapResponse(err)
 	//   if err != nil {
-	//     return fmt.Errorf("unexpected error from Call: %v", err)
+	//     return fmt.Errorf("unexpected error from callPanic: %v", err)
 	//   }
 	//   serialize(result)
-	WrapResponse func(error) (*SimpleService_Call_Result, error)
+	WrapResponse func(error) (*SimpleService_CallPanic_Result, error)
 
-	// UnwrapResponse takes the result struct for Call
+	// UnwrapResponse takes the result struct for callPanic
 	// and returns the erorr returned by it (if any).
 	//
-	// The error is non-nil only if Call threw an
+	// The error is non-nil only if callPanic threw an
 	// exception.
 	//
 	//   result := deserialize(bytes)
-	//   err := SimpleService_Call_Helper.UnwrapResponse(result)
-	UnwrapResponse func(*SimpleService_Call_Result) error
+	//   err := SimpleService_CallPanic_Helper.UnwrapResponse(result)
+	UnwrapResponse func(*SimpleService_CallPanic_Result) error
 }{}
 
 func init() {
-	SimpleService_Call_Helper.Args = func(
+	SimpleService_CallPanic_Helper.Args = func(
 		arg *BazRequest,
 		i64Optional *int64,
 		testUUID *UUID,
-	) *SimpleService_Call_Args {
-		return &SimpleService_Call_Args{
+	) *SimpleService_CallPanic_Args {
+		return &SimpleService_CallPanic_Args{
 			Arg:         arg,
 			I64Optional: i64Optional,
 			TestUUID:    testUUID,
 		}
 	}
 
-	SimpleService_Call_Helper.IsException = func(err error) bool {
+	SimpleService_CallPanic_Helper.IsException = func(err error) bool {
 		switch err.(type) {
 		case *AuthErr:
 			return true
@@ -283,22 +283,22 @@ func init() {
 		}
 	}
 
-	SimpleService_Call_Helper.WrapResponse = func(err error) (*SimpleService_Call_Result, error) {
+	SimpleService_CallPanic_Helper.WrapResponse = func(err error) (*SimpleService_CallPanic_Result, error) {
 		if err == nil {
-			return &SimpleService_Call_Result{}, nil
+			return &SimpleService_CallPanic_Result{}, nil
 		}
 
 		switch e := err.(type) {
 		case *AuthErr:
 			if e == nil {
-				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_Call_Result.AuthErr")
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for SimpleService_CallPanic_Result.AuthErr")
 			}
-			return &SimpleService_Call_Result{AuthErr: e}, nil
+			return &SimpleService_CallPanic_Result{AuthErr: e}, nil
 		}
 
 		return nil, err
 	}
-	SimpleService_Call_Helper.UnwrapResponse = func(result *SimpleService_Call_Result) (err error) {
+	SimpleService_CallPanic_Helper.UnwrapResponse = func(result *SimpleService_CallPanic_Result) (err error) {
 		if result.AuthErr != nil {
 			err = result.AuthErr
 			return
@@ -308,14 +308,14 @@ func init() {
 
 }
 
-// SimpleService_Call_Result represents the result of a SimpleService.Call function call.
+// SimpleService_CallPanic_Result represents the result of a SimpleService.callPanic function call.
 //
-// The result of a Call execution is sent and received over the wire as this struct.
-type SimpleService_Call_Result struct {
+// The result of a callPanic execution is sent and received over the wire as this struct.
+type SimpleService_CallPanic_Result struct {
 	AuthErr *AuthErr `json:"authErr,omitempty"`
 }
 
-// ToWire translates a SimpleService_Call_Result struct into a Thrift-level intermediate
+// ToWire translates a SimpleService_CallPanic_Result struct into a Thrift-level intermediate
 // representation. This intermediate representation may be serialized
 // into bytes using a ThriftRW protocol implementation.
 //
@@ -330,7 +330,7 @@ type SimpleService_Call_Result struct {
 //   if err := binaryProtocol.Encode(x, writer); err != nil {
 //     return err
 //   }
-func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
+func (v *SimpleService_CallPanic_Result) ToWire() (wire.Value, error) {
 	var (
 		fields [1]wire.Field
 		i      int = 0
@@ -348,17 +348,17 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 	}
 
 	if i > 1 {
-		return wire.Value{}, fmt.Errorf("SimpleService_Call_Result should have at most one field: got %v fields", i)
+		return wire.Value{}, fmt.Errorf("SimpleService_CallPanic_Result should have at most one field: got %v fields", i)
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-// FromWire deserializes a SimpleService_Call_Result struct from its Thrift-level
+// FromWire deserializes a SimpleService_CallPanic_Result struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
 //
-// An error is returned if we were unable to build a SimpleService_Call_Result struct
+// An error is returned if we were unable to build a SimpleService_CallPanic_Result struct
 // from the provided intermediate representation.
 //
 //   x, err := binaryProtocol.Decode(reader, wire.TStruct)
@@ -366,12 +366,12 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 //     return nil, err
 //   }
 //
-//   var v SimpleService_Call_Result
+//   var v SimpleService_CallPanic_Result
 //   if err := v.FromWire(x); err != nil {
 //     return nil, err
 //   }
 //   return &v, nil
-func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
+func (v *SimpleService_CallPanic_Result) FromWire(w wire.Value) error {
 	var err error
 
 	for _, field := range w.GetStruct().Fields {
@@ -392,15 +392,15 @@ func (v *SimpleService_Call_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if count > 1 {
-		return fmt.Errorf("SimpleService_Call_Result should have at most one field: got %v fields", count)
+		return fmt.Errorf("SimpleService_CallPanic_Result should have at most one field: got %v fields", count)
 	}
 
 	return nil
 }
 
-// String returns a readable string representation of a SimpleService_Call_Result
+// String returns a readable string representation of a SimpleService_CallPanic_Result
 // struct.
-func (v *SimpleService_Call_Result) String() string {
+func (v *SimpleService_CallPanic_Result) String() string {
 	if v == nil {
 		return "<nil>"
 	}
@@ -412,14 +412,14 @@ func (v *SimpleService_Call_Result) String() string {
 		i++
 	}
 
-	return fmt.Sprintf("SimpleService_Call_Result{%v}", strings.Join(fields[:i], ", "))
+	return fmt.Sprintf("SimpleService_CallPanic_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-// Equals returns true if all the fields of this SimpleService_Call_Result match the
-// provided SimpleService_Call_Result.
+// Equals returns true if all the fields of this SimpleService_CallPanic_Result match the
+// provided SimpleService_CallPanic_Result.
 //
 // This function performs a deep comparison.
-func (v *SimpleService_Call_Result) Equals(rhs *SimpleService_Call_Result) bool {
+func (v *SimpleService_CallPanic_Result) Equals(rhs *SimpleService_CallPanic_Result) bool {
 	if !((v.AuthErr == nil && rhs.AuthErr == nil) || (v.AuthErr != nil && rhs.AuthErr != nil && v.AuthErr.Equals(rhs.AuthErr))) {
 		return false
 	}
@@ -429,7 +429,7 @@ func (v *SimpleService_Call_Result) Equals(rhs *SimpleService_Call_Result) bool 
 
 // GetAuthErr returns the value of AuthErr if it is set or its
 // zero value if it is unset.
-func (v *SimpleService_Call_Result) GetAuthErr() (o *AuthErr) {
+func (v *SimpleService_CallPanic_Result) GetAuthErr() (o *AuthErr) {
 	if v.AuthErr != nil {
 		return v.AuthErr
 	}
@@ -440,14 +440,14 @@ func (v *SimpleService_Call_Result) GetAuthErr() (o *AuthErr) {
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the result.
 //
-// This will always be "Call" for this struct.
-func (v *SimpleService_Call_Result) MethodName() string {
-	return "Call"
+// This will always be "callPanic" for this struct.
+func (v *SimpleService_CallPanic_Result) MethodName() string {
+	return "callPanic"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
 //
 // This will always be Reply for this struct.
-func (v *SimpleService_Call_Result) EnvelopeType() wire.EnvelopeType {
+func (v *SimpleService_CallPanic_Result) EnvelopeType() wire.EnvelopeType {
 	return wire.Reply
 }

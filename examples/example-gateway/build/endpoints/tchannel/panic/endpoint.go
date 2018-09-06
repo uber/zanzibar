@@ -37,18 +37,18 @@ type Endpoint interface {
 // a gateway
 func NewEndpoint(deps *module.Dependencies) Endpoint {
 	return &EndpointHandlers{
-		SimpleServiceCallHandler: NewSimpleServiceCallHandler(deps),
+		SimpleServiceAnotherCallHandler: NewSimpleServiceAnotherCallHandler(deps),
 	}
 }
 
 // EndpointHandlers is a collection of individual endpoint handlers
 type EndpointHandlers struct {
-	SimpleServiceCallHandler *SimpleServiceCallHandler
+	SimpleServiceAnotherCallHandler *SimpleServiceAnotherCallHandler
 }
 
 // Register registers the endpoint handlers with the gateway
 func (handlers *EndpointHandlers) Register(gateway *zanzibar.Gateway) error {
-	err0 := handlers.SimpleServiceCallHandler.Register(gateway)
+	err0 := handlers.SimpleServiceAnotherCallHandler.Register(gateway)
 	if err0 != nil {
 		return err0
 	}

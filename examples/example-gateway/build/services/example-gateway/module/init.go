@@ -34,6 +34,8 @@ import (
 	googlenowclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
+	panicclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic"
+	panicclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic/module"
 	quuxclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -47,6 +49,8 @@ import (
 	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
+	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
@@ -70,6 +74,7 @@ type ClientDependenciesNodes struct {
 	Contacts  contactsclientgenerated.Client
 	GoogleNow googlenowclientgenerated.Client
 	Multi     multiclientgenerated.Client
+	Panic     panicclientgenerated.Client
 	Quux      quuxclientstatic.Client
 }
 
@@ -81,12 +86,13 @@ type MiddlewareDependenciesNodes struct {
 
 // EndpointDependenciesNodes contains endpoint dependencies
 type EndpointDependenciesNodes struct {
-	Bar         barendpointgenerated.Endpoint
-	Baz         bazendpointgenerated.Endpoint
-	BazTChannel baztchannelendpointgenerated.Endpoint
-	Contacts    contactsendpointgenerated.Endpoint
-	Googlenow   googlenowendpointgenerated.Endpoint
-	Multi       multiendpointgenerated.Endpoint
+	Bar           barendpointgenerated.Endpoint
+	Baz           bazendpointgenerated.Endpoint
+	BazTChannel   baztchannelendpointgenerated.Endpoint
+	Contacts      contactsendpointgenerated.Endpoint
+	Googlenow     googlenowendpointgenerated.Endpoint
+	Multi         multiendpointgenerated.Endpoint
+	PanicTChannel panictchannelendpointgenerated.Endpoint
 }
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
@@ -120,6 +126,9 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.Multi = multiclientgenerated.NewClient(&multiclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Panic = panicclientgenerated.NewClient(&panicclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.Quux = quuxclientstatic.NewClient(&quuxclientmodule.Dependencies{
@@ -183,16 +192,23 @@ func InitializeDependencies(
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
+	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &panictchannelendpointmodule.ClientDependencies{
+			Panic: initializedClientDependencies.Panic,
+		},
+	})
 
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &EndpointDependencies{
-			Bar:         initializedEndpointDependencies.Bar,
-			Baz:         initializedEndpointDependencies.Baz,
-			BazTChannel: initializedEndpointDependencies.BazTChannel,
-			Contacts:    initializedEndpointDependencies.Contacts,
-			Googlenow:   initializedEndpointDependencies.Googlenow,
-			Multi:       initializedEndpointDependencies.Multi,
+			Bar:           initializedEndpointDependencies.Bar,
+			Baz:           initializedEndpointDependencies.Baz,
+			BazTChannel:   initializedEndpointDependencies.BazTChannel,
+			Contacts:      initializedEndpointDependencies.Contacts,
+			Googlenow:     initializedEndpointDependencies.Googlenow,
+			Multi:         initializedEndpointDependencies.Multi,
+			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
 		},
 	}
 

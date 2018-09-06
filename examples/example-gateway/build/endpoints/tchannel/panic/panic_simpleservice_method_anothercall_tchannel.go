@@ -41,32 +41,32 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 )
 
-// NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
-func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHandler {
-	handler := &SimpleServiceCallHandler{
+// NewSimpleServiceAnotherCallHandler creates a handler to be registered with a thrift server.
+func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServiceAnotherCallHandler {
+	handler := &SimpleServiceAnotherCallHandler{
 		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
-		"panicTChannel", "call", "SimpleService::Call",
+		"panicTChannel", "call", "SimpleService::AnotherCall",
 		handler,
 	)
 	return handler
 }
 
-// SimpleServiceCallHandler is the handler for "SimpleService::Call".
-type SimpleServiceCallHandler struct {
+// SimpleServiceAnotherCallHandler is the handler for "SimpleService::AnotherCall".
+type SimpleServiceAnotherCallHandler struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
-func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceAnotherCallHandler) Register(g *zanzibar.Gateway) error {
 	return g.TChannelRouter.Register(h.endpoint)
 }
 
-// Handle handles RPC call of "SimpleService::Call".
-func (h *SimpleServiceCallHandler) Handle(
+// Handle handles RPC call of "SimpleService::AnotherCall".
+func (h *SimpleServiceAnotherCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -74,7 +74,7 @@ func (h *SimpleServiceCallHandler) Handle(
 	defer func() {
 		if r := recover(); r != nil {
 			stacktrace := string(debug.Stack())
-			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.endpoint.Logger.Error(
 				"endpoint panic",
 				zap.Error(e),
@@ -95,9 +95,9 @@ func (h *SimpleServiceCallHandler) Handle(
 		)
 	}
 
-	var res endpointsTchannelBazBaz.SimpleService_Call_Result
+	var res endpointsTchannelBazBaz.SimpleService_AnotherCall_Result
 
-	var req endpointsTchannelBazBaz.SimpleService_Call_Args
+	var req endpointsTchannelBazBaz.SimpleService_AnotherCall_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.endpoint.Logger.Warn("Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -111,7 +111,7 @@ func (h *SimpleServiceCallHandler) Handle(
 			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
 		}
 	}
-	workflow := customBaz.NewSimpleServiceCallWorkflow(h.Deps)
+	workflow := customBaz.NewSimpleServiceAnotherCallWorkflow(h.Deps)
 
 	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
@@ -166,12 +166,12 @@ func (h *SimpleServiceCallHandler) Handle(
 }
 
 // redirectToDeputy sends the request to deputy hostPort
-func (h *SimpleServiceCallHandler) redirectToDeputy(
+func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsTchannelBazBaz.SimpleService_Call_Args,
-	res *endpointsTchannelBazBaz.SimpleService_Call_Result,
+	req *endpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
+	res *endpointsTchannelBazBaz.SimpleService_AnotherCall_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
@@ -188,7 +188,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"SimpleService::Call": "Call",
+		"SimpleService::AnotherCall": "AnotherCall",
 	}
 
 	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -207,7 +207,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "Call", reqHeaders, req, res)
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res)
 	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }

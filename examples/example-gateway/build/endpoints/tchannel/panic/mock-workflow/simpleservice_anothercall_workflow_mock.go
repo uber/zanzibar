@@ -30,8 +30,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	panicclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic"
+	panicclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/panic/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
 	panictchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
@@ -39,11 +39,11 @@ import (
 
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
-	Baz bazclientgenerated.Client
+	Panic panicclientgenerated.Client
 }
 
-// NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
-func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallWorkflow, *MockClientNodes) {
+// NewSimpleServiceAnotherCallWorkflowMock creates a workflow with mock clients
+func NewSimpleServiceAnotherCallWorkflowMock(t *testing.T) (workflow.SimpleServiceAnotherCallWorkflow, *MockClientNodes) {
 	ctrl := gomock.NewController(t)
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
@@ -52,15 +52,15 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{
-		Baz: bazclientgeneratedmock.NewMockClient(ctrl),
+		Panic: panicclientgeneratedmock.NewMockClient(ctrl),
 	}
-	initializedClientDependencies.Baz = mockClientNodes.Baz
+	initializedClientDependencies.Panic = mockClientNodes.Panic
 
-	w := panictchannelendpointstatic.NewSimpleServiceCallWorkflow(
+	w := panictchannelendpointstatic.NewSimpleServiceAnotherCallWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
-				Baz: initializedClientDependencies.Baz,
+				Panic: initializedClientDependencies.Panic,
 			},
 		},
 	)

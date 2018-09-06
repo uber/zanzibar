@@ -50,6 +50,22 @@ service SimpleService {
     zanzibar.http.resHeaders = "some-res-header"
   )
 
+  // no response body
+  void AnotherCall(
+    1: required BazRequest arg
+    2: optional i64 i64Optional (zanzibar.http.ref = "headers.x-token")
+    3: optional UUID testUUID (zanzibar.http.ref = "headers.x-uuid")
+  ) throws (
+    1: AuthErr authErr (zanzibar.http.status = "403")
+  ) (
+    zanzibar.http.status = "204"
+    zanzibar.http.method = "POST"
+    zanzibar.http.path = "/baz/call"
+    zanzibar.handler = "baz.call"
+    zanzibar.http.reqHeaders = "x-uuid,x-token"
+    zanzibar.http.resHeaders = "some-res-header"
+  )
+
   // no request body
   BazResponse Ping() (
     zanzibar.http.status = "200"

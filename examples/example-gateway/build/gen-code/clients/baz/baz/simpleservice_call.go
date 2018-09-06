@@ -71,12 +71,6 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
-	var v BazRequest
-	err := v.FromWire(w)
-	return &v, err
-}
-
 // FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
@@ -358,12 +352,6 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _AuthErr_Read(w wire.Value) (*AuthErr, error) {
-	var v AuthErr
-	err := v.FromWire(w)
-	return &v, err
 }
 
 // FromWire deserializes a SimpleService_Call_Result struct from its Thrift-level
