@@ -25,8 +25,10 @@ package bazendpoint
 
 import (
 	"context"
+	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -70,6 +72,19 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			req.Logger.Error(
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			res.SendError(500, "Unexpected server error", e)
+		}
+	}()
 
 	// log endpoint request to downstream services
 	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
