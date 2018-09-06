@@ -87,7 +87,7 @@ func (h *BarNormalHandler) HandleRequest(
 	}
 
 	// log endpoint request to downstream services
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -97,7 +97,7 @@ func (h *BarNormalHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		req.Logger.Debug("endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarNormalWorkflow(h.Dependencies)
@@ -108,7 +108,7 @@ func (h *BarNormalHandler) HandleRequest(
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -123,7 +123,7 @@ func (h *BarNormalHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("trace-key"); ok {
 			zfields = append(zfields, zap.String("trace-key", traceKey))
 		}
-		req.Logger.Debug("downstream service response", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {

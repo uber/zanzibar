@@ -77,7 +77,7 @@ func (h *BarArgNotStructHandler) HandleRequest(
 	}
 
 	// log endpoint request to downstream services
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -87,7 +87,7 @@ func (h *BarArgNotStructHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		req.Logger.Debug("endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := workflow.NewBarArgNotStructWorkflow(h.Dependencies)

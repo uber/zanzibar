@@ -1408,6 +1408,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 
 	tags := allLogs["Finished an incoming server HTTP request"][0]
 	dynamicHeaders := []string{
+		"requestUUID",
 		"remoteAddr",
 		"timestamp-started",
 		"ts",
