@@ -25,6 +25,7 @@ import (
 
 	"github.com/pborman/uuid"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type contextFieldKey string
@@ -130,6 +131,9 @@ type ContextLogger interface {
 	Info(ctx context.Context, msg string, fields ...zap.Field)
 	Panic(ctx context.Context, msg string, fields ...zap.Field)
 	Warn(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Other utility methods on the logger
+	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
 }
 
 // NewContextLogger returns a logger that extracts log fields a context before passing through to underlying zap logger.
@@ -161,4 +165,8 @@ func (c *contextLogger) Panic(ctx context.Context, msg string, userFields ...zap
 
 func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.Field) {
 	c.log.Warn(msg, accumulateLogFields(ctx, userFields)...)
+}
+
+func (c *contextLogger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
+	return c.log.Check(lvl, msg)
 }

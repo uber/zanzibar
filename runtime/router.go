@@ -51,6 +51,8 @@ type RouterEndpoint struct {
 	HandlerName  string
 	HandlerFn    HandlerFn
 
+	contextLogger ContextLogger
+	// Deprecated: use contextLogger instead
 	logger  *zap.Logger
 	metrics *InboundHTTPMetrics
 	tracer  opentracing.Tracer
@@ -65,21 +67,18 @@ func NewRouterEndpoint(
 	handlerID string,
 	handler HandlerFn,
 ) *RouterEndpoint {
-	logger = logger.With(
-		zap.String("endpointID", endpointID),
-		zap.String("handlerID", handlerID),
-	)
 	scope = scope.Tagged(map[string]string{
 		"endpoint": endpointID,
 		"handler":  handlerID,
 	})
 	return &RouterEndpoint{
-		EndpointName: endpointID,
-		HandlerName:  handlerID,
-		HandlerFn:    handler,
-		logger:       logger,
-		metrics:      NewInboundHTTPMetrics(scope),
-		tracer:       tracer,
+		EndpointName:  endpointID,
+		HandlerName:   handlerID,
+		HandlerFn:     handler,
+		contextLogger: NewContextLogger(logger),
+		logger:        logger,
+		metrics:       NewInboundHTTPMetrics(scope),
+		tracer:        tracer,
 	}
 }
 
@@ -89,8 +88,6 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	r *http.Request,
 	params httprouter.Params,
 ) {
-	req := NewServerHTTPRequest(w, r, params, endpoint)
-
 	// TODO: (lu) get timeout from endpoint config
 	//_, ok := ctx.Deadline()
 	//if !ok {
@@ -100,6 +97,13 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//}
 	ctx := withRequestFields(r.Context())
 	ctx = WithEndpointField(ctx, endpoint.EndpointName)
+	ctx = WithLogFields(ctx,
+		zap.String(logFieldEndpointID, endpoint.EndpointName),
+		zap.String(logFieldHandlerID, endpoint.HandlerName),
+	)
+
+	r = r.WithContext(ctx)
+	req := NewServerHTTPRequest(w, r, params, endpoint)
 
 	endpoint.HandlerFn(ctx, req, req.res)
 	req.res.flush()

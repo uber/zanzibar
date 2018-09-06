@@ -80,7 +80,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	requestBody.UserUUID = req.Params.ByName("userUUID")
 
 	// log endpoint request to downstream services
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -90,7 +90,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		req.Logger.Debug("endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := customContacts.NewContactsSaveContactsWorkflow(h.Dependencies)
@@ -101,7 +101,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -116,7 +116,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		if traceKey, ok := req.Header.Get("x-trace-id"); ok {
 			zfields = append(zfields, zap.String("x-trace-id", traceKey))
 		}
-		req.Logger.Debug("downstream service response", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
 	}
 
 	if err != nil {

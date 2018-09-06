@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -50,13 +51,17 @@ type ServerHTTPRequest struct {
 	parseFailed bool
 	rawBody     []byte
 
-	Logger       *zap.Logger
-	EndpointName string
-	HandlerName  string
-	URL          *url.URL
-	Method       string
-	Params       httprouter.Params
-	Header       Header
+	ctx           context.Context
+	contextLogger ContextLogger
+	EndpointName  string
+	HandlerName   string
+	URL           *url.URL
+	Method        string
+	Params        httprouter.Params
+	Header        Header
+
+	// Deprecated: Use contextLogger instead
+	Logger *zap.Logger
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -68,17 +73,19 @@ func NewServerHTTPRequest(
 ) *ServerHTTPRequest {
 	req := &ServerHTTPRequest{
 		httpRequest: r,
+		ctx:         r.Context(),
 		queryValues: nil,
 		metrics:     endpoint.metrics,
 		tracer:      endpoint.tracer,
 
-		Logger:       endpoint.logger,
-		EndpointName: endpoint.EndpointName,
-		HandlerName:  endpoint.HandlerName,
-		URL:          r.URL,
-		Method:       r.Method,
-		Params:       params,
-		Header:       NewServerHTTPHeader(r.Header),
+		contextLogger: endpoint.contextLogger,
+		EndpointName:  endpoint.EndpointName,
+		HandlerName:   endpoint.HandlerName,
+		URL:           r.URL,
+		Method:        r.Method,
+		Params:        params,
+		Header:        NewServerHTTPHeader(r.Header),
+		Logger:        endpoint.logger,
 	}
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
@@ -89,7 +96,7 @@ func NewServerHTTPRequest(
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.Logger.Error(
+		req.contextLogger.Error(req.ctx,
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -112,7 +119,7 @@ func (req *ServerHTTPRequest) start() {
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				/* coverage ignore next line */
-				req.Logger.Warn("Error Extracting Trace Headers", zap.Error(err))
+				req.contextLogger.Warn(req.ctx, "Error Extracting Trace Headers", zap.Error(err))
 			}
 			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
@@ -127,7 +134,7 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		headerValue := req.httpRequest.Header.Get(headerName)
 		if headerValue == "" {
-			req.Logger.Warn("Got request without mandatory header",
+			req.contextLogger.Warn(req.ctx, "Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -173,7 +180,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string", zap.Error(err))
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -218,7 +225,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		Err:  strconv.ErrSyntax,
 	}
 
-	req.Logger.Warn("Got request with invalid query string types",
+	req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 		zap.String("expected", "bool"),
 		zap.String("actual", value),
 		zap.String("key", key),
@@ -241,7 +248,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 8)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 			zap.String("expected", "int8"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -267,7 +274,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 			zap.String("expected", "int16"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -293,7 +300,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 			zap.String("expected", "int32"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -321,7 +328,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 			zap.String("expected", "int64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -347,7 +354,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 			zap.String("expected", "float64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -526,7 +533,7 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 
 	values := req.queryValues[key]
 	if len(values) == 0 {
-		req.Logger.Warn("Got request with missing query string value",
+		req.contextLogger.Warn(req.ctx, "Got request with missing query string value",
 			zap.String("expectedKey", key),
 		)
 		if !req.parseFailed {
@@ -579,7 +586,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.Logger.Error("Could not read request body", zap.Error(err))
+		req.contextLogger.Error(req.ctx, "Could not read request body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
@@ -596,7 +603,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.Logger.Warn("Could not parse json", zap.Error(err))
+		req.contextLogger.Warn(req.ctx, "Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
@@ -613,7 +620,7 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 }
 
 func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
-	req.Logger.Warn("Got request with invalid query string types",
+	req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),
 		zap.String("key", key),

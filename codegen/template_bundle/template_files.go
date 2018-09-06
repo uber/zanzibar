@@ -347,7 +347,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	{{end}}
 
 	// log endpoint request to downstream services
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -359,7 +359,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zfields = append(zfields, zap.String(k, val))
 			}
 		}
-		req.Logger.Debug("endpoint request to downstream", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
 	w := {{$workflowPkg}}.New{{$workflowInterface}}(h.Dependencies)
@@ -377,7 +377,7 @@ func (h *{{$handlerName}}) HandleRequest(
 	response, cliRespHeaders, err := w.Handle(ctx, req.Header, &requestBody)
 
 	// log downstream response to endpoint
-	if ce := req.Logger.Check(zapcore.DebugLevel, "stub"); ce != nil {
+	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
 		zfields := []zapcore.Field{
 			zap.String("endpoint", h.endpoint.EndpointName),
 		}
@@ -394,7 +394,7 @@ func (h *{{$handlerName}}) HandleRequest(
 		if traceKey, ok := req.Header.Get("{{$traceKey}}"); ok {
 			zfields = append(zfields, zap.String("{{$traceKey}}", traceKey))
 		}
-		req.Logger.Debug("downstream service response", zfields...)
+		h.Dependencies.Default.ContextLogger.Debug(ctx, "downstream service response", zfields...)
 	}
 
 	{{end -}}
@@ -445,7 +445,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6268, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6382, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

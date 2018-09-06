@@ -63,7 +63,8 @@ func NewServerHTTPResponse(
 func (res *ServerHTTPResponse) finish() {
 	if !res.Request.started {
 		/* coverage ignore next line */
-		res.Request.Logger.Error(
+		res.Request.contextLogger.Error(
+			res.Request.ctx,
 			"Forgot to start server response",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -72,7 +73,8 @@ func (res *ServerHTTPResponse) finish() {
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.Request.Logger.Error(
+		res.Request.contextLogger.Error(
+			res.Request.ctx,
 			"Finished an server response twice",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -86,7 +88,8 @@ func (res *ServerHTTPResponse) finish() {
 	res.Request.metrics.Latency.Record(res.finishTime.Sub(res.Request.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
-		res.Request.Logger.Error(
+		res.Request.contextLogger.Error(
+			res.Request.ctx,
 			"Could not emit statusCode metric",
 			zap.Int("UnknownStatusCode", res.StatusCode),
 		)
@@ -105,7 +108,7 @@ func (res *ServerHTTPResponse) finish() {
 	}
 
 	// write logs
-	res.Request.Logger.Info(
+	res.Request.contextLogger.Info(res.Request.ctx,
 		"Finished an incoming server HTTP request",
 		serverHTTPLogFields(res.Request, res)...,
 	)
@@ -189,14 +192,14 @@ func (res *ServerHTTPResponse) WriteJSON(
 ) {
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
-		res.Request.Logger.Error("Could not serialize nil pointer body")
+		res.Request.contextLogger.Error(res.Request.ctx, "Could not serialize nil pointer body")
 		return
 	}
 
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
-		res.Request.Logger.Error("Could not serialize json response", zap.Error(err))
+		res.Request.contextLogger.Error(res.Request.ctx, "Could not serialize json response", zap.Error(err))
 		return
 	}
 
@@ -240,7 +243,8 @@ func (res *ServerHTTPResponse) PeekBody(
 func (res *ServerHTTPResponse) flush() {
 	if res.flushed {
 		/* coverage ignore next line */
-		res.Request.Logger.Error(
+		res.Request.contextLogger.Error(
+			res.Request.ctx,
 			"Flushed a server response twice",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -264,7 +268,9 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
 		/* coverage ignore next line */
-		res.Request.Logger.Error("Could not write string to resp body",
+		res.Request.contextLogger.Error(
+			res.Request.ctx,
+			"Could not write string to resp body",
 			zap.Error(err),
 		)
 	}

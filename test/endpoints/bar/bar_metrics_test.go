@@ -203,23 +203,27 @@ func TestCallMetrics(t *testing.T) {
 		delete(logMsg, dynamicValue)
 	}
 	expectedValues := map[string]interface{}{
-		"msg":                            "Finished an outgoing client HTTP request",
-		"env":                            "test",
-		"clientID":                       "bar",
-		"Response-Header-Example-Header": "Example-Value",
-		"statusCode":                     float64(200),
-		"Request-Header-Content-Type":    "application/json",
-		"Response-Header-Content-Type":   "text/plain; charset=utf-8",
+		"msg":                          "Finished an outgoing client HTTP request",
+		"env":                          "test",
+		"clientID":                     "bar",
+		"statusCode":                   float64(200),
+		"Request-Header-Content-Type":  "application/json",
+		"Response-Header-Content-Type": "text/plain; charset=utf-8",
 
 		"level":                      "info",
 		"methodName":                 "Normal",
 		"method":                     "POST",
 		"Request-Header-X-Client-Id": "bar",
 
-		"zone":    "unknown",
-		"service": "example-gateway",
+		"zone":       "unknown",
+		"service":    "example-gateway",
+		"endpointID": "bar",
+		"handlerID":  "normal",
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	}
+	for expectedKey, expectedValue := range expectedValues {
+		assert.Equal(t, expectedValue, logMsg[expectedKey], "unexpected header %q", expectedKey)
 	}
 }
