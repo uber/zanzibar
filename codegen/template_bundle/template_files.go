@@ -1680,11 +1680,12 @@ func InitializeDependenciesMock(
 	tree := &{{$classPkg}}.DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:  g.Logger,
-		Scope:   g.AllHostScope,
-		Config:  g.Config,
-		Channel: g.Channel,
-		Tracer:  g.Tracer,
+		ContextLogger: g.ContextLogger,
+		Logger:  	   g.Logger,
+		Scope:         g.AllHostScope,
+		Config:        g.Config,
+		Channel:       g.Channel,
+		Tracer:        g.Tracer,
 	}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
@@ -1737,7 +1738,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4094, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4156, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2957,6 +2958,8 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies {
 		Logger: zap.NewNop(),
 	}
+	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
@@ -3020,7 +3023,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4831, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4945, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
