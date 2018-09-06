@@ -56,6 +56,5 @@ func (w Workflow) Handle(
 	defer func() {
 		panic("panic at user's code ...")
 	}()
-	
 	return nil, nil
 }
