@@ -44,8 +44,12 @@ import (
 	googlenowendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
 	multiendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
+	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
+	panicendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
+	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
@@ -155,16 +159,30 @@ func InitializeDependenciesMock(
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
+	initializedEndpointDependencies.Panic = panicendpointgenerated.NewEndpoint(&panicendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &panicendpointmodule.ClientDependencies{
+			Multi: initializedClientDependencies.Multi,
+		},
+	})
+	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &panictchannelendpointmodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &module.EndpointDependencies{
-			Bar:         initializedEndpointDependencies.Bar,
-			Baz:         initializedEndpointDependencies.Baz,
-			BazTChannel: initializedEndpointDependencies.BazTChannel,
-			Contacts:    initializedEndpointDependencies.Contacts,
-			Googlenow:   initializedEndpointDependencies.Googlenow,
-			Multi:       initializedEndpointDependencies.Multi,
+			Bar:           initializedEndpointDependencies.Bar,
+			Baz:           initializedEndpointDependencies.Baz,
+			BazTChannel:   initializedEndpointDependencies.BazTChannel,
+			Contacts:      initializedEndpointDependencies.Contacts,
+			Googlenow:     initializedEndpointDependencies.Googlenow,
+			Multi:         initializedEndpointDependencies.Multi,
+			Panic:         initializedEndpointDependencies.Panic,
+			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
 		},
 	}
 

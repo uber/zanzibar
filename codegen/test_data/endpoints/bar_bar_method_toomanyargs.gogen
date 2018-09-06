@@ -27,8 +27,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -73,6 +75,21 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+		}
+	}()
+
 	var requestBody endpointsBarBar.Bar_TooManyArgs_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return

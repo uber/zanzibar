@@ -26,6 +26,7 @@ package barendpoint
 import (
 	"context"
 	"encoding/json"
+	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
@@ -72,6 +73,20 @@ func (h *BarHelloWorldHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+		}
+	}()
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {

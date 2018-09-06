@@ -17,3 +17,12 @@ service ServiceBBack {
         zanzibar.http.status = "200"
     )
 }
+
+service ServiceCBack {
+    string hello (
+    ) (
+        zanzibar.http.method = "GET"
+        zanzibar.http.path = "/multi/serviceC_c/hello"
+        zanzibar.http.status = "200"
+    )
+}

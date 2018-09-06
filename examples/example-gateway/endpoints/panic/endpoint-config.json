@@ -1,0 +1,15 @@
+{
+	"name": "panic",
+	"type": "http",
+	"config": {
+		"rateLimit": 100,
+		"endpoints": [
+			"./endpoint_panic.json"
+		]
+	},
+	"dependencies": {
+		"client": [
+			"multi"
+		]
+	}
+}

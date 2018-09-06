@@ -1,0 +1,14 @@
+{
+	"endpointType": "http",
+	"endpointId": "panic",
+	"handleId": "panic",
+	"thriftFile": "endpoints/multi/multi.thrift",
+	"thriftFileSha": "{{placeholder}}",
+	"thriftMethodName": "ServiceCFront::hello",
+	"workflowType": "custom",
+	"workflowImportPath": "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic",
+	"testFixtures": {},
+	"middlewares": [],
+	"reqHeaderMap": {},
+	"resHeaderMap": {}
+}
