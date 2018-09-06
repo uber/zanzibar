@@ -1,0 +1,15 @@
+{
+	"name": "panicTChannel",
+	"type": "tchannel",
+	"config": {
+		"rateLimit": 100,
+		"endpoints": [
+			"call.json"
+		]
+	},
+	"dependencies": {
+		"client": [
+			"panic"
+		]
+	}
+}
