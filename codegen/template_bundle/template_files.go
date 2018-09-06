@@ -2467,7 +2467,23 @@ func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.endpoint.Logger.Error(
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointID))
+
+			isSuccessful = false
+			response = nil
+			headers = map[string]string{}
+		}
+	}()
+
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
 	if err := wfReqHeaders.Ensure({{.ReqHeaders | printf "%#v" }}, h.endpoint.Logger); err != nil {
@@ -2638,7 +2654,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7479, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7919, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

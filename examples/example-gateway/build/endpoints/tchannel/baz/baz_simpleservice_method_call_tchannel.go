@@ -25,6 +25,7 @@ package baztchannelendpoint
 
 import (
 	"context"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -77,7 +78,23 @@ func (h *SimpleServiceCallHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.endpoint.Logger.Error(
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointID))
+
+			isSuccessful = false
+			response = nil
+			headers = map[string]string{}
+		}
+	}()
+
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	if err := wfReqHeaders.Ensure([]string{"x-uuid", "x-token"}, h.endpoint.Logger); err != nil {
 		return false, nil, nil, errors.Wrapf(
