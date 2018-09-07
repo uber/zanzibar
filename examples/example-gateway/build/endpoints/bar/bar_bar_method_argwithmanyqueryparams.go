@@ -31,6 +31,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
@@ -44,8 +45,9 @@ import (
 
 // BarArgWithManyQueryParamsHandler is the handler for "/bar/argWithManyQueryParams"
 type BarArgWithManyQueryParamsHandler struct {
-	Dependencies *module.Dependencies
-	endpoint     *zanzibar.RouterEndpoint
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
+	endpointScope tally.Scope
 }
 
 // NewBarArgWithManyQueryParamsHandler creates a handler
@@ -58,6 +60,9 @@ func NewBarArgWithManyQueryParamsHandler(deps *module.Dependencies) *BarArgWithM
 		"bar", "argWithManyQueryParams",
 		handler.HandleRequest,
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointName,
+	})
 	return handler
 }
 
@@ -86,7 +91,8 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
 

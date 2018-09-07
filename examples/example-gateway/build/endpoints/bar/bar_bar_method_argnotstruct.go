@@ -30,6 +30,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -42,8 +43,9 @@ import (
 
 // BarArgNotStructHandler is the handler for "/bar/arg-not-struct-path"
 type BarArgNotStructHandler struct {
-	Dependencies *module.Dependencies
-	endpoint     *zanzibar.RouterEndpoint
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
+	endpointScope tally.Scope
 }
 
 // NewBarArgNotStructHandler creates a handler
@@ -56,6 +58,9 @@ func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandle
 		"bar", "argNotStruct",
 		handler.HandleRequest,
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointName,
+	})
 	return handler
 }
 
@@ -84,7 +89,8 @@ func (h *BarArgNotStructHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
 

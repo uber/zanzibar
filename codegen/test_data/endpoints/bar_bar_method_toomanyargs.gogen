@@ -31,6 +31,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,8 +45,9 @@ import (
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
 type BarTooManyArgsHandler struct {
-	Dependencies *module.Dependencies
-	endpoint     *zanzibar.RouterEndpoint
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
+	endpointScope tally.Scope
 }
 
 // NewBarTooManyArgsHandler creates a handler
@@ -58,6 +60,9 @@ func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler 
 		"bar", "tooManyArgs",
 		handler.HandleRequest,
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointName,
+	})
 	return handler
 }
 
@@ -86,7 +91,8 @@ func (h *BarTooManyArgsHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
 

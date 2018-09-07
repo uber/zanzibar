@@ -53,8 +53,5 @@ func (w Workflow) Handle(
 	reqHeaders zanzibar.Header,
 	req *endpointBaz.SimpleService_AnotherCall_Args,
 ) (zanzibar.Header, error) {
-	defer func() {
-		panic("panic at user's code ...")
-	}()
-	return nil, nil
+	panic("panic at user's code ...")
 }

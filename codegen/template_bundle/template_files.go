@@ -244,6 +244,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -275,6 +276,7 @@ import (
 type {{$handlerName}} struct {
 	Dependencies  *module.Dependencies
 	endpoint      *zanzibar.RouterEndpoint
+	endpointScope tally.Scope
 }
 
 // New{{$handlerName}} creates a handler
@@ -301,6 +303,9 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		handler.HandleRequest,
 		{{- end}}
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointName,
+	})
 	return handler
 }
 
@@ -329,7 +334,8 @@ func (h *{{$handlerName}}) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
 
@@ -461,7 +467,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6839, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7067, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2399,6 +2405,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 	tchannel "github.com/uber/tchannel-go"
@@ -2451,6 +2458,9 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointID,
+	})
 	return handler
 }
 
@@ -2458,6 +2468,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 type {{$handlerName}} struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
+	endpointScope tally.Scope
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -2482,6 +2493,7 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
 			isSuccessful = false
 			response = nil
 			headers = map[string]string{}
@@ -2659,7 +2671,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8071, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8295, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

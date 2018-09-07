@@ -30,6 +30,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -41,8 +42,9 @@ import (
 
 // ServiceBFrontHelloHandler is the handler for "/multi/serviceB_f/hello"
 type ServiceBFrontHelloHandler struct {
-	Dependencies *module.Dependencies
-	endpoint     *zanzibar.RouterEndpoint
+	Dependencies  *module.Dependencies
+	endpoint      *zanzibar.RouterEndpoint
+	endpointScope tally.Scope
 }
 
 // NewServiceBFrontHelloHandler creates a handler
@@ -55,6 +57,9 @@ func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHello
 		"multi", "helloB",
 		handler.HandleRequest,
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointName,
+	})
 	return handler
 }
 
@@ -83,7 +88,8 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", e)
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
 

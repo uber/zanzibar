@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 	tchannel "github.com/uber/tchannel-go"
@@ -62,6 +63,9 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointID,
+	})
 	return handler
 }
 
@@ -69,6 +73,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 type {{$handlerName}} struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
+	endpointScope tally.Scope
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -93,6 +98,7 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
 			isSuccessful = false
 			response = nil
 			headers = map[string]string{}

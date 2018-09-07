@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
@@ -51,13 +52,17 @@ func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServic
 		"panicTChannel", "call", "SimpleService::AnotherCall",
 		handler,
 	)
+	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
+		"endpoint": handler.endpoint.EndpointID,
+	})
 	return handler
 }
 
 // SimpleServiceAnotherCallHandler is the handler for "SimpleService::AnotherCall".
 type SimpleServiceAnotherCallHandler struct {
-	Deps     *module.Dependencies
-	endpoint *zanzibar.TChannelEndpoint
+	Deps          *module.Dependencies
+	endpoint      *zanzibar.TChannelEndpoint
+	endpointScope tally.Scope
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -82,6 +87,7 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
+			h.endpointScope.Counter("endpoint.panic").Inc(1)
 			isSuccessful = false
 			response = nil
 			headers = map[string]string{}

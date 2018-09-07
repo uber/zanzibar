@@ -27,9 +27,5 @@ func (w EndpointPanicEndpoint) Handle(
 	ctx context.Context,
 	headers zanzibar.Header,
 ) (string, zanzibar.Header, error) {
-	defer func() {
-		panic("panic at user's code ...")
-	}()
-
-	return "response", nil, nil
+	panic("panic at user's code ...")
 }
