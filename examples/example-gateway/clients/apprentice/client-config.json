@@ -1,0 +1,12 @@
+{
+	"name": "apprentice",
+	"type": "tchannel",
+	"config": {
+		"thriftFile": "clients/apprentice/apprentice.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"getRequest": "Apprentice::getRequest",
+			"getResponse": "Apprentice::getResponse"
+		}
+	}
+}

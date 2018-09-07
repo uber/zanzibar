@@ -47,7 +47,9 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
-	apprenticeCleint *zanzibar.TChannelClient
+	{{if ne $clientID "apprentice" -}}
+	apprenticeClient *zanzibar.TChannelClient
+	{{end -}}
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
@@ -77,6 +79,21 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
 
+	{{if ne $clientID "apprentice" -}}
+	apprenticeMethodNames := map[string]string{
+		"Apprentice::getRequest": "getRequest",
+		"Apprentice::getResponse": "getResponse",
+	}
+
+	apprenticeTimeout := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
+	)
+	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
+	)
+
+	apprenticeRoutingKey := ""
+
 	apprenticeClient := zanzibar.NewTChannelClient(
 		deps.Default.Channel,
 		deps.Default.Logger,
@@ -84,13 +101,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		&zanzibar.TChannelClientOption{
 			ServiceName:       "apprentice",
 			ClientID:          "apprentice",
-			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
-			AltSubchannelName: scAltName,
+			MethodNames:       apprenticeMethodNames,
+			Timeout:           apprenticeTimeout,
+			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
+			RoutingKey:        &apprenticeRoutingKey,
+			AltSubchannelName: "apprentice",
 		},
 	)
+	{{end -}}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -112,7 +130,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		{{if ne $clientID "apprentice" -}}
 		apprenticeClient: apprenticeClient,
+		{{end -}}
 	}
 }
 

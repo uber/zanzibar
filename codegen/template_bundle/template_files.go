@@ -953,6 +953,9 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	{{if ne $clientID "apprentice" -}}
+	apprenticeClient *zanzibar.TChannelClient
+	{{end -}}
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
@@ -982,6 +985,37 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
 
+	{{if ne $clientID "apprentice" -}}
+	apprenticeMethodNames := map[string]string{
+		"Apprentice::getRequest": "getRequest",
+		"Apprentice::getResponse": "getResponse",
+	}
+
+	apprenticeTimeout := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
+	)
+	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
+	)
+
+	apprenticeRoutingKey := ""
+
+	apprenticeClient := zanzibar.NewTChannelClient(
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       "apprentice",
+			ClientID:          "apprentice",
+			MethodNames:       apprenticeMethodNames,
+			Timeout:           apprenticeTimeout,
+			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
+			RoutingKey:        &apprenticeRoutingKey,
+			AltSubchannelName: "apprentice",
+		},
+	)
+	{{end -}}
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
@@ -1002,6 +1036,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		{{if ne $clientID "apprentice" -}}
+		apprenticeClient: apprenticeClient,
+		{{end -}}
 	}
 }
 
@@ -1202,7 +1239,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7938, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 9044, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2162,14 +2199,51 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		},
 	)
 
+	{{if ne $clientID "apprentice" -}}
+	apprenticeMethodNames := map[string]string{
+		"Apprentice::getRequest": "getRequest",
+		"Apprentice::getResponse": "getResponse",
+	}
+
+	apprenticeTimeout := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
+	)
+	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
+	)
+
+	apprenticeRoutingKey := ""
+
+	apprenticeClient := zanzibar.NewTChannelClient(
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       "apprentice",
+			ClientID:          "apprentice",
+			MethodNames:       apprenticeMethodNames,
+			Timeout:           apprenticeTimeout,
+			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
+			RoutingKey:        &apprenticeRoutingKey,
+			AltSubchannelName: "apprentice",
+		},
+	)
+	{{end -}}
+
 	return &{{$clientName}}{
 		client: client,
+		{{if ne $clientID "apprentice" -}}
+		apprenticeClient: apprenticeClient,
+		{{end -}}
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
+	{{if ne $clientID "apprentice" -}}
+	apprenticeClient *zanzibar.TChannelClient
+	{{end -}}
 }
 
 {{range $svc := .Services}}
@@ -2247,7 +2321,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7377, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
