@@ -50,6 +50,7 @@ type EndpointMeta struct {
 	ResRequiredHeadersKeys []string
 	TraceKey               string
 	DeputyReqHeader        string
+	ShadowReqHeader        string
 }
 
 // EndpointCollectionMeta saves information used to generate an initializer
@@ -548,6 +549,7 @@ func (g *TChannelClientGenerator) Generate(
 		SidecarRouter:    clientSpec.SidecarRouter,
 		StagingReqHeader: g.packageHelper.StagingReqHeader(),
 		DeputyReqHeader:  g.packageHelper.DeputyReqHeader(),
+		ShadowReqHeader:  g.packageHelper.ShadowReqHeader(),
 	}
 
 	client, err := g.templates.ExecTemplate(
@@ -916,6 +918,13 @@ func (g *EndpointGenerator) generateEndpointFile(
 		TransformTo: shk,
 		Field:       &compile.FieldSpec{Required: false},
 	}
+
+	shk = textproto.CanonicalMIMEHeaderKey(g.packageHelper.ShadowReqHeader())
+	reqHeaders[shk] = &TypedHeader{
+		Name:        shk,
+		TransformTo: shk,
+		Field:       &compile.FieldSpec{Required: false},
+	}
 	// TODO: http client needs to support multiple thrift services
 	meta := &EndpointMeta{
 		Instance:               instance,
@@ -935,6 +944,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 		WorkflowPkg:            workflowPkg,
 		TraceKey:               g.packageHelper.traceKey,
 		DeputyReqHeader:        g.packageHelper.DeputyReqHeader(),
+		ShadowReqHeader:        g.packageHelper.ShadowReqHeader(),
 	}
 
 	var endpoint []byte
@@ -1276,6 +1286,7 @@ type ClientMeta struct {
 	Fixture          *Fixture
 	StagingReqHeader string
 	DeputyReqHeader  string
+	ShadowReqHeader  string
 }
 
 func findMethod(

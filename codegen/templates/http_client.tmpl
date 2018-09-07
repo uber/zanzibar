@@ -47,6 +47,7 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	apprenticeCleint *zanzibar.TChannelClient
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
@@ -76,6 +77,21 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
 
+	apprenticeClient := zanzibar.NewTChannelClient(
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       "apprentice",
+			ClientID:          "apprentice",
+			MethodNames:       methodNames,
+			Timeout:           timeout,
+			TimeoutPerAttempt: timeoutPerAttempt,
+			RoutingKey:        &routingKey,
+			AltSubchannelName: scAltName,
+		},
+	)
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
@@ -96,6 +112,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		apprenticeClient: apprenticeClient,
 	}
 }
 
