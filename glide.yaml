@@ -59,3 +59,5 @@ import:
   version: master
 - package: github.com/kisielk/errcheck
   version: master
+- package: github.com/mitchellh/mapstructure
+  version: master
