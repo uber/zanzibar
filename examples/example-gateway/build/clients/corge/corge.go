@@ -132,6 +132,7 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
+
 	return &corgeClient{
 		client:           client,
 		apprenticeClient: apprenticeClient,

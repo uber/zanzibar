@@ -286,6 +286,7 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
+
 	return &bazClient{
 		client:           client,
 		apprenticeClient: apprenticeClient,

@@ -99,6 +99,7 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
+
 	return &corgeHTTPClient{
 		clientID:     "corge-http",
 		callerHeader: callerHeader,

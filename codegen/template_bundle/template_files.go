@@ -1014,7 +1014,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
-	{{end -}}
+	{{end}}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1239,7 +1239,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 9044, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 9042, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2228,7 +2228,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
-	{{end -}}
+	{{end}}
 
 	return &{{$clientName}}{
 		client: client,
@@ -2321,7 +2321,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7377, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7375, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -92,6 +92,7 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
+
 	return &multiClient{
 		clientID: "multi",
 		httpClient: zanzibar.NewHTTPClient(

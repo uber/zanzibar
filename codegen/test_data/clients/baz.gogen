@@ -210,14 +210,45 @@ func NewClient(
 		},
 	)
 
+	apprenticeMethodNames := map[string]string{
+		"Apprentice::getRequest":  "getRequest",
+		"Apprentice::getResponse": "getResponse",
+	}
+
+	apprenticeTimeout := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
+	)
+	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(
+		deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
+	)
+
+	apprenticeRoutingKey := ""
+
+	apprenticeClient := zanzibar.NewTChannelClient(
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       "apprentice",
+			ClientID:          "apprentice",
+			MethodNames:       apprenticeMethodNames,
+			Timeout:           apprenticeTimeout,
+			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
+			RoutingKey:        &apprenticeRoutingKey,
+			AltSubchannelName: "apprentice",
+		},
+	)
+
 	return &bazClient{
 		client: client,
+		apprenticeClient: apprenticeClient,
 	}
 }
 
 // bazClient is the TChannel client for downstream service.
 type bazClient struct {
-	client *zanzibar.TChannelClient
+	client           *zanzibar.TChannelClient
+	apprenticeClient *zanzibar.TChannelClient
 }
 
 // EchoBinary is a client RPC call for method "SecondService::echoBinary"

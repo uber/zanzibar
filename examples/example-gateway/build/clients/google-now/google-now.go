@@ -94,6 +94,7 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
+
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClient(

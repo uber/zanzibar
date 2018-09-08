@@ -108,7 +108,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			AltSubchannelName: "apprentice",
 		},
 	)
-	{{end -}}
+	{{end}}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
