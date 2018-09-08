@@ -16,7 +16,11 @@ func TestPanicCall(t *testing.T) {
 	defer ms.Stop()
 
 	// fixtures
-	reqHeaders := map[string]string{}
+	reqHeaders := map[string]string{
+		"x-token":               "token",
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "false",
+	}
 	args := &baz.SimpleService_AnotherCall_Args{
 		Arg: &baz.BazRequest{
 			B1: true,
