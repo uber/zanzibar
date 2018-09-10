@@ -31,7 +31,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
@@ -45,9 +44,8 @@ import (
 
 // BarArgWithHeadersHandler is the handler for "/bar/argWithHeaders"
 type BarArgWithHeadersHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithHeadersHandler creates a handler

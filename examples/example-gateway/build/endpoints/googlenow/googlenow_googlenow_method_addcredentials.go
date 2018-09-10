@@ -30,7 +30,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -43,9 +42,8 @@ import (
 
 // GoogleNowAddCredentialsHandler is the handler for "/googlenow/add-credentials"
 type GoogleNowAddCredentialsHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewGoogleNowAddCredentialsHandler creates a handler

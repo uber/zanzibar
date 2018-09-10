@@ -71,7 +71,6 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 type {{$handlerName}} struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
-	endpointScope tally.Scope
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router

@@ -29,7 +29,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -42,9 +41,8 @@ import (
 
 // BarNoRequestHandler is the handler for "/bar/no-request-path"
 type BarNoRequestHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarNoRequestHandler creates a handler

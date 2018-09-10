@@ -29,7 +29,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -42,9 +41,8 @@ import (
 
 // SimpleServiceTransHeadersNoReqHandler is the handler for "/baz/trans-headers-no-req"
 type SimpleServiceTransHeadersNoReqHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceTransHeadersNoReqHandler creates a handler

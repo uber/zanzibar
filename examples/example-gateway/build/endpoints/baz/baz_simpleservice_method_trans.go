@@ -31,7 +31,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,9 +43,8 @@ import (
 
 // SimpleServiceTransHandler is the handler for "/baz/trans"
 type SimpleServiceTransHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewSimpleServiceTransHandler creates a handler

@@ -31,7 +31,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,9 +43,8 @@ import (
 
 // BarArgWithParamsHandler is the handler for "/bar/argWithParams/:uuid/segment/:user-uuid"
 type BarArgWithParamsHandler struct {
-	Dependencies  *module.Dependencies
-	endpoint      *zanzibar.RouterEndpoint
-	endpointScope tally.Scope
+	Dependencies *module.Dependencies
+	endpoint     *zanzibar.RouterEndpoint
 }
 
 // NewBarArgWithParamsHandler creates a handler

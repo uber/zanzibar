@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
@@ -58,9 +57,8 @@ func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServic
 
 // SimpleServiceAnotherCallHandler is the handler for "SimpleService::AnotherCall".
 type SimpleServiceAnotherCallHandler struct {
-	Deps          *module.Dependencies
-	endpoint      *zanzibar.TChannelEndpoint
-	endpointScope tally.Scope
+	Deps     *module.Dependencies
+	endpoint *zanzibar.TChannelEndpoint
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
