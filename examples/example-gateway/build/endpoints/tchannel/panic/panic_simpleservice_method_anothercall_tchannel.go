@@ -52,9 +52,7 @@ func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServic
 		"panicTChannel", "call", "SimpleService::AnotherCall",
 		handler,
 	)
-	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
-		"endpoint": handler.endpoint.EndpointID,
-	})
+
 	return handler
 }
 
@@ -87,10 +85,10 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			isSuccessful = false
 			response = nil
-			headers = map[string]string{}
+			headers = nil
 		}
 	}()
 

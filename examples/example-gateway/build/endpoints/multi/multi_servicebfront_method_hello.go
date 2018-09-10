@@ -57,9 +57,7 @@ func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHello
 		"multi", "helloB",
 		handler.HandleRequest,
 	)
-	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
-		"endpoint": handler.endpoint.EndpointName,
-	})
+
 	return handler
 }
 
@@ -88,7 +86,7 @@ func (h *ServiceBFrontHelloHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

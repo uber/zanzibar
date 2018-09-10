@@ -303,9 +303,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		handler.HandleRequest,
 		{{- end}}
 	)
-	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
-		"endpoint": handler.endpoint.EndpointName,
-	})
+
 	return handler
 }
 
@@ -334,7 +332,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
@@ -467,7 +465,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7067, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6932, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2458,9 +2456,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
-	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
-		"endpoint": handler.endpoint.EndpointID,
-	})
+
 	return handler
 }
 
@@ -2493,10 +2489,10 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			isSuccessful = false
 			response = nil
-			headers = map[string]string{}
+			headers = nil
 		}
 	}()
 
@@ -2671,7 +2667,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8295, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8146, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

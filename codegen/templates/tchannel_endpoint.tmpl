@@ -63,9 +63,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
-	handler.endpointScope = deps.Default.Scope.Tagged(map[string]string{
-		"endpoint": handler.endpoint.EndpointID,
-	})
+
 	return handler
 }
 
@@ -98,10 +96,10 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpointScope.Counter("endpoint.panic").Inc(1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			isSuccessful = false
 			response = nil
-			headers = map[string]string{}
+			headers = nil
 		}
 	}()
 
