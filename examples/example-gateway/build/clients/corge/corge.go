@@ -104,14 +104,52 @@ func NewClient(deps *module.Dependencies) Client {
 		},
 	)
 
+	apprenticeMethodNames := map[string]string{
+		"Apprentice::getRequest":  "getRequest",
+		"Apprentice::getResponse": "getResponse",
+	}
+
+	apprenticeTimeout := time.Millisecond * time.Duration(50)
+	if deps.Default.Config.ContainsKey("clients.apprentice.timeout") {
+		apprenticeTimeout = time.Millisecond * time.Duration(
+			deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
+		)
+	}
+
+	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(50)
+	if deps.Default.Config.ContainsKey("clients.apprentice.timeoutPerAttempt") {
+		apprenticeTimeoutPerAttempt = time.Millisecond * time.Duration(
+			deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
+		)
+	}
+
+	apprenticeRoutingKey := ""
+
+	apprenticeClient := zanzibar.NewTChannelClient(
+		deps.Default.Channel,
+		deps.Default.Logger,
+		deps.Default.Scope,
+		&zanzibar.TChannelClientOption{
+			ServiceName:       "apprentice",
+			ClientID:          "apprentice",
+			MethodNames:       apprenticeMethodNames,
+			Timeout:           apprenticeTimeout,
+			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
+			RoutingKey:        &apprenticeRoutingKey,
+			AltSubchannelName: "apprentice",
+		},
+	)
+
 	return &corgeClient{
-		client: client,
+		client:           client,
+		apprenticeClient: apprenticeClient,
 	}
 }
 
 // corgeClient is the TChannel client for downstream service.
 type corgeClient struct {
-	client *zanzibar.TChannelClient
+	client           *zanzibar.TChannelClient
+	apprenticeClient *zanzibar.TChannelClient
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"

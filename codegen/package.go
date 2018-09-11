@@ -55,6 +55,8 @@ type PackageHelper struct {
 	stagingReqHeader string
 	// Use deputy client when this header is set
 	deputyReqHeader string
+	// This is a shadow request - call Apprentice instead of a downstream client
+	shadowReqHeader string
 	// traceKey is the key for unique trace id that identifies request / response pair
 	traceKey string
 }
@@ -86,6 +88,8 @@ type PackageHelperOptions struct {
 	StagingReqHeader string
 	// header key to redirect client requests to local environment, defaults to "x-deputy-forwarded"
 	DeputyReqHeader string
+	// header key to redirect client request to apprentice, defaults to "X-Uber-Should-Request-Downstream"
+	ShadowReqHeader string
 	// header key to uniquely identifies request/response pair, defaults to "x-trace-id"
 	TraceKey string
 }
@@ -146,6 +150,13 @@ func (p *PackageHelperOptions) deputyReqHeader() string {
 	return "x-deputy-forwarded"
 }
 
+func (p *PackageHelperOptions) shadowReqHeader() string {
+	if p.ShadowReqHeader != "" {
+		return p.ShadowReqHeader
+	}
+	return "X-Shadow-Start-Trace-Id"
+}
+
 func (p *PackageHelperOptions) traceKey() string {
 	if p.TraceKey != "" {
 		return p.TraceKey
@@ -192,6 +203,7 @@ func NewPackageHelper(
 		annotationPrefix:   options.annotationPrefix(),
 		stagingReqHeader:   options.stagingReqHeader(),
 		deputyReqHeader:    options.deputyReqHeader(),
+		shadowReqHeader:    options.shadowReqHeader(),
 		traceKey:           options.traceKey(),
 	}
 	return p, nil
@@ -318,4 +330,10 @@ func (p PackageHelper) StagingReqHeader() string {
 // if a request should go to the deputy downstream client
 func (p PackageHelper) DeputyReqHeader() string {
 	return p.deputyReqHeader
+}
+
+// ShadowReqHeader returns the header name that will be checked to determine
+// if a request should go to apprentice or downstream client
+func (p PackageHelper) ShadowReqHeader() string {
+	return p.shadowReqHeader
 }
