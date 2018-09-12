@@ -851,13 +851,130 @@ func readPackageInfo(
 	}, nil
 }
 
-// GenerateBuild will, given a module system configuration directory and a
-// target build directory, run the generators assigned to each type of module
-// and write the generated output to the module build directory if commitChange
-func (system *ModuleSystem) GenerateBuild(
+func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool, error) {
+	classGenerators := system.classes[instance.ClassName]
+	generator := classGenerators.types[instance.ClassType]
+
+	if generator == nil {
+		return nil, false, nil
+	}
+
+	specProvider, ok := generator.(SpecProvider)
+	if !ok {
+		fmt.Printf(
+			"%q %q generator is not a spec provider, cannot use incremental builds\n",
+			instance.ClassName,
+			instance.ClassType,
+		)
+
+		return nil, false, fmt.Errorf("%q %q generator does not implement SpecProvider interface", instance.ClassName, instance.ClassType)
+	}
+
+	spec, err := specProvider.ComputeSpec(instance)
+	if err != nil {
+		return nil, false, fmt.Errorf("error when running computespec: %s", err.Error())
+	}
+
+	return spec, true, nil
+}
+
+func (system *ModuleSystem) tryResolveIncrementalBuild(instances []ModuleDependency, resolvedModules map[string][]*ModuleInstance) (map[string][]*ModuleInstance, error) {
+	// toBeBuiltModules is the list of module instances affected by this build
+	toBeBuiltModules := make(map[string]map[string]*ModuleInstance, 0)
+	for _, className := range system.classOrder {
+		toBeBuiltModules[className] = make(map[string]*ModuleInstance, 0)
+	}
+
+	for _, className := range system.classOrder {
+		classInstances := resolvedModules[className]
+
+		for _, classInstance := range classInstances {
+			// Some generators require dependent tasks to have computed their specs.
+			spec, ok, err := system.getSpec(classInstance)
+			if err != nil {
+				// Generators must be adapted to the new SpecProvider interface so that
+				// specs can be computed. Fall back to full build if generator errors when
+				// computing the spec or is not adapted to the SpecProvider interface.
+
+				return nil, err
+			}
+
+			if ok {
+				classInstance.genSpec = spec
+			}
+
+			found := false
+			for _, instance := range instances {
+				if classInstance.InstanceName == instance.InstanceName && classInstance.ClassName == instance.ClassName {
+					found = true
+					break
+				}
+			}
+			if !found {
+				fmt.Printf(
+					"Skipping generation of %q %q class of type %q "+
+						"as not needed for incremental build\n",
+					classInstance.InstanceName,
+					classInstance.ClassName,
+					classInstance.ClassType,
+				)
+				continue
+			}
+
+			toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
+		}
+
+		// Collect things of the same class that depend on us
+		for _, classInstance := range classInstances {
+			// classInstance needs to be built if any of the dependencies that are to be built is in the recursive
+			// dependency tree of classInstance.
+
+			for _, className := range system.classOrder {
+				for _, toBeBuiltInstance := range toBeBuiltModules[className] {
+					classInstanceTransitives, ok := classInstance.RecursiveDependencies[toBeBuiltInstance.ClassName]
+					if !ok {
+						continue
+					}
+
+					for _, classInstanceDependency := range classInstanceTransitives {
+						if classInstanceDependency.InstanceName == toBeBuiltInstance.InstanceName && classInstanceDependency.ClassName == toBeBuiltInstance.ClassName {
+							// toBeBuiltInstance is in the recursive dependency tree of classInstance
+
+							toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
+							fmt.Printf(
+								"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
+								classInstance.InstanceName,
+								classInstance.ClassName,
+								classInstance.ClassType,
+								toBeBuiltInstance.InstanceName,
+								toBeBuiltInstance.ClassName,
+								toBeBuiltInstance.ClassType,
+							)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
+	for _, className := range system.classOrder {
+		toBeBuiltModulesList[className] = make([]*ModuleInstance, 0, len(toBeBuiltModules[className]))
+		for _, classInstance := range toBeBuiltModules[className] {
+			toBeBuiltModulesList[className] = append(toBeBuiltModulesList[className], classInstance)
+		}
+	}
+
+	return toBeBuiltModulesList, nil
+}
+
+// GenerateIncrementalBuild is like GenerateBuild but filtered to only the given
+// module instances.
+func (system *ModuleSystem) GenerateIncrementalBuild(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
+	instances []ModuleDependency,
 	commitChange bool,
 ) (map[string][]*ModuleInstance, error) {
 	resolvedModules, err := system.ResolveModules(
@@ -880,15 +997,22 @@ func (system *ModuleSystem) GenerateBuild(
 	}
 
 	moduleCount := 0
+	moduleIndex := 0
 	for _, moduleList := range resolvedModules {
 		moduleCount += len(moduleList)
 	}
 
-	moduleIndex := 0
-	for _, className := range system.classOrder {
-		classInstances := resolvedModules[className]
+	toBeBuiltModulesList, err := system.tryResolveIncrementalBuild(instances, resolvedModules)
+	if err != nil {
+		fmt.Printf(
+			"Falling back to non-incremental full build because an error occurred: %s\n",
+			err.Error(),
+		)
+		toBeBuiltModulesList = resolvedModules
+	}
 
-		for _, classInstance := range classInstances {
+	for _, className := range system.classOrder {
+		for _, classInstance := range toBeBuiltModulesList[className] {
 			moduleIndex++
 			buildPath := filepath.Join(
 				targetGenDir,
@@ -972,7 +1096,7 @@ func (system *ModuleSystem) GenerateBuild(
 	}
 
 	for i, hook := range system.postGenHook {
-		if err := hook(resolvedModules); err != nil {
+		if err := hook(toBeBuiltModulesList); err != nil {
 			return resolvedModules, errors.Wrapf(
 				err,
 				"error running post generation hook number %d",
@@ -982,6 +1106,40 @@ func (system *ModuleSystem) GenerateBuild(
 	}
 
 	return resolvedModules, nil
+}
+
+// GenerateBuild will, given a module system configuration directory and a
+// target build directory, run the generators assigned to each type of module
+// and write the generated output to the module build directory if commitChange
+//
+// Deprecated: Use GenerateIncrementalBuild instead.
+func (system *ModuleSystem) GenerateBuild(
+	packageRoot string,
+	baseDirectory string,
+	targetGenDir string,
+	commitChange bool,
+) (map[string][]*ModuleInstance, error) {
+	resolvedModules, err := system.ResolveModules(
+		packageRoot,
+		baseDirectory,
+		targetGenDir,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	buildTargets := make([]ModuleDependency, 0, len(resolvedModules))
+	for _, moduleInstances := range resolvedModules {
+		for _, moduleInstance := range moduleInstances {
+			buildTargets = append(buildTargets, ModuleDependency{
+				ClassName:    moduleInstance.ClassName,
+				InstanceName: moduleInstance.InstanceName,
+			})
+		}
+	}
+
+	return system.GenerateIncrementalBuild(packageRoot, baseDirectory, targetGenDir, buildTargets, commitChange)
 }
 
 // PrintGenLine prints the module generation process to stdout
@@ -1053,6 +1211,14 @@ type BuildGenerator interface {
 	Generate(
 		instance *ModuleInstance,
 	) (*BuildResult, error)
+}
+
+// SpecProvider is a generator that can provide a specification without
+// running the build step.
+type SpecProvider interface {
+	ComputeSpec(
+		instance *ModuleInstance,
+	) (interface{}, error)
 }
 
 // PackageInfo provides information about the package associated with a module
