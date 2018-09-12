@@ -51,6 +51,8 @@ func checkError(err error, message string) {
 
 func main() {
 	configFile := flag.String("config", "", "the config file path")
+	moduleName := flag.String("instance", "", "")
+	moduleClass := flag.String("type", "", "")
 	flag.Parse()
 
 	if *configFile == "" {
@@ -125,11 +127,28 @@ func main() {
 	)
 
 	fmt.Printf("Generating module system components:\n")
-	_, err = moduleSystem.GenerateBuild(
-		packageHelper.PackageRoot(),
-		configRoot,
-		packageHelper.CodeGenTargetPath(),
-		true,
-	)
+
+	if *moduleClass != "" && *moduleName != "" {
+		_, err = moduleSystem.GenerateIncrementalBuild(
+			packageHelper.PackageRoot(),
+			configRoot,
+			packageHelper.CodeGenTargetPath(),
+			[]codegen.ModuleDependency{
+				{
+					ClassName:    *moduleClass,
+					InstanceName: *moduleName,
+				},
+			},
+			true,
+		)
+	} else {
+		//lint:ignore SA1019 Migration to incremental builds is ongoing
+		_, err = moduleSystem.GenerateBuild(
+			packageHelper.PackageRoot(),
+			configRoot,
+			packageHelper.CodeGenTargetPath(),
+			true,
+		)
+	}
 	checkError(err, "Failed to generate module system components")
 }

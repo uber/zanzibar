@@ -403,11 +403,10 @@ type HTTPClientGenerator struct {
 	packageHelper *PackageHelper
 }
 
-// Generate returns the HTTP client build result, which contains the files and
-// the generated client spec
-func (g *HTTPClientGenerator) Generate(
+// ComputeSpec returns the spec for a HTTP client
+func (g *HTTPClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
-) (*BuildResult, error) {
+) (interface{}, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
 	if err != nil {
@@ -430,6 +429,24 @@ func (g *HTTPClientGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
+
+	return clientSpec, nil
+}
+
+// Generate returns the HTTP client build result, which contains the files and
+// the generated client spec
+func (g *HTTPClientGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	clientSpecUntyped, err := g.ComputeSpec(instance)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error initializing HTTPClientSpec for %q",
+			instance.InstanceName,
+		)
+	}
+	clientSpec := clientSpecUntyped.(*ClientSpec)
 
 	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
 	if err != nil {
@@ -504,11 +521,10 @@ type TChannelClientGenerator struct {
 	packageHelper *PackageHelper
 }
 
-// Generate returns the TChannel client build result, which contains the files
-// and the generated client spec
-func (g *TChannelClientGenerator) Generate(
+// ComputeSpec computes the TChannel client spec
+func (g *TChannelClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
-) (*BuildResult, error) {
+) (interface{}, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
 	if err != nil {
@@ -531,6 +547,24 @@ func (g *TChannelClientGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
+
+	return clientSpec, nil
+}
+
+// Generate returns the TChannel client build result, which contains the files
+// and the generated client spec
+func (g *TChannelClientGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	clientSpecUntyped, err := g.ComputeSpec(instance)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error initializing TChannelClientSpec for %q",
+			instance.InstanceName,
+		)
+	}
+	clientSpec := clientSpecUntyped.(*ClientSpec)
 
 	exposedMethods, err := reverseExposedMethods(clientSpec, instance)
 	if err != nil {
@@ -657,11 +691,10 @@ type CustomClientGenerator struct {
 	packageHelper *PackageHelper
 }
 
-// Generate returns the custom client build result, which contains the
-// generated client spec and no files
-func (g *CustomClientGenerator) Generate(
+// ComputeSpec computes the client spec for a custom client
+func (g *CustomClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
-) (*BuildResult, error) {
+) (interface{}, error) {
 	// Parse the client config from the endpoint JSON file
 	clientConfig, err := readClientConfig(instance.JSONFileRaw)
 	if err != nil {
@@ -684,6 +717,24 @@ func (g *CustomClientGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
+
+	return clientSpec, nil
+}
+
+// Generate returns the custom client build result, which contains the
+// generated client spec and no files
+func (g *CustomClientGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	clientSpecUntyped, err := g.ComputeSpec(instance)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error initializing CustomClientSpec for %q",
+			instance.InstanceName,
+		)
+	}
+	clientSpec := clientSpecUntyped.(*ClientSpec)
 
 	// When it is possible to generate structs for all module types, the
 	// module system will do this transparently. For now we are opting in
@@ -724,15 +775,12 @@ type EndpointGenerator struct {
 	packageHelper *PackageHelper
 }
 
-// Generate returns the endpoint build result, which contains a file per
-// endpoint handler and a list of handler specs
-func (g *EndpointGenerator) Generate(
+// ComputeSpec computes the endpoint specs for a group of endpoints
+func (g *EndpointGenerator) ComputeSpec(
 	instance *ModuleInstance,
-) (*BuildResult, error) {
-	ret := map[string][]byte{}
+) (interface{}, error) {
 	endpointJsons := []string{}
 	endpointSpecs := []*EndpointSpec{}
-	endpointMeta := []*EndpointMeta{}
 	clientSpecs := readClientDependencySpecs(instance)
 
 	endpointConfig, err := readEndpointConfig(instance.JSONFileRaw)
@@ -769,8 +817,31 @@ func (g *EndpointGenerator) Generate(
 				err, "Error parsing downstream info for endpoint: %s", jsonFile,
 			)
 		}
+	}
 
-		meta, err := g.generateEndpointFile(espec, instance, ret)
+	return endpointSpecs, nil
+}
+
+// Generate returns the endpoint build result, which contains a file per
+// endpoint handler and a list of handler specs
+func (g *EndpointGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	files := make(map[string][]byte)
+	endpointMeta := make([]*EndpointMeta, 0)
+
+	endpointSpecsUntyped, err := g.ComputeSpec(instance)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating endpoint specs for %q",
+			instance.InstanceName,
+		)
+	}
+	endpointSpecs := endpointSpecsUntyped.([]*EndpointSpec)
+
+	for _, espec := range endpointSpecs {
+		meta, err := g.generateEndpointFile(espec, instance, files)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
@@ -780,7 +851,7 @@ func (g *EndpointGenerator) Generate(
 		}
 		endpointMeta = append(endpointMeta, meta)
 
-		err = g.generateEndpointTestFile(espec, instance, ret)
+		err = g.generateEndpointTestFile(espec, instance, files)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
@@ -803,7 +874,7 @@ func (g *EndpointGenerator) Generate(
 		)
 	}
 	if dependencies != nil {
-		ret["module/dependencies.go"] = dependencies
+		files["module/dependencies.go"] = dependencies
 	}
 
 	endpointCollection, err := g.templates.ExecTemplate(
@@ -821,10 +892,10 @@ func (g *EndpointGenerator) Generate(
 			instance.InstanceName,
 		)
 	}
-	ret["endpoint.go"] = endpointCollection
+	files["endpoint.go"] = endpointCollection
 
 	return &BuildResult{
-		Files: ret,
+		Files: files,
 		Spec:  endpointSpecs,
 	}, nil
 }
@@ -1065,6 +1136,13 @@ func NewGatewayServiceGenerator(t *Template, h *PackageHelper) *GatewayServiceGe
 	}
 }
 
+// ComputeSpec computes the spec for a gateway
+func (generator *GatewayServiceGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return nil, nil
+}
+
 // Generate returns the gateway build result, which contains the service and
 // service test main files, and no spec
 func (generator *GatewayServiceGenerator) Generate(
@@ -1161,6 +1239,13 @@ func (generator *GatewayServiceGenerator) Generate(
 type MiddlewareGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
+}
+
+// ComputeSpec computes the spec for a middleware
+func (g *MiddlewareGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return nil, nil
 }
 
 // Generate returns the endpoint build result, which contains a file per
