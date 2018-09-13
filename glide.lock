@@ -1,5 +1,5 @@
-hash: 01e954b57c1610d31a26e5f2b3835f68059e33ce41b3e072b90a2bc82887fb46
-updated: 2018-08-20T17:06:12.605904-07:00
+hash: 7f8e93105ff5e2aeb5a467360fb1ef3a85a8f80a6f6a23ca4dc0cd878ba9a02c
+updated: 2018-09-13T16:00:56.07022329-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -26,6 +26,8 @@ imports:
   subpackages:
   - gomock
   - mockgen/model
+- name: github.com/google/uuid
+  version: d460ce9f8df2e77fb1ba55ca87fafed96c607494
 - name: github.com/jessevdk/go-flags
   version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
 - name: github.com/julienschmidt/httprouter
@@ -37,7 +39,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 03f2033d19d5860aef995fe360ac7d395cd8ce65
+  version: 60711f1a8329503b04e1c88535f419d0bb440bff
   subpackages:
   - bootstrap
   - buffer
@@ -53,7 +55,7 @@ imports:
   - ext
   - log
 - name: github.com/pborman/uuid
-  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+  version: adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -113,6 +115,17 @@ imports:
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+- name: go.uber.org/dig
+  version: d6ba99365e475c24e8ac02392eb3f78ccab2a6f3
+  subpackages:
+  - internal/digreflect
+  - internal/dot
+- name: go.uber.org/fx
+  version: b156a883a62423b7d9ab651d1689c42c4d788787
+  subpackages:
+  - internal/fxlog
+  - internal/fxreflect
+  - internal/lifecycle
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
@@ -150,7 +163,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: aaf60122140d3fcf75376d319f0554393160eb50
+  version: 26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2
   subpackages:
   - context
 - name: honnef.co/go/tools

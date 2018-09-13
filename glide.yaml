@@ -28,7 +28,6 @@ import:
   - lib/go/thrift
 - package: github.com/uber-go/tally
   version: ^3
-# update to master since the last semver release is 2 years old
 - package: github.com/julienschmidt/httprouter
   version: master
 - package: github.com/kardianos/osext
@@ -53,9 +52,17 @@ import:
   version: master
 - package: github.com/pborman/uuid
   version: ^1.1.0
-- package: honnef.co/go/tools/cmd/staticcheck
+- package: honnef.co/go/tools
   version: master
+  subpackages:
+  - cmd/staticcheck
 - package: github.com/kisielk/gotool
   version: master
 - package: github.com/kisielk/errcheck
   version: master
+- package: go.uber.org/fx
+  version: ^1.7.0
+- package: github.com/google/uuid
+  version: ^1.0.0
+- package: go.uber.org/dig
+  version: ^1.4.0
