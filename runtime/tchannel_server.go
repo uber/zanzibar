@@ -57,7 +57,7 @@ type TChannelEndpoint struct {
 
 	contextLogger ContextLogger
 	callback      PostResponseCB
-	metrics       *InboundTChannelMetrics
+	Metrics       *InboundTChannelMetrics
 }
 
 type tchannelInboundCall struct {
@@ -130,7 +130,7 @@ func NewTChannelEndpointWithPostResponseCB(
 		Logger:          logger,
 		Scope:           scope,
 		contextLogger:   contextLogger,
-		metrics:         NewInboundTChannelMetrics(scope),
+		Metrics:         NewInboundTChannelMetrics(scope),
 	}
 }
 
@@ -246,7 +246,7 @@ func (s *TChannelRouter) handle(
 
 func (c *tchannelInboundCall) start() {
 	c.startTime = time.Now()
-	c.endpoint.metrics.Recvd.Inc(1)
+	c.endpoint.Metrics.Recvd.Inc(1)
 }
 
 func (c *tchannelInboundCall) finish(err error) {
@@ -254,13 +254,13 @@ func (c *tchannelInboundCall) finish(err error) {
 
 	// emit metrics
 	if err != nil {
-		c.endpoint.metrics.SystemErrors.IncrErr(err, 1)
+		c.endpoint.Metrics.SystemErrors.IncrErr(err, 1)
 	} else if !c.success {
-		c.endpoint.metrics.AppErrors.Inc(1)
+		c.endpoint.Metrics.AppErrors.Inc(1)
 	} else {
-		c.endpoint.metrics.Success.Inc(1)
+		c.endpoint.Metrics.Success.Inc(1)
 	}
-	c.endpoint.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
+	c.endpoint.Metrics.Latency.Record(c.finishTime.Sub(c.startTime))
 
 	// write logs
 	LogErrorWarnTimeoutContext(c.ctx, c.endpoint.contextLogger, err, "Thrift server error")

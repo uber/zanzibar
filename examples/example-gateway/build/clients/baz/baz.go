@@ -118,6 +118,7 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBazBaz.SecondService_EchoTypedef_Args,
 	) (clientsBazBase.UUID, map[string]string, error)
+
 	Call(
 		ctx context.Context,
 		reqHeaders map[string]string,

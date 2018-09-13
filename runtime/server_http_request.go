@@ -75,7 +75,7 @@ func NewServerHTTPRequest(
 		httpRequest: r,
 		ctx:         r.Context(),
 		queryValues: nil,
-		metrics:     endpoint.metrics,
+		metrics:     endpoint.Metrics,
 		tracer:      endpoint.tracer,
 
 		contextLogger: endpoint.contextLogger,

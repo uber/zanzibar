@@ -26,9 +26,11 @@ package bazendpoint
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"strconv"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -55,6 +57,7 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 		"baz", "call",
 		handler.HandleRequest,
 	)
+
 	return handler
 }
 
@@ -72,6 +75,22 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
+		}
+	}()
+
 	var requestBody endpointsBazBaz.SimpleService_Call_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return

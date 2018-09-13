@@ -27,8 +27,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -64,6 +66,7 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 			),
 		}, handler.HandleRequest).Handle,
 	)
+
 	return handler
 }
 
@@ -81,6 +84,22 @@ func (h *BarNormalHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
+		}
+	}()
+
 	var requestBody endpointsBarBar.Bar_Normal_Args
 	if ok := req.ReadAndUnmarshalBody(&requestBody); !ok {
 		return

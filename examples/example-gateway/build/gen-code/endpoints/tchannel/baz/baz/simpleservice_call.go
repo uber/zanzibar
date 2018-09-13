@@ -71,18 +71,6 @@ func (v *SimpleService_Call_Args) ToWire() (wire.Value, error) {
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
 }
 
-func _BazRequest_Read(w wire.Value) (*BazRequest, error) {
-	var v BazRequest
-	err := v.FromWire(w)
-	return &v, err
-}
-
-func _UUID_Read(w wire.Value) (UUID, error) {
-	var x UUID
-	err := x.FromWire(w)
-	return x, err
-}
-
 // FromWire deserializes a SimpleService_Call_Args struct from its Thrift-level
 // representation. The Thrift-level representation may be obtained
 // from a ThriftRW protocol implementation.
@@ -166,26 +154,6 @@ func (v *SimpleService_Call_Args) String() string {
 	}
 
 	return fmt.Sprintf("SimpleService_Call_Args{%v}", strings.Join(fields[:i], ", "))
-}
-
-func _I64_EqualsPtr(lhs, rhs *int64) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
-func _UUID_EqualsPtr(lhs, rhs *UUID) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
 }
 
 // Equals returns true if all the fields of this SimpleService_Call_Args match the
@@ -384,12 +352,6 @@ func (v *SimpleService_Call_Result) ToWire() (wire.Value, error) {
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
-}
-
-func _AuthErr_Read(w wire.Value) (*AuthErr, error) {
-	var v AuthErr
-	err := v.FromWire(w)
-	return &v, err
 }
 
 // FromWire deserializes a SimpleService_Call_Result struct from its Thrift-level

@@ -79,5 +79,13 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err != nil {
 		return err
 	}
+	err = deps.Endpoint.Panic.Register(g)
+	if err != nil {
+		return err
+	}
+	err = deps.Endpoint.PanicTChannel.Register(g)
+	if err != nil {
+		return err
+	}
 	return nil
 }

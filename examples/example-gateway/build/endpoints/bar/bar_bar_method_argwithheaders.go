@@ -27,8 +27,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
@@ -56,6 +58,7 @@ func NewBarArgWithHeadersHandler(deps *module.Dependencies) *BarArgWithHeadersHa
 		"bar", "argWithHeaders",
 		handler.HandleRequest,
 	)
+
 	return handler
 }
 
@@ -73,6 +76,22 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
+		}
+	}()
+
 	if !req.CheckHeaders([]string{"X-Uuid"}) {
 		return
 	}

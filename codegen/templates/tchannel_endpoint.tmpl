@@ -6,6 +6,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"runtime/debug"
 	"time"
 
 	"github.com/pkg/errors"
@@ -61,6 +62,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
+
 	return handler
 }
 
@@ -80,7 +82,25 @@ func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Deps.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointID))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			isSuccessful = false
+			response = nil
+			headers = nil
+		}
+	}()
+
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
 	if err := wfReqHeaders.EnsureContext(ctx, {{.ReqHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {

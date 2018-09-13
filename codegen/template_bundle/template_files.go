@@ -237,6 +237,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
+	"runtime/debug"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -300,6 +301,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		handler.HandleRequest,
 		{{- end}}
 	)
+
 	return handler
 }
 
@@ -317,7 +319,23 @@ func (h *{{$handlerName}}) HandleRequest(
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
 ) {
-	{{- if $reqHeaderRequiredKeys -}}
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Dependencies.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointName))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
+		}
+	}()
+
+	{{ if $reqHeaderRequiredKeys -}}
 	if !req.CheckHeaders({{$reqHeaderRequiredKeys | printf "%#v" }}) {
 		return
 	}
@@ -445,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6382, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6877, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2467,6 +2485,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"runtime/debug"
 	"time"
 
 	"github.com/pkg/errors"
@@ -2522,6 +2541,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			handler,
 		{{- end}}
 	)
+
 	return handler
 }
 
@@ -2541,7 +2561,25 @@ func (h *{{$handlerName}}) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
-) (bool, zanzibar.RWTStruct, map[string]string, error) {
+) (isSuccessful bool, response zanzibar.RWTStruct, headers map[string]string, e error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stacktrace := string(debug.Stack())
+			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
+			h.Deps.Default.ContextLogger.Error(
+				ctx,
+				"endpoint panic",
+				zap.Error(e),
+				zap.String("stacktrace", stacktrace),
+				zap.String("endpoint", h.endpoint.EndpointID))
+
+			h.endpoint.Metrics.Panic.Inc(1)
+			isSuccessful = false
+			response = nil
+			headers = nil
+		}
+	}()
+
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
 	{{if .ReqHeaders -}}
 	if err := wfReqHeaders.EnsureContext(ctx, {{.ReqHeaders | printf "%#v" }}, h.Deps.Default.ContextLogger); err != nil {
@@ -2713,7 +2751,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 7595, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8091, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
