@@ -88,7 +88,7 @@ func IsPointerType(t string) bool {
 	return strings.HasPrefix(t, "*")
 }
 
-//  Unref unrefs a pointer reference
+// Unref unrefs a pointer reference
 func Unref(t string) string {
 	if strings.HasPrefix(t, "*") {
 		return strings.TrimLeft(t, "*")
