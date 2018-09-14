@@ -83,10 +83,12 @@ func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
 	return string(str), err
 }
 
+// IsPointerType determines if the passed in string is a string for a pointer
 func IsPointerType(t string) bool {
 	return strings.HasPrefix(t, "*")
 }
 
+//  Unref unrefs a pointer reference
 func Unref(t string) string {
 	if strings.HasPrefix(t, "*") {
 		return strings.TrimLeft(t, "*")
