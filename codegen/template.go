@@ -61,8 +61,8 @@ var defaultFuncMap = tmpl.FuncMap{
 	"basePath":      filepath.Base,
 	"pascal":        PascalCase,
 	"jsonMarshal":   jsonMarshal,
-	"isPointerType": isPointerType,
-	"unref":         unref,
+	"isPointerType": IsPointerType,
+	"unref":         Unref,
 	"lintAcronym":   LintAcronym,
 	"args":          args,
 }
@@ -83,11 +83,11 @@ func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
 	return string(str), err
 }
 
-func isPointerType(t string) bool {
+func IsPointerType(t string) bool {
 	return strings.HasPrefix(t, "*")
 }
 
-func unref(t string) string {
+func Unref(t string) string {
 	if strings.HasPrefix(t, "*") {
 		return strings.TrimLeft(t, "*")
 	}
