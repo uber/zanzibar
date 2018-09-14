@@ -47,13 +47,13 @@ type Client interface {
 
 // corgeHTTPClient is the http client.
 type corgeHTTPClient struct {
-	clientID         string
-	httpClient       *zanzibar.HTTPClient
-	apprenticeClient *zanzibar.TChannelClient
-	calleeHeader     string
-	callerHeader     string
-	callerName       string
-	calleeName       string
+	clientID   string
+	httpClient *zanzibar.HTTPClient
+
+	calleeHeader string
+	callerHeader string
+	callerName   string
+	calleeName   string
 }
 
 // NewClient returns a new http client.
@@ -71,42 +71,6 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.corge-http.defaultHeaders", &defaultHeaders)
 	}
 
-	apprenticeMethodNames := map[string]string{
-		"Apprentice::getRequest":  "getRequest",
-		"Apprentice::getResponse": "getResponse",
-	}
-
-	apprenticeTimeout := time.Millisecond * time.Duration(50)
-	if deps.Default.Config.ContainsKey("clients.apprentice.timeout") {
-		apprenticeTimeout = time.Millisecond * time.Duration(
-			deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
-		)
-	}
-
-	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(50)
-	if deps.Default.Config.ContainsKey("clients.apprentice.timeoutPerAttempt") {
-		apprenticeTimeoutPerAttempt = time.Millisecond * time.Duration(
-			deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
-		)
-	}
-
-	apprenticeRoutingKey := ""
-
-	apprenticeClient := zanzibar.NewTChannelClient(
-		deps.Default.Channel,
-		deps.Default.Logger,
-		deps.Default.Scope,
-		&zanzibar.TChannelClientOption{
-			ServiceName:       "apprentice",
-			ClientID:          "apprentice",
-			MethodNames:       apprenticeMethodNames,
-			Timeout:           apprenticeTimeout,
-			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
-			RoutingKey:        &apprenticeRoutingKey,
-			AltSubchannelName: "apprentice",
-		},
-	)
-
 	return &corgeHTTPClient{
 		clientID:     "corge-http",
 		callerHeader: callerHeader,
@@ -123,7 +87,6 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
-		apprenticeClient: apprenticeClient,
 	}
 }
 

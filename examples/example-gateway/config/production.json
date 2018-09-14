@@ -1,9 +1,4 @@
 {
-	"clients.apprentice.ip": "127.0.0.1",
-	"clients.apprentice.port": 4003,
-	"clients.apprentice.timeout": 50,
-	"clients.apprentice.timeoutPerAttempt": 50,
-	"clients.apprentice.serviceName": "apprentice",
 	"clients.bar.defaultHeaders": {
 		"X-Client-ID": "bar"
 	},

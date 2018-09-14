@@ -48,9 +48,8 @@ type Client interface {
 
 // multiClient is the http client.
 type multiClient struct {
-	clientID         string
-	httpClient       *zanzibar.HTTPClient
-	apprenticeClient *zanzibar.TChannelClient
+	clientID   string
+	httpClient *zanzibar.HTTPClient
 }
 
 // NewClient returns a new http client.
@@ -63,42 +62,6 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.multi.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.multi.defaultHeaders", &defaultHeaders)
 	}
-
-	apprenticeMethodNames := map[string]string{
-		"Apprentice::getRequest":  "getRequest",
-		"Apprentice::getResponse": "getResponse",
-	}
-
-	apprenticeTimeout := time.Millisecond * time.Duration(50)
-	if deps.Default.Config.ContainsKey("clients.apprentice.timeout") {
-		apprenticeTimeout = time.Millisecond * time.Duration(
-			deps.Default.Config.MustGetInt("clients.apprentice.timeout"),
-		)
-	}
-
-	apprenticeTimeoutPerAttempt := time.Millisecond * time.Duration(50)
-	if deps.Default.Config.ContainsKey("clients.apprentice.timeoutPerAttempt") {
-		apprenticeTimeoutPerAttempt = time.Millisecond * time.Duration(
-			deps.Default.Config.MustGetInt("clients.apprentice.timeoutPerAttempt"),
-		)
-	}
-
-	apprenticeRoutingKey := ""
-
-	apprenticeClient := zanzibar.NewTChannelClient(
-		deps.Default.Channel,
-		deps.Default.Logger,
-		deps.Default.Scope,
-		&zanzibar.TChannelClientOption{
-			ServiceName:       "apprentice",
-			ClientID:          "apprentice",
-			MethodNames:       apprenticeMethodNames,
-			Timeout:           apprenticeTimeout,
-			TimeoutPerAttempt: apprenticeTimeoutPerAttempt,
-			RoutingKey:        &apprenticeRoutingKey,
-			AltSubchannelName: "apprentice",
-		},
-	)
 
 	return &multiClient{
 		clientID: "multi",
@@ -113,7 +76,6 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
-		apprenticeClient: apprenticeClient,
 	}
 }
 

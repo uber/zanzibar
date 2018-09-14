@@ -89,10 +89,6 @@ func main() {
 	if config.ContainsKey("deputyReqHeader") {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
-	shadowReqHeader := "X-Shadow-Start-Trace-Id"
-	if config.ContainsKey("shadowReqHeader") {
-		shadowReqHeader = config.MustGetString("shadowReqHeader")
-	}
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:        config.MustGetString("targetGenDir"),
@@ -102,7 +98,6 @@ func main() {
 		CopyrightHeader:        string(copyright),
 		StagingReqHeader:       stagingReqHeader,
 		DeputyReqHeader:        deputyReqHeader,
-		ShadowReqHeader:        shadowReqHeader,
 		TraceKey:               config.MustGetString("traceKey"),
 	}
 
