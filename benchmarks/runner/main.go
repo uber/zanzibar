@@ -23,7 +23,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -37,6 +36,7 @@ import (
 	"github.com/uber/zanzibar/test/lib/util"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var logger = zap.New(
@@ -69,23 +69,23 @@ func spawnBenchServer(dirName string) *exec.Cmd {
 }
 
 func writeConfigToFile(config map[string]interface{}) (string, error) {
-	tempConfigDir, err := ioutil.TempDir("", "zanzibar-bench-config-json")
+	tempConfigDir, err := ioutil.TempDir("", "zanzibar-bench-config-yaml")
 	if err != nil {
 		return "", err
 	}
 
-	jsonFile := path.Join(tempConfigDir, "production.json")
-	configBytes, err := json.Marshal(config)
+	yamlFile := path.Join(tempConfigDir, "production.json")
+	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(jsonFile, configBytes, os.ModePerm)
+	err = ioutil.WriteFile(yamlFile, configBytes, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	return jsonFile, nil
+	return yamlFile, nil
 }
 
 func spawnGateway(dirName string) *exec.Cmd {

@@ -73,7 +73,7 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 
 		w.WriteHeader(200)
 
-		payload := []byte(`null`)
+		payload := []byte(`{}`)
 
 		// TODO(zw): generate client response.
 		if _, err := w.Write(payload); err != nil {

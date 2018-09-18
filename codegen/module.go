@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -32,6 +31,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
@@ -698,76 +698,78 @@ func (system *ModuleSystem) readInstance(
 	instanceDirectory string,
 ) (*ModuleInstance, error) {
 
-	jsonFileName := className + configSuffix
+	yamlFileName := className + configSuffix
 	classConfigPath := filepath.Join(
 		baseDirectory,
 		instanceDirectory,
-		jsonFileName,
+		yamlFileName,
 	)
 
-	jsonConfig := JSONClassConfig{}
-	raw, err := jsonConfig.Read(classConfigPath)
+	yamlConfig := yamlClassConfig{}
+	raw, err := yamlConfig.Read(classConfigPath)
 
 	if err != nil {
 		// TODO: We should accumulate errors and list them all here
-		// Expected $class-config.json to exist in ...
+		// Expected $class-config.yaml to exist in ...
 		return nil, errors.Wrapf(
 			err,
-			"Error reading JSON Config %q",
+			"Error reading Config %q",
 			classConfigPath,
 		)
 	}
 
-	dependencies := readDeps(jsonConfig.Dependencies)
+	dependencies := readDeps(yamlConfig.Dependencies)
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
 		targetGenDir,
 		className,
 		instanceDirectory,
-		&jsonConfig,
+		&yamlConfig,
 		dependencies,
 	)
 
 	if err != nil {
 		// TODO: We should accumulate errors and list them all here
-		// Expected $class-config.json to exist in ...
+		// Expected $class-config.yaml to exist in ...
 		return nil, errors.Wrapf(
 			err,
 			"Error reading class package info for %q %q",
 			className,
-			jsonConfig.Name,
+			yamlConfig.Name,
 		)
 	}
 
 	return &ModuleInstance{
 		PackageInfo:           packageInfo,
 		ClassName:             className,
-		ClassType:             jsonConfig.Type,
+		ClassType:             yamlConfig.Type,
 		BaseDirectory:         baseDirectory,
 		Directory:             instanceDirectory,
-		InstanceName:          jsonConfig.Name,
+		InstanceName:          yamlConfig.Name,
 		Dependencies:          dependencies,
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
 		DependencyOrder:       []string{},
-		JSONFileName:          jsonFileName,
-		JSONFileRaw:           raw,
-		Config:                jsonConfig.Config,
+		JSONFileName:          "",
+		YAMLFileName:          yamlFileName,
+		JSONFileRaw:           []byte{},
+		YAMLFileRaw:           raw,
+		Config:                yamlConfig.Config,
 	}, nil
 }
 
-func readDeps(jsonDeps map[string][]string) []ModuleDependency {
+func readDeps(yamlDeps map[string][]string) []ModuleDependency {
 	depCount := 0
 
-	for _, depsList := range jsonDeps {
+	for _, depsList := range yamlDeps {
 		depCount += len(depsList)
 	}
 
 	deps := make([]ModuleDependency, depCount)
 	depIndex := 0
 
-	for className, depsList := range jsonDeps {
+	for className, depsList := range yamlDeps {
 		for _, instanceName := range depsList {
 			deps[depIndex] = ModuleDependency{
 				ClassName:    className,
@@ -786,11 +788,11 @@ func readPackageInfo(
 	targetGenDir string,
 	className string,
 	instanceDirectory string,
-	jsonConfig *JSONClassConfig,
+	yamlConfig *yamlClassConfig,
 	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(CamelCase(className))
-	qualifiedInstanceName := strings.Title(CamelCase(jsonConfig.Name))
+	qualifiedInstanceName := strings.Title(CamelCase(yamlConfig.Name))
 	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
 
 	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
@@ -806,16 +808,16 @@ func readPackageInfo(
 	// type. We should really extrapolate from the class type info what the
 	// default export type is for this instance
 	var isExportGenerated bool
-	if jsonConfig.Type == "custom" {
-		if jsonConfig.IsExportGenerated == nil {
+	if yamlConfig.Type == "custom" {
+		if yamlConfig.IsExportGenerated == nil {
 			isExportGenerated = false
 		} else {
-			isExportGenerated = *jsonConfig.IsExportGenerated
+			isExportGenerated = *yamlConfig.IsExportGenerated
 		}
-	} else if jsonConfig.IsExportGenerated == nil {
+	} else if yamlConfig.IsExportGenerated == nil {
 		isExportGenerated = true
 	} else {
-		isExportGenerated = *jsonConfig.IsExportGenerated
+		isExportGenerated = *yamlConfig.IsExportGenerated
 	}
 
 	return &PackageInfo{
@@ -987,7 +989,7 @@ func (system *ModuleSystem) GenerateIncrementalBuild(
 		return nil, err
 	}
 
-	serializedModules, err := json.Marshal(resolvedModules)
+	serializedModules, err := yaml.Marshal(resolvedModules)
 	if err != nil {
 		return nil, errors.Wrap(err, "error serializing module tree")
 	}
@@ -1300,13 +1302,13 @@ type ModuleInstance struct {
 	// Directory is the relative instance directory
 	Directory string
 	// InstanceName is the name of the instance as configured in the instance's
-	// json file
+	// YAML/JSON file
 	InstanceName string
-	// Config is a reference to the instance "config" key in the instances json
+	// Config is a reference to the instance "config" key in the instances YAML
 	//file.
 	Config map[string]interface{}
 	// Dependencies is a list of dependent modules as defined in the instances
-	// json file
+	// YAML file
 	Dependencies []ModuleDependency
 	// Resolved dependencies is a list of direct dependent modules after processing
 	// (fully resolved)
@@ -1318,10 +1320,14 @@ type ModuleInstance struct {
 	// DependencyOrder is the bottom to top order in which the recursively
 	// resolved dependency class names can depend on each other
 	DependencyOrder []string
-	// The JSONFileName is file name of the instance json file
-	JSONFileName string
+	// The JSONFileName is file name of the instance JSON file
+	JSONFileName string // Deprecated
+	// The YAMLFileName is file name of the instance YAML file
+	YAMLFileName string
 	// JSONFileRaw is the raw JSON file read as bytes used for future parsing
-	JSONFileRaw []byte
+	JSONFileRaw []byte // Deprecated
+	// YAMLFileRaw is the raw YAML file read as bytes used for future parsing
+	YAMLFileRaw []byte
 }
 
 // GeneratedSpec returns the last spec result returned for the module instance
@@ -1337,28 +1343,28 @@ type ModuleDependency struct {
 	InstanceName string
 }
 
-// JSONClassConfig maps onto a json configuration for a class type
-type JSONClassConfig struct {
+// yamlClassConfig maps onto a YAML configuration for a class type
+type yamlClassConfig struct {
 	// Name is the class instance name used to identify the module as a
 	// dependency. The combination of the class Name and this instance name
 	// is unique.
-	Name string `json:"name"`
+	Name string `yaml:"name" json:"name"`
 	// The configuration map for this class instance. This depends on the
 	// class name and class type, and is interpreted by each module generator.
-	Config map[string]interface{} `json:"config"`
+	Config map[string]interface{} `yaml:"config" json:"config"`
 	// Dependencies is a map of class name to a list of instance names. This
 	// infers the dependencies struct generated for the initializer
-	Dependencies map[string][]string `json:"dependencies"`
+	Dependencies map[string][]string `yaml:"dependencies" json:"dependencies"`
 	// Type refers to the class type used to generate the dependency
-	Type string `json:"type"`
+	Type string `yaml:"type" json:"type"`
 	// IsExportGenerated determines whether or not the export lives in
 	// IsExportGenerated defaults to true if not set.
-	IsExportGenerated *bool `json:"IsExportGenerated"`
+	IsExportGenerated *bool `yaml:"IsExportGenerated" json:"IsExportGenerated"`
 }
 
-// Read will read a class configuration json file into a jsonClassConfig struct
+// Read will read a class configuration yaml file into a yamlClassConfig struct
 // or return an error if it cannot be unmarshaled into the struct
-func (jsonConfig *JSONClassConfig) Read(
+func (yamlConfig *yamlClassConfig) Read(
 	classConfigPath string,
 ) ([]byte, error) {
 	configFile, readErr := ioutil.ReadFile(classConfigPath)
@@ -1370,32 +1376,32 @@ func (jsonConfig *JSONClassConfig) Read(
 		)
 	}
 
-	parseErr := json.Unmarshal(configFile, &jsonConfig)
+	parseErr := yaml.Unmarshal(configFile, &yamlConfig)
 
 	if parseErr != nil {
 		return nil, errors.Wrapf(
 			parseErr,
-			"Error JSON parsing clss config %q",
+			"Error yaml parsing clss config %q",
 			configFile,
 		)
 	}
 
-	if jsonConfig.Name == "" {
+	if yamlConfig.Name == "" {
 		return nil, errors.Errorf(
 			"Error reading instance name from %q",
 			classConfigPath,
 		)
 	}
 
-	if jsonConfig.Type == "" {
+	if yamlConfig.Type == "" {
 		return nil, errors.Errorf(
 			"Error reading instance type from %q",
 			classConfigPath,
 		)
 	}
 
-	if jsonConfig.Dependencies == nil {
-		jsonConfig.Dependencies = map[string][]string{}
+	if yamlConfig.Dependencies == nil {
+		yamlConfig.Dependencies = map[string][]string{}
 	}
 
 	return configFile, nil

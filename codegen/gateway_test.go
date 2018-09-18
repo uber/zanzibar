@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,6 +28,7 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var defaultTestOptions = &testGateway.Options{
@@ -56,8 +56,8 @@ func TestHeadersPropagateMultiDest(t *testing.T) {
 			]
 		}
 	}`
-	middlewareObj := make(map[string]interface{})
-	err := json.Unmarshal([]byte(cfg), &middlewareObj)
+	middlewareObj := make(map[interface{}]interface{})
+	err := yaml.Unmarshal([]byte(cfg), &middlewareObj)
 	assert.Nil(t, err)
 	_, err = setPropagateMiddleware(middlewareObj)
 	assert.NotNil(t, err)
