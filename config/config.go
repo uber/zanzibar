@@ -69,7 +69,8 @@ func setEnvConfig(cfg *zanzibar.StaticConfig) {
 	cfg.MustGetStruct("service.env.config", &envConfig)
 	for envVar, configKey := range envConfig {
 		if value, ok := os.LookupEnv(envVar); ok {
-			cfg.SetConfigValueOrDie(configKey.Key, []byte(value), configKey.DataType)
+			cfg.SetConfigValueOrDie(
+				configKey.Key, []byte(value), configKey.DataType)
 		}
 	}
 }
