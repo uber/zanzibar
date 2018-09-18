@@ -74,10 +74,6 @@ func (w barArgWithQueryParamsWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Deputy-Forwarded"] = h
 	}
-	h, ok = reqHeaders.Get("X-Shadow-Start-Trace-Id")
-	if ok {
-		clientHeaders["X-Shadow-Start-Trace-Id"] = h
-	}
 	h, ok = reqHeaders.Get("X-Token")
 	if ok {
 		clientHeaders["x-token"] = h
