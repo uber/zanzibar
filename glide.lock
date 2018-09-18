@@ -1,5 +1,5 @@
-hash: 01e954b57c1610d31a26e5f2b3835f68059e33ce41b3e072b90a2bc82887fb46
-updated: 2018-08-20T17:06:12.605904-07:00
+hash: 1bffbb17d71e3da6efdac89b9ab71a9653130374e43a0ef3d2a404a372f893c9
+updated: 2018-08-29T14:04:09.29889-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -37,7 +37,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 03f2033d19d5860aef995fe360ac7d395cd8ce65
+  version: 60711f1a8329503b04e1c88535f419d0bb440bff
   subpackages:
   - bootstrap
   - buffer
@@ -48,7 +48,7 @@ imports:
 - name: github.com/mcuadros/go-jsonschema-generator
   version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/mitchellh/mapstructure
-  version: f15292f7a699fcc1a38a80977f80a046874ba8ac
+  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
@@ -152,9 +152,11 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: aaf60122140d3fcf75376d319f0554393160eb50
+  version: 8a410e7b638dca158bf9e766925842f6651ff828
   subpackages:
   - context
+- name: gopkg.in/yaml.v2
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: honnef.co/go/tools
   version: 88497007e8588ea5b6baee991f74a1607e809487
   subpackages:
