@@ -30,11 +30,16 @@ import (
 
 type contextFieldKey string
 
+// ContextScopeExtractor defines func where extracts tags from context
+type ContextScopeExtractor func(context.Context) map[string]string
+
 const (
-	endpointKey        = contextFieldKey("endpoint")
-	requestUUIDKey     = contextFieldKey("requestUUID")
-	routingDelegateKey = contextFieldKey("rd")
-	requestLogFields   = contextFieldKey("requestLogFields")
+	endpointKey           = contextFieldKey("endpoint")
+	requestUUIDKey        = contextFieldKey("requestUUID")
+	routingDelegateKey    = contextFieldKey("rd")
+	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
+	requestLogFields      = contextFieldKey("requestLogFields")
+	requestScopeFields    = contextFieldKey("requestScopeFields")
 )
 
 const (
@@ -49,6 +54,23 @@ const (
 	logFieldHandlerID           = "handlerID"
 )
 
+const (
+	scopeFieldRequestMethod = "method"
+	scopeFieldEndpointID    = "endpointID"
+	scopeFieldHandlerID     = "handlerID"
+)
+
+const (
+	// EndpointScope defines the name of endpoint scope
+	EndpointScope = "endpoint"
+
+	// ClientScope defines the name of client scope
+	ClientScope = "client"
+)
+
+// ContextScopeExtractors defines the mapping between scope namespace and context scope extractors
+var ContextScopeExtractors = map[string]ContextScopeExtractor{}
+
 // WithEndpointField adds the endpoint information in the
 // request context.
 func WithEndpointField(ctx context.Context, endpoint string) context.Context {
@@ -62,6 +84,39 @@ func GetRequestEndpointFromCtx(ctx context.Context) string {
 		return endpoint
 	}
 	return ""
+}
+
+// WithEndpointRequestHeaderField adds the endpoint request header information in the
+// request context.
+func WithEndpointRequestHeaderField(ctx context.Context, key string, value string) context.Context {
+	headers := GetEndpointRequestHeadersFromCtx(ctx)
+	headers[key] = value
+
+	return context.WithValue(ctx, endpointRequestHeader, headers)
+}
+
+// WithEndpointRequestHeadersField adds the endpoint request header information in the
+// request context.
+func WithEndpointRequestHeadersField(ctx context.Context, requestHeaders map[string]string) context.Context {
+	headers := GetEndpointRequestHeadersFromCtx(ctx)
+	for k, v := range requestHeaders {
+		headers[k] = v
+	}
+
+	return context.WithValue(ctx, endpointRequestHeader, headers)
+}
+
+// GetEndpointRequestHeadersFromCtx returns the endpoint request headers, if it exists on context
+func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
+	requestHeaders := map[string]string{}
+	if val := ctx.Value(endpointRequestHeader); val != nil {
+		headers, _ := val.(map[string]string)
+		for k, v := range headers {
+			requestHeaders[k] = v
+		}
+	}
+
+	return requestHeaders
 }
 
 // withRequestFields annotates zanzibar request context to context.Context. In
@@ -105,6 +160,37 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
+// WithScopeField returns a new context with the given scope fields attached to context.Context
+func WithScopeField(ctx context.Context, key string, value string) context.Context {
+	fields := GetScopeFieldsFromCtx(ctx)
+	fields[key] = value
+
+	return context.WithValue(ctx, requestScopeFields, fields)
+}
+
+// WithScopeFields returns a new context with the given scope fields attached to context.Context
+func WithScopeFields(ctx context.Context, newFields map[string]string) context.Context {
+	fields := GetScopeFieldsFromCtx(ctx)
+	for k, v := range newFields {
+		fields[k] = v
+	}
+
+	return context.WithValue(ctx, requestScopeFields, fields)
+}
+
+// GetScopeFieldsFromCtx returns the tag info extracted from context.
+func GetScopeFieldsFromCtx(ctx context.Context) map[string]string {
+	fields := map[string]string{}
+	if val := ctx.Value(requestScopeFields); val != nil {
+		headers, _ := val.(map[string]string)
+		for k, v := range headers {
+			fields[k] = v
+		}
+	}
+
+	return fields
+}
+
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
 	previousFieldsUntyped := ctx.Value(requestLogFields)
 	if previousFieldsUntyped == nil {
@@ -122,6 +208,19 @@ func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field
 	}
 
 	return fields
+}
+
+// ExtractScope extracts scope fields from a context into a tag.
+func ExtractScope(ctx context.Context, key string) map[string]string {
+	tags := map[string]string{}
+	if fn, ok := ContextScopeExtractors[key]; ok {
+		sc := fn(ctx)
+		for k, v := range sc {
+			tags[k] = v
+		}
+	}
+
+	return tags
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.

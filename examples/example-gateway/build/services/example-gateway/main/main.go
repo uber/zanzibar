@@ -36,6 +36,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
+	app "github.com/uber/zanzibar/examples/example-gateway"
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
@@ -96,8 +97,13 @@ func readFlags() {
 	flag.Parse()
 }
 
+func readContextExtractors() {
+	zanzibar.ContextScopeExtractors = app.ZanzibarApp.GetContextScopeExtractors()
+}
+
 func main() {
 	readFlags()
+	readContextExtractors()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)

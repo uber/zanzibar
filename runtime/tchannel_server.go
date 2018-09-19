@@ -186,6 +186,9 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		zap.String(logFieldHandlerID, e.HandlerID),
 		zap.String(logFieldRequestMethod, e.Method),
 	)
+	ctx = WithScopeField(ctx, scopeFieldEndpointID, e.EndpointID)
+	ctx = WithScopeField(ctx, scopeFieldHandlerID, e.HandlerID)
+	ctx = WithScopeField(ctx, scopeFieldRequestMethod, e.Method)
 
 	var err error
 	errc := make(chan error, 1)

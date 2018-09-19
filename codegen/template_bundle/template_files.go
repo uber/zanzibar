@@ -1244,6 +1244,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
+	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -1305,8 +1306,13 @@ func readFlags() {
 	flag.Parse()
 }
 
+func readContextExtractors() {
+	zanzibar.ContextScopeExtractors = app.ZanzibarApp.GetContextScopeExtractors()
+}
+
 func main() {
 	readFlags()
+	readContextExtractors()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
@@ -1331,7 +1337,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1738, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1921, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
