@@ -84,7 +84,7 @@ func NewHTTPClient(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
-		Scopes:         scope.Tagged(map[string]string{
+		Scope:          scope.Tagged(map[string]string{
 			"client": clientID,
 		}),
 		metrics:        metrics,
