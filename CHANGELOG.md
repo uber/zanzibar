@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - HTTP `DELETE` methods on clients can now send a JSON payload. Previously it was silently discarded. 
 
+## 1.1.0 - 2018-09-27
+### Added
+- **Context Extractor**: Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextLogger) interface. This new logger interface automatically
+
 ## 1.0.2 - 2018-08-28 
 ### Added
 - **Context logger**: Added [`ContextLogger`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextLogger) interface. This new logger interface automatically has log fields for Zanzibar-defined per-request fields like `requestUUID` to allow correlating all log messages from a given request. [`WithLogFields`](https://godoc.org/github.com/uber/zanzibar/runtime#WithLogFields) method added to `runtime` package to allow users to add their own log fields to be used by subsequent logs that use the context. The context logger is added as a new field to [`DefaultDependencies`](https://godoc.org/github.com/uber/zanzibar/runtime#DefaultDependencies). 
