@@ -61,6 +61,9 @@ func NewHTTPClient(
 	timeout time.Duration,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
+	taggedScope := scope.Tagged(map[string]string{
+		"client": clientID,
+	})
 	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
 	for _, methodName := range methodNames {
 		loggers[methodName] = logger.With(
@@ -84,9 +87,7 @@ func NewHTTPClient(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
-		Scope:          scope.Tagged(map[string]string{
-			"client": clientID,
-		}),
+		Scope:          taggedScope,
 		metrics:        metrics,
 	}
 }
