@@ -557,7 +557,7 @@ func (system *ModuleSystem) ResolveModules(
 
 			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
 			if class.ClassType == SingleModule {
-				instance, instanceErr := system.readInstance(
+				instance, instanceErr := system.ReadInstance(
 					packageRoot,
 					baseDirectory,
 					targetGenDir,
@@ -633,7 +633,7 @@ func (system *ModuleSystem) resolveMultiModules(
 
 	configFile := filepath.Join(classDir, className+configSuffix)
 	if _, err := os.Stat(configFile); err == nil {
-		instance, instanceErr := system.readInstance(
+		instance, instanceErr := system.ReadInstance(
 			packageRoot,
 			baseDirectory,
 			targetGenDir,
@@ -690,7 +690,9 @@ func (system *ModuleSystem) resolveMultiModules(
 	return classInstances, nil
 }
 
-func (system *ModuleSystem) readInstance(
+// ReadInstance reads the config on disk for one instance and populates data
+// for struct ModuleInstance
+func (system *ModuleSystem) ReadInstance(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
