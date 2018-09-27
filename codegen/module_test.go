@@ -1461,3 +1461,33 @@ func compareInstances(
 		}
 	}
 }
+
+func TestReadConfig(t *testing.T) {
+	expectedConfig := map[string]interface{}{"rateLimit": (float64)(100)}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+	system := NewModuleSystem()
+	configDir := path.Join("endpoints", "health")
+
+	actualConfig, err := system.ReadInstanceConfig(
+		testServiceDir, "endpoint", configDir)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedConfig, actualConfig)
+}
+
+func TestReadConfigFails(t *testing.T) {
+	expectedConfig := map[string]interface{}(nil)
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "nonexist_dir")
+	system := NewModuleSystem()
+	configDir := path.Join("endpoints", "health")
+
+	actualConfig, err := system.ReadInstanceConfig(
+		testServiceDir, "endpoint", configDir)
+
+	assert.Error(t, err)
+	assert.Equal(t, expectedConfig, actualConfig)
+}
