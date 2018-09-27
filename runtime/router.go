@@ -103,10 +103,12 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	)
 	ctx = WithScopeField(ctx, scopeFieldEndpointID, endpoint.EndpointName)
 	ctx = WithScopeField(ctx, scopeFieldHandlerID, endpoint.HandlerName)
+	headers := map[string]string{}
 	for k, v := range r.Header {
-		ctx = WithEndpointRequestHeaderField(ctx, k, v[0])
+		headers[k] = v[0]
 	}
 
+	ctx = WithEndpointRequestHeadersField(ctx, headers)
 	r = r.WithContext(ctx)
 	req := NewServerHTTPRequest(w, r, params, endpoint)
 

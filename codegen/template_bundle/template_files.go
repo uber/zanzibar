@@ -1307,7 +1307,7 @@ func readFlags() {
 }
 
 func readContextExtractors() {
-	zanzibar.ContextScopeExtractors = app.ZanzibarApp.GetContextScopeExtractors()
+	zanzibar.ContextScopeExtractors = app.App.GetContextScopeExtractors()
 }
 
 func main() {
@@ -1337,7 +1337,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1921, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1913, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

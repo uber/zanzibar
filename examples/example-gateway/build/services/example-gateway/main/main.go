@@ -98,7 +98,7 @@ func readFlags() {
 }
 
 func readContextExtractors() {
-	zanzibar.ContextScopeExtractors = app.ZanzibarApp.GetContextScopeExtractors()
+	zanzibar.ContextScopeExtractors = app.App.GetContextScopeExtractors()
 }
 
 func main() {

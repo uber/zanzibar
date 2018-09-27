@@ -11,9 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - HTTP `DELETE` methods on clients can now send a JSON payload. Previously it was silently discarded. 
 
-## 1.1.0 - 2018-09-27
+## 1.1.0 - 2018-09-28
 ### Added
-- **Context Extractor**: Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextLogger) interface. This new logger interface automatically
+- **Context Extractor**: Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextExtractor) interface. This new extractor interface extracts scope field from context to into tags.
+- **PackageRoot**: Added PackageRoot for definition of root folder
+
+### BREAKING CHANGE
+- **GetContextScopeExtractors**:Added [`GetContextScopeExtractors`](https://godoc.org/github.com/uber/zanzibar/runtime#GetContextScopeExtractors) interface at runtime/app.go. For migration, define var ZanzibarApp *zanzibar.App at PackageRoot and implement interface accordingly.
 
 ## 1.0.2 - 2018-08-28 
 ### Added

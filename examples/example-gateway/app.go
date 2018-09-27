@@ -28,8 +28,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// ZanzibarApp defines the custom func
-var ZanzibarApp = &zanzibar.App{
+// App defines the custom func
+var App = &zanzibar.App{
 	GetContextScopeExtractors: getContextScopeExtractors,
 }
 

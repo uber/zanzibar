@@ -76,6 +76,7 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	ContextLogger    ContextLogger
+	ContextExtractor ContextExtractor
 	RootScope        tally.Scope
 	AllHostScope     tally.Scope
 	PerHostScope     tally.Scope
@@ -556,6 +557,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	)
 
 	gateway.ContextLogger = NewContextLogger(gateway.Logger)
+	gateway.ContextExtractor = NewContextExtractor()
 	return nil
 }
 

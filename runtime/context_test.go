@@ -55,8 +55,8 @@ func TestGetRequestEndpointFromCtx(t *testing.T) {
 
 func TestWithEndpointRequestHeaderField(t *testing.T) {
 	expected := map[string]string{"region": "san_francisco", "dc": "sjc1"}
-	ctx := WithEndpointRequestHeaderField(context.TODO(), "region", "san_francisco")
-	ctx = WithEndpointRequestHeaderField(ctx, "dc", "sjc1")
+	headers := map[string]string{"region": "san_francisco", "dc": "sjc1"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
 	rh := ctx.Value(endpointRequestHeader)
 	requestHeaders, ok := rh.(map[string]string)
 
@@ -76,8 +76,8 @@ func TestWithEndpointRequestHeadersField(t *testing.T) {
 
 func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 	expected := map[string]string{"region": "san_francisco", "dc": "sjc1"}
-	ctx := WithEndpointRequestHeaderField(context.TODO(), "region", "san_francisco")
-	ctx = WithEndpointRequestHeaderField(ctx, "dc", "sjc1")
+	headers := map[string]string{"region": "san_francisco", "dc": "sjc1"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
 	requestHeaders := GetEndpointRequestHeadersFromCtx(ctx)
 	assert.Equal(t, expected, requestHeaders)
 
@@ -213,13 +213,15 @@ func TestContextLoggerPanic(t *testing.T) {
 }
 
 func TestExtractScope(t *testing.T) {
-	ctx := WithEndpointRequestHeaderField(context.TODO(), "x-uber-region-id", "san_francisco")
+	headers := map[string]string{"x-uber-region-id": "san_francisco"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
 	ContextScopeExtractors[EndpointScope] = func(ctx context.Context) map[string]string {
 		headers := GetEndpointRequestHeadersFromCtx(ctx)
 		return map[string]string{"region-id": headers["x-uber-region-id"]}
 	}
 
 	expected := map[string]string{"region-id": "san_francisco"}
-	tags := ExtractScope(ctx, EndpointScope)
+	contextExtractor := NewContextExtractor()
+	tags := contextExtractor.ExtractScope(ctx, EndpointScope)
 	assert.Equal(t, tags, expected)
 }
