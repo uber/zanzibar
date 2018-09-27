@@ -35,6 +35,7 @@ type HTTPClient struct {
 	BaseURL        string
 	DefaultHeaders map[string]string
 	loggers        map[string]*zap.Logger
+	Scope          tally.Scope
 	metrics        map[string]*OutboundHTTPMetrics
 }
 
@@ -83,6 +84,7 @@ func NewHTTPClient(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
+		Scope:          scope,
 		metrics:        metrics,
 	}
 }
