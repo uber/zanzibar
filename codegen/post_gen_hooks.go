@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"encoding/json"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -31,6 +30,7 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -40,22 +40,22 @@ const (
 
 // helper struct to pull out the fixture config
 type moduleConfig struct {
-	Config *config `json:"config"`
+	Config *config `yaml:"config" json:"config"`
 }
 
-// config is the struct corresponding to the config field in client-config.json
+// config is the struct corresponding to the config field in client-config.yaml
 type config struct {
-	CustomImportPath string   `json:"customImportPath"`
-	Fixture          *Fixture `json:"fixture"`
+	CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
+	Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 }
 
 // Fixture specifies client fixture import path and all scenarios
 type Fixture struct {
 	// ImportPath is the package where the user-defined Fixture global variable is contained.
 	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
-	ImportPath string `json:"importPath"`
+	ImportPath string `yaml:"importPath" json:"importPath"`
 	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
-	Scenarios map[string][]string `json:"scenarios"`
+	Scenarios map[string][]string `yaml:"scenarios" json:"scenarios"`
 }
 
 // Validate the fixture configuration
@@ -89,10 +89,10 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		for _, instance := range clientInstances {
 			key := instance.ClassType + instance.InstanceName
 			var mc moduleConfig
-			if err := json.Unmarshal(instance.JSONFileRaw, &mc); err != nil {
+			if err := yaml.Unmarshal(instance.YAMLFileRaw, &mc); err != nil {
 				return errors.Wrapf(
 					err,
-					"error parsing client-config.json for client %q",
+					"error parsing client-config for client %q",
 					instance.InstanceName,
 				)
 			}
@@ -316,10 +316,10 @@ func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error)
 	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
 		var mc moduleConfig
-		if err := json.Unmarshal(leaf.JSONFileRaw, &mc); err != nil {
+		if err := yaml.Unmarshal(leaf.YAMLFileRaw, &mc); err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"error parsing client-config.json for client %q",
+				"error parsing client-config for client %q",
 				instance.InstanceName,
 			)
 		}

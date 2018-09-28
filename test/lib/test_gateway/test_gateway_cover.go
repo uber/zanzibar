@@ -33,6 +33,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var cachedBinaryFile *testBinaryInfo
@@ -70,23 +71,23 @@ func (info *testBinaryInfo) Cleanup() {
 }
 
 func writeConfigToFile(config map[string]interface{}) (string, error) {
-	tempConfigDir, err := ioutil.TempDir("", "example-gateway-config-json")
+	tempConfigDir, err := ioutil.TempDir("", "example-gateway-config-yaml")
 	if err != nil {
 		return "", err
 	}
 
-	jsonFile := path.Join(tempConfigDir, "test.json")
-	configBytes, err := json.Marshal(config)
+	yamlFile := path.Join(tempConfigDir, "test.json")
+	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(jsonFile, configBytes, os.ModePerm)
+	err = ioutil.WriteFile(yamlFile, configBytes, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	return jsonFile, nil
+	return yamlFile, nil
 }
 
 func makeRandStr() (string, error) {

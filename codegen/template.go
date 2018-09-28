@@ -22,7 +22,6 @@ package codegen
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,7 +59,6 @@ var defaultFuncMap = tmpl.FuncMap{
 	"dec":           decrement,
 	"basePath":      filepath.Base,
 	"pascal":        PascalCase,
-	"jsonMarshal":   jsonMarshal,
 	"isPointerType": IsPointerType,
 	"unref":         Unref,
 	"lintAcronym":   LintAcronym,
@@ -76,11 +74,6 @@ func fullTypeName(typeName, packageName string) string {
 
 func decrement(num int) int {
 	return num - 1
-}
-
-func jsonMarshal(jsonObj map[string]interface{}) (string, error) {
-	str, err := json.Marshal(jsonObj)
-	return string(str), err
 }
 
 // IsPointerType determines if the passed in string is a string for a pointer

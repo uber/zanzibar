@@ -21,7 +21,6 @@
 package codegen
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/textproto"
@@ -35,6 +34,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/compile"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func getDirName() string {
@@ -74,7 +74,9 @@ type ClientSpec struct {
 	// ModuleSpec holds the thrift module information
 	ModuleSpec *ModuleSpec
 	// JSONFile for this spec
-	JSONFile string
+	JSONFile string // Deprecated
+	// YAMLFile for this spec
+	YAMLFile string
 	// ClientType, currently "http", "tchannel" and "custom" are supported
 	ClientType string
 	// If "custom" then where to import custom code from
@@ -104,40 +106,40 @@ type ClientSpec struct {
 	SidecarRouter string
 }
 
-// ModuleClassConfig represents the generic JSON config for
+// ModuleClassConfig represents the generic YAML config for
 // all modules. This will be provided by the module package.
 type ModuleClassConfig struct {
-	Name   string      `json:"name"`
-	Type   string      `json:"type"`
-	Config interface{} `json:"config"`
+	Name   string      `yaml:"name" json:"name"`
+	Type   string      `yaml:"type" json:"type"`
+	Config interface{} `yaml:"config" json:"config"`
 }
 
 // ClientClassConfig represents the specific config for
 // a client. This is a downcast of the moduleClassConfig.
 type ClientClassConfig struct {
-	Name         string                 `json:"name"`
-	Type         string                 `json:"type"`
-	Config       map[string]interface{} `json:"config"`
-	Dependencies Dependencies           `json:"dependencies"`
+	Name         string                 `yaml:"name" json:"name"`
+	Type         string                 `yaml:"type" json:"type"`
+	Config       map[string]interface{} `yaml:"config" json:"config"`
+	Dependencies Dependencies           `yaml:"dependencies" json:"dependencies"`
 }
 
 // Dependencies lists all dependencies of a module
 type Dependencies struct {
-	Client []string `json:"client"`
-	//	Service []string `json:"service"`  // example extension
+	Client []string `yaml:"client" json:"client"`
+	//	Service []string `yaml:"service"`  // example extension
 }
 
-// MiddlewareConfigConfig is the inner config object as prescribed by module_system json conventions
+// MiddlewareConfigConfig is the inner config object as prescribed by module_system yaml conventions
 type MiddlewareConfigConfig struct {
-	OptionsSchemaFile string `json:"schema"`
-	ImportPath        string `json:"path"`
+	OptionsSchemaFile string `yaml:"schema" json:"schema"`
+	ImportPath        string `yaml:"path" json:"path"`
 }
 
-// MiddlewareConfig represents configuration for a middleware as is written in the json file
+// MiddlewareConfig represents configuration for a middleware as is written in the yaml file
 type MiddlewareConfig struct {
-	Name         string                  `json:"name"`
-	Dependencies *Dependencies           `json:"dependencies,omitempty"`
-	Config       *MiddlewareConfigConfig `json:"config"`
+	Name         string                  `yaml:"name" json:"name"`
+	Dependencies *Dependencies           `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Config       *MiddlewareConfigConfig `yaml:"config" json:"config"`
 }
 
 // Validate the config spec attributes
@@ -162,34 +164,34 @@ func (mid *MiddlewareConfig) Validate(configDirName string) error {
 	bytes, err := ioutil.ReadFile(schPath)
 	if err != nil {
 		return errors.Wrapf(
-			err, "Cannot read middleware json schema: %s",
+			err, "Cannot read middleware yaml schema: %s",
 			schPath,
 		)
 	}
 
 	var midOptSchema map[string]interface{}
-	err = json.Unmarshal(bytes, &midOptSchema)
+	err = yaml.Unmarshal(bytes, &midOptSchema)
 	if err != nil {
 		return errors.Wrapf(
-			err, "Cannot parse json schema for middleware options: %s",
+			err, "Cannot parse yaml schema for middleware options: %s",
 			schPath,
 		)
 	}
 	return nil
 }
 
-// NewClientSpec creates a client spec from a json file.
+// NewClientSpec creates a client spec from a yaml file.
 func NewClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
 	clientConfig := &ClientClassConfig{}
 
-	if err := json.Unmarshal(instance.JSONFileRaw, &clientConfig); err != nil {
+	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Could not parse class config json file: %s",
-			instance.JSONFileName,
+			"Could not parse class config yaml file: %s",
+			instance.YAMLFileName,
 		)
 	}
 
@@ -203,7 +205,7 @@ func NewClientSpec(
 	default:
 		return nil, errors.Errorf(
 			"Cannot support unknown clientType for client %q",
-			instance.JSONFileName,
+			instance.YAMLFileName,
 		)
 	}
 }
@@ -217,7 +219,7 @@ func NewHTTPClientSpec(
 	return newClientSpec(instance, clientConfig, true, h)
 }
 
-// NewTChannelClientSpec creates a client spec from a json file whose type is tchannel
+// NewTChannelClientSpec creates a client spec from a yaml file whose type is tchannel
 func NewTChannelClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -226,7 +228,7 @@ func NewTChannelClientSpec(
 	return newClientSpec(instance, clientConfig, false, h)
 }
 
-// NewCustomClientSpec creates a client spec from a json file whose type is custom
+// NewCustomClientSpec creates a client spec from a yaml file whose type is custom
 func NewCustomClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -236,13 +238,14 @@ func NewCustomClientSpec(
 		if _, ok := clientConfig.Config[f]; !ok {
 			return nil, errors.Errorf(
 				"client config %q must have %q field for type custom",
-				instance.JSONFileName,
+				instance.YAMLFileName,
 				f,
 			)
 		}
 	}
 
 	clientSpec := &ClientSpec{
+		YAMLFile:           instance.YAMLFileName,
 		JSONFile:           instance.JSONFileName,
 		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
 		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
@@ -268,7 +271,7 @@ func newClientSpec(
 		fieldName := mandatoryClientFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
-				"client config %q must have %q field", instance.JSONFileName, fieldName,
+				"client config %q must have %q field", instance.YAMLFileName, fieldName,
 			)
 		}
 	}
@@ -287,6 +290,7 @@ func newClientSpec(
 
 	cspec := &ClientSpec{
 		ModuleSpec:         mspec,
+		YAMLFile:           instance.YAMLFileName,
 		JSONFile:           instance.JSONFileName,
 		ClientType:         clientConfig.Type,
 		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
@@ -303,26 +307,27 @@ func newClientSpec(
 		cspec.SidecarRouter = sidecarRouter
 	}
 
-	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[string]interface{})
+	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[interface{}]interface{})
 	if !ok || len(exposedMethods) == 0 {
 		return nil, errors.Errorf(
 			"No methods are exposed in client config: %s",
-			instance.JSONFileName,
+			instance.YAMLFileName,
 		)
 	}
 	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
 	reversed := make(map[string]string, len(exposedMethods))
 	for key, val := range exposedMethods {
 		v := val.(string)
-		cspec.ExposedMethods[key] = v
+		k := key.(string)
+		cspec.ExposedMethods[k] = v
 		if _, ok := reversed[v]; ok {
 			return nil, errors.Errorf(
 				"value %q of the exposedMethods is not unique: %s",
 				v,
-				instance.JSONFileName,
+				instance.YAMLFileName,
 			)
 		}
-		reversed[v] = key
+		reversed[v] = k
 	}
 
 	return cspec, nil
@@ -333,14 +338,14 @@ type MiddlewareSpec struct {
 	// The middleware package name.
 	Name string
 	// Middleware specific configuration options.
-	Options map[string]interface{}
+	Options map[interface{}]interface{}
 	// Options pretty printed for template initialization
 	PrettyOptions map[string]string
 	// Module Dependencies,  clients etc.
 	Dependencies *Dependencies
 	// Go Import Path for MiddlewareHandle implementation
 	ImportPath string
-	// Location of JSON Schema file for the configured endpoint options
+	// Location of yaml Schema file for the configured endpoint options
 	OptionsSchemaFile string
 }
 
@@ -366,8 +371,8 @@ type TypedHeader struct {
 type EndpointSpec struct {
 	// ModuleSpec holds the thrift module info
 	ModuleSpec *ModuleSpec
-	// JSONFile for this endpoint spec
-	JSONFile string
+	// YAMLFile for this endpoint spec
+	YAMLFile string
 	// GoStructsFileName is where structs are generated
 	GoStructsFileName string
 	// GoFolderName is the folder where all the endpoints
@@ -419,58 +424,58 @@ type EndpointSpec struct {
 	ClientSpec *ClientSpec
 }
 
-func ensureFields(config map[string]interface{}, mandatoryFields []string, jsonFile string) error {
+func ensureFields(config map[interface{}]interface{}, mandatoryFields []string, yamlFile string) error {
 	for i := 0; i < len(mandatoryFields); i++ {
 		fieldName := mandatoryFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return errors.Errorf(
-				"config %q must have %q field", jsonFile, fieldName,
+				"config %q must have %q field", yamlFile, fieldName,
 			)
 		}
 	}
 	return nil
 }
 
-// NewEndpointSpec creates an endpoint spec from a json file.
+// NewEndpointSpec creates an endpoint spec from a yaml file.
 func NewEndpointSpec(
-	jsonFile string,
+	yamlFile string,
 	h *PackageHelper,
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
-	_, err := os.Stat(jsonFile)
+	_, err := os.Stat(yamlFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Could not find file %s: ", jsonFile)
+		return nil, errors.Wrapf(err, "Could not find file %s: ", yamlFile)
 	}
 
-	bytes, err := ioutil.ReadFile(jsonFile)
+	bytes, err := ioutil.ReadFile(yamlFile)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not read json file %s: ", jsonFile,
+			err, "Could not read yaml file %s: ", yamlFile,
 		)
 	}
 
-	endpointConfigObj := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &endpointConfigObj)
+	endpointConfigObj := map[interface{}]interface{}{}
+	err = yaml.Unmarshal(bytes, &endpointConfigObj)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Could not parse json file: %s", jsonFile,
+			err, "Could not parse yaml file: %s", yamlFile,
 		)
 	}
 
-	if err := ensureFields(endpointConfigObj, mandatoryEndpointFields, jsonFile); err != nil {
+	if err := ensureFields(endpointConfigObj, mandatoryEndpointFields, yamlFile); err != nil {
 		return nil, err
 	}
 
 	endpointType := endpointConfigObj["endpointType"]
 	if endpointType == "http" {
-		if err := ensureFields(endpointConfigObj, mandatoryHTTPEndpointFields, jsonFile); err != nil {
+		if err := ensureFields(endpointConfigObj, mandatoryHTTPEndpointFields, yamlFile); err != nil {
 			return nil, err
 		}
 
 	}
 	if endpointType != "http" && endpointType != "tchannel" {
 		return nil, errors.Errorf(
-			"Cannot support unknown endpointType for endpoint: %s", jsonFile,
+			"Cannot support unknown endpointType for endpoint: %s", yamlFile,
 		)
 	}
 
@@ -494,7 +499,7 @@ func NewEndpointSpec(
 		iclientID, ok := endpointConfigObj["clientId"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config %q must have clientName field", jsonFile,
+				"endpoint config %q must have clientName field", yamlFile,
 			)
 		}
 		clientID = iclientID.(string)
@@ -502,7 +507,7 @@ func NewEndpointSpec(
 		iclientMethod, ok := endpointConfigObj["clientMethod"]
 		if !ok {
 			return nil, errors.Errorf(
-				"endpoint config %q must have clientMethod field", jsonFile,
+				"endpoint config %q must have clientMethod field", yamlFile,
 			)
 		}
 		clientMethod = iclientMethod.(string)
@@ -511,20 +516,20 @@ func NewEndpointSpec(
 		if !ok {
 			return nil, errors.Errorf(
 				"endpoint config %q must have workflowImportPath field",
-				jsonFile,
+				yamlFile,
 			)
 		}
 		workflowImportPath = iworkflowImportPath.(string)
 	} else {
 		return nil, errors.Errorf(
 			"Invalid workflowType %q for endpoint %q",
-			workflowType, jsonFile,
+			workflowType, yamlFile,
 		)
 	}
 
-	dirName, err := filepath.Rel(h.ConfigRoot(), filepath.Dir(jsonFile))
+	dirName, err := filepath.Rel(h.ConfigRoot(), filepath.Dir(yamlFile))
 	if err != nil {
-		return nil, errors.Errorf("Config file is out of config root: %s", jsonFile)
+		return nil, errors.Errorf("Config file is out of config root: %s", yamlFile)
 	}
 
 	goFolderName := filepath.Join(h.CodeGenTargetPath(), dirName)
@@ -541,14 +546,14 @@ func NewEndpointSpec(
 	parts := strings.Split(thriftInfo, "::")
 	if len(parts) != 2 {
 		return nil, errors.Errorf(
-			"Cannot read thriftMethodName %q for endpoint json file: %s",
-			thriftInfo, jsonFile,
+			"Cannot read thriftMethodName %q for endpoint yaml file: %s",
+			thriftInfo, yamlFile,
 		)
 	}
 
 	espec := &EndpointSpec{
 		ModuleSpec:         mspec,
-		JSONFile:           jsonFile,
+		YAMLFile:           yamlFile,
 		GoStructsFileName:  goStructsFileName,
 		GoFolderName:       goFolderName,
 		GoPackageName:      goPackageName,
@@ -567,21 +572,21 @@ func NewEndpointSpec(
 	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs)
 }
 
-func testFixtures(endpointConfigObj map[string]interface{}) (map[string]*EndpointTestFixture, error) {
+func testFixtures(endpointConfigObj map[interface{}]interface{}) (map[string]*EndpointTestFixture, error) {
 	field, ok := endpointConfigObj["testFixtures"]
 	if !ok {
 		return nil, errors.Errorf("missing testFixtures field")
 	}
-	testFixturesRaw, err := json.Marshal(field)
+	testFixturesRaw, err := yaml.Marshal(field)
 	if err != nil {
 		return nil, err
 	}
 	var ret map[string]*EndpointTestFixture
-	err = json.Unmarshal(testFixturesRaw, &ret)
+	err = yaml.Unmarshal(testFixturesRaw, &ret)
 	return ret, err
 }
 
-func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (map[string]string, error) {
+func loadHeadersFromConfig(endpointCfgObj map[interface{}]interface{}, key string) (map[string]string, error) {
 	// TODO define endpointConfigObj to avoid type assertion
 
 	headers, ok := endpointCfgObj[key]
@@ -589,10 +594,10 @@ func loadHeadersFromConfig(endpointCfgObj map[string]interface{}, key string) (m
 		return nil, errors.Errorf("unable to parse %q", key)
 	}
 	headersMap := make(map[string]string)
-	for key, val := range headers.(map[string]interface{}) {
+	for key, val := range headers.(map[interface{}]interface{}) {
 		switch value := val.(type) {
 		case string:
-			headersMap[textproto.CanonicalMIMEHeaderKey(key)] = value
+			headersMap[textproto.CanonicalMIMEHeaderKey(key.(string))] = value
 		default:
 			return nil, errors.Errorf(
 				"unable to parse string %q in headers %q", value, headers)
@@ -616,7 +621,7 @@ func sortedHeaders(headerMap map[string]*TypedHeader, filterRequired bool) []str
 
 func resolveHeaders(
 	espec *EndpointSpec,
-	endpointConfigObj map[string]interface{},
+	endpointConfigObj map[interface{}]interface{},
 	key string,
 ) error {
 	var (
@@ -744,7 +749,7 @@ func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHea
 
 func augmentEndpointSpec(
 	espec *EndpointSpec,
-	endpointConfigObj map[string]interface{},
+	endpointConfigObj map[interface{}]interface{},
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
 	if _, ok := endpointConfigObj["middlewares"]; ok {
@@ -756,7 +761,7 @@ func augmentEndpointSpec(
 		}
 		var middlewares []MiddlewareSpec
 		for _, middleware := range endpointMids {
-			middlewareObj, ok := middleware.(map[string]interface{})
+			middlewareObj, ok := middleware.(map[interface{}]interface{})
 			if !ok {
 				return nil, errors.Errorf(
 					"Unable to parse middleware %s",
@@ -804,13 +809,14 @@ func augmentEndpointSpec(
 			}
 			// TODO(sindelar): Validate Options against middleware spec and support
 			// nested typed objects.
-			opts, ok := middlewareObj["options"].(map[string]interface{})
+			opts, ok := middlewareObj["options"].(map[interface{}]interface{})
 			if !ok {
-				opts = make(map[string]interface{})
+				opts = make(map[interface{}]interface{})
 			}
 
 			prettyOpts := map[string]string{}
-			for key, value := range opts {
+			for k, value := range opts {
+				key := k.(string)
 				rValue := reflect.ValueOf(value)
 				kind := rValue.Kind()
 
@@ -871,9 +877,9 @@ func augmentEndpointSpec(
 	return espec, nil
 }
 
-func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
+func setPropagateMiddleware(middlewareObj map[interface{}]interface{}) (map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
-	opts, ok := middlewareObj["options"].(map[string]interface{})
+	opts, ok := middlewareObj["options"].(map[interface{}]interface{})
 	if !ok {
 		return nil, errors.New(
 			"missing or invalid options for propagate middleware",
@@ -882,7 +888,7 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 	propagates := opts["propagate"].([]interface{})
 	dest := make(map[string]string)
 	for _, propagate := range propagates {
-		propagateMap := propagate.(map[string]interface{})
+		propagateMap := propagate.(map[interface{}]interface{})
 		fromField, ok := propagateMap["from"].(string)
 		if !ok {
 			return nil, errors.New(
@@ -909,9 +915,9 @@ func setPropagateMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 	return fieldMap, nil
 }
 
-func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]FieldMapperEntry, error) {
+func setTransformMiddleware(middlewareObj map[interface{}]interface{}) (map[string]FieldMapperEntry, error) {
 	fieldMap := make(map[string]FieldMapperEntry)
-	opts, ok := middlewareObj["options"].(map[string]interface{})
+	opts, ok := middlewareObj["options"].(map[interface{}]interface{})
 	if !ok {
 		return nil, errors.Errorf(
 			"transform middleware found with no options.",
@@ -919,7 +925,7 @@ func setTransformMiddleware(middlewareObj map[string]interface{}) (map[string]Fi
 	}
 	transforms := opts["transforms"].([]interface{})
 	for _, transform := range transforms {
-		transformMap := transform.(map[string]interface{})
+		transformMap := transform.(map[interface{}]interface{})
 		fromField, ok := transformMap["from"].(string)
 		if !ok {
 			return nil, errors.New(
@@ -971,7 +977,7 @@ func (e *EndpointSpec) TargetEndpointTestPath(
 
 // EndpointTestConfigPath generates a filepath for each endpoint test config
 func (e *EndpointSpec) EndpointTestConfigPath() string {
-	return strings.TrimSuffix(e.JSONFile, filepath.Ext(e.JSONFile)) + "_test.json"
+	return strings.TrimSuffix(e.YAMLFile, filepath.Ext(e.YAMLFile)) + "_test.json"
 }
 
 // SetDownstream configures the downstream client for this endpoint spec
@@ -993,9 +999,9 @@ func (e *EndpointSpec) SetDownstream(
 
 	if clientSpec == nil {
 		return errors.Errorf(
-			"When parsing endpoint json %q, "+
+			"When parsing endpoint yaml %q, "+
 				"could not find client %q in gateway",
-			e.JSONFile, e.ClientID,
+			e.YAMLFile, e.ClientID,
 		)
 	}
 
@@ -1007,47 +1013,47 @@ func (e *EndpointSpec) SetDownstream(
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
 type EndpointClassConfig struct {
-	Name   string `json:"name"`
-	Type   string `json:"type"`
+	Name   string `yaml:"name" json:"name"`
+	Type   string `yaml:"type" json:"type"`
 	Config struct {
-		Ratelimit int32    `json:"rateLimit"`
-		Endpoints []string `json:"endpoints"`
-	} `json:"config"`
-	Dependencies map[string][]string `json:"dependencies"`
+		Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
+		Endpoints []string `yaml:"endpoints" json:"endpoints"`
+	} `yaml:"config" json:"config"`
+	Dependencies map[string][]string `yaml:"dependencies" json:"dependencies"`
 }
 
-func parseEndpointJsons(
-	endpointGroupJsons []string,
+func parseEndpointYamls(
+	endpointGroupYamls []string,
 ) ([]string, error) {
-	endpointJsons := []string{}
+	endpointYamls := []string{}
 
-	for _, endpointGroupJSON := range endpointGroupJsons {
-		bytes, err := ioutil.ReadFile(endpointGroupJSON)
+	for _, endpointGroupYAML := range endpointGroupYamls {
+		bytes, err := ioutil.ReadFile(endpointGroupYAML)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot read endpoint group json: %s",
-				endpointGroupJSON,
+				err, "Cannot read endpoint group yaml: %s",
+				endpointGroupYAML,
 			)
 		}
 
 		var endpointConfig EndpointClassConfig
-		err = json.Unmarshal(bytes, &endpointConfig)
+		err = yaml.Unmarshal(bytes, &endpointConfig)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot parse json for endpoint group config: %s",
-				endpointGroupJSON,
+				err, "Cannot parse yaml for endpoint group config: %s",
+				endpointGroupYAML,
 			)
 		}
 
-		endpointConfigDir := filepath.Dir(endpointGroupJSON)
+		endpointConfigDir := filepath.Dir(endpointGroupYAML)
 		for _, fileName := range endpointConfig.Config.Endpoints {
-			endpointJsons = append(
-				endpointJsons, filepath.Join(endpointConfigDir, fileName),
+			endpointYamls = append(
+				endpointYamls, filepath.Join(endpointConfigDir, fileName),
 			)
 		}
 	}
 
-	return endpointJsons, nil
+	return endpointYamls, nil
 }
 
 func parseMiddlewareConfig(
@@ -1081,15 +1087,15 @@ func parseMiddlewareConfig(
 			continue
 		} else if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot read middleware config json: %s",
+				err, "Cannot read middleware config yaml: %s",
 				instanceConfig,
 			)
 		}
 		var mid MiddlewareConfig
-		err = json.Unmarshal(bytes, &mid)
+		err = yaml.Unmarshal(bytes, &mid)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot parse json for middleware config json: %s",
+				err, "Cannot parse yaml for middleware config yaml: %s",
 				instanceConfig,
 			)
 		}
