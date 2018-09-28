@@ -724,32 +724,37 @@ func (system *ModuleSystem) readInstance(
 	classConfigPath, yamlFileName, jsonFileName := getConfigFilePath(
 		classConfigDir, className)
 
-	yamlConfig := yamlClassConfig{}
-	raw, err := yamlConfig.Read(classConfigPath)
+	raw, readErr := ioutil.ReadFile(classConfigPath)
+	if readErr != nil {
+		return nil, errors.Wrapf(
+			readErr,
+			"Error reading ClassConfig %q",
+			classConfigPath,
+		)
+	}
 
 	jsonRaw := []byte{}
 	if jsonFileName != "" {
 		jsonRaw = raw
 	}
 
-	if err != nil {
-		// TODO: We should accumulate errors and list them all here
-		// Expected $class-config.yaml to exist in ...
+	config, configErr := NewClassConfig(raw)
+	if configErr != nil {
 		return nil, errors.Wrapf(
-			err,
-			"Error reading Config %q",
+			configErr,
+			"Error unmarshal ClassConfig %q",
 			classConfigPath,
 		)
 	}
 
-	dependencies := readDeps(yamlConfig.Dependencies)
+	dependencies := readDeps(config.Dependencies)
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
 		targetGenDir,
 		className,
 		instanceDirectory,
-		&yamlConfig,
+		config,
 		dependencies,
 	)
 
@@ -760,17 +765,17 @@ func (system *ModuleSystem) readInstance(
 			err,
 			"Error reading class package info for %q %q",
 			className,
-			yamlConfig.Name,
+			config.Name,
 		)
 	}
 
 	return &ModuleInstance{
 		PackageInfo:           packageInfo,
 		ClassName:             className,
-		ClassType:             yamlConfig.Type,
+		ClassType:             config.Type,
 		BaseDirectory:         baseDirectory,
 		Directory:             instanceDirectory,
-		InstanceName:          yamlConfig.Name,
+		InstanceName:          config.Name,
 		Dependencies:          dependencies,
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
@@ -779,7 +784,7 @@ func (system *ModuleSystem) readInstance(
 		YAMLFileName:          yamlFileName,
 		JSONFileRaw:           jsonRaw,
 		YAMLFileRaw:           raw,
-		Config:                yamlConfig.Config,
+		Config:                config.Config,
 	}, nil
 }
 
@@ -812,11 +817,11 @@ func readPackageInfo(
 	targetGenDir string,
 	className string,
 	instanceDirectory string,
-	yamlConfig *yamlClassConfig,
+	config *ClassConfig,
 	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(CamelCase(className))
-	qualifiedInstanceName := strings.Title(CamelCase(yamlConfig.Name))
+	qualifiedInstanceName := strings.Title(CamelCase(config.Name))
 	defaultAlias := packageName(qualifiedInstanceName + qualifiedClassName)
 
 	relativeGeneratedPath, err := filepath.Rel(baseDirectory, targetGenDir)
@@ -832,16 +837,16 @@ func readPackageInfo(
 	// type. We should really extrapolate from the class type info what the
 	// default export type is for this instance
 	var isExportGenerated bool
-	if yamlConfig.Type == "custom" {
-		if yamlConfig.IsExportGenerated == nil {
+	if config.Type == "custom" {
+		if config.IsExportGenerated == nil {
 			isExportGenerated = false
 		} else {
-			isExportGenerated = *yamlConfig.IsExportGenerated
+			isExportGenerated = *config.IsExportGenerated
 		}
-	} else if yamlConfig.IsExportGenerated == nil {
+	} else if config.IsExportGenerated == nil {
 		isExportGenerated = true
 	} else {
-		isExportGenerated = *yamlConfig.IsExportGenerated
+		isExportGenerated = *config.IsExportGenerated
 	}
 
 	return &PackageInfo{
@@ -1370,8 +1375,8 @@ type ModuleDependency struct {
 	InstanceName string
 }
 
-// yamlClassConfig maps onto a YAML configuration for a class type
-type yamlClassConfig struct {
+// ClassConfig maps onto a YAML configuration for a class type
+type ClassConfig struct {
 	// Name is the class instance name used to identify the module as a
 	// dependency. The combination of the class Name and this instance name
 	// is unique.
@@ -1389,49 +1394,36 @@ type yamlClassConfig struct {
 	IsExportGenerated *bool `yaml:"IsExportGenerated" json:"IsExportGenerated"`
 }
 
-// Read will read a class configuration yaml file into a yamlClassConfig struct
+// NewClassConfig unmarshals raw bytes into a ClassConfig struct
 // or return an error if it cannot be unmarshaled into the struct
-func (yamlConfig *yamlClassConfig) Read(
-	classConfigPath string,
-) ([]byte, error) {
-	configFile, readErr := ioutil.ReadFile(classConfigPath)
-	if readErr != nil {
-		return nil, errors.Wrapf(
-			readErr,
-			"Error reading class config %q",
-			classConfigPath,
-		)
-	}
-
-	parseErr := yaml.Unmarshal(configFile, &yamlConfig)
+func NewClassConfig(raw []byte) (*ClassConfig, error) {
+	config := &ClassConfig{}
+	parseErr := yaml.Unmarshal(raw, config)
 
 	if parseErr != nil {
 		return nil, errors.Wrapf(
 			parseErr,
-			"Error yaml parsing clss config %q",
-			configFile,
+			"Error yaml parsing config",
 		)
 	}
 
-	if yamlConfig.Name == "" {
+	if config.Name == "" {
 		return nil, errors.Errorf(
-			"Error reading instance name from %q",
-			classConfigPath,
+			"Error reading instance name",
 		)
 	}
 
-	if yamlConfig.Type == "" {
+	if config.Type == "" {
 		return nil, errors.Errorf(
-			"Error reading instance type from %q",
-			classConfigPath,
+			"Error reading instance type",
 		)
 	}
 
-	if yamlConfig.Dependencies == nil {
-		yamlConfig.Dependencies = map[string][]string{}
+	if config.Dependencies == nil {
+		config.Dependencies = map[string][]string{}
 	}
 
-	return configFile, nil
+	return config, nil
 }
 
 // writeFile is like ioutil.WriteFile with a mkdirp step
