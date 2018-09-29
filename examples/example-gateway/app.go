@@ -33,17 +33,20 @@ var App = &zanzibar.App{
 	GetContextScopeExtractors: getContextScopeExtractors,
 }
 
-func getContextScopeExtractors() map[string]zanzibar.ContextScopeExtractor {
-	extractors := map[string]zanzibar.ContextScopeExtractor{}
-	extractors[zanzibar.EndpointScope] = func(ctx context.Context) map[string]string {
-		tags := map[string]string{}
-		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
-		tags["regionname"] = headers["regionname"]
-		tags["device"] = headers["device"]
-		tags["deviceversion"] = headers["deviceversion"]
-
-		return tags
+func getContextScopeExtractors() []zanzibar.ContextScopeExtractor {
+	extractors := []zanzibar.ContextScopeExtractor{
+		getEndpointTags,
 	}
 
 	return extractors
+}
+
+func getEndpointTags(ctx context.Context) map[string]string {
+	tags := map[string]string{}
+	headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+	tags["regionname"] = headers["regionname"]
+	tags["device"] = headers["device"]
+	tags["deviceversion"] = headers["deviceversion"]
+
+	return tags
 }

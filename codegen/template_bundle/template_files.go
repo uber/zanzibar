@@ -1270,8 +1270,11 @@ func getConfig() *zanzibar.StaticConfig {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
-	
-	gateway, _, err := service.CreateGateway(config, nil)
+	opts := &zanzibar.Options{
+		ScopeExtractors: app.App.GetContextScopeExtractors(),
+	}
+
+	gateway, _, err := service.CreateGateway(config, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -1306,13 +1309,8 @@ func readFlags() {
 	flag.Parse()
 }
 
-func readContextExtractors() {
-	zanzibar.ContextScopeExtractors = app.App.GetContextScopeExtractors()
-}
-
 func main() {
 	readFlags()
-	readContextExtractors()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
@@ -1337,7 +1335,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1913, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1870, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

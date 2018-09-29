@@ -68,9 +68,6 @@ const (
 	ClientScope = "client"
 )
 
-// ContextScopeExtractors defines the mapping between scope namespace and context scope extractors
-var ContextScopeExtractors = map[string]ContextScopeExtractor{}
-
 // WithEndpointField adds the endpoint information in the
 // request context.
 func WithEndpointField(ctx context.Context, endpoint string) context.Context {
@@ -99,7 +96,7 @@ func WithEndpointRequestHeadersField(ctx context.Context, requestHeaders map[str
 
 // GetEndpointRequestHeadersFromCtx returns the endpoint request headers, if it exists on context
 func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
-	requestHeaders := map[string]string{}
+	requestHeaders := make(map[string]string)
 	if val := ctx.Value(endpointRequestHeader); val != nil {
 		headers, _ := val.(map[string]string)
 		for k, v := range headers {
@@ -151,14 +148,6 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
-// WithScopeField returns a new context with the given scope fields attached to context.Context
-func WithScopeField(ctx context.Context, key string, value string) context.Context {
-	fields := GetScopeFieldsFromCtx(ctx)
-	fields[key] = value
-
-	return context.WithValue(ctx, requestScopeFields, fields)
-}
-
 // WithScopeFields returns a new context with the given scope fields attached to context.Context
 func WithScopeFields(ctx context.Context, newFields map[string]string) context.Context {
 	fields := GetScopeFieldsFromCtx(ctx)
@@ -171,7 +160,7 @@ func WithScopeFields(ctx context.Context, newFields map[string]string) context.C
 
 // GetScopeFieldsFromCtx returns the tag info extracted from context.
 func GetScopeFieldsFromCtx(ctx context.Context) map[string]string {
-	fields := map[string]string{}
+	fields := make(map[string]string)
 	if val := ctx.Value(requestScopeFields); val != nil {
 		headers, _ := val.(map[string]string)
 		for k, v := range headers {
@@ -203,21 +192,22 @@ func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field
 
 // ContextExtractor is a extractor that extracts some log fields from the context
 type ContextExtractor interface {
-	ExtractScope(ctx context.Context, key string) map[string]string
+	ExtractScope(ctx context.Context) map[string]string
 }
 
 // NewContextExtractor returns a extractor that extracts log fields a context.
-func NewContextExtractor() ContextExtractor {
-	return &contextExtractor{}
+func NewContextExtractor(scopeExtractors []ContextScopeExtractor) ContextExtractor {
+	return &contextExtractor{scopeExtractors}
 }
 
 type contextExtractor struct {
+	contextScopeExtractors []ContextScopeExtractor
 }
 
 // ExtractScope extracts scope fields from a context into a tag.
-func (c *contextExtractor) ExtractScope(ctx context.Context, key string) map[string]string {
-	tags := map[string]string{}
-	if fn, ok := ContextScopeExtractors[key]; ok {
+func (c *contextExtractor) ExtractScope(ctx context.Context) map[string]string {
+	tags := make(map[string]string)
+	for _, fn := range c.contextScopeExtractors {
 		sc := fn(ctx)
 		for k, v := range sc {
 			tags[k] = v

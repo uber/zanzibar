@@ -22,5 +22,5 @@ package zanzibar
 
 // App defines the customer func and etc...
 type App struct {
-	GetContextScopeExtractors func() map[string]ContextScopeExtractor
+	GetContextScopeExtractors func() []ContextScopeExtractor
 }

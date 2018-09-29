@@ -61,8 +61,9 @@ var defaultCloseTimeout = 10000 * time.Millisecond
 
 // Options configures the gateway
 type Options struct {
-	MetricsBackend tally.CachedStatsReporter
-	LogWriter      zapcore.WriteSyncer
+	MetricsBackend  tally.CachedStatsReporter
+	LogWriter       zapcore.WriteSyncer
+	ScopeExtractors []ContextScopeExtractor
 }
 
 // Gateway type
@@ -126,22 +127,26 @@ func CreateGateway(
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
+	var scopeExtractors []ContextScopeExtractor
 	if opts != nil && opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
 	}
 	if opts != nil && opts.LogWriter != nil {
 		logWriter = opts.LogWriter
 	}
+	if opts != nil && opts.ScopeExtractors != nil {
+		scopeExtractors = opts.ScopeExtractors
+	}
 
 	gateway := &Gateway{
-		HTTPPort:     int32(config.MustGetInt("http.port")),
-		TChannelPort: int32(config.MustGetInt("tchannel.port")),
-		ServiceName:  config.MustGetString("serviceName"),
-		WaitGroup:    &sync.WaitGroup{},
-		Config:       config,
-
-		logWriter:      logWriter,
-		metricsBackend: metricsBackend,
+		HTTPPort:         int32(config.MustGetInt("http.port")),
+		TChannelPort:     int32(config.MustGetInt("tchannel.port")),
+		ServiceName:      config.MustGetString("serviceName"),
+		WaitGroup:        &sync.WaitGroup{},
+		Config:           config,
+		ContextExtractor: NewContextExtractor(scopeExtractors),
+		logWriter:        logWriter,
+		metricsBackend:   metricsBackend,
 	}
 
 	gateway.setupConfig(config)
@@ -557,7 +562,6 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	)
 
 	gateway.ContextLogger = NewContextLogger(gateway.Logger)
-	gateway.ContextExtractor = NewContextExtractor()
 	return nil
 }
 

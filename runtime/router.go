@@ -101,8 +101,9 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldHandlerID, endpoint.HandlerName),
 	)
-	ctx = WithScopeField(ctx, scopeFieldEndpointID, endpoint.EndpointName)
-	ctx = WithScopeField(ctx, scopeFieldHandlerID, endpoint.HandlerName)
+
+	scopeFields := map[string]string{scopeFieldEndpointID: endpoint.EndpointName, scopeFieldHandlerID: endpoint.HandlerName}
+	ctx = WithScopeFields(ctx, scopeFields)
 	headers := map[string]string{}
 	for k, v := range r.Header {
 		headers[k] = v[0]

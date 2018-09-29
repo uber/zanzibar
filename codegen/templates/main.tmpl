@@ -43,8 +43,11 @@ func getConfig() *zanzibar.StaticConfig {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
-	
-	gateway, _, err := service.CreateGateway(config, nil)
+	opts := &zanzibar.Options{
+		ScopeExtractors: app.App.GetContextScopeExtractors(),
+	}
+
+	gateway, _, err := service.CreateGateway(config, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -79,13 +82,8 @@ func readFlags() {
 	flag.Parse()
 }
 
-func readContextExtractors() {
-	zanzibar.ContextScopeExtractors = app.App.GetContextScopeExtractors()
-}
-
 func main() {
 	readFlags()
-	readContextExtractors()
 	server, err := createGateway()
 	if err != nil {
 		panic(err)
