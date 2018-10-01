@@ -1,0 +1,12 @@
+endpointId: bazTChannel
+endpointType: tchannel
+handleId: call
+middlewares:
+- name: example_tchannel
+  options:
+    Foo: test
+thriftFile: endpoints/tchannel/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::Call
+workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz
+workflowType: custom

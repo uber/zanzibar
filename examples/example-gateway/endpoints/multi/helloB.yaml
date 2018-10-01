@@ -1,0 +1,13 @@
+clientId: multi
+clientMethod: HelloB
+endpointId: multi
+endpointType: http
+handleId: helloB
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/multi/multi.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: ServiceBFront::hello
+workflowType: httpClient

@@ -35,9 +35,9 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"description": "Name of the method config json file",
+						"description": "Name of the method config yaml(json) file",
 						"examples": [
-							"hello.json"
+							"hello.yaml"
 						]
 					}
 				}

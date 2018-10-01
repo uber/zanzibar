@@ -1,0 +1,8 @@
+config:
+  headers:
+    x-service-name: example
+dependencies:
+  client:
+  - example-c
+name: example-a
+type: http

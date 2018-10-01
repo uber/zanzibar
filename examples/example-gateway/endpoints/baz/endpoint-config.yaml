@@ -1,0 +1,18 @@
+config:
+  endpoints:
+  - call.yaml
+  - compare.yaml
+  - ping.yaml
+  - silly_noop.yaml
+  - trans.yaml
+  - trans-headers.yaml
+  - trans-headers-type.yaml
+  - trans-headers-no-req.yaml
+  - header-schema.yaml
+  - get-profile.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - baz
+name: baz
+type: http

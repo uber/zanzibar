@@ -1,0 +1,13 @@
+clientId: baz
+clientMethod: HeaderSchema
+endpointId: baz
+endpointType: http
+handleId: headerSchema
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::headerSchema
+workflowType: tchannelClient

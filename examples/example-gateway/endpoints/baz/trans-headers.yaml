@@ -1,0 +1,97 @@
+clientId: baz
+clientMethod: TransHeaders
+endpointId: baz
+endpointType: http
+handleId: transHeaders
+middlewares:
+- name: headersPropagate
+  options:
+    propagate:
+    - from: x-uuid
+      to: Req.W1.N1.UUID
+    - from: x-uuid
+      to: Req.W1.N2.UUID
+    - from: x-uuid
+      to: Req.W2.N1.UUID
+    - from: x-uuid
+      to: Req.W2.N2.UUID
+    - from: x-token
+      to: Req.W1.N1.Token
+    - from: x-token
+      to: Req.W1.N2.Token
+    - from: x-token
+      to: Req.W2.N1.Token
+    - from: x-token
+      to: Req.W2.N2.Token
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::call:
+        clientId: baz
+        clientMethod: transHeaders
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            req:
+              w1:
+                n1:
+                  token: token
+                  uuid: uuid
+                n2:
+                  token: token
+                  uuid: uuid
+              w2:
+                n1:
+                  token: token
+                  uuid: uuid
+                n2:
+                  token: token
+                  uuid: uuid
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            w1:
+              n1:
+                token: token
+                uuid: uuid
+              n2:
+                token: token
+                uuid: uuid
+            w2:
+              n1:
+                token: token
+                uuid: uuid
+              n2:
+                token: token
+                uuid: uuid
+    endpointId: baz
+    endpointReqHeaders:
+      x-token: token
+      x-uuid: uuid
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            req: {}
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson: {}
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: transHeaders
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::transHeaders
+workflowType: tchannelClient

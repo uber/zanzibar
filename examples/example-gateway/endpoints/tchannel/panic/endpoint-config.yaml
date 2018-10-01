@@ -1,0 +1,9 @@
+config:
+  endpoints:
+  - call.json
+  rateLimit: 100
+dependencies:
+  client:
+  - baz
+name: panicTChannel
+type: tchannel

@@ -1,0 +1,40 @@
+clientId: baz
+clientMethod: DeliberateDiffNoop
+endpointId: baz
+endpointType: http
+handleId: sillyNoop
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::DeliberateDiffNoop:
+        clientId: baz
+        clientMethod: DeliberateDiffNoop
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest: {}
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse: {}
+    endpointId: baz
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        method: GET
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: sillyNoop
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::sillyNoop
+workflowType: tchannelClient

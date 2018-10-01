@@ -1,0 +1,8 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/example
+  schema: ./middlewares/example/example_schema.json
+dependencies:
+  client:
+  - baz
+name: example
+type: http

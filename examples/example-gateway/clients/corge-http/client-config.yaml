@@ -1,0 +1,8 @@
+config:
+  exposedMethods:
+    EchoString: Corge::echoString
+  sidecarRouter: default
+  thriftFile: clients/corge/corge.thrift
+  thriftFileSha: '{{placeholder}}'
+name: corge-http
+type: http

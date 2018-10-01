@@ -1,0 +1,22 @@
+config:
+  endpoints:
+  - arg_not_struct.yaml
+  - arg_with_headers.yaml
+  - arg_with_query_params.yaml
+  - arg_with_nested_query_params.yaml
+  - arg_with_query_header.yaml
+  - arg_with_params.yaml
+  - arg_with_many_query_params.yaml
+  - missing_arg.yaml
+  - no_request.yaml
+  - normal.yaml
+  - too_many_args.yaml
+  - hello.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - bar
+  middleware:
+  - example
+name: bar
+type: http

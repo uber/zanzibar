@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/codegen
+  schema: ./middlewares/headers-propagate/headers_propagate_schema.json
+dependencies: {}
+name: headers_propagate
+type: default

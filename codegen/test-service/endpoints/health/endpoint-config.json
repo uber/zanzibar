@@ -1,6 +1,4 @@
 {
-	"name": "health",
-	"type": "http",
 	"config": {
 		"rateLimit": 100
 	},
@@ -8,5 +6,7 @@
 		"client": [
 			"example"
 		]
-	}
+	},
+	"name": "health",
+	"type": "http"
 }

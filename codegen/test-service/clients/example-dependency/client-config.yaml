@@ -1,0 +1,6 @@
+config:
+  headers:
+    x-service-name: example
+dependencies: {}
+name: example-dependency
+type: tchannel

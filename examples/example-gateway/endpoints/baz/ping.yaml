@@ -1,0 +1,45 @@
+clientId: baz
+clientMethod: Ping
+endpointId: baz
+endpointType: http
+handleId: ping
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::ping:
+        clientId: baz
+        clientMethod: ping
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest: {}
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            message: pong
+    endpointId: baz
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        method: GET
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson:
+            message: pong
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: ping
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::ping
+workflowType: tchannelClient

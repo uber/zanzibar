@@ -1,0 +1,10 @@
+config:
+  endpoints:
+  - ./helloA.yaml
+  - ./helloB.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - multi
+name: multi
+type: http
