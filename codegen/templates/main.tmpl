@@ -44,7 +44,7 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 	opts := &zanzibar.Options{
-		ScopeExtractors: app.App.GetContextScopeExtractors(),
+		GetContextScopeExtractors: app.AppOptions.GetContextScopeExtractors,
 	}
 
 	gateway, _, err := service.CreateGateway(config, opts)

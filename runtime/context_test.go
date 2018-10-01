@@ -193,13 +193,18 @@ func TestContextLoggerPanic(t *testing.T) {
 func TestExtractScope(t *testing.T) {
 	headers := map[string]string{"x-uber-region-id": "san_francisco"}
 	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
-	contextScopeExtractors := []ContextScopeExtractor{func(ctx context.Context) map[string]string {
+	contextScopeExtractors := []ContextScopeTagsExtractor{func(ctx context.Context) map[string]string {
 		headers := GetEndpointRequestHeadersFromCtx(ctx)
 		return map[string]string{"region-id": headers["x-uber-region-id"]}
 	}}
 
 	expected := map[string]string{"region-id": "san_francisco"}
-	contextExtractor := NewContextExtractor(contextScopeExtractors)
-	tags := contextExtractor.ExtractScope(ctx)
+	contextExtractors := &ContextExtractors{}
+	for _, scopeExtractor := range contextScopeExtractors {
+		contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+	}
+
+	contextExtractor := contextExtractors.MakeContextExtractor()
+	tags := contextExtractor.ExtractScopeTags(ctx)
 	assert.Equal(t, tags, expected)
 }

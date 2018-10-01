@@ -30,8 +30,8 @@ import (
 
 type contextFieldKey string
 
-// ContextScopeExtractor defines func where extracts tags from context
-type ContextScopeExtractor func(context.Context) map[string]string
+// ContextScopeTagsExtractor defines func where extracts tags from context
+type ContextScopeTagsExtractor func(context.Context) map[string]string
 
 const (
 	endpointKey           = contextFieldKey("endpoint")
@@ -192,20 +192,28 @@ func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field
 
 // ContextExtractor is a extractor that extracts some log fields from the context
 type ContextExtractor interface {
-	ExtractScope(ctx context.Context) map[string]string
+	ExtractScopeTags(ctx context.Context) map[string]string
 }
 
-// NewContextExtractor returns a extractor that extracts log fields a context.
-func NewContextExtractor(scopeExtractors []ContextScopeExtractor) ContextExtractor {
-	return &contextExtractor{scopeExtractors}
+// AddContextScopeTagsExtractor added a scope tags extractor to contextExtractor.
+func (c *ContextExtractors) AddContextScopeTagsExtractor(extractors ...ContextScopeTagsExtractor) {
+	c.contextScopeExtractors = extractors
 }
 
-type contextExtractor struct {
-	contextScopeExtractors []ContextScopeExtractor
+// MakeContextExtractor returns a extractor that extracts log fields a context.
+func (c *ContextExtractors) MakeContextExtractor() ContextExtractor {
+	return &ContextExtractors{
+		contextScopeExtractors: c.contextScopeExtractors,
+	}
 }
 
-// ExtractScope extracts scope fields from a context into a tag.
-func (c *contextExtractor) ExtractScope(ctx context.Context) map[string]string {
+// ContextExtractors warps extractors for context
+type ContextExtractors struct {
+	contextScopeExtractors []ContextScopeTagsExtractor
+}
+
+// ExtractScopeTags extracts scope fields from a context into a tag.
+func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]string {
 	tags := make(map[string]string)
 	for _, fn := range c.contextScopeExtractors {
 		sc := fn(ctx)

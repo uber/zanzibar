@@ -28,13 +28,13 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// App defines the custom func
-var App = &zanzibar.App{
-	GetContextScopeExtractors: getContextScopeExtractors,
+// AppOptions defines the custom application func
+var AppOptions = &zanzibar.Options{
+	GetContextScopeExtractors: getContextScopeTagExtractors,
 }
 
-func getContextScopeExtractors() []zanzibar.ContextScopeExtractor {
-	extractors := []zanzibar.ContextScopeExtractor{
+func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {
+	extractors := []zanzibar.ContextScopeTagsExtractor{
 		getEndpointTags,
 	}
 

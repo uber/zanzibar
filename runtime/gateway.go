@@ -61,9 +61,9 @@ var defaultCloseTimeout = 10000 * time.Millisecond
 
 // Options configures the gateway
 type Options struct {
-	MetricsBackend  tally.CachedStatsReporter
-	LogWriter       zapcore.WriteSyncer
-	ScopeExtractors []ContextScopeExtractor
+	MetricsBackend            tally.CachedStatsReporter
+	LogWriter                 zapcore.WriteSyncer
+	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 }
 
 // Gateway type
@@ -127,15 +127,24 @@ func CreateGateway(
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
-	var scopeExtractors []ContextScopeExtractor
-	if opts != nil && opts.MetricsBackend != nil {
+	var scopeExtractors []ContextScopeTagsExtractor
+	if opts == nil {
+		opts = &Options{}
+	}
+	if opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
 	}
-	if opts != nil && opts.LogWriter != nil {
+	if opts.LogWriter != nil {
 		logWriter = opts.LogWriter
 	}
-	if opts != nil && opts.ScopeExtractors != nil {
-		scopeExtractors = opts.ScopeExtractors
+
+	contextExtractors := &ContextExtractors{}
+	if opts.GetContextScopeExtractors != nil {
+		scopeExtractors = opts.GetContextScopeExtractors()
+
+		for _, scopeExtractor := range scopeExtractors {
+			contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+		}
 	}
 
 	gateway := &Gateway{
@@ -144,7 +153,7 @@ func CreateGateway(
 		ServiceName:      config.MustGetString("serviceName"),
 		WaitGroup:        &sync.WaitGroup{},
 		Config:           config,
-		ContextExtractor: NewContextExtractor(scopeExtractors),
+		ContextExtractor: contextExtractors.MakeContextExtractor(),
 		logWriter:        logWriter,
 		metricsBackend:   metricsBackend,
 	}
