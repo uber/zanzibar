@@ -751,9 +751,9 @@ func (system *ModuleSystem) readInstance(
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
 		DependencyOrder:       []string{},
-		JSONFileName:          "",
+		JSONFileName:          yamlFileName,
 		YAMLFileName:          yamlFileName,
-		JSONFileRaw:           []byte{},
+		JSONFileRaw:           raw,
 		YAMLFileRaw:           raw,
 		Config:                yamlConfig.Config,
 	}, nil
