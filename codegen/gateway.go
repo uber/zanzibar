@@ -180,6 +180,13 @@ func (mid *MiddlewareConfig) Validate(configDirName string) error {
 	return nil
 }
 
+func getModuleConfigFileName(instance *ModuleInstance) string {
+	if instance.YAMLFileName != "" {
+		return instance.YAMLFileName
+	}
+	return instance.JSONFileName
+}
+
 // NewClientSpec creates a client spec from a yaml file.
 func NewClientSpec(
 	instance *ModuleInstance,
@@ -191,7 +198,7 @@ func NewClientSpec(
 		return nil, errors.Wrapf(
 			err,
 			"Could not parse class config yaml file: %s",
-			instance.YAMLFileName,
+			getModuleConfigFileName(instance),
 		)
 	}
 
@@ -205,7 +212,7 @@ func NewClientSpec(
 	default:
 		return nil, errors.Errorf(
 			"Cannot support unknown clientType for client %q",
-			instance.YAMLFileName,
+			getModuleConfigFileName(instance),
 		)
 	}
 }
@@ -238,7 +245,7 @@ func NewCustomClientSpec(
 		if _, ok := clientConfig.Config[f]; !ok {
 			return nil, errors.Errorf(
 				"client config %q must have %q field for type custom",
-				instance.YAMLFileName,
+				getModuleConfigFileName(instance),
 				f,
 			)
 		}
@@ -260,6 +267,57 @@ func NewCustomClientSpec(
 	return clientSpec, nil
 }
 
+func getExposedMethods(
+	clientConfig *ClientClassConfig) (map[string]string, error) {
+	rawMethods := clientConfig.Config["exposedMethods"]
+	exposedMethods, ok := rawMethods.(map[string]interface{})
+	if !ok {
+		// The key of unmarshaled dictionary can be interface{} for yaml.
+		// Convert map[interface{}]interface{} to map[string]interface{}, if we
+		// can.
+		methods, ok2 := rawMethods.(map[interface{}]interface{})
+		if !ok2 || len(methods) == 0 {
+			return nil, errors.Errorf(
+				"No methods are exposed in client config",
+			)
+		}
+		exposedMethods = make(map[string]interface{}, len(methods))
+		for k, v := range methods {
+			key, keyOK := k.(string)
+			if !keyOK {
+				return nil, errors.Errorf(
+					"key %v of the exposedMethods must be a string",
+					k,
+				)
+			}
+			exposedMethods[key] = v
+		}
+	}
+
+	result := make(map[string]string, len(exposedMethods))
+	reversed := make(map[string]string, len(exposedMethods))
+	for key, val := range exposedMethods {
+		v, valOK := val.(string)
+		if !valOK {
+			return nil, errors.Errorf(
+				"Value %v of the exposedMethods[%s] must be a string",
+				val,
+				key,
+			)
+		}
+		result[key] = v
+		if _, ok := reversed[v]; ok {
+			return nil, errors.Errorf(
+				"value %q of the exposedMethods is not unique",
+				v,
+			)
+		}
+		reversed[v] = key
+	}
+
+	return result, nil
+}
+
 func newClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -271,7 +329,9 @@ func newClientSpec(
 		fieldName := mandatoryClientFields[i]
 		if _, ok := config[fieldName]; !ok {
 			return nil, errors.Errorf(
-				"client config %q must have %q field", instance.YAMLFileName, fieldName,
+				"client config %q must have %q field",
+				getModuleConfigFileName(instance),
+				fieldName,
 			)
 		}
 	}
@@ -307,29 +367,16 @@ func newClientSpec(
 		cspec.SidecarRouter = sidecarRouter
 	}
 
-	exposedMethods, ok := clientConfig.Config["exposedMethods"].(map[interface{}]interface{})
-	if !ok || len(exposedMethods) == 0 {
-		return nil, errors.Errorf(
-			"No methods are exposed in client config: %s",
-			instance.YAMLFileName,
+	exposedMethods, getErr := getExposedMethods(clientConfig)
+	if err != nil {
+		return nil, errors.Wrapf(
+			getErr,
+			"Could not get exposed methods for %s: ",
+			getModuleConfigFileName(instance),
 		)
 	}
-	cspec.ExposedMethods = make(map[string]string, len(exposedMethods))
-	reversed := make(map[string]string, len(exposedMethods))
-	for key, val := range exposedMethods {
-		v := val.(string)
-		k := key.(string)
-		cspec.ExposedMethods[k] = v
-		if _, ok := reversed[v]; ok {
-			return nil, errors.Errorf(
-				"value %q of the exposedMethods is not unique: %s",
-				v,
-				instance.YAMLFileName,
-			)
-		}
-		reversed[v] = k
-	}
 
+	cspec.ExposedMethods = exposedMethods
 	return cspec, nil
 }
 
