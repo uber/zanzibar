@@ -61,8 +61,9 @@ var defaultCloseTimeout = 10000 * time.Millisecond
 
 // Options configures the gateway
 type Options struct {
-	MetricsBackend tally.CachedStatsReporter
-	LogWriter      zapcore.WriteSyncer
+	MetricsBackend            tally.CachedStatsReporter
+	LogWriter                 zapcore.WriteSyncer
+	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 }
 
 // Gateway type
@@ -76,6 +77,7 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	ContextLogger    ContextLogger
+	ContextExtractor ContextExtractor
 	RootScope        tally.Scope
 	AllHostScope     tally.Scope
 	PerHostScope     tally.Scope
@@ -125,22 +127,35 @@ func CreateGateway(
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
-	if opts != nil && opts.MetricsBackend != nil {
+	var scopeExtractors []ContextScopeTagsExtractor
+	if opts == nil {
+		opts = &Options{}
+	}
+	if opts.MetricsBackend != nil {
 		metricsBackend = opts.MetricsBackend
 	}
-	if opts != nil && opts.LogWriter != nil {
+	if opts.LogWriter != nil {
 		logWriter = opts.LogWriter
 	}
 
-	gateway := &Gateway{
-		HTTPPort:     int32(config.MustGetInt("http.port")),
-		TChannelPort: int32(config.MustGetInt("tchannel.port")),
-		ServiceName:  config.MustGetString("serviceName"),
-		WaitGroup:    &sync.WaitGroup{},
-		Config:       config,
+	contextExtractors := &ContextExtractors{}
+	if opts.GetContextScopeExtractors != nil {
+		scopeExtractors = opts.GetContextScopeExtractors()
 
-		logWriter:      logWriter,
-		metricsBackend: metricsBackend,
+		for _, scopeExtractor := range scopeExtractors {
+			contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+		}
+	}
+
+	gateway := &Gateway{
+		HTTPPort:         int32(config.MustGetInt("http.port")),
+		TChannelPort:     int32(config.MustGetInt("tchannel.port")),
+		ServiceName:      config.MustGetString("serviceName"),
+		WaitGroup:        &sync.WaitGroup{},
+		Config:           config,
+		ContextExtractor: contextExtractors.MakeContextExtractor(),
+		logWriter:        logWriter,
+		metricsBackend:   metricsBackend,
 	}
 
 	gateway.setupConfig(config)

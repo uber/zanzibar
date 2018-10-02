@@ -36,6 +36,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
+	app "github.com/uber/zanzibar/examples/example-gateway"
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )
 
@@ -61,7 +62,7 @@ func getConfig() *zanzibar.StaticConfig {
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
 
-	gateway, _, err := service.CreateGateway(config, nil)
+	gateway, _, err := service.CreateGateway(config, app.AppOptions)
 	if err != nil {
 		return nil, err
 	}

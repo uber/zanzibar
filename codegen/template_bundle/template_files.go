@@ -1244,6 +1244,7 @@ import (
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
+	app "{{$instance.PackageInfo.PackageRoot}}"
 	service "{{$instance.PackageInfo.GeneratedPackagePath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 )
@@ -1269,8 +1270,8 @@ func getConfig() *zanzibar.StaticConfig {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
-	
-	gateway, _, err := service.CreateGateway(config, nil)
+
+	gateway, _, err := service.CreateGateway(config, app.AppOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -1331,7 +1332,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1738, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1793, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

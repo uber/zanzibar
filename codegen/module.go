@@ -828,6 +828,7 @@ func readPackageInfo(
 		// uniqueness of the provided package aliases. Note that the default
 		// package is "PackageName".
 		PackageAlias:          defaultAlias + "static",
+		PackageRoot:           packageRoot,
 		GeneratedPackageAlias: defaultAlias + "generated",
 		ModulePackageAlias:    defaultAlias + "module",
 		PackagePath: path.Join(
@@ -1231,6 +1232,8 @@ type PackageInfo struct {
 	PackageName string
 	// PackageAlias is the unique import alias for non-generated packages
 	PackageAlias string
+	// PackageRoot is the unique import root for non-generated packages
+	PackageRoot string
 	// GeneratedPackageAlias is the unique import alias for generated packages
 	GeneratedPackageAlias string
 	// ModulePackageAlias is the unique import alias for the module system's,

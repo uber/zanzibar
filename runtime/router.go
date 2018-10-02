@@ -102,6 +102,14 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		zap.String(logFieldHandlerID, endpoint.HandlerName),
 	)
 
+	scopeFields := map[string]string{scopeFieldEndpointID: endpoint.EndpointName, scopeFieldHandlerID: endpoint.HandlerName}
+	ctx = WithScopeFields(ctx, scopeFields)
+	headers := map[string]string{}
+	for k, v := range r.Header {
+		headers[k] = v[0]
+	}
+
+	ctx = WithEndpointRequestHeadersField(ctx, headers)
 	r = r.WithContext(ctx)
 	req := NewServerHTTPRequest(w, r, params, endpoint)
 

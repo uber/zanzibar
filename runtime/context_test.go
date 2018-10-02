@@ -53,6 +53,52 @@ func TestGetRequestEndpointFromCtx(t *testing.T) {
 	assert.Equal(t, expected, endpoint)
 }
 
+func TestWithEndpointRequestHeadersField(t *testing.T) {
+	expected := map[string]string{"region": "san_francisco", "dc": "sjc1"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), expected)
+	rh := ctx.Value(endpointRequestHeader)
+	requestHeaders, ok := rh.(map[string]string)
+
+	assert.True(t, ok)
+	assert.Equal(t, requestHeaders, expected)
+}
+
+func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
+	expected := map[string]string{"region": "san_francisco", "dc": "sjc1"}
+	headers := map[string]string{"region": "san_francisco", "dc": "sjc1"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
+	requestHeaders := GetEndpointRequestHeadersFromCtx(ctx)
+	assert.Equal(t, expected, requestHeaders)
+
+	expected = map[string]string{}
+	ctx = context.TODO()
+	requestHeaders = GetEndpointRequestHeadersFromCtx(ctx)
+	assert.Equal(t, expected, requestHeaders)
+}
+
+func TestWithScopeFields(t *testing.T) {
+	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeFields(context.TODO(), expected)
+	rs := ctx.Value(requestScopeFields)
+	scopes, ok := rs.(map[string]string)
+
+	assert.True(t, ok)
+	assert.Equal(t, scopes, expected)
+}
+
+func TestGetScopeFieldsFromCtx(t *testing.T) {
+	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	scope := map[string]string{"endpoint": "tincup", "handler": "exchange"}
+	ctx := WithScopeFields(context.TODO(), scope)
+	scopes := GetScopeFieldsFromCtx(ctx)
+	assert.Equal(t, expected, scopes)
+
+	expected = map[string]string{}
+	ctx = context.TODO()
+	scopes = GetScopeFieldsFromCtx(ctx)
+	assert.Equal(t, expected, scopes)
+}
+
 func TestWithRequestFields(t *testing.T) {
 	ctx := withRequestFields(context.TODO())
 
@@ -142,4 +188,23 @@ func TestContextLoggerPanic(t *testing.T) {
 	ctx := context.Background()
 
 	contextLogger.Panic(ctx, "msg", zap.String("argField", "argValue"))
+}
+
+func TestExtractScope(t *testing.T) {
+	headers := map[string]string{"x-uber-region-id": "san_francisco"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
+	contextScopeExtractors := []ContextScopeTagsExtractor{func(ctx context.Context) map[string]string {
+		headers := GetEndpointRequestHeadersFromCtx(ctx)
+		return map[string]string{"region-id": headers["x-uber-region-id"]}
+	}}
+
+	expected := map[string]string{"region-id": "san_francisco"}
+	contextExtractors := &ContextExtractors{}
+	for _, scopeExtractor := range contextScopeExtractors {
+		contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+	}
+
+	contextExtractor := contextExtractors.MakeContextExtractor()
+	tags := contextExtractor.ExtractScopeTags(ctx)
+	assert.Equal(t, tags, expected)
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Most built-in logs like `Finished an outgoing client HTTP request` now use the context logger. 
+- **Context Extractor**: Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextExtractor) interface. It can be used to define "extractors" or functions to pull out dynamic fields like trace ID, request headers, etc. out of the context to be used in log fields and metric tags. These can be used to pull out fields that are application-specific without adding code to zanzibar.
+
+  **BREAKING CHANGE**
+- **GetContextScopeExtractors**:Added [`GetContextScopeExtractors`](https://godoc.org/github.com/uber/zanzibar/runtime#GetContextScopeExtractors) interface. For migration, define var AppOptions *zanzibar.Options at PackageRoot and implement interface accordingly.
 
 ### Fixed
 - HTTP `DELETE` methods on clients can now send a JSON payload. Previously it was silently discarded. 
