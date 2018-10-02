@@ -1270,11 +1270,8 @@ func getConfig() *zanzibar.StaticConfig {
 
 func createGateway() (*zanzibar.Gateway, error) {
 	config := getConfig()
-	opts := &zanzibar.Options{
-		GetContextScopeExtractors: app.AppOptions.GetContextScopeExtractors,
-	}
 
-	gateway, _, err := service.CreateGateway(config, opts)
+	gateway, _, err := service.CreateGateway(config, app.AppOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -1335,7 +1332,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1885, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1793, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
