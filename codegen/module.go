@@ -690,6 +690,36 @@ func (system *ModuleSystem) resolveMultiModules(
 	return classInstances, nil
 }
 
+// ReadInstanceConfig reads the instance definition file on disk and returns the
+// Config data of the instance
+//
+// baseDirectory: Directory to the service base
+// instanceDirectory: Directory in the baseDirectoy which contains the instance
+// 		definition files
+func (system *ModuleSystem) ReadInstanceConfig(
+	baseDirectory string,
+	className string,
+	instanceDirectory string,
+) (map[string]interface{}, error) {
+
+	instance, err := system.readInstance(
+		"", // packageRoot
+		baseDirectory,
+		"/", // targetGenDir
+		className,
+		instanceDirectory,
+	)
+
+	if err != nil {
+		return nil, errors.Wrapf(err,
+			"Error reading reading instance config %q in %q",
+			className,
+			instanceDirectory)
+	}
+
+	return instance.Config, nil
+}
+
 func (system *ModuleSystem) readInstance(
 	packageRoot string,
 	baseDirectory string,
