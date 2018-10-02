@@ -47,7 +47,8 @@ const (
 	serializedModuleTreePath = "zanzibar.tree"
 )
 
-const configSuffix = "-config.json"
+const jsonConfigSuffix = "-config.json"
+const yamlConfigSuffix = "-config.yaml"
 
 // NewModuleSystem returns a new module system
 func NewModuleSystem(postGenHook ...PostGenHook) *ModuleSystem {
@@ -615,6 +616,26 @@ func (system *ModuleSystem) ResolveModules(
 	return resolvedModules, nil
 }
 
+func getConfigFilePath(dir, name string) (string, string, string) {
+	yamlFileName := name + yamlConfigSuffix
+	jsonFileName := ""
+	path := filepath.Join(dir, yamlFileName)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		// Cannot find yaml file, try json file instead
+		jsonFileName = name + jsonConfigSuffix
+		yamlFileName = jsonFileName
+		path = filepath.Join(dir, jsonFileName)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			// Cannot find any config file
+			path = ""
+			jsonFileName = ""
+			yamlFileName = ""
+		}
+	}
+
+	return path, yamlFileName, jsonFileName
+}
+
 func (system *ModuleSystem) resolveMultiModules(
 	packageRoot string,
 	baseDirectory string,
@@ -631,8 +652,9 @@ func (system *ModuleSystem) resolveMultiModules(
 		)
 	}
 
-	configFile := filepath.Join(classDir, className+configSuffix)
-	if _, err := os.Stat(configFile); err == nil {
+	configFile, _, _ := getConfigFilePath(classDir, className)
+
+	if configFile != "" {
 		instance, instanceErr := system.readInstance(
 			packageRoot,
 			baseDirectory,
@@ -698,15 +720,17 @@ func (system *ModuleSystem) readInstance(
 	instanceDirectory string,
 ) (*ModuleInstance, error) {
 
-	yamlFileName := className + configSuffix
-	classConfigPath := filepath.Join(
-		baseDirectory,
-		instanceDirectory,
-		yamlFileName,
-	)
+	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
+	classConfigPath, yamlFileName, jsonFileName := getConfigFilePath(
+		classConfigDir, className)
 
 	yamlConfig := yamlClassConfig{}
 	raw, err := yamlConfig.Read(classConfigPath)
+
+	jsonRaw := []byte{}
+	if jsonFileName != "" {
+		jsonRaw = raw
+	}
 
 	if err != nil {
 		// TODO: We should accumulate errors and list them all here
@@ -751,9 +775,9 @@ func (system *ModuleSystem) readInstance(
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
 		DependencyOrder:       []string{},
-		JSONFileName:          yamlFileName,
+		JSONFileName:          jsonFileName,
 		YAMLFileName:          yamlFileName,
-		JSONFileRaw:           raw,
+		JSONFileRaw:           jsonRaw,
 		YAMLFileRaw:           raw,
 		Config:                yamlConfig.Config,
 	}, nil
