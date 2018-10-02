@@ -1,0 +1,50 @@
+clientId: baz
+clientMethod: Call
+endpointId: baz
+endpointType: http
+handleId: call
+middlewares: []
+reqHeaderMap:
+  X-Token: X-Token
+  X-Uuid: X-Uuid
+resHeaderMap:
+  Some-Res-Header: Some-Res-Header
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::call:
+        clientId: baz
+        clientMethod: call
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+    endpointId: baz
+    endpointReqHeaders:
+      x-token: token
+      x-uuid: uuid
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            arg:
+              b1: true
+              i3: 42
+              s2: hello
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: call
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::call
+workflowType: tchannelClient

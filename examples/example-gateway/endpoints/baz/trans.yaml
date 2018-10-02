@@ -1,0 +1,112 @@
+clientId: baz
+clientMethod: Trans
+endpointId: baz
+endpointType: http
+handleId: trans
+middlewares:
+- name: transformRequest
+  options:
+    transforms:
+    - from: Arg1.Driver.Msg
+      override: true
+      to: Arg2.Rider.Msg
+    - from: Arg1.Rider
+      override: false
+      to: Arg2.Driver
+- name: transformResponse
+  options:
+    transforms:
+    - from: Message
+      override: true
+      to: Rider.Msg
+    - from: Message
+      override: false
+      to: Driver.Msg
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::call:
+        clientId: baz
+        clientMethod: trans
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            arg1:
+              driver:
+                check: 2
+                msg: arg1_driver_msg
+              message: msg_arg1
+              rider:
+                check: 1
+                msg: arg1_rider_msg
+            arg2:
+              driver:
+                check: 4
+                msg: arg2_driver_msg
+              message: msg_arg2
+              rider:
+                check: 3
+                msg: arg1_driver_msg
+            message: message
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            driver:
+              check: 12
+              msg: tchan_return_driver
+            message: tchan_return_msg
+            rider:
+              check: 11
+              msg: tchan_return_rider
+    endpointId: baz
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            arg1:
+              driver:
+                check: 2
+                msg: arg1_driver_msg
+              message: msg_arg1
+              rider:
+                check: 1
+                msg: arg1_rider_msg
+            arg2:
+              driver:
+                check: 4
+                msg: arg2_driver_msg
+              message: msg_arg2
+              rider:
+                check: 3
+                msg: arg2_rider_msg
+            message: message
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson:
+            driver:
+              check: 12
+              msg: tchan_return_driver
+            message: tchan_return_msg
+            rider:
+              check: 11
+              msg: tchan_return_msg
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: trans
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::trans
+workflowType: tchannelClient

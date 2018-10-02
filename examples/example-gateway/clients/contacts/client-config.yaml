@@ -1,0 +1,13 @@
+config:
+  exposedMethods:
+    SaveContacts: Contacts::saveContacts
+    TestURLURL: Contacts::testUrlUrl
+  fixture:
+    importPath: github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture
+    scenarios:
+      SaveContacts:
+      - success
+  thriftFile: clients/contacts/contacts.thrift
+  thriftFileSha: '{{placeholder}}'
+name: contacts
+type: http

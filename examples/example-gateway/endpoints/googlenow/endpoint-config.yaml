@@ -1,0 +1,10 @@
+config:
+  endpoints:
+  - ./add_credentials.yaml
+  - ./check_credentials.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - google-now
+name: googlenow
+type: http

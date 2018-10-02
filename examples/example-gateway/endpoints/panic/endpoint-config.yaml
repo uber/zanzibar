@@ -1,0 +1,9 @@
+config:
+  endpoints:
+  - ./endpoint_panic.json
+  rateLimit: 100
+dependencies:
+  client:
+  - multi
+name: panic
+type: http

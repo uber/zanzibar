@@ -1,0 +1,71 @@
+clientId: bar
+clientMethod: Normal
+endpointId: bar
+endpointType: http
+handleId: normal
+middlewares:
+- name: example
+  options:
+    Baz:
+    - foo
+    - bar
+    Foo: test
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      bar::normal:
+        clientId: bar
+        clientMethod: normal
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            requestType: tchannel
+            tchannelRequest:
+              request:
+                binaryField: aGVsbG8=
+                boolField: true
+                enumField: APPLE
+                longField: 123
+                stringField: foo
+                timestamp: 123
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            binaryField: d29ybGQ=
+            intWithRange: 0
+            intWithoutRange: 1
+            mapIntWithRange: {}
+            mapIntWithoutRange: {}
+            stringField: foo
+    endpointId: bar
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            request:
+              binaryField: aGVsbG8=
+              boolField: true
+              enumField: APPLE
+              longField: 123
+              stringField: foo
+              timestamp: 123
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: normal
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::normal
+workflowType: httpClient

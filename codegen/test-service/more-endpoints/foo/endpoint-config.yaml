@@ -1,0 +1,7 @@
+config:
+  rateLimit: 100
+dependencies:
+  client:
+  - example
+name: foo
+type: http

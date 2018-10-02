@@ -8,7 +8,7 @@ service Corge {
         zanzibar.http.path = "/echo/string"
         zanzibar.http.status = "200"
     )
-    // this method is intentionally not exposed in client-config.json
+    // this method is intentionally not exposed in client-config.yaml
     bool echoBool(
         1: required bool arg
     ) (

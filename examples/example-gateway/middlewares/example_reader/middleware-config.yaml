@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/example_reader
+  schema: ./middlewares/example_reader/example_reader_schema.json
+dependencies: {}
+name: example_reader
+type: http

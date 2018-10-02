@@ -13,7 +13,12 @@ ANNOPREFIX=${1:-zanzibar}
 bash ./codegen/runner/pre-steps.sh "$PREFIX/build" "$PREFIX" "$ANNOPREFIX"
 
 start=$(cat .TMP_ZANZIBAR_TIMESTAMP_FILE.txt)
-go run codegen/runner/runner.go -config="$PREFIX/build.json"
+if [ -f "$PREFIX/build.yaml" ]; then
+    go run codegen/runner/runner.go -config="$PREFIX/build.yaml"
+else
+    go run codegen/runner/runner.go -config="$PREFIX/build.json"
+fi
+
 end=`date +%s`
 runtime=$((end - start))
 echo "Generated build : +$runtime"

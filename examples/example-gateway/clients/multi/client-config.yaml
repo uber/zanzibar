@@ -1,0 +1,8 @@
+config:
+  exposedMethods:
+    HelloA: ServiceABack::hello
+    HelloB: ServiceBBack::hello
+  thriftFile: clients/multi/multi.thrift
+  thriftFileSha: '{{placeholder}}'
+name: multi
+type: http

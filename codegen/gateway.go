@@ -1127,7 +1127,15 @@ func parseMiddlewareConfig(
 		if !file.IsDir() {
 			continue
 		}
-		instanceConfig := filepath.Join(fullMiddlewareDir, file.Name(), "middleware-config.json")
+
+		instanceConfig := filepath.Join(
+			fullMiddlewareDir, file.Name(), "middleware-config.yaml")
+		if _, err := os.Stat(instanceConfig); os.IsNotExist(err) {
+			// Cannot find yaml file, use json file instead
+			instanceConfig = filepath.Join(
+				fullMiddlewareDir, file.Name(), "middleware-config.json")
+		}
+
 		bytes, err := ioutil.ReadFile(instanceConfig)
 		if os.IsNotExist(err) {
 			fmt.Printf("Could not read config file for middleware directory \"%s\" skipping...\n", file.Name())

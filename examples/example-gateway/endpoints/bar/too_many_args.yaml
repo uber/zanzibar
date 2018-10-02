@@ -1,0 +1,75 @@
+clientId: bar
+clientMethod: TooManyArgs
+endpointId: bar
+endpointType: http
+handleId: tooManyArgs
+middlewares: []
+reqHeaderMap:
+  X-Token: X-Token
+  X-Uuid: X-Uuid
+resHeaderMap:
+  X-Token: X-Token
+  X-Uuid: X-Uuid
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      bar::tooManyArgs:
+        clientId: bar
+        clientMethod: tooManyArgs
+        clientReqHeaders:
+          X-Token: test-token
+          X-Uuid: test-uuid
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            request:
+              binaryField: aGVsbG8=
+              boolField: true
+              enumField: APPLE
+              longField: 123
+              stringField: foo
+              timestamp: 123
+        clientResHeaders:
+          X-Token: test-token
+          X-Uuid: test-uuid
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            binaryField: d29ybGQ=
+            intWithRange: 0
+            intWithoutRange: 1
+            mapIntWithRange: {}
+            mapIntWithoutRange: {}
+            stringField: foo
+    endpointId: bar
+    endpointReqHeaders:
+      X-Token: test-token
+      X-Uuid: test-uuid
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            request:
+              binaryField: aGVsbG8=
+              boolField: true
+              enumField: APPLE
+              longField: 123
+              stringField: foo
+              timestamp: 123
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders:
+      X-Token: test-token
+      X-Uuid: test-uuid
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: tooManyArgs
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::tooManyArgs
+workflowType: httpClient

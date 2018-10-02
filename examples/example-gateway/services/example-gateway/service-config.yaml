@@ -1,0 +1,13 @@
+config: {}
+dependencies:
+  endpoint:
+  - bar
+  - baz
+  - contacts
+  - googlenow
+  - bazTChannel
+  - multi
+  - panic
+  - panicTChannel
+name: example-gateway
+type: gateway

@@ -1,0 +1,82 @@
+clientId: baz
+clientMethod: TransHeadersNoReq
+endpointId: baz
+endpointType: http
+handleId: transHeadersNoReq
+middlewares:
+- name: headersPropagate
+  options:
+    propagate:
+    - from: s1
+      to: Req.Msg
+    - from: i2
+      to: Req.Check
+    - from: s1
+      to: S2
+    - from: i2
+      to: I3
+    - from: b3
+      to: B4
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::call:
+        clientId: baz
+        clientMethod: transHeadersType
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            b4: true
+            i3: 321
+            req:
+              check: 321
+              msg: string
+            s2: string
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            w1:
+              n1:
+                token: token
+                uuid: uuid
+              n2:
+                token: token
+                uuid: uuid
+            w2:
+              n1:
+                token: token
+                uuid: uuid
+              n2:
+                token: token
+                uuid: uuid
+    endpointId: baz
+    endpointReqHeaders:
+      b3: 'true'
+      i2: '321'
+      s1: string
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson: {}
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson: {}
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: transHeadersNoReq
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::transHeadersNoReq
+workflowType: tchannelClient

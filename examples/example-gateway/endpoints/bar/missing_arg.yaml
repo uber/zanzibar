@@ -1,0 +1,46 @@
+clientId: bar
+clientMethod: MissingArg
+endpointId: bar
+endpointType: http
+handleId: missingArg
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      bar::missingArg:
+        clientId: bar
+        clientMethod: missingArg
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest: {}
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            binaryField: d29ybGQ=
+            intWithRange: 0
+            intWithoutRange: 1
+            mapIntWithRange: {}
+            mapIntWithoutRange: {}
+            stringField: foo
+    endpointId: bar
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        method: GET
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: missingArg
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::missingArg
+workflowType: httpClient

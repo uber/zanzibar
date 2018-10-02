@@ -83,17 +83,28 @@ ABS_IDL_DIR="$(cd "$CONFIG_DIR" && pwd)/$(basename "$CONFIG_DIR/idl")"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 target_dirs=""
 found_thrifts=""
-config_files=$(find "$CONFIG_DIR" -name "*-config.json" | sort)
+config_files=$(find "$CONFIG_DIR" -name "*-config.json" -o -name "*-config.yaml" | sort)
 for config_file in ${config_files}; do
 	if [[ ${config_file} == "./vendor"* ]]; then
 		continue
 	fi
-	module_type=$(jq -r .type "$config_file")
+
+	processor="yq"
+	if [[ $config_file == *.json ]]; then
+		processor="jq"
+	fi
+
+	module_type=$($processor -r .type "$config_file")
 	[[ ${module_type} != "http" ]] && continue
 	dir=$(dirname "$config_file")
-	json_files=$(find "$dir" -name "*.json")
-	for json_file in ${json_files}; do
-		thrift_file=$(jq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$json_file")
+	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
+	for yaml_file in ${yaml_files}; do
+		processor="yq"
+		if [[ $yaml_file == *.json ]]; then
+			processor="jq"
+		fi
+
+		thrift_file=$($processor -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"

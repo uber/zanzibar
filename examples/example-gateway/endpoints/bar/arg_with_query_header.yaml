@@ -1,0 +1,13 @@
+clientId: bar
+clientMethod: ArgWithQueryHeader
+endpointId: bar
+endpointType: http
+handleId: argWithQueryHeader
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::argWithQueryHeader
+workflowType: httpClient

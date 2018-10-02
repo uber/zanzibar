@@ -1,0 +1,46 @@
+clientId: bar
+clientMethod: ArgNotStruct
+endpointId: bar
+endpointType: http
+handleId: argNotStruct
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      bar::argNotStruct:
+        clientId: bar
+        clientMethod: argNotStruct
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            requestType: tchannel
+            tchannelRequest:
+              request: foo
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+    endpointId: bar
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            request: foo
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: argNotStruct
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::argNotStruct
+workflowType: httpClient

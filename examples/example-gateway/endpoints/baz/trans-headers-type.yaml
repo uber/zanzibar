@@ -1,0 +1,83 @@
+clientId: baz
+clientMethod: TransHeadersType
+endpointId: baz
+endpointType: http
+handleId: transHeadersType
+middlewares:
+- name: headersPropagate
+  options:
+    propagate:
+    - from: x-boolean
+      to: Req.B1
+    - from: x-int
+      to: Req.I1
+    - from: x-int
+      to: Req.I2
+    - from: x-float
+      to: Req.F3
+    - from: x-string
+      to: Req.U4
+    - from: x-string
+      to: Req.U5
+    - from: x-string
+      to: Req.S6
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::call:
+        clientId: baz
+        clientMethod: transHeadersType
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            req:
+              b1: true
+              f3: 3.14
+              i1: 3
+              i2: 3
+              s6: 2a629c1a-262a-43f0-8623-869b0256a321
+              u4: 2a629c1a-262a-43f0-8623-869b0256a321
+              u5: 2a629c1a-262a-43f0-8623-869b0256a321
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            b1: true
+            f3: 3.14
+            i1: 3
+            i2: 3
+            s6: 2a629c1a-262a-43f0-8623-869b0256a321
+            u4: 2a629c1a-262a-43f0-8623-869b0256a321
+            u5: 2a629c1a-262a-43f0-8623-869b0256a321
+    endpointId: baz
+    endpointReqHeaders:
+      x-boolean: 'true'
+      x-float: '3.14'
+      x-int: '3'
+      x-string: 2a629c1a-262a-43f0-8623-869b0256a321
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            req: {}
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson: {}
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: transHeadersType
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::transHeadersType
+workflowType: tchannelClient

@@ -1,0 +1,55 @@
+clientId: baz
+clientMethod: Compare
+endpointId: baz
+endpointType: http
+handleId: compare
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      baz::compare:
+        clientId: baz
+        clientMethod: compare
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+          tchannelResponse:
+            message: different
+    endpointId: baz
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            arg1:
+              b1: true
+              i3: 42
+              s2: hello
+            arg2:
+              b1: true
+              i3: 42
+              s2: hola
+          bodyType: json
+        method: POST
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        body:
+          bodyJson:
+            message: different
+          bodyType: json
+        statusCode: 200
+      responseType: http
+    handleId: compare
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/baz/baz.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: SimpleService::compare
+workflowType: tchannelClient

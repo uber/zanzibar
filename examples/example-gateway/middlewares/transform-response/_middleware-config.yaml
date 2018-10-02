@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/codegen
+  schema: ./middlewares/transform-response/transform_response_schema.json
+dependencies: {}
+name: transform_response
+type: default

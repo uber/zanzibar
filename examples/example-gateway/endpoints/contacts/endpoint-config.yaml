@@ -1,0 +1,9 @@
+config:
+  endpoints:
+  - ./save_contacts.yaml
+  rateLimit: 100
+dependencies:
+  client:
+  - contacts
+name: contacts
+type: http

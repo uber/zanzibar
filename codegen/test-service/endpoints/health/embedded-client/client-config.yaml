@@ -1,0 +1,5 @@
+config:
+  headers:
+    x-service-name: example
+name: embedded
+type: http
