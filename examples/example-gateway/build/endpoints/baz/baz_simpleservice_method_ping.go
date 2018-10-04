@@ -29,11 +29,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SimpleServicePingHandler is the handler for "/baz/ping"
@@ -48,7 +50,7 @@ func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHa
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"baz", "ping",
 		handler.HandleRequest,
 	)
@@ -81,7 +83,7 @@ func (h *SimpleServicePingHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

@@ -76,26 +76,26 @@ func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 	assert.Equal(t, expected, requestHeaders)
 }
 
-func TestWithScopeFields(t *testing.T) {
+func TestWithScopeTags(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeFields(context.TODO(), expected)
-	rs := ctx.Value(requestScopeFields)
+	ctx := WithScopeTags(context.TODO(), expected)
+	rs := ctx.Value(scopeTags)
 	scopes, ok := rs.(map[string]string)
 
 	assert.True(t, ok)
-	assert.Equal(t, scopes, expected)
+	assert.Equal(t, expected, scopes)
 }
 
-func TestGetScopeFieldsFromCtx(t *testing.T) {
+func TestGetScopeTagsFromCtx(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 	scope := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeFields(context.TODO(), scope)
-	scopes := GetScopeFieldsFromCtx(ctx)
+	ctx := WithScopeTags(context.TODO(), scope)
+	scopes := GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
 
 	expected = map[string]string{}
 	ctx = context.TODO()
-	scopes = GetScopeFieldsFromCtx(ctx)
+	scopes = GetScopeTagsFromCtx(ctx)
 	assert.Equal(t, expected, scopes)
 }
 

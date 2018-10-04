@@ -65,8 +65,12 @@ func TestCallMetrics(t *testing.T) {
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
+	headers := make(map[string]string)
+	headers["regionname"] = "san_francisco"
+	headers["device"] = "ios"
+	headers["deviceversion"] = "carbon"
 	_, err = gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", headers,
 		bytes.NewReader([]byte(`{
 			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
 		}`)),
@@ -82,24 +86,29 @@ func TestCallMetrics(t *testing.T) {
 	endpointNames := []string{
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",
-		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "bar",
-		"handler":  "normal",
-		"dc":       "unknown",
-		"host":     zanzibar.GetHostname(),
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
+		"dc":            "unknown",
+		"host":          zanzibar.GetHostname(),
 	}
 	eStatusTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "bar",
-		"handler":  "normal",
-		"status":   "200",
-		"dc":       "unknown",
-		"host":     zanzibar.GetHostname(),
+		"env":           "test",
+		"service":       "test-gateway",
+		"status":        "200",
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
+		"dc":            "unknown",
+		"host":          zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -119,8 +128,14 @@ func TestCallMetrics(t *testing.T) {
 	value = *inboundRecvd.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value)
 
+	inboundSuccess := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.success", eStatusTags,
+	)]
+	value = *inboundSuccess.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status.200", eStatusTags,
+		"test-gateway.test.all-workers.inbound.calls.status", eStatusTags,
 	)]
 	value = *inboundStatus.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
@@ -128,24 +143,33 @@ func TestCallMetrics(t *testing.T) {
 	httpClientNames := []string{
 		"test-gateway.test.all-workers.outbound.calls.latency",
 		"test-gateway.test.all-workers.outbound.calls.sent",
-		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	httpClientTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"client":  "bar",
-		"method":  "Normal",
-		"dc":      "unknown",
-		"host":    zanzibar.GetHostname(),
+		"env":           "test",
+		"service":       "test-gateway",
+		"clientid":      "bar",
+		"clientmethod":  "Normal",
+		"dc":            "unknown",
+		"host":          zanzibar.GetHostname(),
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	cStatusTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"client":  "bar",
-		"method":  "Normal",
-		"status":  "200",
-		"dc":      "unknown",
-		"host":    zanzibar.GetHostname(),
+		"env":           "test",
+		"service":       "test-gateway",
+		"clientid":      "bar",
+		"clientmethod":  "Normal",
+		"status":        "200",
+		"dc":            "unknown",
+		"host":          zanzibar.GetHostname(),
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 
 	for _, name := range httpClientNames {
@@ -167,13 +191,13 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	outboundSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.outbound.calls.success", httpClientTags,
+		"test-gateway.test.all-workers.outbound.calls.success", cStatusTags,
 	)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	statusSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.outbound.calls.status.200",
+		"test-gateway.test.all-workers.outbound.calls.status",
 		cStatusTags,
 	)]
 	value = *statusSuccess.MetricValue.Count.I64Value

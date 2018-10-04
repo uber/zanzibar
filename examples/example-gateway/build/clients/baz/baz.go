@@ -30,12 +30,14 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	clientsBazBase "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/base"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // Client defines baz client interface.
@@ -245,7 +247,7 @@ func NewClient(deps *module.Dependencies) Client {
 	client := zanzibar.NewTChannelClient(
 		deps.Default.Channel,
 		deps.Default.Logger,
-		deps.Default.Scope,
+		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "baz",

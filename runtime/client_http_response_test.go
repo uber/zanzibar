@@ -68,7 +68,7 @@ func TestReadAndUnmarshalNonStructBody(t *testing.T) {
 
 	client := zanzibar.NewHTTPClient(
 		bgateway.ActualGateway.Logger,
-		bgateway.ActualGateway.AllHostScope,
+		bgateway.ActualGateway.ContextMetrics,
 		"bar",
 		[]string{"echo"},
 		baseURL,
@@ -126,7 +126,7 @@ func TestReadAndUnmarshalNonStructBodyUnmarshalError(t *testing.T) {
 
 	client := zanzibar.NewHTTPClient(
 		bgateway.ActualGateway.Logger,
-		bgateway.ActualGateway.AllHostScope,
+		bgateway.ActualGateway.ContextMetrics,
 		"bar",
 		[]string{"echo"},
 		baseURL,
@@ -183,7 +183,7 @@ func TestUnknownStatusCode(t *testing.T) {
 
 	client := zanzibar.NewHTTPClient(
 		bgateway.ActualGateway.Logger,
-		bgateway.ActualGateway.AllHostScope,
+		bgateway.ActualGateway.ContextMetrics,
 		"bar",
 		[]string{"echo"},
 		baseURL,

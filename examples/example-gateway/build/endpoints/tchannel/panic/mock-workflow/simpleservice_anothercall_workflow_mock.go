@@ -27,12 +27,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
 	panictchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // NewSimpleServiceAnotherCallWorkflowMock creates a workflow with mock clients
@@ -43,6 +44,8 @@ func NewSimpleServiceAnotherCallWorkflowMock(t *testing.T) (workflow.SimpleServi
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+	contextExtractors := &zanzibar.ContextExtractors{}
+	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{

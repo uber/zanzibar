@@ -77,6 +77,7 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	ContextLogger    ContextLogger
+	ContextMetrics   ContextMetrics
 	ContextExtractor ContextExtractor
 	RootScope        tally.Scope
 	AllHostScope     tally.Scope
@@ -111,9 +112,12 @@ type DefaultDependencies struct {
 	// Logger is a server-scoped logger
 	// Deprecated: Use ContextLogger instead.
 	Logger *zap.Logger
-
+	// ContextExtractor extracts context for scope and logs field
+	ContextExtractor ContextExtractor
 	// ContextLogger is a logger with request-scoped log fields
 	ContextLogger ContextLogger
+	// ContextMetrics emit metrics from context
+	ContextMetrics ContextMetrics
 
 	Scope   tally.Scope
 	Tracer  opentracing.Tracer
@@ -268,7 +272,7 @@ func (gateway *Gateway) registerPredefined() error {
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
 	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
-		gateway.Logger, gateway.AllHostScope, gateway.Tracer,
+		gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
 	))
@@ -481,6 +485,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	).Tagged(
 		map[string]string{"host": GetHostname()},
 	)
+	gateway.ContextMetrics = NewContextMetrics(gateway.AllHostScope)
 
 	// start collecting runtime metrics
 	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
