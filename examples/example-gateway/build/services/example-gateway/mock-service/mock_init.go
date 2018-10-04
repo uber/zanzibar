@@ -25,6 +25,9 @@ package examplegatewayservicegeneratedmock
 
 import (
 	"github.com/golang/mock/gomock"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
@@ -51,10 +54,8 @@ import (
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
-	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // MockClientNodes contains mock client dependencies
@@ -76,12 +77,13 @@ func InitializeDependenciesMock(
 	tree := &module.DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		ContextLogger: g.ContextLogger,
-		Logger:        g.Logger,
-		Scope:         g.AllHostScope,
-		Config:        g.Config,
-		Channel:       g.Channel,
-		Tracer:        g.Tracer,
+		ContextExtractor: g.ContextExtractor,
+		ContextLogger:    g.ContextLogger,
+		Logger:           g.Logger,
+		Scope:            g.AllHostScope,
+		Config:           g.Config,
+		Channel:          g.Channel,
+		Tracer:           g.Tracer,
 	}
 
 	mockClientNodes := &MockClientNodes{

@@ -66,8 +66,8 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
+		deps.Default.ContextExtractor, deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
@@ -114,7 +114,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

@@ -26,8 +26,9 @@ package workflow
 import (
 	"context"
 
-	endpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/echo/echo"
 	zanzibar "github.com/uber/zanzibar/runtime"
+
+	endpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/echo/echo"
 )
 
 // EchoEchoWorkflow defines the interface for EchoEcho workflow

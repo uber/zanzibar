@@ -27,6 +27,7 @@ import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

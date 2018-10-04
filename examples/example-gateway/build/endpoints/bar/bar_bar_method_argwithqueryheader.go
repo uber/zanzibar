@@ -31,13 +31,15 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarArgWithQueryHeaderHandler is the handler for "/bar/argWithQueryHeader"
@@ -51,8 +53,8 @@ func NewBarArgWithQueryHeaderHandler(deps *module.Dependencies) *BarArgWithQuery
 	handler := &BarArgWithQueryHeaderHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
+		deps.Default.ContextExtractor, deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "argWithQueryHeader",
 		handler.HandleRequest,
 	)
@@ -85,7 +87,7 @@ func (h *BarArgWithQueryHeaderHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

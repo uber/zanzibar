@@ -31,12 +31,14 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
+	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SimpleServiceCallHandler is the handler for "/baz/call"
@@ -50,8 +52,8 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 	handler := &SimpleServiceCallHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
+		deps.Default.ContextExtractor, deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"baz", "call",
 		handler.HandleRequest,
 	)
@@ -84,7 +86,7 @@ func (h *SimpleServiceCallHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

@@ -22,12 +22,11 @@ package zanzibar
 
 import (
 	"context"
-	"testing"
-
 	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+	"testing"
 )
 
 func TestWithEndpointField(t *testing.T) {
@@ -78,19 +77,21 @@ func TestGetEndpointRequestHeadersFromCtx(t *testing.T) {
 
 func TestWithScopeFields(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeFields(context.TODO(), expected)
+	ctx, fields := WithScopeFields(context.TODO(), expected)
 	rs := ctx.Value(requestScopeFields)
 	scopes, ok := rs.(map[string]string)
 
 	assert.True(t, ok)
-	assert.Equal(t, scopes, expected)
+	assert.Equal(t, expected, scopes)
+	assert.Equal(t, expected, fields)
 }
 
 func TestGetScopeFieldsFromCtx(t *testing.T) {
 	expected := map[string]string{"endpoint": "tincup", "handler": "exchange"}
 	scope := map[string]string{"endpoint": "tincup", "handler": "exchange"}
-	ctx := WithScopeFields(context.TODO(), scope)
+	ctx, fields := WithScopeFields(context.TODO(), scope)
 	scopes := GetScopeFieldsFromCtx(ctx)
+	assert.Equal(t, expected, fields)
 	assert.Equal(t, expected, scopes)
 
 	expected = map[string]string{}

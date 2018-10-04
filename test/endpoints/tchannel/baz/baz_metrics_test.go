@@ -29,7 +29,7 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -73,13 +73,16 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 14
+	numMetrics := 15
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{
-		"x-token": "token",
-		"x-uuid":  "uuid",
+		"x-token":       "token",
+		"x-uuid":        "uuid",
+		"Regionname":    "san_francisco",
+		"Device":        "ios",
+		"Deviceversion": "carbon",
 	}
 	args := &endpointsBaz.SimpleService_Call_Args{
 		Arg: &endpointsBaz.BazRequest{
@@ -114,11 +117,14 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "bazTChannel",
-		"handler":  "call",
-		"method":   "SimpleService__Call",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "bazTChannel",
+		"handlerid":     "call",
+		"method":        "SimpleService__Call",
+		"device":        "ios",
+		"deviceversion": "carbon",
+		"regionname":    "san_francisco",
 	}
 
 	for _, name := range endpointNames {

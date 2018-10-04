@@ -282,8 +282,8 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
+		deps.Default.ContextExtractor, deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
@@ -330,7 +330,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6877, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6938, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1607,6 +1607,7 @@ func InitializeDependencies(
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:         g.Logger,
+		ContextExtractor: g.ContextExtractor,
 		ContextLogger:  g.ContextLogger,
 		Scope:          g.AllHostScope,
 		Tracer:         g.Tracer,
@@ -1643,7 +1644,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2307, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2347, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1703,6 +1704,7 @@ func InitializeDependenciesMock(
 	{{ end -}}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
+		ContextExtractor: g.ContextExtractor,
 		ContextLogger: g.ContextLogger,
 		Logger:  	   g.Logger,
 		Scope:         g.AllHostScope,
@@ -1761,7 +1763,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4251, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4291, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2490,7 +2492,7 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			isSuccessful = false
 			response = nil
 			headers = nil
@@ -2668,7 +2670,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8129, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8152, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2994,6 +2996,8 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+	contextExtractors := &zanzibar.ContextExtractors{}
+	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
@@ -3057,7 +3061,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4494, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4638, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

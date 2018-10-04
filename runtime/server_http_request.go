@@ -20,6 +20,7 @@
 
 package zanzibar
 
+import "C"
 import (
 	"context"
 	"encoding/json"
@@ -75,7 +76,7 @@ func NewServerHTTPRequest(
 		httpRequest: r,
 		ctx:         r.Context(),
 		queryValues: nil,
-		metrics:     endpoint.Metrics,
+		metrics:     endpoint.ContextMetrics.InboundHTTPMetrics,
 		tracer:      endpoint.tracer,
 
 		contextLogger: endpoint.contextLogger,

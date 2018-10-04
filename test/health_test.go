@@ -115,7 +115,11 @@ func TestHealthMetrics(t *testing.T) {
 	numMetrics := 11
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
-	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
+	headers := make(map[string]string)
+	headers["regionname"] = "san_francisco"
+	headers["device"] = "ios"
+	headers["deviceversion"] = "carbon"
+	res, err := gateway.MakeRequest("GET", "/health", headers, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
@@ -131,17 +135,23 @@ func TestHealthMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	tags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "health",
-		"handler":  "health",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "health",
+		"handlerid":     "health",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	statusTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "health",
-		"handler":  "health",
-		"status":   "200",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "health",
+		"handlerid":     "health",
+		"status":        "200",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	defaultTags := map[string]string{
 		"env":     "test",
