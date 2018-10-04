@@ -22,24 +22,20 @@ package codegen
 
 import (
 	"bytes"
+	"github.com/golang/mock/mockgen/model"
+	"github.com/pkg/errors"
 	"go/token"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/golang/mock/mockgen/model"
-	"github.com/pkg/errors"
 )
 
 const (
-	exampleGatewayPkg = "github.com/uber/zanzibar/examples/example-gateway"
-	mockgenPkg        = "github.com/golang/mock/mockgen"
-	zanzibarPkg       = "github.com/uber/zanzibar"
+	mockgenPkg = "github.com/golang/mock/mockgen"
 )
 
 // MockgenBin is a struct abstracts the mockgen binary built from mockgen package in vendor
@@ -47,23 +43,14 @@ type MockgenBin struct {
 	// Bin is the absolute path to the mockgen binary built from vendor
 	Bin string
 
-	// projRoot is the absolute path of the project, it is also where the vendor directory is
-	projRoot  string
 	pkgHelper *PackageHelper
 	tmpl      *Template
 }
 
 // NewMockgenBin builds the mockgen binary from vendor directory
 func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
-	pkgRoot := h.PackageRoot()
-	// we would not need this if example gateway is a fully standalone application
-	if pkgRoot == exampleGatewayPkg {
-		pkgRoot = zanzibarPkg
-	}
-	projRoot := filepath.Join(os.Getenv("GOPATH"), "src", pkgRoot)
-
 	// we assume that the vendor directory is flattened as Glide does
-	mockgenDir := path.Join(projRoot, "vendor", mockgenPkg)
+	mockgenDir := path.Join("vendor", mockgenPkg)
 	if _, err := os.Stat(mockgenDir); err != nil {
 		return nil, errors.Wrapf(
 			err, "error finding mockgen package in the vendor dir: %q does not exist", mockgenDir,
@@ -93,9 +80,7 @@ func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
 	}
 
 	return &MockgenBin{
-		Bin: path.Join(mockgenDir, mockgenBin),
-
-		projRoot:  projRoot,
+		Bin:       path.Join(mockgenDir, mockgenBin),
 		pkgHelper: h,
 		tmpl:      t,
 	}, nil

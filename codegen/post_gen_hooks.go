@@ -113,7 +113,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		}
 
 		// only run reflect program once to gather interface info for all clients
-		pkgs, err := ReflectInterface(bin.projRoot, pathSymbolMap)
+		pkgs, err := ReflectInterface("", pathSymbolMap)
 		if err != nil {
 			return errors.Wrap(err, "error parsing Client interfaces")
 		}
