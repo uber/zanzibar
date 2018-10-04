@@ -384,6 +384,11 @@ git clone git@github.com:uber/zanzibar $GOPATH/src/github.com/uber/zanzibar
 cd $GOPATH/src/github.com/uber/zanzibar
 make install
 ```
+### Running make generate
+```
+make generate
+```
+If this fails due to `unknown command "examples/example-gateway/clients/baz/client-config.yaml" for "yq"` or `./codegen/runner/pre-steps.sh: line 97: yq: command not found` run `pip install yq` or `pip install --force-reinstall yq`
 
 ### Running the tests
 

@@ -95,7 +95,7 @@ for config_file in ${config_files}; do
 	fi
 
 	module_type=$($processor -r .type "$config_file")
-	[[ ${module_type} != "http" ]] && continue
+	[[ ${module_type} != *"http"* ]] && continue
 	dir=$(dirname "$config_file")
 	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
 	for yaml_file in ${yaml_files}; do
