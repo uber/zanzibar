@@ -388,7 +388,8 @@ make install
 ```
 make generate
 ```
-If this fails due to `unknown command "examples/example-gateway/clients/baz/client-config.yaml" for "yq"` or `./codegen/runner/pre-steps.sh: line 97: yq: command not found` run `pip install yq` or `pip install --force-reinstall yq`
+If this fails due to `yq: command not found`, then install `yq` by running `pip install yq`.
+If you have already installed `yq` and the build fails due to `unknown command "examples/example-gateway/clients/baz/client-config.yaml" for "yq"` then delete `yq` and reinstall by running `pip install --force-reinstall yq`. This is because Zanzibar uses the python distribution of `yq` so other distributions of `yq` will not work.
 
 ### Running the tests
 
