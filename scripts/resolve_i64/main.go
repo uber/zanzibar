@@ -95,7 +95,6 @@ func main() {
 	meta := &Meta{}
 
 	s := strings.TrimSuffix(thriftFile, ".thrift")
-	//s = strings.Replace(s, "/idl/", "/build/gen-code/", 1)
 	s = strings.Replace(s, stripPath, "/build/gen-code/", 1)
 	meta.PackageName = filepath.Base(s)
 
