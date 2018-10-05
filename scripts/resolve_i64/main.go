@@ -85,6 +85,9 @@ func getDirName() string {
 
 func main() {
 	thriftFile := os.Args[1]
+	stripPath := os.Args[2]
+	annotationJSType := os.Args[3]
+
 	module, err := compile.Compile(thriftFile)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse thrift file: %s", thriftFile))
@@ -92,8 +95,8 @@ func main() {
 	meta := &Meta{}
 
 	s := strings.TrimSuffix(thriftFile, ".thrift")
-	// TODO use os.Args[2] instead of hard-coded path
-	s = strings.Replace(s, "/idl/", "/build/gen-code/", 1)
+	//s = strings.Replace(s, "/idl/", "/build/gen-code/", 1)
+	s = strings.Replace(s, stripPath, "/build/gen-code/", 1)
 	meta.PackageName = filepath.Base(s)
 
 	for _, typeDef := range module.Types {
@@ -114,10 +117,10 @@ func main() {
 				}
 
 				i64Struct.TypedefType = refType[1:]
-				if typThriftAnnotation["json.type"] == "Long" {
+				if typThriftAnnotation[annotationJSType] == "Long" {
 					i64Struct.IsLong = true
 				}
-				if typThriftAnnotation["json.type"] == "Date" {
+				if typThriftAnnotation[annotationJSType] == "Date" {
 					i64Struct.IsTimestamp = true
 				}
 			}
