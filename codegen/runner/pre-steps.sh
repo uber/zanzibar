@@ -19,9 +19,10 @@ fi
 BUILD_DIR="$1"
 CONFIG_DIR="$2"
 ANNOPREFIX="$3"
+IDL_DIR="${4:-$CONFIG_DIR/idl}"
 
 if [ -z "$4" ]; then
-	THRIFTRW_SRCS="$(find "$CONFIG_DIR/idl" -name '*.thrift')"
+	THRIFTRW_SRCS="$(find "$IDL_DIR" -name '*.thrift')"
 else
 	THRIFTRW_SRCS="$4"
 fi
@@ -62,7 +63,7 @@ mkdir -p "$BUILD_DIR/gen-code"
 for tfile in ${THRIFTRW_SRCS}; do
 	"$THRIFTRW_BINARY" --out="$BUILD_DIR/gen-code" \
 		--no-embed-idl \
-		--thrift-root="$CONFIG_DIR/idl" "$tfile"
+		--thrift-root="$IDL_DIR" "$tfile"
 done
 gofmt -w "$BUILD_DIR/gen-code/"
 
@@ -79,7 +80,7 @@ go build -o "$RESOLVE_THRIFT_BINARY" "$RESOLVE_THRIFT_FILE"
 go build -o "$RESOLVE_I64_BINARY" "$RESOLVE_I64_FILE"
 
 # find the modules that actually need JSON (un)marshallers
-ABS_IDL_DIR="$(cd "$CONFIG_DIR" && pwd)/$(basename "$CONFIG_DIR/idl")"
+ABS_IDL_DIR="$(cd "$IDL_DIR" && pwd)"
 ABS_GENCODE_DIR="$(cd "$BUILD_DIR" && pwd)/$(basename "$BUILD_DIR/gen-code")"
 target_dirs=""
 found_thrifts=""
@@ -109,7 +110,7 @@ for config_file in ${config_files}; do
 		[[ ${found_thrifts} == *${thrift_file}* ]] && continue
 		found_thrifts+=" $thrift_file"
 
-		thrift_file="$CONFIG_DIR/idl/$thrift_file"
+		thrift_file="$IDL_DIR/$thrift_file"
 		gen_code_dir=$(
 		"$RESOLVE_THRIFT_BINARY" "$thrift_file" "$ANNOPREFIX" | \
 			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
