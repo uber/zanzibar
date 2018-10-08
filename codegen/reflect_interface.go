@@ -43,7 +43,7 @@ type reflectData struct {
 // projRoot is the root dir where mockgen is installed as a vendor package
 func ReflectInterface(projRoot string, pathSymbolMap map[string]string) (map[string]*model.Package, error) {
 	// We use TempDir instead of TempFile so we can control the filename.
-	tmpDir, err := ioutil.TempDir(projRoot, "gomock_reflect_")
+	tmpDir, err := ioutil.TempDir("./", "gomock_reflect_")
 	if err != nil {
 		return nil, err
 	}
