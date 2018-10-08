@@ -115,7 +115,7 @@ for config_file in ${config_files}; do
 			sed "s|$ABS_IDL_DIR\/\(.*\)\/.*.thrift|$ABS_GENCODE_DIR/\1|" | \
 			sort | uniq | xargs
 		)
-		"$RESOLVE_I64_BINARY" "$thrift_file"
+		"$RESOLVE_I64_BINARY" "$thrift_file" "/idl/"  "json.type"
 		target_dirs+=" $gen_code_dir"
 	done
 done
