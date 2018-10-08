@@ -85,7 +85,7 @@ func getDirName() string {
 
 func main() {
 	thriftFile := os.Args[1]
-	stripPath := os.Args[2]
+	idlPathPrefix := os.Args[2]
 	annotationJSType := os.Args[3]
 
 	module, err := compile.Compile(thriftFile)
@@ -95,7 +95,7 @@ func main() {
 	meta := &Meta{}
 
 	s := strings.TrimSuffix(thriftFile, ".thrift")
-	s = strings.Replace(s, stripPath, "/build/gen-code/", 1)
+	s = strings.Replace(s, idlPathPrefix, "/build/gen-code/", 1)
 	meta.PackageName = filepath.Base(s)
 
 	for _, typeDef := range module.Types {
