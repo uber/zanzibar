@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 - JSON static configuration support is now deprecated. 
-- `JSONFileRaw` and `JSONFileName` fields of [`ModuleInstance`](https://godoc.org/github.com/uber/zanzibar/codegen#ModuleInstance) now deprecated. When YAML configuration is used, `JSONFileRaw` and `JSONFileName` will be zero-valued. 
+- `JSONFileRaw` and `JSONFileName` fields of [`ModuleInstance`](https://godoc.org/github.com/uber/zanzibar/codegen#ModuleInstance) are now deprecated. When YAML configuration is used, `JSONFileRaw` and `JSONFileName` will be zero-valued. 
 - Exported types like [`ClientClassConfig`](https://godoc.org/github.com/uber/zanzibar/codegen#ModuleInstance) will have their JSON tags removed in the future. 
 
 ### Fixed
