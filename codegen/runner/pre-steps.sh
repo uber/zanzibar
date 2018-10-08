@@ -19,7 +19,8 @@ fi
 BUILD_DIR="$1"
 CONFIG_DIR="$2"
 ANNOPREFIX="$3"
-IDL_DIR="${4:-$CONFIG_DIR/idl}"
+
+IDL_DIR="${IDL_DIR:-$CONFIG_DIR/idl}"
 
 if [ -z "$4" ]; then
 	THRIFTRW_SRCS="$(find "$IDL_DIR" -name '*.thrift')"
