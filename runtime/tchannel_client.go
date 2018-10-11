@@ -68,7 +68,6 @@ type TChannelClient struct {
 	routingKey        *string
 	Loggers           map[string]*zap.Logger
 	Scopes            map[string]tally.Scope
-	metrics           map[string]*OutboundTChannelMetrics
 }
 
 type tchannelOutboundCall struct {
@@ -95,7 +94,6 @@ func NewTChannelClient(
 	numMethods := len(opt.MethodNames)
 	loggers := make(map[string]*zap.Logger, numMethods)
 	scopes := make(map[string]tally.Scope, numMethods)
-	metrics := make(map[string]*OutboundTChannelMetrics, numMethods)
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String("clientID", opt.ClientID),
@@ -103,13 +101,13 @@ func NewTChannelClient(
 			zap.String("serviceName", opt.ServiceName),
 			zap.String("serviceMethod", serviceMethod),
 		)
+
 		scopes[serviceMethod] = scope.Tagged(map[string]string{
 			"client":          opt.ClientID,
 			"method":          methodName,
 			"target-service":  opt.ServiceName,
 			"target-endpoint": serviceMethod,
 		})
-		metrics[serviceMethod] = NewOutboundTChannelMetrics(scopes[serviceMethod])
 	}
 
 	client := &TChannelClient{
@@ -123,7 +121,6 @@ func NewTChannelClient(
 		routingKey:        opt.RoutingKey,
 		Loggers:           loggers,
 		Scopes:            scopes,
-		metrics:           metrics,
 	}
 	if opt.AltSubchannelName != "" {
 		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
@@ -140,6 +137,8 @@ func (c *TChannelClient) Call(
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
+	scopeFields := GetScopeFieldsFromCtx(ctx)
+	scope := c.Scopes[serviceMethod].Tagged(scopeFields)
 
 	call := &tchannelOutboundCall{
 		client:        c,
@@ -147,7 +146,7 @@ func (c *TChannelClient) Call(
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
 		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics[serviceMethod],
+		metrics:       NewOutboundTChannelMetrics(scope),
 	}
 
 	return c.call(ctx, call, reqHeaders, req, resp, false)
@@ -161,6 +160,8 @@ func (c *TChannelClient) CallThruAltChannel(
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
+	scopeFields := GetScopeFieldsFromCtx(ctx)
+	scope := c.Scopes[serviceMethod].Tagged(scopeFields)
 
 	call := &tchannelOutboundCall{
 		client:        c,
@@ -168,7 +169,7 @@ func (c *TChannelClient) CallThruAltChannel(
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
 		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics[serviceMethod],
+		metrics:       NewOutboundTChannelMetrics(scope),
 	}
 
 	return c.call(ctx, call, reqHeaders, req, resp, true)

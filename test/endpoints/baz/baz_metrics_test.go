@@ -176,6 +176,8 @@ func TestCallMetrics(t *testing.T) {
 		"method":          "Call",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
+		"endpointid":      "baz",
+		"handlerid":       "call",
 	}
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)

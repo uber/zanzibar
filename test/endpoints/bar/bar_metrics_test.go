@@ -126,17 +126,21 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	httpClientTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"client":  "bar",
-		"method":  "Normal",
+		"env":        "test",
+		"service":    "test-gateway",
+		"client":     "bar",
+		"method":     "Normal",
+		"endpointid": "bar",
+		"handlerid":  "normal",
 	}
 	cStatusTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"client":  "bar",
-		"method":  "Normal",
-		"status":  "200",
+		"env":        "test",
+		"service":    "test-gateway",
+		"client":     "bar",
+		"method":     "Normal",
+		"status":     "200",
+		"endpointid": "bar",
+		"handlerid":  "normal",
 	}
 
 	for _, name := range httpClientNames {

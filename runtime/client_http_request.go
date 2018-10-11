@@ -56,13 +56,20 @@ func NewClientHTTPRequest(
 	clientID, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
+	scope := client.Scope.Tagged(map[string]string{
+		"client": clientID,
+		"method": methodName,
+	})
+
+	scopeFields := GetScopeFieldsFromCtx(ctx)
+	scope = scope.Tagged(scopeFields)
 	req := &ClientHTTPRequest{
 		ClientID:       clientID,
 		MethodName:     methodName,
 		client:         client,
 		Logger:         client.loggers[methodName],
 		ContextLogger:  NewContextLogger(client.loggers[methodName]),
-		metrics:        client.metrics[methodName],
+		metrics:        NewOutboundHTTPMetrics(scope),
 		defaultHeaders: client.DefaultHeaders,
 		ctx:            ctx,
 	}

@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
@@ -39,6 +38,7 @@ const rawClient = "raw"
 // method information (because there isn't a method anyway), but the Thrift service
 // and method information is still there.
 type RawTChannelClient struct {
+	scope   tally.Scope
 	tc      *TChannelClient
 	logger  *zap.Logger
 	metrics *OutboundTChannelMetrics
@@ -69,6 +69,7 @@ func NewRawTChannelClient(
 	}))
 
 	return &RawTChannelClient{
+		scope:   scope,
 		tc:      NewTChannelClient(ch, logger, scope, opt),
 		logger:  l,
 		metrics: m,
@@ -83,6 +84,11 @@ func (r *RawTChannelClient) Call(
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
+	scope := r.scope
+	if val, ok := r.tc.Scopes[serviceMethod]; ok {
+		scopeFields := GetScopeFieldsFromCtx(ctx)
+		scope = val.Tagged(scopeFields)
+	}
 
 	call := &tchannelOutboundCall{
 		client:        r.tc,
@@ -96,7 +102,7 @@ func (r *RawTChannelClient) Call(
 	if m, ok := r.tc.methodNames[serviceMethod]; ok {
 		call.methodName = m
 		call.logger = r.tc.Loggers[serviceMethod]
-		call.metrics = r.tc.metrics[serviceMethod]
+		call.metrics = NewOutboundTChannelMetrics(scope)
 	}
 
 	return r.tc.call(ctx, call, reqHeaders, req, resp, false)

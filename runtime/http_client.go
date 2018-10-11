@@ -36,7 +36,6 @@ type HTTPClient struct {
 	DefaultHeaders map[string]string
 	loggers        map[string]*zap.Logger
 	Scope          tally.Scope
-	metrics        map[string]*OutboundHTTPMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -61,16 +60,11 @@ func NewHTTPClient(
 	timeout time.Duration,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
-	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
 	for _, methodName := range methodNames {
 		loggers[methodName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String("methodName", methodName),
 		)
-		metrics[methodName] = NewOutboundHTTPMetrics(scope.Tagged(map[string]string{
-			"client": clientID,
-			"method": methodName,
-		}))
 	}
 	return &HTTPClient{
 		Client: &http.Client{
@@ -85,6 +79,5 @@ func NewHTTPClient(
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
 		Scope:          scope,
-		metrics:        metrics,
 	}
 }

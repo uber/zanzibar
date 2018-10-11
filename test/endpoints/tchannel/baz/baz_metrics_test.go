@@ -29,7 +29,7 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	zanzibar "github.com/uber/zanzibar/runtime"
+	"github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -179,9 +179,11 @@ func TestCallMetrics(t *testing.T) {
 		"env":             "test",
 		"service":         "test-gateway",
 		"client":          "baz",
-		"method":          "Call",
+		"method":          "SimpleService__Call",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
+		"endpointid":      "bazTChannel",
+		"handlerid":       "call",
 	}
 
 	for _, name := range clientNames {
