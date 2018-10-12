@@ -16,6 +16,7 @@ if [ -z "$3" ]; then
 	exit 1
 fi
 
+YQ=$(pip show yq | grep Location | cut -d' ' -f2 | sed 's/lib\/.*/bin\/yq/')
 BUILD_DIR="$1"
 CONFIG_DIR="$2"
 ANNOPREFIX="$3"
@@ -91,7 +92,7 @@ for config_file in ${config_files}; do
 		continue
 	fi
 
-	processor="yq"
+	processor="$YQ"
 	if [[ $config_file == *.json ]]; then
 		processor="jq"
 	fi
@@ -101,7 +102,7 @@ for config_file in ${config_files}; do
 	dir=$(dirname "$config_file")
 	yaml_files=$(find "$dir" -name "*.json" -o -name "*.yaml")
 	for yaml_file in ${yaml_files}; do
-		processor="yq"
+		processor="$YQ"
 		if [[ $yaml_file == *.json ]]; then
 			processor="jq"
 		fi
