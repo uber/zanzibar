@@ -155,7 +155,7 @@ func (h *{{$handlerName}}) Handle(
 			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
-		res.Success = r
+		res.Success = {{.RefResponse "r"}}
 	{{else -}}
 		if err != nil {
 			switch v := err.(type) {
@@ -183,7 +183,7 @@ func (h *{{$handlerName}}) Handle(
 					)
 			}
 		} {{if ne .ResponseType "" -}} else {
-			res.Success = r
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 

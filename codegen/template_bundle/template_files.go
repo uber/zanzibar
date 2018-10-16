@@ -2547,7 +2547,7 @@ func (h *{{$handlerName}}) Handle(
 			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
-		res.Success = r
+		res.Success = {{.RefResponse "r"}}
 	{{else -}}
 		if err != nil {
 			switch v := err.(type) {
@@ -2575,7 +2575,7 @@ func (h *{{$handlerName}}) Handle(
 					)
 			}
 		} {{if ne .ResponseType "" -}} else {
-			res.Success = r
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 
@@ -2664,7 +2664,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8091, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8129, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
