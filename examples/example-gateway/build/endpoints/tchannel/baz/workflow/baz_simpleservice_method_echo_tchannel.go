@@ -21,20 +21,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package workflow
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	"context"
+
+	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the example middleware module
-type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
-	Client  *ClientDependencies
-}
-
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Baz bazclientgenerated.Client
+// SimpleServiceEchoWorkflow defines the interface for SimpleServiceEcho workflow
+type SimpleServiceEchoWorkflow interface {
+	Handle(
+		ctx context.Context,
+		reqHeaders zanzibar.Header,
+		r *endpointsTchannelBazBaz.SimpleService_Echo_Args,
+	) (string, zanzibar.Header, error)
 }

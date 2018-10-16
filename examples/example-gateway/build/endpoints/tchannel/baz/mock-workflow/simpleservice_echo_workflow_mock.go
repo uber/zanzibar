@@ -39,8 +39,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
-func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallWorkflow, *MockClientNodes) {
+// NewSimpleServiceEchoWorkflowMock creates a workflow with mock clients
+func NewSimpleServiceEchoWorkflowMock(t *testing.T) (workflow.SimpleServiceEchoWorkflow, *MockClientNodes) {
 	ctrl := gomock.NewController(t)
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
@@ -62,7 +62,7 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 		Default: initializedDefaultDependencies,
 	})
 
-	w := baztchannelendpointstatic.NewSimpleServiceCallWorkflow(
+	w := baztchannelendpointstatic.NewSimpleServiceEchoWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{

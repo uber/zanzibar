@@ -31,16 +31,13 @@ import (
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
+	example_tchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
-
-	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
-
-	example_tchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.

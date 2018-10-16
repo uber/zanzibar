@@ -21,51 +21,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package panictchannelendpoint
+package baztchannelendpoint
 
 import (
 	"context"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
+	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
 )
 
-// NewSimpleServiceAnotherCallHandler creates a handler to be registered with a thrift server.
-func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServiceAnotherCallHandler {
-	handler := &SimpleServiceAnotherCallHandler{
+// NewSimpleServiceEchoHandler creates a handler to be registered with a thrift server.
+func NewSimpleServiceEchoHandler(deps *module.Dependencies) *SimpleServiceEchoHandler {
+	handler := &SimpleServiceEchoHandler{
 		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		deps.Default.Logger, deps.Default.Scope,
-		"panicTChannel", "call", "SimpleService::AnotherCall",
+		"bazTChannel", "echo", "SimpleService::Echo",
 		handler,
 	)
 
 	return handler
 }
 
-// SimpleServiceAnotherCallHandler is the handler for "SimpleService::AnotherCall".
-type SimpleServiceAnotherCallHandler struct {
+// SimpleServiceEchoHandler is the handler for "SimpleService::Echo".
+type SimpleServiceEchoHandler struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
-func (h *SimpleServiceAnotherCallHandler) Register(g *zanzibar.Gateway) error {
+func (h *SimpleServiceEchoHandler) Register(g *zanzibar.Gateway) error {
 	return g.TChannelRouter.Register(h.endpoint)
 }
 
-// Handle handles RPC call of "SimpleService::AnotherCall".
-func (h *SimpleServiceAnotherCallHandler) Handle(
+// Handle handles RPC call of "SimpleService::Echo".
+func (h *SimpleServiceEchoHandler) Handle(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	wireValue *wire.Value,
@@ -89,16 +88,10 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 	}()
 
 	wfReqHeaders := zanzibar.ServerTChannelHeader(reqHeaders)
-	if err := wfReqHeaders.EnsureContext(ctx, []string{"x-uuid", "x-token"}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) missing request headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
-	}
 
-	var res endpointsTchannelBazBaz.SimpleService_AnotherCall_Result
+	var res endpointsTchannelBazBaz.SimpleService_Echo_Result
 
-	var req endpointsTchannelBazBaz.SimpleService_AnotherCall_Args
+	var req endpointsTchannelBazBaz.SimpleService_Echo_Args
 	if err := req.FromWire(*wireValue); err != nil {
 		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
@@ -112,9 +105,9 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 			return h.redirectToDeputy(ctx, reqHeaders, hostPort, &req, &res)
 		}
 	}
-	workflow := customBaz.NewSimpleServiceAnotherCallWorkflow(h.Deps)
+	workflow := customBaz.NewSimpleServiceEchoWorkflow(h.Deps)
 
-	wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
+	r, wfResHeaders, err := workflow.Handle(ctx, wfReqHeaders, &req)
 
 	resHeaders := map[string]string{}
 	if wfResHeaders != nil {
@@ -124,56 +117,21 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 	}
 
 	if err != nil {
-		switch v := err.(type) {
-		case *endpointsTchannelBazBaz.AuthErr:
-			h.Deps.Default.ContextLogger.Warn(
-				ctx,
-				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
-				zap.Error(err),
-			)
-			if v == nil {
-				return false, nil, resHeaders, errors.Errorf(
-					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
-					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-				)
-			}
-			res.AuthErr = v
-		default:
-			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
-			return false, nil, resHeaders, errors.Wrapf(
-				err, "%s.%s (%s) handler returned error",
-				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-			)
-		}
+		h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
+		return false, nil, resHeaders, err
 	}
-	if wfResHeaders == nil {
-		return false, nil, nil, errors.Wrapf(
-			errors.Errorf(
-				"Missing mandatory headers: %s",
-				strings.Join([]string{"some-res-header"}, ", "),
-			),
-			"%s.%s (%s) missing response headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
-	}
-
-	if err := wfResHeaders.EnsureContext(ctx, []string{"some-res-header"}, h.Deps.Default.ContextLogger); err != nil {
-		return false, nil, nil, errors.Wrapf(
-			err, "%s.%s (%s) missing response headers",
-			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
-		)
-	}
+	res.Success = &r
 
 	return err == nil, &res, resHeaders, nil
 }
 
 // redirectToDeputy sends the request to deputy hostPort
-func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
+func (h *SimpleServiceEchoHandler) redirectToDeputy(
 	ctx context.Context,
 	reqHeaders map[string]string,
 	hostPort string,
-	req *endpointsTchannelBazBaz.SimpleService_AnotherCall_Args,
-	res *endpointsTchannelBazBaz.SimpleService_AnotherCall_Result,
+	req *endpointsTchannelBazBaz.SimpleService_Echo_Args,
+	res *endpointsTchannelBazBaz.SimpleService_Echo_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
 	var routingKey string
 	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
@@ -190,7 +148,7 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 	)
 
 	methodNames := map[string]string{
-		"SimpleService::AnotherCall": "AnotherCall",
+		"SimpleService::Echo": "Echo",
 	}
 
 	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
@@ -209,7 +167,7 @@ func (h *SimpleServiceAnotherCallHandler) redirectToDeputy(
 		},
 	)
 
-	success, respHeaders, err := client.Call(ctx, "SimpleService", "AnotherCall", reqHeaders, req, res)
+	success, respHeaders, err := client.Call(ctx, "SimpleService", "Echo", reqHeaders, req, res)
 	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }

@@ -24,10 +24,16 @@
 package mockpanicworkflow
 
 import (
-	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
+	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
+	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies for the panic endpoint module
 type MockClientNodes struct {
-	Multi *multiclientgenerated.MockClient
+	Multi *multiclientgeneratedmock.MockClient
+}
+
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Multi multiclientgenerated.Client
 }

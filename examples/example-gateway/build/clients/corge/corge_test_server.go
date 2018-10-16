@@ -26,10 +26,9 @@ package corgeclient
 import (
 	"context"
 
+	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
-
-	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
 )
 
 // CorgeEchoStringFunc is the handler function for "echoString" method of thrift service "Corge".

@@ -24,10 +24,16 @@
 package mockcontactsworkflow
 
 import (
-	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
+	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
+	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies for the contacts endpoint module
 type MockClientNodes struct {
-	Contacts *contactsclientgenerated.MockClientWithFixture
+	Contacts *contactsclientgeneratedmock.MockClientWithFixture
+}
+
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Contacts contactsclientgenerated.Client
 }

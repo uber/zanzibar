@@ -27,20 +27,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
-
-	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
 	panicendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
-
-// clientDependenciesNodes contains client dependencies
-type clientDependenciesNodes struct {
-	Multi multiclientgenerated.Client
-}
 
 // NewServiceCFrontHelloWorkflowMock creates a workflow with mock clients
 func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHelloWorkflow, *MockClientNodes) {

@@ -34,6 +34,10 @@ service SimpleService {
     zanzibar.handler = "baz.compare"
   )
 
+  string Echo(
+    1: required string msg
+  )
+
   // no response body
   void Call(
     1: required BazRequest arg

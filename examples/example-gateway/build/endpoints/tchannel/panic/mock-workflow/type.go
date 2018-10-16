@@ -24,10 +24,16 @@
 package mockpanictchannelworkflow
 
 import (
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 )
 
 // MockClientNodes contains mock client dependencies for the panicTChannel endpoint module
 type MockClientNodes struct {
-	Baz *bazclientgenerated.MockClient
+	Baz *bazclientgeneratedmock.MockClient
+}
+
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Baz bazclientgenerated.Client
 }

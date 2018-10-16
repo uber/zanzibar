@@ -32,7 +32,6 @@ import (
 	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

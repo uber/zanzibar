@@ -2547,7 +2547,7 @@ func (h *{{$handlerName}}) Handle(
 			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
-		res.Success = r
+		res.Success = {{.RefResponse "r"}}
 	{{else -}}
 		if err != nil {
 			switch v := err.(type) {
@@ -2575,7 +2575,7 @@ func (h *{{$handlerName}}) Handle(
 					)
 			}
 		} {{if ne .ResponseType "" -}} else {
-			res.Success = r
+			res.Success = {{.RefResponse "r"}}
 		} {{end -}}
 	{{end}}
 
@@ -2664,7 +2664,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8091, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8129, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2963,7 +2963,6 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
-	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}}mock "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
 	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
@@ -2978,17 +2977,6 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
 )
-
-{{range $idx, $className := $instance.DependencyOrder -}}
-{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}DependenciesNodes contains {{$className}} dependencies
-type {{$className}}DependenciesNodes struct {
-	{{ range $idx, $dependency := $moduleInstances -}}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
-	{{end -}}
-}
-{{end -}}
-
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
@@ -3062,35 +3050,52 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4945, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4374, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
-{{$clientsWithFixture := .ClientsWithFixture -}}
+{{$leafWithFixture := .ClientsWithFixture -}}
 {{$leafClass := index $instance.DependencyOrder 0 -}}
 {{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
 {{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
-	{{range $idx, $moduleInstance := $mockDeps -}}
-	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
-	{{end}}
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType $leafClass -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}}mock "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
+	{{else -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end -}}
 )
 
 // {{$typeName}} contains mock {{$leafClass}} dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type {{$typeName}} struct {
 	{{range $idx, $moduleInstance := $mockDeps -}}
 	{{- $pkgInfo := $moduleInstance.PackageInfo }}
-	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
-	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
+	{{- if (index $leafWithFixture $moduleInstance.InstanceName) }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}mock.Mock{{$pkgInfo.ExportType}}WithFixture
 	{{- else }}
-	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}mock.Mock{{$pkgInfo.ExportType}}
 	{{- end }}
 	{{- end }}
 }
+
+{{range $idx, $className := $instance.DependencyOrder -}}
+{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
+// {{$className}}DependenciesNodes contains {{$className}} dependencies
+type {{$className}}DependenciesNodes struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}
 `)
 
 func workflow_mock_clients_typeTmplBytes() ([]byte, error) {
@@ -3103,7 +3108,7 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1087, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1922, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
