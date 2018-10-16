@@ -31,6 +31,7 @@ import (
 	multiendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi"
 	panicendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
+	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -47,6 +48,7 @@ type EndpointDependencies struct {
 	Baz           bazendpointgenerated.Endpoint
 	BazTChannel   baztchannelendpointgenerated.Endpoint
 	Contacts      contactsendpointgenerated.Endpoint
+	Echo          echoendpointgenerated.Endpoint
 	Googlenow     googlenowendpointgenerated.Endpoint
 	Multi         multiendpointgenerated.Endpoint
 	Panic         panicendpointgenerated.Endpoint

@@ -49,6 +49,8 @@ import (
 	panicendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	baztchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz"
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
+	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
@@ -88,6 +90,7 @@ type EndpointDependenciesNodes struct {
 	Baz           bazendpointgenerated.Endpoint
 	BazTChannel   baztchannelendpointgenerated.Endpoint
 	Contacts      contactsendpointgenerated.Endpoint
+	Echo          echoendpointgenerated.Endpoint
 	Googlenow     googlenowendpointgenerated.Endpoint
 	Multi         multiendpointgenerated.Endpoint
 	Panic         panicendpointgenerated.Endpoint
@@ -176,6 +179,9 @@ func InitializeDependencies(
 			Contacts: initializedClientDependencies.Contacts,
 		},
 	})
+	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &googlenowendpointmodule.ClientDependencies{
@@ -208,6 +214,7 @@ func InitializeDependencies(
 			Baz:           initializedEndpointDependencies.Baz,
 			BazTChannel:   initializedEndpointDependencies.BazTChannel,
 			Contacts:      initializedEndpointDependencies.Contacts,
+			Echo:          initializedEndpointDependencies.Echo,
 			Googlenow:     initializedEndpointDependencies.Googlenow,
 			Multi:         initializedEndpointDependencies.Multi,
 			Panic:         initializedEndpointDependencies.Panic,

@@ -1,0 +1,6 @@
+config:
+  endpoints:
+  - echo.yaml
+dependencies:
+name: echo
+type: tchannel

@@ -70,6 +70,10 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err != nil {
 		return err
 	}
+	err = deps.Endpoint.Echo.Register(g)
+	if err != nil {
+		return err
+	}
 	err = deps.Endpoint.Googlenow.Register(g)
 	if err != nil {
 		return err
