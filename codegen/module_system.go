@@ -1043,7 +1043,7 @@ func (g *EndpointGenerator) generateEndpointFile(
 
 	targetPath := e.TargetEndpointPath(thriftServiceName, method.Name)
 	if e.EndpointType == "tchannel" {
-		targetPath = strings.TrimRight(targetPath, ".go") + "_tchannel.go"
+		targetPath = strings.TrimSuffix(targetPath, ".go") + "_tchannel.go"
 	}
 	endpointFilePath, err := filepath.Rel(endpointDirectory, targetPath)
 	if err != nil {
