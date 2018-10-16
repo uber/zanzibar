@@ -30,28 +30,15 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
-	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 	baztchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
 )
-
-// clientDependenciesNodes contains client dependencies
-type clientDependenciesNodes struct {
-	Baz  bazclientgenerated.Client
-	Quux quuxclientstatic.Client
-}
-
-// middlewareDependenciesNodes contains middleware dependencies
-type middlewareDependenciesNodes struct {
-	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
-}
 
 // NewSimpleServiceCallWorkflowMock creates a workflow with mock clients
 func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallWorkflow, *MockClientNodes) {

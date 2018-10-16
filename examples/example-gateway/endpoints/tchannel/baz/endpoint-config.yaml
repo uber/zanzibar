@@ -1,6 +1,7 @@
 config:
   endpoints:
   - call.yaml
+  - echo.yaml
   rateLimit: 100
 dependencies:
   client:

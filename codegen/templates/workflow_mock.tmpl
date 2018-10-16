@@ -20,7 +20,6 @@ import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
 	{{if eq $classType $leafClass -}}
-	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
 	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}}mock "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-client"
 	{{if (index $leafWithFixture $moduleInstance.InstanceName) -}}
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
@@ -35,17 +34,6 @@ import (
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
 )
-
-{{range $idx, $className := $instance.DependencyOrder -}}
-{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
-// {{$className}}DependenciesNodes contains {{$className}} dependencies
-type {{$className}}DependenciesNodes struct {
-	{{ range $idx, $dependency := $moduleInstances -}}
-	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
-	{{end -}}
-}
-{{end -}}
-
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {

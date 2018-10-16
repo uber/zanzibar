@@ -1,24 +1,41 @@
 {{$instance := .Instance -}}
-{{$clientsWithFixture := .ClientsWithFixture -}}
+{{$leafWithFixture := .ClientsWithFixture -}}
 {{$leafClass := index $instance.DependencyOrder 0 -}}
 {{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
 {{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
 
 import (
-	{{range $idx, $moduleInstance := $mockDeps -}}
-	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}} "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
-	{{end}}
+	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
+	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType $leafClass -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{$moduleInstance.PackageInfo.GeneratedPackageAlias}}mock "{{$moduleInstance.PackageInfo.GeneratedPackagePath}}/mock-{{$leafClass}}"
+	{{else -}}
+	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
+	{{end -}}
+	{{end -}}
 )
 
 // {{$typeName}} contains mock {{$leafClass}} dependencies for the {{$instance.InstanceName}} {{$instance.ClassName}} module
 type {{$typeName}} struct {
 	{{range $idx, $moduleInstance := $mockDeps -}}
 	{{- $pkgInfo := $moduleInstance.PackageInfo }}
-	{{- if (index $clientsWithFixture $moduleInstance.InstanceName) }}
-	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}WithFixture
+	{{- if (index $leafWithFixture $moduleInstance.InstanceName) }}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}mock.Mock{{$pkgInfo.ExportType}}WithFixture
 	{{- else }}
-	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}.Mock{{$pkgInfo.ExportType}}
+	{{$pkgInfo.QualifiedInstanceName}} *{{$pkgInfo.GeneratedPackageAlias}}mock.Mock{{$pkgInfo.ExportType}}
 	{{- end }}
 	{{- end }}
 }
+
+{{range $idx, $className := $instance.DependencyOrder -}}
+{{$moduleInstances := (index $instance.RecursiveDependencies $className) -}}
+// {{$className}}DependenciesNodes contains {{$className}} dependencies
+type {{$className}}DependenciesNodes struct {
+	{{ range $idx, $dependency := $moduleInstances -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
+}
+{{end -}}

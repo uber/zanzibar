@@ -30,17 +30,11 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/workflow"
 	panictchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
 )
-
-// clientDependenciesNodes contains client dependencies
-type clientDependenciesNodes struct {
-	Baz bazclientgenerated.Client
-}
 
 // NewSimpleServiceAnotherCallWorkflowMock creates a workflow with mock clients
 func NewSimpleServiceAnotherCallWorkflowMock(t *testing.T) (workflow.SimpleServiceAnotherCallWorkflow, *MockClientNodes) {
