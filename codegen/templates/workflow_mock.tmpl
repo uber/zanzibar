@@ -4,7 +4,10 @@
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$leafClass := "" -}}
+{{if (len $instance.DependencyOrder) -}}
+{{$leafClass = index $instance.DependencyOrder 0 -}}
+{{ end -}}
 {{$mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -37,13 +40,16 @@ import (
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
+	{{ if (len $instance.DependencyOrder) -}}
 	ctrl := gomock.NewController(t)
+	{{ else -}}
+	{{camel $mockType}} := &{{$mockType}}{}
+	{{ end }}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies {
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
-
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}

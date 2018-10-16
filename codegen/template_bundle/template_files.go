@@ -2947,7 +2947,10 @@ var _workflow_mockTmpl = []byte(`{{$instance := .Instance -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$leafClass := "" -}}
+{{if (len $instance.DependencyOrder) -}}
+{{$leafClass = index $instance.DependencyOrder 0 -}}
+{{ end -}}
 {{$mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -2980,13 +2983,16 @@ import (
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
+	{{ if (len $instance.DependencyOrder) -}}
 	ctrl := gomock.NewController(t)
+	{{ else -}}
+	{{camel $mockType}} := &{{$mockType}}{}
+	{{ end }}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies {
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
-
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
@@ -3050,14 +3056,17 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4374, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4555, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$leafClass := "" -}}
+{{if (len $instance.DependencyOrder) -}}
+{{$leafClass = index $instance.DependencyOrder 0 -}}
+{{ end -}}
 {{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
 {{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
@@ -3108,7 +3117,7 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1922, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1996, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
