@@ -26,12 +26,10 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 )
 

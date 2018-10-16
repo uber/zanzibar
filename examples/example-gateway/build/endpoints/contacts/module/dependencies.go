@@ -25,7 +25,6 @@ package module
 
 import (
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

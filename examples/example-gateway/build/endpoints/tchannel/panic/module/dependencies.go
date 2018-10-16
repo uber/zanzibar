@@ -25,7 +25,6 @@ package module
 
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

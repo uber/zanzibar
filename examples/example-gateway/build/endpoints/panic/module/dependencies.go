@@ -25,7 +25,6 @@ package module
 
 import (
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
