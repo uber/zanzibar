@@ -4,10 +4,7 @@
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := "" -}}
-{{if (len $instance.DependencyOrder) -}}
-{{$leafClass = index $instance.DependencyOrder 0 -}}
-{{ end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 

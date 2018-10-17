@@ -1,9 +1,6 @@
 {{$instance := .Instance -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := "" -}}
-{{if (len $instance.DependencyOrder) -}}
-{{$leafClass = index $instance.DependencyOrder 0 -}}
-{{ end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
 {{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow

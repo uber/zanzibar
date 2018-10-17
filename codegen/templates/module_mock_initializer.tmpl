@@ -1,9 +1,6 @@
 {{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
-{{if not (eq $leafClass "client") -}}
-{{$leafClass = "" -}}
-{{end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 

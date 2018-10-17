@@ -51,18 +51,19 @@ func (*defaultAssetCollection) Asset(assetName string) ([]byte, error) {
 }
 
 var defaultFuncMap = tmpl.FuncMap{
-	"lower":         strings.ToLower,
-	"title":         strings.Title,
-	"fullTypeName":  fullTypeName,
-	"camel":         CamelCase,
-	"split":         strings.Split,
-	"dec":           decrement,
-	"basePath":      filepath.Base,
-	"pascal":        PascalCase,
-	"isPointerType": IsPointerType,
-	"unref":         Unref,
-	"lintAcronym":   LintAcronym,
-	"args":          args,
+	"lower":                strings.ToLower,
+	"title":                strings.Title,
+	"fullTypeName":         fullTypeName,
+	"camel":                CamelCase,
+	"split":                strings.Split,
+	"dec":                  decrement,
+	"basePath":             filepath.Base,
+	"pascal":               PascalCase,
+	"isPointerType":        IsPointerType,
+	"unref":                Unref,
+	"lintAcronym":          LintAcronym,
+	"args":                 args,
+	"firstIsClientOrEmpty": firstIsClientOrEmpty,
 }
 
 func fullTypeName(typeName, packageName string) string {
@@ -70,6 +71,14 @@ func fullTypeName(typeName, packageName string) string {
 		return typeName
 	}
 	return packageName + "." + typeName
+}
+
+// work around since text/template variables can not be overwritten until go1.11
+func firstIsClientOrEmpty(list []string) string {
+	if len(list) > 0 && list[0] == "client" {
+		return "client"
+	}
+	return ""
 }
 
 func decrement(num int) int {

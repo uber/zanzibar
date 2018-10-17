@@ -1650,10 +1650,7 @@ func module_initializerTmpl() (*asset, error) {
 
 var _module_mock_initializerTmpl = []byte(`{{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
-{{if not (eq $leafClass "client") -}}
-{{$leafClass = "" -}}
-{{end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -1764,7 +1761,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4308, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4251, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1839,10 +1836,7 @@ func serviceTmpl() (*asset, error) {
 }
 
 var _service_mockTmpl = []byte(`{{- $instance := . -}}
-{{- $leafClass := index .DependencyOrder 0 -}}
-{{if not (eq $leafClass "client") -}}
-{{$leafClass = "" -}}
-{{end -}}
+{{- $leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{- $mock := printf "Mock%ss" (title $leafClass) -}}
 
@@ -2031,7 +2025,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4408, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4360, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2957,10 +2951,7 @@ var _workflow_mockTmpl = []byte(`{{$instance := .Instance -}}
 {{$serviceMethod := printf "%s%s" (title $espec.ThriftServiceName) (title $espec.ThriftMethodName) -}}
 {{$workflowInterface := printf "%sWorkflow" $serviceMethod -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := "" -}}
-{{if (len $instance.DependencyOrder) -}}
-{{$leafClass = index $instance.DependencyOrder 0 -}}
-{{ end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -3066,17 +3057,14 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4555, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4494, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
 var _workflow_mock_clients_typeTmpl = []byte(`{{$instance := .Instance -}}
 {{$leafWithFixture := .ClientsWithFixture -}}
-{{$leafClass := "" -}}
-{{if (len $instance.DependencyOrder) -}}
-{{$leafClass = index $instance.DependencyOrder 0 -}}
-{{ end -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$typeName := printf "Mock%sNodes" (title $leafClass) -}}
 {{$mockDeps := index $instance.RecursiveDependencies $leafClass -}}
 package mock{{lower (camel $instance.InstanceName)}}workflow
@@ -3127,7 +3115,7 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1996, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock_clients_type.tmpl", size: 1935, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
