@@ -1,6 +1,6 @@
 {{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
-{{$leafClass := index $instance.DependencyOrder 0 -}}
+{{$leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -47,6 +47,10 @@ func InitializeDependenciesMock(
 	ctrl *gomock.Controller,
 ) (*{{$classPkg}}.DependenciesTree, *{{$classPkg}}.Dependencies, *{{$mockDeps}}) {
 	tree := &{{$classPkg}}.DependenciesTree{}
+
+	{{ if eq $leafClass "" -}}
+	{{camel $mockDeps}} := &{{$mockDeps}}{}
+	{{ end -}}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		ContextLogger: g.ContextLogger,
