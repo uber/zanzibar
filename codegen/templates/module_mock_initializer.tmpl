@@ -1,7 +1,7 @@
 {{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
 {{$leafClass := index $instance.DependencyOrder 0 -}}
-{{if not (eq $leafClass "Client") -}}
+{{if not (eq $leafClass "client") -}}
 {{$leafClass = "" -}}
 {{end -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}

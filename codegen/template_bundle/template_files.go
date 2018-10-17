@@ -1651,7 +1651,7 @@ func module_initializerTmpl() (*asset, error) {
 var _module_mock_initializerTmpl = []byte(`{{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
 {{$leafClass := index $instance.DependencyOrder 0 -}}
-{{if not (eq $leafClass "Client") -}}
+{{if not (eq $leafClass "client") -}}
 {{$leafClass = "" -}}
 {{end -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
@@ -1840,7 +1840,7 @@ func serviceTmpl() (*asset, error) {
 
 var _service_mockTmpl = []byte(`{{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
-{{if not (eq $leafClass "Client") -}}
+{{if not (eq $leafClass "client") -}}
 {{$leafClass = "" -}}
 {{end -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
