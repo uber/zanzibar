@@ -1,0 +1,6 @@
+config: {}
+dependencies:
+  endpoint:
+  - echo
+name: echo-gateway
+type: gateway

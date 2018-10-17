@@ -21,17 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package examplegatewayservicegenerated
+package echogatewayservicegenerated
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree re-exported for convenience.
 type DependenciesTree module.DependenciesTree
 
-// CreateGateway creates a new instances of the example-gateway
+// CreateGateway creates a new instances of the echo-gateway
 // service with the specified config
 func CreateGateway(
 	config *zanzibar.StaticConfig,
@@ -54,35 +54,7 @@ func CreateGateway(
 // RegisterDeps registers direct dependencies of the service
 func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	var err error
-	err = deps.Endpoint.Bar.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.Baz.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.BazTChannel.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.Contacts.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.Googlenow.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.Multi.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.Panic.Register(g)
-	if err != nil {
-		return err
-	}
-	err = deps.Endpoint.PanicTChannel.Register(g)
+	err = deps.Endpoint.Echo.Register(g)
 	if err != nil {
 		return err
 	}

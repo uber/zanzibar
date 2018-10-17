@@ -6,7 +6,6 @@ dependencies:
   - contacts
   - googlenow
   - bazTChannel
-  - echo
   - multi
   - panic
   - panicTChannel

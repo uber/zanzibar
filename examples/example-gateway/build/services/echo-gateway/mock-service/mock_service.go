@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package examplegatewayservicegeneratedmock
+package echogatewayservicegeneratedmock
 
 import (
 	"context"
@@ -35,7 +35,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
-	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	service "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway"
 	"github.com/uber/zanzibar/runtime"
 )
 
