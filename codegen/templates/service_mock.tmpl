@@ -1,5 +1,8 @@
 {{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
+{{if not (eq $leafClass "Client") -}}
+{{$leafClass = "" -}}
+{{end -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{- $mock := printf "Mock%ss" (title $leafClass) -}}
 

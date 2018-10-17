@@ -1651,6 +1651,9 @@ func module_initializerTmpl() (*asset, error) {
 var _module_mock_initializerTmpl = []byte(`{{$instance := .Instance -}}
 {{$leafWithFixture := .LeafWithFixture -}}
 {{$leafClass := index $instance.DependencyOrder 0 -}}
+{{if not (eq $leafClass "Client") -}}
+{{$leafClass = "" -}}
+{{end -}}
 {{$mockDeps := printf "Mock%sNodes" (title $leafClass) -}}
 {{$classPkg := "module" -}}
 
@@ -1697,6 +1700,10 @@ func InitializeDependenciesMock(
 	ctrl *gomock.Controller,
 ) (*{{$classPkg}}.DependenciesTree, *{{$classPkg}}.Dependencies, *{{$mockDeps}}) {
 	tree := &{{$classPkg}}.DependenciesTree{}
+
+	{{ if eq $leafClass "" -}}
+	{{camel $mockDeps}} := &{{$mockDeps}}{}
+	{{ end -}}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		ContextLogger: g.ContextLogger,
@@ -1757,7 +1764,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4156, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4308, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1833,6 +1840,9 @@ func serviceTmpl() (*asset, error) {
 
 var _service_mockTmpl = []byte(`{{- $instance := . -}}
 {{- $leafClass := index .DependencyOrder 0 -}}
+{{if not (eq $leafClass "Client") -}}
+{{$leafClass = "" -}}
+{{end -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{- $mock := printf "Mock%ss" (title $leafClass) -}}
 
@@ -2021,7 +2031,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4338, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4408, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
