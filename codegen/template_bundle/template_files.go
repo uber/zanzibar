@@ -2290,7 +2290,7 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
 	"github.com/uber/zanzibar/runtime"
-    "go.uber.org/thriftrw/wire"
+	"go.uber.org/thriftrw/wire"
 )
 
 {{$exposedMethods := .ExposedMethods -}}
@@ -2390,7 +2390,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3016, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3013, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
