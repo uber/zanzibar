@@ -36,7 +36,7 @@ const (
 	inboundCallsAppErrors    = "inbound.calls.app-errors"
 	inboundCallsSystemErrors = "inbound.calls.system-errors"
 	inboundCallsErrors       = "inbound.calls.errors"
-	inboundCallsPanic        = "inbound.calls.panic"
+	inboundCallsPanic        = "endpoints.panic"
 	inboundCallsStatus       = "inbound.calls.status"
 
 	// TChannel docs say it emits 'outbound.calls.sent':
@@ -196,7 +196,12 @@ type outboundMetrics struct {
 type commonMetrics struct {
 	Latency tally.Timer   // [inbound|outbound].calls.latency
 	Success tally.Counter // [inbound|outbound].calls.success
-	Panic   tally.Counter // [inbound|outbound].calls.panics
+}
+
+// EndpointMetrics ...
+type EndpointMetrics struct {
+	Panic tally.Counter // [inbound|outbound].calls.panics
+	Recvd tally.Counter // [inbound|outbound].calls.panics
 }
 
 type tchannelMetrics struct {
@@ -235,6 +240,14 @@ type OutboundTChannelMetrics struct {
 	tchannelMetrics
 }
 
+// NewEndpointMetrics returns endpoint panic metrics
+func NewEndpointMetrics(scope tally.Scope) *EndpointMetrics {
+	metrics := EndpointMetrics{}
+	metrics.Panic = scope.Counter(inboundCallsPanic)
+	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+	return &metrics
+}
+
 // NewInboundHTTPMetrics returns inbound HTTP metrics
 func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	metrics := InboundHTTPMetrics{}
@@ -242,7 +255,6 @@ func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
 	metrics.Latency = scope.Timer(inboundCallsLatency)
 	metrics.Success = scope.Counter(inboundCallsSuccess)
 	metrics.Errors = scope.Counter(inboundCallsErrors)
-	metrics.Panic = scope.Counter(inboundCallsPanic)
 	metrics.Status = newHTTPStatusMap(scope, inboundCallsStatus)
 	return &metrics
 }
@@ -254,7 +266,6 @@ func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
 	metrics.Latency = scope.Timer(inboundCallsLatency)
 	metrics.Success = scope.Counter(inboundCallsSuccess)
 	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
-	metrics.Panic = scope.Counter(inboundCallsPanic)
 	metrics.SystemErrors = newsystemErrorMap(scope, inboundCallsSystemErrors)
 	return &metrics
 }

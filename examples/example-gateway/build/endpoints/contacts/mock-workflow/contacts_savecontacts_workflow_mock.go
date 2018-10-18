@@ -27,13 +27,14 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	contactsendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // NewContactsSaveContactsWorkflowMock creates a workflow with mock clients
@@ -44,6 +45,8 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+	contextExtractors := &zanzibar.ContextExtractors{}
+	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{

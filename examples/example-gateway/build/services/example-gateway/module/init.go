@@ -56,6 +56,7 @@ import (
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -102,12 +103,13 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:        g.Logger,
-		ContextLogger: g.ContextLogger,
-		Scope:         g.AllHostScope,
-		Tracer:        g.Tracer,
-		Config:        g.Config,
-		Channel:       g.Channel,
+		Logger:           g.Logger,
+		ContextExtractor: g.ContextExtractor,
+		ContextLogger:    g.ContextLogger,
+		Scope:            g.AllHostScope,
+		Tracer:           g.Tracer,
+		Config:           g.Config,
+		Channel:          g.Channel,
 	}
 
 	initializedClientDependencies := &ClientDependenciesNodes{}

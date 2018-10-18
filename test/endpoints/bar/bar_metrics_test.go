@@ -64,8 +64,12 @@ func TestCallMetrics(t *testing.T) {
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
+	headers := make(map[string]string)
+	headers["regionname"] = "san_francisco"
+	headers["device"] = "ios"
+	headers["deviceversion"] = "carbon"
 	_, err = gateway.MakeRequest(
-		"POST", "/bar/bar-path", nil,
+		"POST", "/bar/bar-path", headers,
 		bytes.NewReader([]byte(`{
 			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
 		}`)),
@@ -84,17 +88,23 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "bar",
-		"handler":  "normal",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	eStatusTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "bar",
-		"handler":  "normal",
-		"status":   "200",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "bar",
+		"handlerid":     "normal",
+		"status":        "200",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)

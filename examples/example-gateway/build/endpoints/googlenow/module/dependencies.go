@@ -25,6 +25,7 @@ package module
 
 import (
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

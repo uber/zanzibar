@@ -25,10 +25,11 @@ package echogatewayservicegeneratedmock
 
 import (
 	"github.com/golang/mock/gomock"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
-	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
+
+	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
+	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 )
 
 // MockNodes contains mock  dependencies
@@ -45,12 +46,13 @@ func InitializeDependenciesMock(
 
 	mockNodes := &MockNodes{}
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		ContextLogger: g.ContextLogger,
-		Logger:        g.Logger,
-		Scope:         g.AllHostScope,
-		Config:        g.Config,
-		Channel:       g.Channel,
-		Tracer:        g.Tracer,
+		ContextExtractor: g.ContextExtractor,
+		ContextLogger:    g.ContextLogger,
+		Logger:           g.Logger,
+		Scope:            g.AllHostScope,
+		Config:           g.Config,
+		Channel:          g.Channel,
+		Tracer:           g.Tracer,
 	}
 
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}

@@ -31,10 +31,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
-	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+
+	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 )
 
 func TestTransHeadersTypeSuccessfulRequestOKResponse(t *testing.T) {

@@ -73,7 +73,9 @@ func TestCallMetrics(t *testing.T) {
 	headers := map[string]string{}
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
-
+	headers["regionname"] = "san_francisco"
+	headers["device"] = "ios"
+	headers["deviceversion"] = "carbon"
 	numMetrics := 15
 	cg.MetricsWaitGroup.Add(numMetrics)
 
@@ -98,17 +100,23 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "baz",
-		"handler":  "call",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "baz",
+		"handlerid":     "call",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	statusTags := map[string]string{
-		"env":      "test",
-		"service":  "test-gateway",
-		"endpoint": "baz",
-		"handler":  "call",
-		"status":   "204",
+		"env":           "test",
+		"service":       "test-gateway",
+		"endpointid":    "baz",
+		"handlerid":     "call",
+		"status":        "204",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)

@@ -22,8 +22,8 @@ package zanzibar
 
 import (
 	"context"
-
 	"github.com/pborman/uuid"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -56,8 +56,8 @@ const (
 
 const (
 	scopeFieldRequestMethod = "method"
-	scopeFieldEndpointID    = "endpointID"
-	scopeFieldHandlerID     = "handlerID"
+	scopeFieldEndpoint      = "endpointid"
+	scopeFieldHandler       = "handlerid"
 )
 
 const (
@@ -149,13 +149,13 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 }
 
 // WithScopeFields returns a new context with the given scope fields attached to context.Context
-func WithScopeFields(ctx context.Context, newFields map[string]string) context.Context {
+func WithScopeFields(ctx context.Context, newFields map[string]string) (context.Context, map[string]string) {
 	fields := GetScopeFieldsFromCtx(ctx)
 	for k, v := range newFields {
 		fields[k] = v
 	}
 
-	return context.WithValue(ctx, requestScopeFields, fields)
+	return context.WithValue(ctx, requestScopeFields, fields), fields
 }
 
 // GetScopeFieldsFromCtx returns the tag info extracted from context.
@@ -270,4 +270,37 @@ func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.
 
 func (c *contextLogger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	return c.log.Check(lvl, msg)
+}
+
+// ContextMetrics emits metrics
+type ContextMetrics struct {
+	scope                  tally.Scope
+	InboundHTTPMetrics     *InboundHTTPMetrics
+	EndpointMetrics        *EndpointMetrics
+	InboundTChannelMetrics *InboundTChannelMetrics
+}
+
+// NewContextMetrics emits metrics.
+func NewContextMetrics(scope tally.Scope) *ContextMetrics {
+	return &ContextMetrics{
+		scope: scope,
+	}
+}
+
+// MakeInboundHTTPMetrics add tags to scope and create inbound http metrics
+func (c *ContextMetrics) MakeInboundHTTPMetrics(tags map[string]string) {
+	scope := c.scope.Tagged(tags)
+	c.InboundHTTPMetrics = NewInboundHTTPMetrics(scope)
+}
+
+// MakeEndpointMetrics add tags to scope and create endpoint metrics
+func (c *ContextMetrics) MakeEndpointMetrics(tags map[string]string) {
+	scope := c.scope.Tagged(tags)
+	c.EndpointMetrics = NewEndpointMetrics(scope)
+}
+
+// MakeInboundTChannelMetrics add tags to scope and create inbound tchannel metrics
+func (c *ContextMetrics) MakeInboundTChannelMetrics(tags map[string]string) {
+	scope := c.scope.Tagged(tags)
+	c.InboundTChannelMetrics = NewInboundTChannelMetrics(scope)
 }

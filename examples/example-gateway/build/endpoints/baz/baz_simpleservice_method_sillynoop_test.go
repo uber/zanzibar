@@ -29,9 +29,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+
+	bazclient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 )
 
 func TestSillyNoopSuccessfulRequestOKResponse(t *testing.T) {

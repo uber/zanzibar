@@ -31,10 +31,11 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
 )
 
 // ServiceAFrontHelloHandler is the handler for "/multi/serviceA_f/hello"
@@ -48,8 +49,8 @@ func NewServiceAFrontHelloHandler(deps *module.Dependencies) *ServiceAFrontHello
 	handler := &ServiceAFrontHelloHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
+		deps.Default.ContextExtractor, deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"multi", "helloA",
 		handler.HandleRequest,
 	)
@@ -82,7 +83,7 @@ func (h *ServiceAFrontHelloHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.EndpointMetrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
