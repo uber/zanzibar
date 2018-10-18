@@ -30,13 +30,12 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	customMulti "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 )
 
 // ServiceCFrontHelloHandler is the handler for "/multi/serviceC_f/hello"

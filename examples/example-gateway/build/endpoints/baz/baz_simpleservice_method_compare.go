@@ -31,14 +31,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SimpleServiceCompareHandler is the handler for "/baz/compare"

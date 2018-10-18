@@ -247,6 +247,7 @@ import (
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	{{range $idx, $pkg := .IncludedPackages -}}
@@ -266,7 +267,7 @@ import (
 	{{- end}}
 	{{- end}}
 
-	module "{{$instance.PackageInfo.ModulePackagePath}}"
+
 )
 
 {{with .Method -}}
@@ -463,7 +464,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6938, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6939, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -933,12 +934,12 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 {{- $clientID := .ClientID -}}
@@ -2079,15 +2080,14 @@ import (
 	"strings"
 	"time"
 
-	"go.uber.org/zap"
-
-	zanzibar "github.com/uber/zanzibar/runtime"
 	tchannel "github.com/uber/tchannel-go"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 {{$clientID := .ClientID -}}
@@ -2272,7 +2272,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6271, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6270, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2286,12 +2286,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/wire"
-
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	"github.com/uber/zanzibar/runtime"
+    "go.uber.org/thriftrw/wire"
 )
 
 {{$exposedMethods := .ExposedMethods -}}
@@ -2391,7 +2390,7 @@ func tchannel_client_test_serverTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3014, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client_test_server.tmpl", size: 3016, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

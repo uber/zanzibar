@@ -7,12 +7,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/wire"
-
 	{{range $idx, $pkg := .IncludedPackages -}}
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end}}
+	"github.com/uber/zanzibar/runtime"
+    "go.uber.org/thriftrw/wire"
 )
 
 {{$exposedMethods := .ExposedMethods -}}

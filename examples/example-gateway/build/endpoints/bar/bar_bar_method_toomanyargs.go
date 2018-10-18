@@ -31,6 +31,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -38,8 +39,6 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarTooManyArgsHandler is the handler for "/bar/too-many-args-path"
