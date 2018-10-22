@@ -103,7 +103,6 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint": "baz",
 		"handler":  "call",
 		"dc":       "unknown",
-		"type":     "m3",
 		"host":     zanzibar.GetHostname(),
 	}
 	statusTags := map[string]string{
@@ -113,7 +112,6 @@ func TestCallMetrics(t *testing.T) {
 		"handler":  "call",
 		"status":   "204",
 		"dc":       "unknown",
-		"type":     "m3",
 		"host":     zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
@@ -157,7 +155,6 @@ func TestCallMetrics(t *testing.T) {
 		"target-endpoint": "SimpleService__call",
 		"host":            zanzibar.GetHostname(),
 		"dc":              "unknown",
-		"type":            "m3",
 	}
 	for _, name := range tchannelNames {
 		key := tally.KeyForPrefixedStringMap(name, tchannelTags)
@@ -185,7 +182,6 @@ func TestCallMetrics(t *testing.T) {
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
 		"dc":              "unknown",
-		"type":            "m3",
 		"host":            zanzibar.GetHostname(),
 	}
 	for _, name := range clientNames {
@@ -216,7 +212,6 @@ func TestCallMetrics(t *testing.T) {
 		"env":     "test",
 		"service": "test-gateway",
 		"dc":      "unknown",
-		"type":    "m3",
 		"host":    zanzibar.GetHostname(),
 	}
 

@@ -90,7 +90,6 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint": "bar",
 		"handler":  "normal",
 		"dc":       "unknown",
-		"type":     "m3",
 		"host":     zanzibar.GetHostname(),
 	}
 	eStatusTags := map[string]string{
@@ -100,7 +99,6 @@ func TestCallMetrics(t *testing.T) {
 		"handler":  "normal",
 		"status":   "200",
 		"dc":       "unknown",
-		"type":     "m3",
 		"host":     zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
@@ -138,7 +136,6 @@ func TestCallMetrics(t *testing.T) {
 		"client":  "bar",
 		"method":  "Normal",
 		"dc":      "unknown",
-		"type":    "m3",
 		"host":    zanzibar.GetHostname(),
 	}
 	cStatusTags := map[string]string{
@@ -148,7 +145,6 @@ func TestCallMetrics(t *testing.T) {
 		"method":  "Normal",
 		"status":  "200",
 		"dc":      "unknown",
-		"type":    "m3",
 		"host":    zanzibar.GetHostname(),
 	}
 
@@ -187,7 +183,6 @@ func TestCallMetrics(t *testing.T) {
 		"env":     "test",
 		"service": "test-gateway",
 		"dc":      "unknown",
-		"type":    "m3",
 		"host":    zanzibar.GetHostname(),
 	}
 
