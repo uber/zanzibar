@@ -452,6 +452,9 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	defaultTags := map[string]string{
 		"env":     env,
 		"service": service,
+		"type":    metricsType,
+		"host":    GetHostname(),
+		"dc":      gateway.Config.MustGetString("datacenter"),
 	}
 	// Adds in any env variable variables specified in config
 	envVarsToTagInRootScope := []string{}

@@ -102,6 +102,9 @@ func TestCallMetrics(t *testing.T) {
 		"service":  "test-gateway",
 		"endpoint": "baz",
 		"handler":  "call",
+		"dc":       "unknown",
+		"type":     "m3",
+		"host":     zanzibar.GetHostname(),
 	}
 	statusTags := map[string]string{
 		"env":      "test",
@@ -109,6 +112,9 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint": "baz",
 		"handler":  "call",
 		"status":   "204",
+		"dc":       "unknown",
+		"type":     "m3",
+		"host":     zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -150,6 +156,8 @@ func TestCallMetrics(t *testing.T) {
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
 		"host":            zanzibar.GetHostname(),
+		"dc":              "unknown",
+		"type":            "m3",
 	}
 	for _, name := range tchannelNames {
 		key := tally.KeyForPrefixedStringMap(name, tchannelTags)
@@ -176,6 +184,9 @@ func TestCallMetrics(t *testing.T) {
 		"method":          "Call",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
+		"dc":              "unknown",
+		"type":            "m3",
+		"host":            zanzibar.GetHostname(),
 	}
 	for _, name := range clientNames {
 		key := tally.KeyForPrefixedStringMap(name, clientTags)
@@ -204,6 +215,9 @@ func TestCallMetrics(t *testing.T) {
 	defaultTags := map[string]string{
 		"env":     "test",
 		"service": "test-gateway",
+		"dc":      "unknown",
+		"type":    "m3",
+		"host":    zanzibar.GetHostname(),
 	}
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
