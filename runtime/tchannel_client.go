@@ -92,6 +92,7 @@ func NewTChannelClient(
 ) *TChannelClient {
 	numMethods := len(opt.MethodNames)
 	loggers := make(map[string]*zap.Logger, numMethods)
+
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String("clientID", opt.ClientID),
@@ -271,13 +272,13 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
 		scopeTags := map[string]string{scopeTagError: errCause.MetricsKey()}
 		ctx = WithScopeTags(ctx, scopeTags)
-		c.metrics.IncCounter(ctx, outboundCallsSystemErrors, 1)
+		c.metrics.IncCounter(ctx, clientSystemErrors, 1)
 	} else if !c.success {
-		c.metrics.IncCounter(ctx, outboundCallsAppErrors, 1)
+		c.metrics.IncCounter(ctx, clientAppErrors, 1)
 	} else {
-		c.metrics.IncCounter(ctx, outboundCallsSuccess, 1)
+		c.metrics.IncCounter(ctx, clientSuccess, 1)
 	}
-	c.metrics.RecordTimer(ctx, outboundCallsLatency, c.finishTime.Sub(c.startTime))
+	c.metrics.RecordTimer(ctx, clientLatency, c.finishTime.Sub(c.startTime))
 
 	// write logs
 	if err == nil {
@@ -370,7 +371,7 @@ func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) 
 	}
 
 	// request sent when arg3writer is closed
-	c.metrics.IncCounter(ctx, outboundCallsSent, 1)
+	c.metrics.IncCounter(ctx, clientRequest, 1)
 	return nil
 }
 
