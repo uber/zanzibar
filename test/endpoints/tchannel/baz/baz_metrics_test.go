@@ -119,6 +119,8 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint": "bazTChannel",
 		"handler":  "call",
 		"method":   "SimpleService__Call",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 
 	for _, name := range endpointNames {
@@ -155,6 +157,7 @@ func TestCallMetrics(t *testing.T) {
 		"service":         "test-gateway",
 		"target-endpoint": "SimpleService__call",
 		"target-service":  "bazService",
+		"dc":              "unknown",
 	}
 
 	for _, name := range tchannelOutboundNames {
@@ -182,6 +185,8 @@ func TestCallMetrics(t *testing.T) {
 		"method":          "Call",
 		"target-service":  "bazService",
 		"target-endpoint": "SimpleService__call",
+		"dc":              "unknown",
+		"host":            zanzibar.GetHostname(),
 	}
 
 	for _, name := range clientNames {

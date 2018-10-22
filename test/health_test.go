@@ -135,6 +135,8 @@ func TestHealthMetrics(t *testing.T) {
 		"service":  "test-gateway",
 		"endpoint": "health",
 		"handler":  "health",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	statusTags := map[string]string{
 		"env":      "test",
@@ -142,10 +144,14 @@ func TestHealthMetrics(t *testing.T) {
 		"endpoint": "health",
 		"handler":  "health",
 		"status":   "200",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	defaultTags := map[string]string{
 		"env":     "test",
 		"service": "test-gateway",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 
 	for _, name := range names {
@@ -234,6 +240,7 @@ func TestRuntimeMetrics(t *testing.T) {
 		"env":     "test",
 		"service": "test-gateway",
 		"host":    zanzibar.GetHostname(),
+		"dc":      "unknown",
 	}
 	for _, name := range names {
 		key := tally.KeyForPrefixedStringMap(name, tags)

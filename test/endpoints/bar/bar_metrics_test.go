@@ -27,6 +27,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -88,6 +89,8 @@ func TestCallMetrics(t *testing.T) {
 		"service":  "test-gateway",
 		"endpoint": "bar",
 		"handler":  "normal",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	eStatusTags := map[string]string{
 		"env":      "test",
@@ -95,6 +98,8 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint": "bar",
 		"handler":  "normal",
 		"status":   "200",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -130,6 +135,8 @@ func TestCallMetrics(t *testing.T) {
 		"service": "test-gateway",
 		"client":  "bar",
 		"method":  "Normal",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 	cStatusTags := map[string]string{
 		"env":     "test",
@@ -137,6 +144,8 @@ func TestCallMetrics(t *testing.T) {
 		"client":  "bar",
 		"method":  "Normal",
 		"status":  "200",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 
 	for _, name := range httpClientNames {
@@ -173,6 +182,8 @@ func TestCallMetrics(t *testing.T) {
 	defaultTags := map[string]string{
 		"env":     "test",
 		"service": "test-gateway",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
