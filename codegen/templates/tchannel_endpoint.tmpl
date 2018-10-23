@@ -162,12 +162,12 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					h.Deps.Default.ContextLogger.Error(
-						ctx,
-						"Handler returned non-nil error type *{{.Type}} but nil value",
-						zap.Error(err),
-					)
 					if v == nil {
+						h.Deps.Default.ContextLogger.Error(
+							ctx,
+							"Handler returned non-nil error type *{{.Type}} but nil value",
+							zap.Error(err),
+						)
 						return false, nil, resHeaders, errors.Errorf(
 							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
 							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,

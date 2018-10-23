@@ -133,12 +133,12 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
-			h.Deps.Default.ContextLogger.Error(
-				ctx,
-				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
-				zap.Error(err),
-			)
 			if v == nil {
+				h.Deps.Default.ContextLogger.Error(
+					ctx,
+					"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					zap.Error(err),
+				)
 				return false, nil, resHeaders, errors.Errorf(
 					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
 					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,

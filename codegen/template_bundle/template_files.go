@@ -2558,12 +2558,12 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					h.Deps.Default.ContextLogger.Error(
-						ctx,
-						"Handler returned non-nil error type *{{.Type}} but nil value",
-						zap.Error(err),
-					)
 					if v == nil {
+						h.Deps.Default.ContextLogger.Error(
+							ctx,
+							"Handler returned non-nil error type *{{.Type}} but nil value",
+							zap.Error(err),
+						)
 						return false, nil, resHeaders, errors.Errorf(
 							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
 							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2668,7 +2668,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8133, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8138, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
