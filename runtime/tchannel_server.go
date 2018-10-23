@@ -396,7 +396,9 @@ func (c *tchannelInboundCall) handle(ctx context.Context, wireValue *wire.Value)
 	}
 	if err != nil {
 		LogErrorWarnTimeoutContext(c.ctx, c.endpoint.contextLogger, err, "Unexpected tchannel system error")
-		err = c.call.Response().SendSystemError(errors.New("Server Error"))
+		if er := c.call.Response().SendSystemError(errors.New("Server Error")); er != nil {
+			LogErrorWarnTimeoutContext(c.ctx, c.endpoint.contextLogger, err, "Error sending server error response")
+		}
 		return
 	}
 	if !c.success {
