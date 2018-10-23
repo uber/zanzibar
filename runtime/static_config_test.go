@@ -818,7 +818,7 @@ func TestInspectFromFile(t *testing.T) {
 		"bool":  true,
 		"float": float64(1.2),
 		"int":   int(1),
-		"struct": map[interface{}]interface{}{
+		"struct": map[string]interface{}{
 			"Field": "a",
 			"Foo":   int(4),
 		},
