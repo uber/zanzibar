@@ -126,27 +126,12 @@ func (l TChannelLogger) WithFields(fields ...tchannel.LogField) tchannel.Logger 
 // TODO: We want to improve the classification of errors, similar to:
 // https://github.com/uber/tchannel-node/blob/master/errors.js#L907-L930
 //
-// Deprecated: Use LogErrorWarnTimeoutContext instead.
+// Deprecated: use proper level to log instead
 func LogErrorWarnTimeout(logger *zap.Logger, err error, msg string) {
-	if err != nil {
-		if isTimeout(err) {
-			logger.Warn(msg, zap.Error(err))
-		} else {
-			logger.Error(msg, zap.Error(err))
-		}
-	}
-}
-
-// LogErrorWarnTimeoutContext logs warnings for timeout errors, otherwise logs errors
-// TODO: We want to improve the classification of errors, similar to:
-// https://github.com/uber/tchannel-node/blob/master/errors.js#L907-L930
-func LogErrorWarnTimeoutContext(ctx context.Context, logger ContextLogger, err error, msg string) {
-	if err != nil {
-		if isTimeout(err) {
-			logger.Warn(ctx, msg, zap.Error(err))
-		} else {
-			logger.Error(ctx, msg, zap.Error(err))
-		}
+	if isTimeout(err) {
+		logger.Warn(msg, zap.Error(err))
+	} else {
+		logger.Error(msg, zap.Error(err))
 	}
 }
 
