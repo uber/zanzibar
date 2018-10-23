@@ -201,6 +201,9 @@ func TestCallTChannelTimeout(t *testing.T) {
 		TChannelClientMethods: map[string]string{
 			"SimpleService::Call": "Call",
 		},
+		LogWhitelist: map[string]bool{
+			"Handler returned error": true,
+		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -247,17 +250,21 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.False(t, success)
 
 	allLogs := gateway.AllLogs()
-	assert.Len(t, allLogs, 12)
+	assert.Len(t, allLogs, 8)
 	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
 	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
-	assert.Len(t, gateway.Logs("warn", "Thrift server error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Could not make outbound request"), 1)
-	assert.Len(t, gateway.Logs("info", "Finished an outgoing client TChannel request"), 1)
-	assert.Len(t, gateway.Logs("warn", "baz.Call returned error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Handler returned error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Unexpected tchannel system error"), 1)
-	assert.Len(t, gateway.Logs("warn", "Could not create arg2reader for outbound response"), 1)
+
+	// logged from tchannel client runtime
 	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
-	assert.Len(t, gateway.Logs("info", "Finished an incoming server TChannel request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Failed to send outgoing client TChannel request"), 1)
+
+	// logged from generated client
 	assert.Len(t, gateway.Logs("warn", "TChannel client call returned error"), 1)
+
+	// logged from generated endpoint
+	assert.Len(t, gateway.Logs("error", "Handler returned error"), 1)
+
+	// logged from tchannel server runtime
+	assert.Len(t, gateway.Logs("warn", "Failed to serve incoming TChannel request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Unexpected tchannel system error"), 1)
 }

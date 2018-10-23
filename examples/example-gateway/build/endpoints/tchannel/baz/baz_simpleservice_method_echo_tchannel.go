@@ -93,7 +93,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 
 	var req endpointsTchannelBazBaz.SimpleService_Echo_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -117,7 +117,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 	}
 
 	if err != nil {
-		h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
 		return false, nil, resHeaders, err
 	}
 	res.Success = &r

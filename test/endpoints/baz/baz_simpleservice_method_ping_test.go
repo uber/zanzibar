@@ -163,10 +163,6 @@ func TestPingWithInvalidResponse(t *testing.T) {
 		KnownTChannelBackends: []string{"baz"},
 		TestBinary:            util.DefaultMainFile("example-gateway"),
 		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
-		LogWhitelist: map[string]bool{
-			"Could not create arg2reader for outbound response": true,
-			"Could not make outbound request":                   true,
-		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
@@ -206,17 +202,13 @@ func TestPingWithInvalidResponse(t *testing.T) {
 
 	assert.Equal(t, `{"error":"Unexpected server error"}`, string(bytes))
 
-	allLogs := gateway.AllLogs()
-
-	assert.Equal(t, 1, len(allLogs["Started ExampleGateway"]))
-	assert.Equal(t, 1, len(allLogs["Created new active connection."]))
-	assert.Equal(t, 1, len(allLogs["Could not create arg2reader for outbound response"]))
-	assert.Equal(t, 1, len(allLogs["Failed after non-retriable error."]))
-	assert.Equal(t, 1, len(allLogs["Could not make outbound request"]))
-	assert.Equal(t, 1, len(allLogs["TChannel client call returned error"]))
-	assert.Equal(t, 1, len(allLogs["Finished an incoming server HTTP request"]))
-	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
-	assert.Equal(t, 1, len(allLogs["Could not make client request"]))
+	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
+	assert.Len(t, gateway.Logs("info", "Created new active connection."), 1)
+	assert.Len(t, gateway.Logs("info", "Failed after non-retriable error."), 1)
+	assert.Len(t, gateway.Logs("warn", "TChannel client call returned error"), 1)
+	assert.Len(t, gateway.Logs("info", "Finished an incoming server HTTP request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Failed to send outgoing client TChannel request"), 1)
+	assert.Len(t, gateway.Logs("warn", "Could not make client request"), 1)
 
 	logLines := gateway.Logs("warn", "Could not make client request")
 	assert.Equal(t, 1, len(logLines))

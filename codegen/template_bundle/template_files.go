@@ -2512,7 +2512,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2548,7 +2548,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
@@ -2558,12 +2558,12 @@ func (h *{{$handlerName}}) Handle(
 			{{$method := .Name -}}
 			{{range .Exceptions -}}
 				case *{{.Type}}:
-					h.Deps.Default.ContextLogger.Warn(
-						ctx,
-						"Handler returned non-nil error type *{{.Type}} but nil value",
-						zap.Error(err),
-					)
 					if v == nil {
+						h.Deps.Default.ContextLogger.Error(
+							ctx,
+							"Handler returned non-nil error type *{{.Type}} but nil value",
+							zap.Error(err),
+						)
 						return false, nil, resHeaders, errors.Errorf(
 							"%s.%s (%s) handler returned non-nil error type *{{.Type}} but nil value",
 							h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2572,7 +2572,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
+					h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2668,7 +2668,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8129, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8138, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

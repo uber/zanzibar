@@ -75,10 +75,6 @@ func (w Workflow) Handle(
 		case *clientBaz.AuthErr:
 			return respHeaders, (*endpointBaz.AuthErr)(v)
 		default:
-			zanzibar.LogErrorWarnTimeoutContext(
-				ctx, w.contextLogger, err,
-				"baz.Call returned error",
-			)
 			return respHeaders, err
 		}
 	}

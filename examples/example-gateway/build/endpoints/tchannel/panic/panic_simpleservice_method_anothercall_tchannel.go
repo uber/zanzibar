@@ -100,7 +100,7 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 
 	var req endpointsTchannelBazBaz.SimpleService_AnotherCall_Args
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Warn(ctx, "Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -126,12 +126,12 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
-			h.Deps.Default.ContextLogger.Warn(
-				ctx,
-				"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
-				zap.Error(err),
-			)
 			if v == nil {
+				h.Deps.Default.ContextLogger.Error(
+					ctx,
+					"Handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
+					zap.Error(err),
+				)
 				return false, nil, resHeaders, errors.Errorf(
 					"%s.%s (%s) handler returned non-nil error type *endpointsTchannelBazBaz.AuthErr but nil value",
 					h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -139,7 +139,7 @@ func (h *SimpleServiceAnotherCallHandler) Handle(
 			}
 			res.AuthErr = v
 		default:
-			h.Deps.Default.ContextLogger.Warn(ctx, "Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
 			return false, nil, resHeaders, errors.Wrapf(
 				err, "%s.%s (%s) handler returned error",
 				h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
