@@ -1,5 +1,5 @@
-hash: 1bffbb17d71e3da6efdac89b9ab71a9653130374e43a0ef3d2a404a372f893c9
-updated: 2018-08-29T14:04:09.29889-07:00
+hash: 944cdd29ac2a8793c497bf312e545c650424af2ed9465479d6f5456c774afabb
+updated: 2018-10-26T17:14:18.264991-07:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,14 +22,16 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 600781dde9cca80734169b9e969d9054ccc57937
+  version: 8a44ef6e8be577e050008c7886f24fc705d709fb
   subpackages:
   - gomock
   - mockgen/model
+- name: github.com/google/uuid
+  version: 16ca3eab7d2086fd5a82993a291cbf3b87fe38b7
 - name: github.com/jessevdk/go-flags
   version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
 - name: github.com/julienschmidt/httprouter
-  version: 348b672cd90d8190f8240323e372ecd1e66b59dc
+  version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
 - name: github.com/kisielk/errcheck
@@ -48,14 +50,14 @@ imports:
 - name: github.com/mcuadros/go-jsonschema-generator
   version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
 - name: github.com/mitchellh/mapstructure
-  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/opentracing/opentracing-go
   version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
   subpackages:
   - ext
   - log
 - name: github.com/pborman/uuid
-  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+  version: adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pmezard/go-difflib
@@ -152,13 +154,17 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 8a410e7b638dca158bf9e766925842f6651ff828
+  version: 9b4f9f5ad5197c79fd623a3638e70d8b26cef344
   subpackages:
   - context
+- name: golang.org/x/tools
+  version: f60e5f99f0816fc2d9ecb338008ea420248d2943
+  subpackages:
+  - cmd/goimports
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: honnef.co/go/tools
-  version: 88497007e8588ea5b6baee991f74a1607e809487
+  version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:
   - cmd/staticcheck
 testImports: []

@@ -1,5 +1,6 @@
 PKGS = $(shell glide novendor | grep -v "workspace/...")
 PKG_FILES = benchmarks codegen examples runtime test
+PWD = $(shell pwd)
 
 COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 	grep -v "main/..." | grep -v "benchmarks/..." | \
@@ -17,6 +18,7 @@ PROGS = benchmarks/benchserver/benchserver \
 EXAMPLE_BASE_DIR = examples/example-gateway/
 EXAMPLE_SERVICES_DIR = $(EXAMPLE_BASE_DIR)build/services/
 EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
+GOIMPORTS = "$(PWD)/vendor/golang.org/x/tools/cmd/goimports"
 
 .PHONY: install
 install:
@@ -26,6 +28,7 @@ install:
 	pip install --user yq
 	glide --version || go get -u -f github.com/Masterminds/glide
 	glide install
+	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 
 .PHONY: check-licence
 check-licence:
@@ -104,8 +107,7 @@ generate:
 	@./node_modules/.bin/uber-licence --file "production.json.go" --dir "config" > /dev/null
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
-	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
-	@bash ./scripts/generate.sh
+	@PATH=$(PATH):$(GOIMPORTS) bash ./scripts/generate.sh
 
 .PHONY: check-generate
 check-generate:
@@ -141,14 +143,14 @@ test: generate lint
 
 .PHONY: test-update
 test-update:
-	go test ./codegen/ -update
+	@PATH=$(PATH):$(GOIMPORTS) go test ./codegen/ -update
 
 .PHONY: test-only
 test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
 	@ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache
-	@ZANZIBAR_CACHE=1 go test \
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test \
 		./examples/example-gateway/... \
 		./codegen/... \
 		./runtime/... \
@@ -220,8 +222,7 @@ clean-cover:
 
 .PHONY: cover
 cover: clean-cover
-	@goimports -h 2>/dev/null || go get golang.org/x/tools/cmd/goimports
-	@bash ./scripts/cover.sh
+	@PATH=$(PATH):$(GOIMPORTS) bash ./scripts/cover.sh
 
 .PHONY: generate-istanbul-json
 generate-istanbul-json:
