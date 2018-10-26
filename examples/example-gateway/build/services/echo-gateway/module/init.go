@@ -26,6 +26,7 @@ package module
 import (
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
@@ -47,12 +48,14 @@ func InitializeDependencies(
 	tree := &DependenciesTree{}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
-		Logger:        g.Logger,
-		ContextLogger: g.ContextLogger,
-		Scope:         g.AllHostScope,
-		Tracer:        g.Tracer,
-		Config:        g.Config,
-		Channel:       g.Channel,
+		Logger:           g.Logger,
+		ContextExtractor: g.ContextExtractor,
+		ContextLogger:    g.ContextLogger,
+		ContextMetrics:   zanzibar.NewContextMetrics(g.AllHostScope),
+		Scope:            g.AllHostScope,
+		Tracer:           g.Tracer,
+		Config:           g.Config,
+		Channel:          g.Channel,
 	}
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}

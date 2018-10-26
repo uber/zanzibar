@@ -49,8 +49,9 @@ func TestInvalidStatusCode(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -104,8 +105,9 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -164,8 +166,9 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -233,8 +236,9 @@ func TestResponsePeekBody(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -299,8 +303,9 @@ func TestResponseSetHeaders(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -347,8 +352,9 @@ func TestResponsePeekBodyError(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(
@@ -404,8 +410,9 @@ func TestPendingResponseBody(t *testing.T) {
 	bgateway := gateway.(*benchGateway.BenchGateway)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo", zanzibar.NewRouterEndpoint(
+			bgateway.ActualGateway.ContextExtractor,
+			bgateway.ActualGateway.ContextMetrics,
 			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.AllHostScope,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			func(

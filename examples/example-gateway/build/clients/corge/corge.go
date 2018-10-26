@@ -30,11 +30,13 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	tchannel "github.com/uber/tchannel-go"
+	zanzibar "github.com/uber/zanzibar/runtime"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // Client defines corge client interface.
@@ -90,7 +92,7 @@ func NewClient(deps *module.Dependencies) Client {
 	client := zanzibar.NewTChannelClient(
 		deps.Default.Channel,
 		deps.Default.Logger,
-		deps.Default.Scope,
+		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "corge",
