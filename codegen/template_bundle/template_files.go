@@ -330,7 +330,7 @@ func (h *{{$handlerName}}) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.EndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6958, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6955, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1609,8 +1609,8 @@ func InitializeDependencies(
 		Logger:         g.Logger,
 		ContextExtractor: g.ContextExtractor,
 		ContextLogger:  g.ContextLogger,
-		ContextMetrics: zanzibar.NewContextMetrics(g.AllHostScope),
-		Scope:          g.AllHostScope,
+		ContextMetrics: zanzibar.NewContextMetrics(g.RootScope),
+		Scope:          g.RootScope,
 		Tracer:         g.Tracer,
 		Config:         g.Config,
 		Channel:        g.Channel,
@@ -1645,7 +1645,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2409, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2403, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1709,7 +1709,7 @@ func InitializeDependenciesMock(
 		ContextMetrics: g.ContextMetrics,
 		ContextLogger: g.ContextLogger,
 		Logger:  	   g.Logger,
-		Scope:         g.AllHostScope,
+		Scope:         g.RootScope,
 		Config:        g.Config,
 		Channel:       g.Channel,
 		Tracer:        g.Tracer,
@@ -1765,7 +1765,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4327, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4324, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2494,7 +2494,7 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.EndpointPanics, 1)
 			isSuccessful = false
 			response = nil
 			headers = nil
@@ -2672,7 +2672,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8188, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8185, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

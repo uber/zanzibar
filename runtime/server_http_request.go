@@ -108,7 +108,7 @@ func (req *ServerHTTPRequest) start() {
 	req.startTime = time.Now()
 
 	// emit metrics
-	req.metrics.IncCounter(req.ctx, inboundCallsRecvd, 1)
+	req.metrics.IncCounter(req.ctx, endpointRequest, 1)
 
 	if req.tracer != nil {
 		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)
