@@ -29,7 +29,7 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -48,13 +48,13 @@ func TestCallMetrics(t *testing.T) {
 			"SimpleService::Call": "Call",
 		},
 	})
-
 	if !assert.NoError(t, err, "got bootstrap err") {
 		return
 	}
 	defer gateway.Close()
 
 	cg := gateway.(*testGateway.ChildProcessGateway)
+
 	fakeCall := func(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -73,16 +73,13 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 15
+	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{
-		"x-token":       "token",
-		"x-uuid":        "uuid",
-		"Regionname":    "san_francisco",
-		"Device":        "ios",
-		"Deviceversion": "carbon",
+		"x-token": "token",
+		"x-uuid":  "uuid",
 	}
 	args := &endpointsBaz.SimpleService_Call_Args{
 		Arg: &endpointsBaz.BazRequest{
@@ -117,16 +114,13 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":            "test",
-		"service":        "test-gateway",
-		"endpointmethod": "SimpleService__Call",
-		"dc":             "unknown",
-		"host":           zanzibar.GetHostname(),
-		"endpointid":     "bazTChannel",
-		"handlerid":      "call",
-		"device":         "ios",
-		"deviceversion":  "carbon",
-		"regionname":     "san_francisco",
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "bazTChannel",
+		"handler":  "call",
+		"method":   "SimpleService__Call",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 
 	for _, name := range endpointNames {
@@ -185,17 +179,14 @@ func TestCallMetrics(t *testing.T) {
 		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	clientTags := map[string]string{
-		"env":            "test",
-		"service":        "test-gateway",
-		"clientid":       "baz",
-		"clientmethod":   "call",
-		"endpointmethod": "SimpleService__Call",
-		"targetservice":  "bazService",
-		"targetendpoint": "SimpleService__call",
-		"dc":             "unknown",
-		"host":           zanzibar.GetHostname(),
-		"endpointid":     "bazTChannel",
-		"handlerid":      "call",
+		"env":             "test",
+		"service":         "test-gateway",
+		"client":          "baz",
+		"method":          "Call",
+		"target-service":  "bazService",
+		"target-endpoint": "SimpleService__call",
+		"dc":              "unknown",
+		"host":            zanzibar.GetHostname(),
 	}
 
 	for _, name := range clientNames {

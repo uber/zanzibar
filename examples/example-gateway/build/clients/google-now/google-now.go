@@ -28,10 +28,9 @@ import (
 	"fmt"
 	"time"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
 	clientsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/googlenow/googlenow"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client defines google-now client interface.
@@ -68,7 +67,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"google-now",
 			[]string{
 				"AddCredentials",

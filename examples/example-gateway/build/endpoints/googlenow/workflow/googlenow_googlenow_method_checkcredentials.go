@@ -26,9 +26,8 @@ package workflow
 import (
 	"context"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 )
 

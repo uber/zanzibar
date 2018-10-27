@@ -31,16 +31,13 @@ import (
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
+	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
+	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
+	example_tchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/wire"
 	"go.uber.org/zap"
-
-	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
-
-	example_tchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 )
 
 // NewSimpleServiceCallHandler creates a handler to be registered with a thrift server.
@@ -91,7 +88,7 @@ func (h *SimpleServiceCallHandler) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			isSuccessful = false
 			response = nil
 			headers = nil
@@ -208,7 +205,7 @@ func (h *SimpleServiceCallHandler) redirectToDeputy(
 	client := zanzibar.NewTChannelClient(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
-		h.Deps.Default.ContextMetrics,
+		h.Deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "",

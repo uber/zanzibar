@@ -29,14 +29,12 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
+	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
-	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
 // SimpleServiceSillyNoopHandler is the handler for "/baz/silly-noop"
@@ -51,7 +49,7 @@ func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceS
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"baz", "sillyNoop",
 		handler.HandleRequest,
 	)
@@ -84,7 +82,7 @@ func (h *SimpleServiceSillyNoopHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

@@ -28,10 +28,9 @@ import (
 	"fmt"
 	"time"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
 	clientsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/contacts/contacts"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client defines contacts client interface.
@@ -68,7 +67,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"contacts",
 			[]string{
 				"SaveContacts",

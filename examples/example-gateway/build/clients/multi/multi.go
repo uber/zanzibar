@@ -28,9 +28,8 @@ import (
 	"fmt"
 	"time"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client defines multi client interface.
@@ -66,7 +65,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &multiClient{
 		clientID: "multi",
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"multi",
 			[]string{
 				"HelloA",

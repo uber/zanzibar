@@ -28,10 +28,9 @@ import (
 	"fmt"
 	"time"
 
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge-http/module"
 	clientsCorgeCorge "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/corge/corge"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client defines corge-http client interface.
@@ -78,7 +77,7 @@ func NewClient(deps *module.Dependencies) Client {
 		callerName:   callerName,
 		calleeName:   calleeName,
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"corge-http",
 			[]string{
 				"EchoString",

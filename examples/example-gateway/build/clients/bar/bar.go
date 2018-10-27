@@ -31,11 +31,10 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	zanzibar "github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	clientsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/bar/bar"
 	clientsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/foo/foo"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Client defines bar client interface.
@@ -211,7 +210,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &barClient{
 		clientID: "bar",
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"bar",
 			[]string{
 				"ArgNotStruct",

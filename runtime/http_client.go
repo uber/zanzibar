@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
@@ -34,7 +35,8 @@ type HTTPClient struct {
 	BaseURL        string
 	DefaultHeaders map[string]string
 	loggers        map[string]*zap.Logger
-	ContextMetrics ContextMetrics
+	Scope          tally.Scope
+	metrics        map[string]*OutboundHTTPMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -51,7 +53,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 // NewHTTPClient will allocate a http client.
 func NewHTTPClient(
 	logger *zap.Logger,
-	ContextMetrics ContextMetrics,
+	scope tally.Scope,
 	clientID string,
 	methodNames []string,
 	baseURL string,
@@ -59,11 +61,16 @@ func NewHTTPClient(
 	timeout time.Duration,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
+	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
 	for _, methodName := range methodNames {
 		loggers[methodName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String("methodName", methodName),
 		)
+		metrics[methodName] = NewOutboundHTTPMetrics(scope.Tagged(map[string]string{
+			"client": clientID,
+			"method": methodName,
+		}))
 	}
 	return &HTTPClient{
 		Client: &http.Client{
@@ -77,6 +84,7 @@ func NewHTTPClient(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
-		ContextMetrics: ContextMetrics,
+		Scope:          scope,
+		metrics:        metrics,
 	}
 }

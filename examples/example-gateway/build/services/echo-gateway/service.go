@@ -24,9 +24,8 @@
 package echogatewayservicegenerated
 
 import (
-	"github.com/uber/zanzibar/runtime"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
+	"github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree re-exported for convenience.

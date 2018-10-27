@@ -31,13 +31,11 @@ import (
 	"strings"
 	"syscall"
 
-	"go.uber.org/zap"
-
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
-
 	app "github.com/uber/zanzibar/examples/example-gateway"
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway"
+	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
 )
 
 var configFiles *string

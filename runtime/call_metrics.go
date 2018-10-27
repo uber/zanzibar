@@ -21,8 +21,11 @@
 package zanzibar
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 )
 
@@ -33,10 +36,8 @@ const (
 	inboundCallsAppErrors    = "inbound.calls.app-errors"
 	inboundCallsSystemErrors = "inbound.calls.system-errors"
 	inboundCallsErrors       = "inbound.calls.errors"
+	inboundCallsPanic        = "inbound.calls.panic"
 	inboundCallsStatus       = "inbound.calls.status"
-
-	// InboundCallsPanic is endpoint level panic counter
-	InboundCallsPanic = "inbound.calls.panic"
 
 	// TChannel docs say it emits 'outbound.calls.sent':
 	// http://tchannel.readthedocs.io/en/latest/metrics/#call-metrics
@@ -139,4 +140,143 @@ var knownStatusCodes = map[int]bool{
 	http.StatusLoopDetected:                  true, // 508
 	http.StatusNotExtended:                   true, // 510
 	http.StatusNetworkAuthenticationRequired: true, // 511
+}
+
+type systemErrorMap map[tchannel.SystemErrCode]tally.Counter
+
+func newsystemErrorMap(scope tally.Scope, key string) systemErrorMap {
+	ret := make(systemErrorMap)
+	ret[tchannel.ErrCodeInvalid] = scope.Counter(key)
+	for errorCode := range knownTchannelErrors {
+		ret[errorCode] = scope.Tagged(map[string]string{
+			"error": errorCode.MetricsKey(),
+		}).Counter(key)
+	}
+	return ret
+}
+
+// IncrErr will increase according error counter
+func (sem systemErrorMap) IncrErr(err error, count int64) {
+	errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
+	counter, ok := sem[errCause]
+	if !ok {
+		counter = sem[0x00]
+	}
+	counter.Inc(count)
+}
+
+// HTTPStatusMap is statusCode -> according counter map
+type HTTPStatusMap map[int]tally.Counter
+
+func newHTTPStatusMap(scope tally.Scope, key string) HTTPStatusMap {
+	ret := make(HTTPStatusMap)
+	for statusCode := range knownStatusCodes {
+		ret[statusCode] = scope.Tagged(map[string]string{
+			"status": fmt.Sprintf("%d", statusCode),
+		}).Counter(fmt.Sprintf("%s.%d", key, statusCode))
+	}
+	return ret
+}
+
+// IncrStatus will increase according status code counter
+func (hsm HTTPStatusMap) IncrStatus(statusCode int, count int64) {
+	if counter, ok := hsm[statusCode]; ok {
+		counter.Inc(count)
+	}
+}
+
+type inboundMetrics struct {
+	Recvd tally.Counter // inbound.calls.recvd
+}
+
+type outboundMetrics struct {
+	Sent tally.Counter // outbound.calls.sent
+}
+
+type commonMetrics struct {
+	Latency tally.Timer   // [inbound|outbound].calls.latency
+	Success tally.Counter // [inbound|outbound].calls.success
+	Panic   tally.Counter // [inbound|outbound].calls.panics
+}
+
+type tchannelMetrics struct {
+	commonMetrics
+	AppErrors    tally.Counter  // [inbound|outbound].calls.app-errors
+	SystemErrors systemErrorMap // [inbound|outbound].calls.system-errors*
+}
+
+type httpMetrics struct {
+	commonMetrics
+	Errors tally.Counter // [inbound|outbound].calls.errors
+	Status HTTPStatusMap // [inbound|outbound].calls.status.XXX
+}
+
+// InboundHTTPMetrics ...
+type InboundHTTPMetrics struct {
+	inboundMetrics
+	httpMetrics
+}
+
+// InboundTChannelMetrics ...
+type InboundTChannelMetrics struct {
+	inboundMetrics
+	tchannelMetrics
+}
+
+// OutboundHTTPMetrics ...
+type OutboundHTTPMetrics struct {
+	outboundMetrics
+	httpMetrics
+}
+
+// OutboundTChannelMetrics ...
+type OutboundTChannelMetrics struct {
+	outboundMetrics
+	tchannelMetrics
+}
+
+// NewInboundHTTPMetrics returns inbound HTTP metrics
+func NewInboundHTTPMetrics(scope tally.Scope) *InboundHTTPMetrics {
+	metrics := InboundHTTPMetrics{}
+	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+	metrics.Latency = scope.Timer(inboundCallsLatency)
+	metrics.Success = scope.Counter(inboundCallsSuccess)
+	metrics.Errors = scope.Counter(inboundCallsErrors)
+	metrics.Panic = scope.Counter(inboundCallsPanic)
+	metrics.Status = newHTTPStatusMap(scope, inboundCallsStatus)
+	return &metrics
+}
+
+// NewInboundTChannelMetrics returns inbound TChannel metrics
+func NewInboundTChannelMetrics(scope tally.Scope) *InboundTChannelMetrics {
+	metrics := InboundTChannelMetrics{}
+	metrics.Recvd = scope.Counter(inboundCallsRecvd)
+	metrics.Latency = scope.Timer(inboundCallsLatency)
+	metrics.Success = scope.Counter(inboundCallsSuccess)
+	metrics.AppErrors = scope.Counter(inboundCallsAppErrors)
+	metrics.Panic = scope.Counter(inboundCallsPanic)
+	metrics.SystemErrors = newsystemErrorMap(scope, inboundCallsSystemErrors)
+	return &metrics
+}
+
+// NewOutboundHTTPMetrics returns outbound HTTP metrics
+func NewOutboundHTTPMetrics(scope tally.Scope) *OutboundHTTPMetrics {
+	metrics := OutboundHTTPMetrics{}
+	metrics.Sent = scope.Counter(outboundCallsSent)
+	metrics.Latency = scope.Timer(outboundCallsLatency)
+	metrics.Success = scope.Counter(outboundCallsSuccess)
+	metrics.Errors = scope.Counter(outboundCallsErrors)
+	metrics.Status = newHTTPStatusMap(scope, outboundCallsStatus)
+	return &metrics
+}
+
+// NewOutboundTChannelMetrics returns outbound TChannel metrics
+func NewOutboundTChannelMetrics(scope tally.Scope) *OutboundTChannelMetrics {
+	metrics := OutboundTChannelMetrics{}
+	metrics.Sent = scope.Counter(outboundCallsSent)
+	metrics.Latency = scope.Timer(outboundCallsLatency)
+	metrics.Success = scope.Counter(outboundCallsSuccess)
+	metrics.AppErrors = scope.Counter(outboundCallsAppErrors)
+	metrics.SystemErrors = newsystemErrorMap(scope, outboundCallsSystemErrors)
+	return &metrics
 }

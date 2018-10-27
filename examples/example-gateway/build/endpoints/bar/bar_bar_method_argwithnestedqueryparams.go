@@ -31,15 +31,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
+	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/ptr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
-	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
-
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
 // BarArgWithNestedQueryParamsHandler is the handler for "/bar/argWithNestedQueryParams"
@@ -54,7 +52,7 @@ func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWit
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
+		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
 		"bar", "argWithNestedQueryParams",
 		handler.HandleRequest,
 	)
@@ -87,7 +85,7 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.InboundCallsPanic, 1)
+			h.endpoint.Metrics.Panic.Inc(1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

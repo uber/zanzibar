@@ -115,11 +115,7 @@ func TestHealthMetrics(t *testing.T) {
 	numMetrics := 11
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
-	headers := make(map[string]string)
-	headers["regionname"] = "san_francisco"
-	headers["device"] = "ios"
-	headers["deviceversion"] = "carbon"
-	res, err := gateway.MakeRequest("GET", "/health", headers, nil)
+	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
@@ -132,29 +128,24 @@ func TestHealthMetrics(t *testing.T) {
 	names := []string{
 		"test-gateway.test.all-workers.inbound.calls.latency",
 		"test-gateway.test.all-workers.inbound.calls.recvd",
+		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	tags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "health",
+		"handler":  "health",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	statusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"status":        "200",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "health",
+		"handler":  "health",
+		"status":   "200",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	defaultTags := map[string]string{
 		"env":     "test",
@@ -169,7 +160,7 @@ func TestHealthMetrics(t *testing.T) {
 	}
 
 	statusKey := tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status", statusTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
 	)
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
@@ -192,13 +183,13 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	successMetric := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.success", statusTags,
+		"test-gateway.test.all-workers.inbound.calls.success", tags,
 	)]
 	value = *successMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
-		"test-gateway.test.all-workers.inbound.calls.status", statusTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
