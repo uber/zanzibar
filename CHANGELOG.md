@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Panics in endpoints are now caught (#458). HTTP endpoints return `502` status code with a body `"Unexpected workflow panic, recovered at endpoint."`. TChannel endpoints will return ErrCodeUnexpected. 
 
 ### Changed
+- **BREAKING** Use [`ContextMerics`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextMerics) instead of tally.Scope at [`NewRouterEndpoint`](https://godoc.org/github.com/uber/zanzibar/runtime#NewRouterEndpointContext), [`NewHTTPClient`](https://godoc.org/github.com/uber/zanzibar/runtime#NewHTTPClient), [`NewTChannelClient`](https://godoc.org/github.com/uber/zanzibar/runtime#NewTChannelClient)
+- **BREAKING** Use [`ContextMerics`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextMerics) to emit metrics instead of metrics from call_metrics.go.
+- **BREAKING** All [`metrics`](https://godoc.org/github.com/uber/zanzibar/runtime#call_metrics.go) counter and timer name has been changed and is using RootScope instead of AllHostScope and PerHostScope
 - **BREAKING** Application packages must now export a global variable named `AppOptions` of type [`*zanzibar.Options`](https://godoc.org/github.com/uber/zanzibar/runtime#Options) to be located at package root (the package defined in `build.json`/`build.yaml`). 
 - Most built-in logs like `Finished an outgoing client HTTP request` now use the context logger. 
 - Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextExtractor) interface. It is part of the API for dfining "extractors" or functions to pull out dynamic fields like trace ID, request headers, etc. out of the context to be used in log fields and metric tags. These can be used to pull out fields that are application-specific without adding code to zanzibar. 

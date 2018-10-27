@@ -48,6 +48,8 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+	contextExtractors := &zanzibar.ContextExtractors{}
+	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{

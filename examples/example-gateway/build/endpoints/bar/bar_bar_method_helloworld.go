@@ -52,7 +52,7 @@ func NewBarHelloWorldHandler(deps *module.Dependencies) *BarHelloWorldHandler {
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.Logger, deps.Default.Scope, deps.Default.Tracer,
+		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"bar", "helloWorld",
 		handler.HandleRequest,
 	)
@@ -85,7 +85,7 @@ func (h *BarHelloWorldHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.EndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()

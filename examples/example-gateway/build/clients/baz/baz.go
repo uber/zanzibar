@@ -247,7 +247,7 @@ func NewClient(deps *module.Dependencies) Client {
 	client := zanzibar.NewTChannelClient(
 		deps.Default.Channel,
 		deps.Default.Logger,
-		deps.Default.Scope,
+		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "baz",

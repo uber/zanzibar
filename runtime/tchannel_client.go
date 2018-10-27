@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/zap"
@@ -67,8 +66,7 @@ type TChannelClient struct {
 	timeoutPerAttempt time.Duration
 	routingKey        *string
 	Loggers           map[string]*zap.Logger
-	Scopes            map[string]tally.Scope
-	metrics           map[string]*OutboundTChannelMetrics
+	metrics           ContextMetrics
 }
 
 type tchannelOutboundCall struct {
@@ -82,20 +80,19 @@ type tchannelOutboundCall struct {
 	reqHeaders    map[string]string
 	resHeaders    map[string]string
 	logger        *zap.Logger
-	metrics       *OutboundTChannelMetrics
+	metrics       ContextMetrics
 }
 
 // NewTChannelClient returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
 func NewTChannelClient(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
-	scope tally.Scope,
+	metrics ContextMetrics,
 	opt *TChannelClientOption,
 ) *TChannelClient {
 	numMethods := len(opt.MethodNames)
 	loggers := make(map[string]*zap.Logger, numMethods)
-	scopes := make(map[string]tally.Scope, numMethods)
-	metrics := make(map[string]*OutboundTChannelMetrics, numMethods)
+
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
 			zap.String("clientID", opt.ClientID),
@@ -103,13 +100,6 @@ func NewTChannelClient(
 			zap.String("serviceName", opt.ServiceName),
 			zap.String("serviceMethod", serviceMethod),
 		)
-		scopes[serviceMethod] = scope.Tagged(map[string]string{
-			"client":          opt.ClientID,
-			"method":          methodName,
-			"target-service":  opt.ServiceName,
-			"target-endpoint": serviceMethod,
-		})
-		metrics[serviceMethod] = NewOutboundTChannelMetrics(scopes[serviceMethod])
 	}
 
 	client := &TChannelClient{
@@ -122,7 +112,6 @@ func NewTChannelClient(
 		timeoutPerAttempt: opt.TimeoutPerAttempt,
 		routingKey:        opt.RoutingKey,
 		Loggers:           loggers,
-		Scopes:            scopes,
 		metrics:           metrics,
 	}
 	if opt.AltSubchannelName != "" {
@@ -140,14 +129,21 @@ func (c *TChannelClient) Call(
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
+	scopeTags := map[string]string{
+		scopeTagClient:          c.ClientID,
+		scopeTagClientMethod:    methodName,
+		scopeTagsTargetService:  c.serviceName,
+		scopeTagsTargetEndpoint: serviceMethod,
+	}
 
+	ctx = WithScopeTags(ctx, scopeTags)
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
 		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics[serviceMethod],
+		metrics:       c.metrics,
 	}
 
 	return c.call(ctx, call, reqHeaders, req, resp, false)
@@ -161,14 +157,21 @@ func (c *TChannelClient) CallThruAltChannel(
 	req, resp RWTStruct,
 ) (success bool, resHeaders map[string]string, err error) {
 	serviceMethod := thriftService + "::" + methodName
+	scopeTags := map[string]string{
+		scopeTagClient:          c.ClientID,
+		scopeTagClientMethod:    methodName,
+		scopeTagsTargetService:  c.serviceName,
+		scopeTagsTargetEndpoint: serviceMethod,
+	}
 
+	ctx = WithScopeTags(ctx, scopeTags)
 	call := &tchannelOutboundCall{
 		client:        c,
 		methodName:    c.methodNames[serviceMethod],
 		serviceMethod: serviceMethod,
 		reqHeaders:    reqHeaders,
 		logger:        c.Loggers[serviceMethod],
-		metrics:       c.metrics[serviceMethod],
+		metrics:       c.metrics,
 	}
 
 	return c.call(ctx, call, reqHeaders, req, resp, true)
@@ -181,7 +184,7 @@ func (c *TChannelClient) call(
 	req, resp RWTStruct,
 	useAltSubchannel bool,
 ) (success bool, resHeaders map[string]string, err error) {
-	defer func() { call.finish(err) }()
+	defer func() { call.finish(ctx, err) }()
 	call.start()
 
 	retryOpts := tchannel.RetryOptions{
@@ -228,7 +231,7 @@ func (c *TChannelClient) call(
 		if cerr := call.writeReqHeaders(reqHeaders); cerr != nil {
 			return cerr
 		}
-		if cerr := call.writeReqBody(req); cerr != nil {
+		if cerr := call.writeReqBody(ctx, req); cerr != nil {
 			return cerr
 		}
 
@@ -261,18 +264,21 @@ func (c *tchannelOutboundCall) start() {
 	c.startTime = time.Now()
 }
 
-func (c *tchannelOutboundCall) finish(err error) {
+func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.finishTime = time.Now()
 
 	// emit metrics
 	if err != nil {
-		c.metrics.SystemErrors.IncrErr(err, 1)
+		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
+		scopeTags := map[string]string{scopeTagError: errCause.MetricsKey()}
+		ctx = WithScopeTags(ctx, scopeTags)
+		c.metrics.IncCounter(ctx, clientSystemErrors, 1)
 	} else if !c.success {
-		c.metrics.AppErrors.Inc(1)
+		c.metrics.IncCounter(ctx, clientAppErrors, 1)
 	} else {
-		c.metrics.Success.Inc(1)
+		c.metrics.IncCounter(ctx, clientSuccess, 1)
 	}
-	c.metrics.Latency.Record(c.finishTime.Sub(c.startTime))
+	c.metrics.RecordTimer(ctx, clientLatency, c.finishTime.Sub(c.startTime))
 
 	// write logs
 	if err == nil {
@@ -334,7 +340,7 @@ func (c *tchannelOutboundCall) writeReqHeaders(reqHeaders map[string]string) err
 }
 
 // writeReqBody writes request body to arg3
-func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
+func (c *tchannelOutboundCall) writeReqBody(ctx context.Context, req RWTStruct) error {
 	structWireValue, err := req.ToWire()
 	if err != nil {
 		return errors.Wrapf(
@@ -365,7 +371,7 @@ func (c *tchannelOutboundCall) writeReqBody(req RWTStruct) error {
 	}
 
 	// request sent when arg3writer is closed
-	c.metrics.Sent.Inc(1)
+	c.metrics.IncCounter(ctx, clientRequest, 1)
 	return nil
 }
 

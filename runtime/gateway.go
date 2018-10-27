@@ -77,10 +77,9 @@ type Gateway struct {
 	WaitGroup        *sync.WaitGroup
 	Channel          *tchannel.Channel
 	ContextLogger    ContextLogger
+	ContextMetrics   ContextMetrics
 	ContextExtractor ContextExtractor
 	RootScope        tally.Scope
-	AllHostScope     tally.Scope
-	PerHostScope     tally.Scope
 	ServiceName      string
 	Config           *StaticConfig
 	HTTPRouter       *HTTPRouter
@@ -111,9 +110,12 @@ type DefaultDependencies struct {
 	// Logger is a server-scoped logger
 	// Deprecated: Use ContextLogger instead.
 	Logger *zap.Logger
-
+	// ContextExtractor extracts context for scope and logs field
+	ContextExtractor ContextExtractor
 	// ContextLogger is a logger with request-scoped log fields
 	ContextLogger ContextLogger
+	// ContextMetrics emit metrics from context
+	ContextMetrics ContextMetrics
 
 	Scope   tally.Scope
 	Tracer  opentracing.Tracer
@@ -193,7 +195,7 @@ func CreateGateway(
 // Bootstrap func
 func (gateway *Gateway) Bootstrap() error {
 	// start HTTP server
-	gateway.PerHostScope.Counter("server.bootstrap").Inc(1)
+	gateway.RootScope.Counter("server.bootstrap").Inc(1)
 	_, err := gateway.localHTTPServer.JustListen()
 	if err != nil {
 		gateway.Logger.Error("Error listening on port", zap.Error(err))
@@ -241,7 +243,7 @@ func (gateway *Gateway) Bootstrap() error {
 		return err
 	}
 
-	gateway.PerHostScope.Counter("startup.success").Inc(1)
+	gateway.RootScope.Counter("startup.success").Inc(1)
 	return nil
 }
 
@@ -268,7 +270,7 @@ func (gateway *Gateway) registerPredefined() error {
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
 	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
-		gateway.Logger, gateway.AllHostScope, gateway.Tracer,
+		gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
 	))
@@ -339,10 +341,10 @@ func (gateway *Gateway) Shutdown() {
 			"%d errors when shutting down the servers: %s",
 			len(errs), strings.Join(errs, ";")),
 		)
-		gateway.PerHostScope.Counter("shutdown.failure").Inc(1)
+		gateway.RootScope.Counter("shutdown.failure").Inc(1)
 	default:
 		gateway.Logger.Info("servers are shut down gracefully")
-		gateway.PerHostScope.Counter("shutdown.success").Inc(1)
+		gateway.RootScope.Counter("shutdown.success").Inc(1)
 	}
 
 	_ = gateway.tracerCloser.Close()
@@ -471,17 +473,8 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		},
 		time.Duration(config.MustGetInt("metrics.flushInterval"))*time.Millisecond,
 	)
-	// As per M3 best practices, creating separate all-host and per-host metrics
-	// to reduce metric cardinality when querying metrics for all hosts.
-	gateway.AllHostScope = gateway.RootScope.SubScope(
-		service + "." + env + ".all-workers",
-	)
-	gateway.PerHostScope = gateway.RootScope.SubScope(
-		service + "." + env + ".per-worker",
-	).Tagged(
-		map[string]string{"host": GetHostname()},
-	)
 
+	gateway.ContextMetrics = NewContextMetrics(gateway.RootScope)
 	// start collecting runtime metrics
 	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
 	runtimeMetricsOpts := RuntimeMetricsOptions{
@@ -492,7 +485,7 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	}
 	gateway.runtimeMetrics = StartRuntimeMetricsCollector(
 		runtimeMetricsOpts,
-		gateway.PerHostScope,
+		gateway.RootScope,
 	)
 
 	return nil
@@ -555,7 +548,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	)
 	zapLogger := zap.New(
 		NewInstrumentedZapCore(
-			prodCore, gateway.AllHostScope,
+			prodCore, gateway.RootScope,
 		),
 	)
 
@@ -584,7 +577,7 @@ func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger 
 			gateway.logWriteSyncer,
 			level,
 		),
-		gateway.AllHostScope,
+		gateway.RootScope,
 	)
 	return gateway.Logger.With(
 		zap.String("subLogger", name),
@@ -619,7 +612,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	opts := []jaegerConfig.Option{
 		// TChannel logger implements jaeger logger interface
 		jaegerConfig.Logger(NewTChannelLogger(gateway.SubLogger("jaeger", level))),
-		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.AllHostScope)),
+		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.RootScope)),
 	}
 	jc := gateway.initJaegerConfig(config)
 
@@ -680,7 +673,7 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 			Tracer:      gateway.Tracer,
 			Logger:      NewTChannelLogger(gateway.SubLogger("tchannel", level)),
 			StatsReporter: NewTChannelStatsReporter(
-				gateway.AllHostScope.SubScope("tchannel"),
+				gateway.RootScope,
 			),
 
 			//DefaultConnectionOptions: opts.DefaultConnectionOptions,

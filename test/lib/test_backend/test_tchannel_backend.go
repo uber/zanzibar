@@ -21,6 +21,7 @@
 package testbackend
 
 import (
+	"context"
 	"net"
 	"os"
 	"strconv"
@@ -144,9 +145,24 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		return nil, err
 	}
 
+	contextExtractors := &zanzibar.ContextExtractors{}
+	scopeExtractor := func(ctx context.Context) map[string]string {
+		tags := map[string]string{}
+		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+		tags["regionname"] = headers["Regionname"]
+		tags["device"] = headers["Device"]
+		tags["deviceversion"] = headers["Deviceversion"]
+
+		return tags
+	}
+
+	contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+	extractor := contextExtractors.MakeContextExtractor()
 	gateway := zanzibar.Gateway{
-		Logger:       testLogger,
-		AllHostScope: tally.NoopScope,
+		Logger:           testLogger,
+		RootScope:        tally.NoopScope,
+		ContextExtractor: extractor,
+		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
 	}
 
 	backend.Channel = channel

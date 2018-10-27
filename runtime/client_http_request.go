@@ -44,7 +44,6 @@ type ClientHTTPRequest struct {
 	startTime      time.Time
 	Logger         *zap.Logger
 	ContextLogger  ContextLogger
-	metrics        *OutboundHTTPMetrics
 	rawBody        []byte
 	defaultHeaders map[string]string
 	ctx            context.Context
@@ -56,13 +55,14 @@ func NewClientHTTPRequest(
 	clientID, methodName string,
 	client *HTTPClient,
 ) *ClientHTTPRequest {
+	scopeTags := map[string]string{scopeTagClientMethod: methodName, scopeTagClient: clientID}
+	ctx = WithScopeTags(ctx, scopeTags)
 	req := &ClientHTTPRequest{
 		ClientID:       clientID,
 		MethodName:     methodName,
 		client:         client,
 		Logger:         client.loggers[methodName],
 		ContextLogger:  NewContextLogger(client.loggers[methodName]),
-		metrics:        client.metrics[methodName],
 		defaultHeaders: client.DefaultHeaders,
 		ctx:            ctx,
 	}
@@ -188,7 +188,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	}
 
 	// emit metrics
-	req.metrics.Sent.Inc(1)
+	req.client.ContextMetrics.IncCounter(req.ctx, clientRequest, 1)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil

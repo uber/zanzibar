@@ -68,7 +68,7 @@ func NewClient(deps *module.Dependencies) Client {
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.Scope,
+			deps.Default.Logger, deps.Default.ContextMetrics,
 			"contacts",
 			[]string{
 				"SaveContacts",

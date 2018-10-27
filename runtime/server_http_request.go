@@ -44,7 +44,7 @@ type ServerHTTPRequest struct {
 	res         *ServerHTTPResponse
 	started     bool
 	startTime   time.Time
-	metrics     *InboundHTTPMetrics
+	metrics     ContextMetrics
 	tracer      opentracing.Tracer
 	span        opentracing.Span
 	queryValues url.Values
@@ -71,13 +71,13 @@ func NewServerHTTPRequest(
 	params httprouter.Params,
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
+	ctx := r.Context()
 	req := &ServerHTTPRequest{
-		httpRequest: r,
-		ctx:         r.Context(),
-		queryValues: nil,
-		metrics:     endpoint.Metrics,
-		tracer:      endpoint.tracer,
-
+		httpRequest:   r,
+		ctx:           ctx,
+		queryValues:   nil,
+		tracer:        endpoint.tracer,
+		metrics:       endpoint.ContextMetrics,
 		contextLogger: endpoint.contextLogger,
 		EndpointName:  endpoint.EndpointName,
 		HandlerName:   endpoint.HandlerName,
@@ -87,6 +87,7 @@ func NewServerHTTPRequest(
 		Header:        NewServerHTTPHeader(r.Header),
 		Logger:        endpoint.logger,
 	}
+
 	req.res = NewServerHTTPResponse(w, req)
 	req.start()
 	return req
@@ -107,7 +108,7 @@ func (req *ServerHTTPRequest) start() {
 	req.startTime = time.Now()
 
 	// emit metrics
-	req.metrics.Recvd.Inc(1)
+	req.metrics.IncCounter(req.ctx, endpointRequest, 1)
 
 	if req.tracer != nil {
 		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)

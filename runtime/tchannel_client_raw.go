@@ -41,7 +41,7 @@ const rawClient = "raw"
 type RawTChannelClient struct {
 	tc      *TChannelClient
 	logger  *zap.Logger
-	metrics *OutboundTChannelMetrics
+	metrics ContextMetrics
 }
 
 // NewRawTChannelClient returns a RawTChannelClient that makes calls over the given
@@ -63,15 +63,12 @@ func NewRawTChannelClient(
 		zap.String("clientID", clientID),
 		zap.String("serviceName", opt.ServiceName),
 	)
-	m := NewOutboundTChannelMetrics(scope.Tagged(map[string]string{
-		"client":         clientID,
-		"target-service": opt.ServiceName,
-	}))
 
+	metrics := NewContextMetrics(scope)
 	return &RawTChannelClient{
-		tc:      NewTChannelClient(ch, logger, scope, opt),
+		tc:      NewTChannelClient(ch, logger, metrics, opt),
 		logger:  l,
-		metrics: m,
+		metrics: metrics,
 	}
 }
 
@@ -96,7 +93,7 @@ func (r *RawTChannelClient) Call(
 	if m, ok := r.tc.methodNames[serviceMethod]; ok {
 		call.methodName = m
 		call.logger = r.tc.Loggers[serviceMethod]
-		call.metrics = r.tc.metrics[serviceMethod]
+		call.metrics = r.metrics
 	}
 
 	return r.tc.call(ctx, call, reqHeaders, req, resp, false)

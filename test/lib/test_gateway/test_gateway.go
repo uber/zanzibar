@@ -35,7 +35,7 @@ import (
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
 	"github.com/uber/tchannel-go"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
 	testM3Server "github.com/uber/zanzibar/test/lib/test_m3_server"
@@ -97,6 +97,8 @@ type ChildProcessGateway struct {
 	RealTChannelAddr string
 	RealTChannelHost string
 	RealTChannelPort int
+	ContextExtractor zanzibar.ContextExtractor
+	ContextMetrics   zanzibar.ContextMetrics
 }
 
 // Options used to create TestGateway
@@ -195,7 +197,7 @@ func CreateGateway(
 	tchannelClient := zanzibar.NewTChannelClient(
 		channel,
 		zap.NewNop(),
-		tally.NoopScope,
+		zanzibar.NewContextMetrics(tally.NoopScope),
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			MethodNames:       opts.TChannelClientMethods,
@@ -203,6 +205,20 @@ func CreateGateway(
 			TimeoutPerAttempt: timeoutPerAttempt,
 		},
 	)
+
+	contextExtractors := &zanzibar.ContextExtractors{}
+	scopeExtractor := func(ctx context.Context) map[string]string {
+		tags := map[string]string{}
+		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+		tags["regionname"] = headers["Regionname"]
+		tags["device"] = headers["Device"]
+		tags["deviceversion"] = headers["Deviceversion"]
+
+		return tags
+	}
+
+	contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+	extractor := contextExtractors.MakeContextExtractor()
 
 	testGateway := &ChildProcessGateway{
 		channel:     channel,
@@ -223,6 +239,8 @@ func CreateGateway(
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
 		MetricsWaitGroup: lib.WaitAtLeast{},
+		ContextExtractor: extractor,
+		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
 	}
 
 	testGateway.setupMetrics(t, opts)
