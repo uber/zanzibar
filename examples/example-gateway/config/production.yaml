@@ -1,0 +1,44 @@
+clients.bar.defaultHeaders:
+  X-Client-ID: bar
+clients.bar.ip: 127.0.0.1
+clients.bar.port: 4001
+clients.bar.timeout: 10000
+clients.baz.ip: 127.0.0.1
+clients.baz.port: 4002
+clients.baz.serviceName: Qux
+clients.baz.timeout: 10000
+clients.baz.timeoutPerAttempt: 2000
+clients.contacts.ip: 127.0.0.1
+clients.contacts.port: 4000
+clients.contacts.timeout: 10000
+clients.corge-http.serviceName: CorgeHttp
+clients.corge.serviceName: Corge
+clients.corge.timeout: 10000
+clients.corge.timeoutPerAttempt: 2000
+clients.google-now.ip: 127.0.0.1
+clients.google-now.port: 14120
+clients.google-now.timeout: 10000
+clients.googleNowTChannel.connectionType: p2p
+clients.googleNowTChannel.hostList:
+- 127.0.0.1:4002
+clients.googleNowTChannel.timeout: 10000
+clients.multi.ip: 127.0.0.1
+clients.multi.port: 4003
+clients.multi.timeout: 10000
+envVarsToTagInRootScope: []
+http.port: 7783
+logger.fileName: /var/log/example-gateway/example-gateway.log
+logger.output: disk
+metrics.serviceName: example-gateway
+service.env.config: {}
+serviceName: example-gateway
+sidecarRouter.default.http.calleeHeader: RPC-Service
+sidecarRouter.default.http.callerHeader: RPC-Caller
+sidecarRouter.default.http.ip: 127.0.0.1
+sidecarRouter.default.http.port: 4999
+sidecarRouter.default.tchannel.ip: 127.0.0.1
+sidecarRouter.default.tchannel.port: 5000
+tchannel.port: 7784
+tchannel.processName: example-gateway
+tchannel.serviceName: example-gateway
+useDatacenter: false

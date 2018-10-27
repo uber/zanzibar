@@ -395,7 +395,7 @@ func TestCanReadYAMLFromFile(t *testing.T) {
 }
 
 func TestCanReadFromFileContents(t *testing.T) {
-	bytes := mustMarshalJSON(map[string]interface{}{
+	bytes := mustMarshalYAML(map[string]interface{}{
 		"a":     "b",
 		"a.b.c": "v",
 		"bool":  true,
@@ -446,7 +446,7 @@ func TestCanReadFromFileContents(t *testing.T) {
 
 func TestCannotSetOverValueFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -454,7 +454,7 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, nil)
 
@@ -466,7 +466,7 @@ func TestCannotSetOverValueFromFile(t *testing.T) {
 }
 
 func TestCannotSetOverValueFromFileContents(t *testing.T) {
-	bytes := mustMarshalJSON(map[string]interface{}{
+	bytes := mustMarshalYAML(map[string]interface{}{
 		"a":     "b",
 		"a.b.c": "v",
 	})
@@ -491,7 +491,7 @@ func TestReadFromSeedConfigIntoNil(t *testing.T) {
 }
 
 func TestDecodeIncompatibleStruct(t *testing.T) {
-	bytes := mustMarshalJSON(map[string]interface{}{
+	bytes := mustMarshalYAML(map[string]interface{}{
 		"struct": map[string]interface{}{
 			"Boolean": true,
 		},
@@ -509,7 +509,7 @@ func TestDecodeIncompatibleStruct(t *testing.T) {
 
 func TestSeedConfigOverwritesFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]string{
+		"config/test.yaml": mustMarshalYAML(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -517,7 +517,7 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, map[string]interface{}{
 		"a": "c",
@@ -531,21 +531,21 @@ func TestSeedConfigOverwritesFiles(t *testing.T) {
 
 func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]string{
+		"config/test.yaml": mustMarshalYAML(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
-		"config/local.json": mustMarshalJSON(map[string]string{
+		"config/local.yaml": mustMarshalYAML(map[string]string{
 			"a": "c",
 		}),
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "local.json"),
+			filepath.Join(testDir, "config", "local.yaml"),
 		),
 	}, nil)
 
@@ -557,19 +557,19 @@ func TestLaterFilesOverwriteEarlierFiles(t *testing.T) {
 
 func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]string{
+		"config/test.yaml": mustMarshalYAML(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
 	})
 
-	bytes := mustMarshalJSON(map[string]string{
+	bytes := mustMarshalYAML(map[string]string{
 		"a": "c",
 	})
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 		zanzibar.ConfigFileContents(bytes),
 	}, nil)
@@ -582,12 +582,12 @@ func TestLaterContentsOverwriteEarlierFiles(t *testing.T) {
 
 func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/local.json": mustMarshalJSON(map[string]string{
+		"config/local.yaml": mustMarshalYAML(map[string]string{
 			"a": "c",
 		}),
 	})
 
-	bytes := mustMarshalJSON(map[string]string{
+	bytes := mustMarshalYAML(map[string]string{
 		"a":     "b",
 		"a.b.c": "v",
 	})
@@ -595,7 +595,7 @@ func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFileContents(bytes),
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "local.json"),
+			filepath.Join(testDir, "config", "local.yaml"),
 		),
 	}, nil)
 
@@ -608,7 +608,7 @@ func TestLaterFilesOverwriteEarlierContents(t *testing.T) {
 func TestSupportsNonExistantFiles(t *testing.T) {
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 		zanzibar.ConfigFilePath(
 			filepath.Join(testDir, "config", "local.json"),
@@ -622,9 +622,9 @@ func TestSupportsNonExistantFiles(t *testing.T) {
 	assert.Equal(t, config.MustGetString("a.b.c"), "v2")
 }
 
-func TestThrowsForInvalidJSONFile(t *testing.T) {
+func TestThrowsForInvalidFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]string{
+		"config/test.yaml": mustMarshalYAML(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -634,7 +634,7 @@ func TestThrowsForInvalidJSONFile(t *testing.T) {
 	assert.Panics(t, func() {
 		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 			zanzibar.ConfigFilePath(
-				filepath.Join(testDir, "config", "test.json"),
+				filepath.Join(testDir, "config", "test.yaml"),
 			),
 			zanzibar.ConfigFilePath(
 				filepath.Join(testDir, "config", "local.json"),
@@ -645,9 +645,9 @@ func TestThrowsForInvalidJSONFile(t *testing.T) {
 	closer.Close()
 }
 
-func TestThrowsForInvalidJSONContents(t *testing.T) {
+func TestThrowsForInvalidContents(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]string{
+		"config/test.yaml": mustMarshalYAML(map[string]string{
 			"a":     "b",
 			"a.b.c": "v",
 		}),
@@ -656,7 +656,7 @@ func TestThrowsForInvalidJSONContents(t *testing.T) {
 	assert.Panics(t, func() {
 		_ = zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 			zanzibar.ConfigFilePath(
-				filepath.Join(testDir, "config", "test.json"),
+				filepath.Join(testDir, "config", "test.yaml"),
 			),
 			zanzibar.ConfigFileContents([]byte("{{{")),
 		}, nil)
@@ -675,7 +675,7 @@ func TestThrowsForReadingBadFiles(t *testing.T) {
 
 func TestGetStructFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -685,7 +685,7 @@ func TestGetStructFromDisk(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, nil)
 
@@ -702,7 +702,7 @@ func TestGetStructFromDisk(t *testing.T) {
 
 func TestInspectMalformedDataFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": []byte(
+		"config/test.yaml": []byte(
 			`{ "a": { "c": %%% }, "b": "c" }`,
 		),
 	})
@@ -710,7 +710,7 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 	assert.Panics(t, func() {
 		zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 			zanzibar.ConfigFilePath(
-				filepath.Join(testDir, "config", "test.json"),
+				filepath.Join(testDir, "config", "test.yaml"),
 			),
 		}, nil)
 	})
@@ -720,7 +720,7 @@ func TestInspectMalformedDataFromDisk(t *testing.T) {
 
 func TestReadStructIntoWrongType(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a":     true,
 			"array": []string{"x", "y"},
 		}),
@@ -728,7 +728,7 @@ func TestReadStructIntoWrongType(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, nil)
 
@@ -758,7 +758,7 @@ func TestReadStructIntoWrongType(t *testing.T) {
 
 func TestOverwriteStructFromSeedConfig(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a": map[string]interface{}{
 				"Field": "a",
 				"Foo":   4,
@@ -768,7 +768,7 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, map[string]interface{}{
 		"a": struct {
@@ -793,7 +793,7 @@ func TestOverwriteStructFromSeedConfig(t *testing.T) {
 
 func TestInspectFromFile(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -808,7 +808,7 @@ func TestInspectFromFile(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, nil)
 
@@ -829,7 +829,7 @@ func TestInspectFromFile(t *testing.T) {
 
 func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 	closer := WriteFixture(testDir, map[string][]byte{
-		"config/test.json": mustMarshalJSON(map[string]interface{}{
+		"config/test.yaml": mustMarshalYAML(map[string]interface{}{
 			"a":     "b",
 			"a.b.c": "v",
 			"bool":  true,
@@ -840,7 +840,7 @@ func TestPanicReadingWrongTypeFromDisk(t *testing.T) {
 
 	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
 		zanzibar.ConfigFilePath(
-			filepath.Join(testDir, "config", "test.json"),
+			filepath.Join(testDir, "config", "test.yaml"),
 		),
 	}, nil)
 

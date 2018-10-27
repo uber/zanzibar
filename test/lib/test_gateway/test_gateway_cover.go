@@ -76,7 +76,7 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	yamlFile := path.Join(tempConfigDir, "test.json")
+	yamlFile := path.Join(tempConfigDir, "test.yaml")
 	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err

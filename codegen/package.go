@@ -296,7 +296,7 @@ func (p PackageHelper) TargetEndpointsRegisterPath() string {
 func (p PackageHelper) EndpointTestConfigPath(
 	serviceName, methodName string,
 ) string {
-	fileName := strings.ToLower(methodName) + "_test.json"
+	fileName := strings.ToLower(methodName) + "_test.yaml"
 	return path.Join(p.testConfigsRootDir, strings.ToLower(serviceName), fileName)
 }
 

@@ -84,8 +84,8 @@ example-gateway                 # root directory
 ├── clients                     # config directory for modules of client module class
 │   └── bar                     # config directory for a client named 'bar'
 ├── config                      # config directory for application runtime properties
-│   ├── production.json         # config file for production environment
-│   └── test.json               # config file for test environment
+│   ├── production.yaml         # config file for production environment
+│   └── test.yaml               # config file for test environment
 ├── copyright_header.txt        # optional copyright header for open source application
 ├── endpoints                   # config directory for modules of endpoint module class
 │   └── bar                     # config directory for an endpoint named 'bar'
