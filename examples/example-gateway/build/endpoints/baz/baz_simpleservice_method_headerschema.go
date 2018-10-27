@@ -52,7 +52,7 @@ func NewSimpleServiceHeaderSchemaHandler(deps *module.Dependencies) *SimpleServi
 	handler := &SimpleServiceHeaderSchemaHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"baz", "headerSchema",
 		handler.HandleRequest,

@@ -52,7 +52,7 @@ func NewSimpleServiceGetProfileHandler(deps *module.Dependencies) *SimpleService
 	handler := &SimpleServiceGetProfileHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"baz", "getProfile",
 		handler.HandleRequest,

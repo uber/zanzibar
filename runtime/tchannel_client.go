@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
 	"go.uber.org/thriftrw/protocol"
 	"go.uber.org/zap"
@@ -83,8 +84,46 @@ type tchannelOutboundCall struct {
 	metrics       ContextMetrics
 }
 
-// NewTChannelClient returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
+// NewTChannelClient is deprecated, use NewTChannelClientContext instead
 func NewTChannelClient(
+	ch *tchannel.Channel,
+	logger *zap.Logger,
+	scope tally.Scope,
+	opt *TChannelClientOption,
+) *TChannelClient {
+	numMethods := len(opt.MethodNames)
+	loggers := make(map[string]*zap.Logger, numMethods)
+
+	for serviceMethod, methodName := range opt.MethodNames {
+		loggers[serviceMethod] = logger.With(
+			zap.String("clientID", opt.ClientID),
+			zap.String("methodName", methodName),
+			zap.String("serviceName", opt.ServiceName),
+			zap.String("serviceMethod", serviceMethod),
+		)
+	}
+
+	client := &TChannelClient{
+		ch:                ch,
+		sc:                ch.GetSubChannel(opt.ServiceName),
+		serviceName:       opt.ServiceName,
+		ClientID:          opt.ClientID,
+		methodNames:       opt.MethodNames,
+		timeout:           opt.Timeout,
+		timeoutPerAttempt: opt.TimeoutPerAttempt,
+		routingKey:        opt.RoutingKey,
+		Loggers:           loggers,
+		metrics:           NewContextMetrics(scope),
+	}
+	if opt.AltSubchannelName != "" {
+		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
+	}
+
+	return client
+}
+
+// NewTChannelClientContext returns a TChannelClient that makes calls over the given tchannel to the given thrift service.
+func NewTChannelClientContext(
 	ch *tchannel.Channel,
 	logger *zap.Logger,
 	metrics ContextMetrics,

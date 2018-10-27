@@ -59,8 +59,28 @@ type RouterEndpoint struct {
 	tracer         opentracing.Tracer
 }
 
-// NewRouterEndpoint creates an endpoint with all the necessary data
+// NewRouterEndpoint is deprecated, use NewRouterEndpointContext instead
 func NewRouterEndpoint(
+	logger *zap.Logger,
+	scope tally.Scope,
+	tracer opentracing.Tracer,
+	endpointID string,
+	handlerID string,
+	handler HandlerFn,
+) *RouterEndpoint {
+	return &RouterEndpoint{
+		EndpointName:   endpointID,
+		HandlerName:    handlerID,
+		HandlerFn:      handler,
+		contextLogger:  NewContextLogger(logger),
+		logger:         logger,
+		ContextMetrics: NewContextMetrics(scope),
+		tracer:         tracer,
+	}
+}
+
+// NewRouterEndpointContext creates an endpoint with all the necessary data
+func NewRouterEndpointContext(
 	extractor ContextExtractor,
 	contextMetrics ContextMetrics,
 	logger *zap.Logger,
@@ -112,9 +132,11 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		headers[k] = v[0]
 	}
 
-	ctx = WithEndpointRequestHeadersField(ctx, headers)
-	for k, v := range endpoint.ContextExtractor.ExtractScopeTags(ctx) {
-		scopeTags[k] = v
+	if endpoint.ContextExtractor != nil {
+		ctx = WithEndpointRequestHeadersField(ctx, headers)
+		for k, v := range endpoint.ContextExtractor.ExtractScopeTags(ctx) {
+			scopeTags[k] = v
+		}
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)
@@ -137,11 +159,11 @@ type HTTPRouter struct {
 // NewHTTPRouter allocates a HTTP router
 func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	router := &HTTPRouter{
-		notFoundEndpoint: NewRouterEndpoint(
+		notFoundEndpoint: NewRouterEndpointContext(
 			gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
 			notFound, notFound, nil,
 		),
-		methodNotAllowedEndpoint: NewRouterEndpoint(
+		methodNotAllowedEndpoint: NewRouterEndpointContext(
 			gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
 			methodNotAllowed, methodNotAllowed, nil,
 		),

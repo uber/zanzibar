@@ -102,7 +102,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,

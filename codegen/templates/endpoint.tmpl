@@ -66,7 +66,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}

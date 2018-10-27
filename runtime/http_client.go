@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
@@ -48,8 +49,42 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 		strconv.Itoa(rawErr.StatusCode) + ")"
 }
 
-// NewHTTPClient will allocate a http client.
+// NewHTTPClient is deprecated, use NewHTTPClientContext instead
 func NewHTTPClient(
+	logger *zap.Logger,
+	scope tally.Scope,
+	clientID string,
+	methodNames []string,
+	baseURL string,
+	defaultHeaders map[string]string,
+	timeout time.Duration,
+) *HTTPClient {
+	loggers := make(map[string]*zap.Logger, len(methodNames))
+
+	for _, methodName := range methodNames {
+		loggers[methodName] = logger.With(
+			zap.String("clientID", clientID),
+			zap.String("methodName", methodName),
+		)
+	}
+	return &HTTPClient{
+		Client: &http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives:   false,
+				MaxIdleConns:        500,
+				MaxIdleConnsPerHost: 500,
+			},
+			Timeout: timeout,
+		},
+		BaseURL:        baseURL,
+		DefaultHeaders: defaultHeaders,
+		loggers:        loggers,
+		ContextMetrics: NewContextMetrics(scope),
+	}
+}
+
+// NewHTTPClientContext will allocate a http client.
+func NewHTTPClientContext(
 	logger *zap.Logger,
 	ContextMetrics ContextMetrics,
 	clientID string,

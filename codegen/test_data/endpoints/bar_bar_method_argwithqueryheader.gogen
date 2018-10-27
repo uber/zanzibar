@@ -53,7 +53,7 @@ func NewBarArgWithQueryHeaderHandler(deps *module.Dependencies) *BarArgWithQuery
 	handler := &BarArgWithQueryHeaderHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"bar", "argWithQueryHeader",
 		handler.HandleRequest,

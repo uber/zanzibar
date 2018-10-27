@@ -50,7 +50,7 @@ func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHello
 	handler := &ServiceBFrontHelloHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"multi", "helloB",
 		handler.HandleRequest,

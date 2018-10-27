@@ -155,7 +155,7 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 
 	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,

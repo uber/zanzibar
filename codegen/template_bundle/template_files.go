@@ -282,7 +282,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler := &{{$handlerName}}{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpoint(
+	handler.endpoint = zanzibar.NewRouterEndpointContext(
 		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6955, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6962, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1008,7 +1008,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		callerName: callerName,
 		calleeName: calleeName,
 		{{end -}}
-		httpClient: zanzibar.NewHTTPClient(
+		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"{{$clientID}}",
 			[]string{
@@ -1220,7 +1220,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7947, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7954, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2174,7 +2174,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
@@ -2274,7 +2274,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6280, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6287, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2639,7 +2639,7 @@ func (h *{{$handlerName}}) redirectToDeputy(
 
 	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
@@ -2672,7 +2672,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8185, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8192, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

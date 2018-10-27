@@ -244,7 +244,7 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,

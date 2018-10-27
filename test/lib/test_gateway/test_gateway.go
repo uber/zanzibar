@@ -194,7 +194,7 @@ func CreateGateway(
 		timeoutPerAttempt = time.Duration(t.(int)) * time.Millisecond
 	}
 
-	tchannelClient := zanzibar.NewTChannelClient(
+	tchannelClient := zanzibar.NewTChannelClientContext(
 		channel,
 		zap.NewNop(),
 		zanzibar.NewContextMetrics(tally.NoopScope),

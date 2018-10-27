@@ -269,7 +269,7 @@ func (gateway *Gateway) registerPredefined() error {
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
-	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
+	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpointContext(
 		gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,

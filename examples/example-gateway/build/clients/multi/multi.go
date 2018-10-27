@@ -65,7 +65,7 @@ func NewClient(deps *module.Dependencies) Client {
 
 	return &multiClient{
 		clientID: "multi",
-		httpClient: zanzibar.NewHTTPClient(
+		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"multi",
 			[]string{

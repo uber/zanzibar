@@ -84,7 +84,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		callerName: callerName,
 		calleeName: calleeName,
 		{{end -}}
-		httpClient: zanzibar.NewHTTPClient(
+		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"{{$clientID}}",
 			[]string{
