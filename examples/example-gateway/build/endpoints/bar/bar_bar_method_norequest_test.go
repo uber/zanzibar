@@ -55,12 +55,12 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameNoRequestSuccessfulRequest(),
 				"../../..",
-				"config", "test.json",
+				"config", "test.yaml",
 			),
 			filepath.Join(
 				getDirNameNoRequestSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "test.json",
+				"config", "example-gateway", "test.yaml",
 			),
 		},
 	})

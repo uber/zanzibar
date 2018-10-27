@@ -55,12 +55,12 @@ func TestArgNotStructSuccessfulRequestOKResponse(t *testing.T) {
 			filepath.Join(
 				getDirNameArgNotStructSuccessfulRequest(),
 				"../../..",
-				"config", "test.json",
+				"config", "test.yaml",
 			),
 			filepath.Join(
 				getDirNameArgNotStructSuccessfulRequest(),
 				"../../..",
-				"config", "example-gateway", "test.json",
+				"config", "example-gateway", "test.yaml",
 			),
 		},
 	})
