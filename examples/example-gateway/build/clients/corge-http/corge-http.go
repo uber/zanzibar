@@ -78,7 +78,7 @@ func NewClient(deps *module.Dependencies) Client {
 		callerName:   callerName,
 		calleeName:   calleeName,
 		httpClient: zanzibar.NewHTTPClient(
-			deps.Default.Logger, deps.Default.ContextMetrics,
+			deps.Default.Logger, deps.Default.Scope,
 			"corge-http",
 			[]string{
 				"EchoString",

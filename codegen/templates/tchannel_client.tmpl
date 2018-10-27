@@ -105,7 +105,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	client := zanzibar.NewTChannelClient(
 		deps.Default.Channel,
 		deps.Default.Logger,
-		deps.Default.ContextMetrics,
+		deps.Default.Scope,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "{{$clientID}}",

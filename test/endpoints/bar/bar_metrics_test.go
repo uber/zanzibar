@@ -61,16 +61,12 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 13
+	numMetrics := 15
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
-	headers := make(map[string]string)
-	headers["regionname"] = "san_francisco"
-	headers["device"] = "ios"
-	headers["deviceversion"] = "carbon"
 	_, err = gateway.MakeRequest(
-		"POST", "/bar/bar-path", headers,
+		"POST", "/bar/bar-path", nil,
 		bytes.NewReader([]byte(`{
 			"request":{"stringField":"foo","boolField":true,"binaryField":"aGVsbG8=","timestamp":123,"enumField":0,"longField":123}
 		}`)),
@@ -84,33 +80,26 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, numMetrics, len(metrics))
 
 	endpointNames := []string{
-		"endpoint.latency",
-		"endpoint.request",
+		"test-gateway.test.all-workers.inbound.calls.latency",
+		"test-gateway.test.all-workers.inbound.calls.recvd",
+		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	endpointTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "bar",
+		"handler":  "normal",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	eStatusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"status":        "200",
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "bar",
+		"handler":  "normal",
+		"status":   "200",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -118,56 +107,45 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	inboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", endpointTags,
+		"test-gateway.test.all-workers.inbound.calls.latency", endpointTags,
 	)]
 	value := *inboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	inboundRecvd := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.request", endpointTags,
+		"test-gateway.test.all-workers.inbound.calls.recvd", endpointTags,
 	)]
 	value = *inboundRecvd.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.status", eStatusTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", eStatusTags,
 	)]
 	value = *inboundStatus.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	httpClientNames := []string{
-		"client.latency",
-		"client.request",
+		"test-gateway.test.all-workers.outbound.calls.latency",
+		"test-gateway.test.all-workers.outbound.calls.sent",
+		"test-gateway.test.all-workers.outbound.calls.success",
 	}
 	httpClientTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"clientid":      "bar",
-		"clientmethod":  "Normal",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"protocal":      "HTTP",
+		"env":     "test",
+		"service": "test-gateway",
+		"client":  "bar",
+		"method":  "Normal",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 	cStatusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"clientid":      "bar",
-		"clientmethod":  "Normal",
-		"status":        "200",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"endpointid":    "bar",
-		"handlerid":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"protocal":      "HTTP",
+		"env":     "test",
+		"service": "test-gateway",
+		"client":  "bar",
+		"method":  "Normal",
+		"status":  "200",
+		"dc":      "unknown",
+		"host":    zanzibar.GetHostname(),
 	}
 
 	for _, name := range httpClientNames {
@@ -176,20 +154,26 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	outboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"client.latency", httpClientTags,
+		"test-gateway.test.all-workers.outbound.calls.latency", httpClientTags,
 	)]
 	value = *outboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	outboundSent := metrics[tally.KeyForPrefixedStringMap(
-		"client.request", httpClientTags,
+		"test-gateway.test.all-workers.outbound.calls.sent", httpClientTags,
 	)]
 	value = *outboundSent.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
+	outboundSuccess := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.outbound.calls.success", httpClientTags,
+	)]
+	value = *outboundSuccess.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
 	statusSuccess := metrics[tally.KeyForPrefixedStringMap(
-		"client.status",
+		"test-gateway.test.all-workers.outbound.calls.status.200",
 		cStatusTags,
 	)]
 	value = *statusSuccess.MetricValue.Count.I64Value
@@ -203,7 +187,7 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
-		"zap.logged.info", defaultTags,
+		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
 	)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
 	assert.Equal(t, int64(3), value, "expected counter to be 3")

@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -140,7 +139,7 @@ func (res *ClientHTTPResponse) finish() {
 	res.finishTime = time.Now()
 
 	// emit metrics
-	res.req.client.ContextMetrics.RecordTimer(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))
+	res.req.metrics.Latency.Record(res.finishTime.Sub(res.req.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
 		res.req.Logger.Error(
@@ -148,12 +147,12 @@ func (res *ClientHTTPResponse) finish() {
 			zap.Int("UnknownStatusCode", res.StatusCode),
 		)
 	} else {
-		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
-		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags)
-		res.req.client.ContextMetrics.IncCounter(res.req.ctx, clientStatus, 1)
+		res.req.metrics.Status.IncrStatus(res.StatusCode, 1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
-		res.req.client.ContextMetrics.IncCounter(res.req.ctx, clientErrors, 1)
+		res.req.metrics.Errors.Inc(1)
+	} else {
+		res.req.metrics.Success.Inc(1)
 	}
 
 	// write logs

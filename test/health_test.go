@@ -112,14 +112,10 @@ func TestHealthMetrics(t *testing.T) {
 	defer gateway.Close()
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
-	numMetrics := 10
+	numMetrics := 11
 	cgateway.MetricsWaitGroup.Add(numMetrics)
 
-	headers := make(map[string]string)
-	headers["regionname"] = "san_francisco"
-	headers["device"] = "ios"
-	headers["deviceversion"] = "carbon"
-	res, err := gateway.MakeRequest("GET", "/health", headers, nil)
+	res, err := gateway.MakeRequest("GET", "/health", nil, nil)
 	if !assert.NoError(t, err, "got http error") {
 		return
 	}
@@ -128,37 +124,30 @@ func TestHealthMetrics(t *testing.T) {
 	cgateway.MetricsWaitGroup.Wait()
 
 	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 10 metrics")
+	assert.Equal(t, numMetrics, len(metrics), "expected 9 metrics")
 	names := []string{
-		"endpoint.latency",
-		"endpoint.request",
+		"test-gateway.test.all-workers.inbound.calls.latency",
+		"test-gateway.test.all-workers.inbound.calls.recvd",
+		"test-gateway.test.all-workers.inbound.calls.success",
 	}
 	tags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "health",
+		"handler":  "health",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
 	statusTags := map[string]string{
-		"env":           "test",
-		"service":       "test-gateway",
-		"endpointid":    "health",
-		"handlerid":     "health",
-		"status":        "200",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
-		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"env":      "test",
+		"service":  "test-gateway",
+		"endpoint": "health",
+		"handler":  "health",
+		"status":   "200",
+		"dc":       "unknown",
+		"host":     zanzibar.GetHostname(),
 	}
-	allhostTags := map[string]string{
+	defaultTags := map[string]string{
 		"env":     "test",
 		"service": "test-gateway",
 		"dc":      "unknown",
@@ -171,36 +160,42 @@ func TestHealthMetrics(t *testing.T) {
 	}
 
 	statusKey := tally.KeyForPrefixedStringMap(
-		"endpoint.status", statusTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
 	)
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
 
 	loggedKey := tally.KeyForPrefixedStringMap(
-		"zap.logged.info", allhostTags,
+		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
 	)
 	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", tags,
+		"test-gateway.test.all-workers.inbound.calls.latency", tags,
 	)]
 	value := *latencyMetric.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
 	assert.True(t, value < 1000*1000*1000, "expected timer to be <1 second")
 
 	recvdMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.request", tags,
+		"test-gateway.test.all-workers.inbound.calls.recvd", tags,
 	)]
 	value = *recvdMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
+	successMetric := metrics[tally.KeyForPrefixedStringMap(
+		"test-gateway.test.all-workers.inbound.calls.success", tags,
+	)]
+	value = *successMetric.MetricValue.Count.I64Value
+	assert.Equal(t, int64(1), value, "expected counter to be 1")
+
 	statusMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.status", statusTags,
+		"test-gateway.test.all-workers.inbound.calls.status.200", statusTags,
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
 
 	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
-		"zap.logged.info", allhostTags,
+		"test-gateway.test.all-workers.zap.logged.info", defaultTags,
 	)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
 	assert.Equal(t, int64(2), value, "expected counter to be 2")
@@ -229,17 +224,17 @@ func TestRuntimeMetrics(t *testing.T) {
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics), "expected 12 metrics")
 	names := []string{
-		"runtime.num-cpu",
-		"runtime.gomaxprocs",
-		"runtime.num-goroutines",
+		"test-gateway.test.per-worker.runtime.num-cpu",
+		"test-gateway.test.per-worker.runtime.gomaxprocs",
+		"test-gateway.test.per-worker.runtime.num-goroutines",
 
-		"runtime.memory.heap",
-		"runtime.memory.heapidle",
-		"runtime.memory.heapinuse",
-		"runtime.memory.stack",
+		"test-gateway.test.per-worker.runtime.memory.heap",
+		"test-gateway.test.per-worker.runtime.memory.heapidle",
+		"test-gateway.test.per-worker.runtime.memory.heapinuse",
+		"test-gateway.test.per-worker.runtime.memory.stack",
 
-		"runtime.memory.num-gc",
-		"runtime.memory.gc-pause-ms",
+		"test-gateway.test.per-worker.runtime.memory.num-gc",
+		"test-gateway.test.per-worker.runtime.memory.gc-pause-ms",
 	}
 	tags := map[string]string{
 		"env":     "test",

@@ -22,7 +22,7 @@ package app
 
 import (
 	"context"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // AppOptions defines the custom application func
@@ -32,18 +32,18 @@ var AppOptions = &zanzibar.Options{
 
 func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {
 	extractors := []zanzibar.ContextScopeTagsExtractor{
-		getRequestTags,
+		getEndpointTags,
 	}
 
 	return extractors
 }
 
-func getRequestTags(ctx context.Context) map[string]string {
+func getEndpointTags(ctx context.Context) map[string]string {
 	tags := map[string]string{}
 	headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
-	tags["regionname"] = headers["Regionname"]
-	tags["device"] = headers["Device"]
-	tags["deviceversion"] = headers["Deviceversion"]
+	tags["regionname"] = headers["regionname"]
+	tags["device"] = headers["device"]
+	tags["deviceversion"] = headers["deviceversion"]
 
 	return tags
 }
