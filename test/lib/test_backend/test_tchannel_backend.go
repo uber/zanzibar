@@ -160,7 +160,7 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 	extractor := contextExtractors.MakeContextExtractor()
 	gateway := zanzibar.Gateway{
 		Logger:           testLogger,
-		RootScope:        tally.NoopScope,
+		AllHostScope:     tally.NoopScope,
 		ContextExtractor: extractor,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
 	}

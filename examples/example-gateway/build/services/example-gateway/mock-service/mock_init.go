@@ -81,7 +81,7 @@ func InitializeDependenciesMock(
 		ContextMetrics:   g.ContextMetrics,
 		ContextLogger:    g.ContextLogger,
 		Logger:           g.Logger,
-		Scope:            g.RootScope,
+		Scope:            g.AllHostScope,
 		Config:           g.Config,
 		Channel:          g.Channel,
 		Tracer:           g.Tracer,

@@ -188,10 +188,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	scopeTags := map[string]string{
 		scopeTagEndpoint:       e.EndpointID,
 		scopeTagHandler:        e.HandlerID,
-		scopeTagEndpointMethod: e.Method,
-		scopeTagProtocal:       scopeTagTChannel,
-	}
-
+		scopeTagEndpointMethod: e.Method}
 	ctx = WithScopeTags(ctx, scopeTags)
 
 	var err error
@@ -235,7 +232,7 @@ func (s *TChannelRouter) handle(
 	}
 
 	c.ctx = WithScopeTags(c.ctx, scopeTags)
-	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
+	c.endpoint.ContextMetrics.IncCounter(c.ctx, inboundCallsRecvd, 1)
 	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
@@ -264,7 +261,7 @@ func (s *TChannelRouter) handle(
 
 func (c *tchannelInboundCall) start() {
 	c.startTime = time.Now()
-	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
+	c.endpoint.ContextMetrics.IncCounter(c.ctx, inboundCallsRecvd, 1)
 }
 
 func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
@@ -275,13 +272,13 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 		errCause := tchannel.GetSystemErrorCode(errors.Cause(err))
 		scopeTags := map[string]string{scopeTagError: errCause.MetricsKey()}
 		c.ctx = WithScopeTags(c.ctx, scopeTags)
-		c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointSystemErrors, 1)
+		c.endpoint.ContextMetrics.IncCounter(c.ctx, inboundCallsSystemErrors, 1)
 	} else if !c.success {
-		c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointAppErrors, 1)
+		c.endpoint.ContextMetrics.IncCounter(c.ctx, inboundCallsAppErrors, 1)
 	} else {
-		c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointSuccess, 1)
+		c.endpoint.ContextMetrics.IncCounter(c.ctx, inboundCallsSuccess, 1)
 	}
-	c.endpoint.ContextMetrics.RecordTimer(c.ctx, endpointLatency, c.finishTime.Sub(c.startTime))
+	c.endpoint.ContextMetrics.RecordTimer(c.ctx, inboundCallsLatency, c.finishTime.Sub(c.startTime))
 
 	// write logs
 	if err == nil {

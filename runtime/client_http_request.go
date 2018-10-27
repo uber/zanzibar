@@ -188,7 +188,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	}
 
 	// emit metrics
-	req.client.ContextMetrics.IncCounter(req.ctx, clientRequest, 1)
+	req.client.ContextMetrics.IncCounter(req.ctx, outboundCallsSent, 1)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil

@@ -101,12 +101,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		zap.String(logFieldHandlerID, endpoint.HandlerName),
 	)
 
-	scopeTags := map[string]string{
-		scopeTagEndpoint: endpoint.EndpointName,
-		scopeTagHandler:  endpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
-	}
-
+	scopeTags := map[string]string{scopeTagEndpoint: endpoint.EndpointName, scopeTagHandler: endpoint.HandlerName}
 	headers := map[string]string{}
 	for k, v := range r.Header {
 		headers[k] = v[0]
@@ -146,7 +141,7 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 			methodNotAllowed, methodNotAllowed, nil,
 		),
 		gateway:    gateway,
-		panicCount: gateway.RootScope.Counter("runtime.router.panic"),
+		panicCount: gateway.PerHostScope.Counter("runtime.router.panic"),
 		routeMap:   make(map[string]*RouterEndpoint),
 	}
 
@@ -232,12 +227,7 @@ func (router *HTTPRouter) handleNotFound(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	scopeTags := map[string]string{
-		scopeTagEndpoint: router.notFoundEndpoint.EndpointName,
-		scopeTagHandler:  router.notFoundEndpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
-	}
-
+	scopeTags := map[string]string{scopeTagEndpoint: router.notFoundEndpoint.EndpointName, scopeTagHandler: router.notFoundEndpoint.HandlerName}
 	ctx := r.Context()
 	ctx = WithScopeTags(ctx, scopeTags)
 	r = r.WithContext(ctx)
@@ -251,12 +241,7 @@ func (router *HTTPRouter) handleMethodNotAllowed(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	scopeTags := map[string]string{
-		scopeTagEndpoint: router.methodNotAllowedEndpoint.EndpointName,
-		scopeTagHandler:  router.methodNotAllowedEndpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
-	}
-
+	scopeTags := map[string]string{scopeTagEndpoint: router.methodNotAllowedEndpoint.EndpointName, scopeTagHandler: router.methodNotAllowedEndpoint.HandlerName}
 	ctx := r.Context()
 	ctx = WithScopeTags(ctx, scopeTags)
 	r = r.WithContext(ctx)
