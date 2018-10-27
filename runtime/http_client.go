@@ -59,7 +59,6 @@ func NewHTTPClient(
 	timeout time.Duration,
 ) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
-
 	for _, methodName := range methodNames {
 		loggers[methodName] = logger.With(
 			zap.String("clientID", clientID),

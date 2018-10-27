@@ -20,50 +20,63 @@
 
 package zanzibar
 
-import "net/http"
+import (
+	"net/http"
 
-const (
-	endpointRequest      = "endpoint.request"
-	endpointSuccess      = "endpoint.success"
-	endpointStatus       = "endpoint.status"
-	endpointErrors       = "endpoint.errors"
-	endpointAppErrors    = "endpoint.app-errors"
-	endpointSystemErrors = "endpoint.system-errors"
-	endpointLatency      = "endpoint.latency"
-
-	// EndpointPanics is endpoint level panic counter
-	EndpointPanics = "endpoint.panic"
-
-	clientRequest      = "client.request"
-	clientSuccess      = "client.success"
-	clientStatus       = "client.status"
-	clientErrors       = "client.errors"
-	clientAppErrors    = "client.app-errors"
-	clientSystemErrors = "client.system-errors"
-	clientLatency      = "client.latency"
+	"github.com/uber/tchannel-go"
 )
 
-var knownMetrics = []string{
-	"inbound.calls.recvd",
-	"inbound.calls.latency",
-	"inbound.calls.success",
-	"inbound.calls.app-errors",
-	"inbound.calls.system-errors",
-	"inbound.calls.errors",
-	"inbound.calls.status",
+const (
+	inboundCallsRecvd        = "inbound.calls.recvd"
+	inboundCallsLatency      = "inbound.calls.latency"
+	inboundCallsSuccess      = "inbound.calls.success"
+	inboundCallsAppErrors    = "inbound.calls.app-errors"
+	inboundCallsSystemErrors = "inbound.calls.system-errors"
+	inboundCallsErrors       = "inbound.calls.errors"
+	inboundCallsStatus       = "inbound.calls.status"
+
+	// InboundCallsPanic is endpoint level panic counter
+	InboundCallsPanic = "inbound.calls.panic"
 
 	// TChannel docs say it emits 'outbound.calls.sent':
 	// http://tchannel.readthedocs.io/en/latest/metrics/#call-metrics
 	// but uber/tchannel-go emits 'outbound.calls.send':
 	// https://github.com/uber/tchannel-go/blob/3abb4c025c1663b383452339a22d918cf9d0be0b/outbound.go#L196
-	"outbound.calls.send",
-	"outbound.calls.sent",
-	"outbound.calls.latency",
-	"outbound.calls.success",
-	"outbound.calls.app-errors",
-	"outbound.calls.system-errors",
-	"outbound.calls.errors",
-	"outbound.calls.status",
+	outboundCallsSend = "outbound.calls.send"
+
+	outboundCallsSent         = "outbound.calls.sent"
+	outboundCallsLatency      = "outbound.calls.latency"
+	outboundCallsSuccess      = "outbound.calls.success"
+	outboundCallsAppErrors    = "outbound.calls.app-errors"
+	outboundCallsSystemErrors = "outbound.calls.system-errors"
+	outboundCallsErrors       = "outbound.calls.errors"
+	outboundCallsStatus       = "outbound.calls.status"
+)
+
+var knownMetrics = []string{
+	inboundCallsRecvd,
+	inboundCallsLatency,
+	inboundCallsSuccess,
+	inboundCallsAppErrors,
+	inboundCallsSystemErrors,
+	inboundCallsErrors,
+	inboundCallsStatus,
+
+	outboundCallsSend,
+	outboundCallsSent,
+	outboundCallsLatency,
+	outboundCallsSuccess,
+	outboundCallsAppErrors,
+	outboundCallsSystemErrors,
+	outboundCallsErrors,
+	outboundCallsStatus,
+}
+
+var knownTchannelErrors = map[tchannel.SystemErrCode]bool{
+	tchannel.ErrCodeTimeout:    true,
+	tchannel.ErrCodeBadRequest: true,
+	tchannel.ErrCodeProtocol:   true,
+	tchannel.ErrCodeCancelled:  true,
 }
 
 var knownStatusCodes = map[int]bool{

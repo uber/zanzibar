@@ -140,7 +140,7 @@ func (res *ClientHTTPResponse) finish() {
 	res.finishTime = time.Now()
 
 	// emit metrics
-	res.req.client.ContextMetrics.RecordTimer(res.req.ctx, clientLatency, res.finishTime.Sub(res.req.startTime))
+	res.req.client.ContextMetrics.RecordTimer(res.req.ctx, outboundCallsLatency, res.finishTime.Sub(res.req.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
 	if !known {
 		res.req.Logger.Error(
@@ -150,10 +150,12 @@ func (res *ClientHTTPResponse) finish() {
 	} else {
 		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
 		res.req.ctx = WithScopeTags(res.req.ctx, scopeTags)
-		res.req.client.ContextMetrics.IncCounter(res.req.ctx, clientStatus, 1)
+		res.req.client.ContextMetrics.IncCounter(res.req.ctx, outboundCallsStatus, 1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
-		res.req.client.ContextMetrics.IncCounter(res.req.ctx, clientErrors, 1)
+		res.req.client.ContextMetrics.IncCounter(res.req.ctx, outboundCallsErrors, 1)
+	} else {
+		res.req.client.ContextMetrics.IncCounter(res.req.ctx, outboundCallsSuccess, 1)
 	}
 
 	// write logs

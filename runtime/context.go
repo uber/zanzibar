@@ -64,9 +64,6 @@ const (
 	scopeTagHandler         = "handlerid"
 	scopeTagError           = "error"
 	scopeTagStatus          = "status"
-	scopeTagProtocal        = "protocal"
-	scopeTagHTTP            = "HTTP"
-	scopeTagTChannel        = "TChannel"
 	scopeTagsTargetService  = "targetservice"
 	scopeTagsTargetEndpoint = "targetendpoint"
 )
