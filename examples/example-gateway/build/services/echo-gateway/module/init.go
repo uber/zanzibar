@@ -26,6 +26,7 @@ package module
 import (
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

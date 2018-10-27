@@ -26,11 +26,12 @@ package mockechoworkflow
 import (
 	"testing"
 
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/workflow"
 	echoendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/echo"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // NewEchoEchoWorkflowMock creates a workflow with mock clients

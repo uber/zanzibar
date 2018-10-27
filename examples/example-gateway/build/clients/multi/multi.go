@@ -28,8 +28,9 @@ import (
 	"fmt"
 	"time"
 
-	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
 )
 
 // Client defines multi client interface.

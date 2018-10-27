@@ -26,6 +26,7 @@ package module
 import (
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

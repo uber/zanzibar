@@ -27,12 +27,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/zap"
+
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
 	panicendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	"go.uber.org/zap"
 )
 
 // NewServiceCFrontHelloWorkflowMock creates a workflow with mock clients

@@ -30,11 +30,13 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
-	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 )
 
 // ServiceAFrontHelloHandler is the handler for "/multi/serviceA_f/hello"

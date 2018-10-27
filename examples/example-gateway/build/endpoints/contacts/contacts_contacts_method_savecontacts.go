@@ -31,12 +31,14 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
-	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
-	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
+	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
+
+	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 )
 
 // ContactsSaveContactsHandler is the handler for "/contacts/:userUUID/contacts"
