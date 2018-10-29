@@ -55,7 +55,7 @@ type RouterEndpoint struct {
 	contextLogger    ContextLogger
 	// Deprecated: use contextLogger instead
 	logger         *zap.Logger
-	ContextMetrics ContextMetrics
+	contextMetrics ContextMetrics
 	tracer         opentracing.Tracer
 }
 
@@ -74,7 +74,7 @@ func NewRouterEndpoint(
 		HandlerFn:      handler,
 		contextLogger:  NewContextLogger(logger),
 		logger:         logger,
-		ContextMetrics: NewContextMetrics(scope),
+		contextMetrics: NewContextMetrics(scope),
 		tracer:         tracer,
 	}
 }
@@ -97,7 +97,7 @@ func NewRouterEndpointContext(
 		contextLogger:    NewContextLogger(logger),
 		logger:           logger,
 		tracer:           tracer,
-		ContextMetrics:   contextMetrics,
+		contextMetrics:   contextMetrics,
 	}
 }
 
