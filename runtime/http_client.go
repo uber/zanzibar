@@ -35,8 +35,7 @@ type HTTPClient struct {
 	BaseURL        string
 	DefaultHeaders map[string]string
 	loggers        map[string]*zap.Logger
-	Scope          tally.Scope
-	metrics        map[string]*OutboundHTTPMetrics
+	contextMetrics ContextMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -50,7 +49,7 @@ func (rawErr *UnexpectedHTTPError) Error() string {
 		strconv.Itoa(rawErr.StatusCode) + ")"
 }
 
-// NewHTTPClient will allocate a http client.
+// NewHTTPClient is deprecated, use NewHTTPClientContext instead
 func NewHTTPClient(
 	logger *zap.Logger,
 	scope tally.Scope,
@@ -60,17 +59,34 @@ func NewHTTPClient(
 	defaultHeaders map[string]string,
 	timeout time.Duration,
 ) *HTTPClient {
+	return NewHTTPClientContext(
+		logger,
+		NewContextMetrics(scope),
+		clientID,
+		methodNames,
+		baseURL,
+		defaultHeaders,
+		timeout,
+	)
+}
+
+// NewHTTPClientContext will allocate a http client.
+func NewHTTPClientContext(
+	logger *zap.Logger,
+	ContextMetrics ContextMetrics,
+	clientID string,
+	methodNames []string,
+	baseURL string,
+	defaultHeaders map[string]string,
+	timeout time.Duration,
+) *HTTPClient {
 	loggers := make(map[string]*zap.Logger, len(methodNames))
-	metrics := make(map[string]*OutboundHTTPMetrics, len(methodNames))
+
 	for _, methodName := range methodNames {
 		loggers[methodName] = logger.With(
 			zap.String("clientID", clientID),
 			zap.String("methodName", methodName),
 		)
-		metrics[methodName] = NewOutboundHTTPMetrics(scope.Tagged(map[string]string{
-			"client": clientID,
-			"method": methodName,
-		}))
 	}
 	return &HTTPClient{
 		Client: &http.Client{
@@ -84,7 +100,6 @@ func NewHTTPClient(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
-		Scope:          scope,
-		metrics:        metrics,
+		contextMetrics: ContextMetrics,
 	}
 }

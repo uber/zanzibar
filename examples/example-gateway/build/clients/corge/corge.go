@@ -89,10 +89,10 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
-		deps.Default.Scope,
+		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "corge",

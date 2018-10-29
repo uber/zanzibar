@@ -39,8 +39,10 @@ func InitializeDependencies(
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger:         g.Logger,
+		ContextExtractor: g.ContextExtractor,
 		ContextLogger:  g.ContextLogger,
-		Scope:          g.AllHostScope,
+		ContextMetrics: zanzibar.NewContextMetrics(g.RootScope),
+		Scope:          g.RootScope,
 		Tracer:         g.Tracer,
 		Config:         g.Config,
 		Channel:        g.Channel,

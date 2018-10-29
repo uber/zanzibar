@@ -42,6 +42,8 @@ func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockNode
 		Logger: zap.NewNop(),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
+	contextExtractors := &zanzibar.ContextExtractors{}
+	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
 	w := echoendpointstatic.NewEchoEchoWorkflow(
 		&module.Dependencies{

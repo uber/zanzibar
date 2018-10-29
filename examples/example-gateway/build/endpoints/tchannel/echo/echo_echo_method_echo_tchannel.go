@@ -82,7 +82,7 @@ func (h *EchoEchoHandler) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.Metrics.Panic.Inc(1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			isSuccessful = false
 			response = nil
 			headers = nil
@@ -155,10 +155,10 @@ func (h *EchoEchoHandler) redirectToDeputy(
 
 	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
-	client := zanzibar.NewTChannelClient(
+	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
-		h.Deps.Default.Scope,
+		h.Deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
 			ServiceName:       serviceName,
 			ClientID:          "",

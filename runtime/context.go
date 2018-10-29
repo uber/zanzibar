@@ -22,8 +22,10 @@ package zanzibar
 
 import (
 	"context"
+	"time"
 
 	"github.com/pborman/uuid"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -39,7 +41,7 @@ const (
 	routingDelegateKey    = contextFieldKey("rd")
 	endpointRequestHeader = contextFieldKey("endpointRequestHeader")
 	requestLogFields      = contextFieldKey("requestLogFields")
-	requestScopeFields    = contextFieldKey("requestScopeFields")
+	scopeTags             = contextFieldKey("scopeTags")
 )
 
 const (
@@ -55,17 +57,18 @@ const (
 )
 
 const (
-	scopeFieldRequestMethod = "method"
-	scopeFieldEndpointID    = "endpointID"
-	scopeFieldHandlerID     = "handlerID"
-)
-
-const (
-	// EndpointScope defines the name of endpoint scope
-	EndpointScope = "endpoint"
-
-	// ClientScope defines the name of client scope
-	ClientScope = "client"
+	scopeTagClientMethod    = "clientmethod"
+	scopeTagEndpointMethod  = "endpointmethod"
+	scopeTagClient          = "clientid"
+	scopeTagEndpoint        = "endpointid"
+	scopeTagHandler         = "handlerid"
+	scopeTagError           = "error"
+	scopeTagStatus          = "status"
+	scopeTagProtocal        = "protocal"
+	scopeTagHTTP            = "HTTP"
+	scopeTagTChannel        = "TChannel"
+	scopeTagsTargetService  = "targetservice"
+	scopeTagsTargetEndpoint = "targetendpoint"
 )
 
 // WithEndpointField adds the endpoint information in the
@@ -148,20 +151,20 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
-// WithScopeFields returns a new context with the given scope fields attached to context.Context
-func WithScopeFields(ctx context.Context, newFields map[string]string) context.Context {
-	fields := GetScopeFieldsFromCtx(ctx)
+// WithScopeTags returns a new context with the given scope tags attached to context.Context
+func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
+	fields := GetScopeTagsFromCtx(ctx)
 	for k, v := range newFields {
 		fields[k] = v
 	}
 
-	return context.WithValue(ctx, requestScopeFields, fields)
+	return context.WithValue(ctx, scopeTags, fields)
 }
 
-// GetScopeFieldsFromCtx returns the tag info extracted from context.
-func GetScopeFieldsFromCtx(ctx context.Context) map[string]string {
+// GetScopeTagsFromCtx returns the tag info extracted from context.
+func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 	fields := make(map[string]string)
-	if val := ctx.Value(requestScopeFields); val != nil {
+	if val := ctx.Value(scopeTags); val != nil {
 		headers, _ := val.(map[string]string)
 		for k, v := range headers {
 			fields[k] = v
@@ -270,4 +273,33 @@ func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.
 
 func (c *contextLogger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	return c.log.Check(lvl, msg)
+}
+
+// ContextMetrics emit metrics with tags extracted from context.
+type ContextMetrics interface {
+	IncCounter(ctx context.Context, name string, value int64)
+	RecordTimer(ctx context.Context, name string, d time.Duration)
+}
+
+type contextMetrics struct {
+	scope tally.Scope
+}
+
+// NewContextMetrics create ContextMetrics to emit metrics with tags extracted from context.
+func NewContextMetrics(scope tally.Scope) ContextMetrics {
+	return &contextMetrics{
+		scope: scope,
+	}
+}
+
+// IncCounter increments the counter with current tags from context
+func (c *contextMetrics) IncCounter(ctx context.Context, name string, value int64) {
+	tags := GetScopeTagsFromCtx(ctx)
+	c.scope.Tagged(tags).Counter(name).Inc(value)
+}
+
+// RecordTimer records the duration with current tags from context
+func (c *contextMetrics) RecordTimer(ctx context.Context, name string, d time.Duration) {
+	tags := GetScopeTagsFromCtx(ctx)
+	c.scope.Tagged(tags).Timer(name).Record(d)
 }

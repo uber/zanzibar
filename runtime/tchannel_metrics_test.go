@@ -29,11 +29,11 @@ import (
 )
 
 var tags = map[string]string{
-	"app":             "app",
-	"host":            "hostname",
-	"service":         "my-service",
-	"target-service":  "other-service",
-	"target-endpoint": "operation",
+	"app":            "app",
+	"host":           "hostname",
+	"service":        "my-service",
+	"targetservice":  "other-service",
+	"targetendpoint": "operation",
 }
 
 var (
