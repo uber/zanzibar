@@ -456,13 +456,6 @@ If you want to update a dependency:
  - run `glide up --quick`
  - check in the `glide.yaml` and `glide.lock`
 
-### Update golden files
-
-Run the test that compares golden files with `-update` flag, e.g.,
-```
-go test ./codegen -update
-```
-
 [doc-img]: https://godoc.org/github.com/uber/zanzibar?status.svg
 [doc]: https://godoc.org/github.com/uber/zanzibar
 [ci-img]: https://travis-ci.org/uber/zanzibar.svg?branch=master
