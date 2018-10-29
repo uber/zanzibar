@@ -35,7 +35,7 @@ type HTTPClient struct {
 	BaseURL        string
 	DefaultHeaders map[string]string
 	loggers        map[string]*zap.Logger
-	ContextMetrics ContextMetrics
+	contextMetrics ContextMetrics
 }
 
 // UnexpectedHTTPError defines an error for HTTP
@@ -59,28 +59,15 @@ func NewHTTPClient(
 	defaultHeaders map[string]string,
 	timeout time.Duration,
 ) *HTTPClient {
-	loggers := make(map[string]*zap.Logger, len(methodNames))
-
-	for _, methodName := range methodNames {
-		loggers[methodName] = logger.With(
-			zap.String("clientID", clientID),
-			zap.String("methodName", methodName),
-		)
-	}
-	return &HTTPClient{
-		Client: &http.Client{
-			Transport: &http.Transport{
-				DisableKeepAlives:   false,
-				MaxIdleConns:        500,
-				MaxIdleConnsPerHost: 500,
-			},
-			Timeout: timeout,
-		},
-		BaseURL:        baseURL,
-		DefaultHeaders: defaultHeaders,
-		loggers:        loggers,
-		ContextMetrics: NewContextMetrics(scope),
-	}
+	return NewHTTPClientContext(
+		logger,
+		NewContextMetrics(scope),
+		clientID,
+		methodNames,
+		baseURL,
+		defaultHeaders,
+		timeout,
+	)
 }
 
 // NewHTTPClientContext will allocate a http client.
@@ -113,6 +100,6 @@ func NewHTTPClientContext(
 		BaseURL:        baseURL,
 		DefaultHeaders: defaultHeaders,
 		loggers:        loggers,
-		ContextMetrics: ContextMetrics,
+		contextMetrics: ContextMetrics,
 	}
 }

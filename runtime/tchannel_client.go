@@ -91,35 +91,12 @@ func NewTChannelClient(
 	scope tally.Scope,
 	opt *TChannelClientOption,
 ) *TChannelClient {
-	numMethods := len(opt.MethodNames)
-	loggers := make(map[string]*zap.Logger, numMethods)
-
-	for serviceMethod, methodName := range opt.MethodNames {
-		loggers[serviceMethod] = logger.With(
-			zap.String("clientID", opt.ClientID),
-			zap.String("methodName", methodName),
-			zap.String("serviceName", opt.ServiceName),
-			zap.String("serviceMethod", serviceMethod),
-		)
-	}
-
-	client := &TChannelClient{
-		ch:                ch,
-		sc:                ch.GetSubChannel(opt.ServiceName),
-		serviceName:       opt.ServiceName,
-		ClientID:          opt.ClientID,
-		methodNames:       opt.MethodNames,
-		timeout:           opt.Timeout,
-		timeoutPerAttempt: opt.TimeoutPerAttempt,
-		routingKey:        opt.RoutingKey,
-		Loggers:           loggers,
-		metrics:           NewContextMetrics(scope),
-	}
-	if opt.AltSubchannelName != "" {
-		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
-	}
-
-	return client
+	return NewTChannelClientContext(
+		ch,
+		logger,
+		NewContextMetrics(scope),
+		opt,
+	)
 }
 
 // NewTChannelClientContext returns a TChannelClient that makes calls over the given tchannel to the given thrift service.

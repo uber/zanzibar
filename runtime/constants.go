@@ -31,8 +31,8 @@ const (
 	endpointSystemErrors = "endpoint.system-errors"
 	endpointLatency      = "endpoint.latency"
 
-	// EndpointPanics is endpoint level panic counter
-	EndpointPanics = "endpoint.panic"
+	// MetricEndpointPanics is endpoint level panic counter
+	MetricEndpointPanics = "endpoint.panic"
 
 	clientRequest      = "client.request"
 	clientSuccess      = "client.success"

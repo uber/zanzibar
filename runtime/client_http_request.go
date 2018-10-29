@@ -47,6 +47,7 @@ type ClientHTTPRequest struct {
 	rawBody        []byte
 	defaultHeaders map[string]string
 	ctx            context.Context
+	metrics        ContextMetrics
 }
 
 // NewClientHTTPRequest allocates a ClientHTTPRequest. The ctx parameter is the context associated with the outbound requests.
@@ -65,6 +66,7 @@ func NewClientHTTPRequest(
 		ContextLogger:  NewContextLogger(client.loggers[methodName]),
 		defaultHeaders: client.DefaultHeaders,
 		ctx:            ctx,
+		metrics:        client.contextMetrics,
 	}
 	req.res = NewClientHTTPResponse(req)
 	req.start()
@@ -188,7 +190,7 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 	}
 
 	// emit metrics
-	req.client.ContextMetrics.IncCounter(req.ctx, clientRequest, 1)
+	req.metrics.IncCounter(req.ctx, clientRequest, 1)
 
 	req.res.setRawHTTPResponse(res)
 	return req.res, nil

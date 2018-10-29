@@ -84,7 +84,7 @@ func (h *BarNoRequestHandler) HandleRequest(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.EndpointPanics, 1)
+			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			res.SendError(502, "Unexpected workflow panic, recovered at endpoint.", nil)
 		}
 	}()
