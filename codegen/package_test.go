@@ -30,6 +30,8 @@ import (
 	"go.uber.org/thriftrw/compile"
 )
 
+const tmpDir = "../../.tmp_gen"
+
 var fooThrift = filepath.Join(
 	os.Getenv("GOPATH"),
 	"/src/github.com/uber/zanzibar/",

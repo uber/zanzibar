@@ -21,25 +21,16 @@
 package codegen_test
 
 import (
-	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/zanzibar/codegen"
-	testlib "github.com/uber/zanzibar/test/lib"
 )
-
-const parsedBarFile = "test_data/bar.json"
 
 func TestModuleSpec(t *testing.T) {
 	barThrift := "../examples/example-gateway/idl/clients/bar/bar.thrift"
-	m, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
+	_, err := codegen.NewModuleSpec(barThrift, true, false, newPackageHelper(t))
 	assert.NoError(t, err, "unable to parse the thrift file")
-	convertThriftPathToRelative(m)
-	actual, err := json.MarshalIndent(m, "", "\t")
-	assert.NoError(t, err, "Unable to marshall response: err = %s", err)
-	testlib.CompareGoldenFile(t, parsedBarFile, actual)
 }
 
 func TestExceptionValidation(t *testing.T) {
@@ -69,21 +60,4 @@ func TestExceptionValidation(t *testing.T) {
 	}
 	err = m.SetDownstream(e, pkgHelper)
 	assert.NotNil(t, err)
-}
-
-func convertThriftPathToRelative(m *codegen.ModuleSpec) {
-	index := strings.LastIndex(m.ThriftFile, "zanzibar")
-	m.ThriftFile = m.ThriftFile[index:]
-
-	m.CompiledModule = nil
-	for _, service := range m.Services {
-		service.CompileSpec = nil
-		service.ThriftFile = service.ThriftFile[index:]
-		for _, method := range service.Methods {
-			if method.Downstream != nil {
-				convertThriftPathToRelative(method.Downstream)
-			}
-			method.CompiledThriftSpec = nil
-		}
-	}
 }
