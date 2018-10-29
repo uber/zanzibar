@@ -51,7 +51,7 @@ type RouterEndpoint struct {
 	HandlerName  string
 	HandlerFn    HandlerFn
 
-	ContextExtractor ContextExtractor
+	contextExtractor ContextExtractor
 	contextLogger    ContextLogger
 	// Deprecated: use contextLogger instead
 	logger         *zap.Logger
@@ -93,7 +93,7 @@ func NewRouterEndpointContext(
 		EndpointName:     endpointID,
 		HandlerName:      handlerID,
 		HandlerFn:        handler,
-		ContextExtractor: extractor,
+		contextExtractor: extractor,
 		contextLogger:    NewContextLogger(logger),
 		logger:           logger,
 		tracer:           tracer,
@@ -132,9 +132,9 @@ func (endpoint *RouterEndpoint) HandleRequest(
 		headers[k] = v[0]
 	}
 
-	if endpoint.ContextExtractor != nil {
+	if endpoint.contextExtractor != nil {
 		ctx = WithEndpointRequestHeadersField(ctx, headers)
-		for k, v := range endpoint.ContextExtractor.ExtractScopeTags(ctx) {
+		for k, v := range endpoint.contextExtractor.ExtractScopeTags(ctx) {
 			scopeTags[k] = v
 		}
 	}
