@@ -77,7 +77,7 @@ func TestHTTPEndpointToHTTPClient(t *testing.T) {
 	}
 
 	// Wait until all spans are flushed
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 100)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
@@ -157,7 +157,7 @@ func TestHTTPEndpointToHTTPClientWithUpstreamSpan(t *testing.T) {
 	_ = closer.Close()
 
 	// Wait until all spans are flushed
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 100)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
@@ -226,7 +226,7 @@ func TestHTTPEndpointToTChannelClient(t *testing.T) {
 	}
 
 	// Wait until all spans are flushed
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 100)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
@@ -322,7 +322,7 @@ func TestHTTPEndpointToTChannelClientWithUpstreamSpan(t *testing.T) {
 	_ = closer.Close()
 
 	// Wait until all spans are flushed
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 100)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 
@@ -400,7 +400,7 @@ func TestTChannelEndpoint(t *testing.T) {
 	}
 
 	// Wait until all spans are flushed
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 100)
 
 	batches := cg.JaegerAgent.GetJaegerBatches()
 

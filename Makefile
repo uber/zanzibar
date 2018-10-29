@@ -10,6 +10,8 @@ GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
 FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "config/" -e "codegen/templates/" -e "codegen/template_bundle/"
+ENV_CONFIG := $(shell find ./config -name 'production.json' -o -name 'production.yaml')
+TEST_ENV_CONFIG := $(shell find ./config -name 'test.json' -o -name 'test.yaml')
 
 # list all executables
 PROGS = benchmarks/benchserver/benchserver \
@@ -102,9 +104,9 @@ generate:
 	@go get -u github.com/jteeuwen/go-bindata/...
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl
-	@chmod 644 ./config/production.json
-	@go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.json.go config/production.json
-	@./node_modules/.bin/uber-licence --file "production.json.go" --dir "config" > /dev/null
+	@chmod 644 $(ENV_CONFIG)
+	@go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.gen.go $(ENV_CONFIG)
+	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
 	@PATH=$(PATH):$(GOIMPORTS) bash ./scripts/generate.sh
@@ -192,8 +194,7 @@ run-%: $(EXAMPLE_SERVICES_DIR)%/
 	cd "$(EXAMPLE_BASE_DIR)"; \
 		UBER_ENVIRONMENT=production \
 		CONFIG_DIR=./config \
-		./bin/$* --config="config/test.json;"
-
+		./bin/$* --config=$(TEST_ENV_CONFIG)
 
 .PHONY: bins
 bins: generate $(PROGS) $(EXAMPLE_SERVICES)

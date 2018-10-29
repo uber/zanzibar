@@ -74,18 +74,22 @@ func writeConfigToFile(config map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	yamlFile := path.Join(tempConfigDir, "production.json")
+	configFile := path.Join(tempConfigDir, "production.yaml")
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		configFile = path.Join(tempConfigDir, "production.json")
+	}
+
 	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(yamlFile, configBytes, os.ModePerm)
+	err = ioutil.WriteFile(configFile, configBytes, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	return yamlFile, nil
+	return configFile, nil
 }
 
 func spawnGateway(dirName string) *exec.Cmd {

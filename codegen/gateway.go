@@ -1024,7 +1024,7 @@ func (e *EndpointSpec) TargetEndpointTestPath(
 
 // EndpointTestConfigPath generates a filepath for each endpoint test config
 func (e *EndpointSpec) EndpointTestConfigPath() string {
-	return strings.TrimSuffix(e.YAMLFile, filepath.Ext(e.YAMLFile)) + "_test.json"
+	return strings.TrimSuffix(e.YAMLFile, filepath.Ext(e.YAMLFile)) + "_test.yaml"
 }
 
 // SetDownstream configures the downstream client for this endpoint spec

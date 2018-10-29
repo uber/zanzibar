@@ -1,0 +1,10 @@
+envVarsToTagInRootScope: []
+http.port: 1000
+service.env.config:
+  UBER_PORT_HTTP:
+    dataType: number
+    key: http.port
+  UBER_PORT_TCHANNEL:
+    dataType: number
+    key: tchannel.port
+serviceName: my-gateway

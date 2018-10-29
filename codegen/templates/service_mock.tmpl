@@ -57,7 +57,7 @@ type mockService struct {
 func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
-	testConfigPath := filepath.Join(currentDir, "../../../../config/test.json")
+	testConfigPath := filepath.Join(currentDir, "../../../../config/test.yaml")
 	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
 
 	server, err := zanzibar.CreateGateway(c, nil)

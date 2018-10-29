@@ -44,7 +44,7 @@ func TestNewRuntimeConfigOrDie(t *testing.T) {
 
 	os.Setenv(uberPortHTTPEnv, "1111")
 	os.Setenv(uberPortTChannelEnv, "2222")
-	cfg := config.NewRuntimeConfigOrDie([]string{"test.json"}, nil)
+	cfg := config.NewRuntimeConfigOrDie([]string{"test.yaml"}, nil)
 
 	assert.Equal(t, "my-gateway", cfg.MustGetString("serviceName")) // existing config
 	assert.Equal(t, int64(1111), cfg.MustGetInt(httpPortKey))       // replaced config

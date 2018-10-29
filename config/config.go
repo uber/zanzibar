@@ -57,11 +57,17 @@ func NewRuntimeConfigOrDie(
 }
 
 func defaultConfig() (*zanzibar.ConfigOption, error) {
-	bytes, err := Asset("production.json")
-	if err != nil {
-		return nil, err
+	bytes, err := Asset("production.yaml")
+	if err == nil {
+		return zanzibar.ConfigFileContents(bytes), nil
 	}
-	return zanzibar.ConfigFileContents(bytes), nil
+
+	// try json version
+	bytes, err = Asset("production.json")
+	if err == nil {
+		return zanzibar.ConfigFileContents(bytes), nil
+	}
+	return nil, err
 }
 
 func setEnvConfig(cfg *zanzibar.StaticConfig) {

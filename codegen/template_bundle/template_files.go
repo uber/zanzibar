@@ -587,12 +587,12 @@ func Test{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}OKRes
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "test.json",
+				"config", "test.yaml",
 			),
 			filepath.Join(
 				getDirName{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}(),
 				"{{$relativePathToRoot}}",
-				"config", "{{$testFixture.TestServiceName}}", "test.json",
+				"config", "{{$testFixture.TestServiceName}}", "test.yaml",
 			),
 		},
 	})
@@ -663,7 +663,7 @@ func Test{{$testFixture.HandleID | title}}{{$testFixture.TestName | title}}OKRes
 	assert.Equal(
 		t,
 		"{{$v}}",
-		res.Header.Get("{{$k}}"))	
+		res.Header.Get("{{$k}}"))
 	{{end}}
 	assert.Equal(t, 1, counter)
 }
@@ -682,7 +682,7 @@ func endpoint_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3821, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint_test.tmpl", size: 3820, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1894,7 +1894,7 @@ type mockService struct {
 func MustCreateTestService(t *testing.T) MockService {
 	_, file, _, _ := runtime.Caller(0)
 	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
-	testConfigPath := filepath.Join(currentDir, "../../../../config/test.json")
+	testConfigPath := filepath.Join(currentDir, "../../../../config/test.yaml")
 	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
 
 	server, err := zanzibar.CreateGateway(c, nil)

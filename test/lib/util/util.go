@@ -36,19 +36,19 @@ func DefaultMainFile(serviceName string) string {
 }
 
 // DefaultConfigFiles returns the typically expected default config files that
-// a service would use. This includes root production.json and the service's
-// own production.json
+// a service would use. This includes root production.yaml and the service's
+// own production.yaml
 func DefaultConfigFiles(serviceName string) []string {
 	return []string{
 		filepath.Join(
 			getDirName(),
 			"..", "..", "..", "examples", "example-gateway", "config",
-			"test.json",
+			"test.yaml",
 		),
 		filepath.Join(
 			getDirName(),
 			"..", "..", "..", "examples", "example-gateway", "config",
-			"example-gateway", "test.json",
+			"example-gateway", "test.yaml",
 		),
 	}
 }
