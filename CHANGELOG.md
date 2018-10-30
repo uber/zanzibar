@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
-- Application configuration (e.g. `config/base.json`) can now be specified in YAML in addition to JSON (). Zanzibar will look for the `yaml` file first, and fall back to `json` file if it does not exist. JSON static configuration support may be removed in future major releases. 
+- Application configuration (e.g. `config/base.json`) can now be specified in YAML in addition to JSON (#504). Zanzibar will look for the `yaml` file first, and fall back to `json` file if it does not exist. JSON static configuration support may be removed in future major releases. 
 - Module configuration (`services/<name>/service-config.json`) can now be specified as YAML ina ddition to JSON (#468).
 - Panics in endpoints are now caught (#458). HTTP endpoints return `502` status code with a body `"Unexpected workflow panic, recovered at endpoint."`. TChannel endpoints will return ErrCodeUnexpected. 
 
