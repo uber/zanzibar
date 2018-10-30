@@ -29,5 +29,6 @@ config:
     URLTest: SimpleService::urlTest
   thriftFile: clients/baz/baz.thrift
   thriftFileSha: '{{placeholder}}'
+  genTestServer: true
 name: baz
 type: tchannel

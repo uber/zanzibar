@@ -29,7 +29,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/thriftrw/compile"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // EndpointMeta saves meta data used to render an endpoint.
@@ -617,19 +617,6 @@ func (g *TChannelClientGenerator) Generate(
 		)
 	}
 
-	server, err := g.templates.ExecTemplate(
-		"tchannel_client_test_server.tmpl",
-		clientMeta,
-		g.packageHelper,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error executing TChannel server template for %q",
-			instance.InstanceName,
-		)
-	}
-
 	// When it is possible to generate structs for all module types, the
 	// module system will do this transparently. For now we are opting in
 	// on a per-generator basis.
@@ -649,11 +636,27 @@ func (g *TChannelClientGenerator) Generate(
 
 	baseName := filepath.Base(instance.Directory)
 	clientFilePath := baseName + ".go"
-	serverFilePath := baseName + "_test_server.go"
 
 	files := map[string][]byte{
 		clientFilePath: client,
-		serverFilePath: server,
+	}
+
+	genTestServer, _ := instance.Config["genTestServer"].(bool)
+	if genTestServer {
+		server, err := g.templates.ExecTemplate(
+			"tchannel_client_test_server.tmpl",
+			clientMeta,
+			g.packageHelper,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Error executing TChannel server template for %q",
+				instance.InstanceName,
+			)
+		}
+		serverFilePath := baseName + "_test_server.go"
+		files[serverFilePath] = server
 	}
 
 	if dependencies != nil {
