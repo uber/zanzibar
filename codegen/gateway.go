@@ -453,6 +453,10 @@ type EndpointSpec struct {
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
 	RespTransforms map[string]FieldMapperEntry
+	// ErrTransforms is a map from endpoint exception fields to client exception fields
+	// that should override their values
+	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
+	ErrTransforms map[string]FieldMapperEntry
 	// ReqHeaders maps headers from server to client
 	ReqHeaders map[string]*TypedHeader
 	// ResHeaders maps headers from client to server
@@ -837,6 +841,14 @@ func augmentEndpointSpec(
 					return nil, err
 				}
 				espec.RespTransforms = resTransforms
+				continue
+			}
+			if name == "transformError" {
+				errTransforms, err := setTransformMiddleware(middlewareObj)
+				if err != nil {
+					return nil, err
+				}
+				espec.ErrTransforms = errTransforms
 				continue
 			}
 			// req header propagate middleware set headersPropagator
