@@ -64,11 +64,12 @@ const (
 	scopeTagHandler         = "handlerid"
 	scopeTagError           = "error"
 	scopeTagStatus          = "status"
-	scopeTagProtocal        = "protocal"
+	scopeTagProtocol        = "protocol"
 	scopeTagHTTP            = "HTTP"
 	scopeTagTChannel        = "TChannel"
 	scopeTagsTargetService  = "targetservice"
 	scopeTagsTargetEndpoint = "targetendpoint"
+	scopeTagResolvedHeaders = "resolvedheaders"
 )
 
 // WithEndpointField adds the endpoint information in the

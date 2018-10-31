@@ -189,7 +189,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		scopeTagEndpoint:       e.EndpointID,
 		scopeTagHandler:        e.HandlerID,
 		scopeTagEndpointMethod: e.Method,
-		scopeTagProtocal:       scopeTagTChannel,
+		scopeTagProtocol:       scopeTagTChannel,
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)
@@ -228,7 +228,8 @@ func (s *TChannelRouter) handle(
 		return err
 	}
 
-	scopeTags := make(map[string]string)
+	scopeTags := map[string]string{scopeTagResolvedHeaders: "true"}
+	c.ctx = WithScopeTags(c.ctx, scopeTags)
 	c.ctx = WithEndpointRequestHeadersField(c.ctx, c.reqHeaders)
 	for k, v := range s.extractor.ExtractScopeTags(c.ctx) {
 		scopeTags[k] = v
@@ -264,6 +265,8 @@ func (s *TChannelRouter) handle(
 
 func (c *tchannelInboundCall) start() {
 	c.startTime = time.Now()
+	scopeTags := map[string]string{scopeTagResolvedHeaders: "false"}
+	c.ctx = WithScopeTags(c.ctx, scopeTags)
 	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
 }
 

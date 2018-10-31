@@ -97,7 +97,7 @@ func TestCallMetrics(t *testing.T) {
 		"deviceversion": "carbon",
 		"dc":            "unknown",
 		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 	eStatusTags := map[string]string{
 		"env":           "test",
@@ -110,7 +110,7 @@ func TestCallMetrics(t *testing.T) {
 		"deviceversion": "carbon",
 		"dc":            "unknown",
 		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 	for _, name := range endpointNames {
 		key := tally.KeyForPrefixedStringMap(name, endpointTags)
@@ -152,7 +152,7 @@ func TestCallMetrics(t *testing.T) {
 		"regionname":    "san_francisco",
 		"device":        "ios",
 		"deviceversion": "carbon",
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 	cStatusTags := map[string]string{
 		"env":           "test",
@@ -167,7 +167,7 @@ func TestCallMetrics(t *testing.T) {
 		"regionname":    "san_francisco",
 		"device":        "ios",
 		"deviceversion": "carbon",
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 
 	for _, name := range httpClientNames {
