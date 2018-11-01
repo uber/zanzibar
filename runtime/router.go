@@ -124,7 +124,7 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	scopeTags := map[string]string{
 		scopeTagEndpoint: endpoint.EndpointName,
 		scopeTagHandler:  endpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
+		scopeTagProtocol: scopeTagHTTP,
 	}
 
 	headers := map[string]string{}
@@ -257,7 +257,7 @@ func (router *HTTPRouter) handleNotFound(
 	scopeTags := map[string]string{
 		scopeTagEndpoint: router.notFoundEndpoint.EndpointName,
 		scopeTagHandler:  router.notFoundEndpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
+		scopeTagProtocol: scopeTagHTTP,
 	}
 
 	ctx := r.Context()
@@ -276,7 +276,7 @@ func (router *HTTPRouter) handleMethodNotAllowed(
 	scopeTags := map[string]string{
 		scopeTagEndpoint: router.methodNotAllowedEndpoint.EndpointName,
 		scopeTagHandler:  router.methodNotAllowedEndpoint.HandlerName,
-		scopeTagProtocal: scopeTagHTTP,
+		scopeTagProtocol: scopeTagHTTP,
 	}
 
 	ctx := r.Context()

@@ -189,7 +189,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		scopeTagEndpoint:       e.EndpointID,
 		scopeTagHandler:        e.HandlerID,
 		scopeTagEndpointMethod: e.Method,
-		scopeTagProtocal:       scopeTagTChannel,
+		scopeTagProtocol:       scopeTagTChannel,
 	}
 
 	ctx = WithScopeTags(ctx, scopeTags)
@@ -235,7 +235,6 @@ func (s *TChannelRouter) handle(
 	}
 
 	c.ctx = WithScopeTags(c.ctx, scopeTags)
-	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
 	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
@@ -264,7 +263,6 @@ func (s *TChannelRouter) handle(
 
 func (c *tchannelInboundCall) start() {
 	c.startTime = time.Now()
-	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
 }
 
 func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
@@ -282,6 +280,7 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 		c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointSuccess, 1)
 	}
 	c.endpoint.ContextMetrics.RecordTimer(c.ctx, endpointLatency, c.finishTime.Sub(c.startTime))
+	c.endpoint.ContextMetrics.IncCounter(c.ctx, endpointRequest, 1)
 
 	// write logs
 	if err == nil {

@@ -127,7 +127,7 @@ func TestCallMetrics(t *testing.T) {
 		"device":         "ios",
 		"deviceversion":  "carbon",
 		"regionname":     "san_francisco",
-		"protocal":       "TChannel",
+		"protocol":       "TChannel",
 	}
 
 	for _, name := range endpointNames {
@@ -197,7 +197,7 @@ func TestCallMetrics(t *testing.T) {
 		"host":           zanzibar.GetHostname(),
 		"endpointid":     "bazTChannel",
 		"handlerid":      "call",
-		"protocal":       "TChannel",
+		"protocol":       "TChannel",
 	}
 
 	for _, name := range clientNames {

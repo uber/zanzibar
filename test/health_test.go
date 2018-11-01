@@ -143,7 +143,7 @@ func TestHealthMetrics(t *testing.T) {
 		"deviceversion": "carbon",
 		"dc":            "unknown",
 		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
 		"env":           "test",
@@ -156,7 +156,7 @@ func TestHealthMetrics(t *testing.T) {
 		"deviceversion": "carbon",
 		"dc":            "unknown",
 		"host":          zanzibar.GetHostname(),
-		"protocal":      "HTTP",
+		"protocol":      "HTTP",
 	}
 	allhostTags := map[string]string{
 		"env":     "test",
