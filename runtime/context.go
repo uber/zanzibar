@@ -69,7 +69,6 @@ const (
 	scopeTagTChannel        = "TChannel"
 	scopeTagsTargetService  = "targetservice"
 	scopeTagsTargetEndpoint = "targetendpoint"
-	scopeTagResolvedHeaders = "resolvedheaders"
 )
 
 // WithEndpointField adds the endpoint information in the

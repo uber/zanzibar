@@ -117,18 +117,17 @@ func TestCallMetrics(t *testing.T) {
 		"endpoint.success",
 	}
 	endpointTags := map[string]string{
-		"env":             "test",
-		"service":         "test-gateway",
-		"endpointmethod":  "SimpleService__Call",
-		"dc":              "unknown",
-		"host":            zanzibar.GetHostname(),
-		"endpointid":      "bazTChannel",
-		"handlerid":       "call",
-		"device":          "ios",
-		"deviceversion":   "carbon",
-		"regionname":      "san_francisco",
-		"protocol":        "TChannel",
-		"resolvedheaders": "true",
+		"env":            "test",
+		"service":        "test-gateway",
+		"endpointmethod": "SimpleService__Call",
+		"dc":             "unknown",
+		"host":           zanzibar.GetHostname(),
+		"endpointid":     "bazTChannel",
+		"handlerid":      "call",
+		"device":         "ios",
+		"deviceversion":  "carbon",
+		"regionname":     "san_francisco",
+		"protocol":       "TChannel",
 	}
 
 	for _, name := range endpointNames {
