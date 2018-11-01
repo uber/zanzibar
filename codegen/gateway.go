@@ -47,10 +47,15 @@ const (
 	resHeaders = "resHeaderMap"
 )
 
+// Deprecated
+// Add validation to the constructor of the configs
 var mandatoryClientFields = []string{
 	"thriftFile",
 	"thriftFileSha",
 }
+
+// Deprecated
+// Add validation to the constructor of the config
 var mandatoryCustomClientFields = []string{
 	"customImportPath",
 }
@@ -116,6 +121,9 @@ type ModuleClassConfig struct {
 
 // ClientClassConfig represents the specific config for
 // a client. This is a downcast of the moduleClassConfig.
+//
+// Deprecated
+//
 type ClientClassConfig struct {
 	Name         string                 `yaml:"name" json:"name"`
 	Type         string                 `yaml:"type" json:"type"`
@@ -192,32 +200,21 @@ func NewClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	clientConfig := &ClientClassConfig{}
-
-	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
+	clientConfig, errNew := newClientConfig(instance.YAMLFileRaw)
+	if errNew != nil {
 		return nil, errors.Wrapf(
-			err,
+			errNew,
 			"Could not parse class config yaml file: %s",
 			getModuleConfigFileName(instance),
 		)
 	}
-
-	switch clientConfig.Type {
-	case "http":
-		return NewHTTPClientSpec(instance, clientConfig, h)
-	case "tchannel":
-		return NewTChannelClientSpec(instance, clientConfig, h)
-	case "custom":
-		return NewCustomClientSpec(instance, clientConfig, h)
-	default:
-		return nil, errors.Errorf(
-			"Cannot support unknown clientType for client %q",
-			getModuleConfigFileName(instance),
-		)
-	}
+	return clientConfig.NewClientSpec(instance, h)
 }
 
 // NewHTTPClientSpec creates a client spec from a http client module instance
+//
+// Deprecated
+//
 func NewHTTPClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -227,6 +224,9 @@ func NewHTTPClientSpec(
 }
 
 // NewTChannelClientSpec creates a client spec from a yaml file whose type is tchannel
+//
+// Deprecated
+//
 func NewTChannelClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -236,6 +236,9 @@ func NewTChannelClientSpec(
 }
 
 // NewCustomClientSpec creates a client spec from a yaml file whose type is custom
+//
+// Deprecated
+//
 func NewCustomClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
@@ -267,6 +270,7 @@ func NewCustomClientSpec(
 	return clientSpec, nil
 }
 
+// Deprecated
 func getExposedMethods(
 	clientConfig *ClientClassConfig) (map[string]string, error) {
 	rawMethods := clientConfig.Config["exposedMethods"]
@@ -318,10 +322,12 @@ func getExposedMethods(
 	return result, nil
 }
 
+// Deprecated
 func newClientSpec(
 	instance *ModuleInstance,
 	clientConfig *ClientClassConfig,
-	wantAnnot bool, h *PackageHelper,
+	wantAnnot bool,
+	h *PackageHelper,
 ) (*ClientSpec, error) {
 	config := clientConfig.Config
 
