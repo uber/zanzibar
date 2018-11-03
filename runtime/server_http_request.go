@@ -35,33 +35,37 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/pborman/uuid"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
 
-// ServerHTTPRequest struct manages request
+// ServerHTTPRequest struct manages server http request
 type ServerHTTPRequest struct {
 	httpRequest *http.Request
 	res         *ServerHTTPResponse
-	started     bool
 	startTime   time.Time
-	metrics     ContextMetrics
+	started     bool
 	tracer      opentracing.Tracer
 	span        opentracing.Span
 	queryValues url.Values
 	parseFailed bool
 	rawBody     []byte
 
-	ctx           context.Context
-	contextLogger ContextLogger
-	EndpointName  string
-	HandlerName   string
-	URL           *url.URL
-	Method        string
-	Params        httprouter.Params
-	Header        Header
+	scopeTags map[string]string
+	logFields []zap.Field
 
-	// Deprecated: Use contextLogger instead
-	Logger *zap.Logger
+	EndpointName string
+	HandlerName  string
+	URL          *url.URL
+	Method       string
+	Params       httprouter.Params
+	Header       Header
+
+	// Logger logs entries with default fields that contains request meta info
+	Logger Logger
+	// Scope emit metrics with default tags that contains request meta info
+	Scope tally.Scope
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -71,21 +75,54 @@ func NewServerHTTPRequest(
 	params httprouter.Params,
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
-	ctx := r.Context()
+	// put request uuid and endpoint name on context
+	requestUUID := uuid.NewUUID()
+	ctx := withRequestUUID(r.Context(), requestUUID)
+	ctx = WithEndpointField(ctx, endpoint.EndpointName)
+
+	// put request log fields on context
+	logFields := []zap.Field{
+		zap.String(logFieldRequestUUID, requestUUID.String()),
+		zap.String(logFieldEndpointID, endpoint.EndpointName),
+		zap.String(logFieldHandlerID, endpoint.HandlerName),
+	}
+	ctx = WithLogFields(ctx, logFields...)
+
+	// put request scope tags on context
+	scopeTags := map[string]string{
+		scopeTagEndpoint: endpoint.EndpointName,
+		scopeTagHandler:  endpoint.HandlerName,
+		scopeTagProtocol: scopeTagHTTP,
+	}
+	if endpoint.contextExtractor != nil {
+		headers := map[string]string{}
+		for k, v := range r.Header {
+			// TODO: this 0th element logic is probably not correct
+			headers[k] = v[0]
+		}
+		ctx = WithEndpointRequestHeadersField(ctx, headers)
+		for k, v := range endpoint.contextExtractor.ExtractScopeTags(ctx) {
+			scopeTags[k] = v
+		}
+	}
+	ctx = WithScopeTags(ctx, scopeTags)
+
+	httpRequest := r.WithContext(ctx)
+	logger := newLoggerWithFields(endpoint.logger, logFields)
+	scope := endpoint.scope.Tagged(scopeTags)
+
 	req := &ServerHTTPRequest{
-		httpRequest:   r,
-		ctx:           ctx,
-		queryValues:   nil,
-		tracer:        endpoint.tracer,
-		metrics:       endpoint.contextMetrics,
-		contextLogger: endpoint.contextLogger,
-		EndpointName:  endpoint.EndpointName,
-		HandlerName:   endpoint.HandlerName,
-		URL:           r.URL,
-		Method:        r.Method,
-		Params:        params,
-		Header:        NewServerHTTPHeader(r.Header),
-		Logger:        endpoint.logger,
+		httpRequest:  httpRequest,
+		queryValues:  nil,
+		tracer:       endpoint.tracer,
+		EndpointName: endpoint.EndpointName,
+		HandlerName:  endpoint.HandlerName,
+		URL:          httpRequest.URL,
+		Method:       httpRequest.Method,
+		Params:       params,
+		Header:       NewServerHTTPHeader(r.Header),
+		Logger:       logger,
+		Scope:        scope,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)
@@ -93,11 +130,16 @@ func NewServerHTTPRequest(
 	return req
 }
 
+// Context returns the request's context.
+func (req *ServerHTTPRequest) Context() context.Context {
+	return req.httpRequest.Context()
+}
+
 // start the request, emit metrics etc
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.contextLogger.Error(req.ctx,
+		req.Logger.Error(
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -107,8 +149,8 @@ func (req *ServerHTTPRequest) start() {
 	req.started = true
 	req.startTime = time.Now()
 
-	// emit metrics
-	req.metrics.IncCounter(req.ctx, endpointRequest, 1)
+	// emit request count
+	req.Scope.Counter(endpointRequest).Inc(1)
 
 	if req.tracer != nil {
 		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)
@@ -120,7 +162,7 @@ func (req *ServerHTTPRequest) start() {
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				/* coverage ignore next line */
-				req.contextLogger.Warn(req.ctx, "Error Extracting Trace Headers", zap.Error(err))
+				req.Logger.Warn("Error Extracting Trace Headers", zap.Error(err))
 			}
 			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
@@ -135,7 +177,7 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		headerValue := req.httpRequest.Header.Get(headerName)
 		if headerValue == "" {
-			req.contextLogger.Warn(req.ctx, "Got request without mandatory header",
+			req.Logger.Warn("Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -181,7 +223,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string", zap.Error(err))
+		req.Logger.Warn("Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -226,7 +268,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		Err:  strconv.ErrSyntax,
 	}
 
-	req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+	req.Logger.Warn("Got request with invalid query string types",
 		zap.String("expected", "bool"),
 		zap.String("actual", value),
 		zap.String("key", key),
@@ -249,7 +291,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 8)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int8"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -275,7 +317,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int16"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -301,7 +343,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int32"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -329,7 +371,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -355,7 +397,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+		req.Logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "float64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -534,7 +576,7 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 
 	values := req.queryValues[key]
 	if len(values) == 0 {
-		req.contextLogger.Warn(req.ctx, "Got request with missing query string value",
+		req.Logger.Warn("Got request with missing query string value",
 			zap.String("expectedKey", key),
 		)
 		if !req.parseFailed {
@@ -587,7 +629,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.contextLogger.Error(req.ctx, "Could not read request body", zap.Error(err))
+		req.Logger.Error("Could not read request body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
@@ -604,7 +646,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.contextLogger.Warn(req.ctx, "Could not parse json", zap.Error(err))
+		req.Logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
@@ -621,7 +663,7 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 }
 
 func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
-	req.contextLogger.Warn(req.ctx, "Got request with invalid query string types",
+	req.Logger.Warn("Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),
 		zap.String("key", key),

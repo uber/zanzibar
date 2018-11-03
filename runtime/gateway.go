@@ -98,6 +98,7 @@ type Gateway struct {
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
 	tracerCloser    io.Closer
+	logger          *zap.Logger
 	//	- panic ???
 	//	- process reporter ?
 
@@ -269,8 +270,8 @@ func (gateway *Gateway) registerPredefined() error {
 	gateway.HTTPRouter.RegisterRaw("GET", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
 
-	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpointContext(
-		gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
+	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
+		gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
 	))
@@ -557,7 +558,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	gateway.logWriteSyncer = output
 
 	// Default to a STDOUT logger
-	gateway.Logger = zapLogger.With(
+	gateway.logger = zapLogger.With(
 		zap.String("zone", gateway.Config.MustGetString("datacenter")),
 		zap.String("env", gateway.Config.MustGetString("env")),
 		zap.String("hostname", GetHostname()),
@@ -565,7 +566,10 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		zap.Int("pid", os.Getpid()),
 	)
 
-	gateway.ContextLogger = NewContextLogger(gateway.Logger)
+	gateway.ContextLogger = NewContextLogger(gateway.logger)
+	// TODO: deprecate Logger
+	gateway.Logger = gateway.logger
+
 	return nil
 }
 

@@ -129,10 +129,6 @@ func TestHealthMetrics(t *testing.T) {
 
 	metrics := cgateway.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics), "expected 10 metrics")
-	names := []string{
-		"endpoint.latency",
-		"endpoint.request",
-	}
 	tags := map[string]string{
 		"env":           "test",
 		"service":       "test-gateway",
@@ -165,10 +161,10 @@ func TestHealthMetrics(t *testing.T) {
 		"host":    zanzibar.GetHostname(),
 	}
 
-	for _, name := range names {
-		key := tally.KeyForPrefixedStringMap(name, tags)
-		assert.Contains(t, metrics, key, "expected metric: %s", key)
-	}
+	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
 
 	statusKey := tally.KeyForPrefixedStringMap(
 		"endpoint.status", statusTags,
@@ -181,7 +177,7 @@ func TestHealthMetrics(t *testing.T) {
 	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", tags,
+		"endpoint.latency", statusTags,
 	)]
 	value := *latencyMetric.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")

@@ -26,7 +26,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -52,37 +52,15 @@ type RouterEndpoint struct {
 	HandlerFn    HandlerFn
 
 	contextExtractor ContextExtractor
-	contextLogger    ContextLogger
-	// Deprecated: use contextLogger instead
-	logger         *zap.Logger
-	contextMetrics ContextMetrics
-	tracer         opentracing.Tracer
+	logger           *zap.Logger
+	scope            tally.Scope
+	tracer           opentracing.Tracer
 }
 
-// NewRouterEndpoint is deprecated, use NewRouterEndpointContext instead
+// NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
 func NewRouterEndpoint(
-	logger *zap.Logger,
-	scope tally.Scope,
-	tracer opentracing.Tracer,
-	endpointID string,
-	handlerID string,
-	handler HandlerFn,
-) *RouterEndpoint {
-	return &RouterEndpoint{
-		EndpointName:   endpointID,
-		HandlerName:    handlerID,
-		HandlerFn:      handler,
-		contextLogger:  NewContextLogger(logger),
-		logger:         logger,
-		contextMetrics: NewContextMetrics(scope),
-		tracer:         tracer,
-	}
-}
-
-// NewRouterEndpointContext creates an endpoint with all the necessary data
-func NewRouterEndpointContext(
 	extractor ContextExtractor,
-	contextMetrics ContextMetrics,
+	scope tally.Scope,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	endpointID string,
@@ -94,10 +72,9 @@ func NewRouterEndpointContext(
 		HandlerName:      handlerID,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
-		contextLogger:    NewContextLogger(logger),
 		logger:           logger,
+		scope:            scope,
 		tracer:           tracer,
-		contextMetrics:   contextMetrics,
 	}
 }
 
@@ -114,35 +91,9 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	ctx, cancel = context.WithTimeout(ctx, time.Duration(100)*time.Millisecond)
 	//	defer cancel()
 	//}
-	ctx := withRequestFields(r.Context())
-	ctx = WithEndpointField(ctx, endpoint.EndpointName)
-	ctx = WithLogFields(ctx,
-		zap.String(logFieldEndpointID, endpoint.EndpointName),
-		zap.String(logFieldHandlerID, endpoint.HandlerName),
-	)
 
-	scopeTags := map[string]string{
-		scopeTagEndpoint: endpoint.EndpointName,
-		scopeTagHandler:  endpoint.HandlerName,
-		scopeTagProtocol: scopeTagHTTP,
-	}
-
-	headers := map[string]string{}
-	for k, v := range r.Header {
-		headers[k] = v[0]
-	}
-
-	if endpoint.contextExtractor != nil {
-		ctx = WithEndpointRequestHeadersField(ctx, headers)
-		for k, v := range endpoint.contextExtractor.ExtractScopeTags(ctx) {
-			scopeTags[k] = v
-		}
-	}
-
-	ctx = WithScopeTags(ctx, scopeTags)
-	r = r.WithContext(ctx)
 	req := NewServerHTTPRequest(w, r, params, endpoint)
-	endpoint.HandlerFn(ctx, req, req.res)
+	endpoint.HandlerFn(req.Context(), req, req.res)
 	req.res.flush()
 }
 
@@ -159,12 +110,12 @@ type HTTPRouter struct {
 // NewHTTPRouter allocates a HTTP router
 func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	router := &HTTPRouter{
-		notFoundEndpoint: NewRouterEndpointContext(
-			gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
+		notFoundEndpoint: NewRouterEndpoint(
+			gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
 			notFound, notFound, nil,
 		),
-		methodNotAllowedEndpoint: NewRouterEndpointContext(
-			gateway.ContextExtractor, gateway.ContextMetrics, gateway.Logger, gateway.Tracer,
+		methodNotAllowedEndpoint: NewRouterEndpoint(
+			gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
 			methodNotAllowed, methodNotAllowed, nil,
 		),
 		gateway:    gateway,

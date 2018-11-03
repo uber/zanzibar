@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber/tchannel-go"
@@ -166,7 +167,8 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
-	ctx = withRequestFields(ctx)
+	uuid := uuid.NewUUID()
+	ctx = withRequestUUID(ctx, uuid)
 
 	s.RLock()
 	e, ok := s.endpoints[method]
@@ -180,6 +182,7 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 
 	ctx = WithEndpointField(ctx, e.EndpointID)
 	ctx = WithLogFields(ctx,
+		zap.String(logFieldRequestUUID, uuid.String()),
 		zap.String(logFieldEndpointID, e.EndpointID),
 		zap.String(logFieldHandlerID, e.HandlerID),
 		zap.String(logFieldRequestMethod, e.Method),

@@ -54,8 +54,8 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 	handler := &BarNormalHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpointContext(
-		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.ContextExtractor, deps.Default.Scope, deps.Default.Logger, deps.Default.Tracer,
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.Example.NewMiddlewareHandle(

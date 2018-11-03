@@ -83,10 +83,6 @@ func TestCallMetrics(t *testing.T) {
 	metrics := cg.M3Service.GetMetrics()
 	assert.Equal(t, numMetrics, len(metrics))
 
-	endpointNames := []string{
-		"endpoint.latency",
-		"endpoint.request",
-	}
 	endpointTags := map[string]string{
 		"env":           "test",
 		"service":       "test-gateway",
@@ -99,7 +95,7 @@ func TestCallMetrics(t *testing.T) {
 		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
-	eStatusTags := map[string]string{
+	statusTags := map[string]string{
 		"env":           "test",
 		"service":       "test-gateway",
 		"status":        "200",
@@ -112,13 +108,13 @@ func TestCallMetrics(t *testing.T) {
 		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
-	for _, name := range endpointNames {
-		key := tally.KeyForPrefixedStringMap(name, endpointTags)
-		assert.Contains(t, metrics, key, "expected metric: %s", key)
-	}
+	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
+	key = tally.KeyForPrefixedStringMap("endpoint.latency", statusTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
 
 	inboundLatency := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.latency", endpointTags,
+		"endpoint.latency", statusTags,
 	)]
 	value := *inboundLatency.MetricValue.Timer.I64Value
 	assert.True(t, value > 1000, "expected timer to be >1000 nano seconds")
@@ -131,7 +127,7 @@ func TestCallMetrics(t *testing.T) {
 	assert.Equal(t, int64(1), value)
 
 	inboundStatus := metrics[tally.KeyForPrefixedStringMap(
-		"endpoint.status", eStatusTags,
+		"endpoint.status", statusTags,
 	)]
 	value = *inboundStatus.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")

@@ -100,24 +100,25 @@ func TestGetScopeTagsFromCtx(t *testing.T) {
 }
 
 func TestWithRequestFields(t *testing.T) {
-	ctx := withRequestFields(context.TODO())
+	uid := uuid.NewUUID()
+	ctx := withRequestUUID(context.TODO(), uid)
 
 	u := ctx.Value(requestUUIDKey)
 	u1, ok := u.(uuid.UUID)
 
 	assert.NotNil(t, ctx)
-	assert.NotNil(t, u)
-	assert.NotNil(t, u1)
+	assert.Equal(t, uid, u1)
 	assert.True(t, ok)
 }
 
 func TestGetRequestUUIDFromCtx(t *testing.T) {
-	ctx := withRequestFields(context.TODO())
+	uid := uuid.NewUUID()
+	ctx := withRequestUUID(context.TODO(), uid)
 
 	requestUUID := GetRequestUUIDFromCtx(ctx)
 
 	assert.NotNil(t, ctx)
-	assert.NotNil(t, requestUUID)
+	assert.Equal(t, uid, requestUUID)
 
 	// Test Default Scenario where no uuid exists in the context
 	requestUUID = GetRequestUUIDFromCtx(context.TODO())

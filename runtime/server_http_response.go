@@ -28,11 +28,12 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-// ServerHTTPResponse struct manages request
+// ServerHTTPResponse struct manages server http response
 type ServerHTTPResponse struct {
 	Request    *ServerHTTPRequest
 	StatusCode int
@@ -44,7 +45,8 @@ type ServerHTTPResponse struct {
 	pendingBodyBytes  []byte
 	pendingBodyObj    interface{}
 	pendingStatusCode int
-	logger            *zap.Logger
+	logger            Logger
+	scope             tally.Scope
 	err               error
 }
 
@@ -55,8 +57,10 @@ func NewServerHTTPResponse(
 ) *ServerHTTPResponse {
 	return &ServerHTTPResponse{
 		Request:        req,
-		responseWriter: w,
 		StatusCode:     200,
+		responseWriter: w,
+		logger:         req.Logger,
+		scope:          req.Scope,
 	}
 }
 
@@ -64,8 +68,7 @@ func NewServerHTTPResponse(
 func (res *ServerHTTPResponse) finish() {
 	if !res.Request.started {
 		/* coverage ignore next line */
-		res.Request.contextLogger.Error(
-			res.Request.ctx,
+		res.logger.Error(
 			"Forgot to start server response",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -74,8 +77,7 @@ func (res *ServerHTTPResponse) finish() {
 	}
 	if res.finished {
 		/* coverage ignore next line */
-		res.Request.contextLogger.Error(
-			res.Request.ctx,
+		res.logger.Error(
 			"Finished an server response twice",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -85,22 +87,21 @@ func (res *ServerHTTPResponse) finish() {
 	res.finished = true
 	res.finishTime = time.Now()
 
-	// emit metrics
-	res.Request.metrics.RecordTimer(res.Request.ctx, endpointLatency, res.finishTime.Sub(res.Request.startTime))
 	_, known := knownStatusCodes[res.StatusCode]
+	// no need to put this tag on the context because this is the end of response life cycle
+	statusTag := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
+	tagged := res.scope.Tagged(statusTag)
+	tagged.Timer(endpointLatency).Record(res.finishTime.Sub(res.Request.startTime))
 	if !known {
-		res.Request.contextLogger.Error(
-			res.Request.ctx,
+		res.logger.Error(
 			"Could not emit statusCode metric",
 			zap.Int("UnknownStatusCode", res.StatusCode),
 		)
 	} else {
-		scopeTags := map[string]string{scopeTagStatus: fmt.Sprintf("%d", res.StatusCode)}
-		res.Request.ctx = WithScopeTags(res.Request.ctx, scopeTags)
-		res.Request.metrics.IncCounter(res.Request.ctx, endpointStatus, 1)
+		tagged.Counter(endpointStatus).Inc(1)
 	}
 	if !known || res.StatusCode >= 400 && res.StatusCode < 600 {
-		res.Request.metrics.IncCounter(res.Request.ctx, endpointErrors, 1)
+		tagged.Counter(endpointAppErrors).Inc(1)
 
 	}
 
@@ -109,8 +110,7 @@ func (res *ServerHTTPResponse) finish() {
 		span.Finish()
 	}
 
-	// write logs
-	res.Request.contextLogger.Info(res.Request.ctx,
+	res.logger.Info(
 		"Finished an incoming server HTTP request",
 		serverHTTPLogFields(res.Request, res)...,
 	)
@@ -194,14 +194,14 @@ func (res *ServerHTTPResponse) WriteJSON(
 ) {
 	if body == nil {
 		res.SendError(500, "Could not serialize json response", errors.New("No Body JSON"))
-		res.Request.contextLogger.Error(res.Request.ctx, "Could not serialize nil pointer body")
+		res.logger.Error("Could not serialize nil pointer body")
 		return
 	}
 
 	bytes, err := body.MarshalJSON()
 	if err != nil {
 		res.SendError(500, "Could not serialize json response", err)
-		res.Request.contextLogger.Error(res.Request.ctx, "Could not serialize json response", zap.Error(err))
+		res.logger.Error("Could not serialize json response", zap.Error(err))
 		return
 	}
 
@@ -245,8 +245,7 @@ func (res *ServerHTTPResponse) PeekBody(
 func (res *ServerHTTPResponse) flush() {
 	if res.flushed {
 		/* coverage ignore next line */
-		res.Request.contextLogger.Error(
-			res.Request.ctx,
+		res.logger.Error(
 			"Flushed a server response twice",
 			zap.String("path", res.Request.URL.Path),
 		)
@@ -270,8 +269,7 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 	_, err := res.responseWriter.Write(bytes)
 	if err != nil {
 		/* coverage ignore next line */
-		res.Request.contextLogger.Error(
-			res.Request.ctx,
+		res.logger.Error(
 			"Could not write string to resp body",
 			zap.Error(err),
 		)
