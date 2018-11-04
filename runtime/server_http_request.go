@@ -52,9 +52,6 @@ type ServerHTTPRequest struct {
 	parseFailed bool
 	rawBody     []byte
 
-	scopeTags map[string]string
-	logFields []zap.Field
-
 	EndpointName string
 	HandlerName  string
 	URL          *url.URL

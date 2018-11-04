@@ -46,7 +46,6 @@ func NewSimpleServiceEchoHandler(deps *module.Dependencies) *SimpleServiceEchoHa
 		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
 		"bazTChannel", "echo", "SimpleService::Echo",
 		handler,
 	)
@@ -82,7 +81,7 @@ func (h *SimpleServiceEchoHandler) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
+			h.Deps.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			isSuccessful = false
 			response = nil
 			headers = nil

@@ -2444,7 +2444,6 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		Deps: deps,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
-		deps.Default.Logger, deps.Default.Scope,
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		{{ if len $middlewares | ne 0 -}}
 			zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
@@ -2494,7 +2493,7 @@ func (h *{{$handlerName}}) Handle(
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
 
-			h.endpoint.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
+			h.Deps.Default.ContextMetrics.IncCounter(ctx, zanzibar.MetricEndpointPanics, 1)
 			isSuccessful = false
 			response = nil
 			headers = nil
@@ -2672,7 +2671,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8198, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -80,6 +80,7 @@ type Gateway struct {
 	ContextMetrics   ContextMetrics
 	ContextExtractor ContextExtractor
 	RootScope        tally.Scope
+	Logger           *zap.Logger
 	ServiceName      string
 	Config           *StaticConfig
 	HTTPRouter       *HTTPRouter
@@ -98,19 +99,11 @@ type Gateway struct {
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
 	tracerCloser    io.Closer
-	logger          *zap.Logger
-	//	- panic ???
 	//	- process reporter ?
-
-	// Soon to be deprecated
-	Logger *zap.Logger
 }
 
 // DefaultDependencies are the common dependencies for all modules
 type DefaultDependencies struct {
-	// Logger is a server-scoped logger
-	// Deprecated: Use ContextLogger instead.
-	Logger *zap.Logger
 	// ContextExtractor extracts context for scope and logs field
 	ContextExtractor ContextExtractor
 	// ContextLogger is a logger with request-scoped log fields
@@ -118,6 +111,7 @@ type DefaultDependencies struct {
 	// ContextMetrics emit metrics from context
 	ContextMetrics ContextMetrics
 
+	Logger  *zap.Logger
 	Scope   tally.Scope
 	Tracer  opentracing.Tracer
 	Config  *StaticConfig
@@ -558,7 +552,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	gateway.logWriteSyncer = output
 
 	// Default to a STDOUT logger
-	gateway.logger = zapLogger.With(
+	gateway.Logger = zapLogger.With(
 		zap.String("zone", gateway.Config.MustGetString("datacenter")),
 		zap.String("env", gateway.Config.MustGetString("env")),
 		zap.String("hostname", GetHostname()),
@@ -566,9 +560,7 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		zap.Int("pid", os.Getpid()),
 	)
 
-	gateway.ContextLogger = NewContextLogger(gateway.logger)
-	// TODO: deprecate Logger
-	gateway.Logger = gateway.logger
+	gateway.ContextLogger = NewContextLogger(gateway.Logger)
 
 	return nil
 }

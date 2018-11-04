@@ -105,7 +105,6 @@ func (backend *TestTChannelBackend) Register(
 	handler zanzibar.TChannelHandler,
 ) error {
 	return backend.Router.Register(zanzibar.NewTChannelEndpoint(
-		zap.NewNop(), tally.NoopScope,
 		endpointID, handlerID, method,
 		handler,
 	))
