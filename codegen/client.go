@@ -93,7 +93,7 @@ func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
 	return config, nil
 }
 
-func newClientSpecV2(
+func newClientSpec(
 	clientType string,
 	config *ClientSubConfig,
 	instance *ModuleInstance,
@@ -133,7 +133,7 @@ func newClientSpecV2(
 func (c *HTTPClientConfig) NewClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper) (*ClientSpec, error) {
-	return newClientSpecV2(c.Type, c.Config, instance, h, true)
+	return newClientSpec(c.Type, c.Config, instance, h, true)
 }
 
 func (c *HTTPClientConfig) customImportPath() string {
@@ -170,7 +170,7 @@ func newTChannelClientConfig(raw []byte) (*TChannelClientConfig, error) {
 func (c *TChannelClientConfig) NewClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper) (*ClientSpec, error) {
-	return newClientSpecV2(c.Type, c.Config, instance, h, false)
+	return newClientSpec(c.Type, c.Config, instance, h, false)
 }
 
 func (c *TChannelClientConfig) customImportPath() string {
