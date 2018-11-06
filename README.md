@@ -251,7 +251,7 @@ for config_file in ${config_files}; do
 	dir=$(dirname "$config_file")
 	yaml_files=$(find "$dir" -name "*.yaml")
 	for yaml_file in ${yaml_files}; do
-		thrift_file=$(jq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
+		thrift_file=$(yq -r '.. | .thriftFile? | select(strings | endswith(".thrift"))' "$yaml_file")
 		[[ -z ${thrift_file} ]] && continue
 		[[ ${THRIFTRW_SRCS} == *${thrift_file}* ]] && continue
         THRIFTRW_SRCS+=" $CONFIG_DIR/idl/$thrift_file"
