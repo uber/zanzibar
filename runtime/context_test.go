@@ -100,24 +100,25 @@ func TestGetScopeTagsFromCtx(t *testing.T) {
 }
 
 func TestWithRequestFields(t *testing.T) {
-	ctx := withRequestFields(context.TODO())
+	uid := uuid.NewUUID()
+	ctx := withRequestUUID(context.TODO(), uid)
 
 	u := ctx.Value(requestUUIDKey)
 	u1, ok := u.(uuid.UUID)
 
 	assert.NotNil(t, ctx)
-	assert.NotNil(t, u)
-	assert.NotNil(t, u1)
+	assert.Equal(t, uid, u1)
 	assert.True(t, ok)
 }
 
 func TestGetRequestUUIDFromCtx(t *testing.T) {
-	ctx := withRequestFields(context.TODO())
+	uid := uuid.NewUUID()
+	ctx := withRequestUUID(context.TODO(), uid)
 
 	requestUUID := GetRequestUUIDFromCtx(ctx)
 
 	assert.NotNil(t, ctx)
-	assert.NotNil(t, requestUUID)
+	assert.Equal(t, uid, requestUUID)
 
 	// Test Default Scenario where no uuid exists in the context
 	requestUUID = GetRequestUUIDFromCtx(context.TODO())
@@ -207,4 +208,64 @@ func TestExtractScope(t *testing.T) {
 	contextExtractor := contextExtractors.MakeContextExtractor()
 	tags := contextExtractor.ExtractScopeTags(ctx)
 	assert.Equal(t, tags, expected)
+}
+func TestLoggerWithFields(t *testing.T) {
+	zapLoggerCore, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(zapLoggerCore)
+	fields := []zap.Field{
+		zap.String("key", "value"),
+	}
+	logger := newLoggerWithFields(zapLogger, fields)
+
+	var logMessages []observer.LoggedEntry
+
+	logger.Debug("msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.DebugLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "key")
+	assert.Equal(t, logMessages[0].Context[0].String, "value")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	logger.Info("msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.InfoLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "key")
+	assert.Equal(t, logMessages[0].Context[0].String, "value")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	logger.Warn("msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.WarnLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "key")
+	assert.Equal(t, logMessages[0].Context[0].String, "value")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	logger.Error("msg", zap.String("argField", "argValue"))
+	logMessages = logs.TakeAll()
+	assert.Len(t, logMessages, 1)
+	assert.Equal(t, zap.ErrorLevel, logMessages[0].Level)
+	assert.Equal(t, logMessages[0].Context[0].Key, "key")
+	assert.Equal(t, logMessages[0].Context[0].String, "value")
+	assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+	assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+
+	assert.Panics(t, func() {
+		logger.Panic("msg", zap.String("argField", "argValue"))
+		logMessages = logs.TakeAll()
+		assert.Len(t, logMessages, 1)
+		assert.Equal(t, zap.ErrorLevel, logMessages[0].Level)
+		assert.Equal(t, logMessages[0].Context[0].Key, "key")
+		assert.Equal(t, logMessages[0].Context[0].String, "value")
+		assert.Equal(t, logMessages[0].Context[1].Key, "argField")
+		assert.Equal(t, logMessages[0].Context[1].String, "argValue")
+	})
+
+	ce := logger.Check(zap.DebugLevel, "msg")
+	assert.NotNil(t, ce)
 }

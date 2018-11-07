@@ -52,8 +52,8 @@ func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveCont
 	handler := &ContactsSaveContactsHandler{
 		Dependencies: deps,
 	}
-	handler.endpoint = zanzibar.NewRouterEndpointContext(
-		deps.Default.ContextExtractor, deps.Default.ContextMetrics, deps.Default.Logger, deps.Default.Tracer,
+	handler.endpoint = zanzibar.NewRouterEndpoint(
+		deps.Default.ContextExtractor, deps.Default.Scope, deps.Default.Logger, deps.Default.Tracer,
 		"contacts", "saveContacts",
 		handler.HandleRequest,
 	)

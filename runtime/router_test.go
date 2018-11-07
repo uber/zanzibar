@@ -47,9 +47,9 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	routerEndpoint := zanzibar.NewRouterEndpointContext(
+	routerEndpoint := zanzibar.NewRouterEndpoint(
 		bgateway.ActualGateway.ContextExtractor,
-		bgateway.ActualGateway.ContextMetrics,
+		bgateway.ActualGateway.RootScope,
 		bgateway.ActualGateway.Logger,
 		bgateway.ActualGateway.Tracer,
 		"foo", "foo",
@@ -70,8 +70,9 @@ func TestTrailingSlashRoutes(t *testing.T) {
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/bar/",
 		zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.Logger,
+			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
+			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"bar", "bar",
 			func(
@@ -193,9 +194,9 @@ func TestRouterPanic(t *testing.T) {
 
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpointContext(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.ContextMetrics,
+			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
@@ -256,9 +257,9 @@ func TestRouterPanicObject(t *testing.T) {
 
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpointContext(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.ContextMetrics,
+			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
@@ -319,9 +320,9 @@ func TestRouterPanicNilPointer(t *testing.T) {
 
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpointContext(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.ContextMetrics,
+			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"panic", "panic",
@@ -386,9 +387,9 @@ func TestConflictingRoutes(t *testing.T) {
 
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpointContext(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.ContextMetrics,
+			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
@@ -404,9 +405,9 @@ func TestConflictingRoutes(t *testing.T) {
 	assert.Nil(t, err)
 	err = bgateway.ActualGateway.HTTPRouter.Register(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpointContext(
+		zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.ContextMetrics,
+			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"bar", "bar",

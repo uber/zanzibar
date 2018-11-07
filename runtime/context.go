@@ -110,14 +110,9 @@ func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
 	return requestHeaders
 }
 
-// withRequestFields annotates zanzibar request context to context.Context. In
-// future, we can use a request context struct to add more context in terms of
-// request handler, etc if need be.
-func withRequestFields(ctx context.Context) context.Context {
-	reqUUID := uuid.NewUUID()
-	ctx = context.WithValue(ctx, requestUUIDKey, reqUUID)
-	ctx = WithLogFields(ctx, zap.String(logFieldRequestUUID, reqUUID.String()))
-	return ctx
+// withRequestUUID returns a context with request uuid.
+func withRequestUUID(ctx context.Context, reqUUID uuid.UUID) context.Context {
+	return context.WithValue(ctx, requestUUIDKey, reqUUID)
 }
 
 // GetRequestUUIDFromCtx returns the RequestUUID, if it exists on context
@@ -151,6 +146,15 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
+func getLogFieldsFromCtx(ctx context.Context) []zap.Field {
+	var fields []zap.Field
+	v := ctx.Value(requestLogFields)
+	if v != nil {
+		fields = v.([]zap.Field)
+	}
+	return fields
+}
+
 // WithScopeTags returns a new context with the given scope tags attached to context.Context
 func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
 	fields := GetScopeTagsFromCtx(ctx)
@@ -175,22 +179,8 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
-	previousFieldsUntyped := ctx.Value(requestLogFields)
-	if previousFieldsUntyped == nil {
-		previousFieldsUntyped = []zap.Field{}
-	}
-	previousFields := previousFieldsUntyped.([]zap.Field)
-
-	fields := make([]zap.Field, 0, len(previousFields)+len(newFields))
-
-	for _, field := range previousFields {
-		fields = append(fields, field)
-	}
-	for _, field := range newFields {
-		fields = append(fields, field)
-	}
-
-	return fields
+	previousFields := getLogFieldsFromCtx(ctx)
+	return append(previousFields, newFields...)
 }
 
 // ContextExtractor is a extractor that extracts some log fields from the context
@@ -273,6 +263,55 @@ func (c *contextLogger) Warn(ctx context.Context, msg string, userFields ...zap.
 
 func (c *contextLogger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	return c.log.Check(lvl, msg)
+}
+
+// Logger is a generic logger interface that zap.Logger implements.
+type Logger interface {
+	Debug(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Panic(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
+}
+
+// newLoggerWithFields creates a lightweight logger that implements Logger interface
+func newLoggerWithFields(logger *zap.Logger, fields []zap.Field) Logger {
+	return &loggerWithFields{
+		logger: logger,
+		fields: fields,
+	}
+}
+
+// loggerWithFields is a logger that logs entries with default fields, it is not
+// a child logger and does not clone, therefore suitable for per request creation.
+type loggerWithFields struct {
+	logger *zap.Logger
+	fields []zap.Field
+}
+
+func (l *loggerWithFields) Debug(msg string, userFields ...zap.Field) {
+	l.logger.Debug(msg, append(l.fields, userFields...)...)
+}
+
+func (l *loggerWithFields) Error(msg string, userFields ...zap.Field) {
+	l.logger.Error(msg, append(l.fields, userFields...)...)
+}
+
+func (l *loggerWithFields) Info(msg string, userFields ...zap.Field) {
+	l.logger.Info(msg, append(l.fields, userFields...)...)
+}
+
+func (l *loggerWithFields) Panic(msg string, userFields ...zap.Field) {
+	l.logger.Panic(msg, append(l.fields, userFields...)...)
+}
+
+func (l *loggerWithFields) Warn(msg string, userFields ...zap.Field) {
+	l.logger.Warn(msg, append(l.fields, userFields...)...)
+}
+
+func (l *loggerWithFields) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
+	return l.logger.Check(lvl, msg)
 }
 
 // ContextMetrics emit metrics with tags extracted from context.
