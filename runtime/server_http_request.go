@@ -59,10 +59,10 @@ type ServerHTTPRequest struct {
 	Params       httprouter.Params
 	Header       Header
 
-	// Logger logs entries with default fields that contains request meta info
-	Logger Logger
-	// Scope emit metrics with default tags that contains request meta info
-	Scope tally.Scope
+	// logger logs entries with default fields that contains request meta info
+	logger Logger
+	// scope emit metrics with default tags that contains request meta info
+	scope tally.Scope
 }
 
 // NewServerHTTPRequest is helper function to alloc ServerHTTPRequest
@@ -118,8 +118,8 @@ func NewServerHTTPRequest(
 		Method:       httpRequest.Method,
 		Params:       params,
 		Header:       NewServerHTTPHeader(r.Header),
-		Logger:       logger,
-		Scope:        scope,
+		logger:       logger,
+		scope:        scope,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)
@@ -136,7 +136,7 @@ func (req *ServerHTTPRequest) Context() context.Context {
 func (req *ServerHTTPRequest) start() {
 	if req.started {
 		/* coverage ignore next line */
-		req.Logger.Error(
+		req.logger.Error(
 			"Cannot start ServerHTTPRequest twice",
 			zap.String("path", req.URL.Path),
 		)
@@ -147,7 +147,7 @@ func (req *ServerHTTPRequest) start() {
 	req.startTime = time.Now()
 
 	// emit request count
-	req.Scope.Counter(endpointRequest).Inc(1)
+	req.scope.Counter(endpointRequest).Inc(1)
 
 	if req.tracer != nil {
 		opName := fmt.Sprintf("%s.%s", req.EndpointName, req.HandlerName)
@@ -159,7 +159,7 @@ func (req *ServerHTTPRequest) start() {
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				/* coverage ignore next line */
-				req.Logger.Warn("Error Extracting Trace Headers", zap.Error(err))
+				req.logger.Warn("Error Extracting Trace Headers", zap.Error(err))
 			}
 			span = req.tracer.StartSpan(opName, urlTag, MethodTag)
 		} else {
@@ -174,7 +174,7 @@ func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
 		headerValue := req.httpRequest.Header.Get(headerName)
 		if headerValue == "" {
-			req.Logger.Warn("Got request without mandatory header",
+			req.logger.Warn("Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
 
@@ -220,7 +220,7 @@ func (req *ServerHTTPRequest) parseQueryValues() bool {
 
 	values, err := url.ParseQuery(req.httpRequest.URL.RawQuery)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string", zap.Error(err))
+		req.logger.Warn("Got request with invalid query string", zap.Error(err))
 
 		if !req.parseFailed {
 			req.res.SendErrorString(
@@ -265,7 +265,7 @@ func (req *ServerHTTPRequest) GetQueryBool(key string) (bool, bool) {
 		Err:  strconv.ErrSyntax,
 	}
 
-	req.Logger.Warn("Got request with invalid query string types",
+	req.logger.Warn("Got request with invalid query string types",
 		zap.String("expected", "bool"),
 		zap.String("actual", value),
 		zap.String("key", key),
@@ -288,7 +288,7 @@ func (req *ServerHTTPRequest) GetQueryInt8(key string) (int8, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 8)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int8"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -314,7 +314,7 @@ func (req *ServerHTTPRequest) GetQueryInt16(key string) (int16, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int16"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -340,7 +340,7 @@ func (req *ServerHTTPRequest) GetQueryInt32(key string) (int32, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int32"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -368,7 +368,7 @@ func (req *ServerHTTPRequest) GetQueryInt64(key string) (int64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "int64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -394,7 +394,7 @@ func (req *ServerHTTPRequest) GetQueryFloat64(key string) (float64, bool) {
 	value := req.queryValues.Get(key)
 	number, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		req.Logger.Warn("Got request with invalid query string types",
+		req.logger.Warn("Got request with invalid query string types",
 			zap.String("expected", "float64"),
 			zap.String("actual", value),
 			zap.String("key", key),
@@ -573,7 +573,7 @@ func (req *ServerHTTPRequest) CheckQueryValue(key string) bool {
 
 	values := req.queryValues[key]
 	if len(values) == 0 {
-		req.Logger.Warn("Got request with missing query string value",
+		req.logger.Warn("Got request with missing query string value",
 			zap.String("expectedKey", key),
 		)
 		if !req.parseFailed {
@@ -626,7 +626,7 @@ func (req *ServerHTTPRequest) ReadAll() ([]byte, bool) {
 	}
 	rawBody, err := ioutil.ReadAll(req.httpRequest.Body)
 	if err != nil {
-		req.Logger.Error("Could not read request body", zap.Error(err))
+		req.logger.Error("Could not read request body", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(500, "Could not read request body", err)
 			req.parseFailed = true
@@ -643,7 +643,7 @@ func (req *ServerHTTPRequest) UnmarshalBody(
 ) bool {
 	err := body.UnmarshalJSON(rawBody)
 	if err != nil {
-		req.Logger.Warn("Could not parse json", zap.Error(err))
+		req.logger.Warn("Could not parse json", zap.Error(err))
 		if !req.parseFailed {
 			req.res.SendError(400, "Could not parse json: "+err.Error(), err)
 			req.parseFailed = true
@@ -660,7 +660,7 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 }
 
 func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
-	req.Logger.Warn("Got request with invalid query string types",
+	req.logger.Warn("Got request with invalid query string types",
 		zap.String("expected", expected),
 		zap.String("actual", value),
 		zap.String("key", key),

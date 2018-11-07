@@ -59,8 +59,8 @@ func NewServerHTTPResponse(
 		Request:        req,
 		StatusCode:     200,
 		responseWriter: w,
-		logger:         req.Logger,
-		scope:          req.Scope,
+		logger:         req.logger,
+		scope:          req.scope,
 	}
 }
 
