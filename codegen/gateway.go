@@ -383,9 +383,9 @@ func newClientSpec(
 // MiddlewareSpec holds information about each middleware at the endpoint
 type MiddlewareSpec struct {
 	// The middleware package name.
-	Name string
+	Name string `yaml:"name"`
 	// Middleware specific configuration options.
-	Options map[interface{}]interface{}
+	Options map[interface{}]interface{} `yaml:"options"`
 	// Options pretty printed for template initialization
 	PrettyOptions map[string]string
 	// Module Dependencies,  clients etc.
@@ -429,21 +429,21 @@ type EndpointSpec struct {
 	GoPackageName string
 
 	// EndpointType, currently only "http"
-	EndpointType string
+	EndpointType string `yaml:"endpointType"`
 	// EndpointID, used in metrics and logging, lower case.
-	EndpointID string
+	EndpointID string `yaml:"endpointId"`
 	// HandleID, used in metrics and logging, lowercase.
-	HandleID string
+	HandleID string `yaml:"handleId"`
 	// ThriftFile, the thrift file for this endpoint
-	ThriftFile string
+	ThriftFile string `yaml:"thriftFile"`
 	// ThriftMethodName, which thrift method to use.
-	ThriftMethodName string
+	ThriftMethodName string `yaml:"thriftMethodName"`
 	// ThriftServiceName, which thrift service to use.
 	ThriftServiceName string
 	// TestFixtures, meta data to generate tests,
-	TestFixtures map[string]*EndpointTestFixture
+	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures"`
 	// Middlewares, meta data to add middlewares,
-	Middlewares []MiddlewareSpec
+	Middlewares []MiddlewareSpec `yaml:"middlewares"`
 	// HeadersPropagate, a map from endpoint request headers to
 	// client request fields.
 	HeadersPropagate map[string]FieldMapperEntry
@@ -458,19 +458,19 @@ type EndpointSpec struct {
 	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
 	ErrTransforms map[string]FieldMapperEntry
 	// ReqHeaders maps headers from server to client
-	ReqHeaders map[string]*TypedHeader
+	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap"`
 	// ResHeaders maps headers from client to server
-	ResHeaders map[string]*TypedHeader
+	ResHeaders map[string]*TypedHeader `yaml:"resHeaderMap"`
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
-	WorkflowType string
+	WorkflowType string `yaml:"workflowType"`
 	// If "custom" then where to import custom code from
-	WorkflowImportPath string
+	WorkflowImportPath string `yaml:"workflowImportPath"`
 	// if "httpClient", which client to call.
-	ClientID string
+	ClientID string `yaml:"clientId"`
 	// if "httpClient", which client method to call.
-	ClientMethod string
+	ClientMethod string `yaml:"clientMethod"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec
 }
