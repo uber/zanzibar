@@ -47,13 +47,6 @@ const (
 	resHeaders = "resHeaderMap"
 )
 
-var mandatoryClientFields = []string{
-	"thriftFile",
-	"thriftFileSha",
-}
-var mandatoryCustomClientFields = []string{
-	"customImportPath",
-}
 var mandatoryEndpointFields = []string{
 	"endpointType",
 	"endpointId",
@@ -112,15 +105,6 @@ type ModuleClassConfig struct {
 	Name   string      `yaml:"name" json:"name"`
 	Type   string      `yaml:"type" json:"type"`
 	Config interface{} `yaml:"config" json:"config"`
-}
-
-// ClientClassConfig represents the specific config for
-// a client. This is a downcast of the moduleClassConfig.
-type ClientClassConfig struct {
-	Name         string                 `yaml:"name" json:"name"`
-	Type         string                 `yaml:"type" json:"type"`
-	Config       map[string]interface{} `yaml:"config" json:"config"`
-	Dependencies Dependencies           `yaml:"dependencies" json:"dependencies"`
 }
 
 // Dependencies lists all dependencies of a module
@@ -192,192 +176,15 @@ func NewClientSpec(
 	instance *ModuleInstance,
 	h *PackageHelper,
 ) (*ClientSpec, error) {
-	clientConfig := &ClientClassConfig{}
-
-	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
+	clientConfig, errNew := newClientConfig(instance.YAMLFileRaw)
+	if errNew != nil {
 		return nil, errors.Wrapf(
-			err,
+			errNew,
 			"Could not parse class config yaml file: %s",
 			getModuleConfigFileName(instance),
 		)
 	}
-
-	switch clientConfig.Type {
-	case "http":
-		return NewHTTPClientSpec(instance, clientConfig, h)
-	case "tchannel":
-		return NewTChannelClientSpec(instance, clientConfig, h)
-	case "custom":
-		return NewCustomClientSpec(instance, clientConfig, h)
-	default:
-		return nil, errors.Errorf(
-			"Cannot support unknown clientType for client %q",
-			getModuleConfigFileName(instance),
-		)
-	}
-}
-
-// NewHTTPClientSpec creates a client spec from a http client module instance
-func NewHTTPClientSpec(
-	instance *ModuleInstance,
-	clientConfig *ClientClassConfig,
-	h *PackageHelper,
-) (*ClientSpec, error) {
-	return newClientSpec(instance, clientConfig, true, h)
-}
-
-// NewTChannelClientSpec creates a client spec from a yaml file whose type is tchannel
-func NewTChannelClientSpec(
-	instance *ModuleInstance,
-	clientConfig *ClientClassConfig,
-	h *PackageHelper,
-) (*ClientSpec, error) {
-	return newClientSpec(instance, clientConfig, false, h)
-}
-
-// NewCustomClientSpec creates a client spec from a yaml file whose type is custom
-func NewCustomClientSpec(
-	instance *ModuleInstance,
-	clientConfig *ClientClassConfig,
-	h *PackageHelper,
-) (*ClientSpec, error) {
-	for _, f := range mandatoryCustomClientFields {
-		if _, ok := clientConfig.Config[f]; !ok {
-			return nil, errors.Errorf(
-				"client config %q must have %q field for type custom",
-				getModuleConfigFileName(instance),
-				f,
-			)
-		}
-	}
-
-	clientSpec := &ClientSpec{
-		YAMLFile:           instance.YAMLFileName,
-		JSONFile:           instance.JSONFileName,
-		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
-		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
-		ExportName:         instance.PackageInfo.ExportName,
-		ExportType:         instance.PackageInfo.ExportType,
-		ClientType:         clientConfig.Type,
-		ClientID:           clientConfig.Name,
-		ClientName:         instance.PackageInfo.QualifiedInstanceName,
-		CustomImportPath:   clientConfig.Config["customImportPath"].(string),
-	}
-
-	return clientSpec, nil
-}
-
-func getExposedMethods(
-	clientConfig *ClientClassConfig) (map[string]string, error) {
-	rawMethods := clientConfig.Config["exposedMethods"]
-	exposedMethods, ok := rawMethods.(map[string]interface{})
-	if !ok {
-		// The key of unmarshaled dictionary can be interface{} for yaml.
-		// Convert map[interface{}]interface{} to map[string]interface{}, if we
-		// can.
-		methods, ok2 := rawMethods.(map[interface{}]interface{})
-		if !ok2 || len(methods) == 0 {
-			return nil, errors.Errorf(
-				"No methods are exposed in client config",
-			)
-		}
-		exposedMethods = make(map[string]interface{}, len(methods))
-		for k, v := range methods {
-			key, keyOK := k.(string)
-			if !keyOK {
-				return nil, errors.Errorf(
-					"key %v of the exposedMethods must be a string",
-					k,
-				)
-			}
-			exposedMethods[key] = v
-		}
-	}
-
-	result := make(map[string]string, len(exposedMethods))
-	reversed := make(map[string]string, len(exposedMethods))
-	for key, val := range exposedMethods {
-		v, valOK := val.(string)
-		if !valOK {
-			return nil, errors.Errorf(
-				"Value %v of the exposedMethods[%s] must be a string",
-				val,
-				key,
-			)
-		}
-		result[key] = v
-		if _, ok := reversed[v]; ok {
-			return nil, errors.Errorf(
-				"value %q of the exposedMethods is not unique",
-				v,
-			)
-		}
-		reversed[v] = key
-	}
-
-	return result, nil
-}
-
-func newClientSpec(
-	instance *ModuleInstance,
-	clientConfig *ClientClassConfig,
-	wantAnnot bool, h *PackageHelper,
-) (*ClientSpec, error) {
-	config := clientConfig.Config
-
-	for i := 0; i < len(mandatoryClientFields); i++ {
-		fieldName := mandatoryClientFields[i]
-		if _, ok := config[fieldName]; !ok {
-			return nil, errors.Errorf(
-				"client config %q must have %q field",
-				getModuleConfigFileName(instance),
-				fieldName,
-			)
-		}
-	}
-
-	thriftFile := filepath.Join(
-		h.ThriftIDLPath(), config["thriftFile"].(string),
-	)
-
-	mspec, err := NewModuleSpec(thriftFile, wantAnnot, false, h)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Could not build module spec for thrift %s: ", thriftFile,
-		)
-	}
-	mspec.PackageName = mspec.PackageName + "client"
-
-	cspec := &ClientSpec{
-		ModuleSpec:         mspec,
-		YAMLFile:           instance.YAMLFileName,
-		JSONFile:           instance.JSONFileName,
-		ClientType:         clientConfig.Type,
-		ImportPackagePath:  instance.PackageInfo.ImportPackagePath(),
-		ImportPackageAlias: instance.PackageInfo.ImportPackageAlias(),
-		ExportName:         instance.PackageInfo.ExportName,
-		ExportType:         instance.PackageInfo.ExportType,
-		ThriftFile:         thriftFile,
-		ClientID:           instance.InstanceName,
-		ClientName:         instance.PackageInfo.QualifiedInstanceName,
-	}
-
-	sidecarRouter, ok := config["sidecarRouter"].(string)
-	if ok {
-		cspec.SidecarRouter = sidecarRouter
-	}
-
-	exposedMethods, getErr := getExposedMethods(clientConfig)
-	if err != nil {
-		return nil, errors.Wrapf(
-			getErr,
-			"Could not get exposed methods for %s: ",
-			getModuleConfigFileName(instance),
-		)
-	}
-
-	cspec.ExposedMethods = exposedMethods
-	return cspec, nil
+	return clientConfig.NewClientSpec(instance, h)
 }
 
 // MiddlewareSpec holds information about each middleware at the endpoint

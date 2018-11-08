@@ -30,24 +30,12 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (
 	clientInterface = "Client"
 	custom          = "custom"
 )
-
-// helper struct to pull out the fixture config
-type moduleConfig struct {
-	Config *config `yaml:"config" json:"config"`
-}
-
-// config is the struct corresponding to the config field in client-config.yaml
-type config struct {
-	CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
-	Fixture          *Fixture `yaml:"fixture" json:"fixture"`
-}
 
 // Fixture specifies client fixture import path and all scenarios
 type Fixture struct {
@@ -88,8 +76,8 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		pathSymbolMap := make(map[string]string)
 		for _, instance := range clientInstances {
 			key := instance.ClassType + instance.InstanceName
-			var mc moduleConfig
-			if err := yaml.Unmarshal(instance.YAMLFileRaw, &mc); err != nil {
+			client, errClient := newClientConfig(instance.YAMLFileRaw)
+			if errClient != nil {
 				return errors.Wrapf(
 					err,
 					"error parsing client-config for client %q",
@@ -99,13 +87,13 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 			importPath := instance.PackageInfo.GeneratedPackagePath
 			if instance.ClassType == custom {
-				importPath = mc.Config.CustomImportPath
+				importPath = client.customImportPath()
 			}
 
 			importPathMap[key] = importPath
 
 			// gather all modules that need to generate fixture types
-			f := mc.Config.Fixture
+			f := client.fixture()
 			if f != nil && f.Scenarios != nil {
 				pathSymbolMap[importPath] = clientInterface
 				fixtureMap[key] = f
@@ -315,16 +303,17 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
 	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
-		var mc moduleConfig
-		if err := yaml.Unmarshal(leaf.YAMLFileRaw, &mc); err != nil {
+		client, err := newClientConfig(leaf.YAMLFileRaw)
+		if err != nil {
 			return nil, errors.Wrapf(
 				err,
 				"error parsing client-config for client %q",
 				instance.InstanceName,
 			)
 		}
-		if mc.Config != nil && mc.Config.Fixture != nil {
-			clientsWithFixture[leaf.InstanceName] = mc.Config.Fixture.ImportPath
+
+		if client.fixture() != nil {
+			clientsWithFixture[leaf.InstanceName] = client.fixture().ImportPath
 		}
 	}
 	return clientsWithFixture, nil

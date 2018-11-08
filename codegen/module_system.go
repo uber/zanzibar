@@ -389,19 +389,6 @@ func NewDefaultModuleSystem(
 	return system, nil
 }
 
-func readClientConfig(rawConfig []byte) (*ClientClassConfig, error) {
-	var clientConfig ClientClassConfig
-	if err := yaml.Unmarshal(rawConfig, &clientConfig); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"Error reading config for client instance",
-		)
-	}
-	clientConfig.Config["clientId"] = clientConfig.Name
-	clientConfig.Config["clientType"] = clientConfig.Type
-	return &clientConfig, nil
-}
-
 func readEndpointConfig(rawConfig []byte) (*EndpointClassConfig, error) {
 	var endpointConfig EndpointClassConfig
 	if err := yaml.Unmarshal(rawConfig, &endpointConfig); err != nil {
@@ -428,7 +415,7 @@ func (g *HTTPClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := readClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -437,9 +424,8 @@ func (g *HTTPClientGenerator) ComputeSpec(
 		)
 	}
 
-	clientSpec, err := NewHTTPClientSpec(
+	clientSpec, err := clientConfig.NewClientSpec(
 		instance,
-		clientConfig,
 		g.packageHelper,
 	)
 	if err != nil {
@@ -546,7 +532,7 @@ func (g *TChannelClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := readClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -555,9 +541,8 @@ func (g *TChannelClientGenerator) ComputeSpec(
 		)
 	}
 
-	clientSpec, err := NewTChannelClientSpec(
+	clientSpec, err := clientConfig.NewClientSpec(
 		instance,
-		clientConfig,
 		g.packageHelper,
 	)
 	if err != nil {
@@ -719,7 +704,7 @@ func (g *CustomClientGenerator) ComputeSpec(
 	instance *ModuleInstance,
 ) (interface{}, error) {
 	// Parse the client config from the endpoint YAML file
-	clientConfig, err := readClientConfig(instance.YAMLFileRaw)
+	clientConfig, err := newClientConfig(instance.YAMLFileRaw)
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -728,9 +713,8 @@ func (g *CustomClientGenerator) ComputeSpec(
 		)
 	}
 
-	clientSpec, err := NewCustomClientSpec(
+	clientSpec, err := clientConfig.NewClientSpec(
 		instance,
-		clientConfig,
 		g.packageHelper,
 	)
 	if err != nil {

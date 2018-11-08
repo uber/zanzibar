@@ -65,3 +65,5 @@ import:
   version: master
 - package: golang.org/x/tools/cmd/goimports
   version: master
+- package: gopkg.in/validator.v2
+  version: master

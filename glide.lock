@@ -1,5 +1,5 @@
-hash: 944cdd29ac2a8793c497bf312e545c650424af2ed9465479d6f5456c774afabb
-updated: 2018-10-26T17:14:18.264991-07:00
+hash: d22933e0e067cdcc884b19097c2ac35cebe7c4657722bb8f9c8363b71755cd76
+updated: 2018-11-06T16:13:52.454011-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -29,7 +29,7 @@ imports:
 - name: github.com/google/uuid
   version: 16ca3eab7d2086fd5a82993a291cbf3b87fe38b7
 - name: github.com/jessevdk/go-flags
-  version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
+  version: 5de817a9aa209ed35a164cb04aec82b7df1a47a6
 - name: github.com/julienschmidt/httprouter
   version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
@@ -109,10 +109,6 @@ imports:
   - tnet
   - trand
   - typed
-- name: github.com/xeipuuv/gojsonpointer
-  version: 4e3ac2762d5f479393488629ee9370b50873b3a6
-- name: github.com/xeipuuv/gojsonreference
-  version: bd5ef7bd5415a7ac448318e64f11a24cd21e594b
 - name: github.com/xeipuuv/gojsonschema
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
@@ -154,13 +150,15 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 9b4f9f5ad5197c79fd623a3638e70d8b26cef344
+  version: e11730110bbd884bbf19550bfafe9d69519ce29e
   subpackages:
   - context
 - name: golang.org/x/tools
-  version: f60e5f99f0816fc2d9ecb338008ea420248d2943
+  version: 45ff765b4815d34d8b80220fd05c79063b185ce1
   subpackages:
   - cmd/goimports
+- name: gopkg.in/validator.v2
+  version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: honnef.co/go/tools
