@@ -40,19 +40,38 @@ type clientConfig interface {
 	NewClientSpec(
 		instance *ModuleInstance,
 		h *PackageHelper) (*ClientSpec, error)
-	customImportPath() string
-	fixture() *Fixture
 }
 
-// ClientSubConfig is the "config" field in the client-config.yaml for http
+// ClientThriftConfig is the "config" field in the client-config.yaml for http
 // client and tchannel client.
-type ClientSubConfig struct {
-	ExposedMethods   map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
-	CustomImportPath string            `yaml:"customImportPath" json:"customImportPath"`
-	ThriftFile       string            `yaml:"thriftFile" json:"thriftFile" validate:"nonzero"`
-	ThriftFileSha    string            `yaml:"thriftFileSha" json:"thriftFileSha" validate:"nonzero"`
-	SidecarRouter    string            `yaml:"sidecarRouter" json:"sidecarRouter"`
-	Fixture          *Fixture          `yaml:"fixture" json:"fixture"`
+type ClientThriftConfig struct {
+	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
+	ThriftFile     string            `yaml:"thriftFile" json:"thriftFile" validate:"nonzero"`
+	ThriftFileSha  string            `yaml:"thriftFileSha" json:"thriftFileSha" validate:"nonzero"`
+	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
+	Fixture        *Fixture          `yaml:"fixture" json:"fixture"`
+}
+
+// Fixture specifies client fixture import path and all scenarios
+type Fixture struct {
+	// ImportPath is the package where the user-defined Fixture global variable is contained.
+	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
+	ImportPath string `yaml:"importPath" json:"importPath" validate:"nonzero"`
+	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
+	Scenarios map[string][]string `yaml:"scenarios" json:"scenarios"`
+}
+
+// Validate the fixture configuration
+func (f *Fixture) Validate(methods map[string]interface{}) error {
+	if f.ImportPath == "" {
+		return errors.New("fixture importPath is empty")
+	}
+	for m := range f.Scenarios {
+		if _, ok := methods[m]; !ok {
+			return errors.Errorf("%q is not a valid method", m)
+		}
+	}
+	return nil
 }
 
 func validateExposedMethods(v interface{}, param string) error {
@@ -71,10 +90,10 @@ func validateExposedMethods(v interface{}, param string) error {
 	return nil
 }
 
-// HTTPClientConfig represents the config for a HTTP client.
+// HTTPClientConfig represents the "config" field for a HTTP client-config.yaml
 type HTTPClientConfig struct {
 	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *ClientSubConfig `yaml:"config" json:"config" validate:"nonzero"`
+	Config           *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
@@ -95,7 +114,7 @@ func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
 
 func newClientSpec(
 	clientType string,
-	config *ClientSubConfig,
+	config *ClientThriftConfig,
 	instance *ModuleInstance,
 	h *PackageHelper,
 	annotate bool,
@@ -136,18 +155,10 @@ func (c *HTTPClientConfig) NewClientSpec(
 	return newClientSpec(c.Type, c.Config, instance, h, true)
 }
 
-func (c *HTTPClientConfig) customImportPath() string {
-	return c.Config.CustomImportPath
-}
-
-func (c *HTTPClientConfig) fixture() *Fixture {
-	return c.Config.Fixture
-}
-
-// TChannelClientConfig represents the config for a TChannel client.
+// TChannelClientConfig represents the "config" field for a TChannel client-config.yaml
 type TChannelClientConfig struct {
 	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *ClientSubConfig `yaml:"config" json:"config" validate:"nonzero"`
+	Config           *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newTChannelClientConfig(raw []byte) (*TChannelClientConfig, error) {
@@ -173,24 +184,13 @@ func (c *TChannelClientConfig) NewClientSpec(
 	return newClientSpec(c.Type, c.Config, instance, h, false)
 }
 
-func (c *TChannelClientConfig) customImportPath() string {
-	return c.Config.CustomImportPath
-}
-
-func (c *TChannelClientConfig) fixture() *Fixture {
-	return c.Config.Fixture
-}
-
-// CustomClientSubConfig is for custom client
-type CustomClientSubConfig struct {
-	CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
-	Fixture          *Fixture `yaml:"fixture" json:"fixture"`
-}
-
 // CustomClientConfig represents the config for a custom client.
 type CustomClientConfig struct {
 	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *CustomClientSubConfig `yaml:"config" json:"config" validate:"nonzero"`
+	Config           *struct {
+		Fixture          *Fixture `yaml:"fixture" json:"fixture"`
+		CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
+	} `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newCustomClientConfig(raw []byte) (*CustomClientConfig, error) {
@@ -227,14 +227,6 @@ func (c *CustomClientConfig) NewClientSpec(
 	}
 
 	return spec, nil
-}
-
-func (c *CustomClientConfig) customImportPath() string {
-	return c.Config.CustomImportPath
-}
-
-func (c *CustomClientConfig) fixture() *Fixture {
-	return c.Config.Fixture
 }
 
 func clientType(raw []byte) (string, error) {

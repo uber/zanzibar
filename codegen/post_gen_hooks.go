@@ -30,6 +30,8 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
+	"gopkg.in/validator.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -37,26 +39,27 @@ const (
 	custom          = "custom"
 )
 
-// Fixture specifies client fixture import path and all scenarios
-type Fixture struct {
-	// ImportPath is the package where the user-defined Fixture global variable is contained.
-	// The Fixture object defines, for a given client, the standardized list of fixture scenarios for that client
-	ImportPath string `yaml:"importPath" json:"importPath"`
-	// Scenarios is a map from zanzibar's exposed method name to a list of user-defined fixture scenarios for a client
-	Scenarios map[string][]string `yaml:"scenarios" json:"scenarios"`
+type mockableClient struct {
+	ClientConfigBase `yaml:",inline" json:",inline"`
+	Config           *struct {
+		Fixture          *Fixture `yaml:"fixture" json:"fixture"`
+		CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
+	} `yaml:"config" json:"config" validate:"nonzero"`
 }
 
-// Validate the fixture configuration
-func (f *Fixture) Validate(methods map[string]interface{}) error {
-	if f.ImportPath == "" {
-		return errors.New("fixture importPath is empty")
+func newMockableClient(raw []byte) (*mockableClient, error) {
+	config := &mockableClient{}
+	if errUnmarshal := yaml.Unmarshal(raw, config); errUnmarshal != nil {
+		return nil, errors.Wrap(
+			errUnmarshal, "Could not parse testable client config data")
 	}
-	for m := range f.Scenarios {
-		if _, ok := methods[m]; !ok {
-			return errors.Errorf("%q is not a valid method", m)
-		}
+
+	if errValidate := validator.Validate(config); errValidate != nil {
+		return nil, errors.Wrap(
+			errValidate, "testable client config validation failed")
 	}
-	return nil
+
+	return config, nil
 }
 
 // ClientMockGenHook returns a PostGenHook to generate client mocks
@@ -76,7 +79,7 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		pathSymbolMap := make(map[string]string)
 		for _, instance := range clientInstances {
 			key := instance.ClassType + instance.InstanceName
-			client, errClient := newClientConfig(instance.YAMLFileRaw)
+			client, errClient := newMockableClient(instance.YAMLFileRaw)
 			if errClient != nil {
 				return errors.Wrapf(
 					err,
@@ -87,13 +90,13 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 
 			importPath := instance.PackageInfo.GeneratedPackagePath
 			if instance.ClassType == custom {
-				importPath = client.customImportPath()
+				importPath = client.Config.CustomImportPath
 			}
 
 			importPathMap[key] = importPath
 
 			// gather all modules that need to generate fixture types
-			f := client.fixture()
+			f := client.Config.Fixture
 			if f != nil && f.Scenarios != nil {
 				pathSymbolMap[importPath] = clientInterface
 				fixtureMap[key] = f
@@ -303,7 +306,7 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error) {
 	clientsWithFixture := map[string]string{}
 	for _, leaf := range instance.RecursiveDependencies["client"] {
-		client, err := newClientConfig(leaf.YAMLFileRaw)
+		client, err := newMockableClient(leaf.YAMLFileRaw)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
@@ -312,8 +315,8 @@ func FindClientsWithFixture(instance *ModuleInstance) (map[string]string, error)
 			)
 		}
 
-		if client.fixture() != nil {
-			clientsWithFixture[leaf.InstanceName] = client.fixture().ImportPath
+		if client.Config.Fixture != nil {
+			clientsWithFixture[leaf.InstanceName] = client.Config.Fixture.ImportPath
 		}
 	}
 	return clientsWithFixture, nil
