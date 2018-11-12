@@ -23,7 +23,7 @@ ModuleClass | Abstraction
 client | clients to communicate with downstreams, e.g., database clients and RPC clients
 endpoint | application interfaces exposed to upstreams
 middleware | common functionality that has less to do with business logic, e.g., rate limiting middleware
-servcie | a collection of endponts that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
+service | a collection of endponts that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
 
 #### Type
 The module `type` differentiates module instances of the same `ModuleClass` with further classification. Types are somewhat arbitrary as they are not necessarily abstractions but indications about how Zanzibar should treat the modules.
