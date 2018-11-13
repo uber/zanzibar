@@ -181,7 +181,7 @@ func TestThriftFileShaMissingValidation(t *testing.T) {
 	doThriftFileShaMissingTest(t, "tchannel")
 }
 
-func TestNewCustomClientConfigValidationFailure(t *testing.T) {
+func TestCustomClientRequiresCustomImportPath(t *testing.T) {
 	configYAML := `
 name: test
 type: custom
@@ -277,14 +277,13 @@ func TestNewClientConfigGetHTTPClient(t *testing.T) {
 				Client: []string{"a", "b"},
 			},
 		},
-		Config: &ClientSubConfig{
+		Config: &ClientThriftConfig{
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			CustomImportPath: "path",
-			ThriftFileSha:    "thriftFileSha",
-			ThriftFile:       "clients/bar/bar.thrift",
-			SidecarRouter:    "sidecar",
+			ThriftFileSha: "thriftFileSha",
+			ThriftFile:    "clients/bar/bar.thrift",
+			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
 				ImportPath: "import",
 				Scenarios: map[string][]string{
@@ -307,14 +306,13 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 				Client: []string{"a", "b"},
 			},
 		},
-		Config: &ClientSubConfig{
+		Config: &ClientThriftConfig{
 			ExposedMethods: map[string]string{
 				"a": "method",
 			},
-			CustomImportPath: "path",
-			ThriftFileSha:    "thriftFileSha",
-			ThriftFile:       "clients/bar/bar.thrift",
-			SidecarRouter:    "sidecar",
+			ThriftFileSha: "thriftFileSha",
+			ThriftFile:    "clients/bar/bar.thrift",
+			SidecarRouter: "sidecar",
 			Fixture: &Fixture{
 				ImportPath: "import",
 				Scenarios: map[string][]string{
@@ -337,7 +335,10 @@ func TestNewClientConfigGetCustomClient(t *testing.T) {
 				Client: []string{"a", "b"},
 			},
 		},
-		Config: &CustomClientSubConfig{
+		Config: &struct {
+			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
+			CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
+		}{
 			CustomImportPath: "path",
 			Fixture: &Fixture{
 				ImportPath: "import",
@@ -349,36 +350,6 @@ func TestNewClientConfigGetCustomClient(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, &expectedClient, client)
-}
-
-func doGetCustomImportPathTest(t *testing.T, config string) {
-	client, err := newClientConfig([]byte(config))
-	assert.NoError(t, err)
-	assert.Equal(t, "path", client.customImportPath())
-}
-
-func TestGetCustomImportPath(t *testing.T) {
-	doGetCustomImportPathTest(t, httpClientYAML)
-	doGetCustomImportPathTest(t, tchannelClientYAML)
-	doGetCustomImportPathTest(t, customClientYAML)
-}
-
-func doGetFixtureTest(t *testing.T, config string) {
-	client, err := newClientConfig([]byte(config))
-	assert.NoError(t, err)
-	expectedFixture := &Fixture{
-		ImportPath: "import",
-		Scenarios: map[string][]string{
-			"scenario": {"s1", "s2"},
-		},
-	}
-	assert.Equal(t, expectedFixture, client.fixture())
-}
-
-func TestGetFixture(t *testing.T) {
-	doGetFixtureTest(t, httpClientYAML)
-	doGetFixtureTest(t, tchannelClientYAML)
-	doGetFixtureTest(t, customClientYAML)
 }
 
 func newTestPackageHelper(t *testing.T) *PackageHelper {
@@ -501,4 +472,46 @@ func TestCustomClientNewClientSpec(t *testing.T) {
 	spec, errSpec := client.NewClientSpec(instance, nil)
 	assert.NoError(t, errSpec)
 	assert.Equal(t, expectedSpec, spec)
+}
+
+func TestConfigNoFixture(t *testing.T) {
+	configYAML := `
+name: test
+type: testable
+config:
+  customImportPath: path
+`
+	client, err := newMockableClient([]byte(configYAML))
+	assert.NoError(t, err)
+	expectedClient := &mockableClient{
+		ClientConfigBase: ClientConfigBase{
+			Name: "test",
+			Type: "testable",
+		},
+		Config: &struct {
+			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
+			CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
+		}{
+			CustomImportPath: "path",
+		},
+	}
+	assert.Equal(t, expectedClient, client)
+}
+
+func TestClientFixtureImportPathMissing(t *testing.T) {
+	configYAML := `
+name: test
+type: testable
+config:
+  customImportPath: path
+  fixture:
+    # ImportPath is missing
+    scenarios:
+      scenario:
+        - s1
+`
+	_, err := newMockableClient([]byte(configYAML))
+	expectedErr := "testable client config validation failed: Config.Fixture.ImportPath: zero value"
+	assert.Error(t, err)
+	assert.Equal(t, expectedErr, err.Error())
 }
