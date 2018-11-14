@@ -26,6 +26,7 @@ package barendpoint
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -62,9 +63,9 @@ func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandle
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgNotStructHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/bar/arg-not-struct-path",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

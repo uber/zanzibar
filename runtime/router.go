@@ -30,12 +30,43 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
+	"net/url"
 )
 
 const (
 	notFound         = "NotFound"
 	methodNotAllowed = "MethodNotAllowed"
 )
+
+// HTTPRouter provides a HTTP router. It will match patterns in URLs and route them to provided HTTP handlers.
+//
+// This router has support for decoding path "parameters" in the URL into named values. An example:
+//
+//   var r zanzibar.HTTPRouter
+//
+//   r.Handle("GET", "/foo/:bar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//       params := zanzibar.ParamsFromContext(r.Context())
+//       w.Write("%s", params.Get("bar"))
+//   }))
+//
+type HTTPRouter interface {
+	// HTTPRouter implements a http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
+	http.Handler
+
+	// Handle associates a HTTP method and a pattern string to a HTTP handler function. If the method and pattern string
+	// already exists, an error is returned.
+	Handle(method, pattern string, handler http.Handler) error
+}
+
+// ParamsFromContext extracts the URL parameters that are embedded in the context by the Zanzibar HTTP router implementation.
+func ParamsFromContext(ctx context.Context) url.Values {
+	julienParams := httprouter.ParamsFromContext(ctx)
+	urlValues := make(url.Values)
+	for _, paramValue := range julienParams {
+		urlValues.Add(paramValue.Key, paramValue.Value)
+	}
+	return urlValues
+}
 
 // HandlerFn is a func that handles ServerHTTPRequest
 type HandlerFn func(
@@ -82,7 +113,6 @@ func NewRouterEndpoint(
 func (endpoint *RouterEndpoint) HandleRequest(
 	w http.ResponseWriter,
 	r *http.Request,
-	params httprouter.Params,
 ) {
 	// TODO: (lu) get timeout from endpoint config
 	//_, ok := ctx.Deadline()
@@ -92,13 +122,14 @@ func (endpoint *RouterEndpoint) HandleRequest(
 	//	defer cancel()
 	//}
 
-	req := NewServerHTTPRequest(w, r, params, endpoint)
+	urlValues := ParamsFromContext(r.Context())
+	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
 	endpoint.HandlerFn(req.Context(), req, req.res)
 	req.res.flush()
 }
 
-// HTTPRouter data structure to handle and register endpoints
-type HTTPRouter struct {
+// httpRouter data structure to handle and register endpoints
+type httpRouter struct {
 	gateway                  *Gateway
 	httpRouter               *httprouter.Router
 	notFoundEndpoint         *RouterEndpoint
@@ -107,9 +138,11 @@ type HTTPRouter struct {
 	routeMap                 map[string]*RouterEndpoint
 }
 
+var _ HTTPRouter = (*httpRouter)(nil)
+
 // NewHTTPRouter allocates a HTTP router
-func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
-	router := &HTTPRouter{
+func NewHTTPRouter(gateway *Gateway) HTTPRouter {
+	router := &httpRouter{
 		notFoundEndpoint: NewRouterEndpoint(
 			gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
 			notFound, notFound, nil,
@@ -124,9 +157,7 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	}
 
 	router.httpRouter = &httprouter.Router{
-		// We handle trailing slash in Register() without redirect
-		RedirectTrailingSlash:  false,
-		RedirectFixedPath:      false,
+		RedirectTrailingSlash:  true,
 		HandleMethodNotAllowed: true,
 		NotFound:               http.HandlerFunc(router.handleNotFound),
 		MethodNotAllowed:       http.HandlerFunc(router.handleMethodNotAllowed),
@@ -135,7 +166,25 @@ func NewHTTPRouter(gateway *Gateway) *HTTPRouter {
 	return router
 }
 
-func (router *HTTPRouter) handlePanic(
+// Register register a handler function.
+func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (err error) {
+	defer func() {
+		recoveredValue := recover()
+		if recoveredValue != nil {
+			err = fmt.Errorf("caught error when registering %s %s: %+v", method, prefix, recoveredValue)
+		}
+	}()
+
+	router.httpRouter.Handler(method, prefix, handler)
+	return err
+}
+
+// ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
+func (router *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	router.httpRouter.ServeHTTP(w, r)
+}
+
+func (router *httpRouter) handlePanic(
 	w http.ResponseWriter, r *http.Request, v interface{},
 ) {
 	err, ok := v.(error)
@@ -160,48 +209,7 @@ func (router *HTTPRouter) handlePanic(
 	)
 }
 
-func (router *HTTPRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	router.httpRouter.ServeHTTP(w, r)
-}
-
-// RegisterRaw register a raw handler function.
-// Such a function take raw http req/writer.
-// Use this only to integrated third-party, like pprof debug handlers
-func (router *HTTPRouter) RegisterRaw(
-	method, prefix string,
-	handler http.HandlerFunc,
-) {
-	router.httpRouter.Handler(method, prefix, handler)
-}
-
-// Register will register an endpoint with the router.
-func (router *HTTPRouter) Register(
-	method, urlpattern string,
-	endpoint *RouterEndpoint,
-) error {
-	canonicalPattern := urlpattern
-	if canonicalPattern[len(canonicalPattern)-1] == '/' {
-		canonicalPattern = canonicalPattern[:len(canonicalPattern)-1]
-	}
-
-	key := urlpattern + "|" + method
-	if _, ok := router.routeMap[key]; ok {
-		return fmt.Errorf("handler for '%s %s' is already registered", method, urlpattern)
-	}
-	router.routeMap[key] = endpoint
-
-	// Support trailing slash going to the same endpoint.
-	router.httpRouter.Handle(
-		method, canonicalPattern, endpoint.HandleRequest,
-	)
-	router.httpRouter.Handle(
-		method, canonicalPattern+"/", endpoint.HandleRequest,
-	)
-
-	return nil
-}
-
-func (router *HTTPRouter) handleNotFound(
+func (router *httpRouter) handleNotFound(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -220,7 +228,7 @@ func (router *HTTPRouter) handleNotFound(
 	req.res.finish()
 }
 
-func (router *HTTPRouter) handleMethodNotAllowed(
+func (router *httpRouter) handleMethodNotAllowed(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {

@@ -23,6 +23,8 @@ package zanzibar_test
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"io/ioutil"
@@ -62,14 +64,14 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		},
 	)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		routerEndpoint,
+		http.HandlerFunc(routerEndpoint.HandleRequest),
 	)
 	assert.NoError(t, err)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/bar/",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -82,7 +84,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			) {
 				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -91,12 +93,12 @@ func TestTrailingSlashRoutes(t *testing.T) {
 		expected string
 	}{
 		{"/foo", "foo\n"},
-		{"/foo/", "foo\n"},
-		{"/bar", "bar\n"},
+		{"/foo/", `<a href="/foo">Moved Permanently</a>.` + "\n\n"},
 		{"/bar/", "bar\n"},
+		{"/bar", `<a href="/bar/">Moved Permanently</a>.` + "\n\n"},
 	}
 
-	for _, testReq := range testRequests {
+	for i, testReq := range testRequests {
 		resp, err := gateway.MakeRequest(
 			"GET",
 			testReq.url,
@@ -112,7 +114,7 @@ func TestTrailingSlashRoutes(t *testing.T) {
 			return
 		}
 
-		assert.Equal(t, []byte(testReq.expected), bytes)
+		assert.Equal(t, []byte(testReq.expected), bytes, fmt.Sprintf("Mismatch in response bytes for %dth test case", i))
 		assert.Equal(t, 1, len(
 			bgateway.Logs("info", "Finished an incoming server HTTP request"),
 		))
@@ -192,9 +194,9 @@ func TestRouterPanic(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -207,7 +209,7 @@ func TestRouterPanic(t *testing.T) {
 			) {
 				panic("a string")
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -255,9 +257,9 @@ func TestRouterPanicObject(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -270,7 +272,7 @@ func TestRouterPanicObject(t *testing.T) {
 			) {
 				panic(errors.New("an error"))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -318,9 +320,9 @@ func TestRouterPanicNilPointer(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/panic",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -334,7 +336,7 @@ func TestRouterPanicNilPointer(t *testing.T) {
 				var foo *string = nil
 				_ = *foo
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -385,9 +387,9 @@ func TestConflictingRoutes(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -400,12 +402,12 @@ func TestConflictingRoutes(t *testing.T) {
 			) {
 				resp.WriteJSONBytes(200, nil, []byte("foo\n"))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.Nil(t, err)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -418,9 +420,9 @@ func TestConflictingRoutes(t *testing.T) {
 			) {
 				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
 			},
-		),
+		).HandleRequest),
 	)
 	if assert.Error(t, err) {
-		assert.Equal(t, err.Error(), "handler for 'GET /foo' is already registered")
+		assert.Equal(t, err.Error(), "caught error when registering GET /foo: a handle is already registered for path '/foo'")
 	}
 }

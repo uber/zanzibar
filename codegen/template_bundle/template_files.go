@@ -307,9 +307,9 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // Register adds the http handler to the gateway's http router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6964, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 6994, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

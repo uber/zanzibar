@@ -26,6 +26,7 @@ package panicendpoint
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -61,9 +62,9 @@ func NewServiceCFrontHelloHandler(deps *module.Dependencies) *ServiceCFrontHello
 
 // Register adds the http handler to the gateway's http router
 func (h *ServiceCFrontHelloHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"GET", "/multi/serviceC_f/hello",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

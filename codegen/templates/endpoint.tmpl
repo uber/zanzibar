@@ -91,9 +91,9 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 
 // Register adds the http handler to the gateway's http router
 func (h *{{$handlerName}}) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"{{.HTTPMethod}}", "{{.HTTPPath}}",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

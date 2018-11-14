@@ -122,8 +122,8 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -140,7 +140,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 				foo2, _ := req.GetQueryValue("foo")
 				assert.Equal(t, "", foo2)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -184,8 +184,8 @@ func TestFailingGetQueryBool(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -199,7 +199,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 				foo1, _ := req.GetQueryBool("foo")
 				assert.Equal(t, false, foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -243,8 +243,8 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -258,7 +258,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 				foo1, _ := req.GetQueryInt8("foo")
 				assert.Equal(t, int8(0), foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -302,8 +302,8 @@ func TestFailingHasQueryValue(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -317,7 +317,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 				ok := req.HasQueryValue("foo")
 				assert.Equal(t, false, ok)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -361,8 +361,8 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -376,7 +376,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 				foo1, _ := req.GetQueryInt16("foo")
 				assert.Equal(t, int16(0), foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -420,8 +420,8 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -435,7 +435,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 				foo1, _ := req.GetQueryInt32("foo")
 				assert.Equal(t, int32(0), foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -479,8 +479,8 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -494,7 +494,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 				foo1, _ := req.GetQueryInt64("foo")
 				assert.Equal(t, int64(0), foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -538,8 +538,8 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -553,7 +553,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 				foo1, _ := req.GetQueryFloat64("foo")
 				assert.Equal(t, float64(0), foo1)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -597,8 +597,8 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -612,7 +612,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 				ok := req.HasQueryPrefix("foo")
 				assert.Equal(t, false, ok)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -649,8 +649,8 @@ func TestGetQueryBoolList(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -666,7 +666,7 @@ func TestGetQueryBoolList(t *testing.T) {
 				assert.Equal(t, []bool{true, true, false}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -683,8 +683,8 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -699,7 +699,7 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -742,8 +742,8 @@ func TestGetQueryInt8List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -759,7 +759,7 @@ func TestGetQueryInt8List(t *testing.T) {
 				assert.Equal(t, []int8{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -776,8 +776,8 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -792,7 +792,7 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -835,8 +835,8 @@ func TestGetQueryInt16List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -852,7 +852,7 @@ func TestGetQueryInt16List(t *testing.T) {
 				assert.Equal(t, []int16{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -869,8 +869,8 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -885,7 +885,7 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -928,8 +928,8 @@ func TestGetQueryInt32List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -945,7 +945,7 @@ func TestGetQueryInt32List(t *testing.T) {
 				assert.Equal(t, []int32{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -962,8 +962,8 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -978,7 +978,7 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1021,8 +1021,8 @@ func TestGetQueryInt64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1038,7 +1038,7 @@ func TestGetQueryInt64List(t *testing.T) {
 				assert.Equal(t, []int64{42, 49}, l)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1055,8 +1055,8 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1071,7 +1071,7 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1114,8 +1114,8 @@ func TestGetQueryFloat64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1131,7 +1131,7 @@ func TestGetQueryFloat64List(t *testing.T) {
 				assert.InEpsilonSlice(t, []float64{42.24, 49.94}, l, float64(0.005))
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1148,8 +1148,8 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1164,7 +1164,7 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1207,8 +1207,8 @@ func TestFailingGetQueryValues(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1223,7 +1223,7 @@ func TestFailingGetQueryValues(t *testing.T) {
 				assert.False(t, ok)
 				assert.Nil(t, l)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1254,8 +1254,8 @@ func TestGetQueryValues(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
-	err := g.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err := g.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			g.RootScope,
 			g.Logger,
@@ -1274,7 +1274,7 @@ func TestGetQueryValues(t *testing.T) {
 				lastQueryParam = params
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1317,8 +1317,8 @@ func TestPeekBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"POST", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -1346,7 +1346,7 @@ func TestPeekBody(t *testing.T) {
 				assert.Equal(t, vType, jsonparser.String)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1370,8 +1370,8 @@ func TestSpanCreated(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"POST", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -1386,7 +1386,7 @@ func TestSpanCreated(t *testing.T) {
 				assert.NotNil(t, span)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -1410,8 +1410,8 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -1424,7 +1424,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 			) {
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
-		),
+		).HandleRequest),
 	)
 
 	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)

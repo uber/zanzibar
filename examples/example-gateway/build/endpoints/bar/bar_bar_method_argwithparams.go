@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -63,9 +64,9 @@ func NewBarArgWithParamsHandler(deps *module.Dependencies) *BarArgWithParamsHand
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithParamsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/bar/argWithParams/:uuid/segment/:user-uuid",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
@@ -96,11 +97,11 @@ func (h *BarArgWithParamsHandler) HandleRequest(
 		return
 	}
 
-	requestBody.UUID = req.Params.ByName("uuid")
+	requestBody.UUID = req.Params.Get("uuid")
 	if requestBody.Params == nil {
 		requestBody.Params = &endpointsBarBar.ParamsStruct{}
 	}
-	requestBody.Params.UserUUID = req.Params.ByName("user-uuid")
+	requestBody.Params.UserUUID = req.Params.Get("user-uuid")
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {

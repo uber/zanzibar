@@ -61,7 +61,7 @@ type TChannelRouter struct {
 	extractor ContextExtractor
 }
 
-// netContextRouter implements the Handler interface that consumes netContext instead of stdlib context
+// netContextRouter implements the Handle interface that consumes netContext instead of stdlib context
 type netContextRouter struct {
 	router *TChannelRouter
 }

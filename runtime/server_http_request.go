@@ -32,7 +32,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/julienschmidt/httprouter"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/pborman/uuid"
@@ -56,7 +55,7 @@ type ServerHTTPRequest struct {
 	HandlerName  string
 	URL          *url.URL
 	Method       string
-	Params       httprouter.Params
+	Params       url.Values
 	Header       Header
 
 	// logger logs entries with default fields that contains request meta info
@@ -69,7 +68,7 @@ type ServerHTTPRequest struct {
 func NewServerHTTPRequest(
 	w http.ResponseWriter,
 	r *http.Request,
-	params httprouter.Params,
+	params url.Values,
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
 	// put request uuid and endpoint name on context

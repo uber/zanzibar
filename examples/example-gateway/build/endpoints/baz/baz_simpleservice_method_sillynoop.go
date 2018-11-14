@@ -25,6 +25,7 @@ package bazendpoint
 
 import (
 	"context"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -61,9 +62,9 @@ func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceS
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceSillyNoopHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"GET", "/baz/silly-noop",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

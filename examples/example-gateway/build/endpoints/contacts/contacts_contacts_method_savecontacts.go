@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -63,9 +64,9 @@ func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveCont
 
 // Register adds the http handler to the gateway's http router
 func (h *ContactsSaveContactsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/contacts/:userUUID/contacts",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
@@ -96,7 +97,7 @@ func (h *ContactsSaveContactsHandler) HandleRequest(
 		return
 	}
 
-	requestBody.UserUUID = req.Params.ByName("userUUID")
+	requestBody.UserUUID = req.Params.Get("userUUID")
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {

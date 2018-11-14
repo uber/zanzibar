@@ -27,7 +27,7 @@ import (
 	"go.uber.org/thriftrw/wire"
 )
 
-// MiddlewareTchannelStack is a stack of Middleware Handlers that can be invoked as an Handler.
+// MiddlewareTchannelStack is a stack of Middleware Handlers that can be invoked as an Handle.
 // MiddlewareTchannelStack middlewares are evaluated for requests in the order that they are added to the stack
 // followed by the underlying HandlerFn. The middleware responses are then executed in reverse.
 type MiddlewareTchannelStack struct {
