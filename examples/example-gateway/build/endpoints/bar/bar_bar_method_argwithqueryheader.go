@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -64,9 +65,9 @@ func NewBarArgWithQueryHeaderHandler(deps *module.Dependencies) *BarArgWithQuery
 
 // Register adds the http handler to the gateway's http router
 func (h *BarArgWithQueryHeaderHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"GET", "/bar/argWithQueryHeader",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

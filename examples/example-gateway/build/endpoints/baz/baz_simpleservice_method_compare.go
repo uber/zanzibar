@@ -27,6 +27,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -63,9 +64,9 @@ func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCom
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceCompareHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/baz/compare",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

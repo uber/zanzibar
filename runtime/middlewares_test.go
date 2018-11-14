@@ -68,16 +68,16 @@ func TestHandlers(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
@@ -157,16 +157,16 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
@@ -214,16 +214,16 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
@@ -276,16 +276,16 @@ func TestMiddlewareSharedStates(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
-	err = bgateway.ActualGateway.HTTPRouter.Register(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
-		zanzibar.NewRouterEndpoint(
+		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
 			bgateway.ActualGateway.Tracer,
 			"foo", "foo",
 			middlewareStack.Handle,
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)

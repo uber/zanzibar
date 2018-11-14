@@ -26,7 +26,7 @@ import (
 	jsonschema "github.com/mcuadros/go-jsonschema-generator"
 )
 
-// MiddlewareStack is a stack of Middleware Handlers that can be invoked as an Handler.
+// MiddlewareStack is a stack of Middleware Handlers that can be invoked as an Handle.
 // MiddlewareStack middlewares are evaluated for requests in the order that they are added to the stack
 // followed by the underlying HandlerFn. The middleware responses are then executed in reverse.
 type MiddlewareStack struct {

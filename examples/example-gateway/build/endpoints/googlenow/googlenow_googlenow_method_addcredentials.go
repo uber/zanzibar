@@ -26,6 +26,7 @@ package googlenowendpoint
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -62,9 +63,9 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 
 // Register adds the http handler to the gateway's http router
 func (h *GoogleNowAddCredentialsHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/googlenow/add-credentials",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

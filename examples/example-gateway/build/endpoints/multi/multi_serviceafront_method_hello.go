@@ -26,6 +26,7 @@ package multiendpoint
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -61,9 +62,9 @@ func NewServiceAFrontHelloHandler(deps *module.Dependencies) *ServiceAFrontHello
 
 // Register adds the http handler to the gateway's http router
 func (h *ServiceAFrontHelloHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"GET", "/multi/serviceA_f/hello",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

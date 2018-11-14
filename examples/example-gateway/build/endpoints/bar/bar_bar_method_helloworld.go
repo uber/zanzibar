@@ -26,6 +26,7 @@ package barendpoint
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/opentracing/opentracing-go"
@@ -62,9 +63,9 @@ func NewBarHelloWorldHandler(deps *module.Dependencies) *BarHelloWorldHandler {
 
 // Register adds the http handler to the gateway's http router
 func (h *BarHelloWorldHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"GET", "/bar/hello",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

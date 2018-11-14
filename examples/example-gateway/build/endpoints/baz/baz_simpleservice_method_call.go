@@ -26,6 +26,7 @@ package bazendpoint
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 	"strconv"
 
@@ -63,9 +64,9 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 
 // Register adds the http handler to the gateway's http router
 func (h *SimpleServiceCallHandler) Register(g *zanzibar.Gateway) error {
-	return g.HTTPRouter.Register(
+	return g.HTTPRouter.Handle(
 		"POST", "/baz/call",
-		h.endpoint,
+		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 

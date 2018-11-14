@@ -83,7 +83,7 @@ type Gateway struct {
 	Logger           *zap.Logger
 	ServiceName      string
 	Config           *StaticConfig
-	HTTPRouter       *HTTPRouter
+	HTTPRouter       HTTPRouter
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
 
@@ -182,9 +182,9 @@ func CreateGateway(
 		return nil, err
 	}
 
-	err := gateway.registerPredefined()
+	gateway.registerPredefined()
 
-	return gateway, err
+	return gateway, nil
 }
 
 // Bootstrap func
@@ -242,34 +242,33 @@ func (gateway *Gateway) Bootstrap() error {
 	return nil
 }
 
-func (gateway *Gateway) registerPredefined() error {
-	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof", pprof.Index)
-	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/cmdline", pprof.Cmdline)
-	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/profile", pprof.Profile)
-	gateway.HTTPRouter.RegisterRaw("GET", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.HTTPRouter.RegisterRaw("POST", "/debug/pprof/symbol", pprof.Symbol)
-	gateway.HTTPRouter.RegisterRaw(
-		"GET", "/debug/pprof/goroutine", pprof.Handler("goroutine").ServeHTTP,
+func (gateway *Gateway) registerPredefined() {
+	gateway.HTTPRouter.Handle("GET", "/debug/pprof", http.HandlerFunc(pprof.Index))
+	gateway.HTTPRouter.Handle("GET", "/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+	gateway.HTTPRouter.Handle("GET", "/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+	gateway.HTTPRouter.Handle("GET", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	gateway.HTTPRouter.Handle("POST", "/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	gateway.HTTPRouter.Handle(
+		"GET", "/debug/pprof/goroutine", pprof.Handler("goroutine"),
 	)
-	gateway.HTTPRouter.RegisterRaw(
-		"GET", "/debug/pprof/heap", pprof.Handler("heap").ServeHTTP,
+	gateway.HTTPRouter.Handle(
+		"GET", "/debug/pprof/heap", pprof.Handler("heap"),
 	)
-	gateway.HTTPRouter.RegisterRaw(
-		"GET", "/debug/pprof/threadcreate",
-		pprof.Handler("threadcreate").ServeHTTP,
+	gateway.HTTPRouter.Handle(
+		"GET", "/debug/pprof/threadcreate", pprof.Handler("threadcreate"),
 	)
-	gateway.HTTPRouter.RegisterRaw(
-		"GET", "/debug/pprof/block", pprof.Handler("block").ServeHTTP,
+	gateway.HTTPRouter.Handle(
+		"GET", "/debug/pprof/block", pprof.Handler("block"),
 	)
-	gateway.HTTPRouter.RegisterRaw("GET", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
-	gateway.HTTPRouter.RegisterRaw("PUT", "/debug/loglevel", gateway.atomLevel.ServeHTTP)
+	gateway.HTTPRouter.Handle("GET", "/debug/loglevel", gateway.atomLevel)
+	gateway.HTTPRouter.Handle("PUT", "/debug/loglevel", gateway.atomLevel)
 
-	err := gateway.HTTPRouter.Register("GET", "/health", NewRouterEndpoint(
+	tracer := NewRouterEndpoint(
 		gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
 		"health", "health",
 		gateway.handleHealthRequest,
-	))
-	return err
+	)
+	gateway.HTTPRouter.Handle("GET", "/health", http.HandlerFunc(tracer.HandleRequest))
 }
 
 func (gateway *Gateway) handleHealthRequest(

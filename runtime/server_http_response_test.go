@@ -24,6 +24,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"github.com/buger/jsonparser"
@@ -47,8 +48,8 @@ func TestInvalidStatusCode(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -61,7 +62,7 @@ func TestInvalidStatusCode(t *testing.T) {
 			) {
 				res.WriteJSONBytes(999, nil, []byte("true"))
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -103,8 +104,8 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -117,7 +118,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 			) {
 				res.WriteJSON(200, nil, nil)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -164,8 +165,8 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -178,7 +179,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 			) {
 				res.WriteJSON(200, nil, failingJsonObj{})
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -234,8 +235,8 @@ func TestResponsePeekBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -263,7 +264,7 @@ func TestResponsePeekBody(t *testing.T) {
 				assert.Equal(t, []byte(`myClientToken`), value)
 				assert.Equal(t, vType, jsonparser.String)
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -301,8 +302,8 @@ func TestResponseSetHeaders(t *testing.T) {
 	headers.Set("foo", "bar")
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -320,7 +321,7 @@ func TestResponseSetHeaders(t *testing.T) {
 					},
 				})
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -350,8 +351,8 @@ func TestResponsePeekBodyError(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -373,7 +374,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 				assert.Error(t, err)
 				assert.Equal(t, "Key path not found", err.Error())
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 
@@ -408,8 +409,8 @@ func TestPendingResponseBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
-	err = bgateway.ActualGateway.HTTPRouter.Register(
-		"GET", "/foo", zanzibar.NewRouterEndpoint(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
+		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			bgateway.ActualGateway.RootScope,
 			bgateway.ActualGateway.Logger,
@@ -436,7 +437,7 @@ func TestPendingResponseBody(t *testing.T) {
 				assert.Equal(t, statusCode, pendingStatusCode)
 
 			},
-		),
+		).HandleRequest),
 	)
 	assert.NoError(t, err)
 

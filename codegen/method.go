@@ -523,12 +523,12 @@ func (ms *MethodSpec) setRequestParamFields(
 		}
 
 		if segment.Required {
-			statements.appendf("requestBody%s = req.Params.ByName(%q)",
+			statements.appendf("requestBody%s = req.Params.Get(%q)",
 				segment.BodyIdentifier, segment.ParamName,
 			)
 		} else {
 			statements.appendf(
-				"requestBody%s = ptr.String(req.Params.ByName(%q))",
+				"requestBody%s = ptr.String(req.Params.Get(%q))",
 				segment.BodyIdentifier,
 				segment.ParamName,
 			)
