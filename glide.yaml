@@ -67,3 +67,7 @@ import:
   version: master
 - package: gopkg.in/validator.v2
   version: master
+- package: go.uber.org/fx
+
+# Transitive dependency of fx
+- package: go.uber.org/dig
