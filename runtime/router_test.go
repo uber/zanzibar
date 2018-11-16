@@ -18,411 +18,142 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package zanzibar_test
+package zanzibar
 
 import (
 	"bytes"
-	"context"
-	"fmt"
+	"errors"
+	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
-	"io/ioutil"
-
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	zanzibar "github.com/uber/zanzibar/runtime"
-	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
-
-	exampleGateway "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
+	"github.com/stretchr/testify/suite"
+	"github.com/uber-go/tally"
+	"go.uber.org/zap"
 )
 
-func TestTrailingSlashRoutes(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
+type routerSuite struct {
+	suite.Suite
 
-	bgateway := gateway.(*benchGateway.BenchGateway)
-	routerEndpoint := zanzibar.NewRouterEndpoint(
-		bgateway.ActualGateway.ContextExtractor,
-		bgateway.ActualGateway.RootScope,
-		bgateway.ActualGateway.Logger,
-		bgateway.ActualGateway.Tracer,
-		"foo", "foo",
-		func(
-			ctx context.Context,
-			req *zanzibar.ServerHTTPRequest,
-			resp *zanzibar.ServerHTTPResponse,
-		) {
-			resp.WriteJSONBytes(200, nil, []byte("foo\n"))
-		},
-	)
+	router *httpRouter
+	gw     *Gateway
+	scope  tally.TestScope
+}
 
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/foo",
-		http.HandlerFunc(routerEndpoint.HandleRequest),
-	)
-	assert.NoError(t, err)
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/bar/",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"bar", "bar",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
-			},
-		).HandleRequest),
-	)
-	assert.NoError(t, err)
+func (s *routerSuite) SetupTest() {
+	logger, _ := zap.NewDevelopment()
+	s.gw = new(Gateway)
+	s.gw.Logger = logger
+	s.scope = tally.NewTestScope("", nil)
+	s.gw.RootScope = s.scope
+	s.router = NewHTTPRouter(s.gw).(*httpRouter)
+}
 
-	testRequests := []struct {
-		url      string
-		expected string
+func (s *routerSuite) TestRouter() {
+	err := s.router.Handle("GET", "/noslash", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("noslash\n"))
+	}))
+	s.NoError(err)
+	err = s.router.Handle("GET", "/withslash/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("withslash\n"))
+	}))
+	s.NoError(err)
+	err = s.router.Handle("POST", "/postonly", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("postonly\n"))
+	}))
+	s.NoError(err)
+	err = s.router.Handle("GET", "/panicerror", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		panic(errors.New("test"))
+	}))
+	s.NoError(err)
+	err = s.router.Handle("GET", "/panicstring", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		panic("test")
+	}))
+	s.NoError(err)
+
+	cases := []struct {
+		RequestMethod string
+		RequestPath   string
+		RequestBody   []byte
+		ResponseCode  int
+		ResponseBody  []byte
 	}{
-		{"/foo", "foo\n"},
-		{"/foo/", `<a href="/foo">Moved Permanently</a>.` + "\n\n"},
-		{"/bar/", "bar\n"},
-		{"/bar", `<a href="/bar/">Moved Permanently</a>.` + "\n\n"},
+		{"GET", "/notfound", nil, http.StatusNotFound, []byte("404 page not found\n")},
+		{"GET", "/noslash", nil, http.StatusOK, []byte("noslash\n")},
+		{"GET", "/noslash/", nil, http.StatusMovedPermanently, []byte(`<a href="/noslash">Moved Permanently</a>.` + "\n\n")},
+		{"GET", "/withslash", nil, http.StatusMovedPermanently, []byte(`<a href="/withslash/">Moved Permanently</a>.` + "\n\n")},
+		{"GET", "/withslash/", nil, http.StatusOK, []byte("withslash\n")},
+		{"GET", "/postonly", nil, http.StatusMethodNotAllowed, []byte("Method Not Allowed\n")},
+		{"GET", "/panicerror", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},
+		{"GET", "/panicstring", nil, http.StatusInternalServerError, []byte("Internal Server Error\n")},
 	}
 
-	for i, testReq := range testRequests {
-		resp, err := gateway.MakeRequest(
-			"GET",
-			testReq.url,
-			nil,
-			bytes.NewReader([]byte("{\"baz\":\"bat\"}")),
-		)
-		if !assert.NoError(t, err) {
-			return
-		}
-
-		bytes, err := ioutil.ReadAll(resp.Body)
-		if !assert.NoError(t, err) {
-			return
-		}
-
-		assert.Equal(t, []byte(testReq.expected), bytes, fmt.Sprintf("Mismatch in response bytes for %dth test case", i))
-		assert.Equal(t, 1, len(
-			bgateway.Logs("info", "Finished an incoming server HTTP request"),
-		))
+	for i, testCase := range cases {
+		req := httptest.NewRequest(testCase.RequestMethod, testCase.RequestPath, bytes.NewBuffer(testCase.RequestBody))
+		w := httptest.NewRecorder()
+		s.router.ServeHTTP(w, req)
+		s.Equal(testCase.ResponseCode, w.Code, "expected response code for %dth test case to be equal", i)
+		body, _ := ioutil.ReadAll(w.Result().Body)
+		s.Equal(testCase.ResponseBody, body, "expected response body for %dth test case to be equal", i)
 	}
 }
 
-func TestRouterNotFound(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
-
-	resp, err := gateway.MakeRequest("GET", "/foo", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, resp.Status, "404 Not Found")
-	assert.Equal(t, resp.StatusCode, 404)
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, bytes, []byte("404 page not found\n"))
-	assert.Equal(t, 1, len(
-		gateway.Logs("info", "Finished an incoming server HTTP request"),
-	))
+func (s *routerSuite) TestExtractParameters() {
+	err := s.router.Handle("GET", "/foo/:a", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		params := ParamsFromContext(r.Context())
+		s.Equal("x", params.Get("a"))
+	}))
+	s.NoError(err)
+	req := httptest.NewRequest("GET", "/foo/x", nil)
+	w := httptest.NewRecorder()
+	s.router.ServeHTTP(w, req)
+	s.Equal(http.StatusOK, w.Code)
 }
 
-func TestRouterInvalidMethod(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
+func (s *routerSuite) TestRouteConflict() {
+	err := s.router.Handle("GET", "/foo", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("foo1\n"))
+	}))
+	s.NoError(err)
 
-	resp, err := gateway.MakeRequest("POST", "/health", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
+	err = s.router.Handle("GET", "/foo", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("foo2\n"))
+	}))
+	s.Error(err)
 
-	assert.Equal(t, resp.Status, "405 Method Not Allowed")
-	assert.Equal(t, resp.StatusCode, 405)
+	// Test that the original route is still registered and working correctly.
 
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, bytes, []byte("Method Not Allowed\n"))
-	assert.Equal(t, 1, len(
-		gateway.Logs("info", "Finished an incoming server HTTP request"),
-	))
+	req := httptest.NewRequest("GET", "/foo", nil)
+	w := httptest.NewRecorder()
+	s.router.ServeHTTP(w, req)
+	s.Equal(http.StatusOK, w.Code)
+	body, _ := ioutil.ReadAll(w.Result().Body)
+	s.Equal([]byte("foo1\n"), body)
 }
 
-func TestRouterPanic(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
+func (s *routerSuite) TestRouteConflictVariable() {
+	err := s.router.Handle("GET", "/foo/:a", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("foo a\n"))
+	}))
+	s.NoError(err)
 
-	bgateway := gateway.(*benchGateway.BenchGateway)
+	err = s.router.Handle("GET", "/foo/:b", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("foo b\n"))
+	}))
+	s.Error(err)
 
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/panic",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"panic", "panic",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				panic("a string")
-			},
-		).HandleRequest),
-	)
-	assert.NoError(t, err)
+	// Test that the original route is still registered and working correctly.
 
-	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, resp.Status, "500 Internal Server Error")
-	assert.Equal(t, resp.StatusCode, 500)
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, bytes, []byte("Internal Server Error\n"))
-
-	allLogs := gateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs))
-
-	logLines := allLogs["A http request handler paniced"]
-	assert.Equal(t, 1, len(logLines))
-
-	line := logLines[0]
-	assert.Equal(t, "http router panic: a string", line["error"])
-	assert.Equal(t, "/panic", line["pathname"])
-	assert.Contains(
-		t,
-		line["errorVerbose"],
-		"runtime_test.TestRouterPanic.func1",
-	)
+	req := httptest.NewRequest("GET", "/foo/x", nil)
+	w := httptest.NewRecorder()
+	s.router.ServeHTTP(w, req)
+	s.Equal(http.StatusOK, w.Code)
+	body, _ := ioutil.ReadAll(w.Result().Body)
+	s.Equal([]byte("foo a\n"), body)
 }
 
-func TestRouterPanicObject(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
-
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/panic",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"panic", "panic",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				panic(errors.New("an error"))
-			},
-		).HandleRequest),
-	)
-	assert.NoError(t, err)
-
-	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, resp.Status, "500 Internal Server Error")
-	assert.Equal(t, resp.StatusCode, 500)
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, bytes, []byte("Internal Server Error\n"))
-
-	allLogs := gateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs))
-
-	logLines := allLogs["A http request handler paniced"]
-	assert.Equal(t, 1, len(logLines))
-
-	line := logLines[0]
-	assert.Equal(t, "an error", line["error"])
-	assert.Equal(t, "/panic", line["pathname"])
-	assert.Contains(
-		t,
-		line["errorVerbose"],
-		"runtime_test.TestRouterPanicObject.func1",
-	)
-}
-
-func TestRouterPanicNilPointer(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
-
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/panic",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"panic", "panic",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				var foo *string = nil
-				_ = *foo
-			},
-		).HandleRequest),
-	)
-	assert.NoError(t, err)
-
-	resp, err := gateway.MakeRequest("GET", "/panic", nil, nil)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, resp.Status, "500 Internal Server Error")
-	assert.Equal(t, resp.StatusCode, 500)
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.Equal(t, bytes, []byte("Internal Server Error\n"))
-
-	allLogs := gateway.AllLogs()
-	assert.Equal(t, 1, len(allLogs))
-
-	logLines := allLogs["A http request handler paniced"]
-	assert.Equal(t, 1, len(logLines))
-
-	line := logLines[0]
-	assert.Equal(t,
-		"wrapped: runtime error: "+
-			"invalid memory address or nil pointer dereference",
-		line["error"],
-	)
-	assert.Equal(t, "/panic", line["pathname"])
-	assert.Contains(
-		t,
-		line["errorVerbose"],
-		"runtime_test.TestRouterPanicNilPointer.func1",
-	)
-}
-func TestConflictingRoutes(t *testing.T) {
-	gateway, err := benchGateway.CreateGateway(
-		defaultTestConfig,
-		defaultTestOptions,
-		exampleGateway.CreateGateway,
-	)
-	if !assert.NoError(t, err) {
-		return
-	}
-	defer gateway.Close()
-
-	bgateway := gateway.(*benchGateway.BenchGateway)
-
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/foo",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"foo", "foo",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				resp.WriteJSONBytes(200, nil, []byte("foo\n"))
-			},
-		).HandleRequest),
-	)
-	assert.Nil(t, err)
-	err = bgateway.ActualGateway.HTTPRouter.Handle(
-		"GET", "/foo",
-		http.HandlerFunc(zanzibar.NewRouterEndpoint(
-			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
-			"bar", "bar",
-			func(
-				ctx context.Context,
-				req *zanzibar.ServerHTTPRequest,
-				resp *zanzibar.ServerHTTPResponse,
-			) {
-				resp.WriteJSONBytes(200, nil, []byte("bar\n"))
-			},
-		).HandleRequest),
-	)
-	if assert.Error(t, err) {
-		assert.Equal(t, err.Error(), "caught error when registering GET /foo: a handle is already registered for path '/foo'")
-	}
+func TestRouterSuite(t *testing.T) {
+	s := new(routerSuite)
+	suite.Run(t, s)
 }
