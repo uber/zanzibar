@@ -64,6 +64,7 @@ type Options struct {
 	MetricsBackend            tally.CachedStatsReporter
 	LogWriter                 zapcore.WriteSyncer
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
+	GetContextFieldExtractors func() []ContextLogFieldsExtractor
 }
 
 // Gateway type
@@ -125,6 +126,7 @@ func CreateGateway(
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
 	var scopeExtractors []ContextScopeTagsExtractor
+	var fieldExtractors []ContextLogFieldsExtractor
 	if opts == nil {
 		opts = &Options{}
 	}
@@ -141,6 +143,14 @@ func CreateGateway(
 
 		for _, scopeExtractor := range scopeExtractors {
 			contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+		}
+	}
+
+	if opts.GetContextFieldExtractors != nil {
+		fieldExtractors = opts.GetContextFieldExtractors()
+
+		for _, fieldExtractor := range fieldExtractors {
+			contextExtractors.AddContextLogFieldsExtractor(fieldExtractor)
 		}
 	}
 

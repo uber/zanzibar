@@ -82,7 +82,7 @@ func NewServerHTTPRequest(
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldHandlerID, endpoint.HandlerName),
 	}
-	ctx = WithLogFields(ctx, logFields...)
+	logger := newLoggerWithFields(endpoint.logger, logFields)
 
 	// put request scope tags on context
 	scopeTags := map[string]string{
@@ -100,11 +100,14 @@ func NewServerHTTPRequest(
 		for k, v := range endpoint.contextExtractor.ExtractScopeTags(ctx) {
 			scopeTags[k] = v
 		}
+
+		logFields = append(logFields, endpoint.contextExtractor.ExtractLogFields(ctx)...)
 	}
 	ctx = WithScopeTags(ctx, scopeTags)
+	ctx = WithLogFields(ctx, logFields...)
 
 	httpRequest := r.WithContext(ctx)
-	logger := newLoggerWithFields(endpoint.logger, logFields)
+
 	scope := endpoint.scope.Tagged(scopeTags)
 
 	req := &ServerHTTPRequest{

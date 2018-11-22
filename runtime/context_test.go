@@ -191,7 +191,7 @@ func TestContextLoggerPanic(t *testing.T) {
 	contextLogger.Panic(ctx, "msg", zap.String("argField", "argValue"))
 }
 
-func TestExtractScope(t *testing.T) {
+func TestExtractScopeTag(t *testing.T) {
 	headers := map[string]string{"x-uber-region-id": "san_francisco"}
 	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
 	contextScopeExtractors := []ContextScopeTagsExtractor{func(ctx context.Context) map[string]string {
@@ -209,6 +209,29 @@ func TestExtractScope(t *testing.T) {
 	tags := contextExtractor.ExtractScopeTags(ctx)
 	assert.Equal(t, tags, expected)
 }
+
+func TestExtractLogField(t *testing.T) {
+	headers := map[string]string{"x-uber-region-id": "san_francisco"}
+	ctx := WithEndpointRequestHeadersField(context.TODO(), headers)
+	contextLogFieldsExtractor := []ContextLogFieldsExtractor{func(ctx context.Context) []zap.Field {
+		var fields []zap.Field
+		headers := GetEndpointRequestHeadersFromCtx(ctx)
+		fields = append(fields, zap.String("region-id", headers["x-uber-region-id"]))
+		return fields
+	}}
+
+	var expected []zap.Field
+	expected = append(expected, zap.String("region-id", "san_francisco"))
+	contextExtractors := &ContextExtractors{}
+	for _, logFieldExtractor := range contextLogFieldsExtractor {
+		contextExtractors.AddContextLogFieldsExtractor(logFieldExtractor)
+	}
+
+	contextExtractor := contextExtractors.MakeContextExtractor()
+	fields := contextExtractor.ExtractLogFields(ctx)
+	assert.Equal(t, expected, fields)
+}
+
 func TestLoggerWithFields(t *testing.T) {
 	zapLoggerCore, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(zapLoggerCore)

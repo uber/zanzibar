@@ -213,6 +213,9 @@ func (s *TChannelRouter) handle(
 		c.scope = c.scope.Tagged(scopeTags)
 	}
 
+	logFields := s.extractor.ExtractLogFields(ctx)
+	ctx = WithLogFields(ctx, logFields...)
+
 	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err

@@ -35,6 +35,9 @@ type contextFieldKey string
 // ContextScopeTagsExtractor defines func where extracts tags from context
 type ContextScopeTagsExtractor func(context.Context) map[string]string
 
+// ContextLogFieldsExtractor defines func where extracts log fields from context
+type ContextLogFieldsExtractor func(context.Context) []zap.Field
+
 const (
 	endpointKey           = contextFieldKey("endpoint")
 	requestUUIDKey        = contextFieldKey("requestUUID")
@@ -186,6 +189,7 @@ func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field
 // ContextExtractor is a extractor that extracts some log fields from the context
 type ContextExtractor interface {
 	ExtractScopeTags(ctx context.Context) map[string]string
+	ExtractLogFields(ctx context.Context) []zap.Field
 }
 
 // AddContextScopeTagsExtractor added a scope tags extractor to contextExtractor.
@@ -193,16 +197,23 @@ func (c *ContextExtractors) AddContextScopeTagsExtractor(extractors ...ContextSc
 	c.contextScopeExtractors = extractors
 }
 
+// AddContextLogFieldsExtractor added a log fields extractor to contextExtractor.
+func (c *ContextExtractors) AddContextLogFieldsExtractor(extractors ...ContextLogFieldsExtractor) {
+	c.contextLogFieldsExtractors = extractors
+}
+
 // MakeContextExtractor returns a extractor that extracts log fields a context.
 func (c *ContextExtractors) MakeContextExtractor() ContextExtractor {
 	return &ContextExtractors{
-		contextScopeExtractors: c.contextScopeExtractors,
+		contextScopeExtractors:     c.contextScopeExtractors,
+		contextLogFieldsExtractors: c.contextLogFieldsExtractors,
 	}
 }
 
 // ContextExtractors warps extractors for context
 type ContextExtractors struct {
-	contextScopeExtractors []ContextScopeTagsExtractor
+	contextScopeExtractors     []ContextScopeTagsExtractor
+	contextLogFieldsExtractors []ContextLogFieldsExtractor
 }
 
 // ExtractScopeTags extracts scope fields from a context into a tag.
@@ -216,6 +227,18 @@ func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]str
 	}
 
 	return tags
+}
+
+// ExtractLogFields extracts log fields from a context into a field.
+func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
+	var fields []zap.Field
+	for _, fn := range c.contextLogFieldsExtractors {
+		logFields := fn(ctx)
+		fields = append(fields, logFields...)
+
+	}
+
+	return fields
 }
 
 // ContextLogger is a logger that extracts some log fields from the context before passing through to underlying zap logger.
