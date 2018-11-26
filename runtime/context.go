@@ -235,7 +235,6 @@ func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	for _, fn := range c.contextLogFieldsExtractors {
 		logFields := fn(ctx)
 		fields = append(fields, logFields...)
-
 	}
 
 	return fields
