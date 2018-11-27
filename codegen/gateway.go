@@ -879,13 +879,11 @@ func (e *EndpointSpec) SetDownstream(
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
 type EndpointClassConfig struct {
-	Name   string `yaml:"name" json:"name"`
-	Type   string `yaml:"type" json:"type"`
-	Config struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Config          struct {
 		Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
 		Endpoints []string `yaml:"endpoints" json:"endpoints"`
-	} `yaml:"config" json:"config"`
-	Dependencies map[string][]string `yaml:"dependencies" json:"dependencies"`
+	} `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func parseEndpointYamls(

@@ -1375,15 +1375,14 @@ type ModuleDependency struct {
 	InstanceName string
 }
 
-// ClassConfig maps onto a YAML configuration for a class type
-type ClassConfig struct {
+// ClassConfigBase defines the shared data fields for all class configs.
+// Configs of different classes can derive from this base struct by add a
+// specific "config" field
+type ClassConfigBase struct {
 	// Name is the class instance name used to identify the module as a
 	// dependency. The combination of the class Name and this instance name
 	// is unique.
 	Name string `yaml:"name" json:"name"`
-	// The configuration map for this class instance. This depends on the
-	// class name and class type, and is interpreted by each module generator.
-	Config map[string]interface{} `yaml:"config" json:"config"`
 	// Dependencies is a map of class name to a list of instance names. This
 	// infers the dependencies struct generated for the initializer
 	Dependencies map[string][]string `yaml:"dependencies" json:"dependencies"`
@@ -1392,6 +1391,14 @@ type ClassConfig struct {
 	// IsExportGenerated determines whether or not the export lives in
 	// IsExportGenerated defaults to true if not set.
 	IsExportGenerated *bool `yaml:"IsExportGenerated" json:"IsExportGenerated"`
+}
+
+// ClassConfig maps onto a YAML configuration for a class type
+type ClassConfig struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	// The configuration map for this class instance. This depends on the
+	// class name and class type, and is interpreted by each module generator.
+	Config map[string]interface{} `yaml:"config" json:"config"`
 }
 
 // NewClassConfig unmarshals raw bytes into a ClassConfig struct
