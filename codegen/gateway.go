@@ -235,17 +235,17 @@ type EndpointSpec struct {
 	GoPackageName string `yaml:"-"`
 
 	// EndpointType, currently only "http"
-	EndpointType string `yaml:"endpointType"`
+	EndpointType string `yaml:"endpointType" validate:"nonzero"`
 	// EndpointID, used in metrics and logging, lower case.
-	EndpointID string `yaml:"endpointId"`
+	EndpointID string `yaml:"endpointId" validate:"nonzero"`
 	// HandleID, used in metrics and logging, lowercase.
-	HandleID string `yaml:"handleId"`
+	HandleID string `yaml:"handleId" validate:"nonzero"`
 	// ThriftFile, the thrift file for this endpoint
-	ThriftFile string `yaml:"thriftFile"`
+	ThriftFile string `yaml:"thriftFile" validate:"nonzero"`
 	// ThriftFileSha, the SHA of the thrift file for this endpoint
-	ThriftFileSha string `yaml:"thriftFileSha"`
+	ThriftFileSha string `yaml:"thriftFileSha" validate:"nonzero"`
 	// ThriftMethodName, which thrift method to use.
-	ThriftMethodName string `yaml:"thriftMethodName"`
+	ThriftMethodName string `yaml:"thriftMethodName" validate:"nonzero"`
 	// ThriftServiceName, which thrift service to use.
 	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
@@ -272,7 +272,7 @@ type EndpointSpec struct {
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
-	WorkflowType string `yaml:"workflowType"`
+	WorkflowType string `yaml:"workflowType" validate:"nonzero"`
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string `yaml:"workflowImportPath"`
 	// if "httpClient", which client to call.
