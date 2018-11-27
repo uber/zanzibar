@@ -40,8 +40,9 @@ const (
 )
 
 type mockableClient struct {
-	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    Dependencies `yaml:"dependencies" json:"dependencies"`
+	Config          *struct {
 		Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 		CustomImportPath string   `yaml:"customImportPath" json:"customImportPath"`
 	} `yaml:"config" json:"config" validate:"nonzero"`

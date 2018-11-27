@@ -102,9 +102,8 @@ type ClientSpec struct {
 // ModuleClassConfig represents the generic YAML config for
 // all modules. This will be provided by the module package.
 type ModuleClassConfig struct {
-	Name   string      `yaml:"name" json:"name"`
-	Type   string      `yaml:"type" json:"type"`
-	Config interface{} `yaml:"config" json:"config"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Config          interface{} `yaml:"config" json:"config"`
 }
 
 // Dependencies lists all dependencies of a module
@@ -121,9 +120,9 @@ type MiddlewareConfigConfig struct {
 
 // MiddlewareConfig represents configuration for a middleware as is written in the yaml file
 type MiddlewareConfig struct {
-	Name         string                  `yaml:"name" json:"name"`
-	Dependencies *Dependencies           `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
-	Config       *MiddlewareConfigConfig `yaml:"config" json:"config"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    *Dependencies           `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Config          *MiddlewareConfigConfig `yaml:"config" json:"config"`
 }
 
 // Validate the config spec attributes
@@ -876,14 +875,18 @@ func (e *EndpointSpec) SetDownstream(
 	return e.ModuleSpec.SetDownstream(e, h)
 }
 
+// EndpointConfig represent the "config" field of endpoint-config.yaml
+type EndpointConfig struct {
+	Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
+	Endpoints []string `yaml:"endpoints" json:"endpoints"`
+}
+
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
 type EndpointClassConfig struct {
 	ClassConfigBase `yaml:",inline" json:",inline"`
-	Config          struct {
-		Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
-		Endpoints []string `yaml:"endpoints" json:"endpoints"`
-	} `yaml:"config" json:"config" validate:"nonzero"`
+	Dependencies    map[string][]string `yaml:"dependencies" json:"dependencies"`
+	Config          *EndpointConfig     `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func parseEndpointYamls(
@@ -974,7 +977,7 @@ func parseMiddlewareConfig(
 		err = mid.Validate(configDirName)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot validate middleware: %s",
+				err, "Cannot validate middleware: %v",
 				mid,
 			)
 		}

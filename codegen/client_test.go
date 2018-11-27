@@ -270,12 +270,12 @@ config:
 func TestNewClientConfigGetHTTPClient(t *testing.T) {
 	client, err := newClientConfig([]byte(httpClientYAML))
 	expectedClient := HTTPClientConfig{
-		ClientConfigBase: ClientConfigBase{
+		ClassConfigBase: ClassConfigBase{
 			Name: "test",
 			Type: "http",
-			Dependencies: Dependencies{
-				Client: []string{"a", "b"},
-			},
+		},
+		Dependencies: Dependencies{
+			Client: []string{"a", "b"},
 		},
 		Config: &ClientThriftConfig{
 			ExposedMethods: map[string]string{
@@ -299,12 +299,12 @@ func TestNewClientConfigGetHTTPClient(t *testing.T) {
 func TestNewClientConfigGetTChannelClient(t *testing.T) {
 	client, err := newClientConfig([]byte(tchannelClientYAML))
 	expectedClient := TChannelClientConfig{
-		ClientConfigBase: ClientConfigBase{
+		ClassConfigBase: ClassConfigBase{
 			Name: "test",
 			Type: "tchannel",
-			Dependencies: Dependencies{
-				Client: []string{"a", "b"},
-			},
+		},
+		Dependencies: Dependencies{
+			Client: []string{"a", "b"},
 		},
 		Config: &ClientThriftConfig{
 			ExposedMethods: map[string]string{
@@ -328,12 +328,12 @@ func TestNewClientConfigGetTChannelClient(t *testing.T) {
 func TestNewClientConfigGetCustomClient(t *testing.T) {
 	client, err := newClientConfig([]byte(customClientYAML))
 	expectedClient := CustomClientConfig{
-		ClientConfigBase: ClientConfigBase{
+		ClassConfigBase: ClassConfigBase{
 			Name: "test",
 			Type: "custom",
-			Dependencies: Dependencies{
-				Client: []string{"a", "b"},
-			},
+		},
+		Dependencies: Dependencies{
+			Client: []string{"a", "b"},
 		},
 		Config: &struct {
 			Fixture          *Fixture `yaml:"fixture" json:"fixture"`
@@ -484,7 +484,7 @@ config:
 	client, err := newMockableClient([]byte(configYAML))
 	assert.NoError(t, err)
 	expectedClient := &mockableClient{
-		ClientConfigBase: ClientConfigBase{
+		ClassConfigBase: ClassConfigBase{
 			Name: "test",
 			Type: "testable",
 		},
