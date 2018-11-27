@@ -223,16 +223,16 @@ type TypedHeader struct {
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
 	// ModuleSpec holds the thrift module info
-	ModuleSpec *ModuleSpec
+	ModuleSpec *ModuleSpec `yaml:"-"`
 	// YAMLFile for this endpoint spec
-	YAMLFile string
+	YAMLFile string `yaml:"-"`
 	// GoStructsFileName is where structs are generated
-	GoStructsFileName string
+	GoStructsFileName string `yaml:"-"`
 	// GoFolderName is the folder where all the endpoints
 	// are generated.
-	GoFolderName string
+	GoFolderName string `yaml:"-"`
 	// GoPackageName is the package import path.
-	GoPackageName string
+	GoPackageName string `yaml:"-"`
 
 	// EndpointType, currently only "http"
 	EndpointType string `yaml:"endpointType"`
@@ -242,27 +242,29 @@ type EndpointSpec struct {
 	HandleID string `yaml:"handleId"`
 	// ThriftFile, the thrift file for this endpoint
 	ThriftFile string `yaml:"thriftFile"`
+	// ThriftFileSha, the SHA of the thrift file for this endpoint
+	ThriftFileSha string `yaml:"thriftFileSha"`
 	// ThriftMethodName, which thrift method to use.
 	ThriftMethodName string `yaml:"thriftMethodName"`
 	// ThriftServiceName, which thrift service to use.
-	ThriftServiceName string
+	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
 	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures"`
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec `yaml:"middlewares"`
 	// HeadersPropagate, a map from endpoint request headers to
 	// client request fields.
-	HeadersPropagate map[string]FieldMapperEntry
+	HeadersPropagate map[string]FieldMapperEntry `yaml:"-"`
 	// ReqTransforms, a map from client request fields to endpoint
 	// request fields that should override their values.
-	ReqTransforms map[string]FieldMapperEntry
+	ReqTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
-	RespTransforms map[string]FieldMapperEntry
+	RespTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ErrTransforms is a map from endpoint exception fields to client exception fields
 	// that should override their values
 	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
-	ErrTransforms map[string]FieldMapperEntry
+	ErrTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ReqHeaders maps headers from server to client
 	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap"`
 	// ResHeaders maps headers from client to server
@@ -278,7 +280,7 @@ type EndpointSpec struct {
 	// if "httpClient", which client method to call.
 	ClientMethod string `yaml:"clientMethod"`
 	// The client for this endpoint if httpClient or tchannelClient
-	ClientSpec *ClientSpec
+	ClientSpec *ClientSpec `yaml:"-"`
 }
 
 func ensureFields(config map[interface{}]interface{}, mandatoryFields []string, yamlFile string) error {
