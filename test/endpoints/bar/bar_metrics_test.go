@@ -238,10 +238,13 @@ func TestCallMetrics(t *testing.T) {
 		"method":                     "POST",
 		"Request-Header-X-Client-Id": "bar",
 
-		"zone":       "unknown",
-		"service":    "example-gateway",
-		"endpointID": "bar",
-		"handlerID":  "normal",
+		"zone":          "unknown",
+		"service":       "example-gateway",
+		"endpointID":    "bar",
+		"handlerID":     "normal",
+		"regionname":    "san_francisco",
+		"device":        "ios",
+		"deviceversion": "carbon",
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)

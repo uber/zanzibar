@@ -21,6 +21,8 @@
 package app
 
 import (
+	"go.uber.org/zap"
+
 	"context"
 	"github.com/uber/zanzibar/runtime"
 )
@@ -28,11 +30,20 @@ import (
 // AppOptions defines the custom application func
 var AppOptions = &zanzibar.Options{
 	GetContextScopeExtractors: getContextScopeTagExtractors,
+	GetContextFieldExtractors: getContextLogFieldExtractors,
 }
 
 func getContextScopeTagExtractors() []zanzibar.ContextScopeTagsExtractor {
 	extractors := []zanzibar.ContextScopeTagsExtractor{
 		getRequestTags,
+	}
+
+	return extractors
+}
+
+func getContextLogFieldExtractors() []zanzibar.ContextLogFieldsExtractor {
+	extractors := []zanzibar.ContextLogFieldsExtractor{
+		getRequestFields,
 	}
 
 	return extractors
@@ -46,4 +57,14 @@ func getRequestTags(ctx context.Context) map[string]string {
 	tags["deviceversion"] = headers["Deviceversion"]
 
 	return tags
+}
+
+func getRequestFields(ctx context.Context) []zap.Field {
+	var fields []zap.Field
+	headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+	fields = append(fields, zap.String("regionname", headers["Regionname"]))
+	fields = append(fields, zap.String("device", headers["Device"]))
+	fields = append(fields, zap.String("deviceversion", headers["Deviceversion"]))
+
+	return fields
 }
