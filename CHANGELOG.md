@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING** All [`metrics`](https://godoc.org/github.com/uber/zanzibar/runtime#call_metrics.go) counter and timer name has been changed and using RootScope instead of AllHostScope and PerHostScope since all parameter at name (e.g. host, env and etc) is already moved to tags.(e.g. fetch name:$service.$env.per-workers.inbound.calls.recvd is changed to fetch name:endpoint.request env:$env service:$service)
 - **BREAKING** Application packages must now export a global variable named `AppOptions` of type [`*zanzibar.Options`](https://godoc.org/github.com/uber/zanzibar/runtime#Options) to be located at package root (the package defined in `build.json`/`build.yaml`). 
 - **BREAKING** `codegen.NewHTTPClientSpec`, `codegen.NewTChannelClientSpec`, `codegen.NewCustomClientSpec` and `codegen.ClientClassConfig` removed ([#515](https://github.com/uber/zanzibar/pull/515)). 
+- **BREAKING** HTTP router [`runtime.HTTPRouter`](https://godoc.org/github.com/uber/zanzibar/runtime#HTTPRouter) method `Register` renamed to `Handle` to better unify with the `net/http` standard library. 
+- **BREAKING** HTTP router type `runtime.HTTPRouter` switched from exposed concrete type to an interface type to allow changing the implementation. 
+- **BREAKING** `ServerHTTPRequest.Params` type changed from `julienschmidt/httprouter.Params` to `url.Values` from the standard library. 
 - Application logs should use the context logger in DefaultDeps. 
 - Added [`ContextExtractor`](https://godoc.org/github.com/uber/zanzibar/runtime#ContextExtractor) interface. It is part of the API for defining "extractors" or functions to pull out dynamic fields like trace ID, request headers, etc. out of the context to be used in log fields and metric tags. These can be used to pull out fields that are application-specific without adding code to zanzibar. 
 - Zanzibar now requires `yq` to be installed, whereas it previously required `jq` to be installed. `yq` is available over [PyPI](https://pypi.org/project/yq/) (`pip install yq`) and homebrew (`brew install python-yq`).  
+- Integrated with [Fx](http://go.uber.org/fx) in the main loop of the generated application. 
 
 ### Deprecated
 - JSON static configuration support is now deprecated. 
