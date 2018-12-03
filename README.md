@@ -23,7 +23,7 @@ ModuleClass | Abstraction
 client | clients to communicate with downstreams, e.g., database clients and RPC clients
 endpoint | application interfaces exposed to upstreams
 middleware | common functionality that has less to do with business logic, e.g., rate limiting middleware
-service | a collection of endponts that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
+service | a collection of endpoints that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
 
 #### Type
 The module `type` differentiates module instances of the same `ModuleClass` with further classification. Types are somewhat arbitrary as they are not necessarily abstractions but indications about how Zanzibar should treat the modules.
@@ -106,7 +106,7 @@ Each module must have a config file so that it can be recognized by Zanzibar. Th
 
  Under a module class directory, there should be a corresponding config directory for each module, e.g., the `clients` directory has a few subdirectories and each of them corresponds to a module.
 
- Under a module directory, there should be a YAML file that contains the meta information of that module. It is required that the file is named of `{$ModuleClass}-config.yaml`, e.g. the path to the YAML config file of `bar` client module is `clients/bar/client-config.yaml`, similarly the path to the YAML config file of `bar` endpoint module is `endpoints/bar/endpont-config.yaml`.
+ Under a module directory, there should be a YAML file that contains the meta information of that module. It is required that the file is named of `{$ModuleClass}-config.yaml`, e.g. the path to the YAML config file of `bar` client module is `clients/bar/client-config.yaml`, similarly the path to the YAML config file of `bar` endpoint module is `endpoints/bar/endpoint-config.yaml`.
 
 ##### Non-Config Content
 Besides the YAML config file, the module directory also contains other necessary directories/files. For example, the [quux](https://github.com/uber/zanzibar/tree/master/examples/example-gateway/clients/quux) client is a custom (non-generated) client, its module config directory has following layout:
