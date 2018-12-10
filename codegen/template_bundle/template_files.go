@@ -1241,6 +1241,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/fx"
+	_ "go.uber.org/automaxprocs"
 
 	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
@@ -1340,7 +1341,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1893, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1923, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
