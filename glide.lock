@@ -1,5 +1,5 @@
-hash: 5bc390ca2677f02ccd0e07e337e2e0b4be3ca21d3f2d60cf4f4d5967ff666c3c
-updated: 2018-11-15T13:55:27.615724786-08:00
+hash: 2ef9d4400fc171f6d522d6b205a20ef840883920335b4c6f1a2e9d5f2cb18883
+updated: 2018-12-10T11:56:28.577474246-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 8a44ef6e8be577e050008c7886f24fc705d709fb
+  version: 51421b967af1f557f93a59e0057aaf15ca02e29c
   subpackages:
   - gomock
   - mockgen/model
@@ -39,7 +39,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 60711f1a8329503b04e1c88535f419d0bb440bff
+  version: d5012789d6659eeed305f54c1b1542e7b65829e6
   subpackages:
   - bootstrap
   - buffer
@@ -73,6 +73,7 @@ imports:
   subpackages:
   - assert
   - require
+  - suite
 - name: github.com/uber-go/atomic
   version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
 - name: github.com/uber-go/tally
@@ -113,10 +114,23 @@ imports:
   version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+- name: go.uber.org/automaxprocs
+  version: 946a8391268aea0a60a86403988ff3ab4b604a83
+  subpackages:
+  - internal/cgroups
+  - internal/runtime
+  - maxprocs
 - name: go.uber.org/dig
   version: 12c8adaa5e6a24ad02198588082d95582ee16e5b
+  subpackages:
+  - internal/digreflect
+  - internal/dot
 - name: go.uber.org/fx
   version: 9c82e1daccdcbd27387a1f044bd3dc6d3f878bf4
+  subpackages:
+  - internal/fxlog
+  - internal/fxreflect
+  - internal/lifecycle
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
@@ -154,17 +168,17 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: adae6a3d119ae4890b46832a2e88a95adc62b8e7
+  version: 610586996380ceef02dd726cc09df7e00a3f8e56
   subpackages:
   - context
 - name: golang.org/x/tools
-  version: f87c222f148786695d2ee5761b06751bb9211f61
+  version: ded554d0681e0cba3cf074977cdc12e2c0906fe6
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
   version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: honnef.co/go/tools
   version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
   subpackages:

@@ -68,6 +68,8 @@ import:
 - package: gopkg.in/validator.v2
   version: master
 - package: go.uber.org/fx
+- package: go.uber.org/automaxprocs
+  version: ^1.2.0
 
 # Transitive dependency of fx
 - package: go.uber.org/dig
