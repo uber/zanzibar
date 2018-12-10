@@ -38,6 +38,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // AddCredentials mocks base method
 func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string, arg2 *googlenow.GoogleNowService_AddCredentials_Args) (map[string]string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddCredentials", arg0, arg1, arg2)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
@@ -46,11 +47,13 @@ func (m *MockClient) AddCredentials(arg0 context.Context, arg1 map[string]string
 
 // AddCredentials indicates an expected call of AddCredentials
 func (mr *MockClientMockRecorder) AddCredentials(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddCredentials", reflect.TypeOf((*MockClient)(nil).AddCredentials), arg0, arg1, arg2)
 }
 
 // CheckCredentials mocks base method
 func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]string) (map[string]string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckCredentials", arg0, arg1)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
@@ -59,11 +62,13 @@ func (m *MockClient) CheckCredentials(arg0 context.Context, arg1 map[string]stri
 
 // CheckCredentials indicates an expected call of CheckCredentials
 func (mr *MockClientMockRecorder) CheckCredentials(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCredentials", reflect.TypeOf((*MockClient)(nil).CheckCredentials), arg0, arg1)
 }
 
 // HTTPClient mocks base method
 func (m *MockClient) HTTPClient() *runtime.HTTPClient {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
 	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
@@ -71,5 +76,6 @@ func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 
 // HTTPClient indicates an expected call of HTTPClient
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))
 }
