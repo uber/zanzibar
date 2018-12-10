@@ -88,7 +88,7 @@ func (h *{{$handlerName}}) Handle(
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.Deps.Default.ContextLogger.Error(
 				ctx,
-				"endpoint panic",
+				"Endpoint failure: endpoint panic",
 				zap.Error(e),
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
@@ -115,7 +115,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Error(ctx, "Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -151,7 +151,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
@@ -164,7 +164,7 @@ func (h *{{$handlerName}}) Handle(
 					if v == nil {
 						h.Deps.Default.ContextLogger.Error(
 							ctx,
-							"Handler returned non-nil error type *{{.Type}} but nil value",
+							"Endpoint failure: handler returned non-nil error type *{{.Type}} but nil value",
 							zap.Error(err),
 						)
 						return false, nil, resHeaders, errors.Errorf(
@@ -175,7 +175,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
+					h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,

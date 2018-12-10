@@ -83,7 +83,7 @@ func (h *BarArgWithHeadersHandler) HandleRequest(
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.Dependencies.Default.ContextLogger.Error(
 				ctx,
-				"endpoint panic",
+				"Endpoint failure: endpoint panic",
 				zap.Error(e),
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))

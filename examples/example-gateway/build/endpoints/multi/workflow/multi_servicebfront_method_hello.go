@@ -81,7 +81,7 @@ func (w serviceBFrontHelloWorkflow) Handle(
 		switch errValue := err.(type) {
 
 		default:
-			w.Logger.Warn("Could not make client request",
+			w.Logger.Warn("Client failure: could not make client request",
 				zap.Error(errValue),
 				zap.String("client", "Multi"),
 			)

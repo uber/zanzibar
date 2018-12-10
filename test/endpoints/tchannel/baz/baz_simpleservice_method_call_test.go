@@ -202,7 +202,7 @@ func TestCallTChannelTimeout(t *testing.T) {
 			"SimpleService::Call": "Call",
 		},
 		LogWhitelist: map[string]bool{
-			"Handler returned error": true,
+			"Endpoint failure: handler returned error": true,
 		},
 	})
 	if !assert.NoError(t, err, "got bootstrap err") {
@@ -259,10 +259,10 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.Len(t, gateway.Logs("warn", "Failed to send outgoing client TChannel request"), 1)
 
 	// logged from generated client
-	assert.Len(t, gateway.Logs("warn", "TChannel client call returned error"), 1)
+	assert.Len(t, gateway.Logs("warn", "Client failure: TChannel client call returned error"), 1)
 
 	// logged from generated endpoint
-	assert.Len(t, gateway.Logs("error", "Handler returned error"), 1)
+	assert.Len(t, gateway.Logs("error", "Endpoint failure: handler returned error"), 1)
 
 	// logged from tchannel server runtime
 	assert.Len(t, gateway.Logs("warn", "Failed to serve incoming TChannel request"), 1)
