@@ -325,7 +325,7 @@ func (h *{{$handlerName}}) HandleRequest(
 			e := errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.Dependencies.Default.ContextLogger.Error(
 				ctx,
-				"endpoint panic",
+				"Endpoint failure: endpoint panic",
 				zap.Error(e),
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointName))
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6994, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7012, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2250,7 +2250,7 @@ type {{$clientName}} struct {
 			}
 		}
 		if err != nil {
-			logger.Warn("TChannel client call returned error", zap.Error(err))
+			logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		{{if eq .ResponseType "" -}}
 			return nil, err
 		{{else -}}
@@ -2263,7 +2263,7 @@ type {{$clientName}} struct {
 		{{else -}}
 			resp, err = {{.GenCodePkgName}}.{{title $svc.Name}}_{{title .Name}}_Helper.UnwrapResponse(&result)
 			if err != nil {
-				logger.Warn("Unable to unwrap client response", zap.Error(err))
+				logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 			}
 			return resp, respHeaders, err
 		{{end -}}
@@ -2283,7 +2283,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6287, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6319, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2497,7 +2497,7 @@ func (h *{{$handlerName}}) Handle(
 			e = errors.Errorf("enpoint panic: %v, stacktrace: %v", r, stacktrace)
 			h.Deps.Default.ContextLogger.Error(
 				ctx,
-				"endpoint panic",
+				"Endpoint failure: endpoint panic",
 				zap.Error(e),
 				zap.String("stacktrace", stacktrace),
 				zap.String("endpoint", h.endpoint.EndpointID))
@@ -2524,7 +2524,7 @@ func (h *{{$handlerName}}) Handle(
 	{{if ne .RequestType "" -}}
 	var req {{unref .RequestType}}
 	if err := req.FromWire(*wireValue); err != nil {
-		h.Deps.Default.ContextLogger.Error(ctx, "Error converting request from wire", zap.Error(err))
+		h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: error converting request from wire", zap.Error(err))
 		return false, nil, nil, errors.Wrapf(
 			err, "Error converting %s.%s (%s) request from wire",
 			h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2560,7 +2560,7 @@ func (h *{{$handlerName}}) Handle(
 
 	{{if eq (len .Exceptions) 0 -}}
 		if err != nil {
-			h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
+			h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 			return false, nil, resHeaders, err
 		}
 		res.Success = {{.RefResponse "r"}}
@@ -2573,7 +2573,7 @@ func (h *{{$handlerName}}) Handle(
 					if v == nil {
 						h.Deps.Default.ContextLogger.Error(
 							ctx,
-							"Handler returned non-nil error type *{{.Type}} but nil value",
+							"Endpoint failure: handler returned non-nil error type *{{.Type}} but nil value",
 							zap.Error(err),
 						)
 						return false, nil, resHeaders, errors.Errorf(
@@ -2584,7 +2584,7 @@ func (h *{{$handlerName}}) Handle(
 					res.{{title .Name}} = v
 			{{end -}}
 				default:
-					h.Deps.Default.ContextLogger.Error(ctx, "Handler returned error", zap.Error(err))
+					h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 					return false, nil, resHeaders, errors.Wrapf(
 						err, "%s.%s (%s) handler returned error",
 						h.endpoint.EndpointID, h.endpoint.HandlerID, h.endpoint.Method,
@@ -2680,7 +2680,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8159, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8249, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2872,7 +2872,7 @@ func (w {{$workflowStruct}}) Handle(
 				{{end}}
 			{{end}}
 			default:
-				w.Logger.Warn("Could not make client request",
+				w.Logger.Warn("Client failure: could not make client request",
 					zap.Error(errValue),
 					zap.String("client", "{{$clientName}}"),
 				)
@@ -2952,7 +2952,7 @@ func workflowTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow.tmpl", size: 7462, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow.tmpl", size: 7478, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -140,13 +140,13 @@ func (c *corgeClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsCorgeCorge.Corge_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }

@@ -295,13 +295,13 @@ func (c *bazClient) EchoBinary(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoBinary_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -332,13 +332,13 @@ func (c *bazClient) EchoBool(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoBool_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -369,13 +369,13 @@ func (c *bazClient) EchoDouble(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoDouble_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -406,13 +406,13 @@ func (c *bazClient) EchoEnum(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoEnum_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -443,13 +443,13 @@ func (c *bazClient) EchoI16(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI16_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -480,13 +480,13 @@ func (c *bazClient) EchoI32(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI32_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -517,13 +517,13 @@ func (c *bazClient) EchoI64(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI64_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -554,13 +554,13 @@ func (c *bazClient) EchoI8(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoI8_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -591,13 +591,13 @@ func (c *bazClient) EchoString(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoString_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -628,13 +628,13 @@ func (c *bazClient) EchoStringList(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -665,13 +665,13 @@ func (c *bazClient) EchoStringMap(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringMap_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -702,13 +702,13 @@ func (c *bazClient) EchoStringSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStringSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -739,13 +739,13 @@ func (c *bazClient) EchoStructList(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructList_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -776,13 +776,13 @@ func (c *bazClient) EchoStructSet(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoStructSet_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -813,13 +813,13 @@ func (c *bazClient) EchoTypedef(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SecondService_EchoTypedef_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -851,7 +851,7 @@ func (c *bazClient) Call(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 
@@ -888,13 +888,13 @@ func (c *bazClient) Compare(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Compare_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -927,13 +927,13 @@ func (c *bazClient) GetProfile(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_GetProfile_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -968,13 +968,13 @@ func (c *bazClient) HeaderSchema(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_HeaderSchema_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1005,13 +1005,13 @@ func (c *bazClient) Ping(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Ping_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1045,7 +1045,7 @@ func (c *bazClient) DeliberateDiffNoop(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 
@@ -1077,7 +1077,7 @@ func (c *bazClient) TestUUID(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 
@@ -1114,13 +1114,13 @@ func (c *bazClient) Trans(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_Trans_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1155,13 +1155,13 @@ func (c *bazClient) TransHeaders(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_TransHeaders_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1194,13 +1194,13 @@ func (c *bazClient) TransHeadersNoReq(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_TransHeadersNoReq_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1235,13 +1235,13 @@ func (c *bazClient) TransHeadersType(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return resp, nil, err
 	}
 
 	resp, err = clientsBazBaz.SimpleService_TransHeadersType_Helper.UnwrapResponse(&result)
 	if err != nil {
-		logger.Warn("Unable to unwrap client response", zap.Error(err))
+		logger.Warn("Client failure: unable to unwrap client response", zap.Error(err))
 	}
 	return resp, respHeaders, err
 }
@@ -1271,7 +1271,7 @@ func (c *bazClient) URLTest(
 		}
 	}
 	if err != nil {
-		logger.Warn("TChannel client call returned error", zap.Error(err))
+		logger.Warn("Client failure: TChannel client call returned error", zap.Error(err))
 		return nil, err
 	}
 

@@ -363,7 +363,7 @@ func TestAddCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	logLines := gateway.Logs("warn", "Could not make client request")
+	logLines := gateway.Logs("warn", "Client failure: could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
@@ -593,7 +593,7 @@ func TestCheckCredentialsBackendDown(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	logLines := gateway.Logs("warn", "Could not make client request")
+	logLines := gateway.Logs("warn", "Client failure: could not make client request")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))
