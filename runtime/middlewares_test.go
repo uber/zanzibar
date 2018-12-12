@@ -68,13 +68,18 @@ func TestHandlers(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
+
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			middlewareStack.Handle,
 		).HandleRequest),
@@ -156,14 +161,18 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			middlewareStack.Handle,
 		).HandleRequest),
@@ -214,13 +223,18 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
 
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
+
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			middlewareStack.Handle,
 		).HandleRequest),
@@ -275,14 +289,18 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo",
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			middlewareStack.Handle,
 		).HandleRequest),

@@ -53,7 +53,7 @@ func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandle
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
-		deps.Default.ContextExtractor, deps.Default.Scope, deps.Default.Logger, deps.Default.Tracer,
+		deps.Default.ContextExtractor, deps.Default,
 		"bar", "argNotStruct",
 		handler.HandleRequest,
 	)
