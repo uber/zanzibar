@@ -91,9 +91,7 @@ type RouterEndpoint struct {
 // NewRouterEndpoint creates an endpoint that can be registered to HTTPRouter
 func NewRouterEndpoint(
 	extractor ContextExtractor,
-	scope tally.Scope,
-	logger *zap.Logger,
-	tracer opentracing.Tracer,
+	deps *DefaultDependencies,
 	endpointID string,
 	handlerID string,
 	handler HandlerFn,
@@ -103,9 +101,9 @@ func NewRouterEndpoint(
 		HandlerName:      handlerID,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
-		logger:           logger,
-		scope:            scope,
-		tracer:           tracer,
+		logger:           deps.Logger,
+		scope:            deps.Scope,
+		tracer:           deps.Tracer,
 	}
 }
 
@@ -142,13 +140,20 @@ var _ HTTPRouter = (*httpRouter)(nil)
 
 // NewHTTPRouter allocates a HTTP router
 func NewHTTPRouter(gateway *Gateway) HTTPRouter {
+	deps := &DefaultDependencies{
+		Logger:        gateway.Logger,
+		ContextLogger: gateway.ContextLogger,
+		Scope:         gateway.RootScope,
+		Tracer:        gateway.Tracer,
+	}
+
 	router := &httpRouter{
 		notFoundEndpoint: NewRouterEndpoint(
-			gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
+			gateway.ContextExtractor, deps,
 			notFound, notFound, nil,
 		),
 		methodNotAllowedEndpoint: NewRouterEndpoint(
-			gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
+			gateway.ContextExtractor, deps,
 			methodNotAllowed, methodNotAllowed, nil,
 		),
 		gateway:    gateway,

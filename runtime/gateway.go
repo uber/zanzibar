@@ -273,8 +273,15 @@ func (gateway *Gateway) registerPredefined() {
 	gateway.HTTPRouter.Handle("GET", "/debug/loglevel", gateway.atomLevel)
 	gateway.HTTPRouter.Handle("PUT", "/debug/loglevel", gateway.atomLevel)
 
+	deps := &DefaultDependencies{
+		Scope:         gateway.RootScope,
+		ContextLogger: gateway.ContextLogger,
+		Logger:        gateway.Logger,
+		Tracer:        gateway.Tracer,
+	}
+
 	tracer := NewRouterEndpoint(
-		gateway.ContextExtractor, gateway.RootScope, gateway.Logger, gateway.Tracer,
+		gateway.ContextExtractor, deps,
 		"health", "health",
 		gateway.handleHealthRequest,
 	)

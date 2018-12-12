@@ -60,11 +60,15 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	endpoint := zanzibar.NewRouterEndpoint(
 		bgateway.ActualGateway.ContextExtractor,
-		bgateway.ActualGateway.RootScope,
-		bgateway.ActualGateway.Logger,
-		bgateway.ActualGateway.Tracer,
+		deps,
 		"foo", "foo",
 		func(
 			ctx context.Context,
@@ -122,12 +126,16 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -184,12 +192,16 @@ func TestFailingGetQueryBool(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -243,12 +255,16 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -302,12 +318,16 @@ func TestFailingHasQueryValue(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -361,12 +381,16 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -420,12 +444,16 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -479,12 +507,16 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -538,12 +570,16 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -597,12 +633,16 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -649,12 +689,16 @@ func TestGetQueryBoolList(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -683,12 +727,16 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -742,12 +790,16 @@ func TestGetQueryInt8List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -776,12 +828,16 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -835,12 +891,16 @@ func TestGetQueryInt16List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -869,12 +929,16 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -928,12 +992,16 @@ func TestGetQueryInt32List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -962,12 +1030,16 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1021,12 +1093,16 @@ func TestGetQueryInt64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1055,12 +1131,16 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1114,12 +1194,16 @@ func TestGetQueryFloat64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1148,12 +1232,16 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1207,12 +1295,16 @@ func TestFailingGetQueryValues(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1254,12 +1346,16 @@ func TestGetQueryValues(t *testing.T) {
 	defer ms.Stop()
 
 	g := ms.Server()
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         g.RootScope,
+		Logger:        g.Logger,
+		ContextLogger: g.ContextLogger,
+		Tracer:        g.Tracer,
+	}
 	err := g.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
-			g.RootScope,
-			g.Logger,
-			g.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1317,12 +1413,16 @@ func TestPeekBody(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1370,12 +1470,16 @@ func TestSpanCreated(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
@@ -1410,12 +1514,16 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	defer gateway.Close()
 
 	bgateway := gateway.(*benchGateway.BenchGateway)
+	deps := &zanzibar.DefaultDependencies{
+		Scope:         bgateway.ActualGateway.RootScope,
+		Logger:        bgateway.ActualGateway.Logger,
+		ContextLogger: bgateway.ActualGateway.ContextLogger,
+		Tracer:        bgateway.ActualGateway.Tracer,
+	}
 	bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
-			bgateway.ActualGateway.RootScope,
-			bgateway.ActualGateway.Logger,
-			bgateway.ActualGateway.Tracer,
+			deps,
 			"foo", "foo",
 			func(
 				ctx context.Context,
