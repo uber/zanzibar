@@ -1,5 +1,5 @@
-hash: f4bf31dd8050f17d392d867d0573ebceb54ed6e3f05caa1191bc626ff2a0e8bd
-updated: 2018-12-13T14:33:16.988318951-08:00
+hash: c6d30588fe00e1e6d79e8c16aaaa9f31d60c1e98d9a07b8bd44cf5eddf93ba92
+updated: 2018-12-13T15:24:04.037541-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -12,30 +12,26 @@ imports:
 - name: github.com/codahale/hdrhistogram
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
   - spew
 - name: github.com/fatih/structtag
   version: 76ae1d6d2117609598c7d4e8f3e938145f204e8f
-- name: github.com/go-validator/validator
-  version: 3e4f037f12a1221a0864cf0dd2e81c452ab22448
-- name: github.com/go-yaml/yaml
-  version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: bcfe3c1f21d5271939479786888af1338fa1b25c
+  version: 51421b967af1f557f93a59e0057aaf15ca02e29c
   subpackages:
   - gomock
   - mockgen/model
 - name: github.com/google/uuid
-  version: 16ca3eab7d2086fd5a82993a291cbf3b87fe38b7
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/jessevdk/go-flags
-  version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
+  version: 5de817a9aa209ed35a164cb04aec82b7df1a47a6
 - name: github.com/jteeuwen/go-bindata
   version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
 - name: github.com/julienschmidt/httprouter
   version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
-  version: c2c54e542fb797ad986b31721e1baedf214ca413
+  version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/kisielk/errcheck
   version: 1787c4bee836470bf45018cfbc783650db3c6501
 - name: github.com/kisielk/gotool
@@ -54,7 +50,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/opentracing/opentracing-go
-  version: 6edb48674bd9467b8e91fda004f2bd7202d60ce4
+  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
   subpackages:
   - ext
   - log
@@ -67,17 +63,17 @@ imports:
   subpackages:
   - difflib
 - name: github.com/sergi/go-diff
-  version: feef008d51ad2b3778f85d387ccf91735543008d
+  version: 1744e2970ca51c86172c8190fadad617561ed6e7
   subpackages:
   - diffmatchpatch
 - name: github.com/stretchr/testify
-  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
   subpackages:
   - assert
   - require
   - suite
 - name: github.com/uber-go/atomic
-  version: e682c1008ac17bf26d2e4b5ad6cdd08520ed0b22
+  version: 8dc6146f7569370a472715e178d8ae31172ee6da
 - name: github.com/uber-go/tally
   version: ff17f3c43c065c3c2991f571e740eee43ea3a14a
   subpackages:
@@ -86,17 +82,24 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: d021e646f5187d77b55592c3efee1a2810e895d7
+  version: 1a782e2da844727691fef1757c72eb190c2909f0
   subpackages:
   - config
+  - internal/baggage
+  - internal/baggage/remote
   - internal/spanlog
+  - internal/throttler
+  - internal/throttler/remote
   - log
   - rpcmetrics
   - testutils
+  - thrift
   - thrift-gen/agent
+  - thrift-gen/baggage
   - thrift-gen/jaeger
   - thrift-gen/sampling
   - thrift-gen/zipkincore
+  - transport
   - utils
 - name: github.com/uber/jaeger-lib
   version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
@@ -112,8 +115,6 @@ imports:
   - tnet
   - trand
   - typed
-- name: github.com/xeipuuv/gojsonschema
-  version: 3f523f4c14b6e925da10475eb0447c2f28614aac
 - name: go.uber.org/atomic
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
 - name: go.uber.org/automaxprocs
@@ -128,7 +129,7 @@ imports:
   - internal/digreflect
   - internal/dot
 - name: go.uber.org/fx
-  version: 9c82e1daccdcbd27387a1f044bd3dc6d3f878bf4
+  version: cb83d0a13cecaa716150cc48ed1fbd9378dbd3b8
   subpackages:
   - internal/fxlog
   - internal/fxreflect
@@ -170,11 +171,11 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 351d144fa1fc0bd934e2408202be0c29f25e35a0
+  version: 891ebc4b82d6e74f468c533b06f983c7be918a96
   subpackages:
   - context
 - name: golang.org/x/tools
-  version: bcd4e47d02889ebbc25c9f4bf3d27e4124b0bf9d
+  version: fe2443f7b95069e01d0b02159564c1b4d0dfcb5e
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2

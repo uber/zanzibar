@@ -23,6 +23,7 @@ package baz
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,7 +77,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
 
-	numMetrics := 14
+	numMetrics := 10
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -92,6 +93,12 @@ func TestCallMetrics(t *testing.T) {
 	cg.MetricsWaitGroup.Wait()
 
 	metrics := cg.M3Service.GetMetrics()
+	// we don't care about jaeger emitted metrics
+	for key := range metrics {
+		if strings.HasPrefix(key, "jaeger") {
+			delete(metrics, key)
+		}
+	}
 	assert.Equal(t, numMetrics, len(metrics))
 
 	endpointTags := map[string]string{
