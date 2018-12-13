@@ -169,6 +169,9 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "SimpleService", "Echo", reqHeaders, req, res)
+	// hostPort is added above, so there should not be any error returned for the
+	// following line
+	// nolint
 	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }

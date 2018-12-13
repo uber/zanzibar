@@ -2662,6 +2662,9 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	)
 
 	success, respHeaders, err := client.Call(ctx, "{{.ThriftService}}", "{{$methodName}}", reqHeaders, req, res)
+	// hostPort is added above, so there should not be any error returned for the
+	// following line
+	// nolint
 	_ = sub.Peers().Remove(hostPort)
 	return success, res, respHeaders, err
 }
@@ -2680,7 +2683,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8249, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
