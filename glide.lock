@@ -1,0 +1,189 @@
+hash: c6d30588fe00e1e6d79e8c16aaaa9f31d60c1e98d9a07b8bd44cf5eddf93ba92
+updated: 2018-12-13T15:24:04.037541-08:00
+imports:
+- name: github.com/anmitsu/go-shlex
+  version: 648efa622239a2f6ff949fed78ee37b48d499ba4
+- name: github.com/apache/thrift
+  version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
+  subpackages:
+  - lib/go/thrift
+- name: github.com/buger/jsonparser
+  version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
+- name: github.com/codahale/hdrhistogram
+  version: 3a0bb77429bd3a61596f5e8a3172445844342120
+- name: github.com/davecgh/go-spew
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  subpackages:
+  - spew
+- name: github.com/fatih/structtag
+  version: 76ae1d6d2117609598c7d4e8f3e938145f204e8f
+- name: github.com/golang/mock
+  version: 51421b967af1f557f93a59e0057aaf15ca02e29c
+  subpackages:
+  - gomock
+  - mockgen/model
+- name: github.com/google/uuid
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
+- name: github.com/jessevdk/go-flags
+  version: 5de817a9aa209ed35a164cb04aec82b7df1a47a6
+- name: github.com/jteeuwen/go-bindata
+  version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
+- name: github.com/julienschmidt/httprouter
+  version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
+- name: github.com/kardianos/osext
+  version: ae77be60afb1dcacde03767a8c37337fad28ac14
+- name: github.com/kisielk/errcheck
+  version: 1787c4bee836470bf45018cfbc783650db3c6501
+- name: github.com/kisielk/gotool
+  version: 80517062f582ea3340cd4baf70e86d539ae7d84d
+- name: github.com/mailru/easyjson
+  version: 60711f1a8329503b04e1c88535f419d0bb440bff
+  subpackages:
+  - bootstrap
+  - buffer
+  - gen
+  - jlexer
+  - jwriter
+  - parser
+- name: github.com/mcuadros/go-jsonschema-generator
+  version: 821f57ef6082dacf56d3354643f2ef36e06ebf29
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/opentracing/opentracing-go
+  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  subpackages:
+  - ext
+  - log
+- name: github.com/pborman/uuid
+  version: adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/sergi/go-diff
+  version: 1744e2970ca51c86172c8190fadad617561ed6e7
+  subpackages:
+  - diffmatchpatch
+- name: github.com/stretchr/testify
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  subpackages:
+  - assert
+  - require
+  - suite
+- name: github.com/uber-go/atomic
+  version: 8dc6146f7569370a472715e178d8ae31172ee6da
+- name: github.com/uber-go/tally
+  version: ff17f3c43c065c3c2991f571e740eee43ea3a14a
+  subpackages:
+  - m3
+  - m3/customtransports
+  - m3/thrift
+  - m3/thriftudp
+- name: github.com/uber/jaeger-client-go
+  version: 1a782e2da844727691fef1757c72eb190c2909f0
+  subpackages:
+  - config
+  - internal/baggage
+  - internal/baggage/remote
+  - internal/spanlog
+  - internal/throttler
+  - internal/throttler/remote
+  - log
+  - rpcmetrics
+  - testutils
+  - thrift
+  - thrift-gen/agent
+  - thrift-gen/baggage
+  - thrift-gen/jaeger
+  - thrift-gen/sampling
+  - thrift-gen/zipkincore
+  - transport
+  - utils
+- name: github.com/uber/jaeger-lib
+  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
+  subpackages:
+  - metrics
+  - metrics/tally
+- name: github.com/uber/tchannel-go
+  version: 0b7f160817553b0bacb5b108dd84a5022dbdd1c4
+  subpackages:
+  - internal/argreader
+  - relay
+  - testutils/testreader
+  - tnet
+  - trand
+  - typed
+- name: go.uber.org/atomic
+  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+- name: go.uber.org/automaxprocs
+  version: 946a8391268aea0a60a86403988ff3ab4b604a83
+  subpackages:
+  - internal/cgroups
+  - internal/runtime
+  - maxprocs
+- name: go.uber.org/dig
+  version: 12c8adaa5e6a24ad02198588082d95582ee16e5b
+  subpackages:
+  - internal/digreflect
+  - internal/dot
+- name: go.uber.org/fx
+  version: cb83d0a13cecaa716150cc48ed1fbd9378dbd3b8
+  subpackages:
+  - internal/fxlog
+  - internal/fxreflect
+  - internal/lifecycle
+- name: go.uber.org/multierr
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+- name: go.uber.org/thriftrw
+  version: fb439a9a7f5a388d8606aae1c1ff6654b8b67fbe
+  subpackages:
+  - ast
+  - compile
+  - gen
+  - idl
+  - idl/internal
+  - internal/concurrent
+  - internal/curry
+  - internal/envelope
+  - internal/envelope/exception
+  - internal/frame
+  - internal/goast
+  - internal/multiplex
+  - internal/plugin
+  - internal/process
+  - internal/semver
+  - plugin/api
+  - protocol
+  - protocol/binary
+  - ptr
+  - thriftreflect
+  - version
+  - wire
+- name: go.uber.org/zap
+  version: ff33455a0e382e8a81d14dd7c922020b6b5e7982
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - zapcore
+  - zaptest/observer
+- name: golang.org/x/net
+  version: 891ebc4b82d6e74f468c533b06f983c7be918a96
+  subpackages:
+  - context
+- name: golang.org/x/tools
+  version: fe2443f7b95069e01d0b02159564c1b4d0dfcb5e
+  subpackages:
+  - cmd/goimports
+- name: gopkg.in/validator.v2
+  version: 135c24b11c19e52befcae2ec3fca5d9b78c4e98e
+- name: gopkg.in/yaml.v2
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+- name: honnef.co/go/tools
+  version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
+  subpackages:
+  - cmd/staticcheck
+testImports: []
