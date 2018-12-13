@@ -71,5 +71,9 @@ import:
 - package: go.uber.org/automaxprocs
   version: ^1.2.0
 
+# Build tools / SDKs
+- package: github.com/jteeuwen/go-bindata
+  version: master
+
 # Transitive dependency of fx
 - package: go.uber.org/dig

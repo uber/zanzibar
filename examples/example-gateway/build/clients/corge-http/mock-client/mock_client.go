@@ -38,7 +38,6 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // EchoString mocks base method
 func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, arg2 *corge.Corge_EchoString_Args) (string, map[string]string, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0, arg1, arg2)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(map[string]string)
@@ -48,13 +47,11 @@ func (m *MockClient) EchoString(arg0 context.Context, arg1 map[string]string, ar
 
 // EchoString indicates an expected call of EchoString
 func (mr *MockClientMockRecorder) EchoString(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0, arg1, arg2)
 }
 
 // HTTPClient mocks base method
 func (m *MockClient) HTTPClient() *runtime.HTTPClient {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
 	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
@@ -62,6 +59,5 @@ func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 
 // HTTPClient indicates an expected call of HTTPClient
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))
 }

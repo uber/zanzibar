@@ -1,5 +1,5 @@
-hash: 2ef9d4400fc171f6d522d6b205a20ef840883920335b4c6f1a2e9d5f2cb18883
-updated: 2018-12-10T11:56:28.577474246-08:00
+hash: f4bf31dd8050f17d392d867d0573ebceb54ed6e3f05caa1191bc626ff2a0e8bd
+updated: 2018-12-13T14:33:16.988318951-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
@@ -22,7 +22,7 @@ imports:
 - name: github.com/go-yaml/yaml
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: github.com/golang/mock
-  version: 51421b967af1f557f93a59e0057aaf15ca02e29c
+  version: bcfe3c1f21d5271939479786888af1338fa1b25c
   subpackages:
   - gomock
   - mockgen/model
@@ -30,6 +30,8 @@ imports:
   version: 16ca3eab7d2086fd5a82993a291cbf3b87fe38b7
 - name: github.com/jessevdk/go-flags
   version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
+- name: github.com/jteeuwen/go-bindata
+  version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
 - name: github.com/julienschmidt/httprouter
   version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
@@ -39,7 +41,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: d5012789d6659eeed305f54c1b1542e7b65829e6
+  version: 60711f1a8329503b04e1c88535f419d0bb440bff
   subpackages:
   - bootstrap
   - buffer
@@ -168,11 +170,11 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 610586996380ceef02dd726cc09df7e00a3f8e56
+  version: 351d144fa1fc0bd934e2408202be0c29f25e35a0
   subpackages:
   - context
 - name: golang.org/x/tools
-  version: ded554d0681e0cba3cf074977cdc12e2c0906fe6
+  version: bcd4e47d02889ebbc25c9f4bf3d27e4124b0bf9d
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2

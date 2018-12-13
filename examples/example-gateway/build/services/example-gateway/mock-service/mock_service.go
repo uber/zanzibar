@@ -35,7 +35,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"
 )

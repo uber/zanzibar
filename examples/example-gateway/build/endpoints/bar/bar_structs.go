@@ -26,7 +26,7 @@ package barendpoint
 import (
 	"runtime"
 
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 func getDirName() string {
