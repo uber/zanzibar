@@ -26,7 +26,6 @@ package multiclient
 import (
 	"context"
 	"fmt"
-	"time"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -54,14 +53,21 @@ type multiClient struct {
 
 // NewClient returns a new http client.
 func NewClient(deps *module.Dependencies) Client {
-	ip := deps.Default.Config.MustGetString("clients.multi.ip")
-	port := deps.Default.Config.MustGetInt("clients.multi.port")
-	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.multi.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.multi.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.multi.defaultHeaders", &defaultHeaders)
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
 	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+	err = deps.Default.Config.Get("clients.multi").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
+	ip := clientConfig.IP
+	port := clientConfig.Port
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 
 	return &multiClient{
 		clientID: "multi",
@@ -73,8 +79,8 @@ func NewClient(deps *module.Dependencies) Client {
 				"HelloB",
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }

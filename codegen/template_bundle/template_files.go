@@ -982,31 +982,39 @@ type {{$clientName}} struct {
 
 // {{$exportName}} returns a new http client.
 func {{$exportName}}(deps *module.Dependencies) Client {
+    var callerName string
+    err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
+	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+    err = deps.Default.Config.Get("clients.{{$clientID}}").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.http.port")
-	callerHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.callerHeader")
-	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
-	callerName := deps.Default.Config.MustGetString("serviceName")
-	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.{{$sidecarRouter}}").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http sidecar config: %q", err.Error()))
+	}
+	ip := sidecarConfig.HTTP.IP
+	port := sidecarConfig.HTTP.Port
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := clientConfig.IP
+	port := clientConfig.Port
 	{{end -}}
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
-	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
-		callerHeader: callerHeader,
-		calleeHeader: calleeHeader,
+		callerHeader: sidecarConfig.HTTP.CallerHeader,
+		calleeHeader: sidecarConfig.HTTP.CalleeHeader,
 		callerName: callerName,
-		calleeName: calleeName,
+		calleeName: clientConfig.ServiceName,
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
@@ -1017,8 +1025,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				{{end}}
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }
@@ -1220,7 +1228,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7954, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 7801, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1239,10 +1247,10 @@ import (
 	"syscall"
 
 	"go.uber.org/zap"
+	"go.uber.org/config"
 	"go.uber.org/fx"
 	_ "go.uber.org/automaxprocs"
 
-	"github.com/uber/zanzibar/config"
 	"github.com/uber/zanzibar/runtime"
 
 	app "{{$instance.PackageInfo.PackageRoot}}"
@@ -1252,20 +1260,24 @@ import (
 
 var configFiles *string
 
-func getConfig() *zanzibar.StaticConfig {
-	var files []string
+// TODO(jacobg): Use Fx provider pattern
+func getConfig() (config.Provider, error) {
+    var opts []config.YAMLOption
 
-	if configFiles == nil {
-		files = []string{}
-	} else {
-		files = strings.Split(*configFiles, ";")
+	if configFiles != nil {
+		for _, file := range strings.Split(*configFiles, ";") {
+			opts = append(opts, config.File(file))
+		}
 	}
 
-	return config.NewRuntimeConfigOrDie(files, nil)
+	return config.NewYAML(opts...)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
+	config, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	gateway, _, err := service.CreateGateway(config, app.AppOptions)
 	if err != nil {
@@ -1279,7 +1291,6 @@ func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started {{$instance.InstanceName | pascal}}",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
 	)
 
 	go func(){
@@ -1335,7 +1346,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1795, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1850, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1784,6 +1795,7 @@ import (
 	"runtime"
 
 	"go.uber.org/zap"
+	"go.uber.org/config"
 	"github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
@@ -1795,7 +1807,7 @@ type DependenciesTree module.DependenciesTree
 // CreateGateway creates a new instances of the {{$instance.InstanceName}}
 // service with the specified config
 func CreateGateway(
-	config *zanzibar.StaticConfig,
+	config config.Provider,
 	opts *zanzibar.Options,
 ) (*zanzibar.Gateway, interface{}, error) {
 	gateway, err := zanzibar.CreateGateway(config, opts)
@@ -1838,7 +1850,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1447, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1462, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2080,6 +2092,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
+	"fmt"
 	"errors"
 	"strconv"
 	"strings"
@@ -2124,47 +2137,56 @@ type Client interface {
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func {{$exportName}}(deps *module.Dependencies) Client {
-	{{- /* this is the service discovery service name */}}
-	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	var routingKey string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	var callerName string
+    err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client caller name: %q", err.Error()))
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+
+	clientConfig := new(zanzibar.TChannelClientConfig)
+    err = deps.Default.Config.Get("clients.{{$clientID}}").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client config: %q", err.Error()))
+	}
 
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.{{$sidecarRouter}}").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel sidecar config: %q", err.Error()))
+	}
+	{{end}}
+
+	sc := deps.Default.Channel.GetSubChannel(callerName, tchannel.Isolated)
+
+	{{if $sidecarRouter -}}
+	ip := sidecarConfig.TChannel.IP
+	port := sidecarConfig.TChannel.Port
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := clientConfig.IP
+	port := clientConfig.Port
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	allStagingConfig := new(zanzibar.StagingConfig)
+	_ = deps.Default.Config.Get("clients.staging.all").Populate(&allStagingConfig)
+
 	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
+	if clientConfig.Staging.ServiceName != "" {
+		scAltName = clientConfig.Staging.ServiceName
+		ipAlt := clientConfig.Staging.IP
+		portAlt := clientConfig.Staging.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+	} else if allStagingConfig.ServiceName != "" {
+		scAltName = allStagingConfig.ServiceName
+		ipAlt := allStagingConfig.IP
+		portAlt := allStagingConfig.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
-
-	{{/* TODO: (lu) maybe set these at per method level */ -}}
-	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
-	)
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
-	)
 
 	methodNames := map[string]string{
 		{{range $svc := .Services -}}
@@ -2183,12 +2205,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       clientConfig.ServiceName,
 			ClientID:          "{{$clientID}}",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           clientConfig.Timeout,
+			TimeoutPerAttempt: clientConfig.TimeoutPerAttempt,
+			RoutingKey:        &clientConfig.RoutingKey,
 			AltSubchannelName: scAltName,
 		},
 	)
@@ -2278,7 +2300,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6319, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6048, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2410,6 +2432,8 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"fmt"
+	"strings"
 	"runtime/debug"
 	"time"
 
@@ -2444,8 +2468,15 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
+	tchannelConfig := new(zanzibar.TChannelConfig)
+	err := deps.Default.Config.Get("tchannel").Populate(&tchannelConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel config: %q", err.Error()))
+	}
+
 	handler := &{{$handlerName}}{
 		Deps: deps,
+		tchannelConfig: tchannelConfig,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
@@ -2473,6 +2504,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 type {{$handlerName}} struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
+	tchannelConfig *zanzibar.TChannelConfig
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -2622,37 +2654,23 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	req *{{unref .RequestType}},
 	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var routingKey string
-	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
-		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
-	}
-
-	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
-	timeout := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
-	)
-
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
-	)
-
 	methodNames := map[string]string{
 		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
-	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(h.tchannelConfig.ServiceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       h.tchannelConfig.ServiceName,
 			ClientID:           "{{$clientID}}",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           h.tchannelConfig.Deputy.Timeout,
+			TimeoutPerAttempt: h.tchannelConfig.Deputy.TimeoutPerAttempt,
+			RoutingKey:        &h.tchannelConfig.RoutingKey,
 		},
 	)
 
@@ -2678,7 +2696,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8273, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

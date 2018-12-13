@@ -123,6 +123,8 @@ imports:
   - internal/cgroups
   - internal/runtime
   - maxprocs
+- name: go.uber.org/config
+  version: c9c3d11a88c1a266ced73d92e22e1d36d2bc2ed6
 - name: go.uber.org/dig
   version: 12c8adaa5e6a24ad02198588082d95582ee16e5b
   subpackages:

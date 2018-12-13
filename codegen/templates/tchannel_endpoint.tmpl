@@ -6,6 +6,8 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
+	"fmt"
+	"strings"
 	"runtime/debug"
 	"time"
 
@@ -40,8 +42,15 @@ import (
 {{with .Method -}}
 // New{{$handlerName}} creates a handler to be registered with a thrift server.
 func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
+	tchannelConfig := new(zanzibar.TChannelConfig)
+	err := deps.Default.Config.Get("tchannel").Populate(&tchannelConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel config: %q", err.Error()))
+	}
+
 	handler := &{{$handlerName}}{
 		Deps: deps,
+		tchannelConfig: tchannelConfig,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
@@ -69,6 +78,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 type {{$handlerName}} struct {
 	Deps     *module.Dependencies
 	endpoint *zanzibar.TChannelEndpoint
+	tchannelConfig *zanzibar.TChannelConfig
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -218,37 +228,23 @@ func (h *{{$handlerName}}) redirectToDeputy(
 	req *{{unref .RequestType}},
 	res *{{$genCodePkg}}.{{title .ThriftService}}_{{title .Name}}_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var routingKey string
-	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
-		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
-	}
-
-	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
-	timeout := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
-	)
-
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
-	)
-
 	methodNames := map[string]string{
 		"{{.ThriftService}}::{{.Name}}": "{{$methodName}}",
 	}
 
-	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(h.tchannelConfig.ServiceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       h.tchannelConfig.ServiceName,
 			ClientID:           "{{$clientID}}",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           h.tchannelConfig.Deputy.Timeout,
+			TimeoutPerAttempt: h.tchannelConfig.Deputy.TimeoutPerAttempt,
+			RoutingKey:        &h.tchannelConfig.RoutingKey,
 		},
 	)
 

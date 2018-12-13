@@ -26,7 +26,6 @@ package googlenowclient
 import (
 	"context"
 	"fmt"
-	"time"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -56,14 +55,21 @@ type googleNowClient struct {
 
 // NewClient returns a new http client.
 func NewClient(deps *module.Dependencies) Client {
-	ip := deps.Default.Config.MustGetString("clients.google-now.ip")
-	port := deps.Default.Config.MustGetInt("clients.google-now.port")
-	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.google-now.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.google-now.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.google-now.defaultHeaders", &defaultHeaders)
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
 	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+	err = deps.Default.Config.Get("clients.google-now").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
+	ip := clientConfig.IP
+	port := clientConfig.Port
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 
 	return &googleNowClient{
 		clientID: "google-now",
@@ -75,8 +81,8 @@ func NewClient(deps *module.Dependencies) Client {
 				"CheckCredentials",
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }

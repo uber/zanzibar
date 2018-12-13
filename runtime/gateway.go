@@ -24,7 +24,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -44,6 +43,7 @@ import (
 	"github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/config"
 )
 
 var levelMap = map[string]zapcore.Level{
@@ -83,7 +83,7 @@ type Gateway struct {
 	RootScope        tally.Scope
 	Logger           *zap.Logger
 	ServiceName      string
-	Config           *StaticConfig
+	Config           config.Provider
 	HTTPRouter       HTTPRouter
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
@@ -115,13 +115,19 @@ type DefaultDependencies struct {
 	Logger  *zap.Logger
 	Scope   tally.Scope
 	Tracer  opentracing.Tracer
-	Config  *StaticConfig
+	Config  config.Provider
 	Channel *tchannel.Channel
+}
+
+type subloggerConfig struct{
+	Jaeger string `yaml:"jaeger"`
+	HTTP string `yaml:"http"`
+	TChannel string `yaml:"tchannel"`
 }
 
 // CreateGateway func
 func CreateGateway(
-	config *StaticConfig, opts *Options,
+	config config.Provider, opts *Options,
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
@@ -154,10 +160,19 @@ func CreateGateway(
 		}
 	}
 
+	var (
+		httpPort, tchannelPort int32
+		serviceName string
+	)
+
+	config.Get("http.port").Populate(&httpPort)
+	config.Get("tchannel.port").Populate(&tchannelPort)
+	config.Get("serviceName").Populate(&serviceName)
+
 	gateway := &Gateway{
-		HTTPPort:         int32(config.MustGetInt("http.port")),
-		TChannelPort:     int32(config.MustGetInt("tchannel.port")),
-		ServiceName:      config.MustGetString("serviceName"),
+		HTTPPort:         httpPort,
+		TChannelPort:     tchannelPort,
+		ServiceName:      serviceName,
 		WaitGroup:        &sync.WaitGroup{},
 		Config:           config,
 		ContextExtractor: contextExtractors.MakeContextExtractor(),
@@ -165,30 +180,30 @@ func CreateGateway(
 		metricsBackend:   metricsBackend,
 	}
 
-	gateway.setupConfig(config)
-	config.Freeze()
-
 	// order matters for following setup method calls
-	if err := gateway.setupMetrics(config); err != nil {
+	if err := gateway.setupMetrics(); err != nil {
 		return nil, err
 	}
 
-	if err := gateway.setupLogger(config); err != nil {
+	if err := gateway.setupLogger(); err != nil {
 		return nil, err
 	}
 
-	if err := gateway.setupTracer(config); err != nil {
+	var subloggerCfg *subloggerConfig
+	config.Get("subLoggerLevel").Populate(&subloggerCfg)
+
+	if err := gateway.setupTracer(subloggerCfg); err != nil {
 		return nil, err
 	}
 
 	// setup router after metrics and logs
 	gateway.HTTPRouter = NewHTTPRouter(gateway)
 
-	if err := gateway.setupHTTPServer(); err != nil {
+	if err := gateway.setupHTTPServer(subloggerCfg); err != nil {
 		return nil, err
 	}
 
-	if err := gateway.setupTChannel(config); err != nil {
+	if err := gateway.setupTChannel(subloggerCfg); err != nil {
 		return nil, err
 	}
 
@@ -400,15 +415,15 @@ func (gateway *Gateway) Close() {
 
 // ShutdownTimeout returns the shutdown configured timeout, which default to 10s.
 func (gateway *Gateway) ShutdownTimeout() time.Duration {
-	if gateway.Config.ContainsKey("shutdown.timeout") {
-		return time.Duration(gateway.Config.MustGetInt("shutdown.timeout")) * time.Millisecond
-	}
-	return defaultCloseTimeout
-}
+	var shutdownTimeout time.Duration
 
-// InspectOrDie inspects the config for this gateway
-func (gateway *Gateway) InspectOrDie() map[string]interface{} {
-	return gateway.Config.InspectOrDie()
+	gateway.Config.Get("shutdown.timeout").Populate(&shutdownTimeout)
+
+	if shutdownTimeout == time.Duration(0) {
+		return defaultCloseTimeout
+	}
+
+	return shutdownTimeout
 }
 
 // Wait for gateway to close the server
@@ -416,28 +431,35 @@ func (gateway *Gateway) Wait() {
 	gateway.WaitGroup.Wait()
 }
 
-func (gateway *Gateway) setupConfig(config *StaticConfig) {
-	useDC := config.MustGetBoolean("useDatacenter")
-
-	if useDC {
-		dcFile := config.MustGetString("datacenterFile")
-		bytes, err := ioutil.ReadFile(dcFile)
-		if err != nil {
-			panic("expected datacenterFile: " + dcFile + " to exist")
-		}
-
-		config.SetSeedOrDie("datacenter", string(bytes))
-	} else {
-		config.SetConfigValueOrDie("datacenter", []byte("unknown"), "string")
-	}
+type metricsConfig struct {
+	Type string `yaml:"type"`
+	ServiceName string `yaml:"serviceName"`
+	M3 m3metricsConfig `yaml:"m3"`
+	Runtime metricsRuntimeConfig `yaml:"runtime"`
+	FlushInterval time.Duration `yaml:"flushDuration"`
 }
 
-func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
-	metricsType := config.MustGetString("metrics.type")
-	service := config.MustGetString("metrics.serviceName")
-	env := config.MustGetString("env")
+type m3metricsConfig struct {
+	HostPort string `yaml:"hostPort"`
+	MaxQueueSize int `yaml:"maxQueueSize"`
+	MaxPacketSizeBytes int32 `yaml:"maxPacketSizeBytes"`
+}
 
-	if metricsType == "m3" {
+type metricsRuntimeConfig struct {
+	CollectInterval time.Duration `yaml:"collectInterval"`
+	EnableCPUMetrics bool `yaml:"enableCPUMetrics"`
+	EnableMemMetrics bool `yaml:"enableMemMetrics"`
+	EnableGCMetrics bool `yaml:"enableGCMetrics"`
+}
+
+func (gateway *Gateway) setupMetrics() (err error) {
+	metricsCfg := &metricsConfig{}
+	gateway.Config.Get("metrics").Populate(&metricsCfg)
+	var env, dc string
+	gateway.Config.Get("env").Populate(&env)
+	gateway.Config.Get("datacenter").Populate(&dc)
+
+	if metricsCfg.Type == "m3" {
 		if gateway.metricsBackend != nil {
 			panic("expected no metrics backend in gateway.")
 		}
@@ -446,13 +468,13 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		// NewReporter adds 'env' and 'service' common tags; and no 'host' tag.
 		commonTags := map[string]string{}
 		opts := m3.Options{
-			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
-			Service:            service,
+			HostPorts:          []string{metricsCfg.M3.HostPort},
+			Service:            metricsCfg.ServiceName,
 			Env:                env,
 			CommonTags:         commonTags,
 			IncludeHost:        false,
-			MaxQueueSize:       int(config.MustGetInt("metrics.m3.maxQueueSize")),
-			MaxPacketSizeBytes: int32(config.MustGetInt("metrics.m3.maxPacketSizeBytes")),
+			MaxQueueSize:       metricsCfg.M3.MaxQueueSize,
+			MaxPacketSizeBytes: metricsCfg.M3.MaxPacketSizeBytes,
 		}
 		if gateway.metricsBackend, err = m3.NewReporter(opts); err != nil {
 			return err
@@ -464,13 +486,14 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	// TODO: Remove 'env' and 'service' default tags once they are emitted by metrics backend.
 	defaultTags := map[string]string{
 		"env":     env,
-		"service": service,
+		"service": metricsCfg.ServiceName,
 		"host":    GetHostname(),
-		"dc":      gateway.Config.MustGetString("datacenter"),
+		"dc":      dc,
 	}
+
 	// Adds in any env variable variables specified in config
-	envVarsToTagInRootScope := []string{}
-	config.MustGetStruct("envVarsToTagInRootScope", &envVarsToTagInRootScope)
+	var envVarsToTagInRootScope []string
+	gateway.Config.Get("envVarsToTagInRootScope").Populate(&envVarsToTagInRootScope)
 	for _, envVarName := range envVarsToTagInRootScope {
 		envVarValue := os.Getenv(envVarName)
 		defaultTags[envVarName] = envVarValue
@@ -482,16 +505,16 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 			Separator:       tally.DefaultSeparator,
 			SanitizeOptions: &m3.DefaultSanitizerOpts,
 		},
-		time.Duration(config.MustGetInt("metrics.flushInterval"))*time.Millisecond,
+		metricsCfg.FlushInterval,
 	)
 
 	gateway.ContextMetrics = NewContextMetrics(gateway.RootScope)
 	// start collecting runtime metrics
-	collectInterval := time.Duration(config.MustGetInt("metrics.runtime.collectInterval")) * time.Millisecond
+	collectInterval := metricsCfg.Runtime.CollectInterval
 	runtimeMetricsOpts := RuntimeMetricsOptions{
-		EnableCPUMetrics: config.MustGetBoolean("metrics.runtime.enableCPUMetrics"),
-		EnableMemMetrics: config.MustGetBoolean("metrics.runtime.enableMemMetrics"),
-		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
+		EnableCPUMetrics: metricsCfg.Runtime.EnableCPUMetrics,
+		EnableMemMetrics: metricsCfg.Runtime.EnableMemMetrics,
+		EnableGCMetrics:  metricsCfg.Runtime.EnableGCMetrics,
 		CollectInterval:  collectInterval,
 	}
 	gateway.runtimeMetrics = StartRuntimeMetricsCollector(
@@ -502,7 +525,12 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 	return nil
 }
 
-func (gateway *Gateway) setupLogger(config *StaticConfig) error {
+type loggerConfig struct {
+	FileName string `yaml:"fileName"`
+	Output string `yaml:"output"`
+}
+
+func (gateway *Gateway) setupLogger() error {
 	var output zapcore.WriteSyncer
 	logEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	logLevel := zap.InfoLevel
@@ -514,8 +542,10 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		),
 	)
 
-	loggerFileName := config.MustGetString("logger.fileName")
-	loggerOutput := config.MustGetString("logger.output")
+	var loggerConfig loggerConfig
+	gateway.Config.Get("logger").Populate(&loggerConfig)
+	loggerFileName := loggerConfig.FileName
+	loggerOutput := loggerConfig.Output
 
 	if loggerFileName == "" || loggerOutput == "stdout" {
 		var writer zapcore.WriteSyncer
@@ -551,6 +581,11 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 		}
 	}
 
+	var env, dc, serviceName string
+	gateway.Config.Get("env").Populate(&env)
+	gateway.Config.Get("datacenter").Populate(&dc)
+	gateway.Config.Get("serviceName").Populate(&serviceName)
+
 	atomLevel := zap.NewAtomicLevelAt(logLevel)
 	prodCore := zapcore.NewCore(
 		logEncoder,
@@ -569,10 +604,10 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 
 	// Default to a STDOUT logger
 	gateway.Logger = zapLogger.With(
-		zap.String("zone", gateway.Config.MustGetString("datacenter")),
-		zap.String("env", gateway.Config.MustGetString("env")),
+		zap.String("zone", dc),
+		zap.String("env", env),
 		zap.String("hostname", GetHostname()),
-		zap.String("service", gateway.Config.MustGetString("serviceName")),
+		zap.String("service", serviceName),
 		zap.Int("pid", os.Getpid()),
 	)
 
@@ -600,23 +635,44 @@ func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger 
 	)
 }
 
-func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Configuration {
+type _jaegerConfig struct {
+	Disabled bool `yaml:"disabled"`
+	Reporter struct {
+		HostPort string `yaml:"hostport"`
+		Flush struct {
+			Milliseconds time.Duration `yaml:"milliseconds"`
+		} `yaml:"flush"`
+	} `yaml:"reporter"`
+	Sampler struct {
+		Type string `yaml:"type"`
+		Param float64 `yaml:"param"`
+	} `yaml:"sampler"`
+}
+
+func (gateway *Gateway) initJaegerConfig() *jaegerConfig.Configuration {
+	var serviceName string
+
+	gateway.Config.Get("serviceName").Populate(&serviceName)
+
+	var cfg _jaegerConfig
+	gateway.Config.Get("jaeger").Populate(&cfg)
+
 	return &jaegerConfig.Configuration{
-		ServiceName: config.MustGetString("serviceName"),
-		Disabled:    config.MustGetBoolean("jaeger.disabled"),
+		ServiceName: serviceName,
+		Disabled:    cfg.Disabled,
 		Reporter: &jaegerConfig.ReporterConfig{
-			LocalAgentHostPort:  config.MustGetString("jaeger.reporter.hostport"),
-			BufferFlushInterval: time.Duration(config.MustGetInt("jaeger.reporter.flush.milliseconds")) * time.Millisecond,
+			LocalAgentHostPort:  cfg.Reporter.HostPort,
+			BufferFlushInterval: cfg.Reporter.Flush.Milliseconds,
 		},
 		Sampler: &jaegerConfig.SamplerConfig{
-			Type:  config.MustGetString("jaeger.sampler.type"),
-			Param: config.MustGetFloat("jaeger.sampler.param"),
+			Type:  cfg.Sampler.Type,
+			Param: cfg.Sampler.Param,
 		},
 	}
 }
 
-func (gateway *Gateway) setupTracer(config *StaticConfig) error {
-	levelString := gateway.Config.MustGetString("subLoggerLevel.jaeger")
+func (gateway *Gateway) setupTracer(subconfig *subloggerConfig) error {
+	levelString := subconfig.Jaeger
 	level, ok := levelMap[levelString]
 	if !ok {
 		return errors.Errorf("unknown sub logger level for jaeger tracer: %s", levelString)
@@ -627,7 +683,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 		jaegerConfig.Logger(NewTChannelLogger(gateway.SubLogger("jaeger", level))),
 		jaegerConfig.Metrics(jaegerLibTally.Wrap(gateway.RootScope)),
 	}
-	jc := gateway.initJaegerConfig(config)
+	jc := gateway.initJaegerConfig()
 
 	tracer, closer, err := jc.NewTracer(opts...)
 	if err != nil {
@@ -639,8 +695,8 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	return nil
 }
 
-func (gateway *Gateway) setupHTTPServer() error {
-	levelString := gateway.Config.MustGetString("subLoggerLevel.http")
+func (gateway *Gateway) setupHTTPServer(subconfig *subloggerConfig) error {
+	levelString := subconfig.HTTP
 	level, ok := levelMap[levelString]
 	if !ok {
 		return errors.Errorf("unknown sub logger level for http server: %s", levelString)
@@ -669,10 +725,17 @@ func (gateway *Gateway) setupHTTPServer() error {
 	return nil
 }
 
-func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
-	serviceName := config.MustGetString("tchannel.serviceName")
-	processName := config.MustGetString("tchannel.processName")
-	levelString := gateway.Config.MustGetString("subLoggerLevel.tchannel")
+func (gateway *Gateway) setupTChannel(subloggerCfg *subloggerConfig) error {
+	var tchannelCfg *TChannelConfig
+
+	err := gateway.Config.Get("tchannel").Populate(&tchannelCfg)
+	if err != nil {
+		return err
+	}
+
+	serviceName := tchannelCfg.ServiceName
+	processName := tchannelCfg.ProcessName
+	levelString := subloggerCfg.TChannel
 	level, ok := levelMap[levelString]
 	if !ok {
 		return errors.Errorf("unknown sub logger level for tchannel server: %s", levelString)
@@ -750,10 +813,13 @@ func GetHostname() string {
 // shutdownTChannelServer gracefully shuts down the tchannel server, blocks until the shutdown is
 // complete or the timeout has reached if there is one associated with the given context
 func (gateway *Gateway) shutdownTChannelServer(ctx context.Context) error {
-	shutdownPollInterval := defaultShutdownPollInterval
-	if gateway.Config.ContainsKey("shutdown.pollInterval") {
-		shutdownPollInterval = time.Duration(gateway.Config.MustGetInt("shutdown.pollInterval")) * time.Millisecond
+	var shutdownPollInterval time.Duration
+	gateway.Config.Get("shutdown.pollInterval").Populate(&shutdownPollInterval)
+
+	if shutdownPollInterval == time.Duration(0) {
+		shutdownPollInterval = defaultShutdownPollInterval
 	}
+
 	ticker := time.NewTicker(shutdownPollInterval)
 	defer ticker.Stop()
 

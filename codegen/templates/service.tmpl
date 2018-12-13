@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"go.uber.org/zap"
+	"go.uber.org/config"
 	"github.com/uber/zanzibar/runtime"
 
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
@@ -20,7 +21,7 @@ type DependenciesTree module.DependenciesTree
 // CreateGateway creates a new instances of the {{$instance.InstanceName}}
 // service with the specified config
 func CreateGateway(
-	config *zanzibar.StaticConfig,
+	config config.Provider,
 	opts *zanzibar.Options,
 ) (*zanzibar.Gateway, interface{}, error) {
 	gateway, err := zanzibar.CreateGateway(config, opts)

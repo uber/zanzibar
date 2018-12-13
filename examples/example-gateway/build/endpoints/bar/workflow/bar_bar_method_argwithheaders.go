@@ -78,10 +78,6 @@ func (w barArgWithHeadersWorkflow) Handle(
 	if ok {
 		clientHeaders["x-uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	clientRespBody, _, err := w.Clients.Bar.ArgWithHeaders(
 		ctx, clientHeaders, clientRequest,

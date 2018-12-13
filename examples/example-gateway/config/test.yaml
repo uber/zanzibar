@@ -1,44 +1,69 @@
-clients.bar.defaultHeaders:
-  X-Client-ID: bar
-clients.bar.ip: 127.0.0.1
-clients.bar.port: 4001
-clients.bar.timeout: 10000
-clients.baz.ip: 127.0.0.1
-clients.baz.port: 4002
-clients.baz.serviceName: Qux
-clients.baz.timeout: 10000
-clients.baz.timeoutPerAttempt: 2000
-clients.contacts.ip: 127.0.0.1
-clients.contacts.port: 4000
-clients.contacts.timeout: 10000
-clients.corge.serviceName: Corge
-clients.corge.timeout: 10000
-clients.corge.timeoutPerAttempt: 2000
-clients.google-now.ip: 127.0.0.1
-clients.google-now.port: 14120
-clients.google-now.timeout: 10000
-clients.googleNowTChannel.connectionType: p2p
-clients.googleNowTChannel.hostList:
-- 127.0.0.1:4002
-clients.googleNowTChannel.timeout: 10000
-clients.multi.ip: 127.0.0.1
-clients.multi.port: 4003
-clients.multi.timeout: 10000
+clients:
+  bar:
+    ip: 127.0.0.1
+    defaultHeaders:
+      X-Client-ID: bar
+    port: 4001
+    timeout: 10000
+  baz:
+    ip: 127.0.0.1
+    port: 4002
+    serviceName: Qux
+    timeout: 10000
+    timeoutPerAttempt: 2000
+  contacts:
+    ip: 127.0.0.1
+    port: 4000
+    timeout: 10000
+  corge:
+    serviceName: Corge
+    timeout: 10000
+    timeoutPerAttempt: 2000
+  google-now:
+    ip: 127.0.0.1
+    port: 14120
+    timeout: 10000
+  googleNowTChannel:
+    connectionType: p2p
+    hostList:
+    - 127.0.0.1:4002
+    timeout: 10000
+  multi:
+    ip: 127.0.0.1
+    port: 4003
+    timeout: 10000
 envVarsToTagInRootScope: []
-http.port: 0
-logger.fileName: /tmp/example-gateway.log
-logger.output: disk
-metrics.serviceName: example-gateway
+http:
+  port: 0
+logger:
+  fileName: /tmp/example-gateway.log
+  output: disk
+metrics:
+  type: m3
+  serviceName: example-gateway
+  m3:
+    hostPort: 127.0.0.1:8888
+env: development
 service.env.config: {}
 serviceName: example-gateway
 shutdown.pollInterval: 10
-sidecarRouter.default.http.calleeHeader: RPC-Service
-sidecarRouter.default.http.callerHeader: RPC-Caller
-sidecarRouter.default.http.ip: 127.0.0.1
-sidecarRouter.default.http.port: 4999
-sidecarRouter.default.tchannel.ip: 127.0.0.1
-sidecarRouter.default.tchannel.port: 5000
-tchannel.port: 0
-tchannel.processName: example-gateway
-tchannel.serviceName: example-gateway
+sidecarRouter:
+  default:
+    http:
+      calleeHeader: RPC-Service
+      callerHeader: RPC-Caller
+      ip: 127.0.0.1
+      port: 4999
+    tchannel:
+      ip: 127.0.0.1
+      port: 5000
+tchannel:
+  port: 0
+  processName: example-gateway
+  serviceName: example-gateway
 useDatacenter: false
+subLoggerLevel:
+  jaeger: info
+  http: info
+  tchannel: info
+

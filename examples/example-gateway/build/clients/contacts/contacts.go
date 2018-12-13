@@ -26,7 +26,6 @@ package contactsclient
 import (
 	"context"
 	"fmt"
-	"time"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -56,14 +55,21 @@ type contactsClient struct {
 
 // NewClient returns a new http client.
 func NewClient(deps *module.Dependencies) Client {
-	ip := deps.Default.Config.MustGetString("clients.contacts.ip")
-	port := deps.Default.Config.MustGetInt("clients.contacts.port")
-	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
 	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+	err = deps.Default.Config.Get("clients.contacts").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
+	ip := clientConfig.IP
+	port := clientConfig.Port
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 
 	return &contactsClient{
 		clientID: "contacts",
@@ -75,8 +81,8 @@ func NewClient(deps *module.Dependencies) Client {
 				"TestURLURL",
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }

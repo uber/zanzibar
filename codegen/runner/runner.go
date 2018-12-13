@@ -23,13 +23,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	"github.com/uber/zanzibar/codegen"
-	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/config"
+	"io/ioutil"
 )
 
 type stackTracer interface {
@@ -49,6 +49,24 @@ func checkError(err error, message string) {
 	}
 }
 
+type codegenOptions struct {
+	PackageRoot string `yaml:"packageRoot"`
+	StagingReqHeader string `yaml:"stagingReqHeader"`
+	CopyrightHeaderRelPath string `yaml:"copyrightHeader"`
+	RelThriftRootDir string `yaml:"thriftRootDir"`
+	RelTargetGenDir string `yaml:"targetGenDir"`
+	RelMiddlewareConfigDir string `yaml:"middlewareConfig"`
+	AnnotationPrefix string `yaml:"annotationPrefix"`
+	GenCodePackage string `yaml:"genCodePackage"`
+	DeputyReqHeader string `yaml:"deputyReqHeader"`
+	TraceKey string `yaml:"traceKey"`
+	GenMock bool `yaml:"genMock"`
+
+	// Deprecated
+	ClientConfig string `yaml:"clientConfig"`
+	EndpointConfig string `yaml:"endpointConfig"`
+}
+
 func main() {
 	configFile := flag.String("config", "", "the config file path")
 	moduleName := flag.String("instance", "", "")
@@ -62,49 +80,54 @@ func main() {
 	}
 
 	configRoot := filepath.Dir(*configFile)
-	config := zanzibar.NewStaticConfigOrDie([]*zanzibar.ConfigOption{
-		zanzibar.ConfigFilePath(*configFile),
-	}, nil)
-
-	configRoot, err := filepath.Abs(configRoot)
+	configProvider, err := config.NewYAML(config.File(*configFile))
 	checkError(
-		err, fmt.Sprintf("can not get abs path of config dir %s", configRoot),
+		err, fmt.Sprintf("can not read config %q", *configFile),
 	)
 
-	copyright := []byte("")
-	if config.ContainsKey("copyrightHeader") {
-		bytes, err := ioutil.ReadFile(filepath.Join(
-			configRoot,
-			config.MustGetString("copyrightHeader"),
-		))
-		if err == nil {
-			copyright = bytes
-		}
+
+	codegenConfig := new(codegenOptions)
+	err = configProvider.Get("").Populate(&codegenConfig)
+	checkError(
+		err, fmt.Sprintf("can not parse config %q", *configFile),
+	)
+
+	// TODO(jacobg): Default value?
+	if codegenConfig.StagingReqHeader == "" {
+		codegenConfig.StagingReqHeader = "X-Zanzibar-Use-Staging"
+	}
+	if codegenConfig.DeputyReqHeader == "" {
+		codegenConfig.StagingReqHeader = "x-deputy-forwarded"
 	}
 
-	stagingReqHeader := "X-Zanzibar-Use-Staging"
-	if config.ContainsKey("stagingReqHeader") {
-		stagingReqHeader = config.MustGetString("stagingReqHeader")
+	var copyrightHeader string
+	if codegenConfig.CopyrightHeaderRelPath != "" {
+		configRoot, err = filepath.Abs(configRoot)
+		checkError(
+			err, fmt.Sprintf("can not get abs path of config dir %s", configRoot),
+		)
+		copyrightAbsPath := filepath.Join(configRoot, codegenConfig.CopyrightHeaderRelPath)
+		bytes, err := ioutil.ReadFile(copyrightAbsPath)
+		checkError(
+			err, fmt.Sprintf("can not read copyright header file"),
+		)
+		copyrightHeader = string(bytes)
 	}
 
-	deputyReqHeader := "x-deputy-forwarded"
-	if config.ContainsKey("deputyReqHeader") {
-		deputyReqHeader = config.MustGetString("deputyReqHeader")
-	}
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
-		RelTargetGenDir:        config.MustGetString("targetGenDir"),
-		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),
-		AnnotationPrefix:       config.MustGetString("annotationPrefix"),
-		GenCodePackage:         config.MustGetString("genCodePackage"),
-		CopyrightHeader:        string(copyright),
-		StagingReqHeader:       stagingReqHeader,
-		DeputyReqHeader:        deputyReqHeader,
-		TraceKey:               config.MustGetString("traceKey"),
+		RelThriftRootDir:       codegenConfig.RelThriftRootDir,
+		RelTargetGenDir:        codegenConfig.RelTargetGenDir,
+		RelMiddlewareConfigDir: codegenConfig.RelMiddlewareConfigDir,
+		AnnotationPrefix:       codegenConfig.AnnotationPrefix,
+		GenCodePackage:         codegenConfig.GenCodePackage,
+		CopyrightHeader:        copyrightHeader,
+		StagingReqHeader:       codegenConfig.StagingReqHeader,
+		DeputyReqHeader:        codegenConfig.DeputyReqHeader,
+		TraceKey:               codegenConfig.TraceKey,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
-		config.MustGetString("packageRoot"),
+		codegenConfig.PackageRoot,
 		configRoot,
 		options,
 	)
@@ -112,12 +135,8 @@ func main() {
 		err, fmt.Sprintf("Can't build package helper %s", configRoot),
 	)
 
-	genMock := config.ContainsKey("genMock")
-	if genMock {
-		genMock = config.MustGetBoolean("genMock")
-	}
 	var moduleSystem *codegen.ModuleSystem
-	if genMock {
+	if codegenConfig.GenMock {
 		moduleSystem, err = codegen.NewDefaultModuleSystemWithMockHook(packageHelper)
 	} else {
 		moduleSystem, err = codegen.NewDefaultModuleSystem(packageHelper)

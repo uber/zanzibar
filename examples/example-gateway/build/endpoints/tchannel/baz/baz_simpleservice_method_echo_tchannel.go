@@ -25,8 +25,8 @@ package baztchannelendpoint
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
-	"time"
 
 	"github.com/pkg/errors"
 	tchannel "github.com/uber/tchannel-go"
@@ -42,8 +42,15 @@ import (
 
 // NewSimpleServiceEchoHandler creates a handler to be registered with a thrift server.
 func NewSimpleServiceEchoHandler(deps *module.Dependencies) *SimpleServiceEchoHandler {
+	tchannelConfig := new(zanzibar.TChannelConfig)
+	err := deps.Default.Config.Get("tchannel").Populate(&tchannelConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel config: %q", err.Error()))
+	}
+
 	handler := &SimpleServiceEchoHandler{
-		Deps: deps,
+		Deps:           deps,
+		tchannelConfig: tchannelConfig,
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"bazTChannel", "echo", "SimpleService::Echo",
@@ -55,8 +62,9 @@ func NewSimpleServiceEchoHandler(deps *module.Dependencies) *SimpleServiceEchoHa
 
 // SimpleServiceEchoHandler is the handler for "SimpleService::Echo".
 type SimpleServiceEchoHandler struct {
-	Deps     *module.Dependencies
-	endpoint *zanzibar.TChannelEndpoint
+	Deps           *module.Dependencies
+	endpoint       *zanzibar.TChannelEndpoint
+	tchannelConfig *zanzibar.TChannelConfig
 }
 
 // Register adds the tchannel handler to the gateway's tchannel router
@@ -134,37 +142,23 @@ func (h *SimpleServiceEchoHandler) redirectToDeputy(
 	req *endpointsTchannelBazBaz.SimpleService_Echo_Args,
 	res *endpointsTchannelBazBaz.SimpleService_Echo_Result,
 ) (bool, zanzibar.RWTStruct, map[string]string, error) {
-	var routingKey string
-	if h.Deps.Default.Config.ContainsKey("tchannel.routingKey") {
-		routingKey = h.Deps.Default.Config.MustGetString("tchannel.routingKey")
-	}
-
-	serviceName := h.Deps.Default.Config.MustGetString("tchannel.serviceName")
-	timeout := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeout"),
-	)
-
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		h.Deps.Default.Config.MustGetInt("tchannel.deputy.timeoutPerAttempt"),
-	)
-
 	methodNames := map[string]string{
 		"SimpleService::Echo": "Echo",
 	}
 
-	sub := h.Deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+	sub := h.Deps.Default.Channel.GetSubChannel(h.tchannelConfig.ServiceName, tchannel.Isolated)
 	sub.Peers().Add(hostPort)
 	client := zanzibar.NewTChannelClientContext(
 		h.Deps.Default.Channel,
 		h.Deps.Default.Logger,
 		h.Deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       h.tchannelConfig.ServiceName,
 			ClientID:          "",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           h.tchannelConfig.Deputy.Timeout,
+			TimeoutPerAttempt: h.tchannelConfig.Deputy.TimeoutPerAttempt,
+			RoutingKey:        &h.tchannelConfig.RoutingKey,
 		},
 	)
 

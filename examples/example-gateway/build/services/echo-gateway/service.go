@@ -25,6 +25,7 @@ package echogatewayservicegenerated
 
 import (
 	zanzibar "github.com/uber/zanzibar/runtime"
+	"go.uber.org/config"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 )
@@ -35,7 +36,7 @@ type DependenciesTree module.DependenciesTree
 // CreateGateway creates a new instances of the echo-gateway
 // service with the specified config
 func CreateGateway(
-	config *zanzibar.StaticConfig,
+	config config.Provider,
 	opts *zanzibar.Options,
 ) (*zanzibar.Gateway, interface{}, error) {
 	gateway, err := zanzibar.CreateGateway(config, opts)

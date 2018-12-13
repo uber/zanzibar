@@ -60,6 +60,8 @@ import:
 - package: go.uber.org/fx
 - package: go.uber.org/automaxprocs
   version: ^1.2.0
+- package: go.uber.org/config
+  version: ^1
 
 # Build tools / SDKs
 - package: github.com/jteeuwen/go-bindata

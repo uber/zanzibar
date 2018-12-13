@@ -26,9 +26,9 @@ package corgeclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -50,40 +50,49 @@ type Client interface {
 
 // NewClient returns a new TChannel client for service corge.
 func NewClient(deps *module.Dependencies) Client {
-	serviceName := deps.Default.Config.MustGetString("clients.corge.serviceName")
-	var routingKey string
-	if deps.Default.Config.ContainsKey("clients.corge.routingKey") {
-		routingKey = deps.Default.Config.MustGetString("clients.corge.routingKey")
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client caller name: %q", err.Error()))
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	ip := deps.Default.Config.MustGetString("sidecarRouter.default.tchannel.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.default.tchannel.port")
+	clientConfig := new(zanzibar.TChannelClientConfig)
+	err = deps.Default.Config.Get("clients.corge").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client config: %q", err.Error()))
+	}
+
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.default").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel sidecar config: %q", err.Error()))
+	}
+
+	sc := deps.Default.Channel.GetSubChannel(callerName, tchannel.Isolated)
+
+	ip := sidecarConfig.TChannel.IP
+	port := sidecarConfig.TChannel.Port
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	allStagingConfig := new(zanzibar.StagingConfig)
+	_ = deps.Default.Config.Get("clients.staging.all").Populate(&allStagingConfig)
+
 	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.corge.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.corge.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.corge.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.corge.staging.port")
+	if clientConfig.Staging.ServiceName != "" {
+		scAltName = clientConfig.Staging.ServiceName
+		ipAlt := clientConfig.Staging.IP
+		portAlt := clientConfig.Staging.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+	} else if allStagingConfig.ServiceName != "" {
+		scAltName = allStagingConfig.ServiceName
+		ipAlt := allStagingConfig.IP
+		portAlt := allStagingConfig.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
-
-	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.corge.timeout"),
-	)
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.corge.timeoutPerAttempt"),
-	)
 
 	methodNames := map[string]string{
 		"Corge::echoString": "EchoString",
@@ -94,12 +103,12 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       clientConfig.ServiceName,
 			ClientID:          "corge",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           clientConfig.Timeout,
+			TimeoutPerAttempt: clientConfig.TimeoutPerAttempt,
+			RoutingKey:        &clientConfig.RoutingKey,
 			AltSubchannelName: scAltName,
 		},
 	)
@@ -126,7 +135,7 @@ func (c *corgeClient) EchoString(
 	logger := c.client.Loggers["Corge::echoString"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(

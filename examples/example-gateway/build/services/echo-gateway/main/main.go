@@ -31,10 +31,10 @@ import (
 	"syscall"
 
 	_ "go.uber.org/automaxprocs"
+	"go.uber.org/config"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	"github.com/uber/zanzibar/config"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	app "github.com/uber/zanzibar/examples/example-gateway"
@@ -43,20 +43,24 @@ import (
 
 var configFiles *string
 
-func getConfig() *zanzibar.StaticConfig {
-	var files []string
+// TODO(jacobg): Use Fx provider pattern
+func getConfig() (config.Provider, error) {
+	var opts []config.YAMLOption
 
-	if configFiles == nil {
-		files = []string{}
-	} else {
-		files = strings.Split(*configFiles, ";")
+	if configFiles != nil {
+		for _, file := range strings.Split(*configFiles, ";") {
+			opts = append(opts, config.File(file))
+		}
 	}
 
-	return config.NewRuntimeConfigOrDie(files, nil)
+	return config.NewYAML(opts...)
 }
 
 func createGateway() (*zanzibar.Gateway, error) {
-	config := getConfig()
+	config, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	gateway, _, err := service.CreateGateway(config, app.AppOptions)
 	if err != nil {
@@ -70,7 +74,6 @@ func logAndWait(server *zanzibar.Gateway) {
 	server.Logger.Info("Started EchoGateway",
 		zap.String("realHTTPAddr", server.RealHTTPAddr),
 		zap.String("realTChannelAddr", server.RealTChannelAddr),
-		zap.Any("config", server.InspectOrDie()),
 	)
 
 	go func() {

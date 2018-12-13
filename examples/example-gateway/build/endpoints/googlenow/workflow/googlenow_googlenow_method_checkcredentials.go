@@ -76,10 +76,6 @@ func (w googleNowCheckCredentialsWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	cliRespHeaders, err := w.Clients.GoogleNow.CheckCredentials(ctx, clientHeaders)
 

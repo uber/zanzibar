@@ -4,6 +4,7 @@ package {{$instance.PackageInfo.PackageName}}
 
 import (
 	"context"
+	"fmt"
 	"errors"
 	"strconv"
 	"strings"
@@ -48,47 +49,56 @@ type Client interface {
 
 // NewClient returns a new TChannel client for service {{$clientID}}.
 func {{$exportName}}(deps *module.Dependencies) Client {
-	{{- /* this is the service discovery service name */}}
-	serviceName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
-	var routingKey string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
-		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
+	var callerName string
+    err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client caller name: %q", err.Error()))
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
+
+	clientConfig := new(zanzibar.TChannelClientConfig)
+    err = deps.Default.Config.Get("clients.{{$clientID}}").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client config: %q", err.Error()))
+	}
 
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.tchannel.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.tchannel.port")
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.{{$sidecarRouter}}").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel sidecar config: %q", err.Error()))
+	}
+	{{end}}
+
+	sc := deps.Default.Channel.GetSubChannel(callerName, tchannel.Isolated)
+
+	{{if $sidecarRouter -}}
+	ip := sidecarConfig.TChannel.IP
+	port := sidecarConfig.TChannel.Port
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := clientConfig.IP
+	port := clientConfig.Port
 	{{end -}}
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	allStagingConfig := new(zanzibar.StagingConfig)
+	_ = deps.Default.Config.Get("clients.staging.all").Populate(&allStagingConfig)
+
 	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.{{$clientID}}.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.{{$clientID}}.staging.port")
+	if clientConfig.Staging.ServiceName != "" {
+		scAltName = clientConfig.Staging.ServiceName
+		ipAlt := clientConfig.Staging.IP
+		portAlt := clientConfig.Staging.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+	} else if allStagingConfig.ServiceName != "" {
+		scAltName = allStagingConfig.ServiceName
+		ipAlt := allStagingConfig.IP
+		portAlt := allStagingConfig.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
-
-	{{/* TODO: (lu) maybe set these at per method level */ -}}
-	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout"),
-	)
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeoutPerAttempt"),
-	)
 
 	methodNames := map[string]string{
 		{{range $svc := .Services -}}
@@ -107,12 +117,12 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       clientConfig.ServiceName,
 			ClientID:          "{{$clientID}}",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           clientConfig.Timeout,
+			TimeoutPerAttempt: clientConfig.TimeoutPerAttempt,
+			RoutingKey:        &clientConfig.RoutingKey,
 			AltSubchannelName: scAltName,
 		},
 	)

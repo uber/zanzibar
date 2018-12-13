@@ -26,9 +26,9 @@ package bazclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -179,40 +179,43 @@ type Client interface {
 
 // NewClient returns a new TChannel client for service baz.
 func NewClient(deps *module.Dependencies) Client {
-	serviceName := deps.Default.Config.MustGetString("clients.baz.serviceName")
-	var routingKey string
-	if deps.Default.Config.ContainsKey("clients.baz.routingKey") {
-		routingKey = deps.Default.Config.MustGetString("clients.baz.routingKey")
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client caller name: %q", err.Error()))
 	}
-	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
-	ip := deps.Default.Config.MustGetString("clients.baz.ip")
-	port := deps.Default.Config.MustGetInt("clients.baz.port")
+	clientConfig := new(zanzibar.TChannelClientConfig)
+	err = deps.Default.Config.Get("clients.baz").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading tchannel client config: %q", err.Error()))
+	}
+
+	sc := deps.Default.Channel.GetSubChannel(callerName, tchannel.Isolated)
+
+	ip := clientConfig.IP
+	port := clientConfig.Port
 	sc.Peers().Add(ip + ":" + strconv.Itoa(int(port)))
 
+	allStagingConfig := new(zanzibar.StagingConfig)
+	_ = deps.Default.Config.Get("clients.staging.all").Populate(&allStagingConfig)
+
 	var scAltName string
-	if deps.Default.Config.ContainsKey("clients.baz.staging.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.baz.staging.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.baz.staging.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.baz.staging.port")
+	if clientConfig.Staging.ServiceName != "" {
+		scAltName = clientConfig.Staging.ServiceName
+		ipAlt := clientConfig.Staging.IP
+		portAlt := clientConfig.Staging.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
-	} else if deps.Default.Config.ContainsKey("clients.staging.all.serviceName") {
-		scAltName = deps.Default.Config.MustGetString("clients.staging.all.serviceName")
-		ipAlt := deps.Default.Config.MustGetString("clients.staging.all.ip")
-		portAlt := deps.Default.Config.MustGetInt("clients.staging.all.port")
+	} else if allStagingConfig.ServiceName != "" {
+		scAltName = allStagingConfig.ServiceName
+		ipAlt := allStagingConfig.IP
+		portAlt := allStagingConfig.Port
 
 		scAlt := deps.Default.Channel.GetSubChannel(scAltName, tchannel.Isolated)
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
-
-	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.baz.timeout"),
-	)
-	timeoutPerAttempt := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
-	)
 
 	methodNames := map[string]string{
 		"SecondService::echoBinary":        "EchoBinary",
@@ -249,12 +252,12 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
+			ServiceName:       clientConfig.ServiceName,
 			ClientID:          "baz",
 			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
+			Timeout:           clientConfig.Timeout,
+			TimeoutPerAttempt: clientConfig.TimeoutPerAttempt,
+			RoutingKey:        &clientConfig.RoutingKey,
 			AltSubchannelName: scAltName,
 		},
 	)
@@ -281,7 +284,7 @@ func (c *bazClient) EchoBinary(
 	logger := c.client.Loggers["SecondService::echoBinary"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -318,7 +321,7 @@ func (c *bazClient) EchoBool(
 	logger := c.client.Loggers["SecondService::echoBool"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -355,7 +358,7 @@ func (c *bazClient) EchoDouble(
 	logger := c.client.Loggers["SecondService::echoDouble"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -392,7 +395,7 @@ func (c *bazClient) EchoEnum(
 	logger := c.client.Loggers["SecondService::echoEnum"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -429,7 +432,7 @@ func (c *bazClient) EchoI16(
 	logger := c.client.Loggers["SecondService::echoI16"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -466,7 +469,7 @@ func (c *bazClient) EchoI32(
 	logger := c.client.Loggers["SecondService::echoI32"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -503,7 +506,7 @@ func (c *bazClient) EchoI64(
 	logger := c.client.Loggers["SecondService::echoI64"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -540,7 +543,7 @@ func (c *bazClient) EchoI8(
 	logger := c.client.Loggers["SecondService::echoI8"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -577,7 +580,7 @@ func (c *bazClient) EchoString(
 	logger := c.client.Loggers["SecondService::echoString"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -614,7 +617,7 @@ func (c *bazClient) EchoStringList(
 	logger := c.client.Loggers["SecondService::echoStringList"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -651,7 +654,7 @@ func (c *bazClient) EchoStringMap(
 	logger := c.client.Loggers["SecondService::echoStringMap"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -688,7 +691,7 @@ func (c *bazClient) EchoStringSet(
 	logger := c.client.Loggers["SecondService::echoStringSet"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -725,7 +728,7 @@ func (c *bazClient) EchoStructList(
 	logger := c.client.Loggers["SecondService::echoStructList"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -762,7 +765,7 @@ func (c *bazClient) EchoStructSet(
 	logger := c.client.Loggers["SecondService::echoStructSet"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -799,7 +802,7 @@ func (c *bazClient) EchoTypedef(
 	logger := c.client.Loggers["SecondService::echoTypedef"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -835,7 +838,7 @@ func (c *bazClient) Call(
 	logger := c.client.Loggers["SimpleService::call"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -870,7 +873,7 @@ func (c *bazClient) Compare(
 	logger := c.client.Loggers["SimpleService::compare"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -911,7 +914,7 @@ func (c *bazClient) GetProfile(
 	logger := c.client.Loggers["SimpleService::getProfile"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -950,7 +953,7 @@ func (c *bazClient) HeaderSchema(
 	logger := c.client.Loggers["SimpleService::headerSchema"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -991,7 +994,7 @@ func (c *bazClient) Ping(
 
 	args := &clientsBazBaz.SimpleService_Ping_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1027,7 +1030,7 @@ func (c *bazClient) DeliberateDiffNoop(
 
 	args := &clientsBazBaz.SimpleService_SillyNoop_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1063,7 +1066,7 @@ func (c *bazClient) TestUUID(
 
 	args := &clientsBazBaz.SimpleService_TestUuid_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1096,7 +1099,7 @@ func (c *bazClient) Trans(
 	logger := c.client.Loggers["SimpleService::trans"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1137,7 +1140,7 @@ func (c *bazClient) TransHeaders(
 	logger := c.client.Loggers["SimpleService::transHeaders"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1178,7 +1181,7 @@ func (c *bazClient) TransHeadersNoReq(
 	logger := c.client.Loggers["SimpleService::transHeadersNoReq"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1217,7 +1220,7 @@ func (c *bazClient) TransHeadersType(
 	logger := c.client.Loggers["SimpleService::transHeadersType"]
 
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(
@@ -1257,7 +1260,7 @@ func (c *bazClient) URLTest(
 
 	args := &clientsBazBaz.SimpleService_UrlTest_Args{}
 	caller := c.client.Call
-	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
+	if strings.EqualFold(reqHeaders["x-deputy-forwarded"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
 	success, respHeaders, err := caller(

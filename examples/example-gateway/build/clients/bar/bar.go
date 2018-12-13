@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -199,14 +198,21 @@ type barClient struct {
 
 // NewClient returns a new http client.
 func NewClient(deps *module.Dependencies) Client {
-	ip := deps.Default.Config.MustGetString("clients.bar.ip")
-	port := deps.Default.Config.MustGetInt("clients.bar.port")
-	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.bar.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
 	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+	err = deps.Default.Config.Get("clients.bar").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
+	ip := clientConfig.IP
+	port := clientConfig.Port
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 
 	return &barClient{
 		clientID: "bar",
@@ -246,8 +252,8 @@ func NewClient(deps *module.Dependencies) Client {
 				"EchoTypedef",
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }

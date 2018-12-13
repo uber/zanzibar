@@ -85,10 +85,6 @@ func (w barTooManyArgsWorkflow) Handle(
 	if ok {
 		clientHeaders["X-Uuid"] = h
 	}
-	h, ok = reqHeaders.Get("X-Zanzibar-Use-Staging")
-	if ok {
-		clientHeaders["X-Zanzibar-Use-Staging"] = h
-	}
 
 	clientRespBody, cliRespHeaders, err := w.Clients.Bar.TooManyArgs(
 		ctx, clientHeaders, clientRequest,

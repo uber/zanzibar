@@ -58,31 +58,39 @@ type {{$clientName}} struct {
 
 // {{$exportName}} returns a new http client.
 func {{$exportName}}(deps *module.Dependencies) Client {
+    var callerName string
+    err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
+	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+    err = deps.Default.Config.Get("clients.{{$clientID}}").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
 	{{if $sidecarRouter -}}
-	ip := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.{{$sidecarRouter}}.http.port")
-	callerHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.callerHeader")
-	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.{{$sidecarRouter}}.http.calleeHeader")
-	callerName := deps.Default.Config.MustGetString("serviceName")
-	calleeName := deps.Default.Config.MustGetString("clients.{{$clientID}}.serviceName")
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.{{$sidecarRouter}}").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http sidecar config: %q", err.Error()))
+	}
+	ip := sidecarConfig.HTTP.IP
+	port := sidecarConfig.HTTP.Port
 	{{else -}}
-	ip := deps.Default.Config.MustGetString("clients.{{$clientID}}.ip")
-	port := deps.Default.Config.MustGetInt("clients.{{$clientID}}.port")
+	ip := clientConfig.IP
+	port := clientConfig.Port
 	{{end -}}
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.{{$clientID}}.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
-	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
-		callerHeader: callerHeader,
-		calleeHeader: calleeHeader,
+		callerHeader: sidecarConfig.HTTP.CallerHeader,
+		calleeHeader: sidecarConfig.HTTP.CalleeHeader,
 		callerName: callerName,
-		calleeName: calleeName,
+		calleeName: clientConfig.ServiceName,
 		{{end -}}
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
@@ -93,8 +101,8 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 				{{end}}
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }

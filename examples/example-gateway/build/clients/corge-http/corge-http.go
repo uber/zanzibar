@@ -26,7 +26,6 @@ package corgehttpclient
 import (
 	"context"
 	"fmt"
-	"time"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -58,25 +57,33 @@ type corgeHTTPClient struct {
 
 // NewClient returns a new http client.
 func NewClient(deps *module.Dependencies) Client {
-	ip := deps.Default.Config.MustGetString("sidecarRouter.default.http.ip")
-	port := deps.Default.Config.MustGetInt("sidecarRouter.default.http.port")
-	callerHeader := deps.Default.Config.MustGetString("sidecarRouter.default.http.callerHeader")
-	calleeHeader := deps.Default.Config.MustGetString("sidecarRouter.default.http.calleeHeader")
-	callerName := deps.Default.Config.MustGetString("serviceName")
-	calleeName := deps.Default.Config.MustGetString("clients.corge-http.serviceName")
-	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.corge-http.timeout")) * time.Millisecond
-	defaultHeaders := make(map[string]string)
-	if deps.Default.Config.ContainsKey("clients.corge-http.defaultHeaders") {
-		deps.Default.Config.MustGetStruct("clients.corge-http.defaultHeaders", &defaultHeaders)
+	var callerName string
+	err := deps.Default.Config.Get("serviceName").Populate(&callerName)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client caller name: %q", err.Error()))
 	}
+
+	clientConfig := new(zanzibar.HTTPClientConfig)
+	err = deps.Default.Config.Get("clients.corge-http").Populate(&clientConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http client config: %q", err.Error()))
+	}
+
+	sidecarConfig := new(zanzibar.SidecarConfig)
+	err = deps.Default.Config.Get("sidecarRouter.default").Populate(&sidecarConfig)
+	if err != nil {
+		panic(fmt.Errorf("error reading http sidecar config: %q", err.Error()))
+	}
+	ip := sidecarConfig.HTTP.IP
+	port := sidecarConfig.HTTP.Port
+	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
 
 	return &corgeHTTPClient{
 		clientID:     "corge-http",
-		callerHeader: callerHeader,
-		calleeHeader: calleeHeader,
+		callerHeader: sidecarConfig.HTTP.CallerHeader,
+		calleeHeader: sidecarConfig.HTTP.CalleeHeader,
 		callerName:   callerName,
-		calleeName:   calleeName,
+		calleeName:   clientConfig.ServiceName,
 		httpClient: zanzibar.NewHTTPClientContext(
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"corge-http",
@@ -84,8 +91,8 @@ func NewClient(deps *module.Dependencies) Client {
 				"EchoString",
 			},
 			baseURL,
-			defaultHeaders,
-			timeout,
+			clientConfig.DefaultHeaders,
+			clientConfig.Timeout,
 		),
 	}
 }
