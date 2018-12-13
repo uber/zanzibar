@@ -595,7 +595,8 @@ func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger 
 
 func (gateway *Gateway) initJaegerConfig(config *StaticConfig) *jaegerConfig.Configuration {
 	return &jaegerConfig.Configuration{
-		Disabled: config.MustGetBoolean("jaeger.disabled"),
+		ServiceName: config.MustGetString("serviceName"),
+		Disabled:    config.MustGetBoolean("jaeger.disabled"),
 		Reporter: &jaegerConfig.ReporterConfig{
 			LocalAgentHostPort:  config.MustGetString("jaeger.reporter.hostport"),
 			BufferFlushInterval: time.Duration(config.MustGetInt("jaeger.reporter.flush.milliseconds")) * time.Millisecond,
@@ -621,8 +622,7 @@ func (gateway *Gateway) setupTracer(config *StaticConfig) error {
 	}
 	jc := gateway.initJaegerConfig(config)
 
-	serviceName := config.MustGetString("serviceName")
-	tracer, closer, err := jc.New(serviceName, opts...)
+	tracer, closer, err := jc.NewTracer(opts...)
 	if err != nil {
 		return errors.Wrapf(err, "error initializing Jaeger tracer client")
 	}

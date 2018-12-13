@@ -121,7 +121,9 @@ func TestHTTPEndpointToHTTPClientWithUpstreamSpan(t *testing.T) {
 		},
 	)
 
-	tracer, closer, err := config.Configuration{}.New("upstream")
+	tracer, closer, err := config.Configuration{
+		ServiceName: "upstream",
+	}.NewTracer()
 	if !assert.NoError(t, err, "error creating upstream tracer") {
 		return
 	}
@@ -282,7 +284,9 @@ func TestHTTPEndpointToTChannelClientWithUpstreamSpan(t *testing.T) {
 	headers["x-token"] = "token"
 	headers["x-uuid"] = "uuid"
 
-	tracer, closer, err := config.Configuration{}.New("upstream")
+	tracer, closer, err := config.Configuration{
+		ServiceName: "upstream",
+	}.NewTracer()
 	if !assert.NoError(t, err, "error creating upstream tracer") {
 		return
 	}
