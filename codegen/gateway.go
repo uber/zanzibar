@@ -102,9 +102,8 @@ type ClientSpec struct {
 // ModuleClassConfig represents the generic YAML config for
 // all modules. This will be provided by the module package.
 type ModuleClassConfig struct {
-	Name   string      `yaml:"name" json:"name"`
-	Type   string      `yaml:"type" json:"type"`
-	Config interface{} `yaml:"config" json:"config"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Config          interface{} `yaml:"config" json:"config"`
 }
 
 // Dependencies lists all dependencies of a module
@@ -121,9 +120,9 @@ type MiddlewareConfigConfig struct {
 
 // MiddlewareConfig represents configuration for a middleware as is written in the yaml file
 type MiddlewareConfig struct {
-	Name         string                  `yaml:"name" json:"name"`
-	Dependencies *Dependencies           `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
-	Config       *MiddlewareConfigConfig `yaml:"config" json:"config"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    *Dependencies           `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Config          *MiddlewareConfigConfig `yaml:"config" json:"config"`
 }
 
 // Validate the config spec attributes
@@ -224,46 +223,48 @@ type TypedHeader struct {
 // gateway including its thriftFile and meta data
 type EndpointSpec struct {
 	// ModuleSpec holds the thrift module info
-	ModuleSpec *ModuleSpec
+	ModuleSpec *ModuleSpec `yaml:"-"`
 	// YAMLFile for this endpoint spec
-	YAMLFile string
+	YAMLFile string `yaml:"-"`
 	// GoStructsFileName is where structs are generated
-	GoStructsFileName string
+	GoStructsFileName string `yaml:"-"`
 	// GoFolderName is the folder where all the endpoints
 	// are generated.
-	GoFolderName string
+	GoFolderName string `yaml:"-"`
 	// GoPackageName is the package import path.
-	GoPackageName string
+	GoPackageName string `yaml:"-"`
 
 	// EndpointType, currently only "http"
-	EndpointType string `yaml:"endpointType"`
+	EndpointType string `yaml:"endpointType" validate:"nonzero"`
 	// EndpointID, used in metrics and logging, lower case.
-	EndpointID string `yaml:"endpointId"`
+	EndpointID string `yaml:"endpointId" validate:"nonzero"`
 	// HandleID, used in metrics and logging, lowercase.
-	HandleID string `yaml:"handleId"`
+	HandleID string `yaml:"handleId" validate:"nonzero"`
 	// ThriftFile, the thrift file for this endpoint
-	ThriftFile string `yaml:"thriftFile"`
+	ThriftFile string `yaml:"thriftFile" validate:"nonzero"`
+	// ThriftFileSha, the SHA of the thrift file for this endpoint
+	ThriftFileSha string `yaml:"thriftFileSha" validate:"nonzero"`
 	// ThriftMethodName, which thrift method to use.
-	ThriftMethodName string `yaml:"thriftMethodName"`
+	ThriftMethodName string `yaml:"thriftMethodName" validate:"nonzero"`
 	// ThriftServiceName, which thrift service to use.
-	ThriftServiceName string
+	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
 	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures"`
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec `yaml:"middlewares"`
 	// HeadersPropagate, a map from endpoint request headers to
 	// client request fields.
-	HeadersPropagate map[string]FieldMapperEntry
+	HeadersPropagate map[string]FieldMapperEntry `yaml:"-"`
 	// ReqTransforms, a map from client request fields to endpoint
 	// request fields that should override their values.
-	ReqTransforms map[string]FieldMapperEntry
+	ReqTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// RespTransforms, a map from endpoint response fields to client
 	// response fields that should override their values.
-	RespTransforms map[string]FieldMapperEntry
+	RespTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ErrTransforms is a map from endpoint exception fields to client exception fields
 	// that should override their values
 	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
-	ErrTransforms map[string]FieldMapperEntry
+	ErrTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ReqHeaders maps headers from server to client
 	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap"`
 	// ResHeaders maps headers from client to server
@@ -271,7 +272,7 @@ type EndpointSpec struct {
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
-	WorkflowType string `yaml:"workflowType"`
+	WorkflowType string `yaml:"workflowType" validate:"nonzero"`
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string `yaml:"workflowImportPath"`
 	// if "httpClient", which client to call.
@@ -279,7 +280,7 @@ type EndpointSpec struct {
 	// if "httpClient", which client method to call.
 	ClientMethod string `yaml:"clientMethod"`
 	// The client for this endpoint if httpClient or tchannelClient
-	ClientSpec *ClientSpec
+	ClientSpec *ClientSpec `yaml:"-"`
 }
 
 func ensureFields(config map[interface{}]interface{}, mandatoryFields []string, yamlFile string) error {
@@ -876,16 +877,18 @@ func (e *EndpointSpec) SetDownstream(
 	return e.ModuleSpec.SetDownstream(e, h)
 }
 
+// EndpointConfig represent the "config" field of endpoint-config.yaml
+type EndpointConfig struct {
+	Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
+	Endpoints []string `yaml:"endpoints" json:"endpoints"`
+}
+
 // EndpointClassConfig represents the specific config for
 // an endpoint group. This is a downcast of the moduleClassConfig.
 type EndpointClassConfig struct {
-	Name   string `yaml:"name" json:"name"`
-	Type   string `yaml:"type" json:"type"`
-	Config struct {
-		Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
-		Endpoints []string `yaml:"endpoints" json:"endpoints"`
-	} `yaml:"config" json:"config"`
-	Dependencies map[string][]string `yaml:"dependencies" json:"dependencies"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    map[string][]string `yaml:"dependencies" json:"dependencies"`
+	Config          *EndpointConfig     `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func parseEndpointYamls(
@@ -976,7 +979,7 @@ func parseMiddlewareConfig(
 		err = mid.Validate(configDirName)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot validate middleware: %s",
+				err, "Cannot validate middleware: %v",
 				mid,
 			)
 		}

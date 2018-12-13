@@ -28,14 +28,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// ClientConfigBase is the struct for client-config.yaml. It is the base for
-// specific type of client.
-type ClientConfigBase struct {
-	Name         string       `yaml:"name" json:"name"`
-	Type         string       `yaml:"type" json:"type"`
-	Dependencies Dependencies `yaml:"dependencies" json:"dependencies"`
-}
-
 type clientConfig interface {
 	NewClientSpec(
 		instance *ModuleInstance,
@@ -92,8 +84,9 @@ func validateExposedMethods(v interface{}, param string) error {
 
 // HTTPClientConfig represents the "config" field for a HTTP client-config.yaml
 type HTTPClientConfig struct {
-	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    Dependencies        `yaml:"dependencies" json:"dependencies"`
+	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newHTTPClientConfig(raw []byte) (*HTTPClientConfig, error) {
@@ -157,8 +150,9 @@ func (c *HTTPClientConfig) NewClientSpec(
 
 // TChannelClientConfig represents the "config" field for a TChannel client-config.yaml
 type TChannelClientConfig struct {
-	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    Dependencies        `yaml:"dependencies" json:"dependencies"`
+	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
 func newTChannelClientConfig(raw []byte) (*TChannelClientConfig, error) {
@@ -186,8 +180,9 @@ func (c *TChannelClientConfig) NewClientSpec(
 
 // CustomClientConfig represents the config for a custom client.
 type CustomClientConfig struct {
-	ClientConfigBase `yaml:",inline" json:",inline"`
-	Config           *struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    Dependencies `yaml:"dependencies" json:"dependencies"`
+	Config          *struct {
 		Fixture          *Fixture `yaml:"fixture" json:"fixture"`
 		CustomImportPath string   `yaml:"customImportPath" json:"customImportPath" validate:"nonzero"`
 	} `yaml:"config" json:"config" validate:"nonzero"`
@@ -230,7 +225,7 @@ func (c *CustomClientConfig) NewClientSpec(
 }
 
 func clientType(raw []byte) (string, error) {
-	clientConfig := ClientConfigBase{}
+	clientConfig := ClassConfigBase{}
 	if err := yaml.Unmarshal(raw, &clientConfig); err != nil {
 		return "", errors.Wrap(
 			err, "Could not parse client config data to determine client type")
