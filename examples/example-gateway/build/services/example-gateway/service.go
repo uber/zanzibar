@@ -24,7 +24,7 @@
 package examplegatewayservicegenerated
 
 import (
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 )

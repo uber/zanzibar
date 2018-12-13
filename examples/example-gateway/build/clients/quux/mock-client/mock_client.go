@@ -36,19 +36,16 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // DropMessages mocks base method
 func (m *MockClient) DropMessages(arg0, arg1 *base.Message) {
-	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "DropMessages", arg0, arg1)
 }
 
 // DropMessages indicates an expected call of DropMessages
 func (mr *MockClientMockRecorder) DropMessages(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropMessages", reflect.TypeOf((*MockClient)(nil).DropMessages), arg0, arg1)
 }
 
 // EchoMessage mocks base method
 func (m *MockClient) EchoMessage(arg0 *base.Message) *base.Message {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoMessage", arg0)
 	ret0, _ := ret[0].(*base.Message)
 	return ret0
@@ -56,13 +53,11 @@ func (m *MockClient) EchoMessage(arg0 *base.Message) *base.Message {
 
 // EchoMessage indicates an expected call of EchoMessage
 func (mr *MockClientMockRecorder) EchoMessage(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoMessage", reflect.TypeOf((*MockClient)(nil).EchoMessage), arg0)
 }
 
 // EchoString mocks base method
 func (m *MockClient) EchoString(arg0 string) string {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EchoString", arg0)
 	ret0, _ := ret[0].(string)
 	return ret0
@@ -70,6 +65,5 @@ func (m *MockClient) EchoString(arg0 string) string {
 
 // EchoString indicates an expected call of EchoString
 func (mr *MockClientMockRecorder) EchoString(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EchoString", reflect.TypeOf((*MockClient)(nil).EchoString), arg0)
 }

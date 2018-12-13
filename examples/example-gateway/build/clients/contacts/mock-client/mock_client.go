@@ -38,7 +38,6 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // HTTPClient mocks base method
 func (m *MockClient) HTTPClient() *runtime.HTTPClient {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HTTPClient")
 	ret0, _ := ret[0].(*runtime.HTTPClient)
 	return ret0
@@ -46,13 +45,11 @@ func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 
 // HTTPClient indicates an expected call of HTTPClient
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))
 }
 
 // SaveContacts mocks base method
 func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, arg2 *contacts.SaveContactsRequest) (*contacts.SaveContactsResponse, map[string]string, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveContacts", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*contacts.SaveContactsResponse)
 	ret1, _ := ret[1].(map[string]string)
@@ -62,13 +59,11 @@ func (m *MockClient) SaveContacts(arg0 context.Context, arg1 map[string]string, 
 
 // SaveContacts indicates an expected call of SaveContacts
 func (mr *MockClientMockRecorder) SaveContacts(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveContacts", reflect.TypeOf((*MockClient)(nil).SaveContacts), arg0, arg1, arg2)
 }
 
 // TestURLURL mocks base method
 func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TestURLURL", arg0, arg1)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(map[string]string)
@@ -78,6 +73,5 @@ func (m *MockClient) TestURLURL(arg0 context.Context, arg1 map[string]string) (s
 
 // TestURLURL indicates an expected call of TestURLURL
 func (mr *MockClientMockRecorder) TestURLURL(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TestURLURL", reflect.TypeOf((*MockClient)(nil).TestURLURL), arg0, arg1)
 }

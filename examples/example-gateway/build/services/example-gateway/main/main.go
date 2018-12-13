@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/uber/zanzibar/config"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 
 	app "github.com/uber/zanzibar/examples/example-gateway"
 	service "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway"

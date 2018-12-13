@@ -21,6 +21,7 @@ EXAMPLE_BASE_DIR = examples/example-gateway/
 EXAMPLE_SERVICES_DIR = $(EXAMPLE_BASE_DIR)build/services/
 EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 GOIMPORTS = "$(PWD)/vendor/golang.org/x/tools/cmd/goimports"
+GOBINDATA = "$(PWD)/vendor/github.com/jteeuwen/go-bindata/go-bindata"
 
 .PHONY: install
 install:
@@ -31,6 +32,7 @@ install:
 	glide --version || go get -u -f github.com/Masterminds/glide
 	glide install
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
+	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 
 .PHONY: check-licence
 check-licence:
@@ -101,13 +103,12 @@ lint: check-licence eclint-check
 
 .PHONY: generate
 generate:
-	@go get -u github.com/jteeuwen/go-bindata/...
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@chmod 644 ./codegen/templates/*.tmpl
 	@chmod 644 $(ENV_CONFIG)
-	@go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.gen.go $(ENV_CONFIG)
+	@$(GOBINDATA)/go-bindata -pkg config -nocompress -modtime 1 -prefix config -o config/production.gen.go $(ENV_CONFIG)
 	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
-	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
+	@$(GOBINDATA)/go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
 	@PATH=$(GOIMPORTS):$(PATH) bash ./scripts/generate.sh
 
