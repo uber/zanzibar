@@ -109,7 +109,7 @@ generate:
 	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
 	@go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
-	@PATH=$(PATH):$(GOIMPORTS) bash ./scripts/generate.sh
+	@PATH=$(GOIMPORTS):$(PATH) bash ./scripts/generate.sh
 
 .PHONY: check-generate
 check-generate:
