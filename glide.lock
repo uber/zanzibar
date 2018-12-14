@@ -1,14 +1,14 @@
-hash: c6d30588fe00e1e6d79e8c16aaaa9f31d60c1e98d9a07b8bd44cf5eddf93ba92
-updated: 2018-12-13T15:24:04.037541-08:00
+hash: c9e408639094e9d8cbe848e1b5be736bf4251251e35a63d8438631b872cbf766
+updated: 2018-12-14T15:12:14.306489-08:00
 imports:
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
-  version: 9549b25c77587b29be4e0b5c258221a4ed85d37a
+  version: b2a4d4ae21c789b689dd162deb819665567f481c
   subpackages:
   - lib/go/thrift
 - name: github.com/buger/jsonparser
-  version: 5b691c8ebc4af5191baa426561d62f1b5115d6e5
+  version: bf1c66bbce23153d89b23f8960071a680dbef54b
 - name: github.com/codahale/hdrhistogram
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
@@ -137,7 +137,7 @@ imports:
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
-  version: fb439a9a7f5a388d8606aae1c1ff6654b8b67fbe
+  version: f21741d67580a27b01451386c3998090905dc243
   subpackages:
   - ast
   - compile
@@ -175,7 +175,7 @@ imports:
   subpackages:
   - context
 - name: golang.org/x/tools
-  version: fe2443f7b95069e01d0b02159564c1b4d0dfcb5e
+  version: 3c39ce7b61056afe4473b651789da5f89d4aeb20
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
