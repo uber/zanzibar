@@ -2976,6 +2976,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -3007,6 +3008,7 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies {
 		Logger: zap.NewNop(),
+		Scope: tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
 	contextExtractors := &zanzibar.ContextExtractors{}
@@ -3074,7 +3076,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4638, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4724, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

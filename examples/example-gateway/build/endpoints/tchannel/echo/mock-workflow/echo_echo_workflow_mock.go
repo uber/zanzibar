@@ -26,6 +26,7 @@ package mockechoworkflow
 import (
 	"testing"
 
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
@@ -40,6 +41,7 @@ func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockNode
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger: zap.NewNop(),
+		Scope:  tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
 	contextExtractors := &zanzibar.ContextExtractors{}

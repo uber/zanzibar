@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
@@ -42,6 +43,7 @@ func NewSimpleServiceAnotherCallWorkflowMock(t *testing.T) (workflow.SimpleServi
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger: zap.NewNop(),
+		Scope:  tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
 	contextExtractors := &zanzibar.ContextExtractors{}
