@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
@@ -89,6 +91,13 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge.errorPercentThreshold")
+	hystrix.ConfigureCommand("corge", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
+
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
@@ -129,9 +138,16 @@ func (c *corgeClient) EchoString(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "Corge", "echoString", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("corge", func() error {
+		success, respHeaders, err = caller(
+			ctx, "Corge", "echoString", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {

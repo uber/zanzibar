@@ -77,7 +77,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
 
-	numMetrics := 10
+	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(

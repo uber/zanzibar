@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/module"
@@ -64,6 +66,13 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
 	}
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.contacts.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.contacts.errorPercentThreshold")
+	hystrix.ConfigureCommand("contacts", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &contactsClient{
 		clientID: "contacts",
@@ -104,7 +113,11 @@ func (c *contactsClient) SaveContacts(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("contacts", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -154,7 +167,11 @@ func (c *contactsClient) TestURLURL(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("contacts", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

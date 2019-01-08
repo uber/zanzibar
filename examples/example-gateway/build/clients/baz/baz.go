@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
@@ -244,6 +246,13 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.baz.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.baz.errorPercentThreshold")
+	hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
+
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
@@ -284,9 +293,16 @@ func (c *bazClient) EchoBinary(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoBinary", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -321,9 +337,16 @@ func (c *bazClient) EchoBool(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoBool", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoBool", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -358,9 +381,16 @@ func (c *bazClient) EchoDouble(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoDouble", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -395,9 +425,16 @@ func (c *bazClient) EchoEnum(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoEnum", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -432,9 +469,16 @@ func (c *bazClient) EchoI16(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoI16", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoI16", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -469,9 +513,16 @@ func (c *bazClient) EchoI32(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoI32", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoI32", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -506,9 +557,16 @@ func (c *bazClient) EchoI64(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoI64", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoI64", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -543,9 +601,16 @@ func (c *bazClient) EchoI8(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoI8", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoI8", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -580,9 +645,16 @@ func (c *bazClient) EchoString(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoString", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoString", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -617,9 +689,16 @@ func (c *bazClient) EchoStringList(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoStringList", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -654,9 +733,16 @@ func (c *bazClient) EchoStringMap(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoStringMap", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -691,9 +777,16 @@ func (c *bazClient) EchoStringSet(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoStringSet", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -728,9 +821,16 @@ func (c *bazClient) EchoStructList(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoStructList", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -765,9 +865,16 @@ func (c *bazClient) EchoStructSet(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoStructSet", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -802,9 +909,16 @@ func (c *bazClient) EchoTypedef(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SecondService", "echoTypedef", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -838,9 +952,16 @@ func (c *bazClient) Call(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "call", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "call", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -873,9 +994,16 @@ func (c *bazClient) Compare(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "compare", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "compare", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -914,9 +1042,16 @@ func (c *bazClient) GetProfile(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "getProfile", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -953,9 +1088,16 @@ func (c *bazClient) HeaderSchema(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "headerSchema", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -994,9 +1136,16 @@ func (c *bazClient) Ping(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "ping", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "ping", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1030,9 +1179,16 @@ func (c *bazClient) DeliberateDiffNoop(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "sillyNoop", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1066,9 +1222,16 @@ func (c *bazClient) TestUUID(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "testUuid", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1099,9 +1262,16 @@ func (c *bazClient) Trans(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "trans", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "trans", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1140,9 +1310,16 @@ func (c *bazClient) TransHeaders(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "transHeaders", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1181,9 +1358,16 @@ func (c *bazClient) TransHeadersNoReq(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "transHeadersNoReq", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1220,9 +1404,16 @@ func (c *bazClient) TransHeadersType(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "transHeadersType", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {
@@ -1260,9 +1451,16 @@ func (c *bazClient) URLTest(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	err = hystrix.Do("baz", func() error {
+		success, respHeaders, err = caller(
+			ctx, "SimpleService", "urlTest", reqHeaders, args, &result,
+		)
+		return err
+	}, nil)
 
 	if err == nil && !success {
 		switch {

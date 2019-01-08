@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/module"
@@ -64,6 +66,13 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.google-now.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.google-now.defaultHeaders", &defaultHeaders)
 	}
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.google-now.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.google-now.errorPercentThreshold")
+	hystrix.ConfigureCommand("google-now", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &googleNowClient{
 		clientID: "google-now",
@@ -108,7 +117,11 @@ func (c *googleNowClient) AddCredentials(
 		return nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("google-now", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +174,11 @@ func (c *googleNowClient) CheckCredentials(
 		return nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("google-now", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return nil, err
 	}

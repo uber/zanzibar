@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
@@ -62,6 +64,13 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.multi.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.multi.defaultHeaders", &defaultHeaders)
 	}
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.multi.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.multi.errorPercentThreshold")
+	hystrix.ConfigureCommand("multi", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &multiClient{
 		clientID: "multi",
@@ -101,7 +110,11 @@ func (c *multiClient) HelloA(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("multi", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -151,7 +164,11 @@ func (c *multiClient) HelloB(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("multi", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}

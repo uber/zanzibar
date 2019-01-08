@@ -929,6 +929,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"fmt"
+	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"time"
 
@@ -999,6 +1000,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
+
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1091,7 +1100,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{- end}}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("{{$clientID}}", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
@@ -1220,7 +1233,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 7954, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8488, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2081,6 +2094,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"errors"
+	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"strings"
 	"time"
@@ -2178,6 +2192,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
+
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
@@ -2230,9 +2251,17 @@ type {{$clientName}} struct {
 		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
-		success, respHeaders, err := caller(
-			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-		)
+
+		var success bool
+		var respHeaders map[string]string
+		var err error
+		err = hystrix.Do("{{$clientID}}", func() error {
+			success, respHeaders, err = caller(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			)
+			return err
+		}, nil)
+
 
 		if err == nil && !success {
 			switch {
@@ -2278,7 +2307,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6319, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6892, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

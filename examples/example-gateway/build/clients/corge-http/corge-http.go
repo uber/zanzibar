@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/corge-http/module"
@@ -70,6 +72,13 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.corge-http.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.corge-http.defaultHeaders", &defaultHeaders)
 	}
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge-http.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge-http.errorPercentThreshold")
+	hystrix.ConfigureCommand("corge-http", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &corgeHTTPClient{
 		clientID:     "corge-http",
@@ -116,7 +125,11 @@ func (c *corgeHTTPClient) EchoString(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("corge-http", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return defaultRes, nil, err
 	}
