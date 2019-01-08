@@ -60,6 +60,8 @@ import:
 - package: go.uber.org/fx
 - package: go.uber.org/automaxprocs
   version: ^1.2.0
+- package: github.com/afex/hystrix-go
+  version: master
 
 # Build tools / SDKs
 - package: github.com/jteeuwen/go-bindata

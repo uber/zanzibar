@@ -5,6 +5,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"errors"
+	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"strings"
 	"time"
@@ -102,6 +103,13 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
+
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
 		deps.Default.Logger,
@@ -154,9 +162,17 @@ type {{$clientName}} struct {
 		if strings.EqualFold(reqHeaders["{{$stagingReqHeader}}"], "true") {
 			caller = c.client.CallThruAltChannel
 		}
-		success, respHeaders, err := caller(
-			ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-		)
+
+		var success bool
+		var respHeaders map[string]string
+		var err error
+		err = hystrix.Do("{{$clientID}}", func() error {
+			success, respHeaders, err = caller(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			)
+			return err
+		}, nil)
+
 
 		if err == nil && !success {
 			switch {

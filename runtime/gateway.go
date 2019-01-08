@@ -23,6 +23,8 @@ package zanzibar
 import (
 	"context"
 	"fmt"
+	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/uber/zanzibar/runtime/plugins"
 	"io"
 	"io/ioutil"
 	"net"
@@ -498,6 +500,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		runtimeMetricsOpts,
 		gateway.RootScope,
 	)
+
+	//Initialize M3Collector for hystrix metrics
+	c := plugins.InitializeM3Collector(gateway.RootScope)
+	metricCollector.Registry.Register(c.NewM3Collector)
 
 	return nil
 }

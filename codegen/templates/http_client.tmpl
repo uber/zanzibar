@@ -5,6 +5,7 @@ package {{$instance.PackageInfo.PackageName}}
 import (
 	"context"
 	"fmt"
+	"github.com/afex/hystrix-go/hystrix"
 	"strconv"
 	"time"
 
@@ -75,6 +76,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
+
+
+	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+		MaxConcurrentRequests: int(maxConcurrentRequests),
+		ErrorPercentThreshold: int(errorPercentThreshold),
+	})
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -167,7 +176,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 	}
 	{{- end}}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	err = hystrix.Do("{{$clientID}}", func() error {
+		res, err = req.Do()
+		return err
+	}, nil)
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
