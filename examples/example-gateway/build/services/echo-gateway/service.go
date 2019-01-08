@@ -54,6 +54,7 @@ func CreateGateway(
 
 // RegisterDeps registers direct dependencies of the service
 func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	//lint:ignore S1021 allow less concise variable declaration for ease of code generation
 	var err error
 	err = deps.Endpoint.Echo.Register(g)
 	if err != nil {

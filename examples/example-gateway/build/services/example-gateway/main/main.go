@@ -27,7 +27,6 @@ import (
 	"flag"
 	"os"
 	"os/signal"
-	"runtime"
 	"strings"
 	"syscall"
 
@@ -43,11 +42,6 @@ import (
 )
 
 var configFiles *string
-
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
 
 func getConfig() *zanzibar.StaticConfig {
 	var files []string

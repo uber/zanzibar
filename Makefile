@@ -34,8 +34,8 @@ install:
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 
-.PHONY: check-license
-check-license:
+.PHONY: check-licence
+check-licence:
 	@echo "Checking uber-licence..."
 	@ls ./node_modules/.bin/uber-licence >/dev/null 2>&1 || npm i uber-licence
 	@./node_modules/.bin/uber-licence --dry --file '*.go' --dir '!workspace' --dir '!vendor' --dir '!examples' --dir '!.tmp_gen' --dir '!template_bundle'
@@ -72,7 +72,7 @@ cyclo-check:
 	@gocyclo -over 15 $(filter-out examples ,$(PKG_FILES))
 
 .PHONY: lint
-lint: check-license eclint-check
+lint: check-licence eclint-check
 	@rm -f lint.log
 	@echo "Checking formatting..."
 	@gofmt -d -s $(PKG_FILES) 2>&1 | $(FILTER_LINT) | tee -a lint.log
