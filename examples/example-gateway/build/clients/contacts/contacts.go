@@ -74,6 +74,9 @@ func NewClient(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
+
 	return &contactsClient{
 		clientID: "contacts",
 		httpClient: zanzibar.NewHTTPClientContext(
@@ -87,6 +90,7 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -114,10 +118,14 @@ func (c *contactsClient) SaveContacts(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("contacts", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -168,10 +176,14 @@ func (c *contactsClient) TestURLURL(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("contacts", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "contacts", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}

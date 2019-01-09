@@ -113,14 +113,19 @@ func NewClient(deps *module.Dependencies) Client {
 		},
 	)
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
+
 	return &corgeClient{
-		client: client,
+		client:                 client,
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
 // corgeClient is the TChannel client for downstream service.
 type corgeClient struct {
-	client *zanzibar.TChannelClient
+	client                 *zanzibar.TChannelClient
+	circuitBreakerDisabled bool
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -142,12 +147,18 @@ func (c *corgeClient) EchoString(
 	var success bool
 	var respHeaders map[string]string
 	var err error
-	err = hystrix.Do("corge", func() error {
+	if c.circuitBreakerDisabled {
 		success, respHeaders, err = caller(
 			ctx, "Corge", "echoString", reqHeaders, args, &result,
 		)
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+			success, respHeaders, err = caller(
+				ctx, "Corge", "echoString", reqHeaders, args, &result,
+			)
+			return err
+		}, nil)
+	}
 
 	if err == nil && !success {
 		switch {

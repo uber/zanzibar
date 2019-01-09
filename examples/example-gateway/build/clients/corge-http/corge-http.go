@@ -52,10 +52,11 @@ type corgeHTTPClient struct {
 	clientID   string
 	httpClient *zanzibar.HTTPClient
 
-	calleeHeader string
-	callerHeader string
-	callerName   string
-	calleeName   string
+	calleeHeader           string
+	callerHeader           string
+	callerName             string
+	calleeName             string
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.
@@ -80,6 +81,9 @@ func NewClient(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
+
 	return &corgeHTTPClient{
 		clientID:     "corge-http",
 		callerHeader: callerHeader,
@@ -96,6 +100,7 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -126,10 +131,14 @@ func (c *corgeHTTPClient) EchoString(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("corge-http", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "corge-http", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}

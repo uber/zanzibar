@@ -74,6 +74,9 @@ func NewClient(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.google-now.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.google-now.circuitBreakerDisabled")
+
 	return &googleNowClient{
 		clientID: "google-now",
 		httpClient: zanzibar.NewHTTPClientContext(
@@ -87,6 +90,7 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -118,10 +122,14 @@ func (c *googleNowClient) AddCredentials(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("google-now", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -175,10 +183,14 @@ func (c *googleNowClient) CheckCredentials(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("google-now", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "google-now", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -72,6 +72,9 @@ func NewClient(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.multi.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.multi.circuitBreakerDisabled")
+
 	return &multiClient{
 		clientID: "multi",
 		httpClient: zanzibar.NewHTTPClientContext(
@@ -85,6 +88,7 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -111,10 +115,14 @@ func (c *multiClient) HelloA(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("multi", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -165,10 +173,14 @@ func (c *multiClient) HelloB(
 	}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("multi", func() error {
+	if c.circuitBreakerDisabled {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
