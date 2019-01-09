@@ -29,7 +29,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the panicTChannel endpoint module
+// Dependencies contains dependencies for the tchannel/panic endpoint module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
 	Client  *ClientDependencies

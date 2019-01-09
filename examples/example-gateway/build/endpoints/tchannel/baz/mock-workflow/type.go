@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mockbaztchannelworkflow
+package mocktchannelbazworkflow
 
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -31,7 +31,7 @@ import (
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 )
 
-// MockClientNodes contains mock client dependencies for the bazTChannel endpoint module
+// MockClientNodes contains mock client dependencies for the tchannel/baz endpoint module
 type MockClientNodes struct {
 	Baz  *bazclientgeneratedmock.MockClient
 	Quux *quuxclientgeneratedmock.MockClientWithFixture

@@ -51,19 +51,21 @@ const jsonConfigSuffix = "-config.json"
 const yamlConfigSuffix = "-config.yaml"
 
 // NewModuleSystem returns a new module system
-func NewModuleSystem(postGenHook ...PostGenHook) *ModuleSystem {
+func NewModuleSystem(moduleSearchPaths []string, postGenHook ...PostGenHook) *ModuleSystem {
 	return &ModuleSystem{
-		classes:     map[string]*ModuleClass{},
-		classOrder:  []string{},
-		postGenHook: postGenHook,
+		classes:           map[string]*ModuleClass{},
+		classOrder:        []string{},
+		postGenHook:       postGenHook,
+		moduleSearchPaths: moduleSearchPaths,
 	}
 }
 
 // ModuleSystem defines the module classes and their type generators
 type ModuleSystem struct {
-	classes     map[string]*ModuleClass
-	classOrder  []string
-	postGenHook []PostGenHook
+	classes           map[string]*ModuleClass
+	classOrder        []string
+	postGenHook       []PostGenHook
+	moduleSearchPaths []string
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -78,19 +80,12 @@ func (system *ModuleSystem) RegisterClass(class ModuleClass) error {
 		return errors.Errorf("A module class name must not be empty")
 	}
 
+	if class.NamePlural == "" {
+		return errors.Errorf("A module class name plural must not be empty")
+	}
+
 	if system.classes[name] != nil {
 		return errors.Errorf("Module class %q is already defined", name)
-	}
-
-	for i, dir := range class.Directories {
-		class.Directories[i] = filepath.Clean(dir)
-	}
-	class.Directories = dedup(class.Directories)
-
-	for _, dir := range class.Directories {
-		if err := system.validateClassDir(&class, dir); err != nil {
-			return err
-		}
 	}
 
 	class.types = map[string]BuildGenerator{}
@@ -129,31 +124,6 @@ func (system *ModuleSystem) validateClassDir(class *ModuleClass, dir string) err
 	}
 
 	return nil
-}
-
-// RegisterClassDir adds the given dir to the directories of the module class with given className.
-// This method allows projects built on zanzibar to have arbitrary directories to host module class
-// configs, therefore is mainly intended for external use.
-func (system *ModuleSystem) RegisterClassDir(className string, dir string) error {
-	dir = filepath.Clean(dir)
-	for _, class := range system.classes {
-		if className != class.Name {
-			continue
-		}
-
-		if err := system.validateClassDir(class, dir); err != nil {
-			return err
-		}
-
-		for _, registered := range class.Directories {
-			if dir == registered {
-				return nil
-			}
-		}
-		class.Directories = append(class.Directories, dir)
-		return nil
-	}
-	return errors.Errorf("Module class %q is not found", className)
 }
 
 // RegisterClassType registers a type generator for a specific module class
@@ -290,10 +260,22 @@ func (system *ModuleSystem) populateRecursiveDependencies(
 				continue
 			}
 
-			classInstance.DependencyOrder = append(
-				classInstance.DependencyOrder,
-				className,
-			)
+			// If a glob pattern matches the same module class multiple times, make sure that DependencyOrder
+			// remains the unique list of classes.
+
+			found := false
+			for _, dependencyOrderClassName := range classInstance.DependencyOrder {
+				if dependencyOrderClassName == className {
+					found = true
+					break
+				}
+			}
+			if !found {
+				classInstance.DependencyOrder = append(
+					classInstance.DependencyOrder,
+					className,
+				)
+			}
 
 			moduleList := make([]*ModuleInstance, len(moduleMap))
 			index := 0
@@ -534,6 +516,31 @@ func (system *ModuleSystem) resolveClassOrder() error {
 	return nil
 }
 
+// Given a module instance name like "app/foo/clients/bar", strip the "clients" part, i.e. usually the
+// second to last path part.
+func stripModuleClassName(classType, moduleDir string) string {
+	parts := strings.Split(moduleDir, string(filepath.Separator))
+
+	if len(parts) == 1 {
+		return moduleDir
+	}
+
+	for i := len(parts) - 1; i >= 0; i-- {
+		if parts[i] == classType {
+
+			// Shift parts left starting with ith element, overwriting parts[i]
+			for j := i + 1; j < len(parts); j++ {
+				parts[j-1] = parts[j]
+			}
+
+			parts = parts[0 : len(parts)-1]
+
+			break
+		}
+	}
+	return strings.Join(parts, string(filepath.Separator))
+}
+
 // ResolveModules resolves the module instances from the config on disk
 // Using the system class and type definitions, the class directories are
 // walked, and a module instance is initialized for each identified module in
@@ -550,56 +557,83 @@ func (system *ModuleSystem) ResolveModules(
 
 	resolvedModules := map[string][]*ModuleInstance{}
 
-	for _, className := range system.classOrder {
-		class := system.classes[className]
-		classInstances := []*ModuleInstance{}
+	for _, moduleDirectoryGlob := range system.moduleSearchPaths {
+		moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
+		if err != nil {
+			return nil, errors.Wrapf(err, "Error globbing %q", moduleDirectoryGlob)
+		}
 
-		for _, dir := range class.Directories {
+		// We don't know until reading the configuration file what the class name will be. For consistency we will
+		// continue to assume that all of the instances that match a glob pattern are the same class name, so
+		// once we've read the first instance we can populate this.
+		className := ""
 
-			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
-			if class.ClassType == SingleModule {
-				instance, instanceErr := system.readInstance(
-					packageRoot,
-					baseDirectory,
-					targetGenDir,
-					className,
-					dir,
+		for _, moduleDirAbs := range moduleDirectoriesAbs {
+			stat, err := os.Stat(moduleDirAbs)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"internal error: cannot stat %q",
+					moduleDirAbs,
 				)
-				if instanceErr != nil {
+			}
+
+			if !stat.IsDir() {
+				// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
+				// interested only in the containing directories.
+				continue
+			}
+
+			moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"internal error: cannot make %q relative to %q",
+					moduleDirAbs,
+					baseDirectory,
+				)
+			}
+
+			instance, instanceErr := system.readInstance(
+				packageRoot,
+				baseDirectory,
+				targetGenDir,
+				moduleDir,
+			)
+			if instanceErr != nil {
+				if _, ok := instanceErr.(inferError); ok {
+					// It could be the case that a glob pattern like "endpoints/*" matches a *folder* that is later
+					// matched by a longer glob pattern like "endpoints/tchannel/*". It will fail at a later step
+					// if no globbing pattern matches the wanted instance.
+					continue
+				} else {
 					return nil, errors.Wrapf(
 						instanceErr,
-						"Error reading single instance %q in %q",
-						className,
-						dir,
+						"Error reading multi instance %q",
+						moduleDir,
 					)
 				}
-				classInstances = append(classInstances, instance)
-			} else {
-				instances, err := system.resolveMultiModules(
-					packageRoot,
-					baseDirectory,
-					targetGenDir,
-					fullInstanceDirectory,
+			}
+
+			resolvedModules[instance.ClassName] = append(resolvedModules[instance.ClassName], instance)
+
+			// For consistency with prior zanzibar behavior of assuming all instances in a multi-module directory
+			// are of the same class name, we will return an error in this case.
+			if className == "" {
+				className = instance.ClassName
+			} else if className != instance.ClassName {
+				return nil, fmt.Errorf(
+					"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
+					moduleDirectoryGlob,
 					className,
-					class,
+					moduleDir,
 				)
-
-				if err != nil {
-					return nil, errors.Wrapf(err,
-						"Error reading resolving multi modules of %q",
-						className,
-					)
-				}
-
-				classInstances = append(classInstances, instances...)
 			}
 		}
 
-		resolvedModules[className] = classInstances
-
 		// Resolve dependencies for all classes
 		resolveErr := system.populateResolvedDependencies(
-			classInstances,
+			resolvedModules[className],
 			resolvedModules,
 		)
 		if resolveErr != nil {
@@ -607,7 +641,7 @@ func (system *ModuleSystem) ResolveModules(
 		}
 
 		// Resolved recursive dependencies for all classes
-		recursiveErr := system.populateRecursiveDependencies(classInstances)
+		recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
 		if recursiveErr != nil {
 			return nil, recursiveErr
 		}
@@ -616,113 +650,54 @@ func (system *ModuleSystem) ResolveModules(
 	return resolvedModules, nil
 }
 
-func getConfigFilePath(dir, name string) (string, string, string) {
-	yamlFileName := name + yamlConfigSuffix
-	jsonFileName := ""
-	path := filepath.Join(dir, yamlFileName)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		// Cannot find yaml file, try json file instead
-		jsonFileName = name + jsonConfigSuffix
-		yamlFileName = jsonFileName
-		path = filepath.Join(dir, jsonFileName)
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			// Cannot find any config file
-			path = ""
-			jsonFileName = ""
-			yamlFileName = ""
-		}
-	}
-
-	return path, yamlFileName, jsonFileName
+type inferError struct {
+	InstanceDirectory string
 }
 
-func (system *ModuleSystem) resolveMultiModules(
-	packageRoot string,
-	baseDirectory string,
-	targetGenDir string,
-	classDir string, // full path
-	className string,
-	class *ModuleClass,
-) ([]*ModuleInstance, error) {
-	relClassDir, err := filepath.Rel(baseDirectory, classDir)
-	if err != nil {
-		return nil, errors.Wrapf(err,
-			"Error relative class directory for %q",
-			className,
-		)
-	}
-
-	configFile, _, _ := getConfigFilePath(classDir, className)
-
-	if configFile != "" {
-		instance, instanceErr := system.readInstance(
-			packageRoot,
-			baseDirectory,
-			targetGenDir,
-			className,
-			relClassDir,
-		)
-		if instanceErr != nil {
-			return nil, errors.Wrapf(
-				instanceErr,
-				"Error reading multi instance %q in %q",
-				className,
-				relClassDir,
-			)
-		}
-		return []*ModuleInstance{instance}, nil
-	}
-
-	classInstances := []*ModuleInstance{}
-	files, err := ioutil.ReadDir(classDir)
-
-	if err != nil {
-		// TODO: We should accumulate errors and list them all here
-		// Expected $path to be a class directory
-		return nil, errors.Wrapf(
-			err,
-			"Error reading module instance directory %q",
-			classDir,
-		)
-	}
-
-	for _, file := range files {
-		if !file.IsDir() {
-			continue
-		}
-
-		instances, err := system.resolveMultiModules(
-			packageRoot,
-			baseDirectory,
-			targetGenDir,
-			filepath.Join(classDir, file.Name()),
-			className,
-			class,
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err,
-				"Error reading subdir of multi instance %q in %q",
-				className,
-				filepath.Join(relClassDir, file.Name()),
-			)
-		}
-		classInstances = append(classInstances, instances...)
-	}
-
-	return classInstances, nil
+func (i inferError) Error() string {
+	return fmt.Sprintf("could not infer class name for %q", i.InstanceDirectory)
 }
 
 func (system *ModuleSystem) readInstance(
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
-	className string,
 	instanceDirectory string,
 ) (*ModuleInstance, error) {
-
 	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
-	classConfigPath, yamlFileName, jsonFileName := getConfigFilePath(
-		classConfigDir, className)
+
+	// Try to infer the class name based on what *-config.yaml files exist.
+	instanceFiles, err := ioutil.ReadDir(classConfigDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"error scanning %q for ClassConfig",
+			classConfigDir,
+		)
+	}
+
+	var (
+		className, jsonFileName, yamlFileName, classConfigPath string
+	)
+	for _, instanceFile := range instanceFiles {
+		if strings.HasSuffix(instanceFile.Name(), yamlConfigSuffix) {
+			className = strings.TrimSuffix(instanceFile.Name(), yamlConfigSuffix)
+			yamlFileName = instanceFile.Name()
+			classConfigPath = filepath.Join(classConfigDir, yamlFileName)
+			break
+		}
+
+		if strings.HasSuffix(instanceFile.Name(), jsonConfigSuffix) {
+			className = strings.TrimSuffix(instanceFile.Name(), jsonConfigSuffix)
+			jsonFileName = instanceFile.Name()
+			classConfigPath = filepath.Join(classConfigDir, jsonFileName)
+			break
+		}
+	}
+
+	if classConfigPath == "" {
+		return nil, inferError{InstanceDirectory: instanceDirectory}
+	}
 
 	raw, readErr := ioutil.ReadFile(classConfigPath)
 	if readErr != nil {
@@ -769,13 +744,20 @@ func (system *ModuleSystem) readInstance(
 		)
 	}
 
+	var classPlural string
+	for _, moduleClass := range system.classes {
+		if moduleClass.Name == className {
+			classPlural = moduleClass.NamePlural
+		}
+	}
+
 	return &ModuleInstance{
 		PackageInfo:           packageInfo,
 		ClassName:             className,
 		ClassType:             config.Type,
 		BaseDirectory:         baseDirectory,
 		Directory:             instanceDirectory,
-		InstanceName:          config.Name,
+		InstanceName:          stripModuleClassName(classPlural, instanceDirectory),
 		Dependencies:          dependencies,
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
@@ -1215,12 +1197,13 @@ func FormatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	Name        string
-	ClassType   moduleClassType
-	Directories []string
-	DependsOn   []string
-	DependedBy  []string
-	types       map[string]BuildGenerator
+	Name       string
+	NamePlural string
+	ClassType  moduleClassType
+
+	DependsOn  []string
+	DependedBy []string
+	types      map[string]BuildGenerator
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass
@@ -1360,6 +1343,10 @@ type ModuleInstance struct {
 	JSONFileRaw []byte // Deprecated
 	// YAMLFileRaw is the raw YAML file read as bytes used for future parsing
 	YAMLFileRaw []byte
+}
+
+func (instance *ModuleInstance) String() string {
+	return fmt.Sprintf("[instance %q %q]", instance.ClassType, instance.InstanceName)
 }
 
 // GeneratedSpec returns the last spec result returned for the module instance

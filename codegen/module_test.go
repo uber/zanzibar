@@ -76,13 +76,23 @@ func (*TestHTTPEndpointGenerator) Generate(
 }
 
 func TestExampleService(t *testing.T) {
-	moduleSystem := NewModuleSystem()
+	moduleSystem := NewModuleSystem(
+		[]string{
+			"clients/*",
+			"endpoints/*",
+			"middlewares/*",
+			"services/*",
+			"another/*",
+			"more-endpoints/*",
+			"endpoints/*/*",
+		},
+	)
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "client",
-		ClassType:   MultiModule,
-		Directories: []string{"clients"},
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering client class: %s", err)
@@ -106,24 +116,14 @@ func TestExampleService(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClassDir("endpoint", "another")
-	if err == nil {
-		t.Error("Registering class dir for endpoint class should have errored")
-	}
-
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "endpoint",
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client"},
-		Directories: []string{"endpoints", "more-endpoints"},
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
-	}
-
-	err = moduleSystem.RegisterClassDir("endpoint", "another")
-	if err != nil {
-		t.Errorf("Unexpected error registering endpoint class dir: %s", err)
 	}
 
 	err = moduleSystem.RegisterClassType(
@@ -145,26 +145,12 @@ func TestExampleService(t *testing.T) {
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "client",
-		ClassType:   MultiModule,
-		Directories: []string{"clients"},
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	})
 	if err == nil {
 		t.Errorf("Expected double definition of client class to error")
-	}
-
-	err = moduleSystem.RegisterClassDir("client", "endpoints")
-	if err != nil {
-		t.Error("Unexpected error registering dir for client class")
-	}
-
-	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "newClient",
-		ClassType:   MultiModule,
-		Directories: []string{"./clients/../../../foo"},
-	})
-	if err == nil {
-		t.Errorf("Expected registering a module in an external directory to throw")
 	}
 
 	currentDir := getTestDirName()
@@ -277,7 +263,7 @@ func TestExampleService(t *testing.T) {
 		Directory:     "endpoints/health",
 		InstanceName:  "health",
 		JSONFileName:  "endpoint-config.json",
-		YAMLFileName:  "endpoint-config.json",
+		YAMLFileName:  "",
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
@@ -313,7 +299,7 @@ func TestExampleService(t *testing.T) {
 		ClassName:     "endpoint",
 		ClassType:     "http",
 		Directory:     "more-endpoints/foo",
-		InstanceName:  "foo",
+		InstanceName:  "more-endpoints/foo",
 		JSONFileName:  "",
 		YAMLFileName:  "endpoint-config.yaml",
 		PackageInfo: &PackageInfo{
@@ -351,7 +337,7 @@ func TestExampleService(t *testing.T) {
 		ClassName:     "endpoint",
 		ClassType:     "http",
 		Directory:     "another/bar",
-		InstanceName:  "bar",
+		InstanceName:  "another/bar",
 		JSONFileName:  "",
 		YAMLFileName:  "endpoint-config.yaml",
 		PackageInfo: &PackageInfo{
@@ -389,10 +375,11 @@ func TestExampleService(t *testing.T) {
 		&expectedClientDependency,
 		&expectedEmbeddedClient,
 	}
+	// Note: Stable ordering is not required by POSIX
 	expectedEndpoints := []*ModuleInstance{
 		&expectedHealthEndpointInstance,
-		&expectedFooEndpointInstance,
 		&expectedBarEndpointInstance,
+		&expectedFooEndpointInstance,
 	}
 
 	for className, classInstances := range instances {
@@ -436,13 +423,13 @@ func TestExampleService(t *testing.T) {
 }
 
 func TestExampleServiceIncremental(t *testing.T) {
-	moduleSystem := NewModuleSystem()
+	moduleSystem := NewModuleSystem([]string{})
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "client",
-		ClassType:   MultiModule,
-		Directories: []string{"clients"},
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering client class: %s", err)
@@ -466,24 +453,14 @@ func TestExampleServiceIncremental(t *testing.T) {
 		t.Errorf("Unexpected error registering tchannel client class type: %s", err)
 	}
 
-	err = moduleSystem.RegisterClassDir("endpoint", "another")
-	if err == nil {
-		t.Error("Registering class dir for endpoint class should have errored")
-	}
-
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "endpoint",
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client"},
-		Directories: []string{"endpoints", "more-endpoints"},
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
-	}
-
-	err = moduleSystem.RegisterClassDir("endpoint", "another")
-	if err != nil {
-		t.Errorf("Unexpected error registering endpoint class dir: %s", err)
 	}
 
 	err = moduleSystem.RegisterClassType(
@@ -505,26 +482,12 @@ func TestExampleServiceIncremental(t *testing.T) {
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "client",
-		ClassType:   MultiModule,
-		Directories: []string{"clients"},
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	})
 	if err == nil {
 		t.Errorf("Expected double definition of client class to error")
-	}
-
-	err = moduleSystem.RegisterClassDir("client", "endpoints")
-	if err != nil {
-		t.Error("Unexpected error registering dir for client class")
-	}
-
-	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "newClient",
-		ClassType:   MultiModule,
-		Directories: []string{"./clients/../../../foo"},
-	})
-	if err == nil {
-		t.Errorf("Expected registering a module in an external directory to throw")
 	}
 
 	currentDir := getTestDirName()
@@ -642,7 +605,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 		Directory:     "endpoints/health",
 		InstanceName:  "health",
 		JSONFileName:  "endpoint-config.json",
-		YAMLFileName:  "endpoint-config.json",
+		YAMLFileName:  "",
 		PackageInfo: &PackageInfo{
 			ExportName:            "NewEndpoint",
 			ExportType:            "Endpoint",
@@ -678,7 +641,7 @@ func TestExampleServiceIncremental(t *testing.T) {
 		ClassName:     "endpoint",
 		ClassType:     "http",
 		Directory:     "more-endpoints/foo",
-		InstanceName:  "foo",
+		InstanceName:  "more-endpoints/foo",
 		JSONFileName:  "",
 		YAMLFileName:  "endpoint-config.yaml",
 		PackageInfo: &PackageInfo{
@@ -801,13 +764,16 @@ func TestExampleServiceIncremental(t *testing.T) {
 }
 
 func TestExampleServiceCycles(t *testing.T) {
-	moduleSystem := NewModuleSystem()
+	moduleSystem := NewModuleSystem([]string{
+		"clients/*",
+		"endpoints/*",
+	})
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "client",
-		ClassType:   MultiModule,
-		Directories: []string{"clients"},
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering client class: %s", err)
@@ -823,10 +789,10 @@ func TestExampleServiceCycles(t *testing.T) {
 	}
 
 	err = moduleSystem.RegisterClass(ModuleClass{
-		Name:        "endpoint",
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client"},
-		Directories: []string{"endpoints"},
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error registering endpoint class: %s", err)
@@ -911,30 +877,30 @@ func TestSortDependencies(t *testing.T) {
 }
 
 func TestSortModuleClasses(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependsOn:   []string{"a"},
-		DependedBy:  []string{"c"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependsOn:  []string{"a"},
+		DependedBy: []string{"c"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "c",
-		DependsOn:   []string{"b"},
-		Directories: []string{"c"},
+		Name:       "c",
+		NamePlural: "cs",
+		DependsOn:  []string{"b"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "d",
-		DependsOn:   []string{"a"},
-		DependedBy:  []string{"c"},
-		Directories: []string{"d"},
+		Name:       "d",
+		NamePlural: "ds",
+		DependsOn:  []string{"a"},
+		DependedBy: []string{"c"},
 	})
 	assert.NoError(t, err)
 	expected := []string{"a", "b", "d", "c"}
@@ -944,25 +910,25 @@ func TestSortModuleClasses(t *testing.T) {
 }
 
 func TestSortModuleClassesNoDeps(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "c",
-		Directories: []string{"c"},
+		Name:       "c",
+		NamePlural: "cs",
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "d",
-		Directories: []string{"d"},
+		Name:       "d",
+		NamePlural: "ds",
 	})
 	assert.NoError(t, err)
 	expected := []string{"a", "b", "c", "d"}
@@ -972,17 +938,17 @@ func TestSortModuleClassesNoDeps(t *testing.T) {
 }
 
 func TestSortModuleClassesUndefined(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependsOn:   []string{"c"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependsOn:  []string{"c"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependsOn:   []string{"a"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependsOn:  []string{"a"},
 	})
 	assert.NoError(t, err)
 	err = ms.resolveClassOrder()
@@ -991,17 +957,17 @@ func TestSortModuleClassesUndefined(t *testing.T) {
 }
 
 func TestSortModuleClassesUndefined2(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependedBy:  []string{"c"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependedBy: []string{"c"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependedBy:  []string{"a"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependedBy: []string{"a"},
 	})
 	assert.NoError(t, err)
 	err = ms.resolveClassOrder()
@@ -1010,17 +976,17 @@ func TestSortModuleClassesUndefined2(t *testing.T) {
 }
 
 func TestSortableModuleClassCycle(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependsOn:   []string{"b"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependsOn:  []string{"b"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependsOn:   []string{"a"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependsOn:  []string{"a"},
 	})
 	assert.NoError(t, err)
 
@@ -1030,17 +996,17 @@ func TestSortableModuleClassCycle(t *testing.T) {
 }
 
 func TestSortableModuleClassCycle2(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependedBy:  []string{"b"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependedBy: []string{"b"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependedBy:  []string{"a"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependedBy: []string{"a"},
 	})
 	assert.NoError(t, err)
 
@@ -1050,23 +1016,23 @@ func TestSortableModuleClassCycle2(t *testing.T) {
 }
 
 func TestSortModuleClassesIndirectCycle(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependsOn:   []string{"b"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependsOn:  []string{"b"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependsOn:   []string{"c"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependsOn:  []string{"c"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "c",
-		DependsOn:   []string{"a"},
-		Directories: []string{"c"},
+		Name:       "c",
+		NamePlural: "cs",
+		DependsOn:  []string{"a"},
 	})
 	assert.NoError(t, err)
 	err = ms.resolveClassOrder()
@@ -1075,23 +1041,23 @@ func TestSortModuleClassesIndirectCycle(t *testing.T) {
 }
 
 func TestSortModuleClassesIndirectCycle2(t *testing.T) {
-	ms := NewModuleSystem()
+	ms := NewModuleSystem([]string{})
 	err := ms.RegisterClass(ModuleClass{
-		Name:        "a",
-		DependedBy:  []string{"b"},
-		Directories: []string{"a"},
+		Name:       "a",
+		NamePlural: "as",
+		DependedBy: []string{"b"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "b",
-		DependedBy:  []string{"c"},
-		Directories: []string{"b"},
+		Name:       "b",
+		NamePlural: "bs",
+		DependedBy: []string{"c"},
 	})
 	assert.NoError(t, err)
 	err = ms.RegisterClass(ModuleClass{
-		Name:        "c",
-		DependedBy:  []string{"a"},
-		Directories: []string{"c"},
+		Name:       "c",
+		NamePlural: "cs",
+		DependedBy: []string{"a"},
 	})
 	assert.NoError(t, err)
 
@@ -1222,7 +1188,9 @@ func compareInstances(
 ) {
 	if actual.ClassName != expected.ClassName {
 		t.Errorf(
-			"Expected class name to be %s but found %s",
+			"Expected class name of %q %q to be %q but found %q",
+			expected.ClassName,
+			expected.InstanceName,
 			expected.ClassName,
 			actual.ClassName,
 		)
@@ -1230,8 +1198,9 @@ func compareInstances(
 
 	if actual.BaseDirectory != expected.BaseDirectory {
 		t.Errorf(
-			"Expected %s base directory to be %s but found %s",
+			"Expected %q %q base directory to be %q but found %q",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.BaseDirectory,
 			actual.BaseDirectory,
 		)
@@ -1239,17 +1208,19 @@ func compareInstances(
 
 	if actual.ClassType != expected.ClassType {
 		t.Errorf(
-			"Expected %s class type to be %s but found %s",
+			"Expected %q %q class type to be %q but found %q",
 			expected.ClassName,
-			expected.ClassType,
-			actual.ClassType,
+			expected.InstanceName,
+			expected.ClassName,
+			actual.ClassName,
 		)
 	}
 
 	if len(actual.Dependencies) != len(expected.Dependencies) {
 		t.Errorf(
-			"Expected %s to have %d dependencies but found %d",
+			"Expected %q %q to have %d dependencies but found %d",
 			expected.ClassName,
+			expected.InstanceName,
 			len(expected.Dependencies),
 			len(actual.Dependencies),
 		)
@@ -1260,8 +1231,9 @@ func compareInstances(
 
 		if actualDependency.ClassName != expectedDependency.ClassName {
 			t.Errorf(
-				"Expected %s dependency %d class name to be %s but found %s",
+				"Expected %q %q dependency %d class name to be %s but found %s",
 				expected.ClassName,
+				expected.InstanceName,
 				di,
 				expectedDependency.ClassName,
 				actualDependency.ClassName,
@@ -1270,7 +1242,8 @@ func compareInstances(
 
 		if actualDependency.InstanceName != expectedDependency.InstanceName {
 			t.Errorf(
-				"Expected %s dependency %d instance name to be %s but found %s",
+				"Expected %q %q dependency %d instance name to be %s but found %s",
+				expected.ClassName,
 				expected.InstanceName,
 				di,
 				expectedDependency.InstanceName,
@@ -1281,8 +1254,9 @@ func compareInstances(
 
 	if actual.Directory != expected.Directory {
 		t.Errorf(
-			"Expected %s directory to be %s but found %s",
+			"Expected %q %q directory to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.Directory,
 			actual.Directory,
 		)
@@ -1290,8 +1264,9 @@ func compareInstances(
 
 	if actual.InstanceName != expected.InstanceName {
 		t.Errorf(
-			"Expected %s instance name to be %s but found %s",
+			"Expected %q %q instance name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.InstanceName,
 			actual.InstanceName,
 		)
@@ -1299,8 +1274,9 @@ func compareInstances(
 
 	if actual.YAMLFileName != expected.YAMLFileName {
 		t.Errorf(
-			"Expected %s yaml file name to be %s but found %s",
+			"Expected %q %q yaml file name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.YAMLFileName,
 			actual.YAMLFileName,
 		)
@@ -1308,8 +1284,9 @@ func compareInstances(
 
 	if actual.JSONFileName != expected.JSONFileName {
 		t.Errorf(
-			"Expected %s json file name to be %s but found %s",
+			"Expected %q %q json file name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.JSONFileName,
 			actual.JSONFileName,
 		)
@@ -1317,8 +1294,9 @@ func compareInstances(
 
 	if actual.PackageInfo.ExportName != expected.PackageInfo.ExportName {
 		t.Errorf(
-			"Expected %s package export name to be %s but found %s",
+			"Expected %q %q package export name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.ExportName,
 			actual.PackageInfo.ExportName,
 		)
@@ -1326,8 +1304,9 @@ func compareInstances(
 
 	if actual.PackageInfo.ExportType != expected.PackageInfo.ExportType {
 		t.Errorf(
-			"Expected %s package export type to be %s but found %s",
+			"Expected %q %q package export type to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.ExportType,
 			actual.PackageInfo.ExportType,
 		)
@@ -1335,8 +1314,9 @@ func compareInstances(
 
 	if actual.PackageInfo.GeneratedPackageAlias != expected.PackageInfo.GeneratedPackageAlias {
 		t.Errorf(
-			"Expected %s generated package alias to be %s but found %s",
+			"Expected %q %q generated package alias to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.GeneratedPackageAlias,
 			actual.PackageInfo.GeneratedPackageAlias,
 		)
@@ -1344,8 +1324,9 @@ func compareInstances(
 
 	if actual.PackageInfo.GeneratedPackagePath != expected.PackageInfo.GeneratedPackagePath {
 		t.Errorf(
-			"Expected %s generated package path to be %s but found %s",
+			"Expected %q %q generated package path to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.GeneratedPackagePath,
 			actual.PackageInfo.GeneratedPackagePath,
 		)
@@ -1353,8 +1334,9 @@ func compareInstances(
 
 	if actual.PackageInfo.IsExportGenerated != expected.PackageInfo.IsExportGenerated {
 		t.Errorf(
-			"Expected %s IsExportGenerated to be %t but found %t",
+			"Expected %q %q IsExportGenerated to be %t but found %t",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.IsExportGenerated,
 			actual.PackageInfo.IsExportGenerated,
 		)
@@ -1362,8 +1344,9 @@ func compareInstances(
 
 	if actual.PackageInfo.PackageAlias != expected.PackageInfo.PackageAlias {
 		t.Errorf(
-			"Expected %s package alias to be %s but found %s",
+			"Expected %q %q package alias to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.PackageAlias,
 			actual.PackageInfo.PackageAlias,
 		)
@@ -1371,8 +1354,9 @@ func compareInstances(
 
 	if actual.PackageInfo.PackageName != expected.PackageInfo.PackageName {
 		t.Errorf(
-			"Expected %s package name to be %s but found %s",
+			"Expected %q %q package name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.PackageName,
 			actual.PackageInfo.PackageName,
 		)
@@ -1380,8 +1364,9 @@ func compareInstances(
 
 	if actual.PackageInfo.PackagePath != expected.PackageInfo.PackagePath {
 		t.Errorf(
-			"Expected %s package path to be %s but found %s",
+			"Expected %q %q package path to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.PackagePath,
 			actual.PackageInfo.PackagePath,
 		)
@@ -1389,8 +1374,9 @@ func compareInstances(
 
 	if actual.PackageInfo.ExportName != expected.PackageInfo.ExportName {
 		t.Errorf(
-			"Expected %s package export name to be %s but found %s",
+			"Expected %q %q package export name to be %s but found %s",
 			expected.ClassName,
+			expected.InstanceName,
 			expected.PackageInfo.ExportName,
 			actual.PackageInfo.ExportName,
 		)
@@ -1398,9 +1384,9 @@ func compareInstances(
 
 	if len(expected.ResolvedDependencies) != len(actual.ResolvedDependencies) {
 		t.Errorf(
-			"Expected %s %s to have %d resolved dependency class names but found %d",
-			expected.InstanceName,
+			"Expected %q %q to have %d resolved dependency class names but found %d",
 			expected.ClassName,
+			expected.InstanceName,
 			len(expected.ResolvedDependencies),
 			len(actual.ResolvedDependencies),
 		)
@@ -1481,4 +1467,51 @@ func compareInstances(
 			}
 		}
 	}
+}
+
+func TestModulePathStripping(t *testing.T) {
+	assert.Equal(t, "foo", stripModuleClassName("clients", "clients/foo"))
+	assert.Equal(t, "a/b/d", stripModuleClassName("c", "a/b/c/d"))
+	assert.Equal(t, "tchannel/foo", stripModuleClassName("endpoints", "endpoints/tchannel/foo"))
+}
+
+func TestModuleSearchDuplicateGlobs(t *testing.T) {
+	moduleSystem := NewModuleSystem([]string{
+		"clients/*",
+		"clients/*",
+	})
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	assert.NoError(t, err)
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	assert.NoError(t, err)
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	defer func() {
+		err := os.Remove(path.Join(testServiceDir, "build", serializedModuleTreePath))
+		if err != nil {
+			panic(errors.Wrap(err, "error removing serialized module tree"))
+		}
+	}()
+	instances, err := moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		false,
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, []string{"client"}, instances["client"][0].DependencyOrder)
 }

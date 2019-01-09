@@ -27,7 +27,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the echo endpoint module
+// Dependencies contains dependencies for the tchannel/echo endpoint module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
 }

@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mockechoworkflow
+package mocktchannelechoworkflow
 
-// MockNodes contains mock  dependencies for the echo endpoint module
+// MockNodes contains mock  dependencies for the tchannel/echo endpoint module
 type MockNodes struct {
 }

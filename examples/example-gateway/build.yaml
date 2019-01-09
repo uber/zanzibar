@@ -9,3 +9,12 @@ packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl
 traceKey: x-trace-id
+moduleSearchPaths:
+- clients/*
+- middlewares/*
+- endpoints/*
+- endpoints/tchannel/*
+- services/*
+- app/*/clients/*
+- app/*/endpoints/*
+- app/*/services/*

@@ -31,7 +31,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the bazTChannel endpoint module
+// Dependencies contains dependencies for the tchannel/baz endpoint module
 type Dependencies struct {
 	Default    *zanzibar.DefaultDependencies
 	Client     *ClientDependencies

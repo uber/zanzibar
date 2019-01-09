@@ -64,10 +64,6 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 	if err != nil {
 		return err
 	}
-	err = deps.Endpoint.BazTChannel.Register(g)
-	if err != nil {
-		return err
-	}
 	err = deps.Endpoint.Contacts.Register(g)
 	if err != nil {
 		return err
@@ -81,6 +77,10 @@ func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
 		return err
 	}
 	err = deps.Endpoint.Panic.Register(g)
+	if err != nil {
+		return err
+	}
+	err = deps.Endpoint.BazTChannel.Register(g)
 	if err != nil {
 		return err
 	}

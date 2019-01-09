@@ -91,6 +91,9 @@ func main() {
 	if config.ContainsKey("deputyReqHeader") {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
+
+	searchPaths := make([]string, 0)
+	config.MustGetStruct("moduleSearchPaths", &searchPaths)
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:        config.MustGetString("targetGenDir"),
@@ -101,6 +104,7 @@ func main() {
 		StagingReqHeader:       stagingReqHeader,
 		DeputyReqHeader:        deputyReqHeader,
 		TraceKey:               config.MustGetString("traceKey"),
+		ModuleSearchPaths:      searchPaths,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

@@ -87,11 +87,11 @@ type MiddlewareDependenciesNodes struct {
 type EndpointDependenciesNodes struct {
 	Bar           barendpointgenerated.Endpoint
 	Baz           bazendpointgenerated.Endpoint
-	BazTChannel   baztchannelendpointgenerated.Endpoint
 	Contacts      contactsendpointgenerated.Endpoint
 	Googlenow     googlenowendpointgenerated.Endpoint
 	Multi         multiendpointgenerated.Endpoint
 	Panic         panicendpointgenerated.Endpoint
+	BazTChannel   baztchannelendpointgenerated.Endpoint
 	PanicTChannel panictchannelendpointgenerated.Endpoint
 }
 
@@ -163,16 +163,6 @@ func InitializeDependencies(
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Client: &baztchannelendpointmodule.ClientDependencies{
-			Baz:  initializedClientDependencies.Baz,
-			Quux: initializedClientDependencies.Quux,
-		},
-		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
-			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
-		},
-	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsendpointmodule.ClientDependencies{
@@ -197,6 +187,16 @@ func InitializeDependencies(
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
+	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &baztchannelendpointmodule.ClientDependencies{
+			Baz:  initializedClientDependencies.Baz,
+			Quux: initializedClientDependencies.Quux,
+		},
+		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
+			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &panictchannelendpointmodule.ClientDependencies{
@@ -209,11 +209,11 @@ func InitializeDependencies(
 		Endpoint: &EndpointDependencies{
 			Bar:           initializedEndpointDependencies.Bar,
 			Baz:           initializedEndpointDependencies.Baz,
-			BazTChannel:   initializedEndpointDependencies.BazTChannel,
 			Contacts:      initializedEndpointDependencies.Contacts,
 			Googlenow:     initializedEndpointDependencies.Googlenow,
 			Multi:         initializedEndpointDependencies.Multi,
 			Panic:         initializedEndpointDependencies.Panic,
+			BazTChannel:   initializedEndpointDependencies.BazTChannel,
 			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
 		},
 	}
