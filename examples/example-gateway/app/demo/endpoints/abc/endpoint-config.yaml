@@ -1,0 +1,8 @@
+config:
+  endpoints:
+  - call.yaml
+dependencies:
+  client:
+  - baz
+name: appDemoAbc
+type: tchannel

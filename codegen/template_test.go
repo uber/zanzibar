@@ -36,6 +36,14 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
+	defer func() {
+		err := os.RemoveAll(tmpDir)
+		if err != nil {
+			t.Logf("error removing temporary directory %q: %s", tmpDir, err.Error())
+			t.Fail()
+		}
+	}()
+
 	relativeGatewayPath := "../examples/example-gateway"
 	absGatewayPath, err := filepath.Abs(relativeGatewayPath)
 	if !assert.NoError(t, err, "failed to get abs path %s", err) {
@@ -48,6 +56,11 @@ func TestGenerateBar(t *testing.T) {
 		CopyrightHeader: testCopyrightHeader,
 		GenCodePackage:  packageRoot + "/build/gen-code",
 		TraceKey:        "trace-key",
+		ModuleSearchPaths: []string{
+			"clients/*",
+			"middlewares/*",
+			"endpoints/*",
+		},
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
@@ -64,12 +77,13 @@ func TestGenerateBar(t *testing.T) {
 		return
 	}
 
-	_, buildErr := moduleSystem.GenerateBuild(
+	resolvedModules, buildErr := moduleSystem.GenerateBuild(
 		"github.com/uber/zanzibar/examples/example-gateway",
 		absGatewayPath,
 		packageHelper.CodeGenTargetPath(),
 		true,
 	)
+	t.Logf("resolved moduels: %+v", resolvedModules)
 	if !assert.NoError(t, buildErr, "failed to create clients init %s", buildErr) {
 		return
 	}

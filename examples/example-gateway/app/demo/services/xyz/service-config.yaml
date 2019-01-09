@@ -1,0 +1,7 @@
+config: {}
+dependencies:
+  endpoint:
+  - bar
+  - app/demo/abc
+name: xyz
+type: gateway

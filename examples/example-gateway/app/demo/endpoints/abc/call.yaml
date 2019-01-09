@@ -1,0 +1,8 @@
+endpointId: appDemoAbc
+endpointType: tchannel
+handleId: call
+thriftFile: endpoints/app/demo/endpoints/abc.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: AppDemoService::Call
+workflowImportPath: github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc
+workflowType: custom

@@ -46,10 +46,10 @@ type Dependencies struct {
 type EndpointDependencies struct {
 	Bar           barendpointgenerated.Endpoint
 	Baz           bazendpointgenerated.Endpoint
-	BazTChannel   baztchannelendpointgenerated.Endpoint
 	Contacts      contactsendpointgenerated.Endpoint
 	Googlenow     googlenowendpointgenerated.Endpoint
 	Multi         multiendpointgenerated.Endpoint
 	Panic         panicendpointgenerated.Endpoint
+	BazTChannel   baztchannelendpointgenerated.Endpoint
 	PanicTChannel panictchannelendpointgenerated.Endpoint
 }

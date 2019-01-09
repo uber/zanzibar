@@ -21,14 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mockpanictchannelworkflow
+package mocktchannelpanicworkflow
 
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 )
 
-// MockClientNodes contains mock client dependencies for the panicTChannel endpoint module
+// MockClientNodes contains mock client dependencies for the tchannel/panic endpoint module
 type MockClientNodes struct {
 	Baz *bazclientgeneratedmock.MockClient
 }

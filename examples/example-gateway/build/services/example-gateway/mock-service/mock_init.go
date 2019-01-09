@@ -133,16 +133,6 @@ func InitializeDependenciesMock(
 			Baz: initializedClientDependencies.Baz,
 		},
 	})
-	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Client: &baztchannelendpointmodule.ClientDependencies{
-			Baz:  initializedClientDependencies.Baz,
-			Quux: initializedClientDependencies.Quux,
-		},
-		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
-			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
-		},
-	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &contactsendpointmodule.ClientDependencies{
@@ -167,6 +157,16 @@ func InitializeDependenciesMock(
 			Multi: initializedClientDependencies.Multi,
 		},
 	})
+	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &baztchannelendpointmodule.ClientDependencies{
+			Baz:  initializedClientDependencies.Baz,
+			Quux: initializedClientDependencies.Quux,
+		},
+		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
+			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
+		},
+	})
 	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &panictchannelendpointmodule.ClientDependencies{
@@ -179,11 +179,11 @@ func InitializeDependenciesMock(
 		Endpoint: &module.EndpointDependencies{
 			Bar:           initializedEndpointDependencies.Bar,
 			Baz:           initializedEndpointDependencies.Baz,
-			BazTChannel:   initializedEndpointDependencies.BazTChannel,
 			Contacts:      initializedEndpointDependencies.Contacts,
 			Googlenow:     initializedEndpointDependencies.Googlenow,
 			Multi:         initializedEndpointDependencies.Multi,
 			Panic:         initializedEndpointDependencies.Panic,
+			BazTChannel:   initializedEndpointDependencies.BazTChannel,
 			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
 		},
 	}

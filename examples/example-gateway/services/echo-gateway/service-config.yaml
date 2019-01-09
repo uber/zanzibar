@@ -1,6 +1,6 @@
+name: echo-gateway
+type: gateway
 config: {}
 dependencies:
   endpoint:
-  - echo
-name: echo-gateway
-type: gateway
+  - tchannel/echo

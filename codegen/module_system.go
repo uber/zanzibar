@@ -258,7 +258,7 @@ func NewDefaultModuleSystem(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	system := NewModuleSystem(hooks...)
+	system := NewModuleSystem(h.moduleSearchPaths, hooks...)
 
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {
@@ -267,9 +267,9 @@ func NewDefaultModuleSystem(
 
 	// Register client module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:        "client",
-		Directories: []string{"clients"},
-		ClassType:   MultiModule,
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering client class")
 	}
@@ -305,10 +305,10 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClass(ModuleClass{
-		Name:        "middleware",
-		Directories: []string{"middlewares"},
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client"},
+		Name:       "middleware",
+		NamePlural: "middlewares",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
@@ -338,10 +338,10 @@ func NewDefaultModuleSystem(
 
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:        "endpoint",
-		Directories: []string{"endpoints"},
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client", "middleware"},
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client", "middleware"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -367,10 +367,10 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClass(ModuleClass{
-		Name:        "service",
-		Directories: []string{"services"},
-		ClassType:   MultiModule,
-		DependsOn:   []string{"endpoint"},
+		Name:       "service",
+		NamePlural: "services",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"endpoint"},
 	}); err != nil {
 		return nil, errors.Wrapf(
 			err,
