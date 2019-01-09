@@ -195,8 +195,9 @@ type Client interface {
 
 // barClient is the http client.
 type barClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.

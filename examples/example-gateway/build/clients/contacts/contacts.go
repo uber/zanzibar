@@ -52,8 +52,9 @@ type Client interface {
 
 // contactsClient is the http client.
 type contactsClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.

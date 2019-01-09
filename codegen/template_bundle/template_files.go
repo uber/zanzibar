@@ -972,13 +972,13 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
 	callerHeader string
 	callerName   string
 	calleeName   string
-	circuitBreakerDisabled bool
 	{{end -}}
 }
 
@@ -1011,7 +1011,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	})
 
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
-    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1242,7 +1242,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 8864, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8860, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2224,7 +2224,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	)
 
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
-    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 
 	return &{{$clientName}}{
 		client: client,
@@ -2270,17 +2270,17 @@ type {{$clientName}} struct {
 		var respHeaders map[string]string
 		var err error
 		if (c.circuitBreakerDisabled) {
-    		success, respHeaders, err = caller(
-        		ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-        	)
-    	} else {
-    		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-    			success, respHeaders, err = caller(
-    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-    			)
-    			return err
-    		}, nil)
-    	}
+			success, respHeaders, err = caller(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			)
+		} else {
+			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+				success, respHeaders, err = caller(
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+				)
+				return err
+			}, nil)
+		}
 
 
 		if err == nil && !success {
@@ -2327,7 +2327,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7357, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

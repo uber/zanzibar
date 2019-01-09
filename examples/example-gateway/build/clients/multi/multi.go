@@ -50,8 +50,9 @@ type Client interface {
 
 // multiClient is the http client.
 type multiClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.

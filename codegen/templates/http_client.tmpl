@@ -48,13 +48,13 @@ type Client interface {
 type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
 	callerHeader string
 	callerName   string
 	calleeName   string
-	circuitBreakerDisabled bool
 	{{end -}}
 }
 
@@ -87,7 +87,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	})
 
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
-    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",

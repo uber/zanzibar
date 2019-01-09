@@ -126,7 +126,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	)
 
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
-    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 
 	return &{{$clientName}}{
 		client: client,
@@ -172,17 +172,17 @@ type {{$clientName}} struct {
 		var respHeaders map[string]string
 		var err error
 		if (c.circuitBreakerDisabled) {
-    		success, respHeaders, err = caller(
-        		ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-        	)
-    	} else {
-    		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
-    			success, respHeaders, err = caller(
-    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-    			)
-    			return err
-    		}, nil)
-    	}
+			success, respHeaders, err = caller(
+				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+			)
+		} else {
+			err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+				success, respHeaders, err = caller(
+					ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+				)
+				return err
+			}, nil)
+		}
 
 
 		if err == nil && !success {

@@ -49,14 +49,14 @@ type Client interface {
 
 // corgeHTTPClient is the http client.
 type corgeHTTPClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
-
-	calleeHeader           string
-	callerHeader           string
-	callerName             string
-	calleeName             string
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+
+	calleeHeader string
+	callerHeader string
+	callerName   string
+	calleeName   string
 }
 
 // NewClient returns a new http client.
