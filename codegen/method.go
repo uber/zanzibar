@@ -289,7 +289,7 @@ func (ms *MethodSpec) scanForNonParams(funcSpec *compile.FunctionSpec) bool {
 		}
 
 		param, ok := field.Annotations[ms.annotations.HTTPRef]
-		if !ok || param[0:6] != "params" {
+		if !ok || strings.HasPrefix(param, "params") {
 			hasNonParams = true
 			return true
 		}
@@ -618,7 +618,7 @@ func (ms *MethodSpec) setEndpointRequestHeaderFields(
 		}
 
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
-			if param[0:8] == "headers." {
+			if strings.HasPrefix(param, "headers.") {
 				headerName := param[8:]
 				camelHeaderName := CamelCase(headerName)
 
@@ -744,7 +744,7 @@ func (ms *MethodSpec) setResponseHeaderFields(
 		goPrefix string, thriftPrefix string, field *compile.FieldSpec,
 	) bool {
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
-			if param[0:8] == "headers." {
+			if strings.HasPrefix(param, "headers.") {
 				headerName := param[8:]
 				ms.ResHeaderFields[headerName] = HeaderFieldInfo{
 					FieldIdentifier: goPrefix + "." + PascalCase(field.Name),
@@ -786,7 +786,7 @@ func (ms *MethodSpec) setClientRequestHeaderFields(
 		}
 
 		if param, ok := field.Annotations[ms.annotations.HTTPRef]; ok {
-			if param[0:8] == "headers." {
+			if strings.HasPrefix(param, "headers.") {
 				headerName := param[8:]
 				bodyIdentifier := goPrefix + "." + PascalCase(field.Name)
 				var headerNameValuePair string
