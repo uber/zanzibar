@@ -125,14 +125,19 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		},
 	)
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
+    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+
 	return &{{$clientName}}{
 		client: client,
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
+	circuitBreakerDisabled bool
 }
 
 {{range $svc := .Services}}
@@ -166,12 +171,18 @@ type {{$clientName}} struct {
 		var success bool
 		var respHeaders map[string]string
 		var err error
-		err = hystrix.Do("{{$clientID}}", func() error {
-			success, respHeaders, err = caller(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-			)
-			return err
-		}, nil)
+		if (c.circuitBreakerDisabled) {
+    		success, respHeaders, err = caller(
+        		ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+        	)
+    	} else {
+    		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+    			success, respHeaders, err = caller(
+    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+    			)
+    			return err
+    		}, nil)
+    	}
 
 
 		if err == nil && !success {

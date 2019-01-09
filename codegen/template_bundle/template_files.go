@@ -978,6 +978,7 @@ type {{$clientName}} struct {
 	callerHeader string
 	callerName   string
 	calleeName   string
+	circuitBreakerDisabled bool
 	{{end -}}
 }
 
@@ -1009,6 +1010,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
+    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
@@ -1029,6 +1033,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -1101,10 +1106,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end}}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("{{$clientID}}", func() error {
+	if (c.circuitBreakerDisabled) {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
@@ -1233,7 +1242,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 8488, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8864, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2214,14 +2223,19 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		},
 	)
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
+    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+
 	return &{{$clientName}}{
 		client: client,
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
 // {{$clientName}} is the TChannel client for downstream service.
 type {{$clientName}} struct {
 	client *zanzibar.TChannelClient
+	circuitBreakerDisabled bool
 }
 
 {{range $svc := .Services}}
@@ -2255,12 +2269,18 @@ type {{$clientName}} struct {
 		var success bool
 		var respHeaders map[string]string
 		var err error
-		err = hystrix.Do("{{$clientID}}", func() error {
-			success, respHeaders, err = caller(
-				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
-			)
-			return err
-		}, nil)
+		if (c.circuitBreakerDisabled) {
+    		success, respHeaders, err = caller(
+        		ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+        	)
+    	} else {
+    		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+    			success, respHeaders, err = caller(
+    				ctx, "{{$svc.Name}}", "{{.Name}}", reqHeaders, args, &result,
+    			)
+    			return err
+    		}, nil)
+    	}
 
 
 		if err == nil && !success {
@@ -2307,7 +2327,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 6892, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7400, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

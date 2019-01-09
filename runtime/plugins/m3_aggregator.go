@@ -23,11 +23,11 @@
 package plugins
 
 import (
-	"github.com/uber-go/tally"
 	"strings"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/uber-go/tally"
 )
 
 // M3Collector fulfills the metricCollector interface allowing users to ship circuit

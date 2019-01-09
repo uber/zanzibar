@@ -23,8 +23,6 @@ package zanzibar
 import (
 	"context"
 	"fmt"
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
-	"github.com/uber/zanzibar/runtime/plugins"
 	"io"
 	"io/ioutil"
 	"net"
@@ -37,13 +35,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
+	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/uber/zanzibar/runtime/plugins"
+
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
 	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

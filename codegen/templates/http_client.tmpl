@@ -54,6 +54,7 @@ type {{$clientName}} struct {
 	callerHeader string
 	callerName   string
 	calleeName   string
+	circuitBreakerDisabled bool
 	{{end -}}
 }
 
@@ -85,6 +86,9 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		ErrorPercentThreshold: int(errorPercentThreshold),
 	})
 
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
+    		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
 		{{if $sidecarRouter -}}
@@ -105,6 +109,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
 }
 
@@ -177,10 +182,14 @@ func (c *{{$clientName}}) {{$methodName}}(
 	{{- end}}
 
 	var res *zanzibar.ClientHTTPResponse
-	err = hystrix.Do("{{$clientID}}", func() error {
+	if (c.circuitBreakerDisabled) {
 		res, err = req.Do()
-		return err
-	}, nil)
+	} else {
+		err = hystrix.DoC(ctx, "{{$clientID}}", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return {{if eq .ResponseType ""}}nil, err{{else}}defaultRes, nil, err{{end}}
 	}
