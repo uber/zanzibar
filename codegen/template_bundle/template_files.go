@@ -1235,7 +1235,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"syscall"
 
@@ -1252,11 +1251,6 @@ import (
 )
 
 var configFiles *string
-
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
 
 func getConfig() *zanzibar.StaticConfig {
 	var files []string
@@ -1341,7 +1335,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1923, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1795, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1388,7 +1382,7 @@ func listenOnSignals() {
 	signal.Notify(sigs, syscall.SIGUSR2)
 
 	go func() {
-		_ = <-sigs
+		<-sigs
 
 		if cachedServer != nil {
 			cachedServer.Close()
@@ -1437,7 +1431,7 @@ func main_testTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main_test.tmpl", size: 1351, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main_test.tmpl", size: 1347, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1820,6 +1814,7 @@ func CreateGateway(
 
 // RegisterDeps registers direct dependencies of the service
 func RegisterDeps(g *zanzibar.Gateway, deps *module.Dependencies) error {
+	//lint:ignore S1021 allow less concise variable declaration for ease of code generation
 	var err error
 	{{- range $class, $instances := $instance.ResolvedDependencies }}
 	{{- range $idx, $instance := $instances }}
@@ -1843,7 +1838,7 @@ func serviceTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service.tmpl", size: 1358, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service.tmpl", size: 1447, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -54,7 +54,7 @@ func listenOnSignals() {
 	signal.Notify(sigs, syscall.SIGUSR2)
 
 	go func() {
-		_ = <-sigs
+		<-sigs
 
 		if cachedServer != nil {
 			cachedServer.Close()

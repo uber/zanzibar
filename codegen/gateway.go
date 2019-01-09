@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Uber Technologies, Inc.
+// Copyright (c) 2019 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,20 +27,13 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/compile"
 	yaml "gopkg.in/yaml.v2"
 )
-
-func getDirName() string {
-	_, file, _, _ := runtime.Caller(0)
-	return zanzibar.GetDirnameFromRuntimeCaller(file)
-}
 
 const (
 	reqHeaders = "reqHeaderMap"
