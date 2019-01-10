@@ -112,7 +112,7 @@ func TestCallMetrics(t *testing.T) {
 	metrics := cg.M3Service.GetMetrics()
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
-		if strings.HasPrefix(key, "jaeger") || strings.HasPrefix(key, "circuitbreaker") {
+		if strings.HasPrefix(key, "jaeger") || strings.Contains(key, "circuitbreaker") {
 			delete(metrics, key)
 		}
 	}

@@ -62,7 +62,7 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 13
+	numMetrics := 9
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
@@ -83,7 +83,7 @@ func TestCallMetrics(t *testing.T) {
 	cg.MetricsWaitGroup.Wait()
 	metrics := cg.M3Service.GetMetrics()
 	for key := range metrics {
-		if strings.HasPrefix(key, "jaeger") || strings.HasPrefix(key, "circuitbreaker") {
+		if strings.HasPrefix(key, "jaeger") || strings.Contains(key, "circuitbreaker") {
 			delete(metrics, key)
 		}
 	}
