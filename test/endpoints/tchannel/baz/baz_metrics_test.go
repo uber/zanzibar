@@ -30,7 +30,7 @@ import (
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -74,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 14
+	numMetrics := 10
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
@@ -112,7 +112,7 @@ func TestCallMetrics(t *testing.T) {
 	metrics := cg.M3Service.GetMetrics()
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
-		if strings.HasPrefix(key, "jaeger") {
+		if strings.HasPrefix(key, "jaeger") || strings.HasPrefix(key, "circuitbreaker") {
 			delete(metrics, key)
 		}
 	}
