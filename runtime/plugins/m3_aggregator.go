@@ -70,17 +70,17 @@ func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCo
 	name = strings.Replace(name, ".", "-", -1)
 	return &M3Collector{
 		scope:                   m.scope,
-		attemptsPrefix:          name + ".attempts",
-		errorsPrefix:            name + ".errors",
-		successesPrefix:         name + ".successes",
-		failuresPrefix:          name + ".failures",
-		rejectsPrefix:           name + ".rejects",
-		shortCircuitsPrefix:     name + ".shortCircuits",
-		timeoutsPrefix:          name + ".timeouts",
-		fallbackSuccessesPrefix: name + ".fallbackSuccesses",
-		fallbackFailuresPrefix:  name + ".fallbackFailures",
-		totalDurationPrefix:     name + ".totalDuration",
-		runDurationPrefix:       name + ".runDuration",
+		attemptsPrefix:          name + ".circuitbreaker" + ".attempts",
+		errorsPrefix:            name + ".circuitbreaker" + ".errors",
+		successesPrefix:         name + ".circuitbreaker" + ".successes",
+		failuresPrefix:          name + ".circuitbreaker" + ".failures",
+		rejectsPrefix:           name + ".circuitbreaker" + ".rejects",
+		shortCircuitsPrefix:     name + ".circuitbreaker" + ".shortCircuits",
+		timeoutsPrefix:          name + ".circuitbreaker" + ".timeouts",
+		fallbackSuccessesPrefix: name + ".circuitbreaker" + ".fallbackSuccesses",
+		fallbackFailuresPrefix:  name + ".circuitbreaker" + ".fallbackFailures",
+		totalDurationPrefix:     name + ".circuitbreaker" + ".totalDuration",
+		runDurationPrefix:       name + ".circuitbreaker" + ".runDuration",
 	}
 }
 

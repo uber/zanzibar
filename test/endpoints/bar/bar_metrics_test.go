@@ -23,6 +23,7 @@ package bar_test
 import (
 	"bytes"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,7 +62,7 @@ func TestCallMetrics(t *testing.T) {
 		},
 	)
 
-	numMetrics := 16
+	numMetrics := 13
 	cg := gateway.(*testGateway.ChildProcessGateway)
 	cg.MetricsWaitGroup.Add(numMetrics)
 
@@ -81,6 +82,11 @@ func TestCallMetrics(t *testing.T) {
 
 	cg.MetricsWaitGroup.Wait()
 	metrics := cg.M3Service.GetMetrics()
+	for key := range metrics {
+		if strings.HasPrefix(key, "jaeger") || strings.HasPrefix(key, "circuitbreaker") {
+			delete(metrics, key)
+		}
+	}
 	assert.Equal(t, numMetrics, len(metrics))
 
 	endpointTags := map[string]string{
