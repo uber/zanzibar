@@ -45,7 +45,6 @@ var mandatoryEndpointFields = []string{
 	"endpointId",
 	"handleId",
 	"thriftFile",
-	"thriftFileSha",
 	"thriftMethodName",
 	"workflowType",
 }
@@ -236,15 +235,15 @@ type EndpointSpec struct {
 	// ThriftFile, the thrift file for this endpoint
 	ThriftFile string `yaml:"thriftFile" validate:"nonzero"`
 	// ThriftFileSha, the SHA of the thrift file for this endpoint
-	ThriftFileSha string `yaml:"thriftFileSha" validate:"nonzero"`
+	ThriftFileSha string `yaml:"thriftFileSha,omitempty"`
 	// ThriftMethodName, which thrift method to use.
 	ThriftMethodName string `yaml:"thriftMethodName" validate:"nonzero"`
 	// ThriftServiceName, which thrift service to use.
 	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
-	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures"`
+	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures,omitempty"`
 	// Middlewares, meta data to add middlewares,
-	Middlewares []MiddlewareSpec `yaml:"middlewares"`
+	Middlewares []MiddlewareSpec `yaml:"middlewares,omitempty"`
 	// HeadersPropagate, a map from endpoint request headers to
 	// client request fields.
 	HeadersPropagate map[string]FieldMapperEntry `yaml:"-"`
@@ -259,9 +258,9 @@ type EndpointSpec struct {
 	// Note that this feature is not yet fully implemented in the stand-alone Zanzibar codebase
 	ErrTransforms map[string]FieldMapperEntry `yaml:"-"`
 	// ReqHeaders maps headers from server to client
-	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap"`
+	ReqHeaders map[string]*TypedHeader `yaml:"reqHeaderMap,omitempty"`
 	// ResHeaders maps headers from client to server
-	ResHeaders map[string]*TypedHeader `yaml:"resHeaderMap"`
+	ResHeaders map[string]*TypedHeader `yaml:"resHeaderMap,omitempty"`
 	// WorkflowType, either "httpClient" or "custom".
 	// A httpClient workflow generates a http client Caller
 	// A custom workflow just imports the custom code
@@ -269,9 +268,9 @@ type EndpointSpec struct {
 	// If "custom" then where to import custom code from
 	WorkflowImportPath string `yaml:"workflowImportPath"`
 	// if "httpClient", which client to call.
-	ClientID string `yaml:"clientId"`
+	ClientID string `yaml:"clientId,omitempty"`
 	// if "httpClient", which client method to call.
-	ClientMethod string `yaml:"clientMethod"`
+	ClientMethod string `yaml:"clientMethod,omitempty"`
 	// The client for this endpoint if httpClient or tchannelClient
 	ClientSpec *ClientSpec `yaml:"-"`
 }
@@ -872,7 +871,7 @@ func (e *EndpointSpec) SetDownstream(
 
 // EndpointConfig represent the "config" field of endpoint-config.yaml
 type EndpointConfig struct {
-	Ratelimit int32    `yaml:"rateLimit" json:"rateLimit"`
+	Ratelimit int32    `yaml:"rateLimit,omitempty" json:"rateLimit"`
 	Endpoints []string `yaml:"endpoints" json:"endpoints"`
 }
 

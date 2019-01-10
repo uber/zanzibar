@@ -1387,9 +1387,9 @@ type ClassConfigBase struct {
 	Type string `yaml:"type" json:"type"`
 	// IsExportGenerated determines whether or not the export lives in
 	// IsExportGenerated defaults to true if not set.
-	IsExportGenerated *bool `yaml:"IsExportGenerated" json:"IsExportGenerated"`
+	IsExportGenerated *bool `yaml:"IsExportGenerated,omitempty" json:"IsExportGenerated"`
 	// Owner is the Name of the class instance owner
-	Owner string `yaml:"owner"`
+	Owner string `yaml:"owner,omitempty"`
 }
 
 // ClassConfig maps onto a YAML configuration for a class type
