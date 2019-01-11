@@ -169,11 +169,7 @@ config:
 `, clientType)
 
 	_, err := newClientConfig([]byte(configYAML))
-	assert.Error(t, err)
-	assert.Equal(
-		t,
-		fmt.Sprintf("%s client config validation failed: Config.ThriftFileSha: zero value", clientType),
-		err.Error())
+	assert.NoError(t, err)
 }
 
 func TestThriftFileShaMissingValidation(t *testing.T) {

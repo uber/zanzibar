@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"gopkg.in/validator.v2"
+	validator "gopkg.in/validator.v2"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -39,9 +39,9 @@ type clientConfig interface {
 type ClientThriftConfig struct {
 	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
 	ThriftFile     string            `yaml:"thriftFile" json:"thriftFile" validate:"nonzero"`
-	ThriftFileSha  string            `yaml:"thriftFileSha" json:"thriftFileSha" validate:"nonzero"`
+	ThriftFileSha  string            `yaml:"thriftFileSha,omitempty" json:"thriftFileSha"`
 	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
-	Fixture        *Fixture          `yaml:"fixture" json:"fixture"`
+	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
 }
 
 // Fixture specifies client fixture import path and all scenarios
@@ -85,7 +85,7 @@ func validateExposedMethods(v interface{}, param string) error {
 // HTTPClientConfig represents the "config" field for a HTTP client-config.yaml
 type HTTPClientConfig struct {
 	ClassConfigBase `yaml:",inline" json:",inline"`
-	Dependencies    Dependencies        `yaml:"dependencies" json:"dependencies"`
+	Dependencies    Dependencies        `yaml:"dependencies,omitempty" json:"dependencies"`
 	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
