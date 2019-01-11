@@ -39,7 +39,7 @@ type clientConfig interface {
 type ClientThriftConfig struct {
 	ExposedMethods map[string]string `yaml:"exposedMethods" json:"exposedMethods" validate:"exposedMethods"`
 	ThriftFile     string            `yaml:"thriftFile" json:"thriftFile" validate:"nonzero"`
-	ThriftFileSha  string            `yaml:"thriftFileSha,omitempty" json:"thriftFileSha""`
+	ThriftFileSha  string            `yaml:"thriftFileSha,omitempty" json:"thriftFileSha"`
 	SidecarRouter  string            `yaml:"sidecarRouter" json:"sidecarRouter"`
 	Fixture        *Fixture          `yaml:"fixture,omitempty" json:"fixture"`
 }
