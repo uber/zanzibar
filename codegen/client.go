@@ -151,7 +151,7 @@ func (c *HTTPClientConfig) NewClientSpec(
 // TChannelClientConfig represents the "config" field for a TChannel client-config.yaml
 type TChannelClientConfig struct {
 	ClassConfigBase `yaml:",inline" json:",inline"`
-	Dependencies    Dependencies        `yaml:"dependencies" json:"dependencies"`
+	Dependencies    Dependencies        `yaml:"dependencies,omitempty" json:"dependencies"`
 	Config          *ClientThriftConfig `yaml:"config" json:"config" validate:"nonzero"`
 }
 
