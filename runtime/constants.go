@@ -26,13 +26,16 @@ const (
 	endpointRequest      = "endpoint.request"
 	endpointSuccess      = "endpoint.success"
 	endpointStatus       = "endpoint.status"
-	endpointErrors       = "endpoint.errors"
-	endpointAppErrors    = "endpoint.app-errors"
 	endpointSystemErrors = "endpoint.system-errors"
 	endpointLatency      = "endpoint.latency"
 
 	// MetricEndpointPanics is endpoint level panic counter
 	MetricEndpointPanics = "endpoint.panic"
+
+	// endpointAppErrors is the metric name for endpoint level application error for HTTP
+	endpointAppErrors = "endpoint.app-errors"
+	// MetricEndpointAppErrors is the metric name for endpoint level application error for TChannel
+	MetricEndpointAppErrors = "endpoint.app-errors"
 
 	clientRequest      = "client.request"
 	clientSuccess      = "client.success"

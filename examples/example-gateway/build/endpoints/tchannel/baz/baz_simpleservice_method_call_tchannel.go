@@ -135,6 +135,10 @@ func (h *SimpleServiceCallHandler) Handle(
 	if err != nil {
 		switch v := err.(type) {
 		case *endpointsTchannelBazBaz.AuthErr:
+			ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+				"app-error": "endpointsTchannelBazBaz.AuthErr",
+			})
+			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			if v == nil {
 				h.Deps.Default.ContextLogger.Error(
 					ctx,
@@ -148,6 +152,10 @@ func (h *SimpleServiceCallHandler) Handle(
 			}
 			res.AuthErr = v
 		default:
+			ctxWithError := zanzibar.WithScopeTags(ctx, map[string]string{
+				"app-error": "unknown",
+			})
+			h.Deps.Default.ContextMetrics.IncCounter(ctxWithError, zanzibar.MetricEndpointAppErrors, 1)
 			h.Deps.Default.ContextLogger.Error(ctx, "Endpoint failure: handler returned error", zap.Error(err))
 			return false, nil, resHeaders, errors.Wrapf(
 				err, "%s.%s (%s) handler returned error",
