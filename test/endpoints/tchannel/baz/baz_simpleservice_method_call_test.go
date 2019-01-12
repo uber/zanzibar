@@ -27,11 +27,14 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/uber-go/tally"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
 	endpointsBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
+	"strings"
 )
 
 func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
@@ -267,4 +270,82 @@ func TestCallTChannelTimeout(t *testing.T) {
 	// logged from tchannel server runtime
 	assert.Len(t, gateway.Logs("warn", "Failed to serve incoming TChannel request"), 1)
 	assert.Len(t, gateway.Logs("warn", "Unexpected tchannel system error"), 1)
+}
+
+func TestMetricsAppError(t *testing.T) {
+	// https://github.com/uber/zanzibar/issues/547
+	t.Skip()
+
+	gateway, err := testGateway.CreateGateway(t, map[string]interface{}{
+		"clients.baz.serviceName": "bazService",
+	}, &testGateway.Options{
+		KnownTChannelBackends: []string{"baz"},
+		TestBinary:            util.DefaultMainFile("example-gateway"),
+		ConfigFiles:           util.DefaultConfigFiles("example-gateway"),
+		TChannelClientMethods: map[string]string{
+			"SimpleService::Call": "Call",
+		},
+	})
+	require.NoError(t, err, "got bootstrap err")
+	defer gateway.Close()
+
+	fakeCall := func(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBaz.SimpleService_Call_Args,
+	) (map[string]string, error) {
+		return map[string]string{"some-res-header": "true"}, &clientsBaz.AuthErr{
+			Message: "authentication is required",
+		}
+	}
+
+	err = gateway.TChannelBackends()["baz"].Register(
+		"baz", "call", "SimpleService::call",
+		bazClient.NewSimpleServiceCallHandler(fakeCall),
+	)
+	assert.NoError(t, err)
+
+	cg := gateway.(*testGateway.ChildProcessGateway)
+	ctx := context.Background()
+	args := &endpointsBaz.SimpleService_Call_Args{
+		Arg: &endpointsBaz.BazRequest{},
+	}
+	var result endpointsBaz.SimpleService_Call_Result
+
+	reqHeaders := map[string]string{
+		"x-uuid":  "test",
+		"x-token": "token",
+	}
+	_, _, err = gateway.MakeTChannelRequest(
+		ctx, "SimpleService", "Call", reqHeaders, args, &result,
+	)
+	require.NoError(t, err, "got unexpected tchannel error")
+
+	metrics := cg.M3Service.GetMetrics()
+	// we don't care about jaeger emitted metrics
+	for key := range metrics {
+		if strings.HasPrefix(key, "jaeger") {
+			delete(metrics, key)
+		}
+	}
+
+	endpointTags := map[string]string{
+		"app-error":      "endpointsTchannelBazBaz.AuthErr",
+		"dc":             "unknown",
+		"device":         "",
+		"deviceversion":  "",
+		"endpointid":     "bazTChannel",
+		"endpointmethod": "SimpleService__Call",
+		"env":            "test",
+		"handlerid":      "call",
+		"host":           "jacobg-C02WC093HTDG",
+		"protocol":       "TChannel",
+		"regionname":     "",
+		"service":        "test-gateway",
+	}
+
+	// t.Logf("metrics received: %+v", metrics)
+	metricAppError := "endpoint.app-errors"
+	key := tally.KeyForPrefixedStringMap(metricAppError, endpointTags)
+	assert.Contains(t, metrics, key, "expected metric: %s", key)
 }
