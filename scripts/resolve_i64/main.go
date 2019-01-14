@@ -25,22 +25,22 @@ import (
 	"os"
 
 	//"github.com/uber/zanzibar/codegen"
+	"bytes"
+	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/runtime"
 	"go.uber.org/thriftrw/compile"
 	"html/template"
-	"bytes"
 	"io/ioutil"
-	"github.com/uber/zanzibar/runtime"
-	"runtime"
 	"path/filepath"
-	"strings"
-	"github.com/uber/zanzibar/codegen"
-	"github.com/pkg/errors"
+	"runtime"
 	"sort"
+	"strings"
 )
 
 const (
 	templateFileName = "i64.tmpl"
-	outFileName = "/types_i64.go"
+	outFileName      = "/types_i64.go"
 )
 
 type naivePackageNameResolver struct {
@@ -59,7 +59,7 @@ func (r *naivePackageNameResolver) TypePackageName(
 // Meta is the struct container for i64 related meta data and package name
 type Meta struct {
 	PackageName string
-	Types []I64Struct
+	Types       []I64Struct
 }
 
 // I64Structs is the struct container for array if I64Struct
@@ -67,16 +67,16 @@ type I64Structs []I64Struct
 
 // I64Struct is the struct container for i64 related meta data
 type I64Struct struct {
-	IsLong bool
+	IsLong      bool
 	IsTimestamp bool
 	TypedefType string
 }
 
-func (l I64Structs) Len() int           { return len(l) }
+func (l I64Structs) Len() int { return len(l) }
 func (l I64Structs) Less(i, j int) bool {
-	return l[i].IsTimestamp
+	return l[i].TypedefType < l[j].TypedefType
 }
-func (l I64Structs) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
+func (l I64Structs) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 
 func getDirName() string {
 	_, file, _, _ := runtime.Caller(0)
