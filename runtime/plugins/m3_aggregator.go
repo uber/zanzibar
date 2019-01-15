@@ -62,7 +62,7 @@ func InitializeM3Collector(scope tally.Scope) *M3CollectorClient {
 }
 
 // NewM3Collector creates a collector for a specific circuit. The
-// prefix given to this circuit will be {config.Prefix}.{circuit_name}.{metric}.
+// prefix given to this circuit will be {circuit_name}.circuitbreaker.{metric}...
 // Circuits with "/" in their names will have them replaced with ".".
 func (m *M3CollectorClient) NewM3Collector(name string) metricCollector.MetricCollector {
 	name = strings.Replace(name, "/", "-", -1)
@@ -94,7 +94,6 @@ func (g *M3Collector) incrementCounterMetric(prefix string, i float64) {
 
 func (g *M3Collector) updateTimerMetric(prefix string, dur time.Duration) {
 	c := g.scope.Timer(prefix)
-
 	c.Record(dur)
 }
 

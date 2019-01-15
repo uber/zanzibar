@@ -246,12 +246,16 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.baz.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.baz.errorPercentThreshold")
-	hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.baz.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.baz.errorPercentThreshold")
+		hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -267,9 +271,6 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: scAltName,
 		},
 	)
-
-	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") &&
-		deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
 
 	return &bazClient{
 		client:                 client,

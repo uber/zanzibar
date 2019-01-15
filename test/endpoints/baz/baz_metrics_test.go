@@ -77,7 +77,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
 
-	numMetrics := 10
+	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -91,11 +91,17 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	cg.MetricsWaitGroup.Wait()
-
 	metrics := cg.M3Service.GetMetrics()
+	cbKeys := make([]string, 0)
+	for key := range metrics {
+		if strings.Contains(key, "circuitbreaker") {
+			cbKeys = append(cbKeys, key)
+		}
+	}
+	assert.Equal(t, 4, len(cbKeys))
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
-		if strings.HasPrefix(key, "jaeger") || strings.Contains(key, "circuitbreaker") {
+		if strings.HasPrefix(key, "jaeger") {
 			delete(metrics, key)
 		}
 	}

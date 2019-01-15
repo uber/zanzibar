@@ -36,8 +36,6 @@ import (
 	"time"
 
 	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
-	"github.com/uber/zanzibar/runtime/plugins"
-
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
@@ -45,6 +43,7 @@ import (
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
 	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
 	tchannel "github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime/plugins"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

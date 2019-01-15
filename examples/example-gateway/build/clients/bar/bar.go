@@ -211,15 +211,16 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.bar.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.bar.errorPercentThreshold")
-	hystrix.ConfigureCommand("bar", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
-
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") &&
 		deps.Default.Config.MustGetBoolean("clients.bar.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.bar.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.bar.errorPercentThreshold")
+		hystrix.ConfigureCommand("bar", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	return &barClient{
 		clientID: "bar",

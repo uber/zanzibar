@@ -68,15 +68,16 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.google-now.defaultHeaders", &defaultHeaders)
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.google-now.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.google-now.errorPercentThreshold")
-	hystrix.ConfigureCommand("google-now", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
-
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.google-now.circuitBreakerDisabled") &&
 		deps.Default.Config.MustGetBoolean("clients.google-now.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.google-now.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.google-now.errorPercentThreshold")
+		hystrix.ConfigureCommand("google-now", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	return &googleNowClient{
 		clientID: "google-now",

@@ -30,8 +30,7 @@
 	"clients.google-now.ip": "127.0.0.1",
 	"clients.google-now.port": 14120,
 	"clients.google-now.timeout": 10000,
-	"clients.google-now.maxConcurrentRequests": 1000,
-	"clients.google-now.errorPercentThreshold": 20,
+	"clients.google-now.circuitBreakerDisabled": true,
 	"clients.googleNowTChannel.connectionType": "p2p",
 	"clients.googleNowTChannel.hostList": [
 		"127.0.0.1:4002"

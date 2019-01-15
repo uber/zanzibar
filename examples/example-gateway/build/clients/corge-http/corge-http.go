@@ -74,15 +74,16 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Config.MustGetStruct("clients.corge-http.defaultHeaders", &defaultHeaders)
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge-http.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge-http.errorPercentThreshold")
-	hystrix.ConfigureCommand("corge-http", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
-
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.corge-http.circuitBreakerDisabled") &&
 		deps.Default.Config.MustGetBoolean("clients.corge-http.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge-http.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge-http.errorPercentThreshold")
+		hystrix.ConfigureCommand("corge-http", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	return &corgeHTTPClient{
 		clientID:     "corge-http",

@@ -91,12 +91,16 @@ func NewClient(deps *module.Dependencies) Client {
 		"Corge::echoString": "EchoString",
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge.errorPercentThreshold")
-	hystrix.ConfigureCommand("corge", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.corge.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.corge.errorPercentThreshold")
+		hystrix.ConfigureCommand("corge", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -112,9 +116,6 @@ func NewClient(deps *module.Dependencies) Client {
 			AltSubchannelName: scAltName,
 		},
 	)
-
-	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") &&
-		deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
 
 	return &corgeClient{
 		client:                 client,

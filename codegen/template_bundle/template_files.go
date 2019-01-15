@@ -1003,15 +1003,16 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	}
 
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
-	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
-
 	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
 		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	return &{{$clientName}}{
 		clientID: "{{$clientID}}",
@@ -1242,7 +1243,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 8860, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 8898, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2201,12 +2202,16 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		{{ end -}}
 	}
 
-	maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
-	errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
-	hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
-		MaxConcurrentRequests: int(maxConcurrentRequests),
-		ErrorPercentThreshold: int(errorPercentThreshold),
-	})
+	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
+		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
+	if !circuitBreakerDisabled {
+		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.{{$clientID}}.maxConcurrentRequests")
+		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.{{$clientID}}.errorPercentThreshold")
+		hystrix.ConfigureCommand("{{$clientID}}", hystrix.CommandConfig{
+			MaxConcurrentRequests: int(maxConcurrentRequests),
+			ErrorPercentThreshold: int(errorPercentThreshold),
+		})
+	}
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -2222,9 +2227,6 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			AltSubchannelName: scAltName,
 		},
 	)
-
-	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.{{$clientID}}.circuitBreakerDisabled") &&
-		deps.Default.Config.MustGetBoolean("clients.{{$clientID}}.circuitBreakerDisabled")
 
 	return &{{$clientName}}{
 		client: client,
@@ -2327,7 +2329,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7357, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 7395, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

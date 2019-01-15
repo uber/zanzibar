@@ -34,7 +34,7 @@ import (
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	"github.com/uber/jaeger-client-go/testutils"
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"github.com/uber/zanzibar/test/lib"
 	testBackend "github.com/uber/zanzibar/test/lib/test_backend"
