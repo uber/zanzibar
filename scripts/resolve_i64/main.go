@@ -21,21 +21,20 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
-	//"github.com/uber/zanzibar/codegen"
 	"bytes"
-	"github.com/pkg/errors"
-	"github.com/uber/zanzibar/codegen"
-	"github.com/uber/zanzibar/runtime"
-	"go.uber.org/thriftrw/compile"
+	"fmt"
 	"html/template"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/uber/zanzibar/codegen"
+	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/compile"
 )
 
 const (
