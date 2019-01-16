@@ -62,22 +62,16 @@ func NewClient(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.contacts.ip")
 	port := deps.Default.Config.MustGetInt("clients.contacts.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.contacts.timeout")) * time.Millisecond
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.contacts.timeout"))
+	timeout := time.Millisecond * time.Duration(
+		timeoutVal,
+	)
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
 	}
 
-	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") &&
-		deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
-	if !circuitBreakerDisabled {
-		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.contacts.maxConcurrentRequests")
-		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.contacts.errorPercentThreshold")
-		hystrix.ConfigureCommand("contacts", hystrix.CommandConfig{
-			MaxConcurrentRequests: int(maxConcurrentRequests),
-			ErrorPercentThreshold: int(errorPercentThreshold),
-		})
-	}
+	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &contactsClient{
 		clientID: "contacts",
@@ -94,6 +88,47 @@ func NewClient(deps *module.Dependencies) Client {
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.contacts.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.contacts.circuitBreakerDisabled")
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.contacts.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.contacts.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.contacts.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.contacts.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.contacts.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.contacts.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.contacts.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.contacts.requestVolumeThreshold"))
+	}
+	if !circuitBreakerDisabled {
+		hystrix.ConfigureCommand("contacts", hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+	}
+	return circuitBreakerDisabled
 }
 
 // HTTPClient returns the underlying HTTP client, should only be

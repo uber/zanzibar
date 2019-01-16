@@ -209,8 +209,9 @@ func NewClient(deps *module.Dependencies) Client {
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
 
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.baz.timeout"))
 	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.baz.timeout"),
+		timeoutVal,
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.baz.timeoutPerAttempt"),
@@ -246,16 +247,7 @@ func NewClient(deps *module.Dependencies) Client {
 		"SimpleService::urlTest":           "URLTest",
 	}
 
-	circuitBreakerDisabled := deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") &&
-		deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
-	if !circuitBreakerDisabled {
-		maxConcurrentRequests := deps.Default.Config.MustGetInt("clients.baz.maxConcurrentRequests")
-		errorPercentThreshold := deps.Default.Config.MustGetInt("clients.baz.errorPercentThreshold")
-		hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
-			MaxConcurrentRequests: int(maxConcurrentRequests),
-			ErrorPercentThreshold: int(errorPercentThreshold),
-		})
-	}
+	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -276,6 +268,47 @@ func NewClient(deps *module.Dependencies) Client {
 		client:                 client,
 		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.baz.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.baz.circuitBreakerDisabled")
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.baz.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.baz.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.baz.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.baz.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.baz.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.baz.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.baz.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.baz.requestVolumeThreshold"))
+	}
+	if !circuitBreakerDisabled {
+		hystrix.ConfigureCommand("baz", hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+	}
+	return circuitBreakerDisabled
 }
 
 // bazClient is the TChannel client for downstream service.
