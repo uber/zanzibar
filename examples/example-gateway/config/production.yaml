@@ -3,8 +3,6 @@ clients.bar.defaultHeaders:
 clients.bar.ip: 127.0.0.1
 clients.bar.port: 4001
 clients.bar.timeout: 10000
-clients.bar.maxConcurrentRequests: 1000
-clients.bar.errorPercentThreshold: 20
 clients.baz.ip: 127.0.0.1
 clients.baz.port: 4002
 clients.baz.serviceName: Qux
@@ -12,6 +10,8 @@ clients.baz.timeout: 10000
 clients.baz.timeoutPerAttempt: 2000
 clients.baz.maxConcurrentRequests: 1000
 clients.baz.errorPercentThreshold: 20
+clients.baz.sleepWindowInMilliseconds : 5000
+clients.baz.requestVolumeThreshold : 20
 clients.contacts.ip: 127.0.0.1
 clients.contacts.port: 4000
 clients.contacts.timeout: 10000
@@ -28,8 +28,7 @@ clients.corge.errorPercentThreshold: 20
 clients.google-now.ip: 127.0.0.1
 clients.google-now.port: 14120
 clients.google-now.timeout: 10000
-clients.google-now.maxConcurrentRequests: 1000
-clients.google-now.errorPercentThreshold: 20
+clients.google-now.circuitBreakerDisabled: true
 clients.googleNowTChannel.connectionType: p2p
 clients.googleNowTChannel.hostList:
 - 127.0.0.1:4002
