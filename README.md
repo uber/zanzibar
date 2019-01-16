@@ -8,7 +8,7 @@ Zanzibar is an extensible framework to build configuration driven web applicatio
 
 Based on the configurations, Zanizbar generates boilerplates and glue code, wires them up with your business domain code and the runtime components Zanzibar provides to create a deployable binary.
 
-The builtin components of Zanzibar makes it easy to develop mircoserivces and gateway services that proxy or orchestrate microsevices. It is also simple to extend Zanzibar with custom plugins to ease the development of applications that suit your specific needs.
+The builtin components of Zanzibar makes it easy to develop microservices and gateway services that proxy or orchestrate microservices. It is also simple to extend Zanzibar with custom plugins to ease the development of applications that suit your specific needs.
 
 ## Concepts
 Zanzibar is built on three pillars: module, config, code generation.
