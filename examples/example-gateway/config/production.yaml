@@ -8,23 +8,38 @@ clients.baz.port: 4002
 clients.baz.serviceName: Qux
 clients.baz.timeout: 10000
 clients.baz.timeoutPerAttempt: 2000
+clients.baz.maxConcurrentRequests: 1000
+clients.baz.errorPercentThreshold: 20
+clients.baz.sleepWindowInMilliseconds : 5000
+clients.baz.requestVolumeThreshold : 20
 clients.contacts.ip: 127.0.0.1
 clients.contacts.port: 4000
 clients.contacts.timeout: 10000
+clients.contacts.maxConcurrentRequests: 1000
+clients.contacts.errorPercentThreshold: 20
 clients.corge-http.serviceName: CorgeHttp
+clients.corge-http.maxConcurrentRequests: 1000
+clients.corge-http.errorPercentThreshold: 20
 clients.corge.serviceName: Corge
 clients.corge.timeout: 10000
 clients.corge.timeoutPerAttempt: 2000
+clients.corge.maxConcurrentRequests: 1000
+clients.corge.errorPercentThreshold: 20
 clients.google-now.ip: 127.0.0.1
 clients.google-now.port: 14120
 clients.google-now.timeout: 10000
+clients.google-now.circuitBreakerDisabled: true
 clients.googleNowTChannel.connectionType: p2p
 clients.googleNowTChannel.hostList:
 - 127.0.0.1:4002
 clients.googleNowTChannel.timeout: 10000
+clients.googleNowTChannel.maxConcurrentRequests: 1000
+clients.googleNowTChannel.errorPercentThreshold: 20
 clients.multi.ip: 127.0.0.1
 clients.multi.port: 4003
 clients.multi.timeout: 10000
+clients.multi.maxConcurrentRequests: 1000
+clients.multi.errorPercentThreshold: 20
 envVarsToTagInRootScope: []
 http.port: 7783
 logger.fileName: /var/log/example-gateway/example-gateway.log

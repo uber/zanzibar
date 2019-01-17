@@ -30,7 +30,7 @@ import (
 	"github.com/uber-go/tally"
 	bazClient "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	clientsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/baz/baz"
-	"github.com/uber/zanzibar/runtime"
+	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -77,7 +77,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
 
-	numMetrics := 10
+	numMetrics := 14
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -91,8 +91,14 @@ func TestCallMetrics(t *testing.T) {
 	}
 
 	cg.MetricsWaitGroup.Wait()
-
 	metrics := cg.M3Service.GetMetrics()
+	cbKeys := make([]string, 0)
+	for key := range metrics {
+		if strings.Contains(key, "circuitbreaker") {
+			cbKeys = append(cbKeys, key)
+		}
+	}
+	assert.Equal(t, 4, len(cbKeys))
 	// we don't care about jaeger emitted metrics
 	for key := range metrics {
 		if strings.HasPrefix(key, "jaeger") {

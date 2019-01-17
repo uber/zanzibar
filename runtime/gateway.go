@@ -35,13 +35,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
+	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
 	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
-	"github.com/uber/tchannel-go"
+	tchannel "github.com/uber/tchannel-go"
+	"github.com/uber/zanzibar/runtime/plugins"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -498,6 +500,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		runtimeMetricsOpts,
 		gateway.RootScope,
 	)
+
+	//Initialize M3Collector for hystrix metrics
+	c := plugins.InitializeM3Collector(gateway.RootScope)
+	metricCollector.Registry.Register(c.NewM3Collector)
 
 	return nil
 }

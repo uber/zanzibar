@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	"go.uber.org/zap"
 
 	tchannel "github.com/uber/tchannel-go"
@@ -78,8 +80,9 @@ func NewClient(deps *module.Dependencies) Client {
 		scAlt.Peers().Add(ipAlt + ":" + strconv.Itoa(int(portAlt)))
 	}
 
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.corge.timeout"))
 	timeout := time.Millisecond * time.Duration(
-		deps.Default.Config.MustGetInt("clients.corge.timeout"),
+		timeoutVal,
 	)
 	timeoutPerAttempt := time.Millisecond * time.Duration(
 		deps.Default.Config.MustGetInt("clients.corge.timeoutPerAttempt"),
@@ -88,6 +91,8 @@ func NewClient(deps *module.Dependencies) Client {
 	methodNames := map[string]string{
 		"Corge::echoString": "EchoString",
 	}
+
+	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	client := zanzibar.NewTChannelClientContext(
 		deps.Default.Channel,
@@ -105,13 +110,56 @@ func NewClient(deps *module.Dependencies) Client {
 	)
 
 	return &corgeClient{
-		client: client,
+		client:                 client,
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.corge.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.corge.circuitBreakerDisabled")
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.corge.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.corge.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.corge.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.corge.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.corge.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.corge.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.corge.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.corge.requestVolumeThreshold"))
+	}
+	if !circuitBreakerDisabled {
+		hystrix.ConfigureCommand("corge", hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+	}
+	return circuitBreakerDisabled
 }
 
 // corgeClient is the TChannel client for downstream service.
 type corgeClient struct {
-	client *zanzibar.TChannelClient
+	client                 *zanzibar.TChannelClient
+	circuitBreakerDisabled bool
 }
 
 // EchoString is a client RPC call for method "Corge::echoString"
@@ -129,9 +177,22 @@ func (c *corgeClient) EchoString(
 	if strings.EqualFold(reqHeaders["X-Zanzibar-Use-Staging"], "true") {
 		caller = c.client.CallThruAltChannel
 	}
-	success, respHeaders, err := caller(
-		ctx, "Corge", "echoString", reqHeaders, args, &result,
-	)
+
+	var success bool
+	var respHeaders map[string]string
+	var err error
+	if c.circuitBreakerDisabled {
+		success, respHeaders, err = caller(
+			ctx, "Corge", "echoString", reqHeaders, args, &result,
+		)
+	} else {
+		err = hystrix.DoC(ctx, "corge", func(ctx context.Context) error {
+			success, respHeaders, err = caller(
+				ctx, "Corge", "echoString", reqHeaders, args, &result,
+			)
+			return err
+		}, nil)
+	}
 
 	if err == nil && !success {
 		switch {

@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
@@ -48,8 +50,9 @@ type Client interface {
 
 // multiClient is the http client.
 type multiClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.
@@ -57,11 +60,16 @@ func NewClient(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.multi.ip")
 	port := deps.Default.Config.MustGetInt("clients.multi.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.multi.timeout")) * time.Millisecond
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.multi.timeout"))
+	timeout := time.Millisecond * time.Duration(
+		timeoutVal,
+	)
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.multi.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.multi.defaultHeaders", &defaultHeaders)
 	}
+
+	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &multiClient{
 		clientID: "multi",
@@ -76,7 +84,49 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.multi.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.multi.circuitBreakerDisabled")
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.multi.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.multi.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.multi.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.multi.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.multi.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.multi.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.multi.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.multi.requestVolumeThreshold"))
+	}
+	if !circuitBreakerDisabled {
+		hystrix.ConfigureCommand("multi", hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+	}
+	return circuitBreakerDisabled
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -101,7 +151,15 @@ func (c *multiClient) HelloA(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -151,7 +209,15 @@ func (c *multiClient) HelloB(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "multi", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}

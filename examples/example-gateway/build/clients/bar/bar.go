@@ -30,6 +30,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
+
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
@@ -193,8 +195,9 @@ type Client interface {
 
 // barClient is the http client.
 type barClient struct {
-	clientID   string
-	httpClient *zanzibar.HTTPClient
+	clientID               string
+	httpClient             *zanzibar.HTTPClient
+	circuitBreakerDisabled bool
 }
 
 // NewClient returns a new http client.
@@ -202,11 +205,16 @@ func NewClient(deps *module.Dependencies) Client {
 	ip := deps.Default.Config.MustGetString("clients.bar.ip")
 	port := deps.Default.Config.MustGetInt("clients.bar.port")
 	baseURL := fmt.Sprintf("http://%s:%d", ip, port)
-	timeout := time.Duration(deps.Default.Config.MustGetInt("clients.bar.timeout")) * time.Millisecond
+	timeoutVal := int(deps.Default.Config.MustGetInt("clients.bar.timeout"))
+	timeout := time.Millisecond * time.Duration(
+		timeoutVal,
+	)
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.bar.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.bar.defaultHeaders", &defaultHeaders)
 	}
+
+	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
 	return &barClient{
 		clientID: "bar",
@@ -249,7 +257,49 @@ func NewClient(deps *module.Dependencies) Client {
 			defaultHeaders,
 			timeout,
 		),
+		circuitBreakerDisabled: circuitBreakerDisabled,
 	}
+}
+
+func configureCicruitBreaker(deps *module.Dependencies, timeoutVal int) bool {
+	// circuitBreakerDisabled sets whether circuit-breaker should be disabled
+	circuitBreakerDisabled := false
+	if deps.Default.Config.ContainsKey("clients.bar.circuitBreakerDisabled") {
+		circuitBreakerDisabled = deps.Default.Config.MustGetBoolean("clients.bar.circuitBreakerDisabled")
+	}
+	// sleepWindowInMilliseconds sets the amount of time, after tripping the circuit,
+	// to reject requests before allowing attempts again to determine if the circuit should again be closed
+	sleepWindowInMilliseconds := 5000
+	if deps.Default.Config.ContainsKey("clients.bar.sleepWindowInMilliseconds") {
+		sleepWindowInMilliseconds = int(deps.Default.Config.MustGetInt("clients.bar.sleepWindowInMilliseconds"))
+	}
+	// maxConcurrentRequests sets how many requests can be run at the same time, beyond which requests are rejected
+	maxConcurrentRequests := 20
+	if deps.Default.Config.ContainsKey("clients.bar.maxConcurrentRequests") {
+		maxConcurrentRequests = int(deps.Default.Config.MustGetInt("clients.bar.maxConcurrentRequests"))
+	}
+	// errorPercentThreshold sets the error percentage at or above which the circuit should trip open
+	errorPercentThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.bar.errorPercentThreshold") {
+		errorPercentThreshold = int(deps.Default.Config.MustGetInt("clients.bar.errorPercentThreshold"))
+	}
+	// requestVolumeThreshold sets a minimum number of requests that will trip the circuit in a rolling window of 10s
+	// For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds
+	// the circuit will not trip open even if all 19 failed.
+	requestVolumeThreshold := 20
+	if deps.Default.Config.ContainsKey("clients.bar.requestVolumeThreshold") {
+		requestVolumeThreshold = int(deps.Default.Config.MustGetInt("clients.bar.requestVolumeThreshold"))
+	}
+	if !circuitBreakerDisabled {
+		hystrix.ConfigureCommand("bar", hystrix.CommandConfig{
+			MaxConcurrentRequests:  maxConcurrentRequests,
+			ErrorPercentThreshold:  errorPercentThreshold,
+			SleepWindow:            sleepWindowInMilliseconds,
+			RequestVolumeThreshold: requestVolumeThreshold,
+			Timeout:                timeoutVal,
+		})
+	}
+	return circuitBreakerDisabled
 }
 
 // HTTPClient returns the underlying HTTP client, should only be
@@ -274,7 +324,15 @@ func (c *barClient) ArgNotStruct(
 		return nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +399,15 @@ func (c *barClient) ArgWithHeaders(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -474,7 +540,15 @@ func (c *barClient) ArgWithManyQueryParams(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -567,7 +641,15 @@ func (c *barClient) ArgWithNestedQueryParams(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -622,7 +704,15 @@ func (c *barClient) ArgWithParams(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -674,7 +764,15 @@ func (c *barClient) ArgWithQueryHeader(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -743,7 +841,15 @@ func (c *barClient) ArgWithQueryParams(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -794,7 +900,15 @@ func (c *barClient) DeleteFoo(
 		return nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -842,7 +956,15 @@ func (c *barClient) Hello(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -901,7 +1023,15 @@ func (c *barClient) MissingArg(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -961,7 +1091,15 @@ func (c *barClient) NoRequest(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1022,7 +1160,15 @@ func (c *barClient) Normal(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1083,7 +1229,15 @@ func (c *barClient) NormalRecur(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1143,7 +1297,15 @@ func (c *barClient) TooManyArgs(
 		return defaultRes, nil, err
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1217,7 +1379,15 @@ func (c *barClient) EchoBinary(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1273,7 +1443,15 @@ func (c *barClient) EchoBool(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1329,7 +1507,15 @@ func (c *barClient) EchoDouble(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1385,7 +1571,15 @@ func (c *barClient) EchoEnum(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1441,7 +1635,15 @@ func (c *barClient) EchoI16(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1497,7 +1699,15 @@ func (c *barClient) EchoI32(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1553,7 +1763,15 @@ func (c *barClient) EchoI32Map(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1609,7 +1827,15 @@ func (c *barClient) EchoI64(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1665,7 +1891,15 @@ func (c *barClient) EchoI8(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1721,7 +1955,15 @@ func (c *barClient) EchoString(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1777,7 +2019,15 @@ func (c *barClient) EchoStringList(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1833,7 +2083,15 @@ func (c *barClient) EchoStringMap(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1889,7 +2147,15 @@ func (c *barClient) EchoStringSet(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -1945,7 +2211,15 @@ func (c *barClient) EchoStructList(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -2001,7 +2275,15 @@ func (c *barClient) EchoStructSet(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
@@ -2057,7 +2339,15 @@ func (c *barClient) EchoTypedef(
 		return defaultRes, nil, headerErr
 	}
 
-	res, err := req.Do()
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
 	if err != nil {
 		return defaultRes, nil, err
 	}
