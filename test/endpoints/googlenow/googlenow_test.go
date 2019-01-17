@@ -204,7 +204,8 @@ func TestGoogleNowFailReadAllCall(t *testing.T) {
 	assert.Nil(t, res)
 	assert.Equal(t, 0, counter)
 
-	time.Sleep(10 * time.Millisecond)
+	// give it enough time to pick up the logs
+	time.Sleep(20 * time.Millisecond)
 
 	logLines := gateway.Logs("error", "Could not read request body")
 	assert.NotNil(t, logLines)
