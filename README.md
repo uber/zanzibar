@@ -144,30 +144,30 @@ Note the type of `deps` parameter passed to `NewClient` constructor function is 
 For increasing overall system resiliency, zanzibar uses a [Circuit Breaker](https://msdn.microsoft.com/en-us/library/dn589784.aspx) which avoids calling client when there is an increase in failure rate beyond a set 
 threshold. After a sleepWindowInMilliseconds, client calls are attempted recovery by going in half-open and then close state. 
 
-circuitBreakerDisabled: Default false. Disables the circuit-breaker: 
+circuitBreakerDisabled: Default false. To disable the circuit-breaker: 
 ```
     "clients.<clientID>.circuitBreakerDisabled" : true
 ```
 
-maxConcurrentRequests: Default 50. Sets how many requests can be run at the same time, beyond which requests are 
+maxConcurrentRequests: Default 50. To set how many requests can be run at the same time, beyond which requests are 
 rejected:  
 ```
    "clients.<clientID>.maxConcurrentRequests": 50
 ```
 
-errorPercentThreshold: Default 20. Sets error percent threshold beyond which to trip the circuit open:
+errorPercentThreshold: Default 20. To set error percent threshold beyond which to trip the circuit open:
 ```
     "clients.<clientID>.errorPercentThreshold": 20
 ```
 
-requestVolumeThreshold: Default 20. Sets minimum number of requests that will trip the circuit in a rolling window of 
-10 (For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds the 
+requestVolumeThreshold: Default 20. To set minimum number of requests that will trip the circuit in a rolling window
+ of 10 (For example, if the value is 20, then if only 19 requests are received in the rolling window of 10 seconds the 
 circuit will not trip open even if all 19 failed): 
 ```
     "clients.<clientID>.requestVolumeThreshold" : true
 ```
 
-sleepWindowInMilliseconds: Default 5000. Sets the amount of time, after tripping the circuit, to reject requests 
+sleepWindowInMilliseconds: Default 5000. To set the amount of time, after tripping the circuit, to reject requests 
 before allowing attempts again to determine if the circuit should again be closed: 
 ```
     "clients.<clientID>.sleepWindowInMilliseconds" : true
