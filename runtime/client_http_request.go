@@ -142,7 +142,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 
 	// Using `Add` over `Set` intentionally, allowing us to create a list
 	// of headerValues for a given key.
-	for headerKey, headerValue := range req.defaultHeaders {
+	for headerKey, headerValue := range req.filteredDefaultHeaders(req.defaultHeaders, headers) {
 		httpReq.Header.Add(headerKey, headerValue)
 	}
 
@@ -210,4 +210,18 @@ func (req *ClientHTTPRequest) InjectSpanToHeader(span opentracing.Span, format i
 	}
 
 	return nil
+}
+
+func (req *ClientHTTPRequest) filteredDefaultHeaders(defaultHeaders map[string]string, headers map[string]string) map[string]string {
+	filteredDefaultHeaders := make(map[string]string)
+	// Copy from the original map to the filtered map
+	for key, value := range defaultHeaders {
+		filteredDefaultHeaders[key] = value
+	}
+
+	sourceHeader := "x-uber-source"
+	if filteredDefaultHeaders[sourceHeader] != "" && headers[sourceHeader] != "" {
+		delete(filteredDefaultHeaders, sourceHeader)
+	}
+	return filteredDefaultHeaders
 }
