@@ -56,13 +56,8 @@ func getConfig() (config.Provider, error) {
 	return config.NewYAML(opts...)
 }
 
-func createGateway() (*zanzibar.Gateway, error) {
-	config, err := getConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
+func createGateway(cfg config.Provider) (*zanzibar.Gateway, error) {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -97,15 +92,17 @@ func readFlags() {
 }
 
 func main() {
+	readFlags()
+
 	app := fx.New(
+		fx.Provide(getConfig),
 		fx.Invoke(zanzibarMain),
 	)
 	app.Run()
 }
 
-func zanzibarMain() {
-	readFlags()
-	server, err := createGateway()
+func zanzibarMain(cfg config.Provider) {
+	server, err := createGateway(cfg)
 	if err != nil {
 		panic(err)
 	}

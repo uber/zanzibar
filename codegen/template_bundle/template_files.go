@@ -1273,13 +1273,8 @@ func getConfig() (config.Provider, error) {
 	return config.NewYAML(opts...)
 }
 
-func createGateway() (*zanzibar.Gateway, error) {
-	config, err := getConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	gateway, _, err := service.CreateGateway(config, app.AppOptions)
+func createGateway(cfg config.Provider) (*zanzibar.Gateway, error) {
+	gateway, _, err := service.CreateGateway(cfg, app.AppOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -1314,15 +1309,17 @@ func readFlags() {
 }
 
 func main() {
+	readFlags()
+
 	app := fx.New(
+		fx.Provide(getConfig),
 		fx.Invoke(zanzibarMain),
 	)
 	app.Run()
 }
 
-func zanzibarMain() {
-	readFlags()
-	server, err := createGateway()
+func zanzibarMain(cfg config.Provider) {
+	server, err := createGateway(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -1346,7 +1343,7 @@ func mainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.tmpl", size: 1850, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "main.tmpl", size: 1847, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
