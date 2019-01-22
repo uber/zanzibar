@@ -143,11 +143,11 @@ func (req *ClientHTTPRequest) WriteJSON(
 	// Using `Add` over `Set` intentionally, allowing us to create a list
 	// of headerValues for a given key.
 	for headerKey, headerValue := range req.defaultHeaders {
-		httpReq.Header.Add(headerKey, headerValue)
+		httpReq.Header.Set(headerKey, headerValue)
 	}
 
 	for k := range headers {
-		httpReq.Header.Add(k, headers[k])
+		httpReq.Header.Set(k, headers[k])
 	}
 
 	if body != nil {
