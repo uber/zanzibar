@@ -49,6 +49,8 @@ type PackageHelper struct {
 	copyrightHeader string
 	// annotation prefix to parse for thrift schema
 	annotationPrefix string
+	// The adapters available
+	adapterSpecs map[string]*AdapterSpec
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
 	// Use staging client when this header is set as "true"
@@ -67,6 +69,8 @@ func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 // PackageHelperOptions set the optional configurations for the project package.
 // Each field is optional, if not set, it is set to the corresponding default value.
 type PackageHelperOptions struct {
+	// relative path to the adapter config dir, defaults to "./adapters"
+	RelAdapterConfigDir string
 	// relative path to the idl dir, defaults to "./idl"
 	RelThriftRootDir string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
@@ -88,6 +92,13 @@ type PackageHelperOptions struct {
 	DeputyReqHeader string
 	// header key to uniquely identifies request/response pair, defaults to "x-trace-id"
 	TraceKey string
+}
+
+func (p *PackageHelperOptions) relAdapterConfigDir() string {
+	if p.RelAdapterConfigDir != "" {
+		return p.RelAdapterConfigDir
+	}
+	return "./adapters"
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
@@ -174,6 +185,12 @@ func NewPackageHelper(
 
 	goGatewayNamespace := path.Join(packageRoot, options.relTargetGenDir())
 
+	adapterSpecs, err := parseAdaptersConfig(options.relAdapterConfigDir(), absConfigRoot)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load adapters:")
+	}
+
 	middlewareSpecs, err := parseMiddlewareConfig(options.relMiddlewareConfigDir(), absConfigRoot)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -188,6 +205,7 @@ func NewPackageHelper(
 		goGatewayNamespace: goGatewayNamespace,
 		targetGenDir:       filepath.Join(absConfigRoot, options.relTargetGenDir()),
 		copyrightHeader:    options.copyrightHeader(),
+		adapterSpecs:       adapterSpecs,
 		middlewareSpecs:    middlewareSpecs,
 		annotationPrefix:   options.annotationPrefix(),
 		stagingReqHeader:   options.stagingReqHeader(),
@@ -205,6 +223,12 @@ func (p PackageHelper) PackageRoot() string {
 // ConfigRoot returns the service's absolute config root path
 func (p PackageHelper) ConfigRoot() string {
 	return p.configRoot
+}
+
+// TODO(rnkim): Must use this somewhere
+// AdapterSpecs returns a map of adapters available
+func (p PackageHelper) AdapterSpecs() map[string]*AdapterSpec {
+	return p.adapterSpecs
 }
 
 // MiddlewareSpecs returns a map of middlewares available

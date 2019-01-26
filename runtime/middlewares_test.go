@@ -49,7 +49,7 @@ func TestHandlers(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareHandle{ex}
-	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+	middlewareStack := zanzibar.NewMiddlewareStack(middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
 	middlewares := middlewareStack.Middlewares()
@@ -144,7 +144,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	}
 
 	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
-	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+	middlewareStack := zanzibar.NewMiddlewareStack(middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
 	middlewares := middlewareStack.Middlewares()
@@ -205,7 +205,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	}
 
 	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
-	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+	middlewareStack := zanzibar.NewMiddlewareStack(middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
 	middlewares := middlewareStack.Middlewares()
@@ -271,7 +271,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareHandle{ex, exReader}
-	middlewareStack := zanzibar.NewStack(middles, noopHandlerFn)
+	middlewareStack := zanzibar.NewMiddlewareStack(middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
 	middlewares := middlewareStack.Middlewares()

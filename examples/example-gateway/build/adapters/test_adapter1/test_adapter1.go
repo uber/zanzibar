@@ -21,35 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package testadapter1adapter
 
 import (
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
-	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
-
+	handle "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the bar endpoint module
-type Dependencies struct {
-	Default    *zanzibar.DefaultDependencies
-	Adapter    *AdapterDependencies
-	Client     *ClientDependencies
-	Middleware *MiddlewareDependencies
+// Adapter is a container for module.Deps and factory for AdapterHandle
+type Adapter struct {
+	Deps *module.Dependencies
 }
 
-// AdapterDependencies contains adapter dependencies
-type AdapterDependencies struct {
-	TestAdapter1 testadapter1adaptergenerated.Adapter
+// NewAdapter is a factory method for the struct
+func NewAdapter(deps *module.Dependencies) Adapter {
+	return Adapter{
+		Deps: deps,
+	}
 }
 
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Bar barclientgenerated.Client
-}
-
-// MiddlewareDependencies contains middleware dependencies
-type MiddlewareDependencies struct {
-	Example examplemiddlewaregenerated.Middleware
+// NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
+	return handle.NewAdapter(m.Deps, o)
 }

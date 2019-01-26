@@ -1,3 +1,4 @@
+adapterConfig: ./adapters
 annotationPrefix: zanzibar
 clientConfig: ./clients
 copyrightHeader: ./copyright_header.txt

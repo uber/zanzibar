@@ -35,8 +35,8 @@ type MiddlewareTchannelStack struct {
 	tchannelHandler TChannelHandler
 }
 
-// NewTchannelStack returns a new MiddlewareStack instance with no middleware preconfigured.
-func NewTchannelStack(middlewares []MiddlewareTchannelHandle,
+// NewMiddlewareTchannelStack returns a new MiddlewareStack instance with no middleware preconfigured.
+func NewMiddlewareTchannelStack(middlewares []MiddlewareTchannelHandle,
 	handler TChannelHandler) *MiddlewareTchannelStack {
 	return &MiddlewareTchannelStack{
 		tchannelHandler: handler,

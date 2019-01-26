@@ -14,6 +14,7 @@ package {{$instance.PackageInfo.PackageName}}
 {{- $clientMethodName := title .ClientMethodName }}
 {{- $endpointId := .Spec.EndpointID }}
 {{- $handleId := .Spec.HandleID }}
+{{- $adapters := .Spec.Adapters }}
 {{- $middlewares := .Spec.Middlewares }}
 {{- $workflowPkg := .WorkflowPkg }}
 {{- $workflowInterface := printf "%sWorkflow" $serviceMethod }}
@@ -44,6 +45,12 @@ import (
 	{{end}}
 	{{- end}}
 
+	{{- if len $adapters | ne 0 }}
+	{{- range $idx, $adapter := $adapters }}
+	"{{$adapter.ImportPath}}"
+	{{- end}}
+	{{- end}}
+
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
 	"{{$middleware.ImportPath}}"
@@ -70,7 +77,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		deps.Default.ContextExtractor, deps.Default,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if len $middlewares | ne 0 -}}
-		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+		zanzibar.NewMiddlewareStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
 				{{$middleware.Name}}.Options{

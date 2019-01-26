@@ -34,8 +34,8 @@ type MiddlewareStack struct {
 	handle      HandlerFn
 }
 
-// NewStack returns a new MiddlewareStack instance with no middleware preconfigured.
-func NewStack(middlewares []MiddlewareHandle,
+// NewMiddlewareStack returns a new MiddlewareStack instance with no middleware preconfigured.
+func NewMiddlewareStack(middlewares []MiddlewareHandle,
 	handle HandlerFn) *MiddlewareStack {
 	return &MiddlewareStack{
 		handle:      handle,

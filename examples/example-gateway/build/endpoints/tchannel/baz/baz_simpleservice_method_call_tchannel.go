@@ -50,7 +50,7 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"bazTChannel", "call", "SimpleService::Call",
-		zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+		zanzibar.NewMiddlewareTchannelStack([]zanzibar.MiddlewareTchannelHandle{
 			deps.Middleware.ExampleTchannel.NewMiddlewareHandle(
 				example_tchannel.Options{
 					Foo: "test",

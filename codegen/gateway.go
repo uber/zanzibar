@@ -104,6 +104,56 @@ type Dependencies struct {
 	//	Service []string `yaml:"service"`  // example extension
 }
 
+// AdapterConfigConfig is the inner config object as prescribed by the module_system yaml conventions
+type AdapterConfigConfig struct {
+	OptionsSchemaFile string `yaml:"schema" json:"schema"`
+	ImportPath        string `yaml:"path" json:"path"`
+}
+
+// AdapterConfig represents configuration for an adapter as is written in the yaml file
+type AdapterConfig struct {
+	ClassConfigBase `yaml:",inline" json:",inline"`
+	Dependencies    *Dependencies        `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Config          *AdapterConfigConfig `yaml:"config" json:"config"`
+}
+
+func (adapter *AdapterConfig) Validate(configDirName string) error {
+	if adapter.Name == "" {
+		return errors.New("adapter config had empty name")
+	}
+
+	if adapter.Config.ImportPath == "" {
+		return errors.New("adapter config had empty import path")
+	}
+
+	if adapter.Config.OptionsSchemaFile == "" {
+		return errors.New("adapter config had empty schema")
+	}
+
+	schPath := filepath.Join(
+		configDirName,
+		adapter.Config.OptionsSchemaFile,
+	)
+
+	bytes, err := ioutil.ReadFile(schPath)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Cannot read adapter yaml schema: %s",
+			schPath,
+		)
+	}
+
+	var adapterOptSchema map[string]interface{}
+	err = yaml.Unmarshal(bytes, &adapterOptSchema)
+	if err != nil {
+		return errors.Wrapf(
+			err, "Cannot parse yaml schema for adapter options: %s",
+			schPath,
+		)
+	}
+	return nil
+}
+
 // MiddlewareConfigConfig is the inner config object as prescribed by module_system yaml conventions
 type MiddlewareConfigConfig struct {
 	OptionsSchemaFile string `yaml:"schema" json:"schema"`
@@ -178,6 +228,31 @@ func NewClientSpec(
 	return clientConfig.NewClientSpec(instance, h)
 }
 
+// AdapterSpec holds information about each adapter
+type AdapterSpec struct {
+	// The adapter package name.
+	Name string `yaml:"name"`
+	// Adapter specific configuration options.
+	Options map[interface{}]interface{} `yaml:"options"`
+	// Options pretty printed for template initialization
+	PrettyOptions map[string]string
+	// Module Dependencies,  clients etc.
+	Dependencies *Dependencies
+	// Go Import Path for AdapterHandle implementation
+	ImportPath string
+	// Location of yaml Schema file for the configured endpoint options
+	OptionsSchemaFile string
+}
+
+func newAdapterSpec(cfg *AdapterConfig) *AdapterSpec {
+	return &AdapterSpec{
+		Name:              cfg.Name,
+		Dependencies:      cfg.Dependencies,
+		ImportPath:        cfg.Config.ImportPath,
+		OptionsSchemaFile: cfg.Config.OptionsSchemaFile,
+	}
+}
+
 // MiddlewareSpec holds information about each middleware at the endpoint
 type MiddlewareSpec struct {
 	// The middleware package name.
@@ -242,6 +317,8 @@ type EndpointSpec struct {
 	ThriftServiceName string `yaml:"-"`
 	// TestFixtures, meta data to generate tests,
 	TestFixtures map[string]*EndpointTestFixture `yaml:"testFixtures,omitempty"`
+	// Adapters, meta data to add adapters
+	Adapters []AdapterSpec `yaml:"adapters,omitempty"`
 	// Middlewares, meta data to add middlewares,
 	Middlewares []MiddlewareSpec `yaml:"middlewares,omitempty"`
 	// HeadersPropagate, a map from endpoint request headers to
@@ -915,6 +992,69 @@ func parseEndpointYamls(
 	}
 
 	return endpointYamls, nil
+}
+
+func parseAdaptersConfig(
+	adapterConfigDir string,
+	configDirName string,
+) (map[string]*AdapterSpec, error) {
+	specMap := map[string]*AdapterSpec{}
+	if adapterConfigDir == "" {
+		return specMap, nil
+	}
+	fullAdapterDir := filepath.Join(configDirName, adapterConfigDir)
+
+	files, err := ioutil.ReadDir(fullAdapterDir)
+
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading adapter config directory %q",
+			fullAdapterDir,
+		)
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+
+		instanceConfig := filepath.Join(
+			fullAdapterDir, file.Name(), "adapter-config.yaml")
+		if _, err := os.Stat(instanceConfig); os.IsNotExist(err) {
+			// Cannot find yaml file, use json file instead
+			instanceConfig = filepath.Join(
+				fullAdapterDir, file.Name(), "adapter-config.json")
+		}
+
+		bytes, err := ioutil.ReadFile(instanceConfig)
+		if os.IsNotExist(err) {
+			fmt.Printf("Could not read config file for adapter directory \"%s\" skipping...\n", file.Name())
+			continue
+		} else if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot read adapter config yaml: %s",
+				instanceConfig,
+			)
+		}
+		var adapter AdapterConfig
+		err = yaml.Unmarshal(bytes, &adapter)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot parse yaml for adapter config yaml: %s",
+				instanceConfig,
+			)
+		}
+		err = adapter.Validate(configDirName)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Cannot validate middleware: %v",
+				adapter,
+			)
+		}
+		specMap[adapter.Name] = newAdapterSpec(&adapter)
+	}
+	return specMap, nil
 }
 
 func parseMiddlewareConfig(

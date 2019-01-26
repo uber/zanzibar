@@ -92,6 +92,7 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 	options := &codegen.PackageHelperOptions{
+		RelAdapterConfigDir:    config.MustGetString("adapterConfig"),
 		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:        config.MustGetString("targetGenDir"),
 		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),

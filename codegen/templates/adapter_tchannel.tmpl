@@ -1,0 +1,26 @@
+{{$instance := . -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	zanzibar "github.com/uber/zanzibar/runtime"
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	handle "{{index .Config "path"}}"
+)
+
+// Adapter is a container for module.Deps and factory for AdapterHandle
+type Adapter struct {
+	Deps *module.Dependencies
+}
+
+// NewAdapter is a factory method for the struct
+func NewAdapter(deps *module.Dependencies) Adapter {
+	return Adapter {
+		Deps: deps,
+	}
+}
+
+// NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterHandle {
+	return handle.NewAdapter(m.Deps, o)
+}

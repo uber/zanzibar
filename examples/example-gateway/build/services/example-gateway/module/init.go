@@ -24,6 +24,8 @@
 package module
 
 import (
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
+	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	barclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -63,6 +65,7 @@ import (
 // DependenciesTree contains all deps for this service.
 type DependenciesTree struct {
 	Client     *ClientDependenciesNodes
+	Adapter    *AdapterDependenciesNodes
 	Middleware *MiddlewareDependenciesNodes
 	Endpoint   *EndpointDependenciesNodes
 }
@@ -75,6 +78,11 @@ type ClientDependenciesNodes struct {
 	GoogleNow googlenowclientgenerated.Client
 	Multi     multiclientgenerated.Client
 	Quux      quuxclientstatic.Client
+}
+
+// AdapterDependenciesNodes contains adapter dependencies
+type AdapterDependenciesNodes struct {
+	TestAdapter1 testadapter1adaptergenerated.Adapter
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -134,6 +142,12 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 
+	initializedAdapterDependencies := &AdapterDependenciesNodes{}
+	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
@@ -150,6 +164,9 @@ func InitializeDependencies(
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &barendpointmodule.AdapterDependencies{
+			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+		},
 		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},

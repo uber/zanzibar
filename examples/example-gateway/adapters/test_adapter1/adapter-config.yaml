@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1
+  schema: ./adapters/test_adapter1/test_adapter1_schema.json
+dependencies: {}
+name: test_adapter1
+type: http

@@ -1,0 +1,6 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"description": "This is the first ever adapter made by RYAN",
+	"type": "object",
+	"properties": {}
+}

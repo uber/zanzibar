@@ -46,7 +46,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
 		{{ if len $middlewares | ne 0 -}}
-			zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+			zanzibar.NewMiddlewareTchannelStack([]zanzibar.MiddlewareTchannelHandle{
 			{{range $idx, $middleware := $middlewares -}}
 				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
 					{{$middleware.Name}}.Options{

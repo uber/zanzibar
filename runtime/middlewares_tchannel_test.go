@@ -107,7 +107,7 @@ func TestTchannelMiddlewareSharedStateSet(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareTchannelHandle{ex, exTchannel}
-	middlewareStack := zanzibar.NewTchannelStack(middles, nil)
+	middlewareStack := zanzibar.NewMiddlewareTchannelStack(middles, nil)
 	middlewares := middlewareStack.TchannelMiddlewares()
 	assert.Equal(t, 2, len(middlewares))
 	ss := zanzibar.NewTchannelSharedState(middles)
@@ -172,7 +172,7 @@ func TestTchannelMiddlewareRequestAbort(t *testing.T) {
 	}
 
 	middles := []zanzibar.MiddlewareTchannelHandle{mid1, mid2}
-	middlewareStack := zanzibar.NewTchannelStack(middles, mockTHandler)
+	middlewareStack := zanzibar.NewMiddlewareTchannelStack(middles, mockTHandler)
 	_, _, _, err := middlewareStack.Handle(context.Background(), map[string]string{}, nil)
 	assert.NoError(t, err)
 

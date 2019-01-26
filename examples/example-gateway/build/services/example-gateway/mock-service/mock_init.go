@@ -28,6 +28,8 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
+	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
@@ -104,6 +106,12 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 	initializedClientDependencies.Quux = mockClientNodes.Quux
 
+	initializedAdapterDependencies := &module.AdapterDependenciesNodes{}
+	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
 	initializedMiddlewareDependencies.Example = examplemiddlewaregenerated.NewMiddleware(&examplemiddlewaremodule.Dependencies{
@@ -120,6 +128,9 @@ func InitializeDependenciesMock(
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &barendpointmodule.AdapterDependencies{
+			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+		},
 		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
 		},

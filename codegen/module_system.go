@@ -305,6 +305,38 @@ func NewDefaultModuleSystem(
 	}
 
 	if err := system.RegisterClass(ModuleClass{
+		Name:        "adapter",
+		Directories: []string{"adapters"},
+		ClassType:   MultiModule,
+		DependsOn:   []string{"client"},
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering adapter class",
+		)
+	}
+
+	if err := system.RegisterClassType("adapter", "http", &AdapterGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway adapter class type",
+		)
+	}
+
+	if err := system.RegisterClassType("adapter", "tchannel", &AdapterGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering Gateway adapter class type",
+		)
+	}
+
+	if err := system.RegisterClass(ModuleClass{
 		Name:        "middleware",
 		Directories: []string{"middlewares"},
 		ClassType:   MultiModule,
@@ -341,7 +373,7 @@ func NewDefaultModuleSystem(
 		Name:        "endpoint",
 		Directories: []string{"endpoints"},
 		ClassType:   MultiModule,
-		DependsOn:   []string{"client", "middleware"},
+		DependsOn:   []string{"client", "adapter", "middleware"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -789,6 +821,7 @@ func (g *EndpointGenerator) ComputeSpec(
 	endpointYamls := []string{}
 	endpointSpecs := []*EndpointSpec{}
 	clientSpecs := readClientDependencySpecs(instance)
+	// RYAN add readAdapterDependencySpecs here?
 
 	endpointConfig, err := readEndpointConfig(instance.YAMLFileRaw)
 	if err != nil {
@@ -815,6 +848,9 @@ func (g *EndpointGenerator) ComputeSpec(
 				err, "Error parsing endpoint yaml file: %s", yamlFile,
 			)
 		}
+
+		// RYAN add all adapters here
+		//espec.Adapters =
 
 		endpointSpecs = append(endpointSpecs, espec)
 
@@ -1239,10 +1275,81 @@ func (generator *GatewayServiceGenerator) Generate(
 }
 
 /*
+ * Adapter Generator
+ */
+
+// AdapterGenerator generates a group of zanzibar adapters
+type AdapterGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+}
+
+// ComputeSpec computes the spec for an adapter
+func (g *AdapterGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return nil, nil
+}
+
+// Generate returns the adapter build result
+func (g *AdapterGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	ret := map[string][]byte{}
+
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating service dependencies for %s %s",
+			instance.InstanceName,
+			instance.ClassName,
+		)
+	}
+	if dependencies != nil {
+		ret["module/dependencies.go"] = dependencies
+	}
+
+	err = g.generateAdapterFile(instance, ret)
+
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating middleware file for %s %s",
+			instance.InstanceName,
+			instance.ClassName,
+		)
+	}
+	return &BuildResult{
+		Files: ret,
+		Spec:  nil,
+	}, nil
+}
+
+func (g *AdapterGenerator) generateAdapterFile(instance *ModuleInstance, out map[string][]byte) error {
+	templateName := "adapter_http.tmpl"
+	if instance.ClassType == "tchannel" {
+		templateName = "adapter_tchannel.tmpl"
+	}
+
+	bytes, err := g.templates.ExecTemplate(templateName, instance, g.packageHelper)
+	if err != nil {
+		return err
+	}
+
+	out[instance.InstanceName+".go"] = bytes
+	return nil
+}
+
+/*
  * Middleware Generator
  */
 
-// MiddlewareGenerator generates a group of zanzibar endpoints that proxy corresponding clients
+// MiddlewareGenerator generates a group of zanzibar middlewares
 type MiddlewareGenerator struct {
 	templates     *Template
 	packageHelper *PackageHelper
@@ -1255,8 +1362,7 @@ func (g *MiddlewareGenerator) ComputeSpec(
 	return nil, nil
 }
 
-// Generate returns the endpoint build result, which contains a file per
-// endpoint handler and a list of handler specs
+// Generate returns the middleware build result
 func (g *MiddlewareGenerator) Generate(
 	instance *ModuleInstance,
 ) (*BuildResult, error) {
