@@ -39,6 +39,8 @@ import (
 	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 )
 
@@ -56,7 +58,12 @@ func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveCont
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"contacts", "saveContacts",
-		handler.HandleRequest,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			}, nil, handler.HandleRequest).Handle,
 	)
 
 	return handler

@@ -37,6 +37,8 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
@@ -54,7 +56,12 @@ func NewSimpleServiceTransHeadersNoReqHandler(deps *module.Dependencies) *Simple
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"baz", "transHeadersNoReq",
-		handler.HandleRequest,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			}, nil, handler.HandleRequest).Handle,
 	)
 
 	return handler

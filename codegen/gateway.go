@@ -369,6 +369,7 @@ func ensureFields(config map[interface{}]interface{}, mandatoryFields []string, 
 func NewEndpointSpec(
 	yamlFile string,
 	h *PackageHelper,
+	adapterSpecs map[string]*AdapterSpec,
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
 	_, err := os.Stat(yamlFile)
@@ -498,7 +499,7 @@ func NewEndpointSpec(
 		ClientMethod:       clientMethod,
 	}
 
-	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs)
+	return augmentEndpointSpec(espec, endpointConfigObj, adapterSpecs, midSpecs)
 }
 
 func testFixtures(endpointConfigObj map[interface{}]interface{}) (map[string]*EndpointTestFixture, error) {
@@ -679,8 +680,16 @@ func resolveHeaderModels(ms *ModuleSpec, modelPath string) (map[string]*TypedHea
 func augmentEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[interface{}]interface{},
+	adapterSpecs map[string]*AdapterSpec,
 	midSpecs map[string]*MiddlewareSpec,
 ) (*EndpointSpec, error) {
+	// TODO(rnkim): Add ability to exclude certain adapters for some endpoints
+	adapters := make([]AdapterSpec, 0, len(adapterSpecs))
+	for _, adapterSpec := range adapterSpecs {
+		adapters = append(adapters, *adapterSpec)
+	}
+	espec.Adapters = adapters
+
 	if _, ok := endpointConfigObj["middlewares"]; ok {
 		endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 		if !ok {

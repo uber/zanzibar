@@ -47,13 +47,13 @@ import (
 
 	{{- if len $adapters | ne 0 }}
 	{{- range $idx, $adapter := $adapters }}
-	"{{$adapter.ImportPath}}"
+	{{$adapter.Name | camel}} "{{$adapter.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	"{{$middleware.ImportPath}}"
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -76,18 +76,39 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"{{$endpointId}}", "{{$handleId}}",
-		{{ if len $middlewares | ne 0 -}}
-		zanzibar.NewMiddlewareStack([]zanzibar.MiddlewareHandle{
-			{{range $idx, $middleware := $middlewares -}}
-			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-				{{$middleware.Name}}.Options{
-				{{range $key, $value := $middleware.PrettyOptions -}}
-					{{$key}} : {{$value}},
+		{{ if or (len $middlewares | ne 0) (len $adapters | ne 0) -}}
+		zanzibar.NewZanzibarStack(
+			{{ if len $adapters | ne 0 -}}
+			[]zanzibar.AdapterHandle{
+				{{range $idx, $adapter := $adapters -}}
+				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
+					{{$adapter.Name | camel}}.Options{
+                	{{range $key, $value := $adapter.PrettyOptions -}}
+                		{{$key}} : {{$value}},
+                	{{end -}}
+                	},
+				),
 				{{end -}}
-				},
-			),
-			{{end -}}
-		}, handler.HandleRequest).Handle,
+			},
+			{{- else -}}
+			nil,
+			{{- end -}}
+			{{- if len $middlewares | ne 0 }}
+			[]zanzibar.MiddlewareHandle{
+				{{range $idx, $middleware := $middlewares -}}
+				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
+					{{$middleware.Name | camel}}.Options{
+					{{range $key, $value := $middleware.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
+				),
+				{{end -}}
+			},
+			{{- else -}}
+			nil,
+			{{- end -}}
+		handler.HandleRequest).Handle,
 		{{- else -}}
 		handler.HandleRequest,
 		{{- end}}

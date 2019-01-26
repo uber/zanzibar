@@ -40,6 +40,8 @@ import (
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 	endpointsFooFoo "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/foo/foo"
 
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
@@ -57,7 +59,12 @@ func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler 
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "tooManyArgs",
-		handler.HandleRequest,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			}, nil, handler.HandleRequest).Handle,
 	)
 
 	return handler

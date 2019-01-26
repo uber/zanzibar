@@ -842,7 +842,7 @@ func (g *EndpointGenerator) ComputeSpec(
 		)
 	}
 	for _, yamlFile := range endpointYamls {
-		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.MiddlewareSpecs())
+		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.AdapterSpecs(), g.packageHelper.MiddlewareSpecs())
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Error parsing endpoint yaml file: %s", yamlFile,

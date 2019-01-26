@@ -36,6 +36,8 @@ import (
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
@@ -53,7 +55,12 @@ func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHa
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"baz", "ping",
-		handler.HandleRequest,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			}, nil, handler.HandleRequest).Handle,
 	)
 
 	return handler

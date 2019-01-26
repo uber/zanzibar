@@ -39,7 +39,8 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
-	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+	example "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -58,14 +59,20 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "normal",
-		zanzibar.NewMiddlewareStack([]zanzibar.MiddlewareHandle{
-			deps.Middleware.Example.NewMiddlewareHandle(
-				example.Options{
-					Baz: []string{"foo", "bar"},
-					Foo: "test",
-				},
-			),
-		}, handler.HandleRequest).Handle,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			},
+			[]zanzibar.MiddlewareHandle{
+				deps.Middleware.Example.NewMiddlewareHandle(
+					example.Options{
+						Baz: []string{"foo", "bar"},
+						Foo: "test",
+					},
+				),
+			}, handler.HandleRequest).Handle,
 	)
 
 	return handler

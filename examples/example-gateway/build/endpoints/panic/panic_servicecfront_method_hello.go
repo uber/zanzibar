@@ -37,6 +37,8 @@ import (
 
 	customMulti "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
 
+	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 )
 
@@ -54,7 +56,12 @@ func NewServiceCFrontHelloHandler(deps *module.Dependencies) *ServiceCFrontHello
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"panic", "panic",
-		handler.HandleRequest,
+		zanzibar.NewZanzibarStack(
+			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter1.NewAdapterHandle(
+					testAdapter1.Options{},
+				),
+			}, nil, handler.HandleRequest).Handle,
 	)
 
 	return handler

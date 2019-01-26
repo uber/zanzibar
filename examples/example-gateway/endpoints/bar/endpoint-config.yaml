@@ -18,7 +18,5 @@ dependencies:
   - bar
   middleware:
   - example
-  adapter:
-  - test_adapter1
 name: bar
 type: http
