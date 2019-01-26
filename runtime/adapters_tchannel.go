@@ -21,68 +21,71 @@
 package zanzibar
 
 import (
-    "context"
+	"context"
+	"github.com/mcuadros/go-jsonschema-generator"
 
-    "go.uber.org/thriftrw/wire"
+	"go.uber.org/thriftrw/wire"
 )
 
 // AdapterTchannelStack is a stack of Adapter Handlers that can be invoked as an Handle.
 // AdapterTchannelStack adapters are evaluated for requests in the order that they are added to the stack
 // followed by the underlying HandlerFn. The adapter responses are then executed in reverse.
 type AdapterTchannelStack struct {
-    adapters        []AdapterTchannelHandle
-    tchannelHandler TChannelHandler
+	adapters        []AdapterTchannelHandle
+	tchannelHandler TChannelHandler
 }
 
 // NewAdapterTchannelStack returns a new AdapterStack instance with no adapter preconfigured.
 func NewAdapterTchannelStack(adapters []AdapterTchannelHandle,
-    handler TChannelHandler) *AdapterTchannelStack {
-    return &AdapterTchannelStack{
-        tchannelHandler: handler,
-        adapters:        adapters,
-    }
+	handler TChannelHandler) *AdapterTchannelStack {
+	return &AdapterTchannelStack{
+		tchannelHandler: handler,
+		adapters:        adapters,
+	}
 }
 
 // TchannelAdapters returns a list of all the handlers in the current AdapterStack.
 func (m *AdapterTchannelStack) TchannelAdapters() []AdapterTchannelHandle {
-    return m.adapters
+	return m.adapters
 }
 
 // AdapterTchannelHandle used to define adapter
 type AdapterTchannelHandle interface {
-    // implement HandleRequest for your adapter. Return false
-    // if the handler writes to the response body.
-    HandleRequest(
-        ctx context.Context,
-        reqHeaders map[string]string,
-        wireValue *wire.Value) (bool, error)
+	// implement HandleRequest for your adapter. Return false
+	// if the handler writes to the response body.
+	HandleRequest(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		wireValue *wire.Value) (bool, error)
 
-    // implement HandleResponse for your adapter. Return false
-    // if the handler writes to the response body.
-    HandleResponse(
-        ctx context.Context,
-        rwt RWTStruct) RWTStruct
+	// implement HandleResponse for your adapter. Return false
+	// if the handler writes to the response body.
+	HandleResponse(
+		ctx context.Context,
+		rwt RWTStruct) RWTStruct
+	JSONSchema() *jsonschema.Document
+	Name() string
 }
 
 // Handle executes the adapters in a stack and underlying handler.
 func (m *AdapterTchannelStack) Handle(
-    ctx context.Context,
-    reqHeaders map[string]string,
-    wireValue *wire.Value) (bool, RWTStruct, map[string]string, error) {
-    var res RWTStruct
-    var ok bool
+	ctx context.Context,
+	reqHeaders map[string]string,
+	wireValue *wire.Value) (bool, RWTStruct, map[string]string, error) {
+	var res RWTStruct
+	var ok bool
 
-    for i := 0; i < len(m.adapters); i++ {
-        ok, err := m.adapters[i].HandleRequest(ctx, reqHeaders, wireValue)
-        if ok == false {
-            return ok, nil, map[string]string{}, err
-        }
-    }
+	for i := 0; i < len(m.adapters); i++ {
+		ok, err := m.adapters[i].HandleRequest(ctx, reqHeaders, wireValue)
+		if ok == false {
+			return ok, nil, map[string]string{}, err
+		}
+	}
 
-    ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
-    for i := len(m.adapters) - 1; i >= 0; i-- {
-        res = m.adapters[i].HandleResponse(ctx, res)
-    }
+	ok, res, resHeaders, err := m.tchannelHandler.Handle(ctx, reqHeaders, wireValue)
+	for i := len(m.adapters) - 1; i >= 0; i-- {
+		res = m.adapters[i].HandleResponse(ctx, res)
+	}
 
-    return ok, res, resHeaders, err
+	return ok, res, resHeaders, err
 }

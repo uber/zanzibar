@@ -93,7 +93,7 @@ func NewAdapter(deps *module.Dependencies) Adapter {
 }
 
 // NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
-func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterHandle {
 	return handle.NewAdapter(m.Deps, o)
 }`)
 
@@ -107,7 +107,7 @@ func adapter_httpTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "adapter_http.tmpl", size: 682, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "adapter_http.tmpl", size: 674, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -134,8 +134,8 @@ func NewAdapter(deps *module.Dependencies) Adapter {
 	}
 }
 
-// NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
-func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterHandle {
+// NewAdapterHandle calls back to the custom adapter to build an AdapterTchannelHandle
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
 	return handle.NewAdapter(m.Deps, o)
 }`)
 
@@ -149,7 +149,7 @@ func adapter_tchannelTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "adapter_tchannel.tmpl", size: 674, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "adapter_tchannel.tmpl", size: 690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -117,6 +117,7 @@ type AdapterConfig struct {
 	Config          *AdapterConfigConfig `yaml:"config" json:"config"`
 }
 
+// Validate the config spec attributes
 func (adapter *AdapterConfig) Validate(configDirName string) error {
 	if adapter.Name == "" {
 		return errors.New("adapter config had empty name")

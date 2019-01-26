@@ -225,9 +225,9 @@ func (p PackageHelper) ConfigRoot() string {
 	return p.configRoot
 }
 
-// TODO(rnkim): Must use this somewhere
 // AdapterSpecs returns a map of adapters available
 func (p PackageHelper) AdapterSpecs() map[string]*AdapterSpec {
+	// TODO(rnkim): Must use this somewhere
 	return p.adapterSpecs
 }
 
