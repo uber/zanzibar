@@ -109,7 +109,7 @@ func (m *ExecutionStack) Handle(
 		ok := m.middlewares[i].HandleRequest(ctx, req, res, shared)
 		// If a middleware errors and writes to the response header
 		// then abort the rest of the stack and evaluate the response
-		// handlers for the adapters seen so far.
+		// handlers for the adapters and middlewares seen so far.
 		if ok == false {
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)

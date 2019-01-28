@@ -65,17 +65,20 @@ Zanzibar is built on three pillars: module, config, code generation.
 Modules are the components that a Zanzibar application is made of. A module belongs to a `ModuleClass`, has a `type` and can have dependencies on other modules.
 
 #### ModuleClass
-`ModuleClass` abstracts the functionality of a specific class of components. Zanzibar predefines a few module classes, i.e., `client`, `endpoint`, `middleware` and `service`. Each represents a corresponding abstraction:
+`ModuleClass` abstracts the functionality of a specific class of components. Zanzibar predefines a few module classes, i.e., `adapter`, `client`, `endpoint`, `middleware` and `service`. Each represents a corresponding abstraction:
 
 ModuleClass | Abstraction
 ----------- | -----------
+adapter | common mandatory functionality that has less to do with business logic
 client | clients to communicate with downstreams, e.g., database clients and RPC clients
 endpoint | application interfaces exposed to upstreams
-middleware | common functionality that has less to do with business logic, e.g., rate limiting middleware
+middleware | common optional functionality that has less to do with business logic, e.g., rate limiting middleware
 service | a collection of endpoints that represents high level application abstraction, e.g., a demo service that prints "Hello World!"
 
 #### Type
 The module `type` differentiates module instances of the same `ModuleClass` with further classification. Types are somewhat arbitrary as they are not necessarily abstractions but indications about how Zanzibar should treat the modules.
+##### Adapter
+An adapter module could be of type `http` or `tchannel`
 ##### Client
 A client module could be of type `http`, `tchannel` or `custom`, where `http` or `tchannel` means Zanzibar will generate a client with given configuration that speaks that protocol while `custom` means the client is fully provided and Zanzibar will use it as is without code generation. In other words, `http` and `tchannel` clients are configuration driven (no user code) whereas `custom` clients are user-defined and can be "smart clients".
 ##### Endpoint
@@ -84,7 +87,7 @@ An `endpoint` module could also be of type `http` or `tchannel`, which determine
  Note that workflow type is likely to be deprecated in the future so that proxy to a client will be no longer a builtin option.
 
 ##### Middleware
-The builtin type of middleware module is `default`.
+A middleware module could be of type `http` or `tchannel`
 
 ##### Service
 The builtin service type is `gateway` (it is likely to change in the future, because `default` is probably a better name).
@@ -105,12 +108,13 @@ To establish and enforce abstraction boundaries, dependency rules at `ModuleClas
 
 ModuleClass | DependsOn | DependedBy
 ----------- | --------- | ----------
-client | N/A | middleware, endpoint
+client | N/A | adapter, middleware, endpoint
+adapter | client | endpoint
 middleware | client | endpoint
-endpoint | client, middleware | service
+endpoint | adapter, client, middleware | service
 service | endpoint | N/A
 
-This table exhausts the possible immediate or direct dependency relationships among builtin module classes. Take endpoint module class for example, an endpoint module can depend on client or middleware modules but not endpoint or service modules. The reasoning for such rules aligns with the abstractions the module classes represent.
+This table exhausts the possible immediate or direct dependency relationships among builtin module classes. Take endpoint module class for example, an endpoint module can depend on adapter, client, or middleware modules but not endpoint or service modules. The reasoning for such rules aligns with the abstractions the module classes represent.
 
 The `ModuleClass` struct has `DependsOn` and `DependedBy` public fields, which makes it simple to extend the dependency rules with custom module class, e.g., we can define a custom module class `task` that abstracts common business workflow by setting its `DependsOn` field to client and `DependedBy` field to endpoint.
 
@@ -121,9 +125,12 @@ Configurations are the interface that developers interact with when using the Za
 Because configurations are the core of a Zanzibar application, we create a root directory to host configuration files when starting a Zanzibar application. There are a few typical directories and files under the root directory. Take [example-gateway](https://github.com/uber/zanzibar/tree/master/examples/example-gateway) for example:
 ```
 example-gateway                 # root directory
+├── adapters                    # config directory for modules of adapter module class
+|   └── rate-limiter            # config directory for an adapter named 'rate-limiter' 
 ├── bin                         # directory for generated application binaries
 │   └── example-gateway         # generated example-gateway binary
 ├── build                       # directory for all generated code
+│   ├── adapters                # generated mocks and module initializers for adapters
 │   ├── clients                 # generated mocks and module initializers for clients
 │   ├── endpoints               # generated mocks and module initializers for endpoints
 │   ├── gen-code                # generated structs and (de)serializers by Thrift compiler
@@ -304,6 +311,7 @@ The [pre-steps.sh](https://github.com/uber/zanzibar/blob/master/codegen/runner/p
 Everything except `gen-code` under `build` directory is generated by Zanzibar. Zanzibar parses config files for each module to gathers meta information and then executing various [templates](https://github.com/uber/zanzibar/tree/master/codegen/templates) by applying them to the meta data. Here is what is generated for each builtin module class:
 
 - client: dependency type, client interface and constructor if non-custom, mock client constructor
+- adapter: dependency type, adapter type and constructor
 - middleware: dependency type, middleware type and constructor (unstable)
 - endpoint: dependency type, endpoint type and constructor, workflow interface, workflow if non-custom, mock workflow constructor if custom
 - service: dependency type and initializer, main.go, mock service constructor, service constructor
