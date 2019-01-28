@@ -56,7 +56,7 @@ func NewBarMissingArgHandler(deps *module.Dependencies) *BarMissingArgHandler {
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "missingArg",
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
 				deps.Adapter.TestAdapter1.NewAdapterHandle(
 					testAdapter1.Options{},

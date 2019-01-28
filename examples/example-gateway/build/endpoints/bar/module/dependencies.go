@@ -24,6 +24,7 @@
 package module
 
 import (
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 
@@ -33,8 +34,14 @@ import (
 // Dependencies contains dependencies for the bar endpoint module
 type Dependencies struct {
 	Default    *zanzibar.DefaultDependencies
+	Adapter    *AdapterDependencies
 	Client     *ClientDependencies
 	Middleware *MiddlewareDependencies
+}
+
+// AdapterDependencies contains adapter dependencies
+type AdapterDependencies struct {
+	TestAdapter1 testadapter1adaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

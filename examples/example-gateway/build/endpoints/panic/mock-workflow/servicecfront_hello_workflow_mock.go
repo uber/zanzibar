@@ -31,6 +31,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
+	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
@@ -55,9 +57,18 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 	}
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 
+	initializedAdapterDependencies := &adapterDependenciesNodes{}
+
+	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := panicendpointstatic.NewServiceCFrontHelloWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
+			Adapter: &module.AdapterDependencies{
+				TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			},
 			Client: &module.ClientDependencies{
 				Multi: initializedClientDependencies.Multi,
 			},

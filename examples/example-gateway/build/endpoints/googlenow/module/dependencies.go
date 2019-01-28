@@ -24,6 +24,7 @@
 package module
 
 import (
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -32,7 +33,13 @@ import (
 // Dependencies contains dependencies for the googlenow endpoint module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
+	Adapter *AdapterDependencies
 	Client  *ClientDependencies
+}
+
+// AdapterDependencies contains adapter dependencies
+type AdapterDependencies struct {
+	TestAdapter1 testadapter1adaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

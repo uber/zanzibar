@@ -56,7 +56,7 @@ func NewServiceBFrontHelloHandler(deps *module.Dependencies) *ServiceBFrontHello
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"multi", "helloB",
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
 				deps.Adapter.TestAdapter1.NewAdapterHandle(
 					testAdapter1.Options{},

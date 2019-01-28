@@ -56,7 +56,7 @@ func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceS
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"baz", "sillyNoop",
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
 				deps.Adapter.TestAdapter1.NewAdapterHandle(
 					testAdapter1.Options{},

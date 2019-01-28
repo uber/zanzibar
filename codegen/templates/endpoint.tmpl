@@ -77,16 +77,16 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		deps.Default.ContextExtractor, deps.Default,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if or (len $middlewares | ne 0) (len $adapters | ne 0) -}}
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			{{ if len $adapters | ne 0 -}}
 			[]zanzibar.AdapterHandle{
 				{{range $idx, $adapter := $adapters -}}
 				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
 					{{$adapter.Name | camel}}.Options{
-                	{{range $key, $value := $adapter.PrettyOptions -}}
-                		{{$key}} : {{$value}},
-                	{{end -}}
-                	},
+					{{range $key, $value := $adapter.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
 				),
 				{{end -}}
 			},

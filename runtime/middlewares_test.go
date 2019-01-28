@@ -49,10 +49,10 @@ func TestHandlers(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareHandle{ex}
-	zanzibarStack := zanzibar.NewZanzibarStack(nil, middles, noopHandlerFn)
+	executionStack := zanzibar.NewExecutionStack(nil, middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
-	middlewares := zanzibarStack.Middlewares()
+	middlewares := executionStack.Middlewares()
 	assert.Equal(t, 1, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
@@ -81,7 +81,7 @@ func TestHandlers(t *testing.T) {
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
 			"foo", "foo",
-			middlewareStack.Handle,
+			executionStack.Handle,
 		).HandleRequest),
 	)
 	assert.NoError(t, err)
@@ -144,10 +144,10 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 	}
 
 	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
-	zanzibarStack := zanzibar.NewZanzibarStack(nil, middles, noopHandlerFn)
+	executionStack := zanzibar.NewExecutionStack(nil, middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
-	middlewares := zanzibarStack.Middlewares()
+	middlewares := executionStack.Middlewares()
 	assert.Equal(t, 3, len(middlewares))
 
 	gateway, err := benchGateway.CreateGateway(
@@ -174,7 +174,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
 			"foo", "foo",
-			middlewareStack.Handle,
+			executionStack.Handle,
 		).HandleRequest),
 	)
 	assert.NoError(t, err)
@@ -205,10 +205,10 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 	}
 
 	middles := []zanzibar.MiddlewareHandle{mid1, mid2, mid3}
-	zanzibarStack := zanzibar.NewZanzibarStack(nil, middles, noopHandlerFn)
+	executionStack := zanzibar.NewExecutionStack(nil, middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
-	middlewares := zanzibarStack.Middlewares()
+	middlewares := executionStack.Middlewares()
 	assert.Equal(t, 3, len(middlewares))
 
 	gateway, err := benchGateway.CreateGateway(
@@ -236,7 +236,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
 			"foo", "foo",
-			middlewareStack.Handle,
+			executionStack.Handle,
 		).HandleRequest),
 	)
 	assert.NoError(t, err)
@@ -271,10 +271,10 @@ func TestMiddlewareSharedStates(t *testing.T) {
 	)
 
 	middles := []zanzibar.MiddlewareHandle{ex, exReader}
-	zanzibarStack := zanzibar.NewZanzibarStack(nil, middles, noopHandlerFn)
+	executionStack := zanzibar.NewExecutionStack(nil, middles, noopHandlerFn)
 
 	// Verify the custom middleware has been added.
-	middlewares := zanzibarStack.Middlewares()
+	middlewares := executionStack.Middlewares()
 	assert.Equal(t, 2, len(middlewares))
 
 	// Run the zanzibar.HandleFn of composed middlewares.
@@ -302,7 +302,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
 			"foo", "foo",
-			middlewareStack.Handle,
+			executionStack.Handle,
 		).HandleRequest),
 	)
 	assert.NoError(t, err)
@@ -332,7 +332,7 @@ func TestMiddlewareSharedStateSet(t *testing.T) {
 
 	middles := []zanzibar.MiddlewareHandle{ex, exReader}
 
-	ss := zanzibar.NewSharedState(middles)
+	ss := zanzibar.NewSharedState(nil, middles)
 
 	ss.SetState(ex, "foo")
 	assert.Equal(t, ss.GetState("example").(string), "foo")

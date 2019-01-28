@@ -53,6 +53,7 @@ func (m *test1Adapter) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState,
 ) bool {
 	return true
 }
@@ -60,6 +61,7 @@ func (m *test1Adapter) HandleRequest(
 func (m *test1Adapter) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
+	shared zanzibar.SharedState,
 ) {
 }
 

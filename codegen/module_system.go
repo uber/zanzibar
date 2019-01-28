@@ -821,7 +821,6 @@ func (g *EndpointGenerator) ComputeSpec(
 	endpointYamls := []string{}
 	endpointSpecs := []*EndpointSpec{}
 	clientSpecs := readClientDependencySpecs(instance)
-	// RYAN add readAdapterDependencySpecs here?
 
 	endpointConfig, err := readEndpointConfig(instance.YAMLFileRaw)
 	if err != nil {
@@ -848,9 +847,6 @@ func (g *EndpointGenerator) ComputeSpec(
 				err, "Error parsing endpoint yaml file: %s", yamlFile,
 			)
 		}
-
-		// RYAN add all adapters here
-		//espec.Adapters =
 
 		endpointSpecs = append(endpointSpecs, espec)
 

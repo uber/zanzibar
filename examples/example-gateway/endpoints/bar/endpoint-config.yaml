@@ -14,6 +14,8 @@ config:
   - hello.yaml
   rateLimit: 100
 dependencies:
+  adapter:
+  - test_adapter1
   client:
   - bar
   middleware:

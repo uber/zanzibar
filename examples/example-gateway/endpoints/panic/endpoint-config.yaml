@@ -3,6 +3,8 @@ config:
   - ./endpoint_panic.json
   rateLimit: 100
 dependencies:
+  adapter:
+  - test_adapter1
   client:
   - multi
 name: panic

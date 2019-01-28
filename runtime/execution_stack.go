@@ -22,32 +22,38 @@ package zanzibar
 
 import "context"
 
-type ZanzibarStack struct {
+// ExecutionStack is a stack of Adapter and Middleware Handlers that can be invoked as an Handle.
+// ExecutionStack adapters and middlewares are evaluated for requests in the order that they are added to the stack
+// followed by the underlying HandlerFn. The adapter responses are then executed in reverse.
+type ExecutionStack struct {
 	adapters    []AdapterHandle
 	middlewares []MiddlewareHandle
 	handle      HandlerFn
 }
 
-func NewZanzibarStack(
-	adapters 	[]AdapterHandle,
+// NewExecutionStack returns a new ExecutionStack instance with no adapter or middleware preconfigured.
+func NewExecutionStack(
+	adapters []AdapterHandle,
 	middlewares []MiddlewareHandle,
-	handle      HandlerFn) *ZanzibarStack {
-	return &ZanzibarStack{
+	handle HandlerFn) *ExecutionStack {
+	return &ExecutionStack{
 		handle:      handle,
 		adapters:    adapters,
 		middlewares: middlewares,
 	}
 }
 
-func (m *ZanzibarStack) Adapters() []AdapterHandle {
+// Adapters returns a list of all the adapter handlers in the current ExecutionStack.
+func (m *ExecutionStack) Adapters() []AdapterHandle {
 	return m.adapters
 }
 
-func (m *ZanzibarStack) Middlewares() []MiddlewareHandle {
+// Middlewares returns a list of all the middleware handlers in the current ExecutionStack.
+func (m *ExecutionStack) Middlewares() []MiddlewareHandle {
 	return m.middlewares
 }
 
-// SharedState used to access other middlewares and adapters in the chain.
+// SharedState used to access other adapters and middlewares in the chain.
 type SharedState struct {
 	// TODO(rnkim): One issue I can see is if a middleware and adapter have the same name
 	stateDict map[string]interface{}
@@ -73,13 +79,13 @@ func (s SharedState) GetState(name string) interface{} {
 	return s.stateDict[name]
 }
 
-// SetState sets value of a middleware shared state
+// SetState sets value of an adapter or middleware shared state
 func (s SharedState) SetState(m MiddlewareHandle, state interface{}) {
 	s.stateDict[m.Name()] = state
 }
 
 // Handle executes the adapters and middlewares in a stack and underlying handler.
-func (m *ZanzibarStack) Handle(
+func (m *ExecutionStack) Handle(
 	ctx context.Context,
 	req *ServerHTTPRequest,
 	res *ServerHTTPResponse) {
@@ -109,7 +115,7 @@ func (m *ZanzibarStack) Handle(
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
 
-			for j := len(m.adapters)-1; j >= 0; j-- {
+			for j := len(m.adapters) - 1; j >= 0; j-- {
 				m.adapters[j].HandleResponse(ctx, res, shared)
 			}
 			return

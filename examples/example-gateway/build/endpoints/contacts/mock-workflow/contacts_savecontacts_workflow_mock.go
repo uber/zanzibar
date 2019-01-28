@@ -31,6 +31,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
+	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
@@ -56,9 +58,18 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 	}
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
 
+	initializedAdapterDependencies := &adapterDependenciesNodes{}
+
+	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
+			Adapter: &module.AdapterDependencies{
+				TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			},
 			Client: &module.ClientDependencies{
 				Contacts: initializedClientDependencies.Contacts,
 			},

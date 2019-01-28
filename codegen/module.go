@@ -769,6 +769,12 @@ func (system *ModuleSystem) readInstance(
 		)
 	}
 
+	// RYAN populate mandatory dependencies here
+	// This is not ideal. The code would look something like
+	// if className == "endpoint" {
+	//     dependencies = append(dependencies, adapters...)
+	// }
+
 	return &ModuleInstance{
 		PackageInfo:           packageInfo,
 		ClassName:             className,

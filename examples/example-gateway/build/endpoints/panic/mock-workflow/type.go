@@ -24,6 +24,7 @@
 package mockpanicworkflow
 
 import (
+	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 )
@@ -36,4 +37,9 @@ type MockClientNodes struct {
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
 	Multi multiclientgenerated.Client
+}
+
+// adapterDependenciesNodes contains adapter dependencies
+type adapterDependenciesNodes struct {
+	TestAdapter1 testadapter1adaptergenerated.Adapter
 }

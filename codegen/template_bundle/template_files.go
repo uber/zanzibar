@@ -379,16 +379,16 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		deps.Default.ContextExtractor, deps.Default,
 		"{{$endpointId}}", "{{$handleId}}",
 		{{ if or (len $middlewares | ne 0) (len $adapters | ne 0) -}}
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			{{ if len $adapters | ne 0 -}}
 			[]zanzibar.AdapterHandle{
 				{{range $idx, $adapter := $adapters -}}
 				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
 					{{$adapter.Name | camel}}.Options{
-                	{{range $key, $value := $adapter.PrettyOptions -}}
-                		{{$key}} : {{$value}},
-                	{{end -}}
-                	},
+					{{range $key, $value := $adapter.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
 				),
 				{{end -}}
 			},
@@ -577,7 +577,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7745, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7698, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

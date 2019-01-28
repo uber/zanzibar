@@ -57,7 +57,7 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"googlenow", "addCredentials",
-		zanzibar.NewZanzibarStack(
+		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
 				deps.Adapter.TestAdapter1.NewAdapterHandle(
 					testAdapter1.Options{},
