@@ -20,7 +20,7 @@ func NewMiddleware(deps *module.Dependencies) Middleware {
 	}
 }
 
-// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareTchannelHandle
 func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
 	return handle.NewMiddleware(m.Deps, o)
 }

@@ -65,7 +65,7 @@ func (m *exampleMiddleware) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
 ) bool {
-	shared.SetState(
+	shared.SetMiddlewareState(
 		m,
 		MiddlewareState{
 			Baz: m.options.Foo,

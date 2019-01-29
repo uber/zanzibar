@@ -334,7 +334,7 @@ func TestMiddlewareSharedStateSet(t *testing.T) {
 
 	ss := zanzibar.NewSharedState(nil, middles)
 
-	ss.SetState(ex, "foo")
+	ss.SetMiddlewareState(ex, "foo")
 	assert.Equal(t, ss.GetState("example").(string), "foo")
 }
 

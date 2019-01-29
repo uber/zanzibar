@@ -1675,7 +1675,7 @@ func NewMiddleware(deps *module.Dependencies) Middleware {
 	}
 }
 
-// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
+// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareTchannelHandle
 func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
 	return handle.NewMiddleware(m.Deps, o)
 }
@@ -1693,7 +1693,7 @@ func middleware_tchannelTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "middleware_tchannel.tmpl", size: 726, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "middleware_tchannel.tmpl", size: 734, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2640,6 +2640,7 @@ var _tchannel_endpointTmpl = []byte(`{{- /* template to render edge gateway tcha
 {{- $spec := .Spec }}
 package {{$instance.PackageInfo.PackageName}}
 
+{{- $adapters := .Spec.Adapters }}
 {{- $middlewares := .Spec.Middlewares }}
 import (
 	"context"
@@ -2656,9 +2657,15 @@ import (
 	{{$pkg.AliasName}} "{{$pkg.PackageName}}"
 	{{end -}}
 
+	{{- if len $adapters | ne 0 }}
+	{{- range $idx, $adapter := $adapters }}
+	{{$adapter.Name | camel}} "{{$adapter.ImportPath}}"
+	{{- end}}
+	{{- end}}
+
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	{{$middleware.Name}} "{{$middleware.ImportPath}}"
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -2682,20 +2689,41 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"{{$spec.EndpointID}}", "{{$spec.HandleID}}", "{{.ThriftService}}::{{.Name}}",
-		{{ if len $middlewares | ne 0 -}}
-			zanzibar.NewMiddlewareTchannelStack([]zanzibar.MiddlewareTchannelHandle{
-			{{range $idx, $middleware := $middlewares -}}
+		{{ if or (len $middlewares | ne 0) (len $adapters | ne 0) -}}
+		zanzibar.NewExecutionTchannelStack(
+			{{ if len $adapters | ne 0 -}}
+			[]zanzibar.AdapterTchannelHandle{
+				{{range $idx, $adapter := $adapters -}}
+				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
+					{{$adapter.Name | camel}}.Options{
+					{{range $key, $value := $adapter.PrettyOptions -}}
+						{{$key}} : {{$value}},
+					{{end -}}
+					},
+				),
+				{{end -}}
+			},
+			{{- else -}}
+			nil,
+			{{- end -}}
+			{{- if len $middlewares | ne 0 }}
+			[]zanzibar.MiddlewareTchannelHandle{
+				{{range $idx, $middleware := $middlewares -}}
 				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-					{{$middleware.Name}}.Options{
+					{{$middleware.Name | camel}}.Options{
 					{{range $key, $value := $middleware.PrettyOptions -}}
 						{{$key}} : {{$value}},
 					{{end -}}
 					},
 				),
-			{{end -}}
-			}, handler),
+				{{end -}}
+			},
+			{{- else -}}
+			nil,
+			{{- end -}}
+		handler),
 		{{- else -}}
-			handler,
+		handler,
 		{{- end}}
 	)
 
@@ -2919,7 +2947,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8776, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9477, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

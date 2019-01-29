@@ -79,8 +79,13 @@ func (s SharedState) GetState(name string) interface{} {
 	return s.stateDict[name]
 }
 
-// SetState sets value of an adapter or middleware shared state
-func (s SharedState) SetState(m MiddlewareHandle, state interface{}) {
+// SetAdapterState sets value of an adapter shared state
+func (s SharedState) SetAdapterState(m AdapterHandle, state interface{}) {
+	s.stateDict[m.Name()] = state
+}
+
+// SetMiddlewareState sets value of an middleware shared state
+func (s SharedState) SetMiddlewareState(m MiddlewareHandle, state interface{}) {
 	s.stateDict[m.Name()] = state
 }
 
