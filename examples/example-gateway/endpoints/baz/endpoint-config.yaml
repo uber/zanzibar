@@ -12,9 +12,6 @@ config:
   - get-profile.yaml
   rateLimit: 100
 dependencies:
-  adapter:
-  - test_adapter1
-  - test_adapter2
   client:
   - baz
 name: baz

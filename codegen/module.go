@@ -768,11 +768,33 @@ func (system *ModuleSystem) readInstance(
 		)
 	}
 
-	// RYAN populate mandatory dependencies here
-	// This is not ideal. The code would look something like
-	// if className == "endpoint" {
-	//     dependencies = append(dependencies, adapters...)
-	// }
+	// TODO(rnkim): This is not ideal. Discuss where to put this? This is hard without orchestrator changes
+	// `Dependencies` needs to be filled before `populateResolvedDependencies` is called since we want to retain the
+	// dependency resolution logic.
+	// module.go doesn't know anything about specific modules, so this logic doesn't belong here
+	if className == "endpoint" {
+		adapterObj := map[string][]string{}
+		adapterOrderingFile := filepath.Join(baseDirectory, "adapters", "adapters.yaml")
+		bytes, _ := ioutil.ReadFile(adapterOrderingFile)
+		err = yaml.Unmarshal(bytes, &adapterObj)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "Could not parse adapter ordering file: %s", adapterOrderingFile,
+			)
+		}
+		adapterOrderingObj := adapterObj[config.Type+"_adapters"]
+
+		deps := make([]ModuleDependency, 0)
+
+		for _, instanceName := range adapterOrderingObj {
+			deps = append(deps, ModuleDependency{
+				ClassName:    "adapter",
+				InstanceName: instanceName,
+			})
+		}
+
+		dependencies = append(dependencies, deps...)
+	}
 
 	return &ModuleInstance{
 		PackageInfo:           packageInfo,
