@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/textproto"
 	"path/filepath"
 	"sort"
@@ -831,6 +832,14 @@ func (g *EndpointGenerator) ComputeSpec(
 		)
 	}
 
+	// This forces adapter ordering from adapters.yaml file
+	orderedAdapterSpecs, err := getOrderedAdapterSpecs(g.packageHelper.ConfigRoot(), g.packageHelper.AdapterSpecs())
+	if err != nil {
+		return nil, errors.Wrap(
+			err, "Error getting ordered adapter specs",
+		)
+	}
+
 	endpointConfigDir := filepath.Join(
 		instance.BaseDirectory,
 		instance.Directory,
@@ -841,7 +850,7 @@ func (g *EndpointGenerator) ComputeSpec(
 		)
 	}
 	for _, yamlFile := range endpointYamls {
-		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, g.packageHelper.AdapterSpecs(), g.packageHelper.MiddlewareSpecs())
+		espec, err := NewEndpointSpec(yamlFile, g.packageHelper, orderedAdapterSpecs, g.packageHelper.MiddlewareSpecs())
 		if err != nil {
 			return nil, errors.Wrapf(
 				err, "Error parsing endpoint yaml file: %s", yamlFile,
@@ -859,6 +868,55 @@ func (g *EndpointGenerator) ComputeSpec(
 	}
 
 	return endpointSpecs, nil
+}
+
+func getOrderedAdapterSpecs(cfgDir string, adapterSpecs map[string]*AdapterSpec) ([]AdapterSpec, error) {
+	adapterObj := map[string][]string{}
+	adapterOrderingFile := filepath.Join(cfgDir, "adapters", "adapters.yaml")
+	bytes, err := ioutil.ReadFile(adapterOrderingFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not read adapter ordering file: %s", adapterOrderingFile,
+		)
+	}
+	err = yaml.Unmarshal(bytes, &adapterObj)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not parse adapter ordering file: %s", adapterOrderingFile,
+		)
+	}
+	adapterOrderingObj := adapterObj["adapters"]
+	if len(adapterSpecs) != len(adapterOrderingObj) {
+		return nil, errors.Errorf(
+			"Number of adapters in ordering file does not match the actual number of adapters: %s, %s",
+			adapterOrderingObj,
+			adapterSpecs,
+		)
+	}
+
+	return sortByAdapterOrdering(adapterOrderingObj, adapterSpecs)
+}
+
+// sortByAdapterOrdering sorts adapterSpecs using the ordering from adapterOrderingObj
+func sortByAdapterOrdering(adapterOrderingObj []string, adapterSpecs map[string]*AdapterSpec) ([]AdapterSpec, error) {
+	adapters := make([]AdapterSpec, 0)
+
+	var found bool
+	for _, adapterName := range adapterOrderingObj {
+		found = false
+		for _, adapterSpec := range adapterSpecs {
+			if adapterName == adapterSpec.Name {
+				adapters = append(adapters, *adapterSpec)
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, errors.Errorf("Could not find adapter %s", adapterName)
+		}
+	}
+
+	return adapters, nil
 }
 
 // Generate returns the endpoint build result, which contains a file per

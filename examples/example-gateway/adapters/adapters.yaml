@@ -1,2 +1,3 @@
+# Adapters are executed in the order they are listed here
 adapters:
-  - ryan_test_adapter1
+- test_adapter1
