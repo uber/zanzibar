@@ -21,30 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package testadapter2adapter
 
 import (
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
-	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
-
+	handle "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter2"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the multi endpoint module
-type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
-	Adapter *AdapterDependencies
-	Client  *ClientDependencies
+// Adapter is a container for module.Deps and factory for AdapterHandle
+type Adapter struct {
+	Deps *module.Dependencies
 }
 
-// AdapterDependencies contains adapter dependencies
-type AdapterDependencies struct {
-	TestAdapter1 testadapter1adaptergenerated.Adapter
-	TestAdapter2 testadapter2adaptergenerated.Adapter
+// NewAdapter is a factory method for the struct
+func NewAdapter(deps *module.Dependencies) Adapter {
+	return Adapter{
+		Deps: deps,
+	}
 }
 
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Multi multiclientgenerated.Client
+// NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterHandle {
+	return handle.NewAdapter(m.Deps, o)
 }

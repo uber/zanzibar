@@ -55,7 +55,7 @@ func (m *ExecutionStack) Middlewares() []MiddlewareHandle {
 
 // SharedState used to access other adapters and middlewares in the chain.
 type SharedState struct {
-	// TODO(rnkim): One issue I can see is if a middleware and adapter have the same name
+	// TODO(rnkim): Should adapters and middlewares share the same state map?
 	stateDict map[string]interface{}
 }
 

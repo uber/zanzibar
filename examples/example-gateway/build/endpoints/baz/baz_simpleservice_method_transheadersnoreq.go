@@ -38,6 +38,7 @@ import (
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
 	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
+	testAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
@@ -58,6 +59,9 @@ func NewSimpleServiceTransHeadersNoReqHandler(deps *module.Dependencies) *Simple
 		"baz", "transHeadersNoReq",
 		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
+				deps.Adapter.TestAdapter2.NewAdapterHandle(
+					testAdapter2.Options{},
+				),
 				deps.Adapter.TestAdapter1.NewAdapterHandle(
 					testAdapter1.Options{},
 				),

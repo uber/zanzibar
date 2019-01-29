@@ -6,6 +6,7 @@ config:
 dependencies:
   adapter:
   - test_adapter1
+  - test_adapter2
   client:
   - google-now
 name: googlenow

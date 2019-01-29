@@ -24,27 +24,10 @@
 package module
 
 import (
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
-	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
-
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the multi endpoint module
+// Dependencies contains dependencies for the test_adapter2 adapter module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
-	Adapter *AdapterDependencies
-	Client  *ClientDependencies
-}
-
-// AdapterDependencies contains adapter dependencies
-type AdapterDependencies struct {
-	TestAdapter1 testadapter1adaptergenerated.Adapter
-	TestAdapter2 testadapter2adaptergenerated.Adapter
-}
-
-// ClientDependencies contains client dependencies
-type ClientDependencies struct {
-	Multi multiclientgenerated.Client
 }

@@ -16,6 +16,7 @@ config:
 dependencies:
   adapter:
   - test_adapter1
+  - test_adapter2
   client:
   - bar
   middleware:

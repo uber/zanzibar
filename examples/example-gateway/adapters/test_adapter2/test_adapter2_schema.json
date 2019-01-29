@@ -1,0 +1,6 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"description": "Example adapter 2",
+	"type": "object",
+	"properties": {}
+}

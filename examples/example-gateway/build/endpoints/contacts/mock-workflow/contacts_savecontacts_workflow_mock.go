@@ -33,6 +33,8 @@ import (
 
 	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
 	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
+	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
+	testadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
@@ -63,12 +65,16 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedAdapterDependencies.TestAdapter2 = testadapter2adaptergenerated.NewAdapter(&testadapter2adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Adapter: &module.AdapterDependencies{
 				TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+				TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 			},
 			Client: &module.ClientDependencies{
 				Contacts: initializedClientDependencies.Contacts,

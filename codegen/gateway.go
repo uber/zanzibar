@@ -243,6 +243,8 @@ type AdapterSpec struct {
 	ImportPath string
 	// Location of yaml Schema file for the configured endpoint options
 	OptionsSchemaFile string
+	// Type (http or tchannel)
+	Type string
 }
 
 func newAdapterSpec(cfg *AdapterConfig) *AdapterSpec {
@@ -251,6 +253,7 @@ func newAdapterSpec(cfg *AdapterConfig) *AdapterSpec {
 		Dependencies:      cfg.Dependencies,
 		ImportPath:        cfg.Config.ImportPath,
 		OptionsSchemaFile: cfg.Config.OptionsSchemaFile,
+		Type:              cfg.Type,
 	}
 }
 

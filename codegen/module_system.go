@@ -833,7 +833,7 @@ func (g *EndpointGenerator) ComputeSpec(
 	}
 
 	// This forces adapter ordering from adapters.yaml file
-	orderedAdapterSpecs, err := getOrderedAdapterSpecs(g.packageHelper.ConfigRoot(), g.packageHelper.AdapterSpecs())
+	orderedAdapterSpecs, err := getOrderedAdapterSpecs(g.packageHelper.ConfigRoot(), g.packageHelper.AdapterSpecs(), instance.ClassType)
 	if err != nil {
 		return nil, errors.Wrap(
 			err, "Error getting ordered adapter specs",
@@ -870,7 +870,11 @@ func (g *EndpointGenerator) ComputeSpec(
 	return endpointSpecs, nil
 }
 
-func getOrderedAdapterSpecs(cfgDir string, adapterSpecs map[string]*AdapterSpec) ([]AdapterSpec, error) {
+func getOrderedAdapterSpecs(
+	cfgDir string,
+	adapterSpecs map[string]*AdapterSpec,
+	classType string,
+) ([]AdapterSpec, error) {
 	adapterObj := map[string][]string{}
 	adapterOrderingFile := filepath.Join(cfgDir, "adapters", "adapters.yaml")
 	bytes, err := ioutil.ReadFile(adapterOrderingFile)
@@ -885,14 +889,7 @@ func getOrderedAdapterSpecs(cfgDir string, adapterSpecs map[string]*AdapterSpec)
 			err, "Could not parse adapter ordering file: %s", adapterOrderingFile,
 		)
 	}
-	adapterOrderingObj := adapterObj["adapters"]
-	if len(adapterSpecs) != len(adapterOrderingObj) {
-		return nil, errors.Errorf(
-			"Number of adapters in ordering file does not match the actual number of adapters: %s, %s",
-			adapterOrderingObj,
-			adapterSpecs,
-		)
-	}
+	adapterOrderingObj := adapterObj[classType+"_adapters"]
 
 	return sortByAdapterOrdering(adapterOrderingObj, adapterSpecs)
 }

@@ -25,6 +25,7 @@ package module
 
 import (
 	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
+	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -40,6 +41,7 @@ type Dependencies struct {
 // AdapterDependencies contains adapter dependencies
 type AdapterDependencies struct {
 	TestAdapter1 testadapter1adaptergenerated.Adapter
+	TestAdapter2 testadapter2adaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

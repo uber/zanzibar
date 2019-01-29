@@ -177,7 +177,7 @@ func TestTchannelMiddlewareRequestAbort(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, mid1.reqCounter, 1)
-	assert.Equal(t, mid1.resCounter, 0)
+	assert.Equal(t, mid1.resCounter, 1)
 	assert.Equal(t, mid2.reqCounter, 0)
 	assert.Equal(t, mid2.resCounter, 0)
 }

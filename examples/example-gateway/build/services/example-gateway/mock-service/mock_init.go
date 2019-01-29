@@ -30,6 +30,8 @@ import (
 
 	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
 	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
+	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
+	testadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/mock-client"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
@@ -111,6 +113,9 @@ func InitializeDependenciesMock(
 	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedAdapterDependencies.TestAdapter2 = testadapter2adaptergenerated.NewAdapter(&testadapter2adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -130,6 +135,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &barendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -142,6 +148,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &bazendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &bazendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
@@ -161,6 +168,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &contactsendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &contactsendpointmodule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
@@ -170,6 +178,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &googlenowendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &googlenowendpointmodule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
@@ -179,6 +188,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &multiendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &multiendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
@@ -188,6 +198,7 @@ func InitializeDependenciesMock(
 		Default: initializedDefaultDependencies,
 		Adapter: &panicendpointmodule.AdapterDependencies{
 			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
+			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
 		},
 		Client: &panicendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
