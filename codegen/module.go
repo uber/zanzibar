@@ -187,7 +187,6 @@ func (system *ModuleSystem) RegisterClassType(
 }
 
 func (system *ModuleSystem) populateResolvedDependencies(
-	className string,
 	classInstances []*ModuleInstance,
 	resolvedModules map[string][]*ModuleInstance,
 ) error {
@@ -610,7 +609,6 @@ func (system *ModuleSystem) ResolveModules(
 
 		// Resolve dependencies for all classes
 		resolveErr := system.populateResolvedDependencies(
-			className,
 			classInstances,
 			resolvedModules,
 		)
@@ -790,7 +788,6 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	dependencies := readDeps(config.Dependencies)
-
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
