@@ -39,6 +39,7 @@ import (
 	endpointsContactsContacts "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/contacts/contacts"
 	customContacts "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 
+	exampleAdapter "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter"
 	exampleAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
@@ -62,6 +63,9 @@ func NewContactsSaveContactsHandler(deps *module.Dependencies) *ContactsSaveCont
 			[]zanzibar.AdapterHandle{
 				deps.Adapter.ExampleAdapter2.NewAdapterHandle(
 					exampleAdapter2.Options{},
+				),
+				deps.Adapter.ExampleAdapter.NewAdapterHandle(
+					exampleAdapter.Options{},
 				),
 			}, nil, handler.HandleRequest).Handle,
 	)

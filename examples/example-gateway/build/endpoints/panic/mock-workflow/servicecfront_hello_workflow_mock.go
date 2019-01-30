@@ -31,6 +31,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
+	exampleadapteradaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter/module"
 	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
 	exampleadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
@@ -59,6 +61,9 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 
 	initializedAdapterDependencies := &adapterDependenciesNodes{}
 
+	initializedAdapterDependencies.ExampleAdapter = exampleadapteradaptergenerated.NewAdapter(&exampleadapteradaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedAdapterDependencies.ExampleAdapter2 = exampleadapter2adaptergenerated.NewAdapter(&exampleadapter2adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -67,6 +72,7 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Adapter: &module.AdapterDependencies{
+				ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 				ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 			},
 			Client: &module.ClientDependencies{

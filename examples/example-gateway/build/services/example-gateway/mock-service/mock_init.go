@@ -28,6 +28,8 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/example-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
+	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
+	exampleadapteradaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter/module"
 	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
 	exampleadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
@@ -110,6 +112,9 @@ func InitializeDependenciesMock(
 
 	initializedAdapterDependencies := &module.AdapterDependenciesNodes{}
 	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.ExampleAdapter = exampleadapteradaptergenerated.NewAdapter(&exampleadapteradaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedAdapterDependencies.ExampleAdapter2 = exampleadapter2adaptergenerated.NewAdapter(&exampleadapter2adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -134,6 +139,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &barendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &barendpointmodule.ClientDependencies{
@@ -146,6 +152,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &bazendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &bazendpointmodule.ClientDependencies{
@@ -168,6 +175,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &contactsendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &contactsendpointmodule.ClientDependencies{
@@ -177,6 +185,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &googlenowendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &googlenowendpointmodule.ClientDependencies{
@@ -186,6 +195,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &multiendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &multiendpointmodule.ClientDependencies{
@@ -195,6 +205,7 @@ func InitializeDependenciesMock(
 	initializedEndpointDependencies.Panic = panicendpointgenerated.NewEndpoint(&panicendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &panicendpointmodule.AdapterDependencies{
+			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
 			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &panicendpointmodule.ClientDependencies{
