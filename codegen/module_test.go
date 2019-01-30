@@ -916,44 +916,49 @@ func TestImplicitDependency(t *testing.T) {
 
 	for className, classInstances := range instances {
 		if className == "client" {
-			if len(classInstances) != 2 {
+			expectedLen := 2
+			if len(classInstances) != expectedLen {
 				t.Errorf(
 					"Expected %d client class instance but found %d",
-					2,
+					expectedLen,
 					len(classInstances),
 				)
 			}
 		} else if className == "endpoint" {
-			if len(classInstances) != 1 {
+			expectedLen := 1
+			if len(classInstances) != expectedLen {
 				t.Errorf(
 					"Expected %d endpoint class instance but found %d",
-					1,
+					expectedLen,
 					len(classInstances),
 				)
 			}
 
 			for _, instance := range classInstances {
-				if len(instance.Dependencies) != 3 {
+				expectedLen = 3
+				if len(instance.Dependencies) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d dependencies but found %d",
 						instance.ClassName,
-						3,
+						expectedLen,
 						len(instance.Dependencies),
 					)
 				}
-				if len(instance.ResolvedDependencies["client"]) != 2 {
+				expectedLen = 2
+				if len(instance.ResolvedDependencies["client"]) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d resolved dependencies but found %d",
 						instance.ClassName,
-						1,
+						expectedLen,
 						len(instance.ResolvedDependencies["client"]),
 					)
 				}
-				if len(instance.RecursiveDependencies["client"]) != 2 {
+				expectedLen = 2
+				if len(instance.RecursiveDependencies["client"]) != expectedLen {
 					t.Errorf(
 						"Expected %s to have %d recursive dependencies but found %d",
 						instance.ClassName,
-						2,
+						expectedLen,
 						len(instance.RecursiveDependencies["client"]),
 					)
 				}

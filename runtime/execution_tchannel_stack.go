@@ -105,7 +105,7 @@ func (m *ExecutionTchannelStack) Handle(
 
 	for i := 0; i < len(m.adapters); i++ {
 		ok, err := m.adapters[i].HandleRequest(ctx, reqHeaders, wireValue, shared)
-		if ok == false {
+		if !ok {
 			for j := i; j >= 0; j-- {
 				m.adapters[j].HandleResponse(ctx, res, shared)
 			}
@@ -115,7 +115,7 @@ func (m *ExecutionTchannelStack) Handle(
 
 	for i := 0; i < len(m.middlewares); i++ {
 		ok, err := m.middlewares[i].HandleRequest(ctx, reqHeaders, wireValue, shared)
-		if ok == false {
+		if !ok {
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}

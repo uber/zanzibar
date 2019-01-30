@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"context"
 	"github.com/mcuadros/go-jsonschema-generator"
-
 	"go.uber.org/thriftrw/wire"
 )
 

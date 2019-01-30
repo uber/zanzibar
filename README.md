@@ -126,7 +126,7 @@ Because configurations are the core of a Zanzibar application, we create a root 
 ```
 example-gateway                 # root directory
 ├── adapters                    # config directory for modules of adapter module class
-│   └── rate-limiter            # config directory for an adapter named 'rate-limiter' 
+│   └── log-publisher           # config directory for an adapter named 'log-publisher' 
 ├── bin                         # directory for generated application binaries
 │   └── example-gateway         # generated example-gateway binary
 ├── build                       # directory for all generated code

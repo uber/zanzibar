@@ -101,7 +101,7 @@ func (m *ExecutionStack) Handle(
 		// If a adapter errors and writes to the response header
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the adapters seen so far.
-		if ok == false {
+		if !ok {
 			for j := i; j >= 0; j-- {
 				m.adapters[j].HandleResponse(ctx, res, shared)
 			}
@@ -114,7 +114,7 @@ func (m *ExecutionStack) Handle(
 		// If a middleware errors and writes to the response header
 		// then abort the rest of the stack and evaluate the response
 		// handlers for the adapters and middlewares seen so far.
-		if ok == false {
+		if !ok {
 			for j := i; j >= 0; j-- {
 				m.middlewares[j].HandleResponse(ctx, res, shared)
 			}
