@@ -24,6 +24,8 @@
 package module
 
 import (
+	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
 	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
@@ -42,6 +44,8 @@ type Dependencies struct {
 
 // AdapterDependencies contains adapter dependencies
 type AdapterDependencies struct {
+	ExampleAdapter         exampleadapteradaptergenerated.Adapter
+	ExampleAdapter2        exampleadapter2adaptergenerated.Adapter
 	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 

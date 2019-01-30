@@ -24,6 +24,10 @@
 package module
 
 import (
+	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
+	exampleadapteradaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter/module"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
+	exampleadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
@@ -40,6 +44,8 @@ type DependenciesTree struct {
 
 // AdapterDependenciesNodes contains adapter dependencies
 type AdapterDependenciesNodes struct {
+	ExampleAdapter         exampleadapteradaptergenerated.Adapter
+	ExampleAdapter2        exampleadapter2adaptergenerated.Adapter
 	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
@@ -68,6 +74,12 @@ func InitializeDependencies(
 
 	initializedAdapterDependencies := &AdapterDependenciesNodes{}
 	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.ExampleAdapter = exampleadapteradaptergenerated.NewAdapter(&exampleadapteradaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedAdapterDependencies.ExampleAdapter2 = exampleadapter2adaptergenerated.NewAdapter(&exampleadapter2adaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
@@ -77,6 +89,8 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &echoendpointmodule.AdapterDependencies{
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
 			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 	})

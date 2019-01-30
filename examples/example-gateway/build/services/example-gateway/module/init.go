@@ -177,8 +177,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &barendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -190,8 +191,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &bazendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &bazendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
@@ -200,6 +202,8 @@ func InitializeDependencies(
 	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &baztchannelendpointmodule.AdapterDependencies{
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
 			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &baztchannelendpointmodule.ClientDependencies{
@@ -213,8 +217,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &contactsendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &contactsendpointmodule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
@@ -223,8 +228,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &googlenowendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &googlenowendpointmodule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
@@ -233,8 +239,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &multiendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &multiendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
@@ -243,8 +250,9 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Panic = panicendpointgenerated.NewEndpoint(&panicendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &panicendpointmodule.AdapterDependencies{
-			ExampleAdapter:  initializedAdapterDependencies.ExampleAdapter,
-			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &panicendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
@@ -253,6 +261,8 @@ func InitializeDependencies(
 	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &panictchannelendpointmodule.AdapterDependencies{
+			ExampleAdapter:         initializedAdapterDependencies.ExampleAdapter,
+			ExampleAdapter2:        initializedAdapterDependencies.ExampleAdapter2,
 			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
 		},
 		Client: &panictchannelendpointmodule.ClientDependencies{

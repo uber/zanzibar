@@ -372,10 +372,11 @@ func NewDefaultModuleSystem(
 
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:        "endpoint",
-		Directories: []string{"endpoints"},
-		ClassType:   MultiModule,
-		DependsOn:   []string{"client", "adapter", "middleware"},
+		Name:              "endpoint",
+		Directories:       []string{"endpoints"},
+		ClassType:         MultiModule,
+		DependsOn:         []string{"client", "adapter", "middleware"},
+		ImplicitDependsOn: []string{"adapter"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}
@@ -907,19 +908,13 @@ func getOrderedAdapterSpecs(
 func sortByAdapterOrdering(adapterOrderingObj []string, adapterSpecs map[string]*AdapterSpec) ([]AdapterSpec, error) {
 	adapters := make([]AdapterSpec, 0)
 
-	var found bool
 	for _, adapterName := range adapterOrderingObj {
-		found = false
-		for _, adapterSpec := range adapterSpecs {
-			if adapterName == adapterSpec.Name {
-				adapters = append(adapters, *adapterSpec)
-				found = true
-				break
-			}
-		}
-		if !found {
+		adapterSpec, ok := adapterSpecs[adapterName]
+		if !ok {
 			return nil, errors.Errorf("Could not find adapter %s", adapterName)
 		}
+
+		adapters = append(adapters, *adapterSpec)
 	}
 
 	return adapters, nil

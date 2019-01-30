@@ -24,6 +24,8 @@
 package mockechoworkflow
 
 import (
+	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
 	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 )
 
@@ -33,5 +35,7 @@ type MockNodes struct {
 
 // adapterDependenciesNodes contains adapter dependencies
 type adapterDependenciesNodes struct {
+	ExampleAdapter         exampleadapteradaptergenerated.Adapter
+	ExampleAdapter2        exampleadapter2adaptergenerated.Adapter
 	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }

@@ -859,6 +859,167 @@ func TestExampleServiceCycles(t *testing.T) {
 	}
 }
 
+func TestImplicitDependency(t *testing.T) {
+	moduleSystem := NewModuleSystem()
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:        "client",
+		ClassType:   MultiModule,
+		Directories: []string{"clients"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:              "endpoint",
+		ClassType:         MultiModule,
+		DependsOn:         []string{"client"},
+		ImplicitDependsOn: []string{"client"},
+		Directories:       []string{"endpoints"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	instances, err := moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		true,
+	)
+	if err != nil {
+		t.Errorf("Unexpected generation failure")
+	}
+
+	for className, classInstances := range instances {
+		if className == "client" {
+			if len(classInstances) != 2 {
+				t.Errorf(
+					"Expected %d client class instance but found %d",
+					2,
+					len(classInstances),
+				)
+			}
+		} else if className == "endpoint" {
+			if len(classInstances) != 1 {
+				t.Errorf(
+					"Expected %d endpoint class instance but found %d",
+					1,
+					len(classInstances),
+				)
+			}
+
+			for _, instance := range classInstances {
+				if len(instance.Dependencies) != 3 {
+					t.Errorf(
+						"Expected %s to have %d dependencies but found %d",
+						instance.ClassName,
+						3,
+						len(instance.Dependencies),
+					)
+				}
+				if len(instance.ResolvedDependencies["client"]) != 2 {
+					t.Errorf(
+						"Expected %s to have %d resolved dependencies but found %d",
+						instance.ClassName,
+						1,
+						len(instance.ResolvedDependencies["client"]),
+					)
+				}
+				if len(instance.RecursiveDependencies["client"]) != 2 {
+					t.Errorf(
+						"Expected %s to have %d recursive dependencies but found %d",
+						instance.ClassName,
+						2,
+						len(instance.RecursiveDependencies["client"]),
+					)
+				}
+			}
+		} else {
+			t.Errorf("Unexpected resolved class type %s", className)
+		}
+	}
+}
+
+func TestInvalidImplicitDependency(t *testing.T) {
+	moduleSystem := NewModuleSystem()
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:        "client",
+		ClassType:   MultiModule,
+		Directories: []string{"clients"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:              "endpoint",
+		ClassType:         MultiModule,
+		DependsOn:         []string{"client"},
+		ImplicitDependsOn: []string{"clientFAILURE"},
+		Directories:       []string{"endpoints"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	_, err = moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		true,
+	)
+	if err == nil {
+		t.Errorf("Expected failure due to implicit dependency which does not exist")
+	}
+}
+
 func TestSortDependencies(t *testing.T) {
 	testInstanceA := createTestInstance("example-a")
 	testInstanceB := createTestInstance("example-b")

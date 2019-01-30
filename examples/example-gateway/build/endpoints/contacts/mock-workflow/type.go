@@ -26,6 +26,7 @@ package mockcontactsworkflow
 import (
 	exampleadapteradaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter"
 	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 )
@@ -42,6 +43,7 @@ type clientDependenciesNodes struct {
 
 // adapterDependenciesNodes contains adapter dependencies
 type adapterDependenciesNodes struct {
-	ExampleAdapter  exampleadapteradaptergenerated.Adapter
-	ExampleAdapter2 exampleadapter2adaptergenerated.Adapter
+	ExampleAdapter         exampleadapteradaptergenerated.Adapter
+	ExampleAdapter2        exampleadapter2adaptergenerated.Adapter
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }

@@ -187,6 +187,7 @@ func (system *ModuleSystem) RegisterClassType(
 }
 
 func (system *ModuleSystem) populateResolvedDependencies(
+	className string,
 	classInstances []*ModuleInstance,
 	resolvedModules map[string][]*ModuleInstance,
 ) error {
@@ -219,7 +220,7 @@ func (system *ModuleSystem) populateResolvedDependencies(
 
 			if dependencyInstance == nil {
 				return errors.Errorf(
-					"Unknown %q class depdendency %q"+
+					"Unknown %q class dependency %q "+
 						"in dependencies for %q %q",
 					classDependency.ClassName,
 					classDependency.InstanceName,
@@ -597,8 +598,19 @@ func (system *ModuleSystem) ResolveModules(
 
 		resolvedModules[className] = classInstances
 
+		// Fill instances in `resolvedModules` with implicit dependencies
+		implicitDepsErr := fillImplicitDependencies(className, class.ImplicitDependsOn, resolvedModules)
+		if implicitDepsErr != nil {
+			return nil, errors.Wrapf(implicitDepsErr,
+				"Error filling implicit dependencies %s for %s",
+				class.ImplicitDependsOn,
+				className,
+			)
+		}
+
 		// Resolve dependencies for all classes
 		resolveErr := system.populateResolvedDependencies(
+			className,
 			classInstances,
 			resolvedModules,
 		)
@@ -614,6 +626,36 @@ func (system *ModuleSystem) ResolveModules(
 	}
 
 	return resolvedModules, nil
+}
+
+func fillImplicitDependencies(className string, classDependencies []string, modules map[string][]*ModuleInstance) error {
+	moduleInstances, ok := modules[className]
+	if !ok {
+		return errors.Errorf(
+			"Could not find class %q while filling implicit dependencies",
+			className)
+	}
+
+	for _, moduleInstance := range moduleInstances {
+		for _, classDependency := range classDependencies {
+			moduleInstanceDependencies, ok := modules[classDependency]
+			if !ok {
+				return errors.Errorf(
+					"Could not find class dependency %q while filling implicit dependencies for class %q",
+					classDependency,
+					className)
+			}
+
+			for _, moduleInstanceDependency := range moduleInstanceDependencies {
+				moduleDependency := ModuleDependency{
+					ClassName:    moduleInstanceDependency.ClassName,
+					InstanceName: moduleInstanceDependency.InstanceName}
+				moduleInstance.Dependencies = append(moduleInstance.Dependencies, moduleDependency)
+			}
+		}
+	}
+
+	return nil
 }
 
 func getConfigFilePath(dir, name string) (string, string, string) {
@@ -748,6 +790,7 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	dependencies := readDeps(config.Dependencies)
+
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
@@ -766,34 +809,6 @@ func (system *ModuleSystem) readInstance(
 			className,
 			config.Name,
 		)
-	}
-
-	// TODO(rnkim): This is not ideal. Discuss where to put this? This is hard without orchestrator changes
-	// `Dependencies` needs to be filled before `populateResolvedDependencies` is called since we want to retain the
-	// dependency resolution logic.
-	// module.go doesn't know anything about specific modules, so this logic doesn't belong here
-	if className == "endpoint" {
-		adapterObj := map[string][]string{}
-		adapterOrderingFile := filepath.Join(baseDirectory, "adapters", "adapters.yaml")
-		bytes, _ := ioutil.ReadFile(adapterOrderingFile)
-		err = yaml.Unmarshal(bytes, &adapterObj)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err, "Could not parse adapter ordering file: %s", adapterOrderingFile,
-			)
-		}
-		adapterOrderingObj := adapterObj[config.Type+"_adapters"]
-
-		deps := make([]ModuleDependency, 0)
-
-		for _, instanceName := range adapterOrderingObj {
-			deps = append(deps, ModuleDependency{
-				ClassName:    "adapter",
-				InstanceName: instanceName,
-			})
-		}
-
-		dependencies = append(dependencies, deps...)
 	}
 
 	return &ModuleInstance{
@@ -1238,7 +1253,7 @@ func FormatGoFile(filePath string) error {
 }
 
 // ModuleClass defines a module class in the build configuration directory.
-// THis could be something like an Endpoint class which contains multiple
+// This could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
 	Name        string
@@ -1247,6 +1262,9 @@ type ModuleClass struct {
 	DependsOn   []string
 	DependedBy  []string
 	types       map[string]BuildGenerator
+
+	// Every module instance of this module class imports all instances of a module class that is implicitly depended on
+	ImplicitDependsOn []string
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass
