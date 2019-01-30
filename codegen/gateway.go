@@ -1057,7 +1057,7 @@ func parseAdaptersConfig(
 		err = adapter.Validate(configDirName)
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "Cannot validate middleware: %v",
+				err, "Cannot validate adapter: %v",
 				adapter,
 			)
 		}
