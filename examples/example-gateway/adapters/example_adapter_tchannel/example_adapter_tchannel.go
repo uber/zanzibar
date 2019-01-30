@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package testadapter1
+package exampleadaptertchannel
 
 import (
 	"context"
 	"github.com/mcuadros/go-jsonschema-generator"
-
-	"github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/wire"
 )
 
-type test1Adapter struct {
+type exampleAdapterTchannel struct {
 	deps    *module.Dependencies
 	options Options
 }
@@ -41,37 +41,38 @@ type Options struct{}
 func NewAdapter(
 	deps *module.Dependencies,
 	options Options,
-) zanzibar.AdapterHandle {
-	return &test1Adapter{
+) zanzibar.AdapterTchannelHandle {
+	return &exampleAdapterTchannel{
 		deps:    deps,
 		options: options,
 	}
 }
 
 // HandleRequest handles the requests before calling lower level adapters.
-func (m *test1Adapter) HandleRequest(
+func (m *exampleAdapterTchannel) HandleRequest(
 	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState,
-) bool {
-	return true
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+	shared zanzibar.TchannelSharedState,
+) (bool, error) {
+	return true, nil
 }
 
-func (m *test1Adapter) HandleResponse(
+func (m *exampleAdapterTchannel) HandleResponse(
 	ctx context.Context,
-	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState,
-) {
+	rwt zanzibar.RWTStruct,
+	shared zanzibar.TchannelSharedState,
+) zanzibar.RWTStruct {
+	return rwt
 }
 
 // JSONSchema returns a schema definition of the configuration options for an adapter
-func (m *test1Adapter) JSONSchema() *jsonschema.Document {
+func (m *exampleAdapterTchannel) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m *test1Adapter) Name() string {
-	return "test_adapter1"
+func (m *exampleAdapterTchannel) Name() string {
+	return "example_adapter_tchannel"
 }

@@ -24,6 +24,7 @@
 package mockbaztchannelworkflow
 
 import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
@@ -41,6 +42,11 @@ type MockClientNodes struct {
 type clientDependenciesNodes struct {
 	Baz  bazclientgenerated.Client
 	Quux quuxclientstatic.Client
+}
+
+// adapterDependenciesNodes contains adapter dependencies
+type adapterDependenciesNodes struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
 // middlewareDependenciesNodes contains middleware dependencies

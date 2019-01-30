@@ -24,10 +24,18 @@
 package module
 
 import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the echo endpoint module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
+	Adapter *AdapterDependencies
+}
+
+// AdapterDependencies contains adapter dependencies
+type AdapterDependencies struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }

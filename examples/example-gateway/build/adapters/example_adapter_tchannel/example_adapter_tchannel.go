@@ -21,13 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package exampleadaptertchanneladapter
 
 import (
+	handle "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter_tchannel"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the test_adapter1 adapter module
-type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
+// Adapter is a container for module.Deps and factory for AdapterHandle
+type Adapter struct {
+	Deps *module.Dependencies
+}
+
+// NewAdapter is a factory method for the struct
+func NewAdapter(deps *module.Dependencies) Adapter {
+	return Adapter{
+		Deps: deps,
+	}
+}
+
+// NewAdapterHandle calls back to the custom adapter to build an AdapterTchannelHandle
+func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
+	return handle.NewAdapter(m.Deps, o)
 }

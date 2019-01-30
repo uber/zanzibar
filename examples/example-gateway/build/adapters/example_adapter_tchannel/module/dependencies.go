@@ -27,7 +27,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the test_adapter2 adapter module
+// Dependencies contains dependencies for the example_adapter_tchannel adapter module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
 }

@@ -24,6 +24,7 @@
 package module
 
 import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
@@ -34,8 +35,14 @@ import (
 // Dependencies contains dependencies for the bazTChannel endpoint module
 type Dependencies struct {
 	Default    *zanzibar.DefaultDependencies
+	Adapter    *AdapterDependencies
 	Client     *ClientDependencies
 	Middleware *MiddlewareDependencies
+}
+
+// AdapterDependencies contains adapter dependencies
+type AdapterDependencies struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

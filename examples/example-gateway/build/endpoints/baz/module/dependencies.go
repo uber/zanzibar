@@ -24,8 +24,7 @@
 package module
 
 import (
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -40,8 +39,7 @@ type Dependencies struct {
 
 // AdapterDependencies contains adapter dependencies
 type AdapterDependencies struct {
-	TestAdapter1 testadapter1adaptergenerated.Adapter
-	TestAdapter2 testadapter2adaptergenerated.Adapter
+	ExampleAdapter2 exampleadapter2adaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

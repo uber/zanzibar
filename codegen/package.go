@@ -69,12 +69,12 @@ func NewDefaultPackageHelperOptions() *PackageHelperOptions {
 // PackageHelperOptions set the optional configurations for the project package.
 // Each field is optional, if not set, it is set to the corresponding default value.
 type PackageHelperOptions struct {
-	// relative path to the adapter config dir, defaults to "./adapters"
-	RelAdapterConfigDir string
 	// relative path to the idl dir, defaults to "./idl"
 	RelThriftRootDir string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
 	RelTargetGenDir string
+	// relative path to the adapter config dir, defaults to "./adapters"
+	RelAdapterConfigDir string
 	// relative path to the middleware config dir, defaults to "./middlewares"
 	RelMiddlewareConfigDir string
 

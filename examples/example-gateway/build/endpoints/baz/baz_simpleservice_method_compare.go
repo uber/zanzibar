@@ -39,8 +39,7 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
-	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
-	testAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter2"
+	exampleAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
@@ -61,11 +60,8 @@ func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCom
 		"baz", "compare",
 		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
-				deps.Adapter.TestAdapter2.NewAdapterHandle(
-					testAdapter2.Options{},
-				),
-				deps.Adapter.TestAdapter1.NewAdapterHandle(
-					testAdapter1.Options{},
+				deps.Adapter.ExampleAdapter2.NewAdapterHandle(
+					exampleAdapter2.Options{},
 				),
 			}, nil, handler.HandleRequest).Handle,
 	)

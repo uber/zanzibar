@@ -28,6 +28,8 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 )
@@ -56,10 +58,19 @@ func InitializeDependenciesMock(
 		Tracer:           g.Tracer,
 	}
 
+	initializedAdapterDependencies := &module.AdapterDependenciesNodes{}
+	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &echoendpointmodule.AdapterDependencies{
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+		},
 	})
 
 	dependencies := &module.Dependencies{

@@ -31,10 +31,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
-	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
-	testadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
+	exampleadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
@@ -61,10 +59,7 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 
 	initializedAdapterDependencies := &adapterDependenciesNodes{}
 
-	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
-		Default: initializedDefaultDependencies,
-	})
-	initializedAdapterDependencies.TestAdapter2 = testadapter2adaptergenerated.NewAdapter(&testadapter2adaptermodule.Dependencies{
+	initializedAdapterDependencies.ExampleAdapter2 = exampleadapter2adaptergenerated.NewAdapter(&exampleadapter2adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -72,8 +67,7 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Adapter: &module.AdapterDependencies{
-				TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-				TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+				ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 			},
 			Client: &module.ClientDependencies{
 				Multi: initializedClientDependencies.Multi,

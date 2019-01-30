@@ -71,7 +71,7 @@ func NewTchannelSharedState(adapters []AdapterTchannelHandle,
 	for i := 0; i < len(adapters); i++ {
 		sharedState.stateDict[adapters[i].Name()] = nil
 	}
-	for i := 0; i < len(adapters); i++ {
+	for i := 0; i < len(middlewares); i++ {
 		sharedState.stateDict[middlewares[i].Name()] = nil
 	}
 

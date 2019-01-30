@@ -24,6 +24,7 @@
 package module
 
 import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -32,7 +33,13 @@ import (
 // Dependencies contains dependencies for the panicTChannel endpoint module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
+	Adapter *AdapterDependencies
 	Client  *ClientDependencies
+}
+
+// AdapterDependencies contains adapter dependencies
+type AdapterDependencies struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
 // ClientDependencies contains client dependencies

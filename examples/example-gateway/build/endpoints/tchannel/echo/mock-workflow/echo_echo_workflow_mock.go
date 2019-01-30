@@ -30,6 +30,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/workflow"
 	echoendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/echo"
@@ -47,9 +49,18 @@ func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockNode
 	contextExtractors := &zanzibar.ContextExtractors{}
 	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
+	initializedAdapterDependencies := &adapterDependenciesNodes{}
+
+	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := echoendpointstatic.NewEchoEchoWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
+			Adapter: &module.AdapterDependencies{
+				ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+			},
 		},
 	)
 

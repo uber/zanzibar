@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package testadapter2
+package exampleadapter2
 
 import (
 	"context"
 	"github.com/mcuadros/go-jsonschema-generator"
 
-	"github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
-type test2Adapter struct {
+type exampleAdapter2 struct {
 	deps    *module.Dependencies
 	options Options
 }
@@ -42,14 +42,14 @@ func NewAdapter(
 	deps *module.Dependencies,
 	options Options,
 ) zanzibar.AdapterHandle {
-	return &test2Adapter{
+	return &exampleAdapter2{
 		deps:    deps,
 		options: options,
 	}
 }
 
 // HandleRequest handles the requests before calling lower level adapters.
-func (m *test2Adapter) HandleRequest(
+func (m *exampleAdapter2) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -58,7 +58,7 @@ func (m *test2Adapter) HandleRequest(
 	return true
 }
 
-func (m *test2Adapter) HandleResponse(
+func (m *exampleAdapter2) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
@@ -66,12 +66,12 @@ func (m *test2Adapter) HandleResponse(
 }
 
 // JSONSchema returns a schema definition of the configuration options for an adapter
-func (m *test2Adapter) JSONSchema() *jsonschema.Document {
+func (m *exampleAdapter2) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m *test2Adapter) Name() string {
-	return "test_adapter2"
+func (m *exampleAdapter2) Name() string {
+	return "example_adapter2"
 }

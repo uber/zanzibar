@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/textproto"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -876,7 +877,15 @@ func getOrderedAdapterSpecs(
 	classType string,
 ) ([]AdapterSpec, error) {
 	adapterObj := map[string][]string{}
-	adapterOrderingFile := filepath.Join(cfgDir, "adapters", "adapters.yaml")
+
+	const className = "adapters"
+	adapterOrderingFile := filepath.Join(cfgDir, className, className+".yaml")
+	if _, err := os.Stat(adapterOrderingFile); os.IsNotExist(err) {
+		// Cannot find yaml file, use json file instead
+		adapterOrderingFile = filepath.Join(
+			cfgDir, className, className+".json")
+	}
+
 	bytes, err := ioutil.ReadFile(adapterOrderingFile)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -889,7 +898,7 @@ func getOrderedAdapterSpecs(
 			err, "Could not parse adapter ordering file: %s", adapterOrderingFile,
 		)
 	}
-	adapterOrderingObj := adapterObj[classType+"_adapters"]
+	adapterOrderingObj := adapterObj[classType+"_"+className]
 
 	return sortByAdapterOrdering(adapterOrderingObj, adapterSpecs)
 }
@@ -1370,7 +1379,7 @@ func (g *AdapterGenerator) Generate(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error generating middleware file for %s %s",
+			"Error generating adapter file for %s %s",
 			instance.InstanceName,
 			instance.ClassName,
 		)

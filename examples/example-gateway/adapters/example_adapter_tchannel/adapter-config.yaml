@@ -1,0 +1,6 @@
+config:
+  path: github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter_tchannel
+  schema: ./adapters/example_adapter_tchannel/example_adapter_tchannel_schema.json
+dependencies: {}
+name: example_adapter_tchannel
+type: tchannel

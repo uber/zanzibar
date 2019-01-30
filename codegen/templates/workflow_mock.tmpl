@@ -38,7 +38,7 @@ import (
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
-	{{ if (len $instance.DependencyOrder) -}}
+	{{ if and (len $instance.DependencyOrder) ($leafClass) -}}
 	ctrl := gomock.NewController(t)
 	{{ else -}}
 	{{camel $mockType}} := &{{$mockType}}{}

@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package testadapter2adapter
+package exampleadapteradapter
 
 import (
-	handle "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter2"
-	module "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
+	handle "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter"
+	module "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 

@@ -31,6 +31,8 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
@@ -61,6 +63,12 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Quux = mockClientNodes.Quux
 
+	initializedAdapterDependencies := &adapterDependenciesNodes{}
+
+	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
 
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
@@ -70,6 +78,9 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 	w := baztchannelendpointstatic.NewSimpleServiceCallWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
+			Adapter: &module.AdapterDependencies{
+				ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+			},
 			Client: &module.ClientDependencies{
 				Baz:  initializedClientDependencies.Baz,
 				Quux: initializedClientDependencies.Quux,

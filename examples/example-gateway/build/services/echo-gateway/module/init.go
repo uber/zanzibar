@@ -24,6 +24,8 @@
 package module
 
 import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 
@@ -32,7 +34,13 @@ import (
 
 // DependenciesTree contains all deps for this service.
 type DependenciesTree struct {
+	Adapter  *AdapterDependenciesNodes
 	Endpoint *EndpointDependenciesNodes
+}
+
+// AdapterDependenciesNodes contains adapter dependencies
+type AdapterDependenciesNodes struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -58,10 +66,19 @@ func InitializeDependencies(
 		Channel:          g.Channel,
 	}
 
+	initializedAdapterDependencies := &AdapterDependenciesNodes{}
+	tree.Adapter = initializedAdapterDependencies
+	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &echoendpointmodule.AdapterDependencies{
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+		},
 	})
 
 	dependencies := &Dependencies{

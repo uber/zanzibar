@@ -24,10 +24,10 @@
 package module
 
 import (
-	testadapter1adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1"
-	testadapter1adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter1/module"
-	testadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2"
-	testadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/test_adapter2/module"
+	exampleadapter2adaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2"
+	exampleadapter2adaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+	exampleadaptertchanneladaptermodule "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel/module"
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
 	barclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar/module"
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
@@ -84,8 +84,8 @@ type ClientDependenciesNodes struct {
 
 // AdapterDependenciesNodes contains adapter dependencies
 type AdapterDependenciesNodes struct {
-	TestAdapter1 testadapter1adaptergenerated.Adapter
-	TestAdapter2 testadapter2adaptergenerated.Adapter
+	ExampleAdapter2        exampleadapter2adaptergenerated.Adapter
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -147,10 +147,10 @@ func InitializeDependencies(
 
 	initializedAdapterDependencies := &AdapterDependenciesNodes{}
 	tree.Adapter = initializedAdapterDependencies
-	initializedAdapterDependencies.TestAdapter1 = testadapter1adaptergenerated.NewAdapter(&testadapter1adaptermodule.Dependencies{
+	initializedAdapterDependencies.ExampleAdapter2 = exampleadapter2adaptergenerated.NewAdapter(&exampleadapter2adaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
-	initializedAdapterDependencies.TestAdapter2 = testadapter2adaptergenerated.NewAdapter(&testadapter2adaptermodule.Dependencies{
+	initializedAdapterDependencies.ExampleAdapterTchannel = exampleadaptertchanneladaptergenerated.NewAdapter(&exampleadaptertchanneladaptermodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -171,8 +171,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Bar = barendpointgenerated.NewEndpoint(&barendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &barendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &barendpointmodule.ClientDependencies{
 			Bar: initializedClientDependencies.Bar,
@@ -184,8 +183,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &bazendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &bazendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
@@ -193,6 +191,9 @@ func InitializeDependencies(
 	})
 	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &baztchannelendpointmodule.AdapterDependencies{
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+		},
 		Client: &baztchannelendpointmodule.ClientDependencies{
 			Baz:  initializedClientDependencies.Baz,
 			Quux: initializedClientDependencies.Quux,
@@ -204,8 +205,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &contactsendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &contactsendpointmodule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
@@ -214,8 +214,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &googlenowendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &googlenowendpointmodule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
@@ -224,8 +223,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &multiendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &multiendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
@@ -234,8 +232,7 @@ func InitializeDependencies(
 	initializedEndpointDependencies.Panic = panicendpointgenerated.NewEndpoint(&panicendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Adapter: &panicendpointmodule.AdapterDependencies{
-			TestAdapter1: initializedAdapterDependencies.TestAdapter1,
-			TestAdapter2: initializedAdapterDependencies.TestAdapter2,
+			ExampleAdapter2: initializedAdapterDependencies.ExampleAdapter2,
 		},
 		Client: &panicendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
@@ -243,6 +240,9 @@ func InitializeDependencies(
 	})
 	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Adapter: &panictchannelendpointmodule.AdapterDependencies{
+			ExampleAdapterTchannel: initializedAdapterDependencies.ExampleAdapterTchannel,
+		},
 		Client: &panictchannelendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
 		},

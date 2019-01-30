@@ -23,6 +23,15 @@
 
 package mockechoworkflow
 
+import (
+	exampleadaptertchanneladaptergenerated "github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter_tchannel"
+)
+
 // MockNodes contains mock  dependencies for the echo endpoint module
 type MockNodes struct {
+}
+
+// adapterDependenciesNodes contains adapter dependencies
+type adapterDependenciesNodes struct {
+	ExampleAdapterTchannel exampleadaptertchanneladaptergenerated.Adapter
 }

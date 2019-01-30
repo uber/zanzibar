@@ -3264,7 +3264,7 @@ import (
 
 // New{{$workflowInterface}}Mock creates a workflow with mock clients
 func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}}, *{{$mockType}}) {
-	{{ if (len $instance.DependencyOrder) -}}
+	{{ if and (len $instance.DependencyOrder) ($leafClass) -}}
 	ctrl := gomock.NewController(t)
 	{{ else -}}
 	{{camel $mockType}} := &{{$mockType}}{}
@@ -3340,7 +3340,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4724, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4741, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -39,8 +39,7 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
-	testAdapter1 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter1"
-	testAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/test_adapter2"
+	exampleAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter2"
 	example "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
@@ -62,11 +61,8 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 		"bar", "normal",
 		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
-				deps.Adapter.TestAdapter2.NewAdapterHandle(
-					testAdapter2.Options{},
-				),
-				deps.Adapter.TestAdapter1.NewAdapterHandle(
-					testAdapter1.Options{},
+				deps.Adapter.ExampleAdapter2.NewAdapterHandle(
+					exampleAdapter2.Options{},
 				),
 			},
 			[]zanzibar.MiddlewareHandle{

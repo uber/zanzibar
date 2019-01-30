@@ -1,5 +1,6 @@
 # Adapters are executed in the order they are listed here. Any adapters which are not listed will not be executed
 tchannel_adapters:
+- example_adapter_tchannel
 http_adapters:
-- test_adapter2
-- test_adapter1
+- example_adapter2
+- example_adapter
