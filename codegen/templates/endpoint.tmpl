@@ -81,13 +81,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			{{ if len $adapters | ne 0 -}}
 			[]zanzibar.AdapterHandle{
 				{{range $idx, $adapter := $adapters -}}
-				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
-					{{$adapter.Name | camel}}.Options{
-					{{range $key, $value := $adapter.PrettyOptions -}}
-						{{$key}} : {{$value}},
-					{{end -}}
-					},
-				),
+				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(),
 				{{end -}}
 			},
 			{{- else -}}

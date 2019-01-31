@@ -36,9 +36,6 @@ import (
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
 
-	exampleAdapter "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter"
-	exampleAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter2"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
@@ -58,12 +55,8 @@ func NewGoogleNowCheckCredentialsHandler(deps *module.Dependencies) *GoogleNowCh
 		"googlenow", "checkCredentials",
 		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
-				deps.Adapter.ExampleAdapter2.NewAdapterHandle(
-					exampleAdapter2.Options{},
-				),
-				deps.Adapter.ExampleAdapter.NewAdapterHandle(
-					exampleAdapter.Options{},
-				),
+				deps.Adapter.ExampleAdapter2.NewAdapterHandle(),
+				deps.Adapter.ExampleAdapter.NewAdapterHandle(),
 			}, nil, handler.HandleRequest).Handle,
 	)
 

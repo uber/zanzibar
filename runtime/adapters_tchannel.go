@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"github.com/mcuadros/go-jsonschema-generator"
 	"go.uber.org/thriftrw/wire"
 )
 
@@ -42,6 +41,5 @@ type AdapterTchannelHandle interface {
 		ctx context.Context,
 		rwt RWTStruct,
 		shared TchannelSharedState) RWTStruct
-	JSONSchema() *jsonschema.Document
 	Name() string
 }

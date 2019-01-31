@@ -94,12 +94,10 @@ func TestTchannelAdapterHandlers(t *testing.T) {
 func TestTchannelAdapterSharedStateSet(t *testing.T) {
 	ex := exampleadaptertchannel.NewAdapter(
 		nil,
-		exampleadaptertchannel.Options{},
 	)
 
 	ex2 := exampleadaptertchannel.NewAdapter(
 		nil,
-		exampleadaptertchannel.Options{},
 	)
 
 	adapterHandles := []zanzibar.AdapterTchannelHandle{ex, ex2}

@@ -21,6 +21,6 @@ func NewAdapter(deps *module.Dependencies) Adapter {
 }
 
 // NewAdapterHandle calls back to the custom adapter to build an AdapterTchannelHandle
-func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
-	return handle.NewAdapter(m.Deps, o)
+func (m *Adapter) NewAdapterHandle() zanzibar.AdapterTchannelHandle {
+	return handle.NewAdapter(m.Deps)
 }

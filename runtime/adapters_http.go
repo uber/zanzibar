@@ -22,7 +22,6 @@ package zanzibar
 
 import (
 	"context"
-	"github.com/mcuadros/go-jsonschema-generator"
 )
 
 // AdapterHandle used to define adapter
@@ -42,6 +41,5 @@ type AdapterHandle interface {
 		res *ServerHTTPResponse,
 		shared SharedState,
 	)
-	JSONSchema() *jsonschema.Document
 	Name() string
 }

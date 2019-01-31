@@ -1,6 +1,5 @@
 config:
   path: github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter
-  schema: ./adapters/example_adapter/example_adapter_schema.json
 dependencies: {}
 name: example_adapter
 type: http

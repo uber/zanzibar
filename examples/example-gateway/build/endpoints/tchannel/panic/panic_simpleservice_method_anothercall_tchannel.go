@@ -38,8 +38,6 @@ import (
 	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/panic"
 
-	exampleAdapterTchannel "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter_tchannel"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
 )
 
@@ -52,9 +50,7 @@ func NewSimpleServiceAnotherCallHandler(deps *module.Dependencies) *SimpleServic
 		"panicTChannel", "call", "SimpleService::AnotherCall",
 		zanzibar.NewExecutionTchannelStack(
 			[]zanzibar.AdapterTchannelHandle{
-				deps.Adapter.ExampleAdapterTchannel.NewAdapterHandle(
-					exampleAdapterTchannel.Options{},
-				),
+				deps.Adapter.ExampleAdapterTchannel.NewAdapterHandle(),
 			}, nil, handler),
 	)
 

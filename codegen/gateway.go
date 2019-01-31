@@ -106,8 +106,7 @@ type Dependencies struct {
 
 // AdapterConfigConfig is the inner config object as prescribed by the module_system yaml conventions
 type AdapterConfigConfig struct {
-	OptionsSchemaFile string `yaml:"schema" json:"schema"`
-	ImportPath        string `yaml:"path" json:"path"`
+	ImportPath string `yaml:"path" json:"path"`
 }
 
 // AdapterConfig represents configuration for an adapter as is written in the yaml file
@@ -127,31 +126,6 @@ func (adapter *AdapterConfig) Validate(configDirName string) error {
 		return errors.New("adapter config had empty import path")
 	}
 
-	if adapter.Config.OptionsSchemaFile == "" {
-		return errors.New("adapter config had empty schema")
-	}
-
-	schPath := filepath.Join(
-		configDirName,
-		adapter.Config.OptionsSchemaFile,
-	)
-
-	bytes, err := ioutil.ReadFile(schPath)
-	if err != nil {
-		return errors.Wrapf(
-			err, "Cannot read adapter yaml schema: %s",
-			schPath,
-		)
-	}
-
-	var adapterOptSchema map[string]interface{}
-	err = yaml.Unmarshal(bytes, &adapterOptSchema)
-	if err != nil {
-		return errors.Wrapf(
-			err, "Cannot parse yaml schema for adapter options: %s",
-			schPath,
-		)
-	}
 	return nil
 }
 
@@ -233,27 +207,20 @@ func NewClientSpec(
 type AdapterSpec struct {
 	// The adapter package name.
 	Name string `yaml:"name"`
-	// Adapter specific configuration options.
-	Options map[interface{}]interface{} `yaml:"options"`
-	// Options pretty printed for template initialization
-	PrettyOptions map[string]string
 	// Module Dependencies,  clients etc.
 	Dependencies *Dependencies
 	// Go Import Path for AdapterHandle implementation
 	ImportPath string
-	// Location of yaml Schema file for the configured endpoint options
-	OptionsSchemaFile string
 	// Type (http or tchannel)
 	Type string
 }
 
 func newAdapterSpec(cfg *AdapterConfig) *AdapterSpec {
 	return &AdapterSpec{
-		Name:              cfg.Name,
-		Dependencies:      cfg.Dependencies,
-		ImportPath:        cfg.Config.ImportPath,
-		OptionsSchemaFile: cfg.Config.OptionsSchemaFile,
-		Type:              cfg.Type,
+		Name:         cfg.Name,
+		Dependencies: cfg.Dependencies,
+		ImportPath:   cfg.Config.ImportPath,
+		Type:         cfg.Type,
 	}
 }
 

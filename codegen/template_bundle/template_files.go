@@ -93,8 +93,8 @@ func NewAdapter(deps *module.Dependencies) Adapter {
 }
 
 // NewAdapterHandle calls back to the custom adapter to build an AdapterHandle
-func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterHandle {
-	return handle.NewAdapter(m.Deps, o)
+func (m *Adapter) NewAdapterHandle() zanzibar.AdapterHandle {
+	return handle.NewAdapter(m.Deps)
 }`)
 
 func adapter_httpTmplBytes() ([]byte, error) {
@@ -107,7 +107,7 @@ func adapter_httpTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "adapter_http.tmpl", size: 674, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "adapter_http.tmpl", size: 655, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -135,8 +135,8 @@ func NewAdapter(deps *module.Dependencies) Adapter {
 }
 
 // NewAdapterHandle calls back to the custom adapter to build an AdapterTchannelHandle
-func (m *Adapter) NewAdapterHandle(o handle.Options) zanzibar.AdapterTchannelHandle {
-	return handle.NewAdapter(m.Deps, o)
+func (m *Adapter) NewAdapterHandle() zanzibar.AdapterTchannelHandle {
+	return handle.NewAdapter(m.Deps)
 }`)
 
 func adapter_tchannelTmplBytes() ([]byte, error) {
@@ -149,7 +149,7 @@ func adapter_tchannelTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "adapter_tchannel.tmpl", size: 690, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "adapter_tchannel.tmpl", size: 671, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -383,13 +383,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			{{ if len $adapters | ne 0 -}}
 			[]zanzibar.AdapterHandle{
 				{{range $idx, $adapter := $adapters -}}
-				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
-					{{$adapter.Name | camel}}.Options{
-					{{range $key, $value := $adapter.PrettyOptions -}}
-						{{$key}} : {{$value}},
-					{{end -}}
-					},
-				),
+				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(),
 				{{end -}}
 			},
 			{{- else -}}
@@ -577,7 +571,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 7698, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7545, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2694,13 +2688,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			{{ if len $adapters | ne 0 -}}
 			[]zanzibar.AdapterTchannelHandle{
 				{{range $idx, $adapter := $adapters -}}
-				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(
-					{{$adapter.Name | camel}}.Options{
-					{{range $key, $value := $adapter.PrettyOptions -}}
-						{{$key}} : {{$value}},
-					{{end -}}
-					},
-				),
+				deps.Adapter.{{$adapter.Name | pascal}}.NewAdapterHandle(),
 				{{end -}}
 			},
 			{{- else -}}
@@ -2947,7 +2935,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9477, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 9324, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

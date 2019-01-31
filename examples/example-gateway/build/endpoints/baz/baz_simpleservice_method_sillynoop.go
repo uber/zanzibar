@@ -37,9 +37,6 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/workflow"
 	endpointsBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/baz/baz"
 
-	exampleAdapter "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter"
-	exampleAdapter2 "github.com/uber/zanzibar/examples/example-gateway/adapters/example_adapter2"
-
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz/module"
 )
 
@@ -59,12 +56,8 @@ func NewSimpleServiceSillyNoopHandler(deps *module.Dependencies) *SimpleServiceS
 		"baz", "sillyNoop",
 		zanzibar.NewExecutionStack(
 			[]zanzibar.AdapterHandle{
-				deps.Adapter.ExampleAdapter2.NewAdapterHandle(
-					exampleAdapter2.Options{},
-				),
-				deps.Adapter.ExampleAdapter.NewAdapterHandle(
-					exampleAdapter.Options{},
-				),
+				deps.Adapter.ExampleAdapter2.NewAdapterHandle(),
+				deps.Adapter.ExampleAdapter.NewAdapterHandle(),
 			}, nil, handler.HandleRequest).Handle,
 	)
 

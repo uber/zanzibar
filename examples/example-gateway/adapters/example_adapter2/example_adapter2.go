@@ -22,29 +22,21 @@ package exampleadapter2
 
 import (
 	"context"
-	"github.com/mcuadros/go-jsonschema-generator"
-
 	"github.com/uber/zanzibar/examples/example-gateway/build/adapters/example_adapter2/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
 type exampleAdapter2 struct {
-	deps    *module.Dependencies
-	options Options
+	deps *module.Dependencies
 }
-
-// Options for adapter configuration
-type Options struct{}
 
 // NewAdapter creates a new adapter that executes the next adapter
 // after performing it's operations.
 func NewAdapter(
 	deps *module.Dependencies,
-	options Options,
 ) zanzibar.AdapterHandle {
 	return &exampleAdapter2{
-		deps:    deps,
-		options: options,
+		deps: deps,
 	}
 }
 
@@ -63,13 +55,6 @@ func (m *exampleAdapter2) HandleResponse(
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
 ) {
-}
-
-// JSONSchema returns a schema definition of the configuration options for an adapter
-func (m *exampleAdapter2) JSONSchema() *jsonschema.Document {
-	s := &jsonschema.Document{}
-	s.Read(&Options{})
-	return s
 }
 
 func (m *exampleAdapter2) Name() string {

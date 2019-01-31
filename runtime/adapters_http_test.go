@@ -41,7 +41,6 @@ func TestAdapterHandlers(t *testing.T) {
 		&module.Dependencies{
 			Default: &zanzibar.DefaultDependencies{},
 		},
-		exampleadapter.Options{},
 	)
 
 	adapterHandles := []zanzibar.AdapterHandle{ex}
@@ -254,11 +253,9 @@ func TestAdapterResponseAbort(t *testing.T) {
 func TestAdapterSharedStates(t *testing.T) {
 	ex := exampleadapter.NewAdapter(
 		nil,
-		exampleadapter.Options{},
 	)
 	ex2 := exampleadapter2.NewAdapter(
 		nil,
-		exampleadapter2.Options{},
 	)
 
 	adapterHandles := []zanzibar.AdapterHandle{ex, ex2}
@@ -308,11 +305,9 @@ func TestAdapterSharedStates(t *testing.T) {
 func TestAdapterSharedStateSet(t *testing.T) {
 	ex := exampleadapter.NewAdapter(
 		nil,
-		exampleadapter.Options{},
 	)
 	ex2 := exampleadapter2.NewAdapter(
 		nil,
-		exampleadapter2.Options{},
 	)
 
 	adapterHandles := []zanzibar.AdapterHandle{ex, ex2}
