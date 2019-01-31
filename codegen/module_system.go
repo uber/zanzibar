@@ -885,6 +885,10 @@ func getOrderedAdapterSpecs(
 		// Cannot find yaml file, use json file instead
 		adapterOrderingFile = filepath.Join(
 			cfgDir, className, className+".json")
+		if _, err := os.Stat(adapterOrderingFile); os.IsNotExist(err) {
+			// Cannot find yaml or json file, skip adapters
+			return nil, nil
+		}
 	}
 
 	bytes, err := ioutil.ReadFile(adapterOrderingFile)
