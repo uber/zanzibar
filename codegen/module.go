@@ -1338,7 +1338,7 @@ func FormatGoFile(filePath string) error {
 }
 
 // ModuleClass defines a module class in the build configuration directory.
-// THis could be something like an Endpoint class which contains multiple
+// This could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
 	Name           string
@@ -1346,7 +1346,7 @@ type ModuleClass struct {
 	Directories    []string
 	DependsOn      []string
 	DependedBy     []string
-	DefaultDepDirs []string
+	DefaultDepDirs []string // Default Dependencies
 	types          map[string]BuildGenerator
 
 	// private field which is populated before module resolving

@@ -128,6 +128,7 @@ example-gateway                 # root directory
 │   ├── endpoints               # generated mocks and module initializers for endpoints
 │   ├── gen-code                # generated structs and (de)serializers by Thrift compiler
 │   ├── middlewares             # generated module initializers for middlewares
+│   │   └── mandatory           # generated module initializers for mandatory middlewares
 │   └── services                # generated mocks and module intialziers for services
 ├── build.yaml                  # config file for Zanzibar code generation, see below for details
 ├── clients                     # config directory for modules of client module class
@@ -142,7 +143,10 @@ example-gateway                 # root directory
 │   ├── clients                 # idl directory for client thrift files
 │   └── endpoints               # idl directory for endpoint thrift files
 ├── middlewares                 # config directory for modules of middleware module class
-│   └── transform-response      # config directory for a middleware named 'transform-response'
+│   ├── transform-response      # config directory for a middleware named 'transform-response'
+│   ├── mandatory               # directory for all mandatory middlewares
+│   │   └── log-publisher       # config directory for a mandatory middleware named 'log-publisher'
+│   └── mandatory.yaml          # config file describing mandatory middlewares and their execution order   
 └── services                    # config directory for modules of service module class
     └── example-gateway         # config directory for a service named 'example-gateway'
 ```
