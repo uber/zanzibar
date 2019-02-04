@@ -881,7 +881,6 @@ func (system *ModuleSystem) readInstance(
 		className,
 		instanceDirectory,
 		config,
-		dependencies,
 	)
 
 	if err != nil {
@@ -944,7 +943,6 @@ func readPackageInfo(
 	className string,
 	instanceDirectory string,
 	config *ClassConfig,
-	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(CamelCase(className))
 	qualifiedInstanceName := strings.Title(CamelCase(config.Name))
