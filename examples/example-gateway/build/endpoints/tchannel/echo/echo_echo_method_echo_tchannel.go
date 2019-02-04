@@ -37,6 +37,8 @@ import (
 	endpointsTchannelEchoEcho "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/echo/echo"
 	customEcho "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/echo"
 
+	mandatoryExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example_tchannel"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 )
 
@@ -47,7 +49,11 @@ func NewEchoEchoHandler(deps *module.Dependencies) *EchoEchoHandler {
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"echo", "echo", "Echo::echo",
-		handler,
+		zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+			deps.Middleware.MandatoryExampleTchannel.NewMiddlewareHandle(
+				mandatoryExampleTchannel.Options{},
+			),
+		}, handler),
 	)
 
 	return handler

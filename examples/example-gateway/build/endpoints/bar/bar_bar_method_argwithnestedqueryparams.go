@@ -40,6 +40,9 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
+	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
+	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
@@ -57,7 +60,14 @@ func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWit
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "argWithNestedQueryParams",
-		handler.HandleRequest,
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
+				mandatoryExample2.Options{},
+			),
+			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
+				mandatoryExample.Options{},
+			),
+		}, handler.HandleRequest).Handle,
 	)
 
 	return handler

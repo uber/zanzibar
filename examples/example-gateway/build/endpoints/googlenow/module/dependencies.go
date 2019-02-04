@@ -25,17 +25,28 @@ package module
 
 import (
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the googlenow endpoint module
 type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
-	Client  *ClientDependencies
+	Default    *zanzibar.DefaultDependencies
+	Client     *ClientDependencies
+	Middleware *MiddlewareDependencies
 }
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
 	GoogleNow googlenowclientgenerated.Client
+}
+
+// MiddlewareDependencies contains middleware dependencies
+type MiddlewareDependencies struct {
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }

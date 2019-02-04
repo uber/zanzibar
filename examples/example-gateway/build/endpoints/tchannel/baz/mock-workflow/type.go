@@ -28,6 +28,9 @@ import (
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 )
 
@@ -45,5 +48,8 @@ type clientDependenciesNodes struct {
 
 // middlewareDependenciesNodes contains middleware dependencies
 type middlewareDependenciesNodes struct {
-	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
+	ExampleTchannel          exampletchannelmiddlewaregenerated.Middleware
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }

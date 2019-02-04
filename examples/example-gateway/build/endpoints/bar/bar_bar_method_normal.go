@@ -39,7 +39,9 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
-	"github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	example "github.com/uber/zanzibar/examples/example-gateway/middlewares/example"
+	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
+	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -59,6 +61,12 @@ func NewBarNormalHandler(deps *module.Dependencies) *BarNormalHandler {
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "normal",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
+				mandatoryExample2.Options{},
+			),
+			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
+				mandatoryExample.Options{},
+			),
 			deps.Middleware.Example.NewMiddlewareHandle(
 				example.Options{
 					Baz: []string{"foo", "bar"},

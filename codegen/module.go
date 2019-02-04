@@ -554,7 +554,6 @@ func (system *ModuleSystem) ResolveModules(
 		class := system.classes[className]
 		classInstances := []*ModuleInstance{}
 
-
 		defaultDeps, defaultDepsErr := getDefaultDependencies(
 			baseDirectory,
 			class.dependentClasses,
@@ -693,41 +692,41 @@ func getModuleDependencies(
 		}
 
 		return []ModuleDependency{moduleDependency}, nil
-	} else {
-		var allModuleDependencies []ModuleDependency
-		files, err := ioutil.ReadDir(currentDir)
-		if err != nil {
-			return nil, errors.Wrapf(
-				err,
-				"Error reading module instance directory %q",
-				currentDir,
-			)
-		}
-
-		for _, file := range files {
-			if !file.IsDir() {
-				continue
-			}
-
-			moduleDependencies, err := getModuleDependencies(
-				filepath.Join(currentDir, file.Name()),
-				className,
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			allModuleDependencies = append(allModuleDependencies, moduleDependencies...)
-		}
-
-		return allModuleDependencies, nil
 	}
+
+	allModuleDependencies := []ModuleDependency{}
+	files, err := ioutil.ReadDir(currentDir)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading module instance directory %q",
+			currentDir,
+		)
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+
+		moduleDependencies, err := getModuleDependencies(
+			filepath.Join(currentDir, file.Name()),
+			className,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		allModuleDependencies = append(allModuleDependencies, moduleDependencies...)
+	}
+
+	return allModuleDependencies, nil
 }
 
 func getClassOfDependency(
 	dependencyDir string,
 	dependencyClasses []*ModuleClass,
-) (string, error){
+) (string, error) {
 	for _, dependencyClass := range dependencyClasses {
 		for _, classDir := range dependencyClass.Directories {
 			if strings.HasPrefix(dependencyDir, classDir) {
@@ -735,7 +734,7 @@ func getClassOfDependency(
 			}
 		}
 	}
-	return "", errors.Errorf("Could not found dependent class for default dependency %s", dependencyDir)
+	return "", errors.Errorf("Could not find class for default dependency %s", dependencyDir)
 }
 
 func getConfigFilePath(dir, name string) (string, string, string) {

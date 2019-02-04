@@ -37,6 +37,9 @@ import (
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/workflow"
 
+	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
+	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/multi/module"
 )
 
@@ -54,7 +57,14 @@ func NewServiceAFrontHelloHandler(deps *module.Dependencies) *ServiceAFrontHello
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"multi", "helloA",
-		handler.HandleRequest,
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
+				mandatoryExample2.Options{},
+			),
+			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
+				mandatoryExample.Options{},
+			),
+		}, handler.HandleRequest).Handle,
 	)
 
 	return handler

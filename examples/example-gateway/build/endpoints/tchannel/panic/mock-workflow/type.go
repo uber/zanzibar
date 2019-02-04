@@ -26,6 +26,9 @@ package mockpanictchannelworkflow
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
 )
 
 // MockClientNodes contains mock client dependencies for the panicTChannel endpoint module
@@ -36,4 +39,11 @@ type MockClientNodes struct {
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
 	Baz bazclientgenerated.Client
+}
+
+// middlewareDependenciesNodes contains middleware dependencies
+type middlewareDependenciesNodes struct {
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }

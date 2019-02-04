@@ -55,6 +55,12 @@ import (
 	examplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 	quuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -79,8 +85,11 @@ type ClientDependenciesNodes struct {
 
 // MiddlewareDependenciesNodes contains middleware dependencies
 type MiddlewareDependenciesNodes struct {
-	Example         examplemiddlewaregenerated.Middleware
-	ExampleTchannel exampletchannelmiddlewaregenerated.Middleware
+	Example                  examplemiddlewaregenerated.Middleware
+	ExampleTchannel          exampletchannelmiddlewaregenerated.Middleware
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -145,6 +154,21 @@ func InitializeDependencies(
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
+	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
@@ -154,13 +178,21 @@ func InitializeDependencies(
 			Bar: initializedClientDependencies.Bar,
 		},
 		Middleware: &barendpointmodule.MiddlewareDependencies{
-			Example: initializedMiddlewareDependencies.Example,
+			Example:                  initializedMiddlewareDependencies.Example,
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 		},
 	})
 	initializedEndpointDependencies.Baz = bazendpointgenerated.NewEndpoint(&bazendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &bazendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
+		},
+		Middleware: &bazendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 		},
 	})
 	initializedEndpointDependencies.BazTChannel = baztchannelendpointgenerated.NewEndpoint(&baztchannelendpointmodule.Dependencies{
@@ -170,7 +202,10 @@ func InitializeDependencies(
 			Quux: initializedClientDependencies.Quux,
 		},
 		Middleware: &baztchannelendpointmodule.MiddlewareDependencies{
-			ExampleTchannel: initializedMiddlewareDependencies.ExampleTchannel,
+			ExampleTchannel:          initializedMiddlewareDependencies.ExampleTchannel,
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 		},
 	})
 	initializedEndpointDependencies.Contacts = contactsendpointgenerated.NewEndpoint(&contactsendpointmodule.Dependencies{
@@ -178,11 +213,21 @@ func InitializeDependencies(
 		Client: &contactsendpointmodule.ClientDependencies{
 			Contacts: initializedClientDependencies.Contacts,
 		},
+		Middleware: &contactsendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+		},
 	})
 	initializedEndpointDependencies.Googlenow = googlenowendpointgenerated.NewEndpoint(&googlenowendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &googlenowendpointmodule.ClientDependencies{
 			GoogleNow: initializedClientDependencies.GoogleNow,
+		},
+		Middleware: &googlenowendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 		},
 	})
 	initializedEndpointDependencies.Multi = multiendpointgenerated.NewEndpoint(&multiendpointmodule.Dependencies{
@@ -190,17 +235,32 @@ func InitializeDependencies(
 		Client: &multiendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
 		},
+		Middleware: &multiendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+		},
 	})
 	initializedEndpointDependencies.Panic = panicendpointgenerated.NewEndpoint(&panicendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &panicendpointmodule.ClientDependencies{
 			Multi: initializedClientDependencies.Multi,
 		},
+		Middleware: &panicendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+		},
 	})
 	initializedEndpointDependencies.PanicTChannel = panictchannelendpointgenerated.NewEndpoint(&panictchannelendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 		Client: &panictchannelendpointmodule.ClientDependencies{
 			Baz: initializedClientDependencies.Baz,
+		},
+		Middleware: &panictchannelendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 		},
 	})
 

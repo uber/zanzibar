@@ -31,9 +31,16 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/workflow"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 	panicendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
 )
 
@@ -51,15 +58,40 @@ func NewServiceCFrontHelloWorkflowMock(t *testing.T) (workflow.ServiceCFrontHell
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{
+		Baz:   bazclientgeneratedmock.NewMockClient(ctrl),
 		Multi: multiclientgeneratedmock.NewMockClient(ctrl),
 	}
+	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Multi = mockClientNodes.Multi
+
+	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
+
+	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	w := panicendpointstatic.NewServiceCFrontHelloWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
 				Multi: initializedClientDependencies.Multi,
+			},
+			Middleware: &module.MiddlewareDependencies{
+				MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+				MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+				MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 			},
 		},
 	)

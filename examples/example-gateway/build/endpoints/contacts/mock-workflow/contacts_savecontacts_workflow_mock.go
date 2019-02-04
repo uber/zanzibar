@@ -31,9 +31,16 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/contacts/workflow"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 	fixturecontactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/clients/contacts/fixture"
 	contactsendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/contacts"
 )
@@ -52,15 +59,40 @@ func NewContactsSaveContactsWorkflowMock(t *testing.T) (workflow.ContactsSaveCon
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{
+		Baz:      bazclientgeneratedmock.NewMockClient(ctrl),
 		Contacts: contactsclientgeneratedmock.New(ctrl, fixturecontactsclientgenerated.Fixture),
 	}
+	initializedClientDependencies.Baz = mockClientNodes.Baz
 	initializedClientDependencies.Contacts = mockClientNodes.Contacts
+
+	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
+
+	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 
 	w := contactsendpointstatic.NewContactsSaveContactsWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
 				Contacts: initializedClientDependencies.Contacts,
+			},
+			Middleware: &module.MiddlewareDependencies{
+				MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+				MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+				MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
 			},
 		},
 	)

@@ -24,16 +24,30 @@
 package mockpanicworkflow
 
 import (
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
 )
 
 // MockClientNodes contains mock client dependencies for the panic endpoint module
 type MockClientNodes struct {
+	Baz   *bazclientgeneratedmock.MockClient
 	Multi *multiclientgeneratedmock.MockClient
 }
 
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
+	Baz   bazclientgenerated.Client
 	Multi multiclientgenerated.Client
+}
+
+// middlewareDependenciesNodes contains middleware dependencies
+type middlewareDependenciesNodes struct {
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }

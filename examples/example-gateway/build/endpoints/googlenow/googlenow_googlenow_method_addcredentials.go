@@ -38,6 +38,9 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
 
+	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
+	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
 
@@ -55,7 +58,14 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"googlenow", "addCredentials",
-		handler.HandleRequest,
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
+				mandatoryExample2.Options{},
+			),
+			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
+				mandatoryExample.Options{},
+			),
+		}, handler.HandleRequest).Handle,
 	)
 
 	return handler

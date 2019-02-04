@@ -28,12 +28,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 )
 
-// MockNodes contains mock  dependencies
-type MockNodes struct {
+// MockClientNodes contains mock client dependencies
+type MockClientNodes struct {
+	Baz *bazclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -41,10 +49,9 @@ type MockNodes struct {
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
 	ctrl *gomock.Controller,
-) (*module.DependenciesTree, *module.Dependencies, *MockNodes) {
+) (*module.DependenciesTree, *module.Dependencies, *MockClientNodes) {
 	tree := &module.DependenciesTree{}
 
-	mockNodes := &MockNodes{}
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		ContextExtractor: g.ContextExtractor,
 		ContextMetrics:   g.ContextMetrics,
@@ -56,10 +63,40 @@ func InitializeDependenciesMock(
 		Tracer:           g.Tracer,
 	}
 
+	mockClientNodes := &MockClientNodes{
+		Baz: bazclientgenerated.NewMockClient(ctrl),
+	}
+	initializedClientDependencies := &module.ClientDependenciesNodes{}
+	tree.Client = initializedClientDependencies
+	initializedClientDependencies.Baz = mockClientNodes.Baz
+
+	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
+	tree.Middleware = initializedMiddlewareDependencies
+	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Middleware: &echoendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+		},
 	})
 
 	dependencies := &module.Dependencies{
@@ -69,5 +106,5 @@ func InitializeDependenciesMock(
 		},
 	}
 
-	return tree, dependencies, mockNodes
+	return tree, dependencies, mockClientNodes
 }

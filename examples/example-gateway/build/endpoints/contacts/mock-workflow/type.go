@@ -24,16 +24,30 @@
 package mockcontactsworkflow
 
 import (
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	contactsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts"
 	contactsclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/contacts/mock-client"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
 )
 
 // MockClientNodes contains mock client dependencies for the contacts endpoint module
 type MockClientNodes struct {
+	Baz      *bazclientgeneratedmock.MockClient
 	Contacts *contactsclientgeneratedmock.MockClientWithFixture
 }
 
 // clientDependenciesNodes contains client dependencies
 type clientDependenciesNodes struct {
+	Baz      bazclientgenerated.Client
 	Contacts contactsclientgenerated.Client
+}
+
+// middlewareDependenciesNodes contains middleware dependencies
+type middlewareDependenciesNodes struct {
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }

@@ -24,15 +24,37 @@
 package module
 
 import (
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/module"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
+	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
+	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
+	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // DependenciesTree contains all deps for this service.
 type DependenciesTree struct {
-	Endpoint *EndpointDependenciesNodes
+	Client     *ClientDependenciesNodes
+	Middleware *MiddlewareDependenciesNodes
+	Endpoint   *EndpointDependenciesNodes
+}
+
+// ClientDependenciesNodes contains client dependencies
+type ClientDependenciesNodes struct {
+	Baz bazclientgenerated.Client
+}
+
+// MiddlewareDependenciesNodes contains middleware dependencies
+type MiddlewareDependenciesNodes struct {
+	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
+	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
+	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
 }
 
 // EndpointDependenciesNodes contains endpoint dependencies
@@ -58,10 +80,39 @@ func InitializeDependencies(
 		Channel:          g.Channel,
 	}
 
+	initializedClientDependencies := &ClientDependenciesNodes{}
+	tree.Client = initializedClientDependencies
+	initializedClientDependencies.Baz = bazclientgenerated.NewClient(&bazclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
+	initializedMiddlewareDependencies := &MiddlewareDependenciesNodes{}
+	tree.Middleware = initializedMiddlewareDependencies
+	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedEndpointDependencies := &EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Middleware: &echoendpointmodule.MiddlewareDependencies{
+			MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
+			MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
+			MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+		},
 	})
 
 	dependencies := &Dependencies{
