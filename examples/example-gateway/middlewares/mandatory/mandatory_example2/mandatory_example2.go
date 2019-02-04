@@ -34,17 +34,7 @@ type mandatoryExample2Middleware struct {
 }
 
 // Options for middleware configuration
-type Options struct {
-	Foo string   `json:"Foo"`
-	Bar int      `json:",omitempty"`
-	Baz []string `json:"Baz"`
-}
-
-// MiddlewareState accessible by other middlewares and endpoint handler
-// though the context object.
-type MiddlewareState struct {
-	Baz string
-}
+type Options struct{}
 
 // NewMiddleware creates a new middleware that executes the next middleware
 // after performing it's operations.
@@ -65,11 +55,6 @@ func (m *mandatoryExample2Middleware) HandleRequest(
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
 ) bool {
-	shared.SetState(
-		m,
-		MiddlewareState{
-			Baz: m.options.Foo,
-		})
 	return true
 }
 

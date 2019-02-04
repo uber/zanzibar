@@ -29,28 +29,9 @@ import (
 func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 	schema := (&mandatoryExampleMiddleware{}).JSONSchema()
 
-	// TODO(sindelar): Read expected from test file
 	expected := "{\n" +
 		"    \"$schema\": \"http://json-schema.org/schema#\",\n" +
-		"    \"type\": \"object\",\n" +
-		"    \"properties\": {\n" +
-		"        \"Bar\": {\n" +
-		"            \"type\": \"integer\"\n" +
-		"        },\n" +
-		"        \"Baz\": {\n" +
-		"            \"type\": \"array\",\n" +
-		"            \"items\": {\n" +
-		"                \"type\": \"string\"\n" +
-		"            }\n" +
-		"        },\n" +
-		"        \"Foo\": {\n" +
-		"            \"type\": \"string\"\n" +
-		"        }\n" +
-		"    },\n" +
-		"    \"required\": [\n" +
-		"        \"Foo\",\n" +
-		"        \"Baz\"\n" +
-		"    ]\n" +
+		"    \"type\": \"object\"\n" +
 		"}"
 
 	json, err := schema.Marshal()

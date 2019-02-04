@@ -1,12 +1,5 @@
 {
 	"$schema": "http://json-schema.org/schema#",
 	"type": "object",
-	"properties": {
-		"Foo": {
-			"type": "string"
-		}
-	},
-	"required": [
-		"Foo"
-	]
+	"properties": {}
 }

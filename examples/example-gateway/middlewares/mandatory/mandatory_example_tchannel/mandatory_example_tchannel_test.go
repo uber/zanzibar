@@ -31,15 +31,7 @@ func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
 
 	expected := "{\n" +
 		"    \"$schema\": \"http://json-schema.org/schema#\",\n" +
-		"    \"type\": \"object\",\n" +
-		"    \"properties\": {\n" +
-		"        \"Foo\": {\n" +
-		"            \"type\": \"string\"\n" +
-		"        }\n" +
-		"    },\n" +
-		"    \"required\": [\n" +
-		"        \"Foo\"\n" +
-		"    ]\n" +
+		"    \"type\": \"object\"\n" +
 		"}"
 
 	json, err := schema.Marshal()

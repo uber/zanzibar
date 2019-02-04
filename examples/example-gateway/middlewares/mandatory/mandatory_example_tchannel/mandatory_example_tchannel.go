@@ -34,13 +34,7 @@ type mandatoryExampleTchannelMiddleware struct {
 }
 
 // Options for middleware configuration
-type Options struct {
-	Foo string `json:"Foo"` // string to verify in shared
-}
-
-// MiddlewareState accessible by other middlewares and endpoint handler
-// though the context object.
-type MiddlewareState struct{}
+type Options struct{}
 
 // NewMiddleware creates a new middleware that executes the next middleware
 // after performing it's operations.
