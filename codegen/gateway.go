@@ -420,7 +420,70 @@ func NewEndpointSpec(
 		ClientMethod:       clientMethod,
 	}
 
-	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs)
+	mandatoryMidSpecs, err := getOrderedMandatoryMiddlewareSpecs(
+		h.ConfigRoot(),
+		h.MandatoryMiddlewareSpecs(),
+		endpointType.(string))
+	if err != nil {
+		return nil, errors.Wrap(
+			err, "Error getting ordered mandatory middleware specs",
+		)
+	}
+
+	return augmentEndpointSpec(espec, endpointConfigObj, midSpecs, mandatoryMidSpecs)
+}
+
+func getOrderedMandatoryMiddlewareSpecs(
+	cfgDir string,
+	middlewareSpecs map[string]*MiddlewareSpec,
+	classType string,
+) ([]MiddlewareSpec, error) {
+	middlewareObj := map[string][]string{}
+
+	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/mandatory.yaml")
+	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
+		// Cannot find yaml file, use json file instead
+		middlewareOrderingFile = filepath.Join(cfgDir, "middlewares/mandatory.json")
+		if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
+			// Cannot find yaml or json file, skip adapters
+			return nil, nil
+		}
+	}
+
+	bytes, err := ioutil.ReadFile(middlewareOrderingFile)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not read mandatory middleware ordering file: %s", middlewareOrderingFile,
+		)
+	}
+	err = yaml.Unmarshal(bytes, &middlewareObj)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Could not parse mandatory middleware ordering file: %s", middlewareOrderingFile,
+		)
+	}
+	middlewareOrderingObj := middlewareObj[classType]
+
+	return sortByMiddlewareOrdering(middlewareOrderingObj, middlewareSpecs)
+}
+
+// sortByMiddlewareOrdering sorts middlewareSpecs using the ordering from middlewareOrderingObj
+func sortByMiddlewareOrdering(
+	middlewareOrderingObj []string,
+	middlewareSpecs map[string]*MiddlewareSpec,
+) ([]MiddlewareSpec, error) {
+	middlewares := make([]MiddlewareSpec, 0)
+
+	for _, middlewareName := range middlewareOrderingObj {
+		middlewareSpec, ok := middlewareSpecs[middlewareName]
+		if !ok {
+			return nil, errors.Errorf("Could not find middleware %s", middlewareName)
+		}
+
+		middlewares = append(middlewares, *middlewareSpec)
+	}
+
+	return middlewares, nil
 }
 
 func testFixtures(endpointConfigObj map[interface{}]interface{}) (map[string]*EndpointTestFixture, error) {
@@ -602,7 +665,10 @@ func augmentEndpointSpec(
 	espec *EndpointSpec,
 	endpointConfigObj map[interface{}]interface{},
 	midSpecs map[string]*MiddlewareSpec,
+	mandatoryMidSpecs []MiddlewareSpec,
 ) (*EndpointSpec, error) {
+	middlewares := mandatoryMidSpecs
+
 	if _, ok := endpointConfigObj["middlewares"]; ok {
 		endpointMids, ok := endpointConfigObj["middlewares"].([]interface{})
 		if !ok {
@@ -610,7 +676,7 @@ func augmentEndpointSpec(
 				"Unable to parse middlewares field",
 			)
 		}
-		var middlewares []MiddlewareSpec
+
 		for _, middleware := range endpointMids {
 			middlewareObj, ok := middleware.(map[interface{}]interface{})
 			if !ok {
@@ -711,9 +777,9 @@ func augmentEndpointSpec(
 				PrettyOptions: prettyOpts,
 			})
 		}
-
-		espec.Middlewares = middlewares
 	}
+
+	espec.Middlewares = middlewares
 
 	if "http" == endpointConfigObj["endpointType"] {
 		testFixtures, err := testFixtures(endpointConfigObj)
@@ -915,6 +981,19 @@ func parseEndpointYamls(
 	}
 
 	return endpointYamls, nil
+}
+
+func parseMandatoryMiddlewareConfig(
+	mandatoryMiddlewareConfigDir string,
+	configDirName string,
+) (map[string]*MiddlewareSpec, error) {
+	fullMiddlewareDir := filepath.Join(configDirName, mandatoryMiddlewareConfigDir)
+	_, err := ioutil.ReadDir(fullMiddlewareDir)
+	if err != nil {
+		return nil, nil
+	}
+
+	return parseMiddlewareConfig(mandatoryMiddlewareConfigDir, configDirName)
 }
 
 func parseMiddlewareConfig(

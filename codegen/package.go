@@ -51,6 +51,8 @@ type PackageHelper struct {
 	annotationPrefix string
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
+	// The mandatory middlewares for all endpoints
+	mandatoryMiddlewareSpecs map[string]*MiddlewareSpec
 	// Use staging client when this header is set as "true"
 	stagingReqHeader string
 	// Use deputy client when this header is set
@@ -73,6 +75,8 @@ type PackageHelperOptions struct {
 	RelTargetGenDir string
 	// relative path to the middleware config dir, defaults to "./middlewares"
 	RelMiddlewareConfigDir string
+	// relative path to the mandatory middleware config dir, defaults to "./middlewares/mandatory"
+	RelMandatoryMidConfigDir string
 
 	// package path to the generated code, defaults to PackageRoot + "/" + RelTargetGenDir + "/gen-code"
 	GenCodePackage string
@@ -109,6 +113,13 @@ func (p *PackageHelperOptions) relMiddlewareConfigDir() string {
 		return p.RelMiddlewareConfigDir
 	}
 	return "./middlewares"
+}
+
+func (p *PackageHelperOptions) relMandatoryMiddlewareConfigDir() string {
+	if p.RelMandatoryMidConfigDir != "" {
+		return p.RelMandatoryMidConfigDir
+	}
+	return "./middlewares/mandatory"
 }
 
 func (p *PackageHelperOptions) genCodePackage(packageRoot string) string {
@@ -177,22 +188,31 @@ func NewPackageHelper(
 	middlewareSpecs, err := parseMiddlewareConfig(options.relMiddlewareConfigDir(), absConfigRoot)
 	if err != nil {
 		return nil, errors.Wrapf(
-			err, "Cannot load middlewares:")
+			err, "Cannot load middlewares")
+	}
+
+	mandatoryMiddlewareSpecs, err := parseMandatoryMiddlewareConfig(
+		options.relMandatoryMiddlewareConfigDir(),
+		absConfigRoot)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "Cannot load mandatory middlewares")
 	}
 
 	p := &PackageHelper{
-		packageRoot:        packageRoot,
-		configRoot:         absConfigRoot,
-		thriftRootDir:      filepath.Join(absConfigRoot, options.relThriftRootDir()),
-		genCodePackage:     options.genCodePackage(packageRoot),
-		goGatewayNamespace: goGatewayNamespace,
-		targetGenDir:       filepath.Join(absConfigRoot, options.relTargetGenDir()),
-		copyrightHeader:    options.copyrightHeader(),
-		middlewareSpecs:    middlewareSpecs,
-		annotationPrefix:   options.annotationPrefix(),
-		stagingReqHeader:   options.stagingReqHeader(),
-		deputyReqHeader:    options.deputyReqHeader(),
-		traceKey:           options.traceKey(),
+		packageRoot:              packageRoot,
+		configRoot:               absConfigRoot,
+		thriftRootDir:            filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		genCodePackage:           options.genCodePackage(packageRoot),
+		goGatewayNamespace:       goGatewayNamespace,
+		targetGenDir:             filepath.Join(absConfigRoot, options.relTargetGenDir()),
+		copyrightHeader:          options.copyrightHeader(),
+		middlewareSpecs:          middlewareSpecs,
+		mandatoryMiddlewareSpecs: mandatoryMiddlewareSpecs,
+		annotationPrefix:         options.annotationPrefix(),
+		stagingReqHeader:         options.stagingReqHeader(),
+		deputyReqHeader:          options.deputyReqHeader(),
+		traceKey:                 options.traceKey(),
 	}
 	return p, nil
 }
@@ -210,6 +230,11 @@ func (p PackageHelper) ConfigRoot() string {
 // MiddlewareSpecs returns a map of middlewares available
 func (p PackageHelper) MiddlewareSpecs() map[string]*MiddlewareSpec {
 	return p.middlewareSpecs
+}
+
+// MandatoryMiddlewareSpecs returns a map of middlewares available
+func (p PackageHelper) MandatoryMiddlewareSpecs() map[string]*MiddlewareSpec {
+	return p.mandatoryMiddlewareSpecs
 }
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.

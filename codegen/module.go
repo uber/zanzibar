@@ -554,6 +554,20 @@ func (system *ModuleSystem) ResolveModules(
 		class := system.classes[className]
 		classInstances := []*ModuleInstance{}
 
+
+		defaultDeps, defaultDepsErr := getDefaultDependencies(
+			baseDirectory,
+			class.dependentClasses,
+			class.DefaultDepDirs,
+		)
+		if defaultDepsErr != nil {
+			return nil, errors.Wrapf(defaultDepsErr,
+				"Error filling default dependencies %s for %s",
+				class.DefaultDepDirs,
+				className,
+			)
+		}
+
 		for _, dir := range class.Directories {
 
 			fullInstanceDirectory := filepath.Join(baseDirectory, dir)
@@ -564,6 +578,7 @@ func (system *ModuleSystem) ResolveModules(
 					targetGenDir,
 					className,
 					dir,
+					defaultDeps,
 				)
 				if instanceErr != nil {
 					return nil, errors.Wrapf(
@@ -582,6 +597,7 @@ func (system *ModuleSystem) ResolveModules(
 					fullInstanceDirectory,
 					className,
 					class,
+					defaultDeps,
 				)
 
 				if err != nil {
@@ -616,6 +632,112 @@ func (system *ModuleSystem) ResolveModules(
 	return resolvedModules, nil
 }
 
+func getDefaultDependencies(
+	baseDir string,
+	dependencyClasses []*ModuleClass,
+	dependencyDirectories []string,
+) ([]ModuleDependency, error) {
+	var allModuleDependencies []ModuleDependency
+
+	for _, dependencyDir := range dependencyDirectories {
+		className, err := getClassOfDependency(dependencyDir, dependencyClasses)
+		if err != nil {
+			return nil, err
+		}
+
+		moduleDependencies, err := getModuleDependencies(filepath.Join(baseDir, dependencyDir), className)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Could not find default dependency directory %s",
+				dependencyDir,
+			)
+		}
+		allModuleDependencies = append(allModuleDependencies, moduleDependencies...)
+	}
+
+	return allModuleDependencies, nil
+}
+
+func getModuleDependencies(
+	currentDir string, // full path
+	className string,
+) ([]ModuleDependency, error) {
+	configFile, _, _ := getConfigFilePath(currentDir, className)
+
+	// Module instance found
+	if configFile != "" {
+		classConfigPath, _, _ := getConfigFilePath(currentDir, className)
+
+		raw, readErr := ioutil.ReadFile(classConfigPath)
+		if readErr != nil {
+			return nil, errors.Wrapf(
+				readErr,
+				"Error reading ClassConfig %q",
+				classConfigPath,
+			)
+		}
+
+		config, configErr := NewClassConfig(raw)
+		if configErr != nil {
+			return nil, errors.Wrapf(
+				configErr,
+				"Error unmarshal ClassConfig %q",
+				classConfigPath,
+			)
+		}
+
+		moduleDependency := ModuleDependency{
+			ClassName:    className,
+			InstanceName: config.Name,
+		}
+
+		return []ModuleDependency{moduleDependency}, nil
+	} else {
+		var allModuleDependencies []ModuleDependency
+		files, err := ioutil.ReadDir(currentDir)
+		if err != nil {
+			return nil, errors.Wrapf(
+				err,
+				"Error reading module instance directory %q",
+				currentDir,
+			)
+		}
+
+		for _, file := range files {
+			if !file.IsDir() {
+				continue
+			}
+
+			moduleDependencies, err := getModuleDependencies(
+				filepath.Join(currentDir, file.Name()),
+				className,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			allModuleDependencies = append(allModuleDependencies, moduleDependencies...)
+		}
+
+		return allModuleDependencies, nil
+	}
+}
+
+func getClassOfDependency(
+	dependencyDir string,
+	dependencyClasses []*ModuleClass,
+) (string, error){
+	for _, dependencyClass := range dependencyClasses {
+		for _, classDir := range dependencyClass.Directories {
+			if strings.HasPrefix(dependencyDir, classDir) {
+				return dependencyClass.Name, nil
+			}
+		}
+	}
+	return "", errors.Errorf("Could not found dependent class for default dependency %s", dependencyDir)
+}
+
 func getConfigFilePath(dir, name string) (string, string, string) {
 	yamlFileName := name + yamlConfigSuffix
 	jsonFileName := ""
@@ -643,6 +765,7 @@ func (system *ModuleSystem) resolveMultiModules(
 	classDir string, // full path
 	className string,
 	class *ModuleClass,
+	defaultDeps []ModuleDependency,
 ) ([]*ModuleInstance, error) {
 	relClassDir, err := filepath.Rel(baseDirectory, classDir)
 	if err != nil {
@@ -661,6 +784,7 @@ func (system *ModuleSystem) resolveMultiModules(
 			targetGenDir,
 			className,
 			relClassDir,
+			defaultDeps,
 		)
 		if instanceErr != nil {
 			return nil, errors.Wrapf(
@@ -698,6 +822,7 @@ func (system *ModuleSystem) resolveMultiModules(
 			filepath.Join(classDir, file.Name()),
 			className,
 			class,
+			defaultDeps,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err,
@@ -718,6 +843,7 @@ func (system *ModuleSystem) readInstance(
 	targetGenDir string,
 	className string,
 	instanceDirectory string,
+	defaultDeps []ModuleDependency,
 ) (*ModuleInstance, error) {
 
 	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
@@ -748,6 +874,7 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	dependencies := readDeps(config.Dependencies)
+	dependencies = append(dependencies, defaultDeps...)
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
@@ -1215,12 +1342,13 @@ func FormatGoFile(filePath string) error {
 // THis could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	Name        string
-	ClassType   moduleClassType
-	Directories []string
-	DependsOn   []string
-	DependedBy  []string
-	types       map[string]BuildGenerator
+	Name           string
+	ClassType      moduleClassType
+	Directories    []string
+	DependsOn      []string
+	DependedBy     []string
+	DefaultDepDirs []string
+	types          map[string]BuildGenerator
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass

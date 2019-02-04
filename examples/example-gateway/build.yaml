@@ -5,6 +5,7 @@ endpointConfig: ./endpoints
 genCodePackage: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
 genMock: true
 middlewareConfig: ./middlewares
+mandatoryMiddlewareConfig: ./middlewares/mandatory
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl
