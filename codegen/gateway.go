@@ -440,10 +440,11 @@ func getOrderedMandatoryMiddlewareSpecs(
 ) ([]MiddlewareSpec, error) {
 	middlewareObj := map[string][]string{}
 
-	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/mandatory.yaml")
+	const mandatoryMiddlewareFile = "middlewares/mandatory"
+	middlewareOrderingFile := filepath.Join(cfgDir, mandatoryMiddlewareFile+".yaml")
 	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
 		// Cannot find yaml file, use json file instead
-		middlewareOrderingFile = filepath.Join(cfgDir, "middlewares/mandatory.json")
+		middlewareOrderingFile = filepath.Join(cfgDir, mandatoryMiddlewareFile+".json")
 		if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
 			// Cannot find yaml or json file, skip adapters
 			return nil, nil
