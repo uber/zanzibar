@@ -561,7 +561,7 @@ func (system *ModuleSystem) ResolveModules(
 		)
 		if defaultDepsErr != nil {
 			return nil, errors.Wrapf(defaultDepsErr,
-				"Error filling default dependencies %s for %s",
+				"error filling default dependencies %s for %s",
 				class.DefaultDepDirs,
 				className,
 			)
@@ -648,7 +648,7 @@ func getDefaultDependencies(
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
-				"Could not find default dependency directory %s",
+				"could not find default dependency directory %s",
 				dependencyDir,
 			)
 		}
@@ -672,7 +672,7 @@ func getModuleDependencies(
 		if readErr != nil {
 			return nil, errors.Wrapf(
 				readErr,
-				"Error reading ClassConfig %q",
+				"error reading ClassConfig %q",
 				classConfigPath,
 			)
 		}
@@ -681,7 +681,7 @@ func getModuleDependencies(
 		if configErr != nil {
 			return nil, errors.Wrapf(
 				configErr,
-				"Error unmarshal ClassConfig %q",
+				"error unmarshal ClassConfig %q",
 				classConfigPath,
 			)
 		}
@@ -699,7 +699,7 @@ func getModuleDependencies(
 	if err != nil {
 		return nil, errors.Wrapf(
 			err,
-			"Error reading module instance directory %q",
+			"error reading module instance directory %q",
 			currentDir,
 		)
 	}
@@ -734,7 +734,7 @@ func getClassOfDependency(
 			}
 		}
 	}
-	return "", errors.Errorf("Could not find class for default dependency %s", dependencyDir)
+	return "", errors.Errorf("could not find class for default dependency %s", dependencyDir)
 }
 
 func getConfigFilePath(dir, name string) (string, string, string) {
