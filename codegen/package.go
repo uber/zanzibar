@@ -73,9 +73,9 @@ type PackageHelperOptions struct {
 	RelThriftRootDir string
 	// relative path to the target dir that will contain generated code, defaults to "./build"
 	RelTargetGenDir string
-	// relative path to the middleware config dir, defaults to "./middlewares"
+	// relative path to the middleware config dir, defaults to ""
 	RelMiddlewareConfigDir string
-	// relative path to the default middleware config dir, defaults to "./middlewares/default"
+	// relative path to the default middleware config dir, defaults to ""
 	RelDefaultMidConfigDir string
 
 	// package path to the generated code, defaults to PackageRoot + "/" + RelTargetGenDir + "/gen-code"
@@ -109,17 +109,11 @@ func (p *PackageHelperOptions) relThriftRootDir() string {
 }
 
 func (p *PackageHelperOptions) relMiddlewareConfigDir() string {
-	if p.RelMiddlewareConfigDir != "" {
-		return p.RelMiddlewareConfigDir
-	}
-	return "./middlewares"
+	return p.RelMiddlewareConfigDir
 }
 
 func (p *PackageHelperOptions) relDefaultMiddlewareConfigDir() string {
-	if p.RelDefaultMidConfigDir != "" {
-		return p.RelDefaultMidConfigDir
-	}
-	return "./middlewares/default"
+	return p.RelDefaultMidConfigDir
 }
 
 func (p *PackageHelperOptions) genCodePackage(packageRoot string) string {

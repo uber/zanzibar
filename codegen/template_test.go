@@ -44,10 +44,12 @@ func TestGenerateBar(t *testing.T) {
 
 	packageRoot := "github.com/uber/zanzibar/examples/example-gateway"
 	options := &codegen.PackageHelperOptions{
-		RelTargetGenDir: tmpDir,
-		CopyrightHeader: testCopyrightHeader,
-		GenCodePackage:  packageRoot + "/build/gen-code",
-		TraceKey:        "trace-key",
+		RelTargetGenDir:        tmpDir,
+		RelMiddlewareConfigDir: "./middlewares",
+		RelDefaultMidConfigDir: "./middlewares/default",
+		CopyrightHeader:        testCopyrightHeader,
+		GenCodePackage:         packageRoot + "/build/gen-code",
+		TraceKey:               "trace-key",
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

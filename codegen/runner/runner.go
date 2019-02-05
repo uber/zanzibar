@@ -92,6 +92,11 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 
+	relMiddlewareConfigDir := ""
+	if config.ContainsKey("middlewareConfig") {
+		relMiddlewareConfigDir = config.MustGetString("middlewareConfig")
+	}
+
 	relDefaultMidConfigDir := ""
 	if config.ContainsKey("defaultMiddlewareConfig") {
 		relDefaultMidConfigDir = config.MustGetString("defaultMiddlewareConfig")
@@ -100,7 +105,7 @@ func main() {
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:        config.MustGetString("targetGenDir"),
-		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),
+		RelMiddlewareConfigDir: relMiddlewareConfigDir,
 		RelDefaultMidConfigDir: relDefaultMidConfigDir,
 		AnnotationPrefix:       config.MustGetString("annotationPrefix"),
 		GenCodePackage:         config.MustGetString("genCodePackage"),
