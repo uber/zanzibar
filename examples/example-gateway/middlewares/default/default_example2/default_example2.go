@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mandatoryexample
+package defaultexample2
 
 import (
 	"context"
 
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
 	"github.com/uber/zanzibar/runtime"
 )
 
-type mandatoryExampleMiddleware struct {
+type defaultExample2Middleware struct {
 	deps    *module.Dependencies
 	options Options
 }
@@ -42,14 +42,14 @@ func NewMiddleware(
 	deps *module.Dependencies,
 	options Options,
 ) zanzibar.MiddlewareHandle {
-	return &mandatoryExampleMiddleware{
+	return &defaultExample2Middleware{
 		deps:    deps,
 		options: options,
 	}
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m *mandatoryExampleMiddleware) HandleRequest(
+func (m *defaultExample2Middleware) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -58,7 +58,7 @@ func (m *mandatoryExampleMiddleware) HandleRequest(
 	return true
 }
 
-func (m *mandatoryExampleMiddleware) HandleResponse(
+func (m *defaultExample2Middleware) HandleResponse(
 	ctx context.Context,
 	res *zanzibar.ServerHTTPResponse,
 	shared zanzibar.SharedState,
@@ -66,12 +66,12 @@ func (m *mandatoryExampleMiddleware) HandleResponse(
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m *mandatoryExampleMiddleware) JSONSchema() *jsonschema.Document {
+func (m *defaultExample2Middleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m *mandatoryExampleMiddleware) Name() string {
-	return "mandatory_example"
+func (m *defaultExample2Middleware) Name() string {
+	return "default_example2"
 }

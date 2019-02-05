@@ -38,8 +38,8 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
-	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
-	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
+	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
@@ -59,11 +59,11 @@ func NewBarHelloWorldHandler(deps *module.Dependencies) *BarHelloWorldHandler {
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "helloWorld",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
-				mandatoryExample2.Options{},
+			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
+				defaultExample2.Options{},
 			),
-			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
-				mandatoryExample.Options{},
+			deps.Middleware.DefaultExample.NewMiddlewareHandle(
+				defaultExample.Options{},
 			),
 		}, handler.HandleRequest).Handle,
 	)

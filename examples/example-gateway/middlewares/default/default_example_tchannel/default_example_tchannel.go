@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mandatoryexample2
+package defaultexampletchannel
 
 import (
 	"context"
-
 	"github.com/mcuadros/go-jsonschema-generator"
-	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
+	"github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	"github.com/uber/zanzibar/runtime"
+	"go.uber.org/thriftrw/wire"
 )
 
-type mandatoryExample2Middleware struct {
+type defaultExampleTchannelMiddleware struct {
 	deps    *module.Dependencies
 	options Options
 }
@@ -41,37 +41,38 @@ type Options struct{}
 func NewMiddleware(
 	deps *module.Dependencies,
 	options Options,
-) zanzibar.MiddlewareHandle {
-	return &mandatoryExample2Middleware{
+) zanzibar.MiddlewareTchannelHandle {
+	return &defaultExampleTchannelMiddleware{
 		deps:    deps,
 		options: options,
 	}
 }
 
 // HandleRequest handles the requests before calling lower level middlewares.
-func (m *mandatoryExample2Middleware) HandleRequest(
+func (m *defaultExampleTchannelMiddleware) HandleRequest(
 	ctx context.Context,
-	req *zanzibar.ServerHTTPRequest,
-	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState,
-) bool {
-	return true
+	reqHeaders map[string]string,
+	wireValue *wire.Value,
+	shared zanzibar.TchannelSharedState,
+) (bool, error) {
+	return true, nil
 }
 
-func (m *mandatoryExample2Middleware) HandleResponse(
+func (m *defaultExampleTchannelMiddleware) HandleResponse(
 	ctx context.Context,
-	res *zanzibar.ServerHTTPResponse,
-	shared zanzibar.SharedState,
-) {
+	rwt zanzibar.RWTStruct,
+	shared zanzibar.TchannelSharedState,
+) zanzibar.RWTStruct {
+	return rwt
 }
 
 // JSONSchema returns a schema definition of the configuration options for a middlware
-func (m *mandatoryExample2Middleware) JSONSchema() *jsonschema.Document {
+func (m *defaultExampleTchannelMiddleware) JSONSchema() *jsonschema.Document {
 	s := &jsonschema.Document{}
 	s.Read(&Options{})
 	return s
 }
 
-func (m *mandatoryExample2Middleware) Name() string {
-	return "mandatory_example2"
+func (m *defaultExampleTchannelMiddleware) Name() string {
+	return "default_example_tchannel"
 }

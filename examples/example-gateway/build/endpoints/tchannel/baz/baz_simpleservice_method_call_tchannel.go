@@ -38,8 +38,8 @@ import (
 	endpointsTchannelBazBaz "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/tchannel/baz/baz"
 	customBaz "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
 
+	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
 	exampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/example_tchannel"
-	mandatoryExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example_tchannel"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 )
@@ -52,8 +52,8 @@ func NewSimpleServiceCallHandler(deps *module.Dependencies) *SimpleServiceCallHa
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"bazTChannel", "call", "SimpleService::Call",
 		zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
-			deps.Middleware.MandatoryExampleTchannel.NewMiddlewareHandle(
-				mandatoryExampleTchannel.Options{},
+			deps.Middleware.DefaultExampleTchannel.NewMiddlewareHandle(
+				defaultExampleTchannel.Options{},
 			),
 			deps.Middleware.ExampleTchannel.NewMiddlewareHandle(
 				exampleTchannel.Options{

@@ -1,6 +1,0 @@
-config:
-  path: github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example_tchannel
-  schema: ./middlewares/mandatory/mandatory_example_tchannel/mandatory_example_tchannel_schema.json
-dependencies: {}
-name: mandatory_example_tchannel
-type: tchannel

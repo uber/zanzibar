@@ -21,27 +21,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mandatoryexampletchannelmiddleware
+package module
 
 import (
-	module "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
-	handle "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example_tchannel"
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Middleware is a container for module.Deps and factory for MiddlewareHandle
-type Middleware struct {
-	Deps *module.Dependencies
+// Dependencies contains dependencies for the default_example2 middleware module
+type Dependencies struct {
+	Default *zanzibar.DefaultDependencies
+	Client  *ClientDependencies
 }
 
-// NewMiddleware is a factory method for the struct
-func NewMiddleware(deps *module.Dependencies) Middleware {
-	return Middleware{
-		Deps: deps,
-	}
-}
-
-// NewMiddlewareHandle calls back to the custom middleware to build a MiddlewareHandle
-func (m *Middleware) NewMiddlewareHandle(o handle.Options) zanzibar.MiddlewareTchannelHandle {
-	return handle.NewMiddleware(m.Deps, o)
+// ClientDependencies contains client dependencies
+type ClientDependencies struct {
+	Baz bazclientgenerated.Client
 }

@@ -1,6 +1,0 @@
-# Middlewares in the ./middlewares/mandatory folder will be executed in the order listed here
-http:
-  - mandatory_example2
-  - mandatory_example
-tchannel:
-  - mandatory_example_tchannel

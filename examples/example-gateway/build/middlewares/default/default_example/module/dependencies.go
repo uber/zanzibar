@@ -29,7 +29,7 @@ import (
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the mandatory_example2 middleware module
+// Dependencies contains dependencies for the default_example middleware module
 type Dependencies struct {
 	Default *zanzibar.DefaultDependencies
 	Client  *ClientDependencies

@@ -37,8 +37,8 @@ import (
 
 	customMulti "github.com/uber/zanzibar/examples/example-gateway/endpoints/panic"
 
-	mandatoryExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example"
-	mandatoryExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/mandatory/mandatory_example2"
+	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/panic/module"
 )
@@ -58,11 +58,11 @@ func NewServiceCFrontHelloHandler(deps *module.Dependencies) *ServiceCFrontHello
 		deps.Default.ContextExtractor, deps.Default,
 		"panic", "panic",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
-			deps.Middleware.MandatoryExample2.NewMiddlewareHandle(
-				mandatoryExample2.Options{},
+			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
+				defaultExample2.Options{},
 			),
-			deps.Middleware.MandatoryExample.NewMiddlewareHandle(
-				mandatoryExample.Options{},
+			deps.Middleware.DefaultExample.NewMiddlewareHandle(
+				defaultExample.Options{},
 			),
 		}, handler.HandleRequest).Handle,
 	)

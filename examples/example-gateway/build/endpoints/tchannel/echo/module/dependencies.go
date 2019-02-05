@@ -24,9 +24,9 @@
 package module
 
 import (
-	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
-	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
-	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
@@ -39,7 +39,7 @@ type Dependencies struct {
 
 // MiddlewareDependencies contains middleware dependencies
 type MiddlewareDependencies struct {
-	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
-	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
-	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

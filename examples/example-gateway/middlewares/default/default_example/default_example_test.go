@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package mandatoryexample2
+package defaultexample
 
 import (
 	"testing"
@@ -27,7 +27,7 @@ import (
 )
 
 func TestNoRequestSuccessfulRequestOKResponse(t *testing.T) {
-	schema := (&mandatoryExample2Middleware{}).JSONSchema()
+	schema := (&defaultExampleMiddleware{}).JSONSchema()
 
 	expected := "{\n" +
 		"    \"$schema\": \"http://json-schema.org/schema#\",\n" +

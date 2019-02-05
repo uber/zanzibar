@@ -114,6 +114,10 @@ This table exhausts the possible immediate or direct dependency relationships am
 
 The `ModuleClass` struct has `DependsOn` and `DependedBy` public fields, which makes it simple to extend the dependency rules with custom module class, e.g., we can define a custom module class `task` that abstracts common business workflow by setting its `DependsOn` field to client and `DependedBy` field to endpoint.
 
+The `ModuleClass` struct also has a `DefaultDepDirs` public field, which allows a module class to include instances of other modules classes as a default dependency. This means that no explicit configurations are required for certain module instances to be included as a dependency. e.g., we can include `clients/logger` as a default dependency for `endpoint`, and every endpoint will have `clients/logger` as a dependency in its `module/dependencies.go` file, even if the endpoint's `endpoint-config.yaml` file does not list `clients/logger` as a dependency.
+
+Note that `DefaultDepDirs` takes a list of directories from which the dependencies should be discovered. For example, if all clients are rooted at `./clients` and `endpoint` has `clients` as a default dependency, then every single client will be included as a dependency for every endpoint.
+
 ### Config
 Configurations are the interface that developers interact with when using the Zanzibar framework, they make up most of Zazibar's API. Various configurarions contain essential meta information of a Zanzibar application and its components. They are source of truth of the application.
 
@@ -128,7 +132,7 @@ example-gateway                 # root directory
 │   ├── endpoints               # generated mocks and module initializers for endpoints
 │   ├── gen-code                # generated structs and (de)serializers by Thrift compiler
 │   ├── middlewares             # generated module initializers for middlewares
-│   │   └── mandatory           # generated module initializers for mandatory middlewares
+│   │   └── default             # generated module initializers for default middlewares
 │   └── services                # generated mocks and module intialziers for services
 ├── build.yaml                  # config file for Zanzibar code generation, see below for details
 ├── clients                     # config directory for modules of client module class
@@ -144,9 +148,9 @@ example-gateway                 # root directory
 │   └── endpoints               # idl directory for endpoint thrift files
 ├── middlewares                 # config directory for modules of middleware module class
 │   ├── transform-response      # config directory for a middleware named 'transform-response'
-│   ├── mandatory               # directory for all mandatory middlewares
-│   │   └── log-publisher       # config directory for a mandatory middleware named 'log-publisher'
-│   └── mandatory.yaml          # config file describing mandatory middlewares and their execution order   
+│   ├── default                 # directory for all default middlewares
+│   │   └── log-publisher       # config directory for a default middleware named 'log-publisher'
+│   └── default.yaml            # config file describing default middlewares and their execution order   
 └── services                    # config directory for modules of service module class
     └── example-gateway         # config directory for a service named 'example-gateway'
 ```

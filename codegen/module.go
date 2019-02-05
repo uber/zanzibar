@@ -1339,12 +1339,13 @@ func FormatGoFile(filePath string) error {
 // This could be something like an Endpoint class which contains multiple
 // endpoint configurations, or a Lib class, that is itself a module instance
 type ModuleClass struct {
-	Name           string
-	ClassType      moduleClassType
-	Directories    []string
-	DependsOn      []string
-	DependedBy     []string
-	DefaultDepDirs []string // Default Dependencies
+	Name        string
+	ClassType   moduleClassType
+	Directories []string
+	DependsOn   []string
+	DependedBy  []string
+	// Default Dependencies
+	DefaultDepDirs []string
 	types          map[string]BuildGenerator
 
 	// private field which is populated before module resolving

@@ -26,9 +26,9 @@ package mockechoworkflow
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
-	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
-	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
-	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 )
 
 // MockClientNodes contains mock client dependencies for the echo endpoint module
@@ -43,7 +43,7 @@ type clientDependenciesNodes struct {
 
 // middlewareDependenciesNodes contains middleware dependencies
 type middlewareDependenciesNodes struct {
-	MandatoryExample         mandatoryexamplemiddlewaregenerated.Middleware
-	MandatoryExample2        mandatoryexample2middlewaregenerated.Middleware
-	MandatoryExampleTchannel mandatoryexampletchannelmiddlewaregenerated.Middleware
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

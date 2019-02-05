@@ -342,7 +342,7 @@ func NewDefaultModuleSystem(
 		Directories:    []string{"endpoints"},
 		ClassType:      MultiModule,
 		DependsOn:      []string{"client", "middleware"},
-		DefaultDepDirs: []string{"middlewares/mandatory"},
+		DefaultDepDirs: []string{"middlewares/default"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}

@@ -35,14 +35,14 @@ import (
 	quuxclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	exampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel"
 	exampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example_tchannel/module"
-	mandatoryexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example"
-	mandatoryexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example/module"
-	mandatoryexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2"
-	mandatoryexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example2/module"
-	mandatoryexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel"
-	mandatoryexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/mandatory/mandatory_example_tchannel/module"
 	fixturequuxclientstatic "github.com/uber/zanzibar/examples/example-gateway/clients/quux/fixture"
 	baztchannelendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/baz"
 )
@@ -69,22 +69,22 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 
 	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
 
+	initializedMiddlewareDependencies.DefaultExample = defaultexamplemiddlewaregenerated.NewMiddleware(&defaultexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExample2 = defaultexample2middlewaregenerated.NewMiddleware(&defaultexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
 	initializedMiddlewareDependencies.ExampleTchannel = exampletchannelmiddlewaregenerated.NewMiddleware(&exampletchannelmiddlewaremodule.Dependencies{
-		Default: initializedDefaultDependencies,
-	})
-	initializedMiddlewareDependencies.MandatoryExample = mandatoryexamplemiddlewaregenerated.NewMiddleware(&mandatoryexamplemiddlewaremodule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Client: &mandatoryexamplemiddlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
-		},
-	})
-	initializedMiddlewareDependencies.MandatoryExample2 = mandatoryexample2middlewaregenerated.NewMiddleware(&mandatoryexample2middlewaremodule.Dependencies{
-		Default: initializedDefaultDependencies,
-		Client: &mandatoryexample2middlewaremodule.ClientDependencies{
-			Baz: initializedClientDependencies.Baz,
-		},
-	})
-	initializedMiddlewareDependencies.MandatoryExampleTchannel = mandatoryexampletchannelmiddlewaregenerated.NewMiddleware(&mandatoryexampletchannelmiddlewaremodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -96,10 +96,10 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 				Quux: initializedClientDependencies.Quux,
 			},
 			Middleware: &module.MiddlewareDependencies{
-				ExampleTchannel:          initializedMiddlewareDependencies.ExampleTchannel,
-				MandatoryExample:         initializedMiddlewareDependencies.MandatoryExample,
-				MandatoryExample2:        initializedMiddlewareDependencies.MandatoryExample2,
-				MandatoryExampleTchannel: initializedMiddlewareDependencies.MandatoryExampleTchannel,
+				DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+				DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+				DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+				ExampleTchannel:        initializedMiddlewareDependencies.ExampleTchannel,
 			},
 		},
 	)

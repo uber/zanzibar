@@ -51,8 +51,8 @@ type PackageHelper struct {
 	annotationPrefix string
 	// The middlewares available for the endpoints
 	middlewareSpecs map[string]*MiddlewareSpec
-	// The mandatory middlewares for all endpoints
-	mandatoryMiddlewareSpecs map[string]*MiddlewareSpec
+	// The default middlewares for all endpoints
+	defaultMiddlewareSpecs map[string]*MiddlewareSpec
 	// Use staging client when this header is set as "true"
 	stagingReqHeader string
 	// Use deputy client when this header is set
@@ -75,8 +75,8 @@ type PackageHelperOptions struct {
 	RelTargetGenDir string
 	// relative path to the middleware config dir, defaults to "./middlewares"
 	RelMiddlewareConfigDir string
-	// relative path to the mandatory middleware config dir, defaults to "./middlewares/mandatory"
-	RelMandatoryMidConfigDir string
+	// relative path to the default middleware config dir, defaults to "./middlewares/default"
+	RelDefaultMidConfigDir string
 
 	// package path to the generated code, defaults to PackageRoot + "/" + RelTargetGenDir + "/gen-code"
 	GenCodePackage string
@@ -115,11 +115,11 @@ func (p *PackageHelperOptions) relMiddlewareConfigDir() string {
 	return "./middlewares"
 }
 
-func (p *PackageHelperOptions) relMandatoryMiddlewareConfigDir() string {
-	if p.RelMandatoryMidConfigDir != "" {
-		return p.RelMandatoryMidConfigDir
+func (p *PackageHelperOptions) relDefaultMiddlewareConfigDir() string {
+	if p.RelDefaultMidConfigDir != "" {
+		return p.RelDefaultMidConfigDir
 	}
-	return "./middlewares/mandatory"
+	return "./middlewares/default"
 }
 
 func (p *PackageHelperOptions) genCodePackage(packageRoot string) string {
@@ -187,32 +187,30 @@ func NewPackageHelper(
 
 	middlewareSpecs, err := parseMiddlewareConfig(options.relMiddlewareConfigDir(), absConfigRoot)
 	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot load middlewares")
+		return nil, errors.Wrapf(err, "cannot load middlewares")
 	}
 
-	mandatoryMiddlewareSpecs, err := parseMandatoryMiddlewareConfig(
-		options.relMandatoryMiddlewareConfigDir(),
+	defaultMiddlewareSpecs, err := parseDefaultMiddlewareConfig(
+		options.relDefaultMiddlewareConfigDir(),
 		absConfigRoot)
 	if err != nil {
-		return nil, errors.Wrapf(
-			err, "Cannot load mandatory middlewares")
+		return nil, errors.Wrapf(err, "cannot load default middlewares")
 	}
 
 	p := &PackageHelper{
-		packageRoot:              packageRoot,
-		configRoot:               absConfigRoot,
-		thriftRootDir:            filepath.Join(absConfigRoot, options.relThriftRootDir()),
-		genCodePackage:           options.genCodePackage(packageRoot),
-		goGatewayNamespace:       goGatewayNamespace,
-		targetGenDir:             filepath.Join(absConfigRoot, options.relTargetGenDir()),
-		copyrightHeader:          options.copyrightHeader(),
-		middlewareSpecs:          middlewareSpecs,
-		mandatoryMiddlewareSpecs: mandatoryMiddlewareSpecs,
-		annotationPrefix:         options.annotationPrefix(),
-		stagingReqHeader:         options.stagingReqHeader(),
-		deputyReqHeader:          options.deputyReqHeader(),
-		traceKey:                 options.traceKey(),
+		packageRoot:            packageRoot,
+		configRoot:             absConfigRoot,
+		thriftRootDir:          filepath.Join(absConfigRoot, options.relThriftRootDir()),
+		genCodePackage:         options.genCodePackage(packageRoot),
+		goGatewayNamespace:     goGatewayNamespace,
+		targetGenDir:           filepath.Join(absConfigRoot, options.relTargetGenDir()),
+		copyrightHeader:        options.copyrightHeader(),
+		middlewareSpecs:        middlewareSpecs,
+		defaultMiddlewareSpecs: defaultMiddlewareSpecs,
+		annotationPrefix:       options.annotationPrefix(),
+		stagingReqHeader:       options.stagingReqHeader(),
+		deputyReqHeader:        options.deputyReqHeader(),
+		traceKey:               options.traceKey(),
 	}
 	return p, nil
 }
@@ -232,9 +230,9 @@ func (p PackageHelper) MiddlewareSpecs() map[string]*MiddlewareSpec {
 	return p.middlewareSpecs
 }
 
-// MandatoryMiddlewareSpecs returns a map of middlewares available
-func (p PackageHelper) MandatoryMiddlewareSpecs() map[string]*MiddlewareSpec {
-	return p.mandatoryMiddlewareSpecs
+// DefaultMiddlewareSpecs returns a map of default middlewares
+func (p PackageHelper) DefaultMiddlewareSpecs() map[string]*MiddlewareSpec {
+	return p.defaultMiddlewareSpecs
 }
 
 // TypeImportPath returns the Go import path for types defined in a thrift file.
