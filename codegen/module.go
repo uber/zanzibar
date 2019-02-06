@@ -644,7 +644,13 @@ func getDefaultDependencies(
 			return nil, err
 		}
 
-		moduleDependencies, err := getModuleDependencies(filepath.Join(baseDir, dependencyDir), className)
+		fullDependencyDir := filepath.Join(baseDir, dependencyDir)
+		if _, err := os.Stat(fullDependencyDir); os.IsNotExist(err) {
+			// This folder is not required so it is okay to skip
+			return nil, nil
+		}
+
+		moduleDependencies, err := getModuleDependencies(fullDependencyDir, className)
 		if err != nil {
 			return nil, errors.Wrapf(
 				err,
