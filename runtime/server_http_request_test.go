@@ -171,7 +171,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -234,7 +234,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -297,7 +297,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -360,7 +360,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -423,7 +423,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -486,7 +486,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -549,7 +549,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -612,7 +612,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue
@@ -675,7 +675,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 	)
 
 	logs := bgateway.AllLogs()
-	assert.Equal(t, 2, len(logs))
+	assert.Equal(t, 4, len(logs))
 
 	// Assert that there is only one log even though
 	// we double call GetQueryValue

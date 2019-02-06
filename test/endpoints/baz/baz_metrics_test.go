@@ -237,5 +237,5 @@ func TestCallMetrics(t *testing.T) {
 		"zap.logged.info", defaultTags,
 	)]
 	value = *loggedMetrics.MetricValue.Count.I64Value
-	assert.Equal(t, int64(4), value, "expected counter to be 4")
+	assert.Equal(t, int64(6), value, "expected counter to be 6")
 }

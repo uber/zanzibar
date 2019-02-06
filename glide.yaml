@@ -14,10 +14,6 @@ import:
   version: ^0.8.0
 - package: go.uber.org/atomic
   version: ^1.3.0
-- package: github.com/apache/thrift
-  version: ^0.10.0
-  subpackages:
-  - lib/go/thrift
 - package: github.com/uber-go/tally
   version: ^3
 # update to master since the last semver release is 2 years old
@@ -28,7 +24,7 @@ import:
 - package: go.uber.org/thriftrw
   version: v1.14.0
 - package: github.com/uber/tchannel-go
-  version: 1.5.0
+  version: ^1.6.0
 - package: github.com/opentracing/opentracing-go
   version: ^1.0.0
 - package: github.com/uber/jaeger-client-go
