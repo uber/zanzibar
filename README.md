@@ -150,9 +150,9 @@ example-gateway                 # root directory
 │   ├── transform-response      # config directory for a middleware named 'transform-response'
 │   ├── default                 # directory for all default middlewares
 │   │   └── log-publisher       # config directory for a default middleware named 'log-publisher'
+│   └── default.yaml            # config file describing default middlewares and their execution order   
 └── services                    # config directory for modules of service module class
-    ├── example-gateway         # config directory for a service named 'example-gateway'
-    └── default.yaml            # config file describing default middlewares and their execution order   
+    └── example-gateway         # config directory for a service named 'example-gateway'
 ```
 
 #### Module Config
