@@ -3115,7 +3115,7 @@ import (
 	{{end -}}
 	{{end -}}
 	{{end -}}
-	{{$instance.PackageInfo.PackageAlias}} "{{$instance.PackageInfo.PackagePath}}"
+	{{$instance.PackageInfo.PackageAlias}} "{{$espec.WorkflowImportPath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
 )
@@ -3198,7 +3198,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4724, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4716, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

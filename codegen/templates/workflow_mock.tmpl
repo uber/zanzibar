@@ -31,7 +31,7 @@ import (
 	{{end -}}
 	{{end -}}
 	{{end -}}
-	{{$instance.PackageInfo.PackageAlias}} "{{$instance.PackageInfo.PackagePath}}"
+	{{$instance.PackageInfo.PackageAlias}} "{{$espec.WorkflowImportPath}}"
 	module "{{$instance.PackageInfo.ModulePackagePath}}"
 	workflow "{{$instance.PackageInfo.GeneratedPackagePath}}/workflow"
 )
