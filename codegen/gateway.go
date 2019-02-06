@@ -440,7 +440,7 @@ func getOrderedDefaultMiddlewareSpecs(
 ) ([]MiddlewareSpec, error) {
 	middlewareObj := map[string][]string{}
 
-	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/default.yaml")
+	middlewareOrderingFile := filepath.Join(cfgDir, "services/default.yaml")
 	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
 		// This file is not required so it is okay to skip
 		return nil, nil
