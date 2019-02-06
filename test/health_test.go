@@ -194,12 +194,6 @@ func TestHealthMetrics(t *testing.T) {
 	)]
 	value = *statusMetric.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
-		"zap.logged.info", allhostTags,
-	)]
-	value = *loggedMetrics.MetricValue.Count.I64Value
-	assert.Equal(t, int64(4), value, "expected counter to be 4")
 }
 
 func TestRuntimeMetrics(t *testing.T) {

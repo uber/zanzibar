@@ -22,6 +22,7 @@ package baztchannel
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -253,6 +254,9 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.False(t, success)
 
 	allLogs := gateway.AllLogs()
+	fmt.Println("de")
+	fmt.Println(allLogs)
+	fmt.Println("ade")
 	assert.Len(t, allLogs, 10)
 	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
 	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
