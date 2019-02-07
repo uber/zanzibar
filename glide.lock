@@ -1,8 +1,12 @@
-hash: c9e408639094e9d8cbe848e1b5be736bf4251251e35a63d8438631b872cbf766
-updated: 2018-12-14T15:12:14.306489-08:00
+hash: d139d0b3a740db69a8f05f3bd0c21050741bf5881cba15c4fc6f723cee9c3946
+updated: 2019-02-06T13:52:33.978534-08:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
+  subpackages:
+  - hystrix
+  - hystrix/metric_collector
+  - hystrix/rolling
 - name: github.com/anmitsu/go-shlex
   version: 648efa622239a2f6ff949fed78ee37b48d499ba4
 - name: github.com/apache/thrift
@@ -35,7 +39,7 @@ imports:
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/kisielk/errcheck
-  version: 1787c4bee836470bf45018cfbc783650db3c6501
+  version: e14f8d59a22d460d56c5ee92507cd94c78fbf274
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
@@ -59,9 +63,9 @@ imports:
 - name: github.com/pborman/uuid
   version: adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: ba968bfe8b2f7e042a574c888954fccecfa385b4
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: 5d4384ee4fb2527b0a1256a821ebfc92f91efefc
   subpackages:
   - difflib
 - name: github.com/sergi/go-diff
@@ -69,13 +73,15 @@ imports:
   subpackages:
   - diffmatchpatch
 - name: github.com/stretchr/testify
-  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  version: ffdc059bfe9ce6a4e144ba849dbedead332c6053
   subpackages:
   - assert
   - require
   - suite
 - name: github.com/uber-go/atomic
-  version: 8dc6146f7569370a472715e178d8ae31172ee6da
+  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+  subpackages:
+  - utils
 - name: github.com/uber-go/tally
   version: ff17f3c43c065c3c2991f571e740eee43ea3a14a
   subpackages:
@@ -109,12 +115,13 @@ imports:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: 0b7f160817553b0bacb5b108dd84a5022dbdd1c4
+  version: 162ecb0dc97845a0c42aae3899651dba111085e5
   subpackages:
   - internal/argreader
   - relay
   - testutils/testreader
   - tnet
+  - tos
   - trand
   - typed
 - name: go.uber.org/atomic
@@ -122,11 +129,10 @@ imports:
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
-  - internal/cgroups
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
-  version: 12c8adaa5e6a24ad02198588082d95582ee16e5b
+  version: 7ff117f761a3f1b3eb521945c17a1091438eb6de
   subpackages:
   - internal/digreflect
   - internal/dot
@@ -173,11 +179,16 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 891ebc4b82d6e74f468c533b06f983c7be918a96
+  version: d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf
   subpackages:
+  - bpf
   - context
+  - internal/iana
+  - internal/socket
+  - ipv4
+  - ipv6
 - name: golang.org/x/tools
-  version: 3c39ce7b61056afe4473b651789da5f89d4aeb20
+  version: 40960b6deb8ecdb8bcde6a8f44722731939b8ddc
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2

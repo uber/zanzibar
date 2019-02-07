@@ -225,17 +225,4 @@ func TestCallMetrics(t *testing.T) {
 	)]
 	value = *outboundSuccess.MetricValue.Count.I64Value
 	assert.Equal(t, int64(1), value, "expected counter to be 1")
-
-	defaultTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"dc":      "unknown",
-		"host":    zanzibar.GetHostname(),
-	}
-
-	loggedMetrics := metrics[tally.KeyForPrefixedStringMap(
-		"zap.logged.info", defaultTags,
-	)]
-	value = *loggedMetrics.MetricValue.Count.I64Value
-	assert.Equal(t, int64(4), value, "expected counter to be 4")
 }

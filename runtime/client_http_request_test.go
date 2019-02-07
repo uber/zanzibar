@@ -192,8 +192,6 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 
 	logs := gateway.AllLogs()
 
-	assert.Equal(t, 1, len(logs))
-
 	lines := logs["Got outbound request without mandatory header"]
 	assert.Equal(t, 1, len(lines))
 

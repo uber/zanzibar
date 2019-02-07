@@ -23,10 +23,8 @@ package gateway_test
 import (
 	"testing"
 
-	"encoding/json"
-
 	"github.com/pkg/errors"
-	assert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -59,18 +57,9 @@ func TestBootstrapError(t *testing.T) {
 
 	switch err := errors.Cause(err).(type) {
 	case *testGateway.MalformedStdoutError:
-		var lineStruct struct {
-			Msg   string
-			Error string
-		}
-		jsonErr := json.Unmarshal([]byte(err.StdoutLine), &lineStruct)
-		if !assert.NoError(t, jsonErr, "must json parse") {
-			return
-		}
-
-		assert.Equal(t, "Error listening on port", lineStruct.Msg,
+		assert.Contains(t, err.StdoutLine, "Error listening on port",
 			"error should be about listening on port")
-		assert.Contains(t, lineStruct.Error, "address already in use",
+		assert.Contains(t, err.StdoutLine, "address already in use",
 			"error message is about address in use")
 	default:
 		assert.Fail(t, "got weird error")

@@ -253,7 +253,7 @@ func TestCallTChannelTimeout(t *testing.T) {
 	assert.False(t, success)
 
 	allLogs := gateway.AllLogs()
-	assert.Len(t, allLogs, 8)
+	assert.Len(t, allLogs, 10)
 	assert.Len(t, gateway.Logs("info", "Started ExampleGateway"), 1)
 	assert.Len(t, gateway.Logs("info", "Created new active connection."), 2)
 
