@@ -56,10 +56,10 @@ func TestGenerateBar(t *testing.T) {
 		CopyrightHeader: testCopyrightHeader,
 		GenCodePackage:  packageRoot + "/build/gen-code",
 		TraceKey:        "trace-key",
-		ModuleSearchPaths: []string{
-			"clients/*",
-			"middlewares/*",
-			"endpoints/*",
+		ModuleSearchPaths: map[string][]string{
+			"client":     {"clients/*"},
+			"middleware": {"middlewares/*"},
+			"endpoint":   {"endpoints/*"},
 		},
 	}
 

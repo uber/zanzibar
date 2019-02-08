@@ -10,11 +10,15 @@ targetGenDir: ./build
 thriftRootDir: ./idl
 traceKey: x-trace-id
 moduleSearchPaths:
-- clients/*
-- middlewares/*
-- endpoints/*
-- endpoints/tchannel/*
-- services/*
-- app/*/clients/*
-- app/*/endpoints/*
-- app/*/services/*
+  client:
+    - clients/*
+    - app/*/clients/*
+  middleware:
+    - middlewares/*
+  endpoint:
+    - endpoints/*
+    - endpoints/tchannel/*
+    - app/*/endpoints/*
+  service:
+    - services/*
+    - app/*/services/*

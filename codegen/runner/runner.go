@@ -92,7 +92,7 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 
-	searchPaths := make([]string, 0)
+	searchPaths := make(map[string][]string, 0)
 	config.MustGetStruct("moduleSearchPaths", &searchPaths)
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
