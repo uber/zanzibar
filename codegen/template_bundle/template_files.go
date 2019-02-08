@@ -262,7 +262,7 @@ import (
 
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	"{{$middleware.ImportPath}}"
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -289,7 +289,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-				{{$middleware.Name}}.Options{
+				{{$middleware.Name | camel}}.Options{
 				{{range $key, $value := $middleware.PrettyOptions -}}
 					{{$key}} : {{$value}},
 				{{end -}}
@@ -463,7 +463,7 @@ func endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "endpoint.tmpl", size: 6964, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "endpoint.tmpl", size: 7001, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2544,7 +2544,7 @@ import (
 
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	{{$middleware.Name}} "{{$middleware.ImportPath}}"
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -2572,7 +2572,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 			zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
 			{{range $idx, $middleware := $middlewares -}}
 				deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-					{{$middleware.Name}}.Options{
+					{{$middleware.Name | camel}}.Options{
 					{{range $key, $value := $middleware.PrettyOptions -}}
 						{{$key}} : {{$value}},
 					{{end -}}
@@ -2805,7 +2805,7 @@ func tchannel_endpointTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8766, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_endpoint.tmpl", size: 8782, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

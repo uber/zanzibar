@@ -92,19 +92,34 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 
+<<<<<<< HEAD
 	searchPaths := make(map[string][]string, 0)
+=======
+	relMiddlewareConfigDir := ""
+	if config.ContainsKey("middlewareConfig") {
+		relMiddlewareConfigDir = config.MustGetString("middlewareConfig")
+	}
+
+	relDefaultMiddlewareConfigDir := ""
+	if config.ContainsKey("defaultMiddlewareConfig") {
+		relDefaultMiddlewareConfigDir = config.MustGetString("defaultMiddlewareConfig")
+	}
+
+	searchPaths := make([]string, 0)
+>>>>>>> Default middlewares initial merge
 	config.MustGetStruct("moduleSearchPaths", &searchPaths)
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
-		RelTargetGenDir:        config.MustGetString("targetGenDir"),
-		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),
-		AnnotationPrefix:       config.MustGetString("annotationPrefix"),
-		GenCodePackage:         config.MustGetString("genCodePackage"),
-		CopyrightHeader:        string(copyright),
-		StagingReqHeader:       stagingReqHeader,
-		DeputyReqHeader:        deputyReqHeader,
-		TraceKey:               config.MustGetString("traceKey"),
-		ModuleSearchPaths:      searchPaths,
+		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
+		RelTargetGenDir:               config.MustGetString("targetGenDir"),
+		RelMiddlewareConfigDir:        relMiddlewareConfigDir,
+		RelDefaultMiddlewareConfigDir: relDefaultMiddlewareConfigDir,
+		AnnotationPrefix:              config.MustGetString("annotationPrefix"),
+		GenCodePackage:                config.MustGetString("genCodePackage"),
+		CopyrightHeader:               string(copyright),
+		StagingReqHeader:              stagingReqHeader,
+		DeputyReqHeader:               deputyReqHeader,
+		TraceKey:                      config.MustGetString("traceKey"),
+		ModuleSearchPaths:             searchPaths,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
