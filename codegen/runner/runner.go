@@ -92,9 +92,6 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 
-<<<<<<< HEAD
-	searchPaths := make(map[string][]string, 0)
-=======
 	relMiddlewareConfigDir := ""
 	if config.ContainsKey("middlewareConfig") {
 		relMiddlewareConfigDir = config.MustGetString("middlewareConfig")
@@ -105,9 +102,12 @@ func main() {
 		relDefaultMiddlewareConfigDir = config.MustGetString("defaultMiddlewareConfig")
 	}
 
-	searchPaths := make([]string, 0)
->>>>>>> Default middlewares initial merge
+	searchPaths := make(map[string][]string, 0)
 	config.MustGetStruct("moduleSearchPaths", &searchPaths)
+
+	defaultDependencies := make(map[string][]string, 0)
+	config.MustGetStruct("defaultDependencies", &defaultDependencies)
+
 	options := &codegen.PackageHelperOptions{
 		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
 		RelTargetGenDir:               config.MustGetString("targetGenDir"),
@@ -120,6 +120,7 @@ func main() {
 		DeputyReqHeader:               deputyReqHeader,
 		TraceKey:                      config.MustGetString("traceKey"),
 		ModuleSearchPaths:             searchPaths,
+		DefaultDependencies:           defaultDependencies,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(
