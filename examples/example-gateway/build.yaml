@@ -16,7 +16,7 @@ moduleSearchPaths:
     - app/*/clients/*
   middleware:
     - middlewares/*
-    #- middlewares/default/*
+    - middlewares/default/*
   endpoint:
     - endpoints/*
     - endpoints/tchannel/*
@@ -24,3 +24,6 @@ moduleSearchPaths:
   service:
     - services/*
     - app/*/services/*
+defaultDependencies:
+  endpoint:
+    - middlewares/default/*

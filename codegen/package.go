@@ -61,6 +61,8 @@ type PackageHelper struct {
 	traceKey string
 	// moduleSearchPaths is a dictionary of glob patterns for folders that contain *-config.yaml files
 	moduleSearchPaths map[string][]string
+	// defaultDependencies is a dictionary of glob patterns for default dependencies
+	defaultDependencies map[string][]string
 }
 
 //NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
@@ -96,6 +98,8 @@ type PackageHelperOptions struct {
 	TraceKey string
 	// ModuleSearchPaths is a dictionary of glob patterns for folders that contain *-config.yaml files
 	ModuleSearchPaths map[string][]string
+	// DefaultDependencies is a dictionary of glob patterns for folders that contain default dependencies
+	DefaultDependencies map[string][]string
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
@@ -210,6 +214,7 @@ func NewPackageHelper(
 		deputyReqHeader:        options.deputyReqHeader(),
 		traceKey:               options.traceKey(),
 		moduleSearchPaths:      options.ModuleSearchPaths,
+		defaultDependencies:    options.DefaultDependencies,
 	}
 	return p, nil
 }

@@ -51,21 +51,27 @@ const jsonConfigSuffix = "-config.json"
 const yamlConfigSuffix = "-config.yaml"
 
 // NewModuleSystem returns a new module system
-func NewModuleSystem(moduleSearchPaths map[string][]string, postGenHook ...PostGenHook) *ModuleSystem {
+func NewModuleSystem(
+	moduleSearchPaths map[string][]string,
+	defaultDependencies map[string][]string,
+	postGenHook ...PostGenHook,
+) *ModuleSystem {
 	return &ModuleSystem{
-		classes:           map[string]*ModuleClass{},
-		classOrder:        []string{},
-		postGenHook:       postGenHook,
-		moduleSearchPaths: moduleSearchPaths,
+		classes:            map[string]*ModuleClass{},
+		classOrder:         []string{},
+		postGenHook:        postGenHook,
+		moduleSearchPaths:   moduleSearchPaths,
+		defaultDependencies: defaultDependencies,
 	}
 }
 
 // ModuleSystem defines the module classes and their type generators
 type ModuleSystem struct {
-	classes           map[string]*ModuleClass
-	classOrder        []string
-	postGenHook       []PostGenHook
-	moduleSearchPaths map[string][]string
+	classes             map[string]*ModuleClass
+	classOrder          []string
+	postGenHook         []PostGenHook
+	moduleSearchPaths   map[string][]string
+	defaultDependencies map[string][]string
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -555,13 +561,13 @@ func (system *ModuleSystem) ResolveModules(
 		return nil, err
 	}
 
-	defaultDependencies := map[string][]ModuleDependency{}
+	/*defaultDependencies := map[string][]ModuleDependency{}
 	for _, className := range system.classOrder {
 		for _, defaultDepDirGlob := range system.classes[className].DefaultDepDirs {
 			filepath.Glob(filepath.Join(baseDirectory, defaultDepDirGlob))
 		}
 	}
-
+	*/
 	resolvedModules := map[string][]*ModuleInstance{}
 
 	// system.classOrder is important. Downstream dependencies **must** be resolved first
