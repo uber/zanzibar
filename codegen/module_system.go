@@ -1306,7 +1306,10 @@ func (g *MiddlewareGenerator) generateMiddlewareFile(instance *ModuleInstance, o
 		return err
 	}
 
-	out[instance.InstanceName+".go"] = bytes
+	baseName := filepath.Base(instance.Directory)
+
+	out[baseName+".go"] = bytes
+
 	return nil
 }
 
