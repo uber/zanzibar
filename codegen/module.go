@@ -592,6 +592,7 @@ func (system *ModuleSystem) ResolveModules(
 				}
 
 				instance, instanceErr := system.readInstance(
+					className,
 					packageRoot,
 					baseDirectory,
 					targetGenDir,
@@ -653,6 +654,7 @@ func (i inferError) Error() string {
 }
 
 func (system *ModuleSystem) readInstance(
+	className string,
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
@@ -660,7 +662,6 @@ func (system *ModuleSystem) readInstance(
 ) (*ModuleInstance, error) {
 	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
 
-	// Try to infer the class name based on what *-config.yaml files exist.
 	instanceFiles, err := ioutil.ReadDir(classConfigDir)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -671,18 +672,16 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	var (
-		className, jsonFileName, yamlFileName, classConfigPath string
+		jsonFileName, yamlFileName, classConfigPath string
 	)
 	for _, instanceFile := range instanceFiles {
 		if strings.HasSuffix(instanceFile.Name(), yamlConfigSuffix) {
-			className = strings.TrimSuffix(instanceFile.Name(), yamlConfigSuffix)
 			yamlFileName = instanceFile.Name()
 			classConfigPath = filepath.Join(classConfigDir, yamlFileName)
 			break
 		}
 
 		if strings.HasSuffix(instanceFile.Name(), jsonConfigSuffix) {
-			className = strings.TrimSuffix(instanceFile.Name(), jsonConfigSuffix)
 			jsonFileName = instanceFile.Name()
 			classConfigPath = filepath.Join(classConfigDir, jsonFileName)
 			break
