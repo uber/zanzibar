@@ -29,7 +29,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/opentracing/opentracing-go"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
@@ -37,6 +37,9 @@ import (
 
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/workflow"
 	endpointsGooglenowGooglenow "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/googlenow/googlenow"
+
+	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
 
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/googlenow/module"
 )
@@ -55,7 +58,14 @@ func NewGoogleNowAddCredentialsHandler(deps *module.Dependencies) *GoogleNowAddC
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"googlenow", "addCredentials",
-		handler.HandleRequest,
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
+				defaultExample2.Options{},
+			),
+			deps.Middleware.DefaultExample.NewMiddlewareHandle(
+				defaultExample.Options{},
+			),
+		}, handler.HandleRequest).Handle,
 	)
 
 	return handler

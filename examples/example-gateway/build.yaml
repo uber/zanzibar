@@ -5,6 +5,7 @@ endpointConfig: ./endpoints
 genCodePackage: github.com/uber/zanzibar/examples/example-gateway/build/gen-code
 genMock: true
 middlewareConfig: ./middlewares
+defaultMiddlewareConfig: ./middlewares/default
 packageRoot: github.com/uber/zanzibar/examples/example-gateway
 targetGenDir: ./build
 thriftRootDir: ./idl
@@ -15,6 +16,7 @@ moduleSearchPaths:
     - app/*/clients/*
   middleware:
     - middlewares/*
+    #- middlewares/default/*
   endpoint:
     - endpoints/*
     - endpoints/tchannel/*

@@ -1,0 +1,6 @@
+# Middlewares in the ./middlewares/default folder will be executed in the order listed here
+http:
+  - default_example2
+  - default_example
+tchannel:
+  - default_example_tchannel

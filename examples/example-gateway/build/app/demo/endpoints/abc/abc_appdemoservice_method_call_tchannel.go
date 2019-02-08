@@ -35,6 +35,8 @@ import (
 	customAbc "github.com/uber/zanzibar/examples/example-gateway/app/demo/endpoints/abc"
 	endpointsAppDemoEndpointsAbc "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/app/demo/endpoints/abc"
 
+	defaultExampleTchannel "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example_tchannel"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
 )
 
@@ -45,7 +47,11 @@ func NewAppDemoServiceCallHandler(deps *module.Dependencies) *AppDemoServiceCall
 	}
 	handler.endpoint = zanzibar.NewTChannelEndpoint(
 		"appDemoAbc", "call", "AppDemoService::Call",
-		handler,
+		zanzibar.NewTchannelStack([]zanzibar.MiddlewareTchannelHandle{
+			deps.Middleware.DefaultExampleTchannel.NewMiddlewareHandle(
+				defaultExampleTchannel.Options{},
+			),
+		}, handler),
 	)
 
 	return handler

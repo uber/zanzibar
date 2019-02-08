@@ -555,6 +555,13 @@ func (system *ModuleSystem) ResolveModules(
 		return nil, err
 	}
 
+	defaultDependencies := map[string][]ModuleDependency{}
+	for _, className := range system.classOrder {
+		for _, defaultDepDirGlob := range system.classes[className].DefaultDepDirs {
+			filepath.Glob(filepath.Join(baseDirectory, defaultDepDirGlob))
+		}
+	}
+
 	resolvedModules := map[string][]*ModuleInstance{}
 
 	// system.classOrder is important. Downstream dependencies **must** be resolved first
@@ -1194,9 +1201,10 @@ type ModuleClass struct {
 	NamePlural string
 	ClassType  moduleClassType
 
-	DependsOn  []string
-	DependedBy []string
-	types      map[string]BuildGenerator
+	DependsOn      []string
+	DependedBy     []string
+	types          map[string]BuildGenerator
+	DefaultDepDirs []string
 
 	// private field which is populated before module resolving
 	dependentClasses []*ModuleClass
