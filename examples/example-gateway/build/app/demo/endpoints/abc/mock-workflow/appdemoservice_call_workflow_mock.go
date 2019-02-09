@@ -35,6 +35,12 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/app/demo/endpoints/abc/workflow"
 	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 )
 
 // NewAppDemoServiceCallWorkflowMock creates a workflow with mock clients
@@ -55,11 +61,34 @@ func NewAppDemoServiceCallWorkflowMock(t *testing.T) (workflow.AppDemoServiceCal
 	}
 	initializedClientDependencies.Baz = mockClientNodes.Baz
 
+	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
+
+	initializedMiddlewareDependencies.DefaultExample = defaultexamplemiddlewaregenerated.NewMiddleware(&defaultexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExample2 = defaultexample2middlewaregenerated.NewMiddleware(&defaultexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := appdemoabcendpointstatic.NewAppDemoServiceCallWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
 			Client: &module.ClientDependencies{
 				Baz: initializedClientDependencies.Baz,
+			},
+			Middleware: &module.MiddlewareDependencies{
+				DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+				DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+				DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 			},
 		},
 	)

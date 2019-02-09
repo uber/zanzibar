@@ -25,17 +25,28 @@ package module
 
 import (
 	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the baz endpoint module
 type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
-	Client  *ClientDependencies
+	Default    *zanzibar.DefaultDependencies
+	Client     *ClientDependencies
+	Middleware *MiddlewareDependencies
 }
 
 // ClientDependencies contains client dependencies
 type ClientDependencies struct {
 	Baz bazclientgenerated.Client
+}
+
+// MiddlewareDependencies contains middleware dependencies
+type MiddlewareDependencies struct {
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

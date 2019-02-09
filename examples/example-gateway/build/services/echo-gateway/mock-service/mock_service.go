@@ -55,7 +55,7 @@ type MockService interface {
 		headers map[string]string,
 		req, resp zanzibar.RWTStruct,
 	) (bool, map[string]string, error)
-	Mocks() *MockNodes
+	MockClients() *MockClientNodes
 	Server() *zanzibar.Gateway
 	Start()
 	Stop()
@@ -65,7 +65,7 @@ type mockService struct {
 	started        bool
 	server         *zanzibar.Gateway
 	ctrl           *gomock.Controller
-	mocks          *MockNodes
+	mockClients    *MockClientNodes
 	httpClient     *http.Client
 	tChannelClient zanzibar.TChannelCaller
 }
@@ -115,7 +115,7 @@ func MustCreateTestService(t *testing.T) MockService {
 	return &mockService{
 		server:         server,
 		ctrl:           ctrl,
-		mocks:          mockNodes,
+		mockClients:    mockNodes,
 		httpClient:     httpClient,
 		tChannelClient: tchannelClient,
 	}
@@ -145,9 +145,9 @@ func (m *mockService) Stop() {
 	m.ctrl.Finish()
 }
 
-// Mocks returns the mock s
-func (m *mockService) Mocks() *MockNodes {
-	return m.mocks
+// MockClients returns the mock clients
+func (m *mockService) MockClients() *MockClientNodes {
+	return m.mockClients
 }
 
 // MakeHTTPRequest makes a HTTP request to the mock server

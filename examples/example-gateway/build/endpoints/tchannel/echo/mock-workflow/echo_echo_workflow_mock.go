@@ -26,18 +26,26 @@ package mocktchannelechoworkflow
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/uber-go/tally"
 	zanzibar "github.com/uber/zanzibar/runtime"
 	"go.uber.org/zap"
 
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/workflow"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 	echoendpointstatic "github.com/uber/zanzibar/examples/example-gateway/endpoints/tchannel/echo"
 )
 
 // NewEchoEchoWorkflowMock creates a workflow with mock clients
-func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockNodes) {
-	mockNodes := &MockNodes{}
+func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockClientNodes) {
+	ctrl := gomock.NewController(t)
 
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		Logger: zap.NewNop(),
@@ -47,11 +55,40 @@ func NewEchoEchoWorkflowMock(t *testing.T) (workflow.EchoEchoWorkflow, *MockNode
 	contextExtractors := &zanzibar.ContextExtractors{}
 	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
 
+	initializedClientDependencies := &clientDependenciesNodes{}
+	mockClientNodes := &MockClientNodes{
+		Baz: bazclientgeneratedmock.NewMockClient(ctrl),
+	}
+	initializedClientDependencies.Baz = mockClientNodes.Baz
+
+	initializedMiddlewareDependencies := &middlewareDependenciesNodes{}
+
+	initializedMiddlewareDependencies.DefaultExample = defaultexamplemiddlewaregenerated.NewMiddleware(&defaultexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExample2 = defaultexample2middlewaregenerated.NewMiddleware(&defaultexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	w := echoendpointstatic.NewEchoEchoWorkflow(
 		&module.Dependencies{
 			Default: initializedDefaultDependencies,
+			Middleware: &module.MiddlewareDependencies{
+				DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+				DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+				DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+			},
 		},
 	)
 
-	return w, mockNodes
+	return w, mockClientNodes
 }
