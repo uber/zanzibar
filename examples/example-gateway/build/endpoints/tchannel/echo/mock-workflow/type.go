@@ -23,6 +23,27 @@
 
 package mocktchannelechoworkflow
 
-// MockNodes contains mock  dependencies for the tchannel/echo endpoint module
-type MockNodes struct {
+import (
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz"
+	bazclientgeneratedmock "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+)
+
+// MockClientNodes contains mock client dependencies for the tchannel/echo endpoint module
+type MockClientNodes struct {
+	Baz *bazclientgeneratedmock.MockClient
+}
+
+// clientDependenciesNodes contains client dependencies
+type clientDependenciesNodes struct {
+	Baz bazclientgenerated.Client
+}
+
+// middlewareDependenciesNodes contains middleware dependencies
+type middlewareDependenciesNodes struct {
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

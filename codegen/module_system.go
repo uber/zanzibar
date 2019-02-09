@@ -338,11 +338,10 @@ func NewDefaultModuleSystem(
 
 	// Register endpoint module class and type generators
 	if err := system.RegisterClass(ModuleClass{
-		Name:           "endpoint",
-		NamePlural:     "endpoints",
-		ClassType:      MultiModule,
-		DependsOn:      []string{"client", "middleware"},
-		DefaultDepDirs: []string{"middlewares/default/*"},
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client", "middleware"},
 	}); err != nil {
 		return nil, errors.Wrapf(err, "Error registering endpoint class")
 	}

@@ -25,6 +25,9 @@ package module
 
 import (
 	barclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/bar"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 	examplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/example"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
@@ -44,5 +47,8 @@ type ClientDependencies struct {
 
 // MiddlewareDependencies contains middleware dependencies
 type MiddlewareDependencies struct {
-	Example examplemiddlewaregenerated.Middleware
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
+	Example                examplemiddlewaregenerated.Middleware
 }

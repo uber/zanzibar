@@ -114,10 +114,6 @@ This table exhausts the possible immediate or direct dependency relationships am
 
 The `ModuleClass` struct has `DependsOn` and `DependedBy` public fields, which makes it simple to extend the dependency rules with custom module class, e.g., we can define a custom module class `task` that abstracts common business workflow by setting its `DependsOn` field to client and `DependedBy` field to endpoint.
 
-The `ModuleClass` struct also has a `DefaultDepDirs` public field, which allows a module class to include instances of other modules classes as a default dependency. This means that no explicit configurations are required for certain module instances to be included as a dependency. e.g., we can include `clients/logger` as a default dependency for `endpoint`, and every endpoint will have `clients/logger` as a dependency in its `module/dependencies.go` file, even if the endpoint's `endpoint-config.yaml` file does not list `clients/logger` as a dependency.
-
-Note that `DefaultDepDirs` takes a list of directories from which the dependencies should be discovered. For example, if all clients are rooted at `./clients` and `endpoint` has `clients` as a default dependency, then every single client will be included as a dependency for every endpoint.
-
 ### Config
 Configurations are the interface that developers interact with when using the Zanzibar framework, they make up most of Zazibar's API. Various configurarions contain essential meta information of a Zanzibar application and its components. They are source of truth of the application.
 

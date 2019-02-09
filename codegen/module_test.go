@@ -90,6 +90,7 @@ func TestExampleService(t *testing.T) {
 			"middleware": {"middlewares/*"},
 			"service":    {"services/*"},
 		},
+		map[string][]string{},
 	)
 	var err error
 
@@ -427,7 +428,7 @@ func TestExampleService(t *testing.T) {
 }
 
 func TestExampleServiceIncremental(t *testing.T) {
-	moduleSystem := NewModuleSystem(map[string][]string{})
+	moduleSystem := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
@@ -768,10 +769,13 @@ func TestExampleServiceIncremental(t *testing.T) {
 }
 
 func TestExampleServiceCycles(t *testing.T) {
-	moduleSystem := NewModuleSystem(map[string][]string{
-		"client":   {"clients/*"},
-		"endpoint": {"endpoints/*"},
-	})
+	moduleSystem := NewModuleSystem(
+		map[string][]string{
+			"client":   {"clients/*"},
+			"endpoint": {"endpoints/*"},
+		},
+		map[string][]string{},
+	)
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
@@ -881,7 +885,7 @@ func TestSortDependencies(t *testing.T) {
 }
 
 func TestSortModuleClasses(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -914,7 +918,7 @@ func TestSortModuleClasses(t *testing.T) {
 }
 
 func TestSortModuleClassesNoDeps(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -942,7 +946,7 @@ func TestSortModuleClassesNoDeps(t *testing.T) {
 }
 
 func TestSortModuleClassesUndefined(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -961,7 +965,7 @@ func TestSortModuleClassesUndefined(t *testing.T) {
 }
 
 func TestSortModuleClassesUndefined2(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -980,7 +984,7 @@ func TestSortModuleClassesUndefined2(t *testing.T) {
 }
 
 func TestSortableModuleClassCycle(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -1000,7 +1004,7 @@ func TestSortableModuleClassCycle(t *testing.T) {
 }
 
 func TestSortableModuleClassCycle2(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -1020,7 +1024,7 @@ func TestSortableModuleClassCycle2(t *testing.T) {
 }
 
 func TestSortModuleClassesIndirectCycle(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -1045,7 +1049,7 @@ func TestSortModuleClassesIndirectCycle(t *testing.T) {
 }
 
 func TestSortModuleClassesIndirectCycle2(t *testing.T) {
-	ms := NewModuleSystem(map[string][]string{})
+	ms := NewModuleSystem(map[string][]string{}, map[string][]string{})
 	err := ms.RegisterClass(ModuleClass{
 		Name:       "a",
 		NamePlural: "as",
@@ -1480,9 +1484,10 @@ func TestModulePathStripping(t *testing.T) {
 }
 
 func TestModuleSearchDuplicateGlobs(t *testing.T) {
-	moduleSystem := NewModuleSystem(map[string][]string{
-		"client": {"clients/*", "clients/*"},
-	})
+	moduleSystem := NewModuleSystem(
+		map[string][]string{"client": {"clients/*", "clients/*"}},
+		map[string][]string{},
+	)
 	var err error
 
 	err = moduleSystem.RegisterClass(ModuleClass{
