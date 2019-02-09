@@ -768,6 +768,326 @@ func TestExampleServiceIncremental(t *testing.T) {
 	}
 }
 
+func TestDefaultDependency(t *testing.T) {
+	moduleSystem := NewModuleSystem(
+		map[string][]string{
+			"client":     {"clients/*"},
+			"endpoint":   {"endpoints/*"},
+			"middleware": {"middlewares/*"},
+			"service":    {"services/*"},
+		},
+		map[string][]string{
+			"endpoint": {
+				"clients/*",
+			},
+		},
+	)
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	defer func() {
+		err := os.Remove(path.Join(testServiceDir, "build", serializedModuleTreePath))
+		if err != nil {
+			panic(errors.Wrap(err, "error removing serialized module tree"))
+		}
+	}()
+
+	instances, err := moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		true,
+	)
+	if err != nil {
+		t.Errorf("Unexpected generation failure")
+	}
+
+	for className, classInstances := range instances {
+		if className == "client" {
+			expectedLen := 2
+			if len(classInstances) != expectedLen {
+				t.Errorf(
+					"Expected %d client class instance but found %d",
+					expectedLen,
+					len(classInstances),
+				)
+			}
+		} else if className == "endpoint" {
+			expectedLen := 1
+			if len(classInstances) != expectedLen {
+				t.Errorf(
+					"Expected %d endpoint class instance but found %d",
+					expectedLen,
+					len(classInstances),
+				)
+			}
+
+			for _, instance := range classInstances {
+				expectedLen = 3
+				if len(instance.Dependencies) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.Dependencies),
+					)
+				}
+				expectedLen = 2
+				if len(instance.ResolvedDependencies["client"]) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d resolved dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.ResolvedDependencies["client"]),
+					)
+				}
+				expectedLen = 2
+				if len(instance.RecursiveDependencies["client"]) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d recursive dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.RecursiveDependencies["client"]),
+					)
+				}
+			}
+		} else {
+			t.Errorf("Unexpected resolved class type %s", className)
+		}
+	}
+}
+
+func TestSingleDefaultDependency(t *testing.T) {
+	moduleSystem := NewModuleSystem(
+		map[string][]string{
+			"client":     {"clients/*"},
+			"endpoint":   {"endpoints/*"},
+			"middleware": {"middlewares/*"},
+			"service":    {"services/*"},
+		},
+		map[string][]string{
+			"endpoint": {
+				"clients/example",
+			},
+		},
+	)
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+		DependsOn:  []string{"client"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	defer func() {
+		err := os.Remove(path.Join(testServiceDir, "build", serializedModuleTreePath))
+		if err != nil {
+			panic(errors.Wrap(err, "error removing serialized module tree"))
+		}
+	}()
+
+	instances, err := moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		true,
+	)
+	if err != nil {
+		t.Errorf("Unexpected generation failure")
+	}
+
+	for className, classInstances := range instances {
+		if className == "client" {
+			expectedLen := 2
+			if len(classInstances) != expectedLen {
+				t.Errorf(
+					"Expected %d client class instance but found %d",
+					expectedLen,
+					len(classInstances),
+				)
+			}
+		} else if className == "endpoint" {
+			expectedLen := 1
+			if len(classInstances) != expectedLen {
+				t.Errorf(
+					"Expected %d endpoint class instance but found %d",
+					expectedLen,
+					len(classInstances),
+				)
+			}
+
+			for _, instance := range classInstances {
+				expectedLen = 2
+				if len(instance.Dependencies) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.Dependencies),
+					)
+				}
+				expectedLen = 1
+				if len(instance.ResolvedDependencies["client"]) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d resolved dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.ResolvedDependencies["client"]),
+					)
+				}
+				expectedLen = 2
+				if len(instance.RecursiveDependencies["client"]) != expectedLen {
+					t.Errorf(
+						"Expected %s to have %d recursive dependencies but found %d",
+						instance.ClassName,
+						expectedLen,
+						len(instance.RecursiveDependencies["client"]),
+					)
+				}
+			}
+		} else {
+			t.Errorf("Unexpected resolved class type %s", className)
+		}
+	}
+}
+
+func TestNoClassDefaultDependency(t *testing.T) {
+	moduleSystem := NewModuleSystem(
+		map[string][]string{
+			"client":   {"clients/*"},
+			"endpoint": {"endpoints/*"},
+		},
+		map[string][]string{
+			"endpoint": {
+				"clients/example",
+			},
+		},
+	)
+	var err error
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "client",
+		NamePlural: "clients",
+		ClassType:  MultiModule,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering client class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"client",
+		"http",
+		&TestHTTPClientGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	err = moduleSystem.RegisterClass(ModuleClass{
+		Name:       "endpoint",
+		NamePlural: "endpoints",
+		ClassType:  MultiModule,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error registering endpoint class: %s", err)
+	}
+
+	err = moduleSystem.RegisterClassType(
+		"endpoint",
+		"http",
+		&TestHTTPEndpointGenerator{},
+	)
+	if err != nil {
+		t.Errorf("Unexpected error registering http client class type: %s", err)
+	}
+
+	currentDir := getTestDirName()
+	testServiceDir := path.Join(currentDir, "test-service")
+
+	_, err = moduleSystem.GenerateBuild(
+		"github.com/uber/zanzibar/codegen/test-service",
+		testServiceDir,
+		path.Join(testServiceDir, "build"),
+		true,
+	)
+	if err == nil {
+		t.Errorf("Expected failure due to default dependency directory which is not a dependency")
+	}
+}
+
 func TestExampleServiceCycles(t *testing.T) {
 	moduleSystem := NewModuleSystem(
 		map[string][]string{
