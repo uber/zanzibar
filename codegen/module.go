@@ -679,7 +679,26 @@ func (system *ModuleSystem) getDefaultDependencies(
 		for _, defaultDepDirAbs := range defaultDepDirsAbs {
 			dependencyClassName, err := getClassNameOfDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths)
 			if err != nil {
-				return nil, err // RYAN todo
+				return nil, errors.Wrapf(
+					err,
+					"cannot get class name of dependency %s",
+					defaultDepDirAbs,
+				)
+			}
+
+			found := false
+			for _, actualClassDependencyName := range system.classes[className].DependsOn {
+				if dependencyClassName == actualClassDependencyName {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil, errors.Errorf(
+					"default dependency class %s is not a dependency of %s",
+					dependencyClassName,
+					className,
+				)
 			}
 
 			classConfigPath, _, _ := getConfigFilePath(defaultDepDirAbs, dependencyClassName)
@@ -692,7 +711,7 @@ func (system *ModuleSystem) getDefaultDependencies(
 			if err != nil {
 				return nil, errors.Wrapf(
 					err,
-					"internal error: cannot make %q relative to %q",
+					"cannot make %q relative to %q for default dependency",
 					defaultDepDirAbs,
 					baseDirectory,
 				)
