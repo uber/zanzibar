@@ -51,7 +51,7 @@ const jsonConfigSuffix = "-config.json"
 const yamlConfigSuffix = "-config.yaml"
 
 // NewModuleSystem returns a new module system
-func NewModuleSystem(moduleSearchPaths []string, postGenHook ...PostGenHook) *ModuleSystem {
+func NewModuleSystem(moduleSearchPaths map[string][]string, postGenHook ...PostGenHook) *ModuleSystem {
 	return &ModuleSystem{
 		classes:           map[string]*ModuleClass{},
 		classOrder:        []string{},
@@ -65,7 +65,7 @@ type ModuleSystem struct {
 	classes           map[string]*ModuleClass
 	classOrder        []string
 	postGenHook       []PostGenHook
-	moduleSearchPaths []string
+	moduleSearchPaths map[string][]string
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -557,93 +557,88 @@ func (system *ModuleSystem) ResolveModules(
 
 	resolvedModules := map[string][]*ModuleInstance{}
 
-	for _, moduleDirectoryGlob := range system.moduleSearchPaths {
-		moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
-		if err != nil {
-			return nil, errors.Wrapf(err, "Error globbing %q", moduleDirectoryGlob)
-		}
-
-		// We don't know until reading the configuration file what the class name will be. For consistency we will
-		// continue to assume that all of the instances that match a glob pattern are the same class name, so
-		// once we've read the first instance we can populate this.
-		className := ""
-
-		for _, moduleDirAbs := range moduleDirectoriesAbs {
-			stat, err := os.Stat(moduleDirAbs)
+	// system.classOrder is important. Downstream dependencies **must** be resolved first
+	for _, className := range system.classOrder {
+		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
+			moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
 			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"internal error: cannot stat %q",
-					moduleDirAbs,
-				)
+				return nil, errors.Wrapf(err, "Error globbing %q", moduleDirectoryGlob)
 			}
 
-			if !stat.IsDir() {
-				// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
-				// interested only in the containing directories.
-				continue
-			}
-
-			moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
-			if err != nil {
-				return nil, errors.Wrapf(
-					err,
-					"internal error: cannot make %q relative to %q",
-					moduleDirAbs,
-					baseDirectory,
-				)
-			}
-
-			instance, instanceErr := system.readInstance(
-				packageRoot,
-				baseDirectory,
-				targetGenDir,
-				moduleDir,
-			)
-			if instanceErr != nil {
-				if _, ok := instanceErr.(inferError); ok {
-					// It could be the case that a glob pattern like "endpoints/*" matches a *folder* that is later
-					// matched by a longer glob pattern like "endpoints/tchannel/*". It will fail at a later step
-					// if no globbing pattern matches the wanted instance.
-					continue
-				} else {
+			for _, moduleDirAbs := range moduleDirectoriesAbs {
+				stat, err := os.Stat(moduleDirAbs)
+				if err != nil {
 					return nil, errors.Wrapf(
-						instanceErr,
-						"Error reading multi instance %q",
+						err,
+						"internal error: cannot stat %q",
+						moduleDirAbs,
+					)
+				}
+
+				if !stat.IsDir() {
+					// If a *-config.yaml file, or any other metadata file also matched the glob, skip it, since we are
+					// interested only in the containing directories.
+					continue
+				}
+
+				moduleDir, err := filepath.Rel(baseDirectory, moduleDirAbs)
+				if err != nil {
+					return nil, errors.Wrapf(
+						err,
+						"internal error: cannot make %q relative to %q",
+						moduleDirAbs,
+						baseDirectory,
+					)
+				}
+
+				instance, instanceErr := system.readInstance(
+					className,
+					packageRoot,
+					baseDirectory,
+					targetGenDir,
+					moduleDir,
+				)
+				if instanceErr != nil {
+					if _, ok := instanceErr.(inferError); ok {
+						// It could be the case that a glob pattern like "endpoints/*" matches a *folder* that is later
+						// matched by a longer glob pattern like "endpoints/tchannel/*". It will fail at a later step
+						// if no globbing pattern matches the wanted instance.
+						continue
+					} else {
+						return nil, errors.Wrapf(
+							instanceErr,
+							"Error reading multi instance %q",
+							moduleDir,
+						)
+					}
+				}
+
+				resolvedModules[instance.ClassName] = append(resolvedModules[instance.ClassName], instance)
+
+				if className != instance.ClassName {
+					return nil, fmt.Errorf(
+						"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
+						moduleDirectoryGlob,
+						className,
 						moduleDir,
 					)
 				}
 			}
 
-			resolvedModules[instance.ClassName] = append(resolvedModules[instance.ClassName], instance)
-
-			// For consistency with prior zanzibar behavior of assuming all instances in a multi-module directory
-			// are of the same class name, we will return an error in this case.
-			if className == "" {
-				className = instance.ClassName
-			} else if className != instance.ClassName {
-				return nil, fmt.Errorf(
-					"invariant: all instances in a multi-module directory %q are of type %q (violated by %q)",
-					moduleDirectoryGlob,
-					className,
-					moduleDir,
-				)
+			// Resolve dependencies for all classes
+			resolveErr := system.populateResolvedDependencies(
+				resolvedModules[className],
+				resolvedModules,
+			)
+			if resolveErr != nil {
+				return nil, resolveErr
 			}
-		}
 
-		// Resolve dependencies for all classes
-		resolveErr := system.populateResolvedDependencies(
-			resolvedModules[className],
-			resolvedModules,
-		)
-		if resolveErr != nil {
-			return nil, resolveErr
-		}
-
-		// Resolved recursive dependencies for all classes
-		recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
-		if recursiveErr != nil {
-			return nil, recursiveErr
+			// Resolved recursive dependencies for all classes
+			recursiveErr := system.populateRecursiveDependencies(resolvedModules[className])
+			if recursiveErr != nil {
+				return nil, recursiveErr
+			}
 		}
 	}
 
@@ -659,6 +654,7 @@ func (i inferError) Error() string {
 }
 
 func (system *ModuleSystem) readInstance(
+	className string,
 	packageRoot string,
 	baseDirectory string,
 	targetGenDir string,
@@ -666,7 +662,6 @@ func (system *ModuleSystem) readInstance(
 ) (*ModuleInstance, error) {
 	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
 
-	// Try to infer the class name based on what *-config.yaml files exist.
 	instanceFiles, err := ioutil.ReadDir(classConfigDir)
 	if err != nil {
 		return nil, errors.Wrapf(
@@ -677,18 +672,16 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	var (
-		className, jsonFileName, yamlFileName, classConfigPath string
+		jsonFileName, yamlFileName, classConfigPath string
 	)
 	for _, instanceFile := range instanceFiles {
 		if strings.HasSuffix(instanceFile.Name(), yamlConfigSuffix) {
-			className = strings.TrimSuffix(instanceFile.Name(), yamlConfigSuffix)
 			yamlFileName = instanceFile.Name()
 			classConfigPath = filepath.Join(classConfigDir, yamlFileName)
 			break
 		}
 
 		if strings.HasSuffix(instanceFile.Name(), jsonConfigSuffix) {
-			className = strings.TrimSuffix(instanceFile.Name(), jsonConfigSuffix)
 			jsonFileName = instanceFile.Name()
 			classConfigPath = filepath.Join(classConfigDir, jsonFileName)
 			break

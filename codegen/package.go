@@ -57,8 +57,8 @@ type PackageHelper struct {
 	deputyReqHeader string
 	// traceKey is the key for unique trace id that identifies request / response pair
 	traceKey string
-	// moduleSearchPaths is a list of glob patterns for folders that contain *-config.yaml files
-	moduleSearchPaths []string
+	// moduleSearchPaths is a dictionary of glob patterns for folders that contain *-config.yaml files
+	moduleSearchPaths map[string][]string
 }
 
 //NewDefaultPackageHelperOptions returns a new default PackageHelperOptions, all optional fields are set as default.
@@ -90,8 +90,8 @@ type PackageHelperOptions struct {
 	DeputyReqHeader string
 	// header key to uniquely identifies request/response pair, defaults to "x-trace-id"
 	TraceKey string
-	// ModuleSearchPaths is a list of glob patterns for folders that contain *-config.yaml files
-	ModuleSearchPaths []string
+	// ModuleSearchPaths is a dictionary of glob patterns for folders that contain *-config.yaml files
+	ModuleSearchPaths map[string][]string
 }
 
 func (p *PackageHelperOptions) relTargetGenDir() string {
