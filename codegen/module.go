@@ -1533,6 +1533,12 @@ func NewClassConfig(raw []byte) (*ClassConfig, error) {
 		)
 	}
 
+	if config.Name == "" {
+		return nil, errors.Errorf(
+			"Error reading instance name",
+		)
+	}
+
 	if config.Type == "" {
 		return nil, errors.Errorf(
 			"Error reading instance type",

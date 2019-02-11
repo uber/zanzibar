@@ -297,7 +297,8 @@ In this config file, you can specify the paths from which to discover modules. Y
 
 `Default Dependencies` allow module classes to include instances of other module classes as default dependencies. This means that no explicit configurations are required for certain module instances to be included as a dependency. e.g., we can include `clients/logger` as a default dependency for `endpoint`, and every endpoint will have `clients/logger` as a dependency in its `module/dependencies.go` file, even if the endpoint's `endpoint-config.yaml` file does not list `clients/logger` as a dependency.
 
-Note that these paths support `Glob`.
+Note that these paths support `Glob` patterns.
+
 ### Code Generation
 Zanzibar provides HTTP and TChannel runtime components for both clients and servers. Once all the configs are properly defined, Zanzibar is able to parse the config files and generate code and wire it up with the runime components to produce a full application. All generated code is placed in the `build` directory.
 

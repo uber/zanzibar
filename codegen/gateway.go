@@ -442,8 +442,12 @@ func getOrderedDefaultMiddlewareSpecs(
 
 	middlewareOrderingFile := filepath.Join(cfgDir, "middlewares/default.yaml")
 	if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
-		// This file is not required so it is okay to skip
-		return nil, nil
+		// Cannot find yaml file, use json file instead
+		middlewareOrderingFile = filepath.Join(cfgDir, "middlewares/default.json")
+		if _, err := os.Stat(middlewareOrderingFile); os.IsNotExist(err) {
+			// This file is not required so it is okay to skip
+			return nil, nil
+		}
 	}
 
 	bytes, err := ioutil.ReadFile(middlewareOrderingFile)
