@@ -661,9 +661,9 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
 }
 
-// GetHTTPRequestHeaders returns the underlying http request's headers
-func (req *ServerHTTPRequest) GetHTTPRequestHeaders() http.Header {
-	return req.httpRequest.Header
+// GetHTTPRequest returns the underlying http request
+func (req *ServerHTTPRequest) GetHTTPRequest() *http.Request {
+	return req.httpRequest
 }
 
 // GetStartTime returns the start time of the request
