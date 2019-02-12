@@ -661,6 +661,16 @@ func (req *ServerHTTPRequest) GetSpan() opentracing.Span {
 	return req.span
 }
 
+// GetHTTPRequest returns the underlying http Request
+func (req *ServerHTTPRequest) GetHTTPRequest() *http.Request {
+	return req.httpRequest
+}
+
+// GetStartTime returns the start time of the request
+func (req *ServerHTTPRequest) GetStartTime() time.Time {
+	return req.startTime
+}
+
 func (req *ServerHTTPRequest) logAndSendQueryError(err error, expected, key, value string) {
 	req.logger.Warn("Got request with invalid query string types",
 		zap.String("expected", expected),
