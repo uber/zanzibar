@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -240,7 +241,7 @@ func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
 				}
 				files.Store(filepath.Join(genDir, "mock_init.go"), mockInit)
 
-				mockService, err := t.ExecTemplate("service_mock.tmpl", instance, h)
+				mockService, err := generateServiceMock(instance, h, t)
 				if err != nil {
 					ec <- errors.Wrapf(
 						err,
@@ -301,6 +302,21 @@ func generateMockInitializer(instance *ModuleInstance, h *PackageHelper, t *Temp
 		"LeafWithFixture": leafWithFixture,
 	}
 	return t.ExecTemplate("module_mock_initializer.tmpl", data, h)
+}
+
+// generateServiceMock generates mock service
+func generateServiceMock(instance *ModuleInstance, h *PackageHelper, t *Template) ([]byte, error) {
+	configPath := path.Join(strings.Replace(instance.Directory, "services", "config", 1), "test.yaml")
+	if _, err := os.Stat(filepath.Join(h.ConfigRoot(), configPath)); err != nil {
+		if os.IsNotExist(err) {
+			configPath = "config/test.yaml"
+		}
+	}
+	data := map[string]interface{}{
+		"Instance":       instance,
+		"TestConfigPath": filepath.Join(h.packageRoot, configPath),
+	}
+	return t.ExecTemplate("service_mock.tmpl", data, h)
 }
 
 // FindClientsWithFixture finds the given module's dependent clients that have fixture config
