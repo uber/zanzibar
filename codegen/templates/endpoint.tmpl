@@ -68,7 +68,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"{{$endpointId}}", "{{$handleId}}",
+		"{{$endpointId}}", "{{$handleId}}", "{{.HTTPPath}}",
 		{{ if len $middlewares | ne 0 -}}
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}

@@ -58,7 +58,7 @@ func NewSimpleServiceGetProfileHandler(deps *module.Dependencies) *SimpleService
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"baz", "getProfile",
+		"baz", "getProfile", "/baz/get-profile",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

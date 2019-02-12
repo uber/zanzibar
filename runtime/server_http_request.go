@@ -53,6 +53,7 @@ type ServerHTTPRequest struct {
 
 	EndpointName string
 	HandlerName  string
+	RawPattern   string
 	URL          *url.URL
 	Method       string
 	Params       url.Values
@@ -116,6 +117,7 @@ func NewServerHTTPRequest(
 		tracer:       endpoint.tracer,
 		EndpointName: endpoint.EndpointName,
 		HandlerName:  endpoint.HandlerName,
+		RawPattern:   endpoint.RawPattern,
 		URL:          httpRequest.URL,
 		Method:       httpRequest.Method,
 		Params:       params,

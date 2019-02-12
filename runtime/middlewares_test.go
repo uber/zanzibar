@@ -80,7 +80,7 @@ func TestHandlers(t *testing.T) {
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			middlewareStack.Handle,
 		).HandleRequest),
 	)
@@ -173,7 +173,7 @@ func TestMiddlewareRequestAbort(t *testing.T) {
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			middlewareStack.Handle,
 		).HandleRequest),
 	)
@@ -235,7 +235,7 @@ func TestMiddlewareResponseAbort(t *testing.T) {
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			middlewareStack.Handle,
 		).HandleRequest),
 	)
@@ -301,7 +301,7 @@ func TestMiddlewareSharedStates(t *testing.T) {
 		http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			middlewareStack.Handle,
 		).HandleRequest),
 	)

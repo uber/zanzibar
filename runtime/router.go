@@ -80,6 +80,7 @@ type HandlerFn func(
 type RouterEndpoint struct {
 	EndpointName string
 	HandlerName  string
+	RawPattern   string
 	HandlerFn    HandlerFn
 
 	contextExtractor ContextExtractor
@@ -94,11 +95,13 @@ func NewRouterEndpoint(
 	deps *DefaultDependencies,
 	endpointID string,
 	handlerID string,
+	rawPattern string,
 	handler HandlerFn,
 ) *RouterEndpoint {
 	return &RouterEndpoint{
 		EndpointName:     endpointID,
 		HandlerName:      handlerID,
+		RawPattern:       rawPattern,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
 		logger:           deps.Logger,
@@ -150,11 +153,11 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 	router := &httpRouter{
 		notFoundEndpoint: NewRouterEndpoint(
 			gateway.ContextExtractor, deps,
-			notFound, notFound, nil,
+			notFound, notFound, notFound, nil,
 		),
 		methodNotAllowedEndpoint: NewRouterEndpoint(
 			gateway.ContextExtractor, deps,
-			methodNotAllowed, methodNotAllowed, nil,
+			methodNotAllowed, methodNotAllowed, methodNotAllowed, nil,
 		),
 		gateway:    gateway,
 		panicCount: gateway.RootScope.Counter("runtime.router.panic"),

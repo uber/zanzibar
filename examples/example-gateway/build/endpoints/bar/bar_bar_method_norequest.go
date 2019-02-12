@@ -56,7 +56,7 @@ func NewBarNoRequestHandler(deps *module.Dependencies) *BarNoRequestHandler {
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "noRequest",
+		"bar", "noRequest", "/bar/no-request-path",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

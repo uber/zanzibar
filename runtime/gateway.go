@@ -284,7 +284,7 @@ func (gateway *Gateway) registerPredefined() {
 
 	tracer := NewRouterEndpoint(
 		gateway.ContextExtractor, deps,
-		"health", "health",
+		"health", "health", "/health",
 		gateway.handleHealthRequest,
 	)
 	gateway.HTTPRouter.Handle("GET", "/health", http.HandlerFunc(tracer.HandleRequest))

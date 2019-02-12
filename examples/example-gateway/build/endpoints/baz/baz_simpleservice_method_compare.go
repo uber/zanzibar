@@ -58,7 +58,7 @@ func NewSimpleServiceCompareHandler(deps *module.Dependencies) *SimpleServiceCom
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"baz", "compare",
+		"baz", "compare", "/baz/compare",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

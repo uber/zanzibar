@@ -59,7 +59,7 @@ func NewBarArgWithNestedQueryParamsHandler(deps *module.Dependencies) *BarArgWit
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "argWithNestedQueryParams",
+		"bar", "argWithNestedQueryParams", "/bar/argWithNestedQueryParams",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

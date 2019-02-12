@@ -55,7 +55,7 @@ func NewGoogleNowCheckCredentialsHandler(deps *module.Dependencies) *GoogleNowCh
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"googlenow", "checkCredentials",
+		"googlenow", "checkCredentials", "/googlenow/check-credentials",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

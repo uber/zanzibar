@@ -69,7 +69,7 @@ func TestInvalidReadAndUnmarshalBody(t *testing.T) {
 	endpoint := zanzibar.NewRouterEndpoint(
 		bgateway.ActualGateway.ContextExtractor,
 		deps,
-		"foo", "foo",
+		"foo", "foo", "/health-check",
 		func(
 			ctx context.Context,
 			req *zanzibar.ServerHTTPRequest,
@@ -136,7 +136,7 @@ func TestDoubleParseQueryValues(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -201,7 +201,7 @@ func TestFailingGetQueryBool(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -263,7 +263,7 @@ func TestFailingGetQueryInt8(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -325,7 +325,7 @@ func TestFailingHasQueryValue(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -387,7 +387,7 @@ func TestFailingGetQueryInt16(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -449,7 +449,7 @@ func TestFailingGetQueryInt32(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -511,7 +511,7 @@ func TestFailingGetQueryInt64(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -573,7 +573,7 @@ func TestFailingGetQueryFloat64(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -635,7 +635,7 @@ func TestFailingHasQueryPrefix(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -690,7 +690,7 @@ func TestGetQueryBoolList(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=true&a[]=true&a[]=false",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -728,7 +728,7 @@ func TestFailingGetQueryBoolList(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=truer",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -791,7 +791,7 @@ func TestGetQueryInt8List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -829,7 +829,7 @@ func TestFailingGetQueryInt8List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49er",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -892,7 +892,7 @@ func TestGetQueryInt16List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -930,7 +930,7 @@ func TestFailingGetQueryInt16List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49er",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -993,7 +993,7 @@ func TestGetQueryInt32List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1031,7 +1031,7 @@ func TestFailingGetQueryInt32List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49er",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1094,7 +1094,7 @@ func TestGetQueryInt64List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1132,7 +1132,7 @@ func TestFailingGetQueryInt64List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42&a[]=49er",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1195,7 +1195,7 @@ func TestGetQueryFloat64List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42.42&a[]=49.94",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1233,7 +1233,7 @@ func TestFailingGetQueryFloat64List(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?a[]=42.24&a[]=49.94er",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1296,7 +1296,7 @@ func TestFailingGetQueryValues(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?%gh&%ij",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1347,7 +1347,7 @@ func TestGetQueryValues(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			g.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?foo=bar",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1414,7 +1414,7 @@ func TestPeekBody(t *testing.T) {
 		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?foo=bar",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1471,7 +1471,7 @@ func TestSpanCreated(t *testing.T) {
 		"POST", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?foo=bar",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -1515,7 +1515,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo?bar=bar",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,

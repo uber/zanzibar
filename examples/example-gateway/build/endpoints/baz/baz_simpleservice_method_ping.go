@@ -55,7 +55,7 @@ func NewSimpleServicePingHandler(deps *module.Dependencies) *SimpleServicePingHa
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"baz", "ping",
+		"baz", "ping", "/baz/ping",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

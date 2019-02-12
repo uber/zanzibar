@@ -58,7 +58,7 @@ func TestInvalidStatusCode(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -118,7 +118,7 @@ func TestCallingWriteJSONWithNil(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -183,7 +183,7 @@ func TestCallWriteJSONWithBadJSON(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -258,7 +258,7 @@ func TestResponsePeekBody(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -329,7 +329,7 @@ func TestResponseSetHeaders(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -382,7 +382,7 @@ func TestResponsePeekBodyError(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,
@@ -444,7 +444,7 @@ func TestPendingResponseBody(t *testing.T) {
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
-			"foo", "foo",
+			"foo", "foo", "/foo",
 			func(
 				ctx context.Context,
 				req *zanzibar.ServerHTTPRequest,

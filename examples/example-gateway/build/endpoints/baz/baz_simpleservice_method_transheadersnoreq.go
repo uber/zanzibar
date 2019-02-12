@@ -56,7 +56,7 @@ func NewSimpleServiceTransHeadersNoReqHandler(deps *module.Dependencies) *Simple
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"baz", "transHeadersNoReq",
+		"baz", "transHeadersNoReq", "/baz/trans-headers-no-req",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},

@@ -59,7 +59,7 @@ func NewBarTooManyArgsHandler(deps *module.Dependencies) *BarTooManyArgsHandler 
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "tooManyArgs",
+		"bar", "tooManyArgs", "/bar/too-many-args-path",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
