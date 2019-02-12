@@ -1113,7 +1113,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	fullURL := c.httpClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
-	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})
+	{{- else -}}+"/"+string({{- if not $segment.Required }} * {{- end -}}r{{$segment.BodyIdentifier | title}})
 	{{- end -}}
 	{{- end}}
 
@@ -1278,7 +1278,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 10765, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 10810, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -189,7 +189,7 @@ func (c *{{$clientName}}) {{$methodName}}(
 	fullURL := c.httpClient.BaseURL
 	{{- range $k, $segment := .PathSegments -}}
 	{{- if eq $segment.Type "static" -}}+"/{{$segment.Text}}"
-	{{- else -}}+"/"+string(r{{$segment.BodyIdentifier | title}})
+	{{- else -}}+"/"+string({{- if not $segment.Required }} * {{- end -}}r{{$segment.BodyIdentifier | title}})
 	{{- end -}}
 	{{- end}}
 
