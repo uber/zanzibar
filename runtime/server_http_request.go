@@ -51,13 +51,13 @@ type ServerHTTPRequest struct {
 	parseFailed bool
 	rawBody     []byte
 
-	EndpointName string
-	HandlerName  string
-	RawPattern   string
-	URL          *url.URL
-	Method       string
-	Params       url.Values
-	Header       Header
+	EndpointName  string
+	HandlerName   string
+	RawURLPattern string
+	URL           *url.URL
+	Method        string
+	Params        url.Values
+	Header        Header
 
 	// logger logs entries with default fields that contains request meta info
 	logger Logger
@@ -112,18 +112,18 @@ func NewServerHTTPRequest(
 	scope := endpoint.scope.Tagged(scopeTags)
 
 	req := &ServerHTTPRequest{
-		httpRequest:  httpRequest,
-		queryValues:  nil,
-		tracer:       endpoint.tracer,
-		EndpointName: endpoint.EndpointName,
-		HandlerName:  endpoint.HandlerName,
-		RawPattern:   endpoint.RawPattern,
-		URL:          httpRequest.URL,
-		Method:       httpRequest.Method,
-		Params:       params,
-		Header:       NewServerHTTPHeader(r.Header),
-		logger:       logger,
-		scope:        scope,
+		httpRequest:   httpRequest,
+		queryValues:   nil,
+		tracer:        endpoint.tracer,
+		EndpointName:  endpoint.EndpointName,
+		HandlerName:   endpoint.HandlerName,
+		RawURLPattern: endpoint.RawURLPattern,
+		URL:           httpRequest.URL,
+		Method:        httpRequest.Method,
+		Params:        params,
+		Header:        NewServerHTTPHeader(r.Header),
+		logger:        logger,
+		scope:         scope,
 	}
 
 	req.res = NewServerHTTPResponse(w, req)

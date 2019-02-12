@@ -78,10 +78,10 @@ type HandlerFn func(
 // RouterEndpoint struct represents an endpoint that can be registered
 // into the router itself.
 type RouterEndpoint struct {
-	EndpointName string
-	HandlerName  string
-	RawPattern   string
-	HandlerFn    HandlerFn
+	EndpointName  string
+	HandlerName   string
+	RawURLPattern string
+	HandlerFn     HandlerFn
 
 	contextExtractor ContextExtractor
 	logger           *zap.Logger
@@ -95,13 +95,13 @@ func NewRouterEndpoint(
 	deps *DefaultDependencies,
 	endpointID string,
 	handlerID string,
-	rawPattern string,
+	rawURLPattern string,
 	handler HandlerFn,
 ) *RouterEndpoint {
 	return &RouterEndpoint{
 		EndpointName:     endpointID,
 		HandlerName:      handlerID,
-		RawPattern:       rawPattern,
+		RawURLPattern:    rawURLPattern,
 		HandlerFn:        handler,
 		contextExtractor: extractor,
 		logger:           deps.Logger,
