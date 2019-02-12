@@ -1901,7 +1901,8 @@ func serviceTmpl() (*asset, error) {
 	return a, nil
 }
 
-var _service_mockTmpl = []byte(`{{- $instance := . -}}
+var _service_mockTmpl = []byte(`{{- $instance := .Instance -}}
+{{- $defaultTestConfigPath := .TestConfigPath -}}
 {{- $leafClass := firstIsClientOrEmpty $instance.DependencyOrder -}}
 {{- $mockType := printf "Mock%sNodes" (title $leafClass) -}}
 {{- $mock := printf "Mock%ss" (title $leafClass) -}}
@@ -1913,8 +1914,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 	"time"
 
@@ -1957,11 +1958,18 @@ type mockService struct {
 }
 
 // MustCreateTestService creates a new MockService, panics if it fails doing so.
-func MustCreateTestService(t *testing.T) MockService {
-	_, file, _, _ := runtime.Caller(0)
-	currentDir := zanzibar.GetDirnameFromRuntimeCaller(file)
-	testConfigPath := filepath.Join(currentDir, "../../../../config/test.yaml")
-	c := config.NewRuntimeConfigOrDie([]string{testConfigPath}, nil)
+// Optional testConfigPaths specifies runtime config files used in tests, it
+// should be paths that are relative to "$GOPATH/src".
+// If testConfigPaths is absent, a default test config file is used.
+// The default test config file is chosen base on existence in order below:
+// - "../../config/test.yaml" where current dir is the dir of service-config.yaml for the mocked service
+// - "config/test.yaml" where current dir is the project root
+func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService {
+	if len(testConfigPaths) == 0 {
+		defaultPath := filepath.Join(os.Getenv("GOPATH"), "src", "{{$defaultTestConfigPath}}")
+		testConfigPaths = append(testConfigPaths, defaultPath)
+	}
+	c := config.NewRuntimeConfigOrDie(testConfigPaths, nil)
 
 	server, err := zanzibar.CreateGateway(c, nil)
 	if err != nil {
@@ -2091,7 +2099,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4360, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4885, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
