@@ -92,19 +92,35 @@ func main() {
 		deputyReqHeader = config.MustGetString("deputyReqHeader")
 	}
 
+	relMiddlewareConfigDir := ""
+	if config.ContainsKey("middlewareConfig") {
+		relMiddlewareConfigDir = config.MustGetString("middlewareConfig")
+	}
+
+	relDefaultMiddlewareConfigDir := ""
+	if config.ContainsKey("defaultMiddlewareConfig") {
+		relDefaultMiddlewareConfigDir = config.MustGetString("defaultMiddlewareConfig")
+	}
+
 	searchPaths := make(map[string][]string, 0)
 	config.MustGetStruct("moduleSearchPaths", &searchPaths)
+
+	defaultDependencies := make(map[string][]string, 0)
+	config.MustGetStruct("defaultDependencies", &defaultDependencies)
+
 	options := &codegen.PackageHelperOptions{
-		RelThriftRootDir:       config.MustGetString("thriftRootDir"),
-		RelTargetGenDir:        config.MustGetString("targetGenDir"),
-		RelMiddlewareConfigDir: config.MustGetString("middlewareConfig"),
-		AnnotationPrefix:       config.MustGetString("annotationPrefix"),
-		GenCodePackage:         config.MustGetString("genCodePackage"),
-		CopyrightHeader:        string(copyright),
-		StagingReqHeader:       stagingReqHeader,
-		DeputyReqHeader:        deputyReqHeader,
-		TraceKey:               config.MustGetString("traceKey"),
-		ModuleSearchPaths:      searchPaths,
+		RelThriftRootDir:              config.MustGetString("thriftRootDir"),
+		RelTargetGenDir:               config.MustGetString("targetGenDir"),
+		RelMiddlewareConfigDir:        relMiddlewareConfigDir,
+		RelDefaultMiddlewareConfigDir: relDefaultMiddlewareConfigDir,
+		AnnotationPrefix:              config.MustGetString("annotationPrefix"),
+		GenCodePackage:                config.MustGetString("genCodePackage"),
+		CopyrightHeader:               string(copyright),
+		StagingReqHeader:              stagingReqHeader,
+		DeputyReqHeader:               deputyReqHeader,
+		TraceKey:                      config.MustGetString("traceKey"),
+		ModuleSearchPaths:             searchPaths,
+		DefaultDependencies:           defaultDependencies,
 	}
 
 	packageHelper, err := codegen.NewPackageHelper(

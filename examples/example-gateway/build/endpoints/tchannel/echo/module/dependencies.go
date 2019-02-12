@@ -24,10 +24,22 @@
 package module
 
 import (
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
 // Dependencies contains dependencies for the tchannel/echo endpoint module
 type Dependencies struct {
-	Default *zanzibar.DefaultDependencies
+	Default    *zanzibar.DefaultDependencies
+	Middleware *MiddlewareDependencies
+}
+
+// MiddlewareDependencies contains middleware dependencies
+type MiddlewareDependencies struct {
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

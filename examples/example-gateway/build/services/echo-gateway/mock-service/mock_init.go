@@ -28,12 +28,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/services/echo-gateway/module"
 	zanzibar "github.com/uber/zanzibar/runtime"
 
+	bazclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/baz/mock-client"
 	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
 	echoendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo/module"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexample2middlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2/module"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
+	defaultexampletchannelmiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel/module"
 )
 
-// MockNodes contains mock  dependencies
-type MockNodes struct {
+// MockClientNodes contains mock client dependencies
+type MockClientNodes struct {
+	Baz *bazclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -41,10 +49,9 @@ type MockNodes struct {
 func InitializeDependenciesMock(
 	g *zanzibar.Gateway,
 	ctrl *gomock.Controller,
-) (*module.DependenciesTree, *module.Dependencies, *MockNodes) {
+) (*module.DependenciesTree, *module.Dependencies, *MockClientNodes) {
 	tree := &module.DependenciesTree{}
 
-	mockNodes := &MockNodes{}
 	initializedDefaultDependencies := &zanzibar.DefaultDependencies{
 		ContextExtractor: g.ContextExtractor,
 		ContextMetrics:   g.ContextMetrics,
@@ -56,10 +63,40 @@ func InitializeDependenciesMock(
 		Tracer:           g.Tracer,
 	}
 
+	mockClientNodes := &MockClientNodes{
+		Baz: bazclientgenerated.NewMockClient(ctrl),
+	}
+	initializedClientDependencies := &module.ClientDependenciesNodes{}
+	tree.Client = initializedClientDependencies
+	initializedClientDependencies.Baz = mockClientNodes.Baz
+
+	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
+	tree.Middleware = initializedMiddlewareDependencies
+	initializedMiddlewareDependencies.DefaultExample = defaultexamplemiddlewaregenerated.NewMiddleware(&defaultexamplemiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexamplemiddlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExample2 = defaultexample2middlewaregenerated.NewMiddleware(&defaultexample2middlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &defaultexample2middlewaremodule.ClientDependencies{
+			Baz: initializedClientDependencies.Baz,
+		},
+	})
+	initializedMiddlewareDependencies.DefaultExampleTchannel = defaultexampletchannelmiddlewaregenerated.NewMiddleware(&defaultexampletchannelmiddlewaremodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+
 	initializedEndpointDependencies := &module.EndpointDependenciesNodes{}
 	tree.Endpoint = initializedEndpointDependencies
 	initializedEndpointDependencies.Echo = echoendpointgenerated.NewEndpoint(&echoendpointmodule.Dependencies{
 		Default: initializedDefaultDependencies,
+		Middleware: &echoendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
 	})
 
 	dependencies := &module.Dependencies{
@@ -69,5 +106,5 @@ func InitializeDependenciesMock(
 		},
 	}
 
-	return tree, dependencies, mockNodes
+	return tree, dependencies, mockClientNodes
 }

@@ -51,21 +51,27 @@ const jsonConfigSuffix = "-config.json"
 const yamlConfigSuffix = "-config.yaml"
 
 // NewModuleSystem returns a new module system
-func NewModuleSystem(moduleSearchPaths map[string][]string, postGenHook ...PostGenHook) *ModuleSystem {
+func NewModuleSystem(
+	moduleSearchPaths map[string][]string,
+	defaultDependencies map[string][]string,
+	postGenHook ...PostGenHook,
+) *ModuleSystem {
 	return &ModuleSystem{
-		classes:           map[string]*ModuleClass{},
-		classOrder:        []string{},
-		postGenHook:       postGenHook,
-		moduleSearchPaths: moduleSearchPaths,
+		classes:             map[string]*ModuleClass{},
+		classOrder:          []string{},
+		postGenHook:         postGenHook,
+		moduleSearchPaths:   moduleSearchPaths,
+		defaultDependencies: defaultDependencies,
 	}
 }
 
 // ModuleSystem defines the module classes and their type generators
 type ModuleSystem struct {
-	classes           map[string]*ModuleClass
-	classOrder        []string
-	postGenHook       []PostGenHook
-	moduleSearchPaths map[string][]string
+	classes             map[string]*ModuleClass
+	classOrder          []string
+	postGenHook         []PostGenHook
+	moduleSearchPaths   map[string][]string
+	defaultDependencies map[string][]string
 }
 
 // PostGenHook provides a way to do work after the build is generated,
@@ -189,7 +195,7 @@ func (system *ModuleSystem) populateResolvedDependencies(
 
 			if dependencyInstance == nil {
 				return errors.Errorf(
-					"Unknown %q class depdendency %q"+
+					"Unknown %q class dependency %q "+
 						"in dependencies for %q %q",
 					classDependency.ClassName,
 					classDependency.InstanceName,
@@ -559,10 +565,21 @@ func (system *ModuleSystem) ResolveModules(
 
 	// system.classOrder is important. Downstream dependencies **must** be resolved first
 	for _, className := range system.classOrder {
+
+		defaultDependencies, err := system.getDefaultDependencies(
+			baseDirectory,
+			className,
+			system.defaultDependencies,
+			system.moduleSearchPaths,
+		)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error getting default dependencies for class %s", className)
+		}
+
 		for _, moduleDirectoryGlob := range system.moduleSearchPaths[className] {
 			moduleDirectoriesAbs, err := filepath.Glob(filepath.Join(baseDirectory, moduleDirectoryGlob))
 			if err != nil {
-				return nil, errors.Wrapf(err, "Error globbing %q", moduleDirectoryGlob)
+				return nil, errors.Wrapf(err, "error globbing %q", moduleDirectoryGlob)
 			}
 
 			for _, moduleDirAbs := range moduleDirectoriesAbs {
@@ -591,26 +608,27 @@ func (system *ModuleSystem) ResolveModules(
 					)
 				}
 
+				classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
+				if classConfigPath == "" {
+					// No class config found in this directory, skip over it
+					continue
+				}
+
 				instance, instanceErr := system.readInstance(
 					className,
 					packageRoot,
 					baseDirectory,
 					targetGenDir,
 					moduleDir,
+					moduleDirAbs,
+					defaultDependencies,
 				)
 				if instanceErr != nil {
-					if _, ok := instanceErr.(inferError); ok {
-						// It could be the case that a glob pattern like "endpoints/*" matches a *folder* that is later
-						// matched by a longer glob pattern like "endpoints/tchannel/*". It will fail at a later step
-						// if no globbing pattern matches the wanted instance.
-						continue
-					} else {
-						return nil, errors.Wrapf(
-							instanceErr,
-							"Error reading multi instance %q",
-							moduleDir,
-						)
-					}
+					return nil, errors.Wrapf(
+						instanceErr,
+						"Error reading multi instance %q",
+						moduleDir,
+					)
 				}
 
 				resolvedModules[instance.ClassName] = append(resolvedModules[instance.ClassName], instance)
@@ -645,12 +663,158 @@ func (system *ModuleSystem) ResolveModules(
 	return resolvedModules, nil
 }
 
-type inferError struct {
-	InstanceDirectory string
+func (system *ModuleSystem) getDefaultDependencies(
+	baseDirectory string,
+	className string,
+	dependencyGlobs map[string][]string,
+	moduleSearchPaths map[string][]string,
+) ([]ModuleDependency, error) {
+	defaultDependencies := make([]ModuleDependency, 0)
+	for _, defaultDepDirGlob := range dependencyGlobs[className] {
+		defaultDepDirsAbs, err := filepath.Glob(filepath.Join(baseDirectory, defaultDepDirGlob))
+		if err != nil {
+			return nil, errors.Wrapf(err, "error globbing default dependency %q", defaultDepDirGlob)
+		}
+
+		for _, defaultDepDirAbs := range defaultDepDirsAbs {
+			dependencyClassName, err := getClassNameOfDependency(baseDirectory, defaultDepDirAbs, moduleSearchPaths)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"cannot get class name of dependency %s",
+					defaultDepDirAbs,
+				)
+			}
+
+			found := false
+			for _, actualClassDependencyName := range system.classes[className].DependsOn {
+				if dependencyClassName == actualClassDependencyName {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil, errors.Errorf(
+					"default dependency class %s is not a dependency of %s",
+					dependencyClassName,
+					className,
+				)
+			}
+
+			classConfigPath, _, _ := getConfigFilePath(defaultDepDirAbs, dependencyClassName)
+			if classConfigPath == "" {
+				// No class config found, skip over this directory
+				continue
+			}
+
+			dependencyDir, err := filepath.Rel(baseDirectory, defaultDepDirAbs)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"cannot make %q relative to %q for default dependency",
+					defaultDepDirAbs,
+					baseDirectory,
+				)
+			}
+
+			defaultDependency, err := system.getModuleDependency(classConfigPath, dependencyDir, dependencyClassName)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"error getting default dependency module %s for class %s",
+					defaultDepDirAbs,
+					className,
+				)
+			}
+
+			defaultDependencies = append(defaultDependencies, *defaultDependency)
+		}
+	}
+
+	return defaultDependencies, nil
 }
 
-func (i inferError) Error() string {
-	return fmt.Sprintf("could not infer class name for %q", i.InstanceDirectory)
+func (system *ModuleSystem) getModuleDependency(
+	classConfigPath string,
+	dependencyDir string,
+	className string,
+) (*ModuleDependency, error) {
+	raw, readErr := ioutil.ReadFile(classConfigPath)
+	if readErr != nil {
+		return nil, errors.Wrapf(
+			readErr,
+			"error reading ClassConfig %q",
+			classConfigPath,
+		)
+	}
+
+	_, configErr := NewClassConfig(raw)
+	if configErr != nil {
+		return nil, errors.Wrapf(
+			configErr,
+			"error unmarshal ClassConfig %q",
+			classConfigPath,
+		)
+	}
+
+	var classPlural string
+	for _, moduleClass := range system.classes {
+		if moduleClass.Name == className {
+			classPlural = moduleClass.NamePlural
+		}
+	}
+
+	moduleDependency := ModuleDependency{
+		ClassName:    className,
+		InstanceName: stripModuleClassName(classPlural, dependencyDir),
+	}
+
+	return &moduleDependency, nil
+}
+
+func getClassNameOfDependency(
+	baseDirectory string,
+	dependencyDirectory string,
+	moduleSearchPaths map[string][]string,
+) (string, error) {
+	for className, moduleGlobs := range moduleSearchPaths {
+		for _, moduleGlob := range moduleGlobs {
+			matched, err := filepath.Match(filepath.Join(baseDirectory, moduleGlob), dependencyDirectory)
+			if err != nil {
+				return "", errors.Wrapf(
+					err,
+					"error matching module glob %s with dependency directory %s",
+					moduleGlob,
+					dependencyDirectory,
+				)
+			}
+
+			if matched {
+				return className, nil
+			}
+		}
+	}
+
+	return "", errors.Errorf("could not find class for default dependency %s", dependencyDirectory)
+}
+
+func getConfigFilePath(dir, name string) (string, string, string) {
+	yamlFileName := name + yamlConfigSuffix
+	jsonFileName := ""
+	path := filepath.Join(dir, yamlFileName)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		// Cannot find yaml file, try json file instead
+		jsonFileName = name + jsonConfigSuffix
+		yamlFileName = ""
+		path = filepath.Join(dir, jsonFileName)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			// Cannot find any config file
+			path = ""
+			jsonFileName = ""
+			yamlFileName = ""
+		}
+	}
+	return path, yamlFileName, jsonFileName
 }
 
 func (system *ModuleSystem) readInstance(
@@ -659,38 +823,10 @@ func (system *ModuleSystem) readInstance(
 	baseDirectory string,
 	targetGenDir string,
 	instanceDirectory string,
+	classConfigDir string,
+	defaultDependencies []ModuleDependency,
 ) (*ModuleInstance, error) {
-	classConfigDir := filepath.Join(baseDirectory, instanceDirectory)
-
-	instanceFiles, err := ioutil.ReadDir(classConfigDir)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"error scanning %q for ClassConfig",
-			classConfigDir,
-		)
-	}
-
-	var (
-		jsonFileName, yamlFileName, classConfigPath string
-	)
-	for _, instanceFile := range instanceFiles {
-		if strings.HasSuffix(instanceFile.Name(), yamlConfigSuffix) {
-			yamlFileName = instanceFile.Name()
-			classConfigPath = filepath.Join(classConfigDir, yamlFileName)
-			break
-		}
-
-		if strings.HasSuffix(instanceFile.Name(), jsonConfigSuffix) {
-			jsonFileName = instanceFile.Name()
-			classConfigPath = filepath.Join(classConfigDir, jsonFileName)
-			break
-		}
-	}
-
-	if classConfigPath == "" {
-		return nil, inferError{InstanceDirectory: instanceDirectory}
-	}
+	classConfigPath, yamlFileName, jsonFileName := getConfigFilePath(classConfigDir, className)
 
 	raw, readErr := ioutil.ReadFile(classConfigPath)
 	if readErr != nil {
@@ -716,6 +852,16 @@ func (system *ModuleSystem) readInstance(
 	}
 
 	dependencies := readDeps(config.Dependencies)
+	dependencies = append(dependencies, defaultDependencies...)
+
+	var classPlural string
+	for _, moduleClass := range system.classes {
+		if moduleClass.Name == className {
+			classPlural = moduleClass.NamePlural
+		}
+	}
+	instanceName := stripModuleClassName(classPlural, instanceDirectory)
+
 	packageInfo, err := readPackageInfo(
 		packageRoot,
 		baseDirectory,
@@ -723,7 +869,6 @@ func (system *ModuleSystem) readInstance(
 		className,
 		instanceDirectory,
 		config,
-		dependencies,
 	)
 
 	if err != nil {
@@ -733,15 +878,8 @@ func (system *ModuleSystem) readInstance(
 			err,
 			"Error reading class package info for %q %q",
 			className,
-			config.Name,
+			instanceName,
 		)
-	}
-
-	var classPlural string
-	for _, moduleClass := range system.classes {
-		if moduleClass.Name == className {
-			classPlural = moduleClass.NamePlural
-		}
 	}
 
 	return &ModuleInstance{
@@ -750,7 +888,7 @@ func (system *ModuleSystem) readInstance(
 		ClassType:             config.Type,
 		BaseDirectory:         baseDirectory,
 		Directory:             instanceDirectory,
-		InstanceName:          stripModuleClassName(classPlural, instanceDirectory),
+		InstanceName:          instanceName,
 		Dependencies:          dependencies,
 		ResolvedDependencies:  map[string][]*ModuleInstance{},
 		RecursiveDependencies: map[string][]*ModuleInstance{},
@@ -793,7 +931,6 @@ func readPackageInfo(
 	className string,
 	instanceDirectory string,
 	config *ClassConfig,
-	dependencies []ModuleDependency,
 ) (*PackageInfo, error) {
 	qualifiedClassName := strings.Title(CamelCase(className))
 	qualifiedInstanceName := strings.Title(CamelCase(config.Name))

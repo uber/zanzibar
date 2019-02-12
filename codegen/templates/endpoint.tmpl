@@ -46,7 +46,7 @@ import (
 
 	{{- if len $middlewares | ne 0 }}
 	{{- range $idx, $middleware := $middlewares }}
-	"{{$middleware.ImportPath}}"
+	{{$middleware.Name | camel}} "{{$middleware.ImportPath}}"
 	{{- end}}
 	{{- end}}
 
@@ -73,7 +73,7 @@ func New{{$handlerName}}(deps *module.Dependencies) *{{$handlerName}} {
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			{{range $idx, $middleware := $middlewares -}}
 			deps.Middleware.{{$middleware.Name | pascal}}.NewMiddlewareHandle(
-				{{$middleware.Name}}.Options{
+				{{$middleware.Name | camel}}.Options{
 				{{range $key, $value := $middleware.PrettyOptions -}}
 					{{$key}} : {{$value}},
 				{{end -}}

@@ -38,6 +38,9 @@ import (
 	workflow "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/workflow"
 	endpointsBarBar "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bar/bar"
 
+	defaultExample "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example"
+	defaultExample2 "github.com/uber/zanzibar/examples/example-gateway/middlewares/default/default_example2"
+
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
@@ -55,7 +58,14 @@ func NewBarArgNotStructHandler(deps *module.Dependencies) *BarArgNotStructHandle
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
 		"bar", "argNotStruct",
-		handler.HandleRequest,
+		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
+			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
+				defaultExample2.Options{},
+			),
+			deps.Middleware.DefaultExample.NewMiddlewareHandle(
+				defaultExample.Options{},
+			),
+		}, handler.HandleRequest).Handle,
 	)
 
 	return handler

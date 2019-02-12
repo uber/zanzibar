@@ -258,7 +258,7 @@ func NewDefaultModuleSystem(
 	h *PackageHelper,
 	hooks ...PostGenHook,
 ) (*ModuleSystem, error) {
-	system := NewModuleSystem(h.moduleSearchPaths, hooks...)
+	system := NewModuleSystem(h.moduleSearchPaths, h.defaultDependencies, hooks...)
 
 	tmpl, err := NewDefaultTemplate()
 	if err != nil {

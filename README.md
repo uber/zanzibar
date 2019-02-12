@@ -128,6 +128,7 @@ example-gateway                 # root directory
 │   ├── endpoints               # generated mocks and module initializers for endpoints
 │   ├── gen-code                # generated structs and (de)serializers by Thrift compiler
 │   ├── middlewares             # generated module initializers for middlewares
+│   │   └── default             # generated module initializers for default middlewares
 │   └── services                # generated mocks and module intialziers for services
 ├── build.yaml                  # config file for Zanzibar code generation, see below for details
 ├── clients                     # config directory for modules of client module class
@@ -142,7 +143,10 @@ example-gateway                 # root directory
 │   ├── clients                 # idl directory for client thrift files
 │   └── endpoints               # idl directory for endpoint thrift files
 ├── middlewares                 # config directory for modules of middleware module class
-│   └── transform-response      # config directory for a middleware named 'transform-response'
+│   ├── transform-response      # config directory for a middleware named 'transform-response'
+│   ├── default                 # directory for all default middlewares
+│   │   └── log-publisher       # config directory for a default middleware named 'log-publisher'
+│   └── default.yaml            # config file describing default middlewares and their execution order   
 └── services                    # config directory for modules of service module class
     └── example-gateway         # config directory for a service named 'example-gateway'
 ```
@@ -288,6 +292,12 @@ The reason for such layout is to avoid a large endpoint-config.yaml file when an
 Besides the module configs, Zanzibar also expects a YAML file that configures necessary properties to boostrap the code generation process of a Zanzibar application. The schema for application config is defined [here](https://github.com/uber/zanzibar/tree/master/docs/application_config_schema.json).
 
 Unlike the module configs, there is no restriction on how this config file should be named. It can be named `{$appName}.yaml` or `build.yaml` as it is in [example-gateway](https://github.com/uber/zanzibar/blob/master/examples/example-gateway/build.yaml), as long as it is passed correctly as an argument to the code generation [runner](https://github.com/uber/zanzibar/blob/master/codegen/runner/runner.go).
+
+In this config file, you can specify the paths from which to discover modules. You can also specify `default dependencies`.
+
+`Default Dependencies` allow module classes to include instances of other module classes as default dependencies. This means that no explicit configurations are required for certain module instances to be included as a dependency. e.g., we can include `clients/logger` as a default dependency for `endpoint`, and every endpoint will have `clients/logger` as a dependency in its `module/dependencies.go` file, even if the endpoint's `endpoint-config.yaml` file does not list `clients/logger` as a dependency.
+
+Note that these paths support `Glob` patterns.
 
 ### Code Generation
 Zanzibar provides HTTP and TChannel runtime components for both clients and servers. Once all the configs are properly defined, Zanzibar is able to parse the config files and generate code and wire it up with the runime components to produce a full application. All generated code is placed in the `build` directory.
