@@ -282,7 +282,7 @@ func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
 	return res.pendingBodyBytes, res.pendingStatusCode
 }
 
-// GetResponseHeader returns the underlying http response writer's headers
-func (res *ServerHTTPResponse) GetResponseHeader() http.Header {
+// GetResponseHeaders returns the underlying http response's headers
+func (res *ServerHTTPResponse) GetResponseHeaders() http.Header {
 	return res.responseWriter.Header()
 }
