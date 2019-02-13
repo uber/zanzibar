@@ -1005,8 +1005,9 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 
 	specProvider, ok := generator.(SpecProvider)
 	if !ok {
-		fmt.Printf(
-			"%q %q generator is not a spec provider, cannot use incremental builds\n",
+		fmt.Fprintf(
+			os.Stderr,
+			"warning: %q %q generator is not a spec provider, cannot use incremental builds\n",
 			instance.ClassName,
 			instance.ClassType,
 		)
@@ -1022,6 +1023,16 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 	return spec, true, nil
 }
 
+// tryResolveIncrementalBuild will try to run the codegen for just the module instance(s) provided. If we encounter
+// a module that does not provide getSpec interface, then we will fall back to full build.
+//
+// A key assumption of this method is that the output files for the given module instance will **not** depend on the
+// concrete details of its dependencies. For example, if a service depends on endpoints, details (i.e. endpoint type,
+// or endpoint configuration) of the endpoint will not vary the output of the service's template. This allows us to make
+// a simplifying assumption about running incremental build: we only need to run codegen for module X if the configuration
+// file for X has changed. If the assumption was false, then we would need to run codegen for module X if any of the
+// dependencies of X have changed, which would require pulling the dependencies of X (i.e. the YAML *-config.yaml files
+// ) out into the build system.
 func (system *ModuleSystem) tryResolveIncrementalBuild(instances []ModuleDependency, resolvedModules map[string][]*ModuleInstance) (map[string][]*ModuleInstance, error) {
 	// toBeBuiltModules is the list of module instances affected by this build
 	toBeBuiltModules := make(map[string]map[string]*ModuleInstance, 0)
@@ -1066,38 +1077,6 @@ func (system *ModuleSystem) tryResolveIncrementalBuild(instances []ModuleDepende
 			}
 
 			toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
-		}
-
-		// Collect things of the same class that depend on us
-		for _, classInstance := range classInstances {
-			// classInstance needs to be built if any of the dependencies that are to be built is in the recursive
-			// dependency tree of classInstance.
-
-			for _, className := range system.classOrder {
-				for _, toBeBuiltInstance := range toBeBuiltModules[className] {
-					classInstanceTransitives, ok := classInstance.RecursiveDependencies[toBeBuiltInstance.ClassName]
-					if !ok {
-						continue
-					}
-
-					for _, classInstanceDependency := range classInstanceTransitives {
-						if classInstanceDependency.InstanceName == toBeBuiltInstance.InstanceName && classInstanceDependency.ClassName == toBeBuiltInstance.ClassName {
-							// toBeBuiltInstance is in the recursive dependency tree of classInstance
-
-							toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
-							fmt.Printf(
-								"Need to generate %q %q %q because it transitively depends on %q %q %q\n",
-								classInstance.InstanceName,
-								classInstance.ClassName,
-								classInstance.ClassType,
-								toBeBuiltInstance.InstanceName,
-								toBeBuiltInstance.ClassName,
-								toBeBuiltInstance.ClassType,
-							)
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -1148,7 +1127,8 @@ func (system *ModuleSystem) GenerateIncrementalBuild(
 
 	toBeBuiltModulesList, err := system.tryResolveIncrementalBuild(instances, resolvedModules)
 	if err != nil {
-		fmt.Printf(
+		fmt.Fprintf(
+			os.Stderr,
 			"Falling back to non-incremental full build because an error occurred: %s\n",
 			err.Error(),
 		)
@@ -1179,7 +1159,8 @@ func (system *ModuleSystem) GenerateIncrementalBuild(
 			generator := classGenerators.types[classInstance.ClassType]
 
 			if generator == nil {
-				fmt.Printf(
+				fmt.Fprintf(
+					os.Stderr,
 					"Skipping generation of %q %q class of type %q "+
 						"as generator is not defined\n",
 					classInstance.InstanceName,
@@ -1192,7 +1173,8 @@ func (system *ModuleSystem) GenerateIncrementalBuild(
 			buildResult, err := generator.Generate(classInstance)
 
 			if err != nil {
-				fmt.Printf(
+				fmt.Fprintf(
+					os.Stderr,
 					"Error generating %q %q of type %q:\n%s\n",
 					classInstance.InstanceName,
 					classInstance.ClassName,
