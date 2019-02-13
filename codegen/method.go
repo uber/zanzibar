@@ -107,6 +107,7 @@ type MethodSpec struct {
 	ShortResponseType string
 	OKStatusCode      StatusCode
 	Exceptions        []ExceptionSpec
+	ExceptionsByStatusCode map[int][]ExceptionSpec
 	ExceptionsIndex   map[string]ExceptionSpec
 	ValidStatusCodes  []int
 	// Additional struct generated from the bundle of request args.
@@ -388,11 +389,12 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 }
 
 func (ms *MethodSpec) setValidStatusCodes() {
-	ms.ValidStatusCodes = make([]int, len(ms.Exceptions)+1)
+	ms.ValidStatusCodes = []int{
+		ms.OKStatusCode.Code,
+	}
 
-	ms.ValidStatusCodes[0] = ms.OKStatusCode.Code
-	for i := 0; i < len(ms.Exceptions); i++ {
-		ms.ValidStatusCodes[i+1] = ms.Exceptions[i].StatusCode.Code
+	for code, _ := range ms.ExceptionsByStatusCode {
+		ms.ValidStatusCodes = append(ms.ValidStatusCodes, code)
 	}
 }
 
@@ -409,6 +411,7 @@ func (ms *MethodSpec) setExceptions(
 	ms.ExceptionsIndex = make(
 		map[string]ExceptionSpec, len(resultSpec.Exceptions),
 	)
+	ms.ExceptionsByStatusCode = map[int][]ExceptionSpec{}
 
 	for i, e := range resultSpec.Exceptions {
 		typeName, err := h.TypeFullName(e.Type)
@@ -430,6 +433,13 @@ func (ms *MethodSpec) setExceptions(
 			}
 			ms.Exceptions[i] = exception
 			ms.ExceptionsIndex[e.Name] = exception
+			if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
+				ms.ExceptionsByStatusCode[exception.StatusCode.Code] = []ExceptionSpec{}
+			}
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code] = append(
+				ms.ExceptionsByStatusCode[exception.StatusCode.Code],
+				exception,
+			)
 			continue
 		}
 
@@ -464,6 +474,13 @@ func (ms *MethodSpec) setExceptions(
 		}
 		ms.Exceptions[i] = exception
 		ms.ExceptionsIndex[e.Name] = exception
+		if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code] = []ExceptionSpec{}
+		}
+		ms.ExceptionsByStatusCode[exception.StatusCode.Code] = append(
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code],
+			exception,
+		)
 	}
 	return nil
 }

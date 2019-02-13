@@ -2,7 +2,11 @@ namespace java com.uber.zanzibar.clients.withexceptions
 
 
 exception ExceptionType1 {
-    1: required string message
+    1: required string message1
+}
+
+exception ExceptionType2 {
+    1: required string message2
 }
 
 service WithExceptionsService {
