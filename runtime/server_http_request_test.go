@@ -1479,9 +1479,9 @@ func TestSpanCreated(t *testing.T) {
 			) {
 				span := req.GetSpan()
 				assert.NotNil(t, span)
-				timeStarted := req.GetStartTime()
+				timeStarted := req.StartTime()
 				assert.NotNil(t, timeStarted)
-				httpRequest := req.GetHTTPRequest()
+				httpRequest := req.HTTPRequest()
 				assert.NotNil(t, httpRequest)
 				res.WriteJSONBytes(200, nil, []byte(`{"ok":true}`))
 			},
