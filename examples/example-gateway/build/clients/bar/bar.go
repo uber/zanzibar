@@ -352,14 +352,15 @@ func (c *barClient) ArgNotStruct(
 		}
 
 		return respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return respHeaders, err
 		}
-		return respHeaders, &exception
+		return respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -985,14 +986,15 @@ func (c *barClient) Hello(
 		}
 
 		return responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -1053,14 +1055,15 @@ func (c *barClient) MissingArg(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -1121,14 +1124,15 @@ func (c *barClient) NoRequest(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -1190,14 +1194,15 @@ func (c *barClient) Normal(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -1258,14 +1263,15 @@ func (c *barClient) NormalRecur(
 		}
 
 		return &responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()
@@ -1327,22 +1333,24 @@ func (c *barClient) TooManyArgs(
 		// TODO(jakev): read response headers and put them in body
 
 		return &responseBody, respHeaders, nil
-
 	case 403:
-		var exception clientsBarBar.BarException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
-
+		return defaultRes, respHeaders, v.(error)
 	case 418:
-		var exception clientsFooFoo.FooException
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsFooFoo.FooException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()

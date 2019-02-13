@@ -172,6 +172,8 @@ func init() {
 		switch err.(type) {
 		case *ExceptionType1:
 			return true
+		case *ExceptionType2:
+			return true
 		default:
 			return false
 		}
@@ -188,6 +190,11 @@ func init() {
 				return nil, errors.New("WrapResponse received non-nil error type with nil value for WithExceptionsService_Func1_Result.E1")
 			}
 			return &WithExceptionsService_Func1_Result{E1: e}, nil
+		case *ExceptionType2:
+			if e == nil {
+				return nil, errors.New("WrapResponse received non-nil error type with nil value for WithExceptionsService_Func1_Result.E2")
+			}
+			return &WithExceptionsService_Func1_Result{E2: e}, nil
 		}
 
 		return nil, err
@@ -195,6 +202,10 @@ func init() {
 	WithExceptionsService_Func1_Helper.UnwrapResponse = func(result *WithExceptionsService_Func1_Result) (success string, err error) {
 		if result.E1 != nil {
 			err = result.E1
+			return
+		}
+		if result.E2 != nil {
+			err = result.E2
 			return
 		}
 
@@ -218,6 +229,7 @@ type WithExceptionsService_Func1_Result struct {
 	// Value returned by func1 after a successful execution.
 	Success *string         `json:"success,omitempty"`
 	E1      *ExceptionType1 `json:"e1,omitempty"`
+	E2      *ExceptionType2 `json:"e2,omitempty"`
 }
 
 // ToWire translates a WithExceptionsService_Func1_Result struct into a Thrift-level intermediate
@@ -237,7 +249,7 @@ type WithExceptionsService_Func1_Result struct {
 //   }
 func (v *WithExceptionsService_Func1_Result) ToWire() (wire.Value, error) {
 	var (
-		fields [2]wire.Field
+		fields [3]wire.Field
 		i      int = 0
 		w      wire.Value
 		err    error
@@ -259,6 +271,14 @@ func (v *WithExceptionsService_Func1_Result) ToWire() (wire.Value, error) {
 		fields[i] = wire.Field{ID: 1, Value: w}
 		i++
 	}
+	if v.E2 != nil {
+		w, err = v.E2.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
 
 	if i != 1 {
 		return wire.Value{}, fmt.Errorf("WithExceptionsService_Func1_Result should have exactly one field: got %v fields", i)
@@ -269,6 +289,12 @@ func (v *WithExceptionsService_Func1_Result) ToWire() (wire.Value, error) {
 
 func _ExceptionType1_Read(w wire.Value) (*ExceptionType1, error) {
 	var v ExceptionType1
+	err := v.FromWire(w)
+	return &v, err
+}
+
+func _ExceptionType2_Read(w wire.Value) (*ExceptionType2, error) {
+	var v ExceptionType2
 	err := v.FromWire(w)
 	return &v, err
 }
@@ -313,6 +339,14 @@ func (v *WithExceptionsService_Func1_Result) FromWire(w wire.Value) error {
 				}
 
 			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.E2, err = _ExceptionType2_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
 		}
 	}
 
@@ -321,6 +355,9 @@ func (v *WithExceptionsService_Func1_Result) FromWire(w wire.Value) error {
 		count++
 	}
 	if v.E1 != nil {
+		count++
+	}
+	if v.E2 != nil {
 		count++
 	}
 	if count != 1 {
@@ -337,7 +374,7 @@ func (v *WithExceptionsService_Func1_Result) String() string {
 		return "<nil>"
 	}
 
-	var fields [2]string
+	var fields [3]string
 	i := 0
 	if v.Success != nil {
 		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
@@ -345,6 +382,10 @@ func (v *WithExceptionsService_Func1_Result) String() string {
 	}
 	if v.E1 != nil {
 		fields[i] = fmt.Sprintf("E1: %v", v.E1)
+		i++
+	}
+	if v.E2 != nil {
+		fields[i] = fmt.Sprintf("E2: %v", v.E2)
 		i++
 	}
 
@@ -377,6 +418,9 @@ func (v *WithExceptionsService_Func1_Result) Equals(rhs *WithExceptionsService_F
 	if !((v.E1 == nil && rhs.E1 == nil) || (v.E1 != nil && rhs.E1 != nil && v.E1.Equals(rhs.E1))) {
 		return false
 	}
+	if !((v.E2 == nil && rhs.E2 == nil) || (v.E2 != nil && rhs.E2 != nil && v.E2.Equals(rhs.E2))) {
+		return false
+	}
 
 	return true
 }
@@ -392,6 +436,9 @@ func (v *WithExceptionsService_Func1_Result) MarshalLogObject(enc zapcore.Object
 	}
 	if v.E1 != nil {
 		err = multierr.Append(err, enc.AddObject("e1", v.E1))
+	}
+	if v.E2 != nil {
+		err = multierr.Append(err, enc.AddObject("e2", v.E2))
 	}
 	return err
 }
@@ -424,6 +471,21 @@ func (v *WithExceptionsService_Func1_Result) GetE1() (o *ExceptionType1) {
 // IsSetE1 returns true if E1 is not nil.
 func (v *WithExceptionsService_Func1_Result) IsSetE1() bool {
 	return v.E1 != nil
+}
+
+// GetE2 returns the value of E2 if it is set or its
+// zero value if it is unset.
+func (v *WithExceptionsService_Func1_Result) GetE2() (o *ExceptionType2) {
+	if v.E2 != nil {
+		return v.E2
+	}
+
+	return
+}
+
+// IsSetE2 returns true if E2 is not nil.
+func (v *WithExceptionsService_Func1_Result) IsSetE2() bool {
+	return v.E2 != nil
 }
 
 // MethodName returns the name of the Thrift function as specified in

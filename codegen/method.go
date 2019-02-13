@@ -404,9 +404,6 @@ func (ms *MethodSpec) setExceptions(
 	resultSpec *compile.ResultSpec,
 	h *PackageHelper,
 ) error {
-	seenStatusCodes := map[int]bool{
-		ms.OKStatusCode.Code: true,
-	}
 	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
 	ms.ExceptionsIndex = make(
 		map[string]ExceptionSpec, len(resultSpec.Exceptions),
@@ -450,16 +447,6 @@ func (ms *MethodSpec) setExceptions(
 				"cannot parse the annotation %s for exception %s", ms.annotations.HTTPStatus, e.Name,
 			)
 		}
-
-		if seenStatusCodes[code] && !isEndpoint {
-			return errors.Wrapf(
-				err,
-				"cannot have duplicate status code %s for exception %s",
-				ms.annotations.HTTPStatus,
-				e.Name,
-			)
-		}
-		seenStatusCodes[code] = true
 
 		exception := ExceptionSpec{
 			StructSpec: StructSpec{

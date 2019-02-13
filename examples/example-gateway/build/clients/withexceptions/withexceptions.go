@@ -176,14 +176,15 @@ func (c *withexceptionsClient) WithExceptions(
 		}
 
 		return responseBody, respHeaders, nil
-
 	case 401:
-		var exception clientsWithexceptionsWithexceptions.ExceptionType1
-		err = res.ReadAndUnmarshalBody(&exception)
+		allOptions := []interface{}{
+			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
-		return defaultRes, respHeaders, &exception
+		return defaultRes, respHeaders, v.(error)
 
 	default:
 		_, err = res.ReadAll()

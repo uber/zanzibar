@@ -13,6 +13,7 @@ service WithExceptionsService {
     string func1(
     ) throws (
         1: ExceptionType1 e1 (zanzibar.http.status = "401")
+        2: ExceptionType2 e2 (zanzibar.http.status = "401")
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/withexceptions/func1"

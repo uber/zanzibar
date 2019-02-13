@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -107,6 +108,35 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 	}
 
 	return nil
+}
+
+// ReadAndUnmarshalBodyMultipleOptions will try to unmarshal non pointer value to one of the provided types or fail
+// It will return the deserialized struct (if any) that succeeded
+func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interface{}) (interface{}, error) {
+	rawBody, err := res.ReadAll()
+	if err != nil {
+		/* coverage ignore next line */
+		return nil, err
+	}
+
+	errMessages := []string{}
+	for _, v := range vs {
+		err = json.Unmarshal(rawBody, v)
+		if err == nil {
+			// All done -- successfully deserialized
+			return v, nil
+		}
+
+		errMessages = append(errMessages, err.Error())
+	}
+
+	err = fmt.Errorf("all json serialization errors: %s", strings.Join(errMessages, " | "))
+
+	res.req.Logger.Warn("Could not parse response json into any of provided interfaces", zap.Error(err))
+	return nil, errors.Wrapf(
+		err, "Could not parse %s.%s response json into any of provided interfaces",
+		res.req.ClientID, res.req.MethodName,
+	)
 }
 
 // CheckOKResponse checks if the status code is OK.
