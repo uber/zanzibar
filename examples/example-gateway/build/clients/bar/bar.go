@@ -1321,7 +1321,7 @@ func (c *barClient) TooManyArgs(
 		respHeaders[k] = res.Header.Get(k)
 	}
 
-	res.CheckOKResponse([]int{200, 403, 418})
+	res.CheckOKResponse([]int{200, 418, 403})
 
 	switch res.StatusCode {
 	case 200:
