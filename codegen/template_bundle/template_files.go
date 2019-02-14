@@ -193,7 +193,11 @@ type Dependencies struct {
 type {{$classType | pascal}}Dependencies struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{- /* TODO: the dependency type should cover all types instead of just interface type */ -}}
+	{{if eq $classType "task" -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.PackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{else -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
 	{{end -}}
 }
 {{end -}}
@@ -209,7 +213,7 @@ func dependency_structTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1180, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "dependency_struct.tmpl", size: 1365, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1599,7 +1603,11 @@ tree.{{$className | title}} = {{$initializedDeps}}
 
 {{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{if eq $className "task" -}}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.PackageAlias}}.New(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{else -}}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{end -}}
 	Default: initializedDefaultDependencies,
 	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
@@ -1622,7 +1630,7 @@ func module_class_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1191, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_class_initializer.tmpl", size: 1381, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1634,7 +1642,11 @@ package module
 import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end}}
@@ -1654,7 +1666,11 @@ type DependenciesTree struct {
 // {{$className | title}}DependenciesNodes contains {{$className}} dependencies
 type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
+	{{if eq $className "task" -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.PackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{else -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
 	{{end -}}
 }
 {{end -}}
@@ -1706,7 +1722,7 @@ func module_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2403, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_initializer.tmpl", size: 2734, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1734,7 +1750,11 @@ import (
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
 	{{end -}}
 	{{else -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
@@ -1826,7 +1846,7 @@ func module_mock_initializerTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4324, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "module_mock_initializer.tmpl", size: 4470, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3118,7 +3138,11 @@ import (
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
 	{{end -}}
 	{{else -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
@@ -3166,7 +3190,11 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 	{{else -}}
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{if eq $className "task" -}}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.PackageAlias}}.New(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{else -}}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{end -}}
 	Default: initializedDefaultDependencies,
 	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{
@@ -3194,7 +3222,8 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 	)
 
 	return w, {{camel $mockType}}
-}`)
+}
+`)
 
 func workflow_mockTmplBytes() ([]byte, error) {
 	return _workflow_mockTmpl, nil
@@ -3206,7 +3235,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4716, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 5053, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

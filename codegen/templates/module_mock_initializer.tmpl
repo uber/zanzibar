@@ -21,7 +21,11 @@ import (
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
 	{{end -}}
 	{{else -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}

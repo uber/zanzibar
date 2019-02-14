@@ -26,7 +26,11 @@ import (
 	fixture{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{index $leafWithFixture $moduleInstance.InstanceName}}"
 	{{end -}}
 	{{else -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end -}}
@@ -74,7 +78,11 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 	{{else -}}
 	{{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{if eq $className "task" -}}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.PackageAlias}}.New(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{else -}}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{end -}}
 	Default: initializedDefaultDependencies,
 	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{

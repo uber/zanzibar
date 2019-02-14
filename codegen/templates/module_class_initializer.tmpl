@@ -13,7 +13,11 @@ tree.{{$className | title}} = {{$initializedDeps}}
 
 {{- range $idx, $dependency := $moduleInstances}}
 	{{- $pkgInfo := $dependency.PackageInfo }}
+	{{if eq $className "task" -}}
+	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.PackageAlias}}.New(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{else -}}
 	{{$initializedDeps}}.{{$pkgInfo.QualifiedInstanceName}} = {{$pkgInfo.ImportPackageAlias}}.{{$pkgInfo.ExportName}}(&{{$pkgInfo.ModulePackageAlias}}.Dependencies{
+	{{end -}}
 	Default: initializedDefaultDependencies,
 	{{- range $className, $moduleInstances := $dependency.ResolvedDependencies}}
 	{{$className | pascal}}: &{{$pkgInfo.ModulePackageAlias}}.{{$className | pascal}}Dependencies{

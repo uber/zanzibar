@@ -5,7 +5,11 @@ package module
 import (
 	{{range $classType, $moduleInstances := $instance.RecursiveDependencies -}}
 	{{range $idx, $moduleInstance := $moduleInstances -}}
+	{{if eq $classType "task" -}}
+	{{$moduleInstance.PackageInfo.PackageAlias}} "{{$moduleInstance.PackageInfo.PackagePath}}"
+	{{else -}}
 	{{$moduleInstance.PackageInfo.ImportPackageAlias}} "{{$moduleInstance.PackageInfo.ImportPackagePath}}"
+	{{end -}}
 	{{$moduleInstance.PackageInfo.ModulePackageAlias}} "{{$moduleInstance.PackageInfo.ModulePackagePath}}"
 	{{end -}}
 	{{end}}
@@ -25,7 +29,11 @@ type DependenciesTree struct {
 // {{$className | title}}DependenciesNodes contains {{$className}} dependencies
 type {{$className | title}}DependenciesNodes struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
+	{{if eq $className "task" -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.PackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{else -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
 	{{end -}}
 }
 {{end -}}

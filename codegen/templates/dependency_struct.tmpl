@@ -24,7 +24,11 @@ type Dependencies struct {
 type {{$classType | pascal}}Dependencies struct {
 	{{ range $idx, $dependency := $moduleInstances -}}
 	{{- /* TODO: the dependency type should cover all types instead of just interface type */ -}}
+	{{if eq $classType "task" -}}
+	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.PackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{else -}}
 	{{$dependency.PackageInfo.QualifiedInstanceName}} {{$dependency.PackageInfo.ImportPackageAlias}}.{{$dependency.PackageInfo.ExportType}}
+	{{end -}}
 	{{end -}}
 }
 {{end -}}
