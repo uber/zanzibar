@@ -9,7 +9,7 @@ COVER_PKGS = $(shell glide novendor | grep -v "test/..." | \
 GO_FILES := $(shell \
 	find . '(' -path '*/.*' -o -path './vendor' -o -path './workspace' ')' -prune -o -name '*.go' -print | cut -b3-)
 
-FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "config/" -e "codegen/templates/" -e "codegen/template_bundle/"
+FILTER_LINT := grep -v -e "vendor/" -e "third_party/" -e "gen-code/" -e "config/" -e "codegen/templates/" -e "codegen/template_bundle/" -e "codegen/runner/runner.go"
 ENV_CONFIG := $(shell find ./config -name 'production.json' -o -name 'production.yaml')
 TEST_ENV_CONFIG := $(shell find ./config -name 'test.json' -o -name 'test.yaml')
 
