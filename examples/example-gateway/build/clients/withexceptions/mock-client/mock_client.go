@@ -35,6 +35,22 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
+// Func1 mocks base method
+func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Func1", arg0, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// Func1 indicates an expected call of Func1
+func (mr *MockClientMockRecorder) Func1(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Func1", reflect.TypeOf((*MockClient)(nil).Func1), arg0, arg1)
+}
+
 // HTTPClient mocks base method
 func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 	m.ctrl.T.Helper()
@@ -47,20 +63,4 @@ func (m *MockClient) HTTPClient() *runtime.HTTPClient {
 func (mr *MockClientMockRecorder) HTTPClient() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTPClient", reflect.TypeOf((*MockClient)(nil).HTTPClient))
-}
-
-// WithExceptions mocks base method
-func (m *MockClient) WithExceptions(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithExceptions", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(map[string]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// WithExceptions indicates an expected call of WithExceptions
-func (mr *MockClientMockRecorder) WithExceptions(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithExceptions", reflect.TypeOf((*MockClient)(nil).WithExceptions), arg0, arg1)
 }

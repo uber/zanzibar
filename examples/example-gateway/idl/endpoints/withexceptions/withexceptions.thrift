@@ -1,19 +1,19 @@
 namespace java com.uber.zanzibar.clients.withexceptions
 
 
-exception ExceptionType1 {
+exception EndpointExceptionType1 {
     1: required string message1
 }
 
-exception ExceptionType2 {
+exception EndpointExceptionType2 {
     1: required string message2
 }
 
 service WithExceptions {
     string func1(
     ) throws (
-        1: ExceptionType1 e1 (zanzibar.http.status = "401")
-        2: ExceptionType2 e2 (zanzibar.http.status = "401")
+        1: EndpointExceptionType1 e1 (zanzibar.http.status = "401")
+        2: EndpointExceptionType2 e2 (zanzibar.http.status = "401")
     ) (
         zanzibar.http.method = "GET"
         zanzibar.http.path = "/withexceptions/func1"

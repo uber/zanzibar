@@ -1,0 +1,46 @@
+clientId: withexceptions
+clientMethod: func1
+endpointId: withexceptions
+endpointType: http
+handleId: func1
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures:
+  successfulRequest:
+    clientTestFixtures:
+      withexceptions::func1:
+        clientId: withexceptions
+        clientMethod: func1
+        clientReqHeaders: {}
+        clientRequest:
+          requestType: tchannel
+          tchannelRequest:
+            requestType: tchannel
+            tchannelRequest:
+              request: foo
+        clientResHeaders: {}
+        clientResponse:
+          responseType: tchannel
+    endpointId: withexceptions
+    endpointReqHeaders: {}
+    endpointRequest:
+      httpRequest:
+        body:
+          bodyJson:
+            request: foo
+          bodyType: json
+        method: GET
+      requestType: http
+    endpointResHeaders: {}
+    endpointResponse:
+      httpResponse:
+        statusCode: 200
+      responseType: http
+    handleId: func1
+    testName: successfulRequest
+    testServiceName: example-gateway
+thriftFile: endpoints/withexceptions/withexceptions.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: WithExceptions::func1
+workflowType: httpClient

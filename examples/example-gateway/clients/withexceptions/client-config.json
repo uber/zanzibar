@@ -5,7 +5,7 @@
 		"thriftFile": "clients/withexceptions/withexceptions.thrift",
 		"thriftFileSha": "{{placeholder}}",
 		"exposedMethods": {
-			"WithExceptions": "WithExceptionsService::func1"
+			"func1": "WithExceptions::func1"
 		}
 	}
 }

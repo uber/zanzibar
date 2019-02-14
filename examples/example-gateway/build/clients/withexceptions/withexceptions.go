@@ -39,7 +39,7 @@ import (
 // Client defines withexceptions client interface.
 type Client interface {
 	HTTPClient() *zanzibar.HTTPClient
-	WithExceptions(
+	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (string, map[string]string, error)
@@ -74,7 +74,7 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"withexceptions",
 			[]string{
-				"WithExceptions",
+				"func1",
 			},
 			baseURL,
 			defaultHeaders,
@@ -131,13 +131,13 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 	return c.httpClient
 }
 
-// WithExceptions calls "/withexceptions/func1" endpoint.
-func (c *withexceptionsClient) WithExceptions(
+// Func1 calls "/withexceptions/func1" endpoint.
+func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
 ) (string, map[string]string, error) {
 	var defaultRes string
-	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "WithExceptions", c.httpClient)
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", c.httpClient)
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/withexceptions" + "/func1"
