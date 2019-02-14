@@ -101,15 +101,15 @@ type MethodSpec struct {
 	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
 	ResHeaders []string
 
-	RequestType       string
-	ShortRequestType  string
-	ResponseType      string
-	ShortResponseType string
-	OKStatusCode      StatusCode
-	Exceptions        []ExceptionSpec
+	RequestType            string
+	ShortRequestType       string
+	ResponseType           string
+	ShortResponseType      string
+	OKStatusCode           StatusCode
+	Exceptions             []ExceptionSpec
 	ExceptionsByStatusCode map[int][]ExceptionSpec
-	ExceptionsIndex   map[string]ExceptionSpec
-	ValidStatusCodes  []int
+	ExceptionsIndex        map[string]ExceptionSpec
+	ValidStatusCodes       []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed bool
 	// Thrift service name the method belongs to.
@@ -393,7 +393,7 @@ func (ms *MethodSpec) setValidStatusCodes() {
 		ms.OKStatusCode.Code,
 	}
 
-	for code, _ := range ms.ExceptionsByStatusCode {
+	for code := range ms.ExceptionsByStatusCode {
 		ms.ValidStatusCodes = append(ms.ValidStatusCodes, code)
 	}
 }
