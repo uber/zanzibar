@@ -37,6 +37,11 @@ clients.multi.port: 4003
 clients.multi.timeout: 10000
 clients.multi.maxConcurrentRequests: 1000
 clients.multi.errorPercentThreshold: 20
+clients.withexceptions.ip: 127.0.0.1
+clients.withexceptions.port: 4004
+clients.withexceptions.timeout: 10000
+clients.withexceptions.maxConcurrentRequests: 1000
+clients.withexceptions.errorPercentThreshold: 20
 envVarsToTagInRootScope: []
 http.port: 0
 logger.fileName: /tmp/example-gateway.log
