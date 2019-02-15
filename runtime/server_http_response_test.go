@@ -465,7 +465,7 @@ func TestPendingResponseBody(t *testing.T) {
 				assert.Equal(t, bytes, pendingBytes)
 				assert.Equal(t, statusCode, pendingStatusCode)
 
-				headers := res.ResponseHeaders()
+				headers := res.Headers()
 				assert.NotNil(t, headers)
 			},
 		).HandleRequest),
