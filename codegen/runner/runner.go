@@ -38,11 +38,11 @@ type stackTracer interface {
 
 func checkError(err error, message string) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s:\n%s\n", message, err)
+		fmt.Printf("%s:\n%s\n", message, err)
 
 		causeErr := errors.Cause(err)
 		if causeErr, ok := causeErr.(stackTracer); ok {
-			fmt.Fprintf(os.Stderr, "%+v \n", causeErr.StackTrace())
+			fmt.Printf("%+v \n", causeErr.StackTrace())
 		}
 
 		os.Exit(1)
