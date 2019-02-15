@@ -281,3 +281,8 @@ func (res *ServerHTTPResponse) writeBytes(bytes []byte) {
 func (res *ServerHTTPResponse) GetPendingResponse() ([]byte, int) {
 	return res.pendingBodyBytes, res.pendingStatusCode
 }
+
+// Headers returns the underlying http response's headers
+func (res *ServerHTTPResponse) Headers() http.Header {
+	return res.responseWriter.Header()
+}
