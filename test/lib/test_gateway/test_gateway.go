@@ -276,6 +276,7 @@ func CreateGateway(
 	composedConfig["metrics.serviceName"] = serviceName
 	composedConfig["metrics.flushInterval"] = 10
 	composedConfig["metrics.m3.hostPort"] = testGateway.m3Server.Addr
+	composedConfig["metrics.m3.includeHost"] = true
 	composedConfig["metrics.runtime.enableCPUMetrics"] = opts.EnableRuntimeMetrics
 	composedConfig["metrics.runtime.enableMemMetrics"] = opts.EnableRuntimeMetrics
 	composedConfig["metrics.runtime.enableGCMetrics"] = opts.EnableRuntimeMetrics

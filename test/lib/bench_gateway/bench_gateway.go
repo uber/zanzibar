@@ -107,6 +107,7 @@ func CreateGateway(
 	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.serviceName"] = "bench-gateway"
+	seedConfig["metrics.m3.includeHost"] = true
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{

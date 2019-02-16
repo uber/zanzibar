@@ -444,15 +444,10 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 			panic("expected no metrics backend in gateway.")
 		}
 
-		// TODO: Why aren't common tags emitted?
-		// NewReporter adds 'env' and 'service' common tags; and no 'host' tag.
-		commonTags := map[string]string{}
 		opts := m3.Options{
 			HostPorts:          []string{config.MustGetString("metrics.m3.hostPort")},
 			Service:            service,
 			Env:                env,
-			CommonTags:         commonTags,
-			IncludeHost:        false,
 			MaxQueueSize:       int(config.MustGetInt("metrics.m3.maxQueueSize")),
 			MaxPacketSizeBytes: int32(config.MustGetInt("metrics.m3.maxPacketSizeBytes")),
 		}
@@ -463,13 +458,15 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		panic("expected gateway to have MetricsBackend in opts")
 	}
 
-	// TODO: Remove 'env' and 'service' default tags once they are emitted by metrics backend.
 	defaultTags := map[string]string{
 		"env":     env,
 		"service": service,
-		"host":    GetHostname(),
 		"dc":      gateway.Config.MustGetString("datacenter"),
 	}
+	if config.MustGetBoolean("metrics.m3.includeHost") {
+		defaultTags["host"] = GetHostname()
+	}
+
 	// Adds in any env variable variables specified in config
 	envVarsToTagInRootScope := []string{}
 	config.MustGetStruct("envVarsToTagInRootScope", &envVarsToTagInRootScope)

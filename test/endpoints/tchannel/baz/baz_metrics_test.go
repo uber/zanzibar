@@ -74,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 10
+	numMetrics := 9
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()

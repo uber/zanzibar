@@ -219,7 +219,7 @@ func readAddrFromStdout(testGateway *ChildProcessGateway, reader *bufio.Reader) 
 		return &MalformedStdoutError{
 			Type:       "malformed.stdout",
 			StdoutLine: msg,
-			Message:    "Could not find real http/tchannle address in server stdout",
+			Message:    "Could not find real http/tchannel address in server stdout",
 		}
 	}
 

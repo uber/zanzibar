@@ -48,6 +48,7 @@
 	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
 	"logger.output": "disk",
 	"metrics.serviceName": "example-gateway",
+	"metrics.m3.includeHost": true,
 	"service.env.config": {},
 	"serviceName": "example-gateway",
 	"sidecarRouter.default.http.ip": "127.0.0.1",
