@@ -22,6 +22,7 @@ EXAMPLE_SERVICES_DIR = $(EXAMPLE_BASE_DIR)build/services/
 EXAMPLE_SERVICES = $(sort $(dir $(wildcard $(EXAMPLE_SERVICES_DIR)*/)))
 GOIMPORTS = "$(PWD)/vendor/golang.org/x/tools/cmd/goimports"
 GOBINDATA = "$(PWD)/vendor/github.com/jteeuwen/go-bindata/go-bindata"
+GOMOCK = "$(PWD)/vendor/github.com/golang/mock/mockgen"
 
 .PHONY: install
 install:
@@ -33,6 +34,7 @@ install:
 	glide install
 	go build -o $(GOIMPORTS)/goimports ./vendor/golang.org/x/tools/cmd/goimports/
 	go build -o $(GOBINDATA)/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
+	go build -o $(GOMOCK)/mockgen ./vendor/github.com/golang/mock/mockgen/
 
 .PHONY: check-licence
 check-licence:
@@ -110,7 +112,7 @@ generate:
 	@./node_modules/.bin/uber-licence --file "production.gen.go" --dir "config" > /dev/null
 	@$(GOBINDATA)/go-bindata -pkg templates -nocompress -modtime 1 -prefix codegen/templates -o codegen/template_bundle/template_files.go codegen/templates/...
 	@gofmt -w -e -s "codegen/template_bundle/template_files.go"
-	@PATH=$(GOIMPORTS):$(PATH) bash ./scripts/generate.sh
+	@PATH=$(GOIMPORTS):$(GOMOCK):$(PATH) bash ./scripts/generate.sh
 
 .PHONY: check-generate
 check-generate:

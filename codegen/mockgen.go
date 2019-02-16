@@ -25,10 +25,8 @@ import (
 	"github.com/golang/mock/mockgen/model"
 	"github.com/pkg/errors"
 	"go/token"
-	"os"
 	"os/exec"
 	"path"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,47 +38,13 @@ const (
 
 // MockgenBin is a struct abstracts the mockgen binary built from mockgen package in vendor
 type MockgenBin struct {
-	// Bin is the absolute path to the mockgen binary built from vendor
-	Bin string
-
 	pkgHelper *PackageHelper
 	tmpl      *Template
 }
 
 // NewMockgenBin builds the mockgen binary from vendor directory
 func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
-	// we assume that the vendor directory is flattened as Glide does
-	mockgenDir := path.Join("vendor", mockgenPkg)
-	if _, err := os.Stat(mockgenDir); err != nil {
-		return nil, errors.Wrapf(
-			err, "error finding mockgen package in the vendor dir: %q does not exist", mockgenDir,
-		)
-	}
-
-	var mockgenBin = "mockgen.bin"
-	if runtime.GOOS == "windows" {
-		// Windows won't execute a program unless it has a ".exe" suffix.
-		mockgenBin += ".exe"
-	}
-
-	cmd := exec.Command("go", "build", "-o", mockgenBin, ".")
-	cmd.Dir = mockgenDir
-
-	var stderr, stdout bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"error running command %q in %s: %s",
-			strings.Join(cmd.Args, " "),
-			mockgenDir,
-			stderr.String(),
-		)
-	}
-
 	return &MockgenBin{
-		Bin:       path.Join(mockgenDir, mockgenBin),
 		pkgHelper: h,
 		tmpl:      t,
 	}, nil
@@ -89,7 +53,7 @@ func NewMockgenBin(h *PackageHelper, t *Template) (*MockgenBin, error) {
 // GenMock generates mocks for given module instance, pkg is the package name of the generated mocks,
 // and intf is the interface name to generate mock for
 func (m MockgenBin) GenMock(importPath, pkg, intf string) ([]byte, error) {
-	cmd := exec.Command(m.Bin, "-package", pkg, importPath, intf)
+	cmd := exec.Command("mockgen", "-package", pkg, importPath, intf)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
