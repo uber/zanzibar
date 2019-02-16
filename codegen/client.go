@@ -24,8 +24,8 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"gopkg.in/validator.v2"
-	"gopkg.in/yaml.v2"
+	validator "gopkg.in/validator.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type clientConfig interface {

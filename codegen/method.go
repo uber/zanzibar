@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -396,6 +397,9 @@ func (ms *MethodSpec) setValidStatusCodes() {
 	for code := range ms.ExceptionsByStatusCode {
 		ms.ValidStatusCodes = append(ms.ValidStatusCodes, code)
 	}
+
+	// Prevents non-deterministic builds
+	sort.Ints(ms.ValidStatusCodes)
 }
 
 func (ms *MethodSpec) setExceptions(
