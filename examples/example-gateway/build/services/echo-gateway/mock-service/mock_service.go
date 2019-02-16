@@ -146,7 +146,7 @@ func (m *mockService) Stop() {
 	// m.ctrl.Finish() calls runtime.Goexit() on errors
 	// put it in defer so cleanup is always done
 	defer func() {
-		m.server.Close()
+		m.server.Shutdown()
 		m.started = false
 	}()
 	m.ctrl.Finish()
