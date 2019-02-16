@@ -558,16 +558,11 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 	}
 
 	atomLevel := zap.NewAtomicLevelAt(logLevel)
-	prodCore := zapcore.NewCore(
+	zapLogger := zap.New(zapcore.NewCore(
 		logEncoder,
 		output,
 		atomLevel,
-	)
-	zapLogger := zap.New(
-		NewInstrumentedZapCore(
-			prodCore, gateway.RootScope,
-		),
-	)
+	))
 
 	gateway.atomLevel = &atomLevel
 	gateway.logEncoder = logEncoder
@@ -589,13 +584,10 @@ func (gateway *Gateway) setupLogger(config *StaticConfig) error {
 
 // SubLogger returns a sub logger clone with given name and log level.
 func (gateway *Gateway) SubLogger(name string, level zapcore.Level) *zap.Logger {
-	newCore := NewInstrumentedZapCore(
-		zapcore.NewCore(
-			gateway.logEncoder.Clone(),
-			gateway.logWriteSyncer,
-			level,
-		),
-		gateway.RootScope,
+	newCore := zapcore.NewCore(
+		gateway.logEncoder.Clone(),
+		gateway.logWriteSyncer,
+		level,
 	)
 	return gateway.Logger.With(
 		zap.String("subLogger", name),

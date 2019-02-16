@@ -154,12 +154,6 @@ func TestHealthMetrics(t *testing.T) {
 		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
-	allhostTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"dc":      "unknown",
-		"host":    zanzibar.GetHostname(),
-	}
 
 	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
 	assert.Contains(t, metrics, key, "expected metric: %s", key)
@@ -170,11 +164,6 @@ func TestHealthMetrics(t *testing.T) {
 		"endpoint.status", statusTags,
 	)
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
-
-	loggedKey := tally.KeyForPrefixedStringMap(
-		"zap.logged.info", allhostTags,
-	)
-	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.latency", statusTags,
