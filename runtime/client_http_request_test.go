@@ -43,6 +43,12 @@ var defaultTestOptions *testGateway.Options = &testGateway.Options{
 }
 var defaultTestConfig map[string]interface{} = map[string]interface{}{
 	"clients.baz.serviceName": "baz",
+
+	// disable circuit breaker to avoid race condition when running tests
+	// the circuit breaker lib emits metrics in a free goroutine, when the
+	// server closes, it attempts to close the channel for emitting metrics
+	// but the circuit breaker stats report goroutine could still be running
+	"clients.bar.circuitBreakerDisabled": true,
 }
 
 func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
