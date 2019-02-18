@@ -41,6 +41,7 @@
 	"clients.multi.maxConcurrentRequests": 1000,
 	"clients.multi.errorPercentThreshold": 20,
 	"envVarsToTagInRootScope": [],
+	"env": "test",
 	"http.port": 0,
 	"logger.fileName": "/tmp/example-gateway.log",
 	"logger.output": "disk",

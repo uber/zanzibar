@@ -61,6 +61,9 @@ var levelMap = map[string]zapcore.Level{
 var defaultShutdownPollInterval = 500 * time.Millisecond
 var defaultCloseTimeout = 10000 * time.Millisecond
 
+const localhost = "127.0.0.1"
+const prod = "production"
+
 // Options configures the gateway
 type Options struct {
 	MetricsBackend            tally.CachedStatsReporter
@@ -201,6 +204,8 @@ func CreateGateway(
 
 // Bootstrap func
 func (gateway *Gateway) Bootstrap() error {
+	env := gateway.Config.MustGetString("env")
+
 	// start HTTP server
 	gateway.RootScope.Counter("server.bootstrap").Inc(1)
 	_, err := gateway.localHTTPServer.JustListen()
@@ -208,7 +213,7 @@ func (gateway *Gateway) Bootstrap() error {
 		gateway.Logger.Error("Error listening on port", zap.Error(err))
 		return errors.Wrap(err, "error listening on port")
 	}
-	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP {
+	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP && env == prod {
 		_, err := gateway.httpServer.JustListen()
 		if err != nil {
 			gateway.Logger.Error("Error listening on port", zap.Error(err))
@@ -230,11 +235,15 @@ func (gateway *Gateway) Bootstrap() error {
 	}
 
 	// start TChannel server
-	tchannelIP, err := tchannel.ListenIP()
-	if err != nil {
-		return errors.Wrap(err, "error finding the best IP for tchannel")
+	ip := localhost
+	if env == prod {
+		tchannelIP, err := tchannel.ListenIP()
+		if err != nil {
+			return errors.Wrap(err, "error finding the best IP for tchannel")
+		}
+		ip = tchannelIP.String()
 	}
-	tchannelAddr := tchannelIP.String() + ":" + strconv.Itoa(int(gateway.TChannelPort))
+	tchannelAddr := ip + ":" + strconv.Itoa(int(gateway.TChannelPort))
 	ln, err := net.Listen("tcp", tchannelAddr)
 	if err != nil {
 		gateway.Logger.Error("Error listening tchannel port", zap.Error(err))

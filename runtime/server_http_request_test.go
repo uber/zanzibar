@@ -1550,7 +1550,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 
 	expectedValues := map[string]interface{}{
 		"msg":                            "Finished an incoming server HTTP request",
-		"env":                            "production",
+		"env":                            "test",
 		"level":                          "info",
 		"zone":                           "unknown",
 		"service":                        "example-gateway",

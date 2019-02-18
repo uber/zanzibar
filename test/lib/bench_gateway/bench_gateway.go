@@ -94,6 +94,7 @@ func CreateGateway(
 
 	seedConfig["http.port"] = int64(0)
 	seedConfig["tchannel.port"] = int64(0)
+	seedConfig["env"] = "test"
 	seedConfig["envVarsToTagInRootScope"] = []string{}
 
 	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
