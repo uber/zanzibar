@@ -493,9 +493,17 @@ func (gateway *Gateway) setupMetrics(config *StaticConfig) (err error) {
 		EnableGCMetrics:  config.MustGetBoolean("metrics.runtime.enableGCMetrics"),
 		CollectInterval:  collectInterval,
 	}
+
+	// runtime metrics should always have host tag
+	runtimeScope := gateway.RootScope
+	if _, ok := defaultTags["host"]; !ok {
+		runtimeScope = gateway.RootScope.Tagged(map[string]string{
+			"host": GetHostname(),
+		})
+	}
 	gateway.runtimeMetrics = StartRuntimeMetricsCollector(
 		runtimeMetricsOpts,
-		gateway.RootScope,
+		runtimeScope,
 	)
 
 	//Initialize M3Collector for hystrix metrics

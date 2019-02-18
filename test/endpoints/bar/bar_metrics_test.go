@@ -28,7 +28,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber-go/tally"
-	zanzibar "github.com/uber/zanzibar/runtime"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
 )
@@ -105,7 +104,6 @@ func TestCallMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
@@ -118,7 +116,6 @@ func TestCallMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
@@ -155,7 +152,6 @@ func TestCallMetrics(t *testing.T) {
 		"clientid":      "bar",
 		"clientmethod":  "Normal",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"endpointid":    "bar",
 		"handlerid":     "normal",
 		"regionname":    "san_francisco",
@@ -170,7 +166,6 @@ func TestCallMetrics(t *testing.T) {
 		"clientmethod":  "Normal",
 		"status":        "200",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"endpointid":    "bar",
 		"handlerid":     "normal",
 		"regionname":    "san_francisco",

@@ -42,7 +42,7 @@ http.port: 0
 logger.fileName: /tmp/example-gateway.log
 logger.output: disk
 metrics.serviceName: example-gateway
-metrics.m3.includeHost: true
+metrics.m3.includeHost: false
 service.env.config: {}
 serviceName: example-gateway
 shutdown.pollInterval: 10

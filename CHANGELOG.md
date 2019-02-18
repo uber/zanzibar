@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed
-- **BREAKING** It is now configurable whether to emit metrics with `host` tag or not. Runtime config now expects the boolean field `metrics.m3.includeHost` to be set.
+- **BREAKING** It is now configurable whether to emit non-runtime metrics with `host` tag or not. Runtime config now expects the boolean field `metrics.m3.includeHost` to be set. Runtime metrics are always emitted with `host` tag.
 - Removed logger metrics since it is barely useful.
 
 ## 0.2.0 - 2019-01-17

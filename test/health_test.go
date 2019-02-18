@@ -138,7 +138,6 @@ func TestHealthMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
@@ -151,7 +150,6 @@ func TestHealthMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 
