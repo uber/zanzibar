@@ -9,8 +9,10 @@ exception EndpointExceptionType2 {
     1: required string message2
 }
 
+struct Response {}
+
 service WithExceptions {
-    string func1(
+    Response Func1(
     ) throws (
         1: EndpointExceptionType1 e1 (zanzibar.http.status = "401")
         2: EndpointExceptionType2 e2 (zanzibar.http.status = "401")

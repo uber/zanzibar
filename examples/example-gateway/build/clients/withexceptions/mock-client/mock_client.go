@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	withexceptions "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/clients/withexceptions/withexceptions"
 	runtime "github.com/uber/zanzibar/runtime"
 )
 
@@ -36,10 +37,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Func1 mocks base method
-func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (string, map[string]string, error) {
+func (m *MockClient) Func1(arg0 context.Context, arg1 map[string]string) (*withexceptions.Response, map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Func1", arg0, arg1)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*withexceptions.Response)
 	ret1, _ := ret[1].(map[string]string)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

@@ -25,7 +25,6 @@ package withexceptionsendpoint
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"runtime/debug"
 
@@ -57,7 +56,7 @@ func NewWithExceptionsFunc1Handler(deps *module.Dependencies) *WithExceptionsFun
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"withexceptions", "func1",
+		"withexceptions", "Func1",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -142,10 +141,5 @@ func (h *WithExceptionsFunc1Handler) HandleRequest(
 
 	}
 
-	bytes, err := json.Marshal(response)
-	if err != nil {
-		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
-		return
-	}
-	res.WriteJSONBytes(200, cliRespHeaders, bytes)
+	res.WriteJSON(200, cliRespHeaders, response)
 }

@@ -42,7 +42,7 @@ type Client interface {
 	Func1(
 		ctx context.Context,
 		reqHeaders map[string]string,
-	) (string, map[string]string, error)
+	) (*clientsWithexceptionsWithexceptions.Response, map[string]string, error)
 }
 
 // withexceptionsClient is the http client.
@@ -74,7 +74,7 @@ func NewClient(deps *module.Dependencies) Client {
 			deps.Default.Logger, deps.Default.ContextMetrics,
 			"withexceptions",
 			[]string{
-				"func1",
+				"Func1",
 			},
 			baseURL,
 			defaultHeaders,
@@ -135,8 +135,8 @@ func (c *withexceptionsClient) HTTPClient() *zanzibar.HTTPClient {
 func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
-) (string, map[string]string, error) {
-	var defaultRes string
+) (*clientsWithexceptionsWithexceptions.Response, map[string]string, error) {
+	var defaultRes *clientsWithexceptionsWithexceptions.Response
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", c.httpClient)
 
 	// Generate full URL.
@@ -169,13 +169,13 @@ func (c *withexceptionsClient) Func1(
 
 	switch res.StatusCode {
 	case 200:
-		var responseBody string
+		var responseBody clientsWithexceptionsWithexceptions.Response
 		err = res.ReadAndUnmarshalBody(&responseBody)
 		if err != nil {
 			return defaultRes, respHeaders, err
 		}
 
-		return responseBody, respHeaders, nil
+		return &responseBody, respHeaders, nil
 	case 401:
 		allOptions := []interface{}{
 			&clientsWithexceptionsWithexceptions.ExceptionType1{}, &clientsWithexceptionsWithexceptions.ExceptionType2{},

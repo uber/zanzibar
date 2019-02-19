@@ -12,9 +12,9 @@ import (
 	"strings"
 )
 
-// WithExceptions_Func1_Args represents the arguments for the WithExceptions.func1 function.
+// WithExceptions_Func1_Args represents the arguments for the WithExceptions.Func1 function.
 //
-// The arguments for func1 are sent and received over the wire as this struct.
+// The arguments for Func1 are sent and received over the wire as this struct.
 type WithExceptions_Func1_Args struct {
 }
 
@@ -108,9 +108,9 @@ func (v *WithExceptions_Func1_Args) MarshalLogObject(enc zapcore.ObjectEncoder) 
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the arguments.
 //
-// This will always be "func1" for this struct.
+// This will always be "Func1" for this struct.
 func (v *WithExceptions_Func1_Args) MethodName() string {
-	return "func1"
+	return "Func1"
 }
 
 // EnvelopeType returns the kind of value inside this struct.
@@ -121,46 +121,46 @@ func (v *WithExceptions_Func1_Args) EnvelopeType() wire.EnvelopeType {
 }
 
 // WithExceptions_Func1_Helper provides functions that aid in handling the
-// parameters and return values of the WithExceptions.func1
+// parameters and return values of the WithExceptions.Func1
 // function.
 var WithExceptions_Func1_Helper = struct {
-	// Args accepts the parameters of func1 in-order and returns
+	// Args accepts the parameters of Func1 in-order and returns
 	// the arguments struct for the function.
 	Args func() *WithExceptions_Func1_Args
 
 	// IsException returns true if the given error can be thrown
-	// by func1.
+	// by Func1.
 	//
-	// An error can be thrown by func1 only if the
+	// An error can be thrown by Func1 only if the
 	// corresponding exception type was mentioned in the 'throws'
 	// section for it in the Thrift file.
 	IsException func(error) bool
 
-	// WrapResponse returns the result struct for func1
+	// WrapResponse returns the result struct for Func1
 	// given its return value and error.
 	//
 	// This allows mapping values and errors returned by
-	// func1 into a serializable result struct.
+	// Func1 into a serializable result struct.
 	// WrapResponse returns a non-nil error if the provided
-	// error cannot be thrown by func1
+	// error cannot be thrown by Func1
 	//
-	//   value, err := func1(args)
+	//   value, err := Func1(args)
 	//   result, err := WithExceptions_Func1_Helper.WrapResponse(value, err)
 	//   if err != nil {
-	//     return fmt.Errorf("unexpected error from func1: %v", err)
+	//     return fmt.Errorf("unexpected error from Func1: %v", err)
 	//   }
 	//   serialize(result)
-	WrapResponse func(string, error) (*WithExceptions_Func1_Result, error)
+	WrapResponse func(*Response, error) (*WithExceptions_Func1_Result, error)
 
-	// UnwrapResponse takes the result struct for func1
+	// UnwrapResponse takes the result struct for Func1
 	// and returns the value or error returned by it.
 	//
-	// The error is non-nil only if func1 threw an
+	// The error is non-nil only if Func1 threw an
 	// exception.
 	//
 	//   result := deserialize(bytes)
 	//   value, err := WithExceptions_Func1_Helper.UnwrapResponse(result)
-	UnwrapResponse func(*WithExceptions_Func1_Result) (string, error)
+	UnwrapResponse func(*WithExceptions_Func1_Result) (*Response, error)
 }{}
 
 func init() {
@@ -179,9 +179,9 @@ func init() {
 		}
 	}
 
-	WithExceptions_Func1_Helper.WrapResponse = func(success string, err error) (*WithExceptions_Func1_Result, error) {
+	WithExceptions_Func1_Helper.WrapResponse = func(success *Response, err error) (*WithExceptions_Func1_Result, error) {
 		if err == nil {
-			return &WithExceptions_Func1_Result{Success: &success}, nil
+			return &WithExceptions_Func1_Result{Success: success}, nil
 		}
 
 		switch e := err.(type) {
@@ -199,7 +199,7 @@ func init() {
 
 		return nil, err
 	}
-	WithExceptions_Func1_Helper.UnwrapResponse = func(result *WithExceptions_Func1_Result) (success string, err error) {
+	WithExceptions_Func1_Helper.UnwrapResponse = func(result *WithExceptions_Func1_Result) (success *Response, err error) {
 		if result.E1 != nil {
 			err = result.E1
 			return
@@ -210,7 +210,7 @@ func init() {
 		}
 
 		if result.Success != nil {
-			success = *result.Success
+			success = result.Success
 			return
 		}
 
@@ -220,14 +220,14 @@ func init() {
 
 }
 
-// WithExceptions_Func1_Result represents the result of a WithExceptions.func1 function call.
+// WithExceptions_Func1_Result represents the result of a WithExceptions.Func1 function call.
 //
-// The result of a func1 execution is sent and received over the wire as this struct.
+// The result of a Func1 execution is sent and received over the wire as this struct.
 //
 // Success is set only if the function did not throw an exception.
 type WithExceptions_Func1_Result struct {
-	// Value returned by func1 after a successful execution.
-	Success *string                 `json:"success,omitempty"`
+	// Value returned by Func1 after a successful execution.
+	Success *Response               `json:"success,omitempty"`
 	E1      *EndpointExceptionType1 `json:"e1,omitempty"`
 	E2      *EndpointExceptionType2 `json:"e2,omitempty"`
 }
@@ -256,7 +256,7 @@ func (v *WithExceptions_Func1_Result) ToWire() (wire.Value, error) {
 	)
 
 	if v.Success != nil {
-		w, err = wire.NewValueString(*(v.Success)), error(nil)
+		w, err = v.Success.ToWire()
 		if err != nil {
 			return w, err
 		}
@@ -285,6 +285,12 @@ func (v *WithExceptions_Func1_Result) ToWire() (wire.Value, error) {
 	}
 
 	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _Response_Read(w wire.Value) (*Response, error) {
+	var v Response
+	err := v.FromWire(w)
+	return &v, err
 }
 
 func _EndpointExceptionType1_Read(w wire.Value) (*EndpointExceptionType1, error) {
@@ -322,10 +328,8 @@ func (v *WithExceptions_Func1_Result) FromWire(w wire.Value) error {
 	for _, field := range w.GetStruct().Fields {
 		switch field.ID {
 		case 0:
-			if field.Value.Type() == wire.TBinary {
-				var x string
-				x, err = field.Value.GetString(), error(nil)
-				v.Success = &x
+			if field.Value.Type() == wire.TStruct {
+				v.Success, err = _Response_Read(field.Value)
 				if err != nil {
 					return err
 				}
@@ -377,7 +381,7 @@ func (v *WithExceptions_Func1_Result) String() string {
 	var fields [3]string
 	i := 0
 	if v.Success != nil {
-		fields[i] = fmt.Sprintf("Success: %v", *(v.Success))
+		fields[i] = fmt.Sprintf("Success: %v", v.Success)
 		i++
 	}
 	if v.E1 != nil {
@@ -392,16 +396,6 @@ func (v *WithExceptions_Func1_Result) String() string {
 	return fmt.Sprintf("WithExceptions_Func1_Result{%v}", strings.Join(fields[:i], ", "))
 }
 
-func _String_EqualsPtr(lhs, rhs *string) bool {
-	if lhs != nil && rhs != nil {
-
-		x := *lhs
-		y := *rhs
-		return (x == y)
-	}
-	return lhs == nil && rhs == nil
-}
-
 // Equals returns true if all the fields of this WithExceptions_Func1_Result match the
 // provided WithExceptions_Func1_Result.
 //
@@ -412,7 +406,7 @@ func (v *WithExceptions_Func1_Result) Equals(rhs *WithExceptions_Func1_Result) b
 	} else if rhs == nil {
 		return false
 	}
-	if !_String_EqualsPtr(v.Success, rhs.Success) {
+	if !((v.Success == nil && rhs.Success == nil) || (v.Success != nil && rhs.Success != nil && v.Success.Equals(rhs.Success))) {
 		return false
 	}
 	if !((v.E1 == nil && rhs.E1 == nil) || (v.E1 != nil && rhs.E1 != nil && v.E1.Equals(rhs.E1))) {
@@ -432,7 +426,7 @@ func (v *WithExceptions_Func1_Result) MarshalLogObject(enc zapcore.ObjectEncoder
 		return nil
 	}
 	if v.Success != nil {
-		enc.AddString("success", *v.Success)
+		err = multierr.Append(err, enc.AddObject("success", v.Success))
 	}
 	if v.E1 != nil {
 		err = multierr.Append(err, enc.AddObject("e1", v.E1))
@@ -445,9 +439,9 @@ func (v *WithExceptions_Func1_Result) MarshalLogObject(enc zapcore.ObjectEncoder
 
 // GetSuccess returns the value of Success if it is set or its
 // zero value if it is unset.
-func (v *WithExceptions_Func1_Result) GetSuccess() (o string) {
+func (v *WithExceptions_Func1_Result) GetSuccess() (o *Response) {
 	if v.Success != nil {
-		return *v.Success
+		return v.Success
 	}
 
 	return
@@ -491,9 +485,9 @@ func (v *WithExceptions_Func1_Result) IsSetE2() bool {
 // MethodName returns the name of the Thrift function as specified in
 // the IDL, for which this struct represent the result.
 //
-// This will always be "func1" for this struct.
+// This will always be "Func1" for this struct.
 func (v *WithExceptions_Func1_Result) MethodName() string {
-	return "func1"
+	return "Func1"
 }
 
 // EnvelopeType returns the kind of value inside this struct.

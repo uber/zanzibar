@@ -40,7 +40,7 @@ type WithExceptionsFunc1Workflow interface {
 	Handle(
 		ctx context.Context,
 		reqHeaders zanzibar.Header,
-	) (string, zanzibar.Header, error)
+	) (*endpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error)
 }
 
 // NewWithExceptionsFunc1Workflow creates a workflow
@@ -61,7 +61,7 @@ type withExceptionsFunc1Workflow struct {
 func (w withExceptionsFunc1Workflow) Handle(
 	ctx context.Context,
 	reqHeaders zanzibar.Header,
-) (string, zanzibar.Header, error) {
+) (*endpointsWithexceptionsWithexceptions.Response, zanzibar.Header, error) {
 
 	clientHeaders := map[string]string{}
 
@@ -88,14 +88,14 @@ func (w withExceptionsFunc1Workflow) Handle(
 				errValue,
 			)
 
-			return "", nil, serverErr
+			return nil, nil, serverErr
 
 		case *clientsWithexceptionsWithexceptions.ExceptionType2:
 			serverErr := convertFunc1E2(
 				errValue,
 			)
 
-			return "", nil, serverErr
+			return nil, nil, serverErr
 
 		default:
 			w.Logger.Warn("Client failure: could not make client request",
@@ -103,7 +103,7 @@ func (w withExceptionsFunc1Workflow) Handle(
 				zap.String("client", "Withexceptions"),
 			)
 
-			return "", nil, err
+			return nil, nil, err
 
 		}
 	}
@@ -130,8 +130,8 @@ func convertFunc1E2(
 	return serverError
 }
 
-func convertWithExceptionsFunc1ClientResponse(in string) string {
-	out := in
+func convertWithExceptionsFunc1ClientResponse(in *clientsWithexceptionsWithexceptions.Response) *endpointsWithexceptionsWithexceptions.Response {
+	out := &endpointsWithexceptionsWithexceptions.Response{}
 
 	return out
 }

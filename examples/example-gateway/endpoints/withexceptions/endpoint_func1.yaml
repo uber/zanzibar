@@ -1,17 +1,17 @@
 clientId: withexceptions
-clientMethod: func1
+clientMethod: Func1
 endpointId: withexceptions
 endpointType: http
-handleId: func1
+handleId: Func1
 middlewares: []
 reqHeaderMap: {}
 resHeaderMap: {}
 testFixtures:
   successfulRequest:
     clientTestFixtures:
-      withexceptions::func1:
+      withexceptions::Func1:
         clientId: withexceptions
-        clientMethod: func1
+        clientMethod: Func1
         clientReqHeaders: {}
         clientRequest:
           requestType: tchannel
@@ -37,10 +37,10 @@ testFixtures:
       httpResponse:
         statusCode: 200
       responseType: http
-    handleId: func1
+    handleId: Func1
     testName: successfulRequest
     testServiceName: example-gateway
 thriftFile: endpoints/withexceptions/withexceptions.thrift
 thriftFileSha: '{{placeholder}}'
-thriftMethodName: WithExceptions::func1
+thriftMethodName: WithExceptions::Func1
 workflowType: httpClient
