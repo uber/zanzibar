@@ -37,11 +37,13 @@ clients.multi.port: 4003
 clients.multi.timeout: 10000
 clients.multi.maxConcurrentRequests: 1000
 clients.multi.errorPercentThreshold: 20
+env: test
 envVarsToTagInRootScope: []
 http.port: 0
 logger.fileName: /tmp/example-gateway.log
 logger.output: disk
 metrics.serviceName: example-gateway
+metrics.m3.includeHost: false
 service.env.config: {}
 serviceName: example-gateway
 shutdown.pollInterval: 10

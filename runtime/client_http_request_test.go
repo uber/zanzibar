@@ -263,7 +263,7 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 
 	expectedValues := map[string]interface{}{
 		"msg":                            "Finished an outgoing client HTTP request",
-		"env":                            "production",
+		"env":                            "test",
 		"clientID":                       "bar",
 		"Response-Header-Example-Header": "Example-Value",
 		"statusCode":                     float64(200),

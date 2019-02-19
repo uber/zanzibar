@@ -94,6 +94,7 @@ func CreateGateway(
 
 	seedConfig["http.port"] = int64(0)
 	seedConfig["tchannel.port"] = int64(0)
+	seedConfig["env"] = "test"
 	seedConfig["envVarsToTagInRootScope"] = []string{}
 
 	if _, ok := seedConfig["tchannel.serviceName"]; !ok {
@@ -107,6 +108,7 @@ func CreateGateway(
 	}
 	seedConfig["tchannel.processName"] = "bench-gateway"
 	seedConfig["metrics.serviceName"] = "bench-gateway"
+	seedConfig["metrics.m3.includeHost"] = true
 
 	benchGateway := &BenchGateway{
 		httpClient: &http.Client{
