@@ -138,7 +138,6 @@ func TestHealthMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
@@ -151,14 +150,7 @@ func TestHealthMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
-	}
-	allhostTags := map[string]string{
-		"env":     "test",
-		"service": "test-gateway",
-		"dc":      "unknown",
-		"host":    zanzibar.GetHostname(),
 	}
 
 	key := tally.KeyForPrefixedStringMap("endpoint.request", tags)
@@ -170,11 +162,6 @@ func TestHealthMetrics(t *testing.T) {
 		"endpoint.status", statusTags,
 	)
 	assert.Contains(t, metrics, statusKey, "expected metrics: %s", statusKey)
-
-	loggedKey := tally.KeyForPrefixedStringMap(
-		"zap.logged.info", allhostTags,
-	)
-	assert.Contains(t, metrics, loggedKey, "expected metrics: %s", loggedKey)
 
 	latencyMetric := metrics[tally.KeyForPrefixedStringMap(
 		"endpoint.latency", statusTags,
@@ -211,13 +198,6 @@ func TestRuntimeMetrics(t *testing.T) {
 
 	cgateway := gateway.(*testGateway.ChildProcessGateway)
 
-	// Expect 9 runtime metrics + 2 logged metric
-	numMetrics := 12
-	cgateway.MetricsWaitGroup.Add(numMetrics)
-	cgateway.MetricsWaitGroup.Wait()
-
-	metrics := cgateway.M3Service.GetMetrics()
-	assert.Equal(t, numMetrics, len(metrics), "expected 12 metrics")
 	names := []string{
 		"runtime.num-cpu",
 		"runtime.gomaxprocs",
@@ -231,6 +211,14 @@ func TestRuntimeMetrics(t *testing.T) {
 		"runtime.memory.num-gc",
 		"runtime.memory.gc-pause-ms",
 	}
+	// this is a shame because first GC takes 20s to kick in
+	// only then gc stats can be collected
+	// oh and the magic number 2 are 2 other stats produced
+	cgateway.MetricsWaitGroup.Add(len(names) + 2)
+	cgateway.MetricsWaitGroup.Wait()
+
+	metrics := cgateway.M3Service.GetMetrics()
+
 	tags := map[string]string{
 		"env":     "test",
 		"service": "test-gateway",

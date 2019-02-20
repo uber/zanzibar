@@ -74,7 +74,7 @@ func TestCallMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	numMetrics := 10
+	numMetrics := 9
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	ctx := context.Background()
@@ -128,7 +128,6 @@ func TestCallMetrics(t *testing.T) {
 		"service":        "test-gateway",
 		"endpointmethod": "SimpleService__Call",
 		"dc":             "unknown",
-		"host":           zanzibar.GetHostname(),
 		"endpointid":     "bazTChannel",
 		"handlerid":      "call",
 		"device":         "ios",
@@ -165,7 +164,8 @@ func TestCallMetrics(t *testing.T) {
 		"outbound.calls.per-attempt.latency",
 	}
 	tchannelOutboundTags := map[string]string{
-		"app":             "test-gateway",
+		"app": "test-gateway",
+		// this host tag is added by tchannel library, which we don't have control with
 		"host":            zanzibar.GetHostname(),
 		"env":             "test",
 		"service":         "test-gateway",
@@ -201,7 +201,6 @@ func TestCallMetrics(t *testing.T) {
 		"targetservice":  "bazService",
 		"targetendpoint": "SimpleService__call",
 		"dc":             "unknown",
-		"host":           zanzibar.GetHostname(),
 		"device":         "ios",
 		"deviceversion":  "carbon",
 		"regionname":     "san_francisco",

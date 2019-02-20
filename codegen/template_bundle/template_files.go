@@ -2041,7 +2041,7 @@ func (m *mockService) Stop() {
 	// m.ctrl.Finish() calls runtime.Goexit() on errors
 	// put it in defer so cleanup is always done
 	defer func(){
-		m.server.Close()
+		m.server.Shutdown()
 		m.started = false
 	}()
 	m.ctrl.Finish()
@@ -2107,7 +2107,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 4885, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 4888, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

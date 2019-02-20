@@ -73,6 +73,7 @@ jaeger.sampler.param: 0.001
 jaeger.sampler.type: remote
 metrics.flushInterval: 1000
 metrics.m3.hostPort: 127.0.0.1:9052
+metrics.m3.includeHost: true
 metrics.m3.maxPacketSizeBytes: 1440
 metrics.m3.maxQueueSize: 10000
 metrics.runtime.collectInterval: 1000
@@ -97,7 +98,7 @@ func productionYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "production.yaml", size: 636, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "production.yaml", size: 665, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

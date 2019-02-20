@@ -77,7 +77,7 @@ func TestCallMetrics(t *testing.T) {
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
 
-	numMetrics := 14
+	numMetrics := 13
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	_, err = gateway.MakeRequest(
@@ -116,7 +116,6 @@ func TestCallMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	statusTags := map[string]string{
@@ -129,7 +128,6 @@ func TestCallMetrics(t *testing.T) {
 		"device":        "ios",
 		"deviceversion": "carbon",
 		"dc":            "unknown",
-		"host":          zanzibar.GetHostname(),
 		"protocol":      "HTTP",
 	}
 	key := tally.KeyForPrefixedStringMap("endpoint.request", endpointTags)
@@ -194,7 +192,6 @@ func TestCallMetrics(t *testing.T) {
 		"targetservice":  "bazService",
 		"targetendpoint": "SimpleService__call",
 		"dc":             "unknown",
-		"host":           zanzibar.GetHostname(),
 		"endpointid":     "baz",
 		"handlerid":      "call",
 		"regionname":     "san_francisco",
