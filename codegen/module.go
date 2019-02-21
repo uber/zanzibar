@@ -610,7 +610,7 @@ func (system *ModuleSystem) ResolveModules(
 
 				classConfigPath, _, _ := getConfigFilePath(moduleDirAbs, className)
 				if classConfigPath == "" {
-					fmt.Printf("  no class config found in %s directory, skipping over it\n", moduleDirAbs)
+					fmt.Printf("  no class config found in %s directory\n", moduleDirAbs)
 					// No class config found in this directory, skip over it
 					continue
 				}
