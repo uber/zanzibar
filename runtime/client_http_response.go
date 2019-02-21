@@ -25,10 +25,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -119,18 +119,17 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 		return nil, err
 	}
 
-	errMessages := []string{}
+	var merr error = nil
 	for _, v := range vs {
 		err = json.Unmarshal(rawBody, v)
 		if err == nil {
 			// All done -- successfully deserialized
 			return v, nil
 		}
-
-		errMessages = append(errMessages, err.Error())
+		merr = multierr.Append(merr, err)
 	}
 
-	err = fmt.Errorf("all json serialization errors: %s", strings.Join(errMessages, " | "))
+	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
 
 	res.req.Logger.Warn("Could not parse response json into any of provided interfaces", zap.Error(err))
 	return nil, errors.Wrapf(
