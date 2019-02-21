@@ -119,7 +119,7 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interfac
 		return nil, err
 	}
 
-	var merr error = nil
+	var merr error
 	for _, v := range vs {
 		err = json.Unmarshal(rawBody, v)
 		if err == nil {
