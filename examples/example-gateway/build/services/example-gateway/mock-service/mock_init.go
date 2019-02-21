@@ -34,6 +34,7 @@ import (
 	googlenowclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/google-now/mock-client"
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/mock-client"
 	quuxclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/mock-client"
+	withexceptionsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/mock-client"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -50,6 +51,8 @@ import (
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
+	withexceptionsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
@@ -66,12 +69,13 @@ import (
 
 // MockClientNodes contains mock client dependencies
 type MockClientNodes struct {
-	Bar       *barclientgenerated.MockClient
-	Baz       *bazclientgenerated.MockClient
-	Contacts  *contactsclientgenerated.MockClientWithFixture
-	GoogleNow *googlenowclientgenerated.MockClient
-	Multi     *multiclientgenerated.MockClient
-	Quux      *quuxclientgenerated.MockClientWithFixture
+	Bar            *barclientgenerated.MockClient
+	Baz            *bazclientgenerated.MockClient
+	Contacts       *contactsclientgenerated.MockClientWithFixture
+	GoogleNow      *googlenowclientgenerated.MockClient
+	Multi          *multiclientgenerated.MockClient
+	Quux           *quuxclientgenerated.MockClientWithFixture
+	Withexceptions *withexceptionsclientgenerated.MockClient
 }
 
 // InitializeDependenciesMock fully initializes all dependencies in the dep tree
@@ -94,12 +98,13 @@ func InitializeDependenciesMock(
 	}
 
 	mockClientNodes := &MockClientNodes{
-		Bar:       barclientgenerated.NewMockClient(ctrl),
-		Baz:       bazclientgenerated.NewMockClient(ctrl),
-		Contacts:  contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
-		GoogleNow: googlenowclientgenerated.NewMockClient(ctrl),
-		Multi:     multiclientgenerated.NewMockClient(ctrl),
-		Quux:      quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
+		Bar:            barclientgenerated.NewMockClient(ctrl),
+		Baz:            bazclientgenerated.NewMockClient(ctrl),
+		Contacts:       contactsclientgenerated.New(ctrl, fixturecontactsclientgenerated.Fixture),
+		GoogleNow:      googlenowclientgenerated.NewMockClient(ctrl),
+		Multi:          multiclientgenerated.NewMockClient(ctrl),
+		Quux:           quuxclientgenerated.New(ctrl, fixturequuxclientstatic.Fixture),
+		Withexceptions: withexceptionsclientgenerated.NewMockClient(ctrl),
 	}
 	initializedClientDependencies := &module.ClientDependenciesNodes{}
 	tree.Client = initializedClientDependencies
@@ -109,6 +114,7 @@ func InitializeDependenciesMock(
 	initializedClientDependencies.GoogleNow = mockClientNodes.GoogleNow
 	initializedClientDependencies.Multi = mockClientNodes.Multi
 	initializedClientDependencies.Quux = mockClientNodes.Quux
+	initializedClientDependencies.Withexceptions = mockClientNodes.Withexceptions
 
 	initializedMiddlewareDependencies := &module.MiddlewareDependenciesNodes{}
 	tree.Middleware = initializedMiddlewareDependencies
@@ -230,18 +236,30 @@ func InitializeDependenciesMock(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &withexceptionsendpointmodule.ClientDependencies{
+			Withexceptions: initializedClientDependencies.Withexceptions,
+		},
+		Middleware: &withexceptionsendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 
 	dependencies := &module.Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &module.EndpointDependencies{
-			Bar:           initializedEndpointDependencies.Bar,
-			Baz:           initializedEndpointDependencies.Baz,
-			Contacts:      initializedEndpointDependencies.Contacts,
-			Googlenow:     initializedEndpointDependencies.Googlenow,
-			Multi:         initializedEndpointDependencies.Multi,
-			Panic:         initializedEndpointDependencies.Panic,
-			BazTChannel:   initializedEndpointDependencies.BazTChannel,
-			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
+			Bar:            initializedEndpointDependencies.Bar,
+			Baz:            initializedEndpointDependencies.Baz,
+			Contacts:       initializedEndpointDependencies.Contacts,
+			Googlenow:      initializedEndpointDependencies.Googlenow,
+			Multi:          initializedEndpointDependencies.Multi,
+			Panic:          initializedEndpointDependencies.Panic,
+			BazTChannel:    initializedEndpointDependencies.BazTChannel,
+			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
+			Withexceptions: initializedEndpointDependencies.Withexceptions,
 		},
 	}
 

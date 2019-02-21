@@ -1,0 +1,9 @@
+config:
+  endpoints:
+    - endpoint_func1.yaml
+  rateLimit: 100
+dependencies:
+  client:
+    - withexceptions
+name: withexceptions
+type: http

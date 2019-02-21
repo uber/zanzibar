@@ -1212,14 +1212,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 			}
 
 			return respHeaders, nil
-		{{range $idx, $exception := .Exceptions}}
-		case {{$exception.StatusCode.Code}}:
-			var exception {{$exception.Type}}
-			err = res.ReadAndUnmarshalBody(&exception)
+		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
+		case {{$code}}:
+			allOptions := []interface{}{
+				{{range $idx, $exception := $exceptions -}}
+				&{{$exception.Type}}{},
+				{{- end}}
+			}
+			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
 				return respHeaders, err
 			}
-			return respHeaders, &exception
+			return respHeaders, v.(error)
 		{{end}}
 		default:
 			_, err = res.ReadAll()
@@ -1241,14 +1245,18 @@ func (c *{{$clientName}}) {{$methodName}}(
 			{{- end}}
 
 			return {{if isPointerType .ResponseType}}&{{end}}responseBody, respHeaders, nil
-		{{range $idx, $exception := .Exceptions}}
-		case {{$exception.StatusCode.Code}}:
-			var exception {{$exception.Type}}
-			err = res.ReadAndUnmarshalBody(&exception)
+		{{range $code, $exceptions := .ExceptionsByStatusCode -}}
+		case {{$code}}:
+			allOptions := []interface{}{
+				{{range $idx, $exception := $exceptions -}}
+				&{{$exception.Type}}{},
+				{{- end}}
+			}
+			v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
 			if err != nil {
 				return defaultRes, respHeaders, err
 			}
-			return defaultRes, respHeaders, &exception
+			return defaultRes, respHeaders, v.(error)
 		{{end}}
 		default:
 			_, err = res.ReadAll()
@@ -1278,7 +1286,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 10810, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11016, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -22,6 +22,7 @@ package codegen
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -101,14 +102,15 @@ type MethodSpec struct {
 	// ResHeaders needed, generated from "zanzibar.http.resHeaders"
 	ResHeaders []string
 
-	RequestType       string
-	ShortRequestType  string
-	ResponseType      string
-	ShortResponseType string
-	OKStatusCode      StatusCode
-	Exceptions        []ExceptionSpec
-	ExceptionsIndex   map[string]ExceptionSpec
-	ValidStatusCodes  []int
+	RequestType            string
+	ShortRequestType       string
+	ResponseType           string
+	ShortResponseType      string
+	OKStatusCode           StatusCode
+	Exceptions             []ExceptionSpec
+	ExceptionsByStatusCode map[int][]ExceptionSpec
+	ExceptionsIndex        map[string]ExceptionSpec
+	ValidStatusCodes       []int
 	// Additional struct generated from the bundle of request args.
 	RequestBoxed bool
 	// Thrift service name the method belongs to.
@@ -388,12 +390,16 @@ func (ms *MethodSpec) setOKStatusCode(statusCode string) error {
 }
 
 func (ms *MethodSpec) setValidStatusCodes() {
-	ms.ValidStatusCodes = make([]int, len(ms.Exceptions)+1)
-
-	ms.ValidStatusCodes[0] = ms.OKStatusCode.Code
-	for i := 0; i < len(ms.Exceptions); i++ {
-		ms.ValidStatusCodes[i+1] = ms.Exceptions[i].StatusCode.Code
+	ms.ValidStatusCodes = []int{
+		ms.OKStatusCode.Code,
 	}
+
+	for code := range ms.ExceptionsByStatusCode {
+		ms.ValidStatusCodes = append(ms.ValidStatusCodes, code)
+	}
+
+	// Prevents non-deterministic builds
+	sort.Ints(ms.ValidStatusCodes)
 }
 
 func (ms *MethodSpec) setExceptions(
@@ -402,13 +408,11 @@ func (ms *MethodSpec) setExceptions(
 	resultSpec *compile.ResultSpec,
 	h *PackageHelper,
 ) error {
-	seenStatusCodes := map[int]bool{
-		ms.OKStatusCode.Code: true,
-	}
 	ms.Exceptions = make([]ExceptionSpec, len(resultSpec.Exceptions))
 	ms.ExceptionsIndex = make(
 		map[string]ExceptionSpec, len(resultSpec.Exceptions),
 	)
+	ms.ExceptionsByStatusCode = map[int][]ExceptionSpec{}
 
 	for i, e := range resultSpec.Exceptions {
 		typeName, err := h.TypeFullName(e.Type)
@@ -430,6 +434,13 @@ func (ms *MethodSpec) setExceptions(
 			}
 			ms.Exceptions[i] = exception
 			ms.ExceptionsIndex[e.Name] = exception
+			if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
+				ms.ExceptionsByStatusCode[exception.StatusCode.Code] = []ExceptionSpec{}
+			}
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code] = append(
+				ms.ExceptionsByStatusCode[exception.StatusCode.Code],
+				exception,
+			)
 			continue
 		}
 
@@ -440,16 +451,6 @@ func (ms *MethodSpec) setExceptions(
 				"cannot parse the annotation %s for exception %s", ms.annotations.HTTPStatus, e.Name,
 			)
 		}
-
-		if seenStatusCodes[code] && !isEndpoint {
-			return errors.Wrapf(
-				err,
-				"cannot have duplicate status code %s for exception %s",
-				ms.annotations.HTTPStatus,
-				e.Name,
-			)
-		}
-		seenStatusCodes[code] = true
 
 		exception := ExceptionSpec{
 			StructSpec: StructSpec{
@@ -464,6 +465,13 @@ func (ms *MethodSpec) setExceptions(
 		}
 		ms.Exceptions[i] = exception
 		ms.ExceptionsIndex[e.Name] = exception
+		if _, exists := ms.ExceptionsByStatusCode[exception.StatusCode.Code]; !exists {
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code] = []ExceptionSpec{}
+		}
+		ms.ExceptionsByStatusCode[exception.StatusCode.Code] = append(
+			ms.ExceptionsByStatusCode[exception.StatusCode.Code],
+			exception,
+		)
 	}
 	return nil
 }

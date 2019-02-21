@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -107,6 +108,34 @@ func (res *ClientHTTPResponse) ReadAndUnmarshalBody(v interface{}) error {
 	}
 
 	return nil
+}
+
+// ReadAndUnmarshalBodyMultipleOptions will try to unmarshal non pointer value to one of the provided types or fail
+// It will return the deserialized struct (if any) that succeeded
+func (res *ClientHTTPResponse) ReadAndUnmarshalBodyMultipleOptions(vs []interface{}) (interface{}, error) {
+	rawBody, err := res.ReadAll()
+	if err != nil {
+		/* coverage ignore next line */
+		return nil, err
+	}
+
+	var merr error
+	for _, v := range vs {
+		err = json.Unmarshal(rawBody, v)
+		if err == nil {
+			// All done -- successfully deserialized
+			return v, nil
+		}
+		merr = multierr.Append(merr, err)
+	}
+
+	err = fmt.Errorf("all json serialization errors: %s", merr.Error())
+
+	res.req.Logger.Warn("Could not parse response json into any of provided interfaces", zap.Error(err))
+	return nil, errors.Wrapf(
+		err, "Could not parse %s.%s response json into any of provided interfaces",
+		res.req.ClientID, res.req.MethodName,
+	)
 }
 
 // CheckOKResponse checks if the status code is OK.

@@ -1,0 +1,11 @@
+{
+	"name": "withexceptions",
+	"type": "http",
+	"config": {
+		"thriftFile": "clients/withexceptions/withexceptions.thrift",
+		"thriftFileSha": "{{placeholder}}",
+		"exposedMethods": {
+			"Func1": "WithExceptions::Func1"
+		}
+	}
+}

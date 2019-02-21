@@ -35,6 +35,8 @@ import (
 	multiclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi"
 	multiclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/multi/module"
 	quuxclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/quux/module"
+	withexceptionsclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions"
+	withexceptionsclientmodule "github.com/uber/zanzibar/examples/example-gateway/build/clients/withexceptions/module"
 	barendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar"
 	barendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 	bazendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/baz"
@@ -51,6 +53,8 @@ import (
 	baztchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	panictchannelendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic"
 	panictchannelendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/panic/module"
+	withexceptionsendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions"
+	withexceptionsendpointmodule "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/withexceptions/module"
 	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
 	defaultexamplemiddlewaremodule "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example/module"
 	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
@@ -75,12 +79,13 @@ type DependenciesTree struct {
 
 // ClientDependenciesNodes contains client dependencies
 type ClientDependenciesNodes struct {
-	Bar       barclientgenerated.Client
-	Baz       bazclientgenerated.Client
-	Contacts  contactsclientgenerated.Client
-	GoogleNow googlenowclientgenerated.Client
-	Multi     multiclientgenerated.Client
-	Quux      quuxclientstatic.Client
+	Bar            barclientgenerated.Client
+	Baz            bazclientgenerated.Client
+	Contacts       contactsclientgenerated.Client
+	GoogleNow      googlenowclientgenerated.Client
+	Multi          multiclientgenerated.Client
+	Quux           quuxclientstatic.Client
+	Withexceptions withexceptionsclientgenerated.Client
 }
 
 // MiddlewareDependenciesNodes contains middleware dependencies
@@ -94,14 +99,15 @@ type MiddlewareDependenciesNodes struct {
 
 // EndpointDependenciesNodes contains endpoint dependencies
 type EndpointDependenciesNodes struct {
-	Bar           barendpointgenerated.Endpoint
-	Baz           bazendpointgenerated.Endpoint
-	Contacts      contactsendpointgenerated.Endpoint
-	Googlenow     googlenowendpointgenerated.Endpoint
-	Multi         multiendpointgenerated.Endpoint
-	Panic         panicendpointgenerated.Endpoint
-	BazTChannel   baztchannelendpointgenerated.Endpoint
-	PanicTChannel panictchannelendpointgenerated.Endpoint
+	Bar            barendpointgenerated.Endpoint
+	Baz            bazendpointgenerated.Endpoint
+	Contacts       contactsendpointgenerated.Endpoint
+	Googlenow      googlenowendpointgenerated.Endpoint
+	Multi          multiendpointgenerated.Endpoint
+	Panic          panicendpointgenerated.Endpoint
+	BazTChannel    baztchannelendpointgenerated.Endpoint
+	PanicTChannel  panictchannelendpointgenerated.Endpoint
+	Withexceptions withexceptionsendpointgenerated.Endpoint
 }
 
 // InitializeDependencies fully initializes all dependencies in the dep tree
@@ -140,6 +146,9 @@ func InitializeDependencies(
 		Default: initializedDefaultDependencies,
 	})
 	initializedClientDependencies.Quux = quuxclientstatic.NewClient(&quuxclientmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+	})
+	initializedClientDependencies.Withexceptions = withexceptionsclientgenerated.NewClient(&withexceptionsclientmodule.Dependencies{
 		Default: initializedDefaultDependencies,
 	})
 
@@ -263,18 +272,30 @@ func InitializeDependencies(
 			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
 		},
 	})
+	initializedEndpointDependencies.Withexceptions = withexceptionsendpointgenerated.NewEndpoint(&withexceptionsendpointmodule.Dependencies{
+		Default: initializedDefaultDependencies,
+		Client: &withexceptionsendpointmodule.ClientDependencies{
+			Withexceptions: initializedClientDependencies.Withexceptions,
+		},
+		Middleware: &withexceptionsendpointmodule.MiddlewareDependencies{
+			DefaultExample:         initializedMiddlewareDependencies.DefaultExample,
+			DefaultExample2:        initializedMiddlewareDependencies.DefaultExample2,
+			DefaultExampleTchannel: initializedMiddlewareDependencies.DefaultExampleTchannel,
+		},
+	})
 
 	dependencies := &Dependencies{
 		Default: initializedDefaultDependencies,
 		Endpoint: &EndpointDependencies{
-			Bar:           initializedEndpointDependencies.Bar,
-			Baz:           initializedEndpointDependencies.Baz,
-			Contacts:      initializedEndpointDependencies.Contacts,
-			Googlenow:     initializedEndpointDependencies.Googlenow,
-			Multi:         initializedEndpointDependencies.Multi,
-			Panic:         initializedEndpointDependencies.Panic,
-			BazTChannel:   initializedEndpointDependencies.BazTChannel,
-			PanicTChannel: initializedEndpointDependencies.PanicTChannel,
+			Bar:            initializedEndpointDependencies.Bar,
+			Baz:            initializedEndpointDependencies.Baz,
+			Contacts:       initializedEndpointDependencies.Contacts,
+			Googlenow:      initializedEndpointDependencies.Googlenow,
+			Multi:          initializedEndpointDependencies.Multi,
+			Panic:          initializedEndpointDependencies.Panic,
+			BazTChannel:    initializedEndpointDependencies.BazTChannel,
+			PanicTChannel:  initializedEndpointDependencies.PanicTChannel,
+			Withexceptions: initializedEndpointDependencies.Withexceptions,
 		},
 	}
 
