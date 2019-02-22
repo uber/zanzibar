@@ -15,7 +15,7 @@ import:
 - package: go.uber.org/atomic
   version: ^1.3.0
 - package: github.com/uber-go/tally
-  version: ^3
+  version: ^3.3.8
 # update to master since the last semver release is 2 years old
 - package: github.com/julienschmidt/httprouter
   version: master
