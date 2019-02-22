@@ -202,9 +202,13 @@ func (s *TChannelRouter) handle(
 		return err
 	}
 
-	// extract potential scope tags from headers and put on context
-	scopeTags := make(map[string]string)
+	// put request headers on context so that user-provided extractor
+	// functions can choose to have certain headers as metric tags or
+	// log fields
 	ctx = WithEndpointRequestHeadersField(ctx, c.reqHeaders)
+
+	// use user-provided extractor function to decide metric tags
+	scopeTags := make(map[string]string)
 	for k, v := range s.extractor.ExtractScopeTags(ctx) {
 		scopeTags[k] = v
 	}
@@ -213,6 +217,7 @@ func (s *TChannelRouter) handle(
 		c.scope = c.scope.Tagged(scopeTags)
 	}
 
+	// use user-provided extractor function to decide log fields
 	logFields := s.extractor.ExtractLogFields(ctx)
 	ctx = WithLogFields(ctx, logFields...)
 
@@ -230,6 +235,9 @@ func (s *TChannelRouter) handle(
 	if err != nil {
 		return err
 	}
+
+	// TODO: put response headers on ctx for final metrics and logs
+	//ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
 
 	// write response
 	if err = c.writeResHeaders(ctx); err != nil {
