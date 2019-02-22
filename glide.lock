@@ -83,7 +83,7 @@ imports:
   subpackages:
   - utils
 - name: github.com/uber-go/tally
-  version: ff17f3c43c065c3c2991f571e740eee43ea3a14a
+  version: e9a67ec1839e1f6e5133dbcca2f57bec12fdeda2
   subpackages:
   - m3
   - m3/customtransports
@@ -129,6 +129,7 @@ imports:
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
+  - internal/cgroups
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
