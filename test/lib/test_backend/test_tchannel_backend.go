@@ -144,7 +144,6 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 		return nil, err
 	}
 
-	contextExtractors := &zanzibar.ContextExtractors{}
 	scopeExtractor := func(ctx context.Context) map[string]string {
 		tags := map[string]string{}
 		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
@@ -154,13 +153,14 @@ func CreateTChannelBackend(port int32, serviceName string) (*TestTChannelBackend
 
 		return tags
 	}
+	contextExtractors := &zanzibar.ContextExtractors{
+		ScopeTagsExtractors: []zanzibar.ContextScopeTagsExtractor{scopeExtractor},
+	}
 
-	contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
-	extractor := contextExtractors.MakeContextExtractor()
 	gateway := zanzibar.Gateway{
 		Logger:           testLogger,
 		RootScope:        tally.NoopScope,
-		ContextExtractor: extractor,
+		ContextExtractor: contextExtractors,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
 	}
 

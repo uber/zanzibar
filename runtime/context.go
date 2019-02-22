@@ -160,25 +160,25 @@ func getLogFieldsFromCtx(ctx context.Context) []zap.Field {
 
 // WithScopeTags returns a new context with the given scope tags attached to context.Context
 func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
-	fields := GetScopeTagsFromCtx(ctx)
+	tags := GetScopeTagsFromCtx(ctx)
 	for k, v := range newFields {
-		fields[k] = v
+		tags[k] = v
 	}
 
-	return context.WithValue(ctx, scopeTags, fields)
+	return context.WithValue(ctx, scopeTags, tags)
 }
 
 // GetScopeTagsFromCtx returns the tag info extracted from context.
 func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
-	fields := make(map[string]string)
+	tags := make(map[string]string)
 	if val := ctx.Value(scopeTags); val != nil {
 		headers, _ := val.(map[string]string)
 		for k, v := range headers {
-			fields[k] = v
+			tags[k] = v
 		}
 	}
 
-	return fields
+	return tags
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
@@ -192,34 +192,16 @@ type ContextExtractor interface {
 	ExtractLogFields(ctx context.Context) []zap.Field
 }
 
-// AddContextScopeTagsExtractor added a scope tags extractor to contextExtractor.
-func (c *ContextExtractors) AddContextScopeTagsExtractor(extractors ...ContextScopeTagsExtractor) {
-	c.contextScopeExtractors = extractors
-}
-
-// AddContextLogFieldsExtractor added a log fields extractor to contextExtractor.
-func (c *ContextExtractors) AddContextLogFieldsExtractor(extractors ...ContextLogFieldsExtractor) {
-	c.contextLogFieldsExtractors = extractors
-}
-
-// MakeContextExtractor returns a extractor that extracts log fields a context.
-func (c *ContextExtractors) MakeContextExtractor() ContextExtractor {
-	return &ContextExtractors{
-		contextScopeExtractors:     c.contextScopeExtractors,
-		contextLogFieldsExtractors: c.contextLogFieldsExtractors,
-	}
-}
-
-// ContextExtractors warps extractors for context
+// ContextExtractors warps extractors for context, implements ContextExtractor interface
 type ContextExtractors struct {
-	contextScopeExtractors     []ContextScopeTagsExtractor
-	contextLogFieldsExtractors []ContextLogFieldsExtractor
+	ScopeTagsExtractors []ContextScopeTagsExtractor
+	LogFieldsExtractors []ContextLogFieldsExtractor
 }
 
 // ExtractScopeTags extracts scope fields from a context into a tag.
 func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]string {
 	tags := make(map[string]string)
-	for _, fn := range c.contextScopeExtractors {
+	for _, fn := range c.ScopeTagsExtractors {
 		sc := fn(ctx)
 		for k, v := range sc {
 			tags[k] = v
@@ -232,7 +214,7 @@ func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]str
 // ExtractLogFields extracts log fields from a context into a field.
 func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	var fields []zap.Field
-	for _, fn := range c.contextLogFieldsExtractors {
+	for _, fn := range c.LogFieldsExtractors {
 		logFields := fn(ctx)
 		fields = append(fields, logFields...)
 	}

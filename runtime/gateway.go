@@ -130,8 +130,8 @@ func CreateGateway(
 ) (*Gateway, error) {
 	var metricsBackend tally.CachedStatsReporter
 	var logWriter zapcore.WriteSyncer
-	var scopeExtractors []ContextScopeTagsExtractor
-	var fieldExtractors []ContextLogFieldsExtractor
+	var scopeTagsExtractors []ContextScopeTagsExtractor
+	var logFieldsExtractors []ContextLogFieldsExtractor
 	if opts == nil {
 		opts = &Options{}
 	}
@@ -142,21 +142,30 @@ func CreateGateway(
 		logWriter = opts.LogWriter
 	}
 
-	contextExtractors := &ContextExtractors{}
 	if opts.GetContextScopeExtractors != nil {
-		scopeExtractors = opts.GetContextScopeExtractors()
-
-		for _, scopeExtractor := range scopeExtractors {
-			contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
-		}
+		scopeTagsExtractors = opts.GetContextScopeExtractors()
+	} else {
+		scopeTagsExtractors = []ContextScopeTagsExtractor{GetEndpointRequestHeadersFromCtx}
 	}
 
 	if opts.GetContextFieldExtractors != nil {
-		fieldExtractors = opts.GetContextFieldExtractors()
-
-		for _, fieldExtractor := range fieldExtractors {
-			contextExtractors.AddContextLogFieldsExtractor(fieldExtractor)
+		logFieldsExtractors = opts.GetContextFieldExtractors()
+	} else {
+		logFieldsExtractors = []ContextLogFieldsExtractor{
+			func(ctx context.Context) []zap.Field {
+				reqHeaders := GetEndpointRequestHeadersFromCtx(ctx)
+				fields := make([]zap.Field, 0, len(reqHeaders))
+				for k, v := range reqHeaders {
+					fields = append(fields, zap.String(k, v))
+				}
+				return fields
+			},
 		}
+	}
+
+	extractors := &ContextExtractors{
+		ScopeTagsExtractors: scopeTagsExtractors,
+		LogFieldsExtractors: logFieldsExtractors,
 	}
 
 	gateway := &Gateway{
@@ -165,7 +174,7 @@ func CreateGateway(
 		ServiceName:      config.MustGetString("serviceName"),
 		WaitGroup:        &sync.WaitGroup{},
 		Config:           config,
-		ContextExtractor: contextExtractors.MakeContextExtractor(),
+		ContextExtractor: extractors,
 		logWriter:        logWriter,
 		metricsBackend:   metricsBackend,
 	}

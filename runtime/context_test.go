@@ -200,13 +200,11 @@ func TestExtractScopeTag(t *testing.T) {
 	}}
 
 	expected := map[string]string{"region-id": "san_francisco"}
-	contextExtractors := &ContextExtractors{}
-	for _, scopeExtractor := range contextScopeExtractors {
-		contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
+	extractors := &ContextExtractors{
+		ScopeTagsExtractors: contextScopeExtractors,
 	}
 
-	contextExtractor := contextExtractors.MakeContextExtractor()
-	tags := contextExtractor.ExtractScopeTags(ctx)
+	tags := extractors.ExtractScopeTags(ctx)
 	assert.Equal(t, tags, expected)
 }
 
@@ -222,13 +220,10 @@ func TestExtractLogField(t *testing.T) {
 
 	var expected []zap.Field
 	expected = append(expected, zap.String("region-id", "san_francisco"))
-	contextExtractors := &ContextExtractors{}
-	for _, logFieldExtractor := range contextLogFieldsExtractor {
-		contextExtractors.AddContextLogFieldsExtractor(logFieldExtractor)
+	extractors := &ContextExtractors{
+		LogFieldsExtractors: contextLogFieldsExtractor,
 	}
-
-	contextExtractor := contextExtractors.MakeContextExtractor()
-	fields := contextExtractor.ExtractLogFields(ctx)
+	fields := extractors.ExtractLogFields(ctx)
 	assert.Equal(t, expected, fields)
 }
 

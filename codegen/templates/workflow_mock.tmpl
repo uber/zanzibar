@@ -49,8 +49,7 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 		Scope: tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
-	contextExtractors := &zanzibar.ContextExtractors{}
-	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
+	initializedDefaultDependencies.ContextExtractor = &zanzibar.ContextExtractors{}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}

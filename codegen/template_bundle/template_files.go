@@ -3149,8 +3149,7 @@ func New{{$workflowInterface}}Mock(t *testing.T) (workflow.{{$workflowInterface}
 		Scope: tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
-	contextExtractors := &zanzibar.ContextExtractors{}
-	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
+	initializedDefaultDependencies.ContextExtractor = &zanzibar.ContextExtractors{}
 
 	{{range $idx, $className := $instance.DependencyOrder}}
 	{{- $moduleInstances := (index $instance.RecursiveDependencies $className)}}
@@ -3214,7 +3213,7 @@ func workflow_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4716, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "workflow_mock.tmpl", size: 4653, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
