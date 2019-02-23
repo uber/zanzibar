@@ -51,21 +51,28 @@ type TChannelClientOption struct {
 	// instead; e.g. can allow the service to be overridden when a "X-Zanzibar-Use-Staging"
 	// header is present
 	AltSubchannelName string
+
+	// the header key that is used together with the request uuid on context to
+	// form a header when sending the request to downstream, e.g. "x-request-uuid"
+	RequestUUIDHeaderKey string
 }
 
 // TChannelClient implements TChannelCaller and makes outgoing Thrift calls.
 type TChannelClient struct {
+	ClientID string
+	Loggers  map[string]*zap.Logger
+
 	ch                *tchannel.Channel
 	sc                *tchannel.SubChannel
 	scAlt             *tchannel.SubChannel
 	serviceName       string
-	ClientID          string
 	methodNames       map[string]string
 	timeout           time.Duration
 	timeoutPerAttempt time.Duration
 	routingKey        *string
-	Loggers           map[string]*zap.Logger
 	metrics           ContextMetrics
+
+	requestUUIDHeaderKey string
 }
 
 // NewTChannelClient is deprecated, use NewTChannelClientContext instead
@@ -113,6 +120,8 @@ func NewTChannelClientContext(
 		routingKey:        opt.RoutingKey,
 		Loggers:           loggers,
 		metrics:           metrics,
+
+		requestUUIDHeaderKey: opt.RequestUUIDHeaderKey,
 	}
 	if opt.AltSubchannelName != "" {
 		client.scAlt = ch.GetSubChannel(opt.AltSubchannelName)
@@ -186,6 +195,11 @@ func (c *TChannelClient) call(
 ) (success bool, resHeaders map[string]string, err error) {
 	defer func() { call.finish(ctx, err) }()
 	call.start()
+
+	reqUUID := RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
+	}
 
 	retryOpts := tchannel.RetryOptions{
 		TimeoutPerAttempt: c.timeoutPerAttempt,

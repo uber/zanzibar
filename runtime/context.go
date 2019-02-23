@@ -24,7 +24,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/pborman/uuid"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -114,17 +113,17 @@ func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
 }
 
 // withRequestUUID returns a context with request uuid.
-func withRequestUUID(ctx context.Context, reqUUID uuid.UUID) context.Context {
+func withRequestUUID(ctx context.Context, reqUUID string) context.Context {
 	return context.WithValue(ctx, requestUUIDKey, reqUUID)
 }
 
 // RequestUUIDFromCtx returns the RequestUUID, if it exists on context
-func RequestUUIDFromCtx(ctx context.Context) uuid.UUID {
+func RequestUUIDFromCtx(ctx context.Context) string {
 	if val := ctx.Value(requestUUIDKey); val != nil {
-		uuid, _ := val.(uuid.UUID)
+		uuid, _ := val.(string)
 		return uuid
 	}
-	return nil
+	return ""
 }
 
 // WithRoutingDelegate adds the tchannel routing delegate information in the

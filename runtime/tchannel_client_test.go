@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -41,7 +42,7 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 		resHeaders:    headers,
 	}
 
-	fields := outboundCall.logFields()
+	fields := outboundCall.logFields(context.TODO())
 
 	// one field for each of the:
 	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader

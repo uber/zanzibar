@@ -973,6 +973,7 @@ type {{$clientName}} struct {
 	clientID string
 	httpClient   *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+	requestUUIDHeaderKey string
 
 	{{if $sidecarRouter -}}
 	calleeHeader string
@@ -1004,6 +1005,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.{{$clientID}}.defaultHeaders", &defaultHeaders)
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
+	}
 
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
@@ -1029,6 +1034,7 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 			timeout,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey: requestUUIDHeaderKey,
 	}
 }
 
@@ -1093,6 +1099,11 @@ func (c *{{$clientName}}) {{$methodName}}(
 	r {{.RequestType}},
 	{{end -}}
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	{{if .ResponseType -}}
 	var defaultRes  {{.ResponseType}}
 	{{end -}}
@@ -1286,7 +1297,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11016, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11411, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2205,6 +2216,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
+	}
 	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
@@ -2261,13 +2276,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
-			ClientID:          "{{$clientID}}",
-			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
-			AltSubchannelName: scAltName,
+			ServiceName:          serviceName,
+			ClientID:             "{{$clientID}}",
+			MethodNames:          methodNames,
+			Timeout:              timeout,
+			TimeoutPerAttempt:    timeoutPerAttempt,
+			RoutingKey:           &routingKey,
+			AltSubchannelName:    scAltName,
+			RequestUUIDHeaderKey: requestUUIDHeaderKey,
 		},
 	)
 
@@ -2413,7 +2429,7 @@ func tchannel_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9256, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "tchannel_client.tmpl", size: 9539, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

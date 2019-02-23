@@ -50,6 +50,7 @@ type withexceptionsClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+	requestUUIDHeaderKey   string
 }
 
 // NewClient returns a new http client.
@@ -64,6 +65,10 @@ func NewClient(deps *module.Dependencies) Client {
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.withexceptions.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.withexceptions.defaultHeaders", &defaultHeaders)
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
@@ -81,6 +86,7 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey:   requestUUIDHeaderKey,
 	}
 }
 
@@ -136,6 +142,11 @@ func (c *withexceptionsClient) Func1(
 	ctx context.Context,
 	headers map[string]string,
 ) (*clientsWithexceptionsWithexceptions.Response, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	var defaultRes *clientsWithexceptionsWithexceptions.Response
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "Func1", c.httpClient)
 

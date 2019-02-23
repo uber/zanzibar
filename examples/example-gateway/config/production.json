@@ -50,6 +50,7 @@
 	"clients.withexceptions.errorPercentThreshold": 20,
 	"envVarsToTagInRootScope": [],
 	"http.port": 7783,
+	"http.clients.requestUUIDHeaderKey": "x-request-uuid",
 	"logger.fileName": "/var/log/example-gateway/example-gateway.log",
 	"logger.output": "disk",
 	"metrics.serviceName": "example-gateway",
@@ -65,5 +66,7 @@
 	"tchannel.port": 7784,
 	"tchannel.processName": "example-gateway",
 	"tchannel.serviceName": "example-gateway",
-	"useDatacenter": false
+	"tchannel.clients.requestUUIDHeaderKey": "x-request-uuid",
+	"useDatacenter": false,
+
 }
