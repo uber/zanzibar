@@ -118,9 +118,8 @@ func withRequestUUID(ctx context.Context, reqUUID uuid.UUID) context.Context {
 	return context.WithValue(ctx, requestUUIDKey, reqUUID)
 }
 
-// GetRequestUUIDFromCtx returns the RequestUUID, if it exists on context
-// TODO: in future, we can extend this to have request object
-func GetRequestUUIDFromCtx(ctx context.Context) uuid.UUID {
+// RequestUUIDFromCtx returns the RequestUUID, if it exists on context
+func RequestUUIDFromCtx(ctx context.Context) uuid.UUID {
 	if val := ctx.Value(requestUUIDKey); val != nil {
 		uuid, _ := val.(uuid.UUID)
 		return uuid
@@ -149,7 +148,7 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
-func getLogFieldsFromCtx(ctx context.Context) []zap.Field {
+func logFieldsFromCtx(ctx context.Context) []zap.Field {
 	var fields []zap.Field
 	v := ctx.Value(requestLogFields)
 	if v != nil {
@@ -182,7 +181,7 @@ func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
-	previousFields := getLogFieldsFromCtx(ctx)
+	previousFields := logFieldsFromCtx(ctx)
 	return append(previousFields, newFields...)
 }
 

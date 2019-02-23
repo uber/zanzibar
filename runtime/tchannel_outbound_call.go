@@ -66,14 +66,16 @@ func (c *tchannelOutboundCall) finish(ctx context.Context, err error) {
 	c.metrics.RecordTimer(ctx, clientLatency, c.finishTime.Sub(c.startTime))
 
 	// write logs
+	fields := c.logFields(ctx)
 	if err == nil {
-		c.logger.Info("Finished an outgoing client TChannel request", c.logFields()...)
+		c.logger.Info("Finished an outgoing client TChannel request", fields...)
 	} else {
-		c.logger.Warn("Failed to send outgoing client TChannel request", zap.Error(err))
+		fields = append(fields, zap.Error(err))
+		c.logger.Warn("Failed to send outgoing client TChannel request", fields...)
 	}
 }
 
-func (c *tchannelOutboundCall) logFields() []zapcore.Field {
+func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 	var hostPort string
 	if c.call != nil {
 		hostPort = c.call.RemotePeer().HostPort
@@ -86,13 +88,7 @@ func (c *tchannelOutboundCall) logFields() []zapcore.Field {
 		zap.Time("timestamp-finished", c.finishTime),
 	}
 
-	for k, v := range c.reqHeaders {
-		fields = append(fields, zap.String("Request-Header-"+k, v))
-	}
-	for k, v := range c.resHeaders {
-		fields = append(fields, zap.String("Response-Header-"+k, v))
-	}
-
+	fields = append(fields, logFieldsFromCtx(ctx)...)
 	return fields
 }
 

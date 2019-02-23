@@ -115,13 +115,13 @@ func TestGetRequestUUIDFromCtx(t *testing.T) {
 	uid := uuid.NewUUID()
 	ctx := withRequestUUID(context.TODO(), uid)
 
-	requestUUID := GetRequestUUIDFromCtx(ctx)
+	requestUUID := RequestUUIDFromCtx(ctx)
 
 	assert.NotNil(t, ctx)
 	assert.Equal(t, uid, requestUUID)
 
 	// Test Default Scenario where no uuid exists in the context
-	requestUUID = GetRequestUUIDFromCtx(context.TODO())
+	requestUUID = RequestUUIDFromCtx(context.TODO())
 	assert.Nil(t, requestUUID)
 }
 

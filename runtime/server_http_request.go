@@ -34,7 +34,6 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/pborman/uuid"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 )
@@ -71,14 +70,10 @@ func NewServerHTTPRequest(
 	params url.Values,
 	endpoint *RouterEndpoint,
 ) *ServerHTTPRequest {
-	// put request uuid and endpoint name on context
-	requestUUID := uuid.NewUUID()
-	ctx := withRequestUUID(r.Context(), requestUUID)
-	ctx = WithEndpointField(ctx, endpoint.EndpointName)
+	ctx := r.Context()
 
 	// put request log fields on context
 	logFields := []zap.Field{
-		zap.String(logFieldRequestUUID, requestUUID.String()),
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
 		zap.String(logFieldHandlerID, endpoint.HandlerName),
 	}

@@ -84,7 +84,7 @@ func (c *tchannelInboundCall) logFields(ctx context.Context) []zap.Field {
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
 	}
-	fields = append(fields, getLogFieldsFromCtx(ctx)...)
+	fields = append(fields, logFieldsFromCtx(ctx)...)
 	return fields
 }
 

@@ -70,6 +70,11 @@ type Options struct {
 	LogWriter                 zapcore.WriteSyncer
 	GetContextScopeExtractors func() []ContextScopeTagsExtractor
 	GetContextFieldExtractors func() []ContextLogFieldsExtractor
+
+	// If present, request uuid is retrieved from the incoming request
+	// headers using the key, and put on the context. Otherwise, a new
+	// uuid is created for the incoming request.
+	RequestUUIDHeaderKey string
 }
 
 // Gateway type
@@ -105,7 +110,8 @@ type Gateway struct {
 	localHTTPServer *HTTPServer
 	tchannelServer  *tchannel.Channel
 	tracerCloser    io.Closer
-	//	- process reporter ?
+
+	requestUUIDHeaderKey string
 }
 
 // DefaultDependencies are the common dependencies for all modules
@@ -177,6 +183,8 @@ func CreateGateway(
 		ContextExtractor: extractors,
 		logWriter:        logWriter,
 		metricsBackend:   metricsBackend,
+
+		requestUUIDHeaderKey: opts.RequestUUIDHeaderKey,
 	}
 
 	gateway.setupConfig(config)

@@ -59,6 +59,8 @@ type TChannelRouter struct {
 	logger    *zap.Logger
 	scope     tally.Scope
 	extractor ContextExtractor
+
+	requestUUIDHeaderKey string
 }
 
 // netContextRouter implements the Handle interface that consumes netContext instead of stdlib context
@@ -106,6 +108,8 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 		logger:    g.Logger,
 		scope:     g.RootScope,
 		extractor: g.ContextExtractor,
+
+		requestUUIDHeaderKey: g.requestUUIDHeaderKey,
 	}
 }
 
@@ -144,14 +148,8 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
-	// put endpoint id and request uuid on the context
-	uuid := uuid.NewUUID()
-	ctx = withRequestUUID(ctx, uuid)
-	ctx = WithEndpointField(ctx, e.EndpointID)
-
 	// put log fields on the context
 	logFields := []zap.Field{
-		zap.String(logFieldRequestUUID, uuid.String()),
 		zap.String(logFieldEndpointID, e.EndpointID),
 		zap.String(logFieldHandlerID, e.HandlerID),
 		zap.String(logFieldRequestMethod, e.Method),
@@ -201,6 +199,12 @@ func (s *TChannelRouter) handle(
 	if err = c.readReqHeaders(ctx); err != nil {
 		return err
 	}
+
+	reqUUID, ok := c.reqHeaders[s.requestUUIDHeaderKey]
+	if !ok {
+		reqUUID = uuid.New()
+	}
+	ctx = withRequestUUID(ctx, reqUUID)
 
 	// put request headers on context so that user-provided extractor
 	// functions can choose to have certain headers as metric tags or
