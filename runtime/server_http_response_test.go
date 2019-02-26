@@ -357,6 +357,12 @@ func TestResponseSetHeaders(t *testing.T) {
 		resp.Header.Get("foo"),
 		"bar",
 	)
+	// Ensure content-type is set for JSON body.
+	assert.Equal(
+		t,
+		resp.Header.Get("Content-type"),
+		"application/json",
+	)
 }
 
 func TestResponsePeekBodyError(t *testing.T) {
