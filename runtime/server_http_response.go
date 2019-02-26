@@ -169,8 +169,8 @@ func (res *ServerHTTPResponse) SendError(
 	)
 }
 
-// WriteJSONBytes writes a byte[] slice that is valid json to Response
-func (res *ServerHTTPResponse) WriteJSONBytes(
+// WriteBytes writes a byte[] slice that is valid Response
+func (res *ServerHTTPResponse) WriteBytes(
 	statusCode int, headers Header, bytes []byte,
 ) {
 	if headers != nil {
@@ -182,10 +182,20 @@ func (res *ServerHTTPResponse) WriteJSONBytes(
 		}
 	}
 
-	res.responseWriter.Header().Set("content-type", "application/json")
-
 	res.pendingStatusCode = statusCode
 	res.pendingBodyBytes = bytes
+}
+
+// WriteJSONBytes writes a byte[] slice that is valid json to Response
+func (res *ServerHTTPResponse) WriteJSONBytes(
+	statusCode int, headers Header, bytes []byte,
+) {
+	if headers == nil {
+		headers = ServerHTTPHeader{}
+	}
+
+	headers.Add("content-type", "application/json")
+	res.WriteBytes(statusCode, headers, bytes)
 }
 
 // WriteJSON writes a json serializable struct to Response
