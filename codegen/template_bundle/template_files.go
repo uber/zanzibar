@@ -1101,6 +1101,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1297,7 +1300,7 @@ func http_clientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "http_client.tmpl", size: 11411, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "http_client.tmpl", size: 11474, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

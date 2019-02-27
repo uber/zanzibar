@@ -322,6 +322,9 @@ func (c *barClient) ArgNotStruct(
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -394,6 +397,9 @@ func (c *barClient) ArgWithHeaders(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -467,6 +473,9 @@ func (c *barClient) ArgWithManyQueryParams(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -613,6 +622,9 @@ func (c *barClient) ArgWithNestedQueryParams(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -719,6 +731,9 @@ func (c *barClient) ArgWithParams(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -787,6 +802,9 @@ func (c *barClient) ArgWithQueryHeader(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -852,6 +870,9 @@ func (c *barClient) ArgWithQueryParams(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -934,6 +955,9 @@ func (c *barClient) DeleteFoo(
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -994,6 +1018,9 @@ func (c *barClient) Hello(
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1067,6 +1094,9 @@ func (c *barClient) MissingArg(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1141,6 +1171,9 @@ func (c *barClient) NoRequest(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1216,6 +1249,9 @@ func (c *barClient) Normal(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1291,6 +1327,9 @@ func (c *barClient) NormalRecur(
 ) (*clientsBarBar.BarResponseRecur, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1365,6 +1404,9 @@ func (c *barClient) TooManyArgs(
 ) (*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1449,6 +1491,9 @@ func (c *barClient) EchoBinary(
 ) ([]byte, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1518,6 +1563,9 @@ func (c *barClient) EchoBool(
 ) (bool, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1587,6 +1635,9 @@ func (c *barClient) EchoDouble(
 ) (float64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1656,6 +1707,9 @@ func (c *barClient) EchoEnum(
 ) (clientsBarBar.Fruit, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1725,6 +1779,9 @@ func (c *barClient) EchoI16(
 ) (int16, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1794,6 +1851,9 @@ func (c *barClient) EchoI32(
 ) (int32, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1863,6 +1923,9 @@ func (c *barClient) EchoI32Map(
 ) (map[int32]*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -1932,6 +1995,9 @@ func (c *barClient) EchoI64(
 ) (int64, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2001,6 +2067,9 @@ func (c *barClient) EchoI8(
 ) (int8, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2070,6 +2139,9 @@ func (c *barClient) EchoString(
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2139,6 +2211,9 @@ func (c *barClient) EchoStringList(
 ) ([]string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2208,6 +2283,9 @@ func (c *barClient) EchoStringMap(
 ) (map[string]*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2277,6 +2355,9 @@ func (c *barClient) EchoStringSet(
 ) (map[string]struct{}, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2346,6 +2427,9 @@ func (c *barClient) EchoStructList(
 ) ([]*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2415,6 +2499,9 @@ func (c *barClient) EchoStructSet(
 ) ([]*clientsBarBar.BarResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -2484,6 +2571,9 @@ func (c *barClient) EchoTypedef(
 ) (clientsBarBar.UUID, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 

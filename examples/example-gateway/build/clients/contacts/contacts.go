@@ -151,6 +151,9 @@ func (c *contactsClient) SaveContacts(
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -214,6 +217,9 @@ func (c *contactsClient) TestURLURL(
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 

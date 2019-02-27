@@ -148,6 +148,9 @@ func (c *multiClient) HelloA(
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -211,6 +214,9 @@ func (c *multiClient) HelloB(
 ) (string, map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 

@@ -151,6 +151,9 @@ func (c *googleNowClient) AddCredentials(
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
@@ -217,6 +220,9 @@ func (c *googleNowClient) CheckCredentials(
 ) (map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 

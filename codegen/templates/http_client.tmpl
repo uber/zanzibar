@@ -177,6 +177,9 @@ func (c *{{$clientName}}) {{$methodName}}(
 ) ({{- if ne .ResponseType "" -}} {{.ResponseType}}, {{- end -}}map[string]string, error) {
 	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
 		headers[c.requestUUIDHeaderKey] = reqUUID
 	}
 
