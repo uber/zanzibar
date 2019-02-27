@@ -123,8 +123,9 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
-	endpoint.HandlerFn(req.Context(), req, req.res)
-	req.res.flush()
+	ctx := req.Context()
+	endpoint.HandlerFn(ctx, req, req.res)
+	req.res.flush(ctx)
 }
 
 // httpRouter data structure to handle and register endpoints
@@ -191,6 +192,7 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 			reqUUID = uuid.New()
 		}
 		ctx := withRequestUUID(r.Context(), reqUUID)
+		ctx = WithLogFields(ctx, zap.String(logFieldRequestUUID, reqUUID))
 		r = r.WithContext(ctx)
 		handler.ServeHTTP(w, r)
 	}
@@ -201,12 +203,6 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 
 // ServeHTTP implements the http.Handle as a convenience to allow HTTPRouter to be invoked by the standard library HTTP server.
 func (router *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	reqUUID := r.Header.Get(router.requestUUIDHeaderKey)
-	if reqUUID == "" {
-		reqUUID = uuid.New()
-	}
-	ctx := withRequestUUID(r.Context(), reqUUID)
-	r = r.WithContext(ctx)
 	router.httpRouter.ServeHTTP(w, r)
 }
 
@@ -251,7 +247,7 @@ func (router *httpRouter) handleNotFound(
 	req := NewServerHTTPRequest(w, r, nil, router.notFoundEndpoint)
 	http.NotFound(w, r)
 	req.res.StatusCode = http.StatusNotFound
-	req.res.finish()
+	req.res.finish(ctx)
 }
 
 func (router *httpRouter) handleMethodNotAllowed(
@@ -273,5 +269,5 @@ func (router *httpRouter) handleMethodNotAllowed(
 		http.StatusMethodNotAllowed,
 	)
 	req.res.StatusCode = http.StatusMethodNotAllowed
-	req.res.finish()
+	req.res.finish(ctx)
 }

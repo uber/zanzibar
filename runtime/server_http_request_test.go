@@ -1511,7 +1511,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		ContextLogger: bgateway.ActualGateway.ContextLogger,
 		Tracer:        bgateway.ActualGateway.Tracer,
 	}
-	bgateway.ActualGateway.HTTPRouter.Handle(
+	err = bgateway.ActualGateway.HTTPRouter.Handle(
 		"GET", "/foo", http.HandlerFunc(zanzibar.NewRouterEndpoint(
 			bgateway.ActualGateway.ContextExtractor,
 			deps,
@@ -1525,6 +1525,7 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 			},
 		).HandleRequest),
 	)
+	assert.NoError(t, err)
 
 	_, err = gateway.MakeRequest("GET", "/foo?bar=bar", nil, nil)
 	assert.NoError(t, err)
@@ -1549,19 +1550,18 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 	}
 
 	expectedValues := map[string]interface{}{
-		"msg":                            "Finished an incoming server HTTP request",
-		"env":                            "test",
-		"level":                          "info",
-		"zone":                           "unknown",
-		"service":                        "example-gateway",
-		"method":                         "GET",
-		"pathname":                       "/foo?bar=bar",
-		"statusCode":                     float64(200),
-		"Response-Header-Content-Type":   "application/json",
-		"Request-Header-Accept-Encoding": "gzip",
-		"Request-Header-User-Agent":      "Go-http-client/1.1",
-		"handlerID":                      "foo",
-		"endpointID":                     "foo",
+		"msg":             "Finished an incoming server HTTP request",
+		"env":             "test",
+		"level":           "info",
+		"zone":            "unknown",
+		"service":         "example-gateway",
+		"method":          "GET",
+		"pathname":        "/foo?bar=bar",
+		"statusCode":      float64(200),
+		"Accept-Encoding": "gzip",
+		"User-Agent":      "Go-http-client/1.1",
+		"handlerID":       "foo",
+		"endpointID":      "foo",
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)

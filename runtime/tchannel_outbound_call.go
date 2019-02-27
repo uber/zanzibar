@@ -88,6 +88,7 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		zap.Time("timestamp-finished", c.finishTime),
 	}
 
+	// TODO: log client request headers and differentiate with endpoint headers
 	fields = append(fields, logFieldsFromCtx(ctx)...)
 	return fields
 }

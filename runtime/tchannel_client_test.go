@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestNilCallReferenceForLogger(t *testing.T) {
@@ -41,13 +42,18 @@ func TestNilCallReferenceForLogger(t *testing.T) {
 		reqHeaders:    headers,
 		resHeaders:    headers,
 	}
+	ctx := context.TODO()
+	ctx = WithLogFields(ctx, zap.String("foo", "bar"))
 
-	fields := outboundCall.logFields(context.TODO())
+	fields := outboundCall.logFields(ctx)
 
 	// one field for each of the:
 	// timestamp-started, timestamp-finished, remoteAddr, requestHeader, responseHeader
-	assert.Len(t, fields, 5)
+	assert.Len(t, fields, 4)
 	assert.Equal(t, fields[0].Key, "remoteAddr")
 	// nil call should cause remoteAddr to be set to unknown
 	assert.Equal(t, fields[0].String, "unknown")
+
+	assert.Equal(t, fields[3].Key, "foo")
+	assert.Equal(t, fields[3].String, "bar")
 }

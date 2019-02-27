@@ -75,8 +75,11 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 
 	ctx := context.Background()
 	reqHeaders := map[string]string{
-		"x-token": "token",
-		"x-uuid":  "uuid",
+		"x-token":       "token",
+		"x-uuid":        "uuid",
+		"Regionname":    "sf",
+		"Device":        "ios",
+		"Deviceversion": "1.0",
 	}
 	args := &endpointsBaz.SimpleService_Call_Args{
 		Arg: &endpointsBaz.BazRequest{
@@ -107,7 +110,7 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	assert.Equal(t, 1, len(allLogs["Finished an outgoing client TChannel request"]))
 	assert.Equal(t, 1, len(allLogs["Finished an incoming server TChannel request"]))
 
-	tags := allLogs["Finished an incoming server TChannel request"][0]
+	logs := allLogs["Finished an incoming server TChannel request"][0]
 	dynamicHeaders := []string{
 		"requestUUID",
 		"timestamp-started",
@@ -118,65 +121,71 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"pid",
 	}
 	for _, dynamicValue := range dynamicHeaders {
-		assert.Contains(t, tags, dynamicValue)
-		delete(tags, dynamicValue)
+		assert.Contains(t, logs, dynamicValue)
+		delete(logs, dynamicValue)
 	}
 
-	expectedValues := map[string]interface{}{
-		"level":                           "info",
-		"env":                             "test",
-		"service":                         "example-gateway",
-		"msg":                             "Finished an incoming server TChannel request",
-		"endpointID":                      "bazTChannel",
-		"handlerID":                       "call",
-		"method":                          "SimpleService::Call",
-		"Request-Header-x-token":          "token",
-		"Request-Header-x-uuid":           "uuid",
-		"Response-Header-some-res-header": "something",
-		"calling-service":                 "test-gateway",
-		"zone":                            "unknown",
+	expectedValues := map[string]string{
+		"level":                "info",
+		"msg":                  "Finished an incoming server TChannel request",
+		"env":                  "test",
+		"service":              "example-gateway",
+		"endpointID":           "bazTChannel",
+		"endpointHandler":      "call",
+		"endpointThriftMethod": "SimpleService::Call",
+		"x-uuid":               "uuid",
+		"calling-service":      "test-gateway",
+		"zone":                 "unknown",
+		"regionname":           "sf",
+		"device":               "ios",
+		"deviceversion":        "1.0",
 	}
-	for actualKey, actualValue := range tags {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	for actualKey, actualValue := range logs {
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
 	}
 	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
+		assert.Equal(t, expectedValue, logs[expectedKey], "unexpected field %q", expectedKey)
 	}
 
-	tags = allLogs["Finished an outgoing client TChannel request"][0]
+	logs = allLogs["Finished an outgoing client TChannel request"][0]
 	dynamicHeaders = []string{
+		"requestUUID",
 		"remoteAddr",
 		"timestamp-started",
 		"ts",
 		"hostname",
 		"pid",
 		"timestamp-finished",
-		"Request-Header-$tracing$uber-trace-id",
 	}
 	for _, dynamicValue := range dynamicHeaders {
-		assert.Contains(t, tags, dynamicValue)
-		delete(tags, dynamicValue)
+		assert.Contains(t, logs, dynamicValue)
+		delete(logs, dynamicValue)
 	}
 
-	expectedValues = map[string]interface{}{
-		"msg":                             "Finished an outgoing client TChannel request",
-		"env":                             "test",
-		"clientID":                        "baz",
-		"level":                           "info",
-		"serviceName":                     "bazService",
-		"serviceMethod":                   "SimpleService::call",
-		"methodName":                      "Call",
-		"zone":                            "unknown",
-		"service":                         "example-gateway",
-		"Request-Header-x-uuid":           "uuid",
-		"Request-Header-x-token":          "token",
-		"Response-Header-some-res-header": "something",
+	expectedValues = map[string]string{
+		"msg":                  "Finished an outgoing client TChannel request",
+		"env":                  "test",
+		"level":                "info",
+		"zone":                 "unknown",
+		"service":              "example-gateway",
+		"clientID":             "baz",
+		"clientService":        "bazService",
+		"clientThriftMethod":   "SimpleService::call",
+		"clientMethod":         "Call",
+		"endpointID":           "bazTChannel",
+		"endpointThriftMethod": "SimpleService::Call",
+		"endpointHandler":      "call",
+		"x-uuid":               "uuid",
+		//"Response-Header-some-res-header": "something",
+		"deviceversion": "1.0",
+		"device":        "ios",
+		"regionname":    "sf",
 	}
-	for actualKey, actualValue := range tags {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+	for actualKey, actualValue := range logs {
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
 	}
 	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, expectedValue, tags[expectedKey], "unexpected header %q", expectedKey)
+		assert.Equal(t, expectedValue, logs[expectedKey], "unexpected field %q", expectedKey)
 	}
 }
 

@@ -47,7 +47,8 @@ const (
 )
 
 const (
-	logFieldRequestMethod       = "method"
+	// thrift service::method of endpoint thrift spec
+	logFieldRequestMethod       = "endpointThriftMethod"
 	logFieldRequestURL          = "url"
 	logFieldRequestStartTime    = "timestamp-started"
 	logFieldRequestFinishedTime = "timestamp-finished"
@@ -55,7 +56,7 @@ const (
 	logFieldResponseStatusCode  = "statusCode"
 	logFieldRequestUUID         = "requestUUID"
 	logFieldEndpointID          = "endpointID"
-	logFieldHandlerID           = "handlerID"
+	logFieldEndpointHandler     = "endpointHandler"
 )
 
 const (
@@ -275,45 +276,6 @@ type Logger interface {
 	Panic(msg string, fields ...zap.Field)
 	Warn(msg string, fields ...zap.Field)
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
-}
-
-// newLoggerWithFields creates a lightweight logger that implements Logger interface
-func newLoggerWithFields(logger *zap.Logger, fields []zap.Field) Logger {
-	return &loggerWithFields{
-		logger: logger,
-		fields: fields,
-	}
-}
-
-// loggerWithFields is a logger that logs entries with default fields, it is not
-// a child logger and does not clone, therefore suitable for per request creation.
-type loggerWithFields struct {
-	logger *zap.Logger
-	fields []zap.Field
-}
-
-func (l *loggerWithFields) Debug(msg string, userFields ...zap.Field) {
-	l.logger.Debug(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Error(msg string, userFields ...zap.Field) {
-	l.logger.Error(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Info(msg string, userFields ...zap.Field) {
-	l.logger.Info(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Panic(msg string, userFields ...zap.Field) {
-	l.logger.Panic(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Warn(msg string, userFields ...zap.Field) {
-	l.logger.Warn(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
-	return l.logger.Check(lvl, msg)
 }
 
 // ContextMetrics emit metrics with tags extracted from context.

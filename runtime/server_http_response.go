@@ -21,6 +21,7 @@
 package zanzibar
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -65,12 +66,13 @@ func NewServerHTTPResponse(
 }
 
 // finish will handle final logic, like metrics
-func (res *ServerHTTPResponse) finish() {
+func (res *ServerHTTPResponse) finish(ctx context.Context) {
+	logFields := logFieldsFromCtx(ctx)
 	if !res.Request.started {
 		/* coverage ignore next line */
 		res.logger.Error(
 			"Forgot to start server response",
-			zap.String("path", res.Request.URL.Path),
+			append(logFields, zap.String("path", res.Request.URL.Path))...,
 		)
 		/* coverage ignore next line */
 		return
@@ -79,7 +81,7 @@ func (res *ServerHTTPResponse) finish() {
 		/* coverage ignore next line */
 		res.logger.Error(
 			"Finished an server response twice",
-			zap.String("path", res.Request.URL.Path),
+			append(logFields, zap.String("path", res.Request.URL.Path))...,
 		)
 		/* coverage ignore next line */
 		return
@@ -94,8 +96,8 @@ func (res *ServerHTTPResponse) finish() {
 	tagged.Timer(endpointLatency).Record(res.finishTime.Sub(res.Request.startTime))
 	if !known {
 		res.logger.Error(
-			"Could not emit statusCode metric",
-			zap.Int("UnknownStatusCode", res.StatusCode),
+			"Unknown status code",
+			append(logFields, zap.Int("UnknownStatusCode", res.StatusCode))...,
 		)
 	} else {
 		tagged.Counter(endpointStatus).Inc(1)
@@ -112,7 +114,7 @@ func (res *ServerHTTPResponse) finish() {
 
 	res.logger.Info(
 		"Finished an incoming server HTTP request",
-		serverHTTPLogFields(res.Request, res)...,
+		append(logFields, serverHTTPLogFields(res.Request, res)...)...,
 	)
 }
 
@@ -133,17 +135,6 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		cause := errors.Cause(res.err)
 		if cause != nil && cause != res.err {
 			fields = append(fields, zap.NamedError("errorCause", cause))
-		}
-	}
-
-	for k, v := range req.httpRequest.Header {
-		if len(v) > 0 {
-			fields = append(fields, zap.String("Request-Header-"+k, v[0]))
-		}
-	}
-	for k, v := range req.res.responseWriter.Header() {
-		if len(v) > 0 {
-			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
 		}
 	}
 
@@ -242,7 +233,7 @@ func (res *ServerHTTPResponse) PeekBody(
 // Flush will write the body to the response. Before flush is called
 // the body is pending. A pending body allows a response middleware to
 // write a different body.
-func (res *ServerHTTPResponse) flush() {
+func (res *ServerHTTPResponse) flush(ctx context.Context) {
 	if res.flushed {
 		/* coverage ignore next line */
 		res.logger.Error(
@@ -256,7 +247,7 @@ func (res *ServerHTTPResponse) flush() {
 	res.flushed = true
 	res.writeHeader(res.pendingStatusCode)
 	res.writeBytes(res.pendingBodyBytes)
-	res.finish()
+	res.finish(ctx)
 }
 
 func (res *ServerHTTPResponse) writeHeader(statusCode int) {

@@ -75,9 +75,8 @@ func NewServerHTTPRequest(
 	// put request log fields on context
 	logFields := []zap.Field{
 		zap.String(logFieldEndpointID, endpoint.EndpointName),
-		zap.String(logFieldHandlerID, endpoint.HandlerName),
+		zap.String(logFieldEndpointHandler, endpoint.HandlerName),
 	}
-	logger := newLoggerWithFields(endpoint.logger, logFields)
 
 	// put request scope tags on context
 	scopeTags := map[string]string{
@@ -115,7 +114,7 @@ func NewServerHTTPRequest(
 		Method:       httpRequest.Method,
 		Params:       params,
 		Header:       NewServerHTTPHeader(r.Header),
-		logger:       logger,
+		logger:       endpoint.logger,
 		scope:        scope,
 	}
 

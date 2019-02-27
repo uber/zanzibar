@@ -31,6 +31,16 @@ import (
 	netContext "golang.org/x/net/context"
 )
 
+const (
+	logFieldClientID = "clientID"
+	// thrift service::method of client thrift spec
+	logFieldClientThriftMethod = "clientThriftMethod"
+	// the backend service corresponding to the client
+	logFieldClientService = "clientService"
+	// the method name for a particular client method call
+	logFieldClientMethod = "clientMethod"
+)
+
 // TChannelClientOption is used when creating a new TChannelClient
 type TChannelClientOption struct {
 	ServiceName       string
@@ -102,10 +112,10 @@ func NewTChannelClientContext(
 
 	for serviceMethod, methodName := range opt.MethodNames {
 		loggers[serviceMethod] = logger.With(
-			zap.String("clientID", opt.ClientID),
-			zap.String("methodName", methodName),
-			zap.String("serviceName", opt.ServiceName),
-			zap.String("serviceMethod", serviceMethod),
+			zap.String(logFieldClientID, opt.ClientID),
+			zap.String(logFieldClientService, opt.ServiceName),
+			zap.String(logFieldClientMethod, methodName),
+			zap.String(logFieldClientThriftMethod, serviceMethod),
 		)
 	}
 
