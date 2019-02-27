@@ -57,6 +57,7 @@ const (
 	logFieldRequestUUID         = "requestUUID"
 	logFieldEndpointID          = "endpointID"
 	logFieldEndpointHandler     = "endpointHandler"
+	logFieldClientHTTPMethod    = "clientHTTPMethod"
 )
 
 const (

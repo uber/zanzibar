@@ -156,7 +156,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 
 	req.httpReq = httpReq
 	req.ctx = WithLogFields(req.ctx,
-		zap.String(logFieldRequestMethod, method),
+		zap.String(logFieldClientHTTPMethod, method),
 		zap.String(logFieldRequestURL, url),
 		zap.Time(logFieldRequestStartTime, req.startTime),
 	)

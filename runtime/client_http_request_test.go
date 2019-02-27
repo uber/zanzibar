@@ -197,7 +197,7 @@ func TestBarClientWithoutHeaders(t *testing.T) {
 
 	logLine := lines[0]
 	assert.Equal(t, "bar", logLine["clientID"])
-	assert.Equal(t, "EchoI8", logLine["methodName"])
+	assert.Equal(t, "EchoI8", logLine["clientMethod"])
 	assert.Equal(t, "x-uuid", logLine["headerName"])
 }
 
@@ -265,24 +265,24 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 		"msg":                            "Finished an outgoing client HTTP request",
 		"env":                            "test",
 		"clientID":                       "bar",
+		"clientHTTPMethod":               "POST",
 		"Response-Header-Example-Header": "Example-Value",
 		"statusCode":                     float64(200),
 		"Request-Header-Content-Type":    "application/json",
 		"Response-Header-Content-Type":   "text/plain; charset=utf-8",
 
 		"level":                      "info",
-		"methodName":                 "Normal",
-		"method":                     "POST",
+		"clientMethod":               "Normal",
 		"Request-Header-X-Client-Id": "bar",
 
 		"zone":    "unknown",
 		"service": "example-gateway",
 	}
 	for actualKey, actualValue := range logMsg {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
 	}
 	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, logMsg[expectedKey], expectedValue, "unexpected header %q", expectedKey)
+		assert.Equal(t, logMsg[expectedKey], expectedValue, "unexpected field %q", expectedKey)
 	}
 }
 
