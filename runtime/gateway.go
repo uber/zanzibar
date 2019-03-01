@@ -61,8 +61,10 @@ var levelMap = map[string]zapcore.Level{
 var defaultShutdownPollInterval = 500 * time.Millisecond
 var defaultCloseTimeout = 10000 * time.Millisecond
 
-const localhost = "127.0.0.1"
-const prod = "production"
+const (
+	localhost = "127.0.0.1"
+	testenv   = "test"
+)
 
 // Options configures the gateway
 type Options struct {
@@ -213,7 +215,7 @@ func (gateway *Gateway) Bootstrap() error {
 		gateway.Logger.Error("Error listening on port", zap.Error(err))
 		return errors.Wrap(err, "error listening on port")
 	}
-	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP && env == prod {
+	if gateway.localHTTPServer.RealIP != gateway.httpServer.RealIP && env != testenv {
 		_, err := gateway.httpServer.JustListen()
 		if err != nil {
 			gateway.Logger.Error("Error listening on port", zap.Error(err))
@@ -236,7 +238,7 @@ func (gateway *Gateway) Bootstrap() error {
 
 	// start TChannel server
 	ip := localhost
-	if env == prod {
+	if env != testenv {
 		tchannelIP, err := tchannel.ListenIP()
 		if err != nil {
 			return errors.Wrap(err, "error finding the best IP for tchannel")
