@@ -55,6 +55,10 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.{{$clientID}}.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.{{$clientID}}.routingKey")
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
+	}
 	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	{{if $sidecarRouter -}}
@@ -111,13 +115,14 @@ func {{$exportName}}(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
-			ClientID:          "{{$clientID}}",
-			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
-			AltSubchannelName: scAltName,
+			ServiceName:          serviceName,
+			ClientID:             "{{$clientID}}",
+			MethodNames:          methodNames,
+			Timeout:              timeout,
+			TimeoutPerAttempt:    timeoutPerAttempt,
+			RoutingKey:           &routingKey,
+			AltSubchannelName:    scAltName,
+			RequestUUIDHeaderKey: requestUUIDHeaderKey,
 		},
 	)
 

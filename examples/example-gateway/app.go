@@ -62,6 +62,11 @@ func getRequestTags(ctx context.Context) map[string]string {
 func getRequestFields(ctx context.Context) []zap.Field {
 	var fields []zap.Field
 	headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
+	uuid, ok := headers["X-Uuid"]
+	if !ok {
+		uuid = headers["x-uuid"]
+	}
+	fields = append(fields, zap.String("x-uuid", uuid))
 	fields = append(fields, zap.String("regionname", headers["Regionname"]))
 	fields = append(fields, zap.String("device", headers["Device"]))
 	fields = append(fields, zap.String("deviceversion", headers["Deviceversion"]))

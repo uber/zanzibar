@@ -55,6 +55,7 @@ type contactsClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+	requestUUIDHeaderKey   string
 }
 
 // NewClient returns a new http client.
@@ -69,6 +70,10 @@ func NewClient(deps *module.Dependencies) Client {
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.contacts.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.contacts.defaultHeaders", &defaultHeaders)
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
@@ -87,6 +92,7 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey:   requestUUIDHeaderKey,
 	}
 }
 
@@ -143,6 +149,14 @@ func (c *contactsClient) SaveContacts(
 	headers map[string]string,
 	r *clientsContactsContacts.SaveContactsRequest,
 ) (*clientsContactsContacts.SaveContactsResponse, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	var defaultRes *clientsContactsContacts.SaveContactsResponse
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "SaveContacts", c.httpClient)
 
@@ -201,6 +215,14 @@ func (c *contactsClient) TestURLURL(
 	ctx context.Context,
 	headers map[string]string,
 ) (string, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	var defaultRes string
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "TestURLURL", c.httpClient)
 

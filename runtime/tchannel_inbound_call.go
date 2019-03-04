@@ -68,7 +68,7 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 	c.scope.Timer(endpointLatency).Record(c.finishTime.Sub(c.startTime))
 	c.scope.Counter(endpointRequest).Inc(1)
 
-	fields := c.logFields()
+	fields := c.logFields(ctx)
 	if err == nil {
 		c.logger.Info("Finished an incoming server TChannel request", fields...)
 	} else {
@@ -77,21 +77,14 @@ func (c *tchannelInboundCall) finish(ctx context.Context, err error) {
 	}
 }
 
-func (c *tchannelInboundCall) logFields() []zap.Field {
+func (c *tchannelInboundCall) logFields(ctx context.Context) []zap.Field {
 	fields := []zap.Field{
 		zap.String("remoteAddr", c.call.RemotePeer().HostPort),
 		zap.String("calling-service", c.call.CallerName()),
 		zap.Time("timestamp-started", c.startTime),
 		zap.Time("timestamp-finished", c.finishTime),
 	}
-
-	for k, v := range c.reqHeaders {
-		fields = append(fields, zap.String("Request-Header-"+k, v))
-	}
-	for k, v := range c.resHeaders {
-		fields = append(fields, zap.String("Response-Header-"+k, v))
-	}
-
+	fields = append(fields, logFieldsFromCtx(ctx)...)
 	return fields
 }
 

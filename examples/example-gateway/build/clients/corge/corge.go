@@ -57,6 +57,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.corge.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.corge.routingKey")
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
+	}
 	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := deps.Default.Config.MustGetString("sidecarRouter.default.tchannel.ip")
@@ -99,13 +103,14 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
-			ClientID:          "corge",
-			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
-			AltSubchannelName: scAltName,
+			ServiceName:          serviceName,
+			ClientID:             "corge",
+			MethodNames:          methodNames,
+			Timeout:              timeout,
+			TimeoutPerAttempt:    timeoutPerAttempt,
+			RoutingKey:           &routingKey,
+			AltSubchannelName:    scAltName,
+			RequestUUIDHeaderKey: requestUUIDHeaderKey,
 		},
 	)
 

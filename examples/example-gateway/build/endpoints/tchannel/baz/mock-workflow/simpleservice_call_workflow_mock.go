@@ -56,8 +56,7 @@ func NewSimpleServiceCallWorkflowMock(t *testing.T) (workflow.SimpleServiceCallW
 		Scope:  tally.NewTestScope("", make(map[string]string)),
 	}
 	initializedDefaultDependencies.ContextLogger = zanzibar.NewContextLogger(initializedDefaultDependencies.Logger)
-	contextExtractors := &zanzibar.ContextExtractors{}
-	initializedDefaultDependencies.ContextExtractor = contextExtractors.MakeContextExtractor()
+	initializedDefaultDependencies.ContextExtractor = &zanzibar.ContextExtractors{}
 
 	initializedClientDependencies := &clientDependenciesNodes{}
 	mockClientNodes := &MockClientNodes{

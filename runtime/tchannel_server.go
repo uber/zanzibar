@@ -59,6 +59,8 @@ type TChannelRouter struct {
 	logger    *zap.Logger
 	scope     tally.Scope
 	extractor ContextExtractor
+
+	requestUUIDHeaderKey string
 }
 
 // netContextRouter implements the Handle interface that consumes netContext instead of stdlib context
@@ -106,6 +108,8 @@ func NewTChannelRouter(registrar tchannel.Registrar, g *Gateway) *TChannelRouter
 		logger:    g.Logger,
 		scope:     g.RootScope,
 		extractor: g.ContextExtractor,
+
+		requestUUIDHeaderKey: g.requestUUIDHeaderKey,
 	}
 }
 
@@ -144,16 +148,10 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 		return
 	}
 
-	// put endpoint id and request uuid on the context
-	uuid := uuid.NewUUID()
-	ctx = withRequestUUID(ctx, uuid)
-	ctx = WithEndpointField(ctx, e.EndpointID)
-
 	// put log fields on the context
 	logFields := []zap.Field{
-		zap.String(logFieldRequestUUID, uuid.String()),
 		zap.String(logFieldEndpointID, e.EndpointID),
-		zap.String(logFieldHandlerID, e.HandlerID),
+		zap.String(logFieldEndpointHandler, e.HandlerID),
 		zap.String(logFieldRequestMethod, e.Method),
 	}
 	ctx = WithLogFields(ctx, logFields...)
@@ -171,15 +169,19 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	c := &tchannelInboundCall{
 		call:     call,
 		endpoint: e,
-		logger:   newLoggerWithFields(s.logger, logFields),
+		logger:   s.logger,
 		scope:    s.scope.Tagged(scopeTags),
 	}
 
 	c.start()
+	ctx, err = s.handleHeader(ctx, c)
 	defer func() { c.finish(ctx, err) }()
+	if err != nil {
+		return
+	}
 
 	errc := make(chan error, 1)
-	go func() { errc <- s.handle(ctx, c) }()
+	go func() { errc <- s.handleBody(ctx, c) }()
 	select {
 	case <-ctx.Done():
 		err = ctx.Err()
@@ -193,18 +195,27 @@ func (s *TChannelRouter) Handle(ctx context.Context, call *tchannel.InboundCall)
 	}
 }
 
-func (s *TChannelRouter) handle(
+func (s *TChannelRouter) handleHeader(
 	ctx context.Context,
 	c *tchannelInboundCall,
-) (err error) {
-	// read request
-	if err = c.readReqHeaders(ctx); err != nil {
-		return err
+) (context.Context, error) {
+	if err := c.readReqHeaders(ctx); err != nil {
+		return ctx, err
 	}
 
-	// extract potential scope tags from headers and put on context
-	scopeTags := make(map[string]string)
+	reqUUID, ok := c.reqHeaders[s.requestUUIDHeaderKey]
+	if !ok {
+		reqUUID = uuid.New()
+	}
+	ctx = withRequestUUID(ctx, reqUUID)
+
+	// put request headers on context so that user-provided extractor
+	// functions can choose to have certain headers as metric tags or
+	// log fields
 	ctx = WithEndpointRequestHeadersField(ctx, c.reqHeaders)
+
+	// use user-provided extractor function to decide metric tags
+	scopeTags := make(map[string]string)
 	for k, v := range s.extractor.ExtractScopeTags(ctx) {
 		scopeTags[k] = v
 	}
@@ -213,9 +224,18 @@ func (s *TChannelRouter) handle(
 		c.scope = c.scope.Tagged(scopeTags)
 	}
 
+	// use user-provided extractor function to decide log fields
 	logFields := s.extractor.ExtractLogFields(ctx)
+	logFields = append(logFields, zap.String(logFieldRequestUUID, reqUUID))
 	ctx = WithLogFields(ctx, logFields...)
 
+	return ctx, nil
+}
+
+func (s *TChannelRouter) handleBody(
+	ctx context.Context,
+	c *tchannelInboundCall,
+) (err error) {
 	wireValue, err := c.readReqBody(ctx)
 	if err != nil {
 		return err
@@ -230,6 +250,9 @@ func (s *TChannelRouter) handle(
 	if err != nil {
 		return err
 	}
+
+	// TODO: put response headers on ctx for final metrics and logs
+	//ctx = WithEndpointResponseHeadersField(ctx, c.resHeaders)
 
 	// write response
 	if err = c.writeResHeaders(ctx); err != nil {

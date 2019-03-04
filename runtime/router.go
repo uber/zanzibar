@@ -27,6 +27,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/opentracing/opentracing-go"
+	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
@@ -122,8 +123,9 @@ func (endpoint *RouterEndpoint) HandleRequest(
 
 	urlValues := ParamsFromContext(r.Context())
 	req := NewServerHTTPRequest(w, r, urlValues, endpoint)
-	endpoint.HandlerFn(req.Context(), req, req.res)
-	req.res.flush()
+	ctx := req.Context()
+	endpoint.HandlerFn(ctx, req, req.res)
+	req.res.flush(ctx)
 }
 
 // httpRouter data structure to handle and register endpoints
@@ -134,6 +136,8 @@ type httpRouter struct {
 	methodNotAllowedEndpoint *RouterEndpoint
 	panicCount               tally.Counter
 	routeMap                 map[string]*RouterEndpoint
+
+	requestUUIDHeaderKey string
 }
 
 var _ HTTPRouter = (*httpRouter)(nil)
@@ -159,6 +163,8 @@ func NewHTTPRouter(gateway *Gateway) HTTPRouter {
 		gateway:    gateway,
 		panicCount: gateway.RootScope.Counter("runtime.router.panic"),
 		routeMap:   make(map[string]*RouterEndpoint),
+
+		requestUUIDHeaderKey: gateway.requestUUIDHeaderKey,
 	}
 
 	router.httpRouter = &httprouter.Router{
@@ -180,7 +186,18 @@ func (router *httpRouter) Handle(method, prefix string, handler http.Handler) (e
 		}
 	}()
 
-	router.httpRouter.Handler(method, prefix, handler)
+	h := func(w http.ResponseWriter, r *http.Request) {
+		reqUUID := r.Header.Get(router.requestUUIDHeaderKey)
+		if reqUUID == "" {
+			reqUUID = uuid.New()
+		}
+		ctx := withRequestUUID(r.Context(), reqUUID)
+		ctx = WithLogFields(ctx, zap.String(logFieldRequestUUID, reqUUID))
+		r = r.WithContext(ctx)
+		handler.ServeHTTP(w, r)
+	}
+
+	router.httpRouter.Handler(method, prefix, http.HandlerFunc(h))
 	return err
 }
 
@@ -230,7 +247,7 @@ func (router *httpRouter) handleNotFound(
 	req := NewServerHTTPRequest(w, r, nil, router.notFoundEndpoint)
 	http.NotFound(w, r)
 	req.res.StatusCode = http.StatusNotFound
-	req.res.finish()
+	req.res.finish(ctx)
 }
 
 func (router *httpRouter) handleMethodNotAllowed(
@@ -252,5 +269,5 @@ func (router *httpRouter) handleMethodNotAllowed(
 		http.StatusMethodNotAllowed,
 	)
 	req.res.StatusCode = http.StatusMethodNotAllowed
-	req.res.finish()
+	req.res.finish(ctx)
 }

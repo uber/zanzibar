@@ -45,6 +45,7 @@ clients.withexceptions.errorPercentThreshold: 20
 env: test
 envVarsToTagInRootScope: []
 http.port: 0
+http.clients.requestUUIDHeaderKey: x-request-uuid
 logger.fileName: /tmp/example-gateway.log
 logger.output: disk
 metrics.serviceName: example-gateway
@@ -61,4 +62,5 @@ sidecarRouter.default.tchannel.port: 5000
 tchannel.port: 0
 tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
+tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false

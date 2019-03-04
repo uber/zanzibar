@@ -66,6 +66,7 @@ func TestCallMetrics(t *testing.T) {
 	cg.MetricsWaitGroup.Add(numMetrics)
 
 	headers := make(map[string]string)
+	headers["x-uuid"] = "uuid"
 	headers["regionname"] = "san_francisco"
 	headers["device"] = "ios"
 	headers["deviceversion"] = "carbon"
@@ -208,6 +209,7 @@ func TestCallMetrics(t *testing.T) {
 		"url",
 		"timestamp-finished",
 		"Request-Header-Uber-Trace-Id",
+		"Request-Header-X-Request-Uuid",
 		"Response-Header-Content-Length",
 		"timestamp-started",
 		"Response-Header-Date",
@@ -229,22 +231,23 @@ func TestCallMetrics(t *testing.T) {
 		"Response-Header-Content-Type": "text/plain; charset=utf-8",
 
 		"level":                      "info",
-		"methodName":                 "Normal",
-		"method":                     "POST",
+		"clientMethod":               "Normal",
+		"clientHTTPMethod":           "POST",
 		"Request-Header-X-Client-Id": "bar",
 
-		"zone":          "unknown",
-		"service":       "example-gateway",
-		"endpointID":    "bar",
-		"handlerID":     "normal",
-		"regionname":    "san_francisco",
-		"device":        "ios",
-		"deviceversion": "carbon",
+		"zone":            "unknown",
+		"service":         "example-gateway",
+		"endpointID":      "bar",
+		"endpointHandler": "normal",
+		"x-uuid":          "uuid",
+		"regionname":      "san_francisco",
+		"device":          "ios",
+		"deviceversion":   "carbon",
 	}
 	for actualKey, actualValue := range logMsg {
-		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
+		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
 	}
 	for expectedKey, expectedValue := range expectedValues {
-		assert.Equal(t, expectedValue, logMsg[expectedKey], "unexpected header %q", expectedKey)
+		assert.Equal(t, expectedValue, logMsg[expectedKey], "unexpected field %q", expectedKey)
 	}
 }

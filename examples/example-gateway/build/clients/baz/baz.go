@@ -186,6 +186,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.baz.routingKey") {
 		routingKey = deps.Default.Config.MustGetString("clients.baz.routingKey")
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("tchannel.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("tchannel.clients.requestUUIDHeaderKey")
+	}
 	sc := deps.Default.Channel.GetSubChannel(serviceName, tchannel.Isolated)
 
 	ip := deps.Default.Config.MustGetString("clients.baz.ip")
@@ -254,13 +258,14 @@ func NewClient(deps *module.Dependencies) Client {
 		deps.Default.Logger,
 		deps.Default.ContextMetrics,
 		&zanzibar.TChannelClientOption{
-			ServiceName:       serviceName,
-			ClientID:          "baz",
-			MethodNames:       methodNames,
-			Timeout:           timeout,
-			TimeoutPerAttempt: timeoutPerAttempt,
-			RoutingKey:        &routingKey,
-			AltSubchannelName: scAltName,
+			ServiceName:          serviceName,
+			ClientID:             "baz",
+			MethodNames:          methodNames,
+			Timeout:              timeout,
+			TimeoutPerAttempt:    timeoutPerAttempt,
+			RoutingKey:           &routingKey,
+			AltSubchannelName:    scAltName,
+			RequestUUIDHeaderKey: requestUUIDHeaderKey,
 		},
 	)
 

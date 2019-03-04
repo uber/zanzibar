@@ -52,6 +52,7 @@ type corgeHTTPClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+	requestUUIDHeaderKey   string
 
 	calleeHeader string
 	callerHeader string
@@ -76,6 +77,10 @@ func NewClient(deps *module.Dependencies) Client {
 	if deps.Default.Config.ContainsKey("clients.corge-http.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.corge-http.defaultHeaders", &defaultHeaders)
 	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
+	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
 
@@ -96,6 +101,7 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey:   requestUUIDHeaderKey,
 	}
 }
 
@@ -152,6 +158,14 @@ func (c *corgeHTTPClient) EchoString(
 	headers map[string]string,
 	r *clientsCorgeCorge.Corge_EchoString_Args,
 ) (string, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	var defaultRes string
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "EchoString", c.httpClient)
 

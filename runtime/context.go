@@ -24,7 +24,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/pborman/uuid"
 	"github.com/uber-go/tally"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -48,7 +47,8 @@ const (
 )
 
 const (
-	logFieldRequestMethod       = "method"
+	// thrift service::method of endpoint thrift spec
+	logFieldRequestMethod       = "endpointThriftMethod"
 	logFieldRequestURL          = "url"
 	logFieldRequestStartTime    = "timestamp-started"
 	logFieldRequestFinishedTime = "timestamp-finished"
@@ -56,7 +56,8 @@ const (
 	logFieldResponseStatusCode  = "statusCode"
 	logFieldRequestUUID         = "requestUUID"
 	logFieldEndpointID          = "endpointID"
-	logFieldHandlerID           = "handlerID"
+	logFieldEndpointHandler     = "endpointHandler"
+	logFieldClientHTTPMethod    = "clientHTTPMethod"
 )
 
 const (
@@ -114,18 +115,17 @@ func GetEndpointRequestHeadersFromCtx(ctx context.Context) map[string]string {
 }
 
 // withRequestUUID returns a context with request uuid.
-func withRequestUUID(ctx context.Context, reqUUID uuid.UUID) context.Context {
+func withRequestUUID(ctx context.Context, reqUUID string) context.Context {
 	return context.WithValue(ctx, requestUUIDKey, reqUUID)
 }
 
-// GetRequestUUIDFromCtx returns the RequestUUID, if it exists on context
-// TODO: in future, we can extend this to have request object
-func GetRequestUUIDFromCtx(ctx context.Context) uuid.UUID {
+// RequestUUIDFromCtx returns the RequestUUID, if it exists on context
+func RequestUUIDFromCtx(ctx context.Context) string {
 	if val := ctx.Value(requestUUIDKey); val != nil {
-		uuid, _ := val.(uuid.UUID)
+		uuid, _ := val.(string)
 		return uuid
 	}
-	return nil
+	return ""
 }
 
 // WithRoutingDelegate adds the tchannel routing delegate information in the
@@ -149,7 +149,7 @@ func WithLogFields(ctx context.Context, newFields ...zap.Field) context.Context 
 	return context.WithValue(ctx, requestLogFields, accumulateLogFields(ctx, newFields))
 }
 
-func getLogFieldsFromCtx(ctx context.Context) []zap.Field {
+func logFieldsFromCtx(ctx context.Context) []zap.Field {
 	var fields []zap.Field
 	v := ctx.Value(requestLogFields)
 	if v != nil {
@@ -160,29 +160,29 @@ func getLogFieldsFromCtx(ctx context.Context) []zap.Field {
 
 // WithScopeTags returns a new context with the given scope tags attached to context.Context
 func WithScopeTags(ctx context.Context, newFields map[string]string) context.Context {
-	fields := GetScopeTagsFromCtx(ctx)
+	tags := GetScopeTagsFromCtx(ctx)
 	for k, v := range newFields {
-		fields[k] = v
+		tags[k] = v
 	}
 
-	return context.WithValue(ctx, scopeTags, fields)
+	return context.WithValue(ctx, scopeTags, tags)
 }
 
 // GetScopeTagsFromCtx returns the tag info extracted from context.
 func GetScopeTagsFromCtx(ctx context.Context) map[string]string {
-	fields := make(map[string]string)
+	tags := make(map[string]string)
 	if val := ctx.Value(scopeTags); val != nil {
 		headers, _ := val.(map[string]string)
 		for k, v := range headers {
-			fields[k] = v
+			tags[k] = v
 		}
 	}
 
-	return fields
+	return tags
 }
 
 func accumulateLogFields(ctx context.Context, newFields []zap.Field) []zap.Field {
-	previousFields := getLogFieldsFromCtx(ctx)
+	previousFields := logFieldsFromCtx(ctx)
 	return append(previousFields, newFields...)
 }
 
@@ -192,34 +192,16 @@ type ContextExtractor interface {
 	ExtractLogFields(ctx context.Context) []zap.Field
 }
 
-// AddContextScopeTagsExtractor added a scope tags extractor to contextExtractor.
-func (c *ContextExtractors) AddContextScopeTagsExtractor(extractors ...ContextScopeTagsExtractor) {
-	c.contextScopeExtractors = extractors
-}
-
-// AddContextLogFieldsExtractor added a log fields extractor to contextExtractor.
-func (c *ContextExtractors) AddContextLogFieldsExtractor(extractors ...ContextLogFieldsExtractor) {
-	c.contextLogFieldsExtractors = extractors
-}
-
-// MakeContextExtractor returns a extractor that extracts log fields a context.
-func (c *ContextExtractors) MakeContextExtractor() ContextExtractor {
-	return &ContextExtractors{
-		contextScopeExtractors:     c.contextScopeExtractors,
-		contextLogFieldsExtractors: c.contextLogFieldsExtractors,
-	}
-}
-
-// ContextExtractors warps extractors for context
+// ContextExtractors warps extractors for context, implements ContextExtractor interface
 type ContextExtractors struct {
-	contextScopeExtractors     []ContextScopeTagsExtractor
-	contextLogFieldsExtractors []ContextLogFieldsExtractor
+	ScopeTagsExtractors []ContextScopeTagsExtractor
+	LogFieldsExtractors []ContextLogFieldsExtractor
 }
 
 // ExtractScopeTags extracts scope fields from a context into a tag.
 func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]string {
 	tags := make(map[string]string)
-	for _, fn := range c.contextScopeExtractors {
+	for _, fn := range c.ScopeTagsExtractors {
 		sc := fn(ctx)
 		for k, v := range sc {
 			tags[k] = v
@@ -232,7 +214,7 @@ func (c *ContextExtractors) ExtractScopeTags(ctx context.Context) map[string]str
 // ExtractLogFields extracts log fields from a context into a field.
 func (c *ContextExtractors) ExtractLogFields(ctx context.Context) []zap.Field {
 	var fields []zap.Field
-	for _, fn := range c.contextLogFieldsExtractors {
+	for _, fn := range c.LogFieldsExtractors {
 		logFields := fn(ctx)
 		fields = append(fields, logFields...)
 	}
@@ -295,45 +277,6 @@ type Logger interface {
 	Panic(msg string, fields ...zap.Field)
 	Warn(msg string, fields ...zap.Field)
 	Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry
-}
-
-// newLoggerWithFields creates a lightweight logger that implements Logger interface
-func newLoggerWithFields(logger *zap.Logger, fields []zap.Field) Logger {
-	return &loggerWithFields{
-		logger: logger,
-		fields: fields,
-	}
-}
-
-// loggerWithFields is a logger that logs entries with default fields, it is not
-// a child logger and does not clone, therefore suitable for per request creation.
-type loggerWithFields struct {
-	logger *zap.Logger
-	fields []zap.Field
-}
-
-func (l *loggerWithFields) Debug(msg string, userFields ...zap.Field) {
-	l.logger.Debug(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Error(msg string, userFields ...zap.Field) {
-	l.logger.Error(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Info(msg string, userFields ...zap.Field) {
-	l.logger.Info(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Panic(msg string, userFields ...zap.Field) {
-	l.logger.Panic(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Warn(msg string, userFields ...zap.Field) {
-	l.logger.Warn(msg, append(l.fields, userFields...)...)
-}
-
-func (l *loggerWithFields) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
-	return l.logger.Check(lvl, msg)
 }
 
 // ContextMetrics emit metrics with tags extracted from context.

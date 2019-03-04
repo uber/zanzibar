@@ -85,7 +85,7 @@ func TestInvalidStatusCode(t *testing.T) {
 
 	assert.Equal(t, "true", string(bytes))
 
-	logLines := bgateway.Logs("error", "Could not emit statusCode metric")
+	logLines := bgateway.Logs("error", "Unknown status code")
 
 	assert.NotNil(t, logLines)
 	assert.Equal(t, 1, len(logLines))

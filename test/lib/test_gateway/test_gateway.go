@@ -206,7 +206,6 @@ func CreateGateway(
 		},
 	)
 
-	contextExtractors := &zanzibar.ContextExtractors{}
 	scopeExtractor := func(ctx context.Context) map[string]string {
 		tags := map[string]string{}
 		headers := zanzibar.GetEndpointRequestHeadersFromCtx(ctx)
@@ -217,8 +216,9 @@ func CreateGateway(
 		return tags
 	}
 
-	contextExtractors.AddContextScopeTagsExtractor(scopeExtractor)
-	extractor := contextExtractors.MakeContextExtractor()
+	extractors := &zanzibar.ContextExtractors{
+		ScopeTagsExtractors: []zanzibar.ContextScopeTagsExtractor{scopeExtractor},
+	}
 
 	testGateway := &ChildProcessGateway{
 		channel:     channel,
@@ -239,7 +239,7 @@ func CreateGateway(
 		backendsHTTP:     backendsHTTP,
 		backendsTChannel: backendsTChannel,
 		MetricsWaitGroup: lib.WaitAtLeast{},
-		ContextExtractor: extractor,
+		ContextExtractor: extractors,
 		ContextMetrics:   zanzibar.NewContextMetrics(tally.NoopScope),
 	}
 

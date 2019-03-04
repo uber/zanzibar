@@ -55,6 +55,7 @@ type googleNowClient struct {
 	clientID               string
 	httpClient             *zanzibar.HTTPClient
 	circuitBreakerDisabled bool
+	requestUUIDHeaderKey   string
 }
 
 // NewClient returns a new http client.
@@ -69,6 +70,10 @@ func NewClient(deps *module.Dependencies) Client {
 	defaultHeaders := make(map[string]string)
 	if deps.Default.Config.ContainsKey("clients.google-now.defaultHeaders") {
 		deps.Default.Config.MustGetStruct("clients.google-now.defaultHeaders", &defaultHeaders)
+	}
+	var requestUUIDHeaderKey string
+	if deps.Default.Config.ContainsKey("http.clients.requestUUIDHeaderKey") {
+		requestUUIDHeaderKey = deps.Default.Config.MustGetString("http.clients.requestUUIDHeaderKey")
 	}
 
 	circuitBreakerDisabled := configureCicruitBreaker(deps, timeoutVal)
@@ -87,6 +92,7 @@ func NewClient(deps *module.Dependencies) Client {
 			timeout,
 		),
 		circuitBreakerDisabled: circuitBreakerDisabled,
+		requestUUIDHeaderKey:   requestUUIDHeaderKey,
 	}
 }
 
@@ -143,6 +149,14 @@ func (c *googleNowClient) AddCredentials(
 	headers map[string]string,
 	r *clientsGooglenowGooglenow.GoogleNowService_AddCredentials_Args,
 ) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "AddCredentials", c.httpClient)
 
 	// Generate full URL.
@@ -204,6 +218,14 @@ func (c *googleNowClient) CheckCredentials(
 	ctx context.Context,
 	headers map[string]string,
 ) (map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
 	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "CheckCredentials", c.httpClient)
 
 	// Generate full URL.
