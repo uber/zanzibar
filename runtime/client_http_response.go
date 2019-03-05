@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -198,10 +199,20 @@ func clientHTTPLogFields(req *ClientHTTPRequest, res *ClientHTTPResponse) []zapc
 		zap.Time(logFieldRequestFinishedTime, res.finishTime),
 		zap.Int(logFieldResponseStatusCode, res.StatusCode),
 	}
-
+	for k, v := range req.httpReq.Header {
+		if len(v) > 0 {
+			fields = append(fields, zap.String(
+				fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k),
+				strings.Join(v, ", "),
+			))
+		}
+	}
 	for k, v := range req.res.Header {
 		if len(v) > 0 {
-			fields = append(fields, zap.String("Response-Header-"+k, v[0]))
+			fields = append(fields, zap.String(
+				fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k),
+				strings.Join(v, ", "),
+			))
 		}
 	}
 

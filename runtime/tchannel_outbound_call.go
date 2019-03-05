@@ -22,6 +22,7 @@ package zanzibar
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -88,7 +89,17 @@ func (c *tchannelOutboundCall) logFields(ctx context.Context) []zapcore.Field {
 		zap.Time("timestamp-finished", c.finishTime),
 	}
 
-	// TODO: log client request headers and differentiate with endpoint headers
+	for k, v := range c.reqHeaders {
+		fields = append(fields, zap.String(
+			fmt.Sprintf("%s-%s", logFieldClientRequestHeaderPrefix, k), v,
+		))
+	}
+	for k, v := range c.resHeaders {
+		fields = append(fields, zap.String(
+			fmt.Sprintf("%s-%s", logFieldClientResponseHeaderPrefix, k), v,
+		))
+	}
+
 	fields = append(fields, logFieldsFromCtx(ctx)...)
 	return fields
 }

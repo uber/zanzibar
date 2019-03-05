@@ -208,11 +208,11 @@ func TestCallMetrics(t *testing.T) {
 	dynamicHeaders := []string{
 		"url",
 		"timestamp-finished",
-		"Request-Header-Uber-Trace-Id",
-		"Request-Header-X-Request-Uuid",
-		"Response-Header-Content-Length",
+		"Client-Req-Header-Uber-Trace-Id",
+		"Client-Req-Header-X-Request-Uuid",
+		"Client-Res-Header-Content-Length",
+		"Client-Res-Header-Date",
 		"timestamp-started",
-		"Response-Header-Date",
 		"ts",
 		"hostname",
 		"pid",
@@ -223,17 +223,16 @@ func TestCallMetrics(t *testing.T) {
 		delete(logMsg, dynamicValue)
 	}
 	expectedValues := map[string]interface{}{
-		"msg":                          "Finished an outgoing client HTTP request",
-		"env":                          "test",
-		"clientID":                     "bar",
-		"statusCode":                   float64(200),
-		"Request-Header-Content-Type":  "application/json",
-		"Response-Header-Content-Type": "text/plain; charset=utf-8",
-
-		"level":                      "info",
-		"clientMethod":               "Normal",
-		"clientHTTPMethod":           "POST",
-		"Request-Header-X-Client-Id": "bar",
+		"env":                            "test",
+		"level":                          "info",
+		"msg":                            "Finished an outgoing client HTTP request",
+		"statusCode":                     float64(200),
+		"clientID":                       "bar",
+		"clientMethod":                   "Normal",
+		"clientHTTPMethod":               "POST",
+		"Client-Req-Header-X-Client-Id":  "bar",
+		"Client-Req-Header-Content-Type": "application/json",
+		"Client-Res-Header-Content-Type": "text/plain; charset=utf-8",
 
 		"zone":            "unknown",
 		"service":         "example-gateway",

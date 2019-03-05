@@ -22,6 +22,7 @@ package bazhandler
 
 import (
 	"context"
+	"net/textproto"
 
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/module"
 	"github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/baz/workflow"
@@ -59,6 +60,9 @@ func (w Workflow) Handle(
 	clientReqHeaders := make(map[string]string)
 	// passing endpoint reqHeaders to downstream client
 	for _, k := range reqHeaders.Keys() {
+		if textproto.CanonicalMIMEHeaderKey(k) == "X-Token" {
+			continue
+		}
 		if v, ok := reqHeaders.Get(k); ok {
 			clientReqHeaders[k] = v
 		}
@@ -80,7 +84,7 @@ func (w Workflow) Handle(
 	}
 
 	if val, ok := clientReqHeaders["x-nil-response-header"]; ok {
-		if "true" == val {
+		if val == "true" {
 			return nil, nil
 		}
 	}

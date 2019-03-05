@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -127,6 +128,15 @@ func serverHTTPLogFields(req *ServerHTTPRequest, res *ServerHTTPResponse) []zapc
 		zap.Time("timestamp-started", req.startTime),
 		zap.Time("timestamp-finished", res.finishTime),
 		zap.Int("statusCode", res.StatusCode),
+	}
+
+	for k, v := range res.Headers() {
+		if len(v) > 0 {
+			fields = append(fields, zap.String(
+				fmt.Sprintf("%s-%s", logFieldEndpointResponseHeaderPrefix, k),
+				strings.Join(v, ", "),
+			))
+		}
 	}
 
 	if res.err != nil {

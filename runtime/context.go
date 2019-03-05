@@ -52,12 +52,15 @@ const (
 	logFieldRequestURL          = "url"
 	logFieldRequestStartTime    = "timestamp-started"
 	logFieldRequestFinishedTime = "timestamp-finished"
-	logFieldRequestHeaderPrefix = "Request-Header"
 	logFieldResponseStatusCode  = "statusCode"
 	logFieldRequestUUID         = "requestUUID"
 	logFieldEndpointID          = "endpointID"
 	logFieldEndpointHandler     = "endpointHandler"
 	logFieldClientHTTPMethod    = "clientHTTPMethod"
+
+	logFieldClientRequestHeaderPrefix    = "Client-Req-Header"
+	logFieldClientResponseHeaderPrefix   = "Client-Res-Header"
+	logFieldEndpointResponseHeaderPrefix = "Res-Header"
 )
 
 const (

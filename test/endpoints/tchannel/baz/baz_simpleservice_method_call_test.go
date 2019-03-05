@@ -139,6 +139,8 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"regionname":           "sf",
 		"device":               "ios",
 		"deviceversion":        "1.0",
+
+		"Res-Header-some-res-header": "something",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)
@@ -156,6 +158,8 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 		"hostname",
 		"pid",
 		"timestamp-finished",
+		"Client-Req-Header-x-request-uuid",
+		"Client-Req-Header-$tracing$uber-trace-id",
 	}
 	for _, dynamicValue := range dynamicHeaders {
 		assert.Contains(t, logs, dynamicValue)
@@ -163,23 +167,31 @@ func TestCallTChannelSuccessfulRequestOKResponse(t *testing.T) {
 	}
 
 	expectedValues = map[string]string{
-		"msg":                  "Finished an outgoing client TChannel request",
-		"env":                  "test",
-		"level":                "info",
-		"zone":                 "unknown",
-		"service":              "example-gateway",
-		"clientID":             "baz",
-		"clientService":        "bazService",
-		"clientThriftMethod":   "SimpleService::call",
-		"clientMethod":         "Call",
+		"msg":     "Finished an outgoing client TChannel request",
+		"env":     "test",
+		"level":   "info",
+		"zone":    "unknown",
+		"service": "example-gateway",
+
+		// contextual logs
 		"endpointID":           "bazTChannel",
 		"endpointThriftMethod": "SimpleService::Call",
 		"endpointHandler":      "call",
 		"x-uuid":               "uuid",
-		//"Response-Header-some-res-header": "something",
-		"deviceversion": "1.0",
-		"device":        "ios",
-		"regionname":    "sf",
+		"deviceversion":        "1.0",
+		"device":               "ios",
+		"regionname":           "sf",
+
+		// client specific logs
+		"clientID":                          "baz",
+		"clientService":                     "bazService",
+		"clientThriftMethod":                "SimpleService::call",
+		"clientMethod":                      "Call",
+		"Client-Req-Header-Device":          "ios",
+		"Client-Req-Header-x-uuid":          "uuid",
+		"Client-Req-Header-Regionname":      "sf",
+		"Client-Req-Header-Deviceversion":   "1.0",
+		"Client-Res-Header-some-res-header": "something",
 	}
 	for actualKey, actualValue := range logs {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)

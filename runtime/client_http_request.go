@@ -178,13 +178,6 @@ func (req *ClientHTTPRequest) Do() (*ClientHTTPResponse, error) {
 		return nil, err
 	}
 
-	logFields := make([]zap.Field, 0, len(req.httpReq.Header))
-	for k, v := range req.httpReq.Header {
-		logFields = append(logFields, zap.String(fmt.Sprintf("%s-%s", logFieldRequestHeaderPrefix, k), v[0]))
-	}
-	ctx = WithLogFields(ctx, logFields...)
-	req.ctx = ctx
-
 	res, err := req.client.Client.Do(req.httpReq.WithContext(ctx))
 	span.Finish()
 	if err != nil {
