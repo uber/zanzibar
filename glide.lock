@@ -1,5 +1,5 @@
-hash: d139d0b3a740db69a8f05f3bd0c21050741bf5881cba15c4fc6f723cee9c3946
-updated: 2019-02-06T13:52:33.978534-08:00
+hash: acd0511ffa7005d38d66a1be1578cc68c8888330fb70a3ad28d815932265647a
+updated: 2019-03-06T16:33:35.900424-08:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -31,19 +31,19 @@ imports:
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/jessevdk/go-flags
-  version: 5de817a9aa209ed35a164cb04aec82b7df1a47a6
+  version: c0795c8afcf41dd1d786bebce68636c199b3bb45
 - name: github.com/jteeuwen/go-bindata
   version: 6025e8de665b31fa74ab1a66f2cddd8c0abf887e
 - name: github.com/julienschmidt/httprouter
   version: 26a05976f9bf5c3aa992cc20e8588c359418ee58
 - name: github.com/kardianos/osext
-  version: ae77be60afb1dcacde03767a8c37337fad28ac14
+  version: 2bc1f35cddc0cc527b4bc3dce8578fc2a6c11384
 - name: github.com/kisielk/errcheck
   version: e14f8d59a22d460d56c5ee92507cd94c78fbf274
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 60711f1a8329503b04e1c88535f419d0bb440bff
+  version: 6243d8e04c3f819e79757e8bc3faa15c3cb27003
   subpackages:
   - bootstrap
   - buffer
@@ -138,7 +138,7 @@ imports:
   - internal/digreflect
   - internal/dot
 - name: go.uber.org/fx
-  version: cb83d0a13cecaa716150cc48ed1fbd9378dbd3b8
+  version: 3de044da969b90ad0a3e4a7867a74662f645f3f9
   subpackages:
   - internal/fxlog
   - internal/fxreflect
@@ -146,7 +146,7 @@ imports:
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
-  version: f21741d67580a27b01451386c3998090905dc243
+  version: 4fe4d5a28a338ad3cc955897e9586021d1732c3f
   subpackages:
   - ast
   - compile
@@ -180,7 +180,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf
+  version: 16b79f2e4e95ea23b2bf9903c9809ff7b013ce85
   subpackages:
   - bpf
   - context
@@ -189,7 +189,7 @@ imports:
   - ipv4
   - ipv6
 - name: golang.org/x/tools
-  version: 40960b6deb8ecdb8bcde6a8f44722731939b8ddc
+  version: 69e0dcfa1121488c38c3c8f9624f7de769003896
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
