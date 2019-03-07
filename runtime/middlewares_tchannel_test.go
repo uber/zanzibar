@@ -57,9 +57,14 @@ func TestTchannelHandlers(t *testing.T) {
 		"some-res-header": "something",
 	}
 
+	expectedClientReqHeaders := map[string]string{
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "false",
+	}
+
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
@@ -77,7 +82,12 @@ func TestTchannelHandlers(t *testing.T) {
 		"x-nil-response-header": "true",
 	}
 
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	expectedClientReqHeaders = map[string]string{
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "true",
+	}
+
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedClientReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 	success, resHeaders, err = ms.MakeTChannelRequest(
 		ctx, "SimpleService", "Call", reqHeaders, args, &result,

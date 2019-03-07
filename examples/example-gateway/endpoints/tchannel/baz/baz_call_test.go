@@ -29,13 +29,17 @@ func TestBazCall(t *testing.T) {
 			I3: 42,
 		},
 	}
-	expectedHeaders := map[string]string{
+	expectedReqHeaders := map[string]string{
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "false",
+	}
+	expectedResHeaders := map[string]string{
 		"some-res-header": "something",
 	}
 
 	ctx := context.Background()
 	var result baz.SimpleService_Call_Result
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err := ms.MakeTChannelRequest(
@@ -45,15 +49,18 @@ func TestBazCall(t *testing.T) {
 		return
 	}
 	assert.True(t, success)
-	assert.Equal(t, expectedHeaders, resHeaders)
+	assert.Equal(t, expectedResHeaders, resHeaders)
 
 	reqHeaders = map[string]string{
 		"x-token":               "token",
 		"x-uuid":                "uuid",
 		"x-nil-response-header": "true",
 	}
-
-	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), reqHeaders, gomock.Any()).
+	expectedReqHeaders = map[string]string{
+		"x-uuid":                "uuid",
+		"x-nil-response-header": "true",
+	}
+	ms.MockClients().Baz.EXPECT().Call(gomock.Any(), expectedReqHeaders, gomock.Any()).
 		Return(map[string]string{"some-res-header": "something"}, nil)
 
 	success, resHeaders, err = ms.MakeTChannelRequest(

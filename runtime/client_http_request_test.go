@@ -248,10 +248,10 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	dynamicHeaders := []string{
 		"url",
 		"timestamp-finished",
-		"Request-Header-Uber-Trace-Id",
-		"Response-Header-Content-Length",
+		"Client-Req-Header-Uber-Trace-Id",
+		"Client-Res-Header-Content-Length",
 		"timestamp-started",
-		"Response-Header-Date",
+		"Client-Res-Header-Date",
 		"ts",
 		"hostname",
 		"pid",
@@ -262,21 +262,19 @@ func TestMakingClientCallWithRespHeaders(t *testing.T) {
 	}
 
 	expectedValues := map[string]interface{}{
-		"msg":                            "Finished an outgoing client HTTP request",
-		"env":                            "test",
-		"clientID":                       "bar",
-		"clientHTTPMethod":               "POST",
-		"Response-Header-Example-Header": "Example-Value",
-		"statusCode":                     float64(200),
-		"Request-Header-Content-Type":    "application/json",
-		"Response-Header-Content-Type":   "text/plain; charset=utf-8",
-
-		"level":                      "info",
-		"clientMethod":               "Normal",
-		"Request-Header-X-Client-Id": "bar",
-
-		"zone":    "unknown",
-		"service": "example-gateway",
+		"msg":                              "Finished an outgoing client HTTP request",
+		"level":                            "info",
+		"env":                              "test",
+		"zone":                             "unknown",
+		"service":                          "example-gateway",
+		"statusCode":                       float64(200),
+		"clientMethod":                     "Normal",
+		"clientID":                         "bar",
+		"clientHTTPMethod":                 "POST",
+		"Client-Req-Header-X-Client-Id":    "bar",
+		"Client-Req-Header-Content-Type":   "application/json",
+		"Client-Res-Header-Example-Header": "Example-Value",
+		"Client-Res-Header-Content-Type":   "text/plain; charset=utf-8",
 	}
 	for actualKey, actualValue := range logMsg {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected field %q", actualKey)

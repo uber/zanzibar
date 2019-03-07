@@ -1558,10 +1558,12 @@ func TestIncomingHTTPRequestServerLog(t *testing.T) {
 		"method":          "GET",
 		"pathname":        "/foo?bar=bar",
 		"statusCode":      float64(200),
-		"Accept-Encoding": "gzip",
-		"User-Agent":      "Go-http-client/1.1",
 		"endpointHandler": "foo",
 		"endpointID":      "foo",
+
+		"Accept-Encoding":         "gzip",
+		"User-Agent":              "Go-http-client/1.1",
+		"Res-Header-Content-Type": "application/json",
 	}
 	for actualKey, actualValue := range tags {
 		assert.Equal(t, expectedValues[actualKey], actualValue, "unexpected header %q", actualKey)
