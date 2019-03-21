@@ -105,11 +105,11 @@ func (h *BarListAndEnumHandler) HandleRequest(
 
 	var requestBody endpointsBarBar.Bar_ListAndEnum_Args
 
-	demoIdsOk := req.CheckQueryValue("demoIds[]")
+	demoIdsOk := req.CheckQueryValue("demoIds")
 	if !demoIdsOk {
 		return
 	}
-	demoIdsQuery, ok := req.GetQueryValues("demoIds[]")
+	demoIdsQuery, ok := req.GetQueryValues("demoIds")
 	if !ok {
 		return
 	}

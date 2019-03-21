@@ -1210,9 +1210,6 @@ func (ms *MethodSpec) setWriteQueryParamStatements(
 		longQueryName := ms.getLongQueryName(field, thriftPrefix)
 		identifierName := CamelCase(longQueryName) + "Query"
 		_, isList := realType.(*compile.ListSpec)
-		if isList {
-			longQueryName = longQueryName + "[]"
-		}
 
 		if !hasQueryFields {
 			statements.append("queryValues := &url.Values{}")
@@ -1305,7 +1302,6 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		var listValueTypedef string
 		t, isList := realType.(*compile.ListSpec)
 		if isList {
-			longQueryName = longQueryName + "[]"
 			if _, ok := t.ValueSpec.(*compile.TypedefSpec); ok {
 				listValueTypedef, err = GoType(packageHelper, t.ValueSpec)
 				if err != nil {

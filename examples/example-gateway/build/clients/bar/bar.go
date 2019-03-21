@@ -541,27 +541,27 @@ func (c *barClient) ArgWithManyQueryParams(
 		queryValues.Set("anOptUUID", anOptUUIDQuery)
 	}
 	for _, value := range r.AListUUID {
-		queryValues.Add("aListUUID[]", string(value))
+		queryValues.Add("aListUUID", string(value))
 	}
 	if r.AnOptListUUID != nil {
 		for _, value := range r.AnOptListUUID {
-			queryValues.Add("anOptListUUID[]", string(value))
+			queryValues.Add("anOptListUUID", string(value))
 		}
 	}
 	for _, value := range r.AStringList {
-		queryValues.Add("aStringList[]", value)
+		queryValues.Add("aStringList", value)
 	}
 	if r.AnOptStringList != nil {
 		for _, value := range r.AnOptStringList {
-			queryValues.Add("anOptStringList[]", value)
+			queryValues.Add("anOptStringList", value)
 		}
 	}
 	for _, value := range r.AUUIDList {
-		queryValues.Add("aUUIDList[]", string(value))
+		queryValues.Add("aUUIDList", string(value))
 	}
 	if r.AnOptUUIDList != nil {
 		for _, value := range r.AnOptUUIDList {
-			queryValues.Add("anOptUUIDList[]", string(value))
+			queryValues.Add("anOptUUIDList", string(value))
 		}
 	}
 	aTsQuery := strconv.FormatInt(int64(r.ATs), 10)
@@ -661,7 +661,7 @@ func (c *barClient) ArgWithNestedQueryParams(
 		queryValues.Set("request.myuuid", requestMyuuidQuery)
 	}
 	for _, value := range r.Request.Foo {
-		queryValues.Add("request.foo[]", value)
+		queryValues.Add("request.foo", value)
 	}
 	if r.Opt != nil {
 		optNameQuery := r.Opt.Name
@@ -897,11 +897,11 @@ func (c *barClient) ArgWithQueryParams(
 	}
 	if r.Foo != nil {
 		for _, value := range r.Foo {
-			queryValues.Add("foo[]", value)
+			queryValues.Add("foo", value)
 		}
 	}
 	for _, value := range r.Bar {
-		queryValues.Add("bar[]", strconv.Itoa(int(value)))
+		queryValues.Add("bar", strconv.Itoa(int(value)))
 	}
 	fullURL += "?" + queryValues.Encode()
 
@@ -1115,7 +1115,7 @@ func (c *barClient) ListAndEnum(
 
 	queryValues := &url.Values{}
 	for _, value := range r.DemoIds {
-		queryValues.Add("demoIds[]", value)
+		queryValues.Add("demoIds", value)
 	}
 	if r.DemoType != nil {
 		demoTypeQuery := strconv.Itoa(int(*r.DemoType))

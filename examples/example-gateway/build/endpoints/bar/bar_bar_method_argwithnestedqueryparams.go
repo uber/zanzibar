@@ -139,11 +139,11 @@ func (h *BarArgWithNestedQueryParamsHandler) HandleRequest(
 		requestBody.Request.UserUUID = ptr.String(requestUserUUIDQuery)
 	}
 
-	requestFooOk := req.CheckQueryValue("request.foo[]")
+	requestFooOk := req.CheckQueryValue("request.foo")
 	if !requestFooOk {
 		return
 	}
-	requestFooQuery, ok := req.GetQueryValues("request.foo[]")
+	requestFooQuery, ok := req.GetQueryValues("request.foo")
 	if !ok {
 		return
 	}

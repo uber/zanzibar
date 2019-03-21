@@ -124,20 +124,20 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		requestBody.UserUUID = ptr.String(userUUIDQuery)
 	}
 
-	fooOk := req.HasQueryValue("foo[]")
+	fooOk := req.HasQueryValue("foo")
 	if fooOk {
-		fooQuery, ok := req.GetQueryValues("foo[]")
+		fooQuery, ok := req.GetQueryValues("foo")
 		if !ok {
 			return
 		}
 		requestBody.Foo = fooQuery
 	}
 
-	barOk := req.CheckQueryValue("bar[]")
+	barOk := req.CheckQueryValue("bar")
 	if !barOk {
 		return
 	}
-	barQuery, ok := req.GetQueryInt8List("bar[]")
+	barQuery, ok := req.GetQueryInt8List("bar")
 	if !ok {
 		return
 	}
