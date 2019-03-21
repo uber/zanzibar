@@ -80,8 +80,8 @@ service Bar {
     )
 
     string listAndEnum (
-        1: required list<string> demoIds (rtapi.http.ref = "query.demoIds")
-        2: optional DemoType demoType (rtapi.http.ref = "query.demoType")
+        1: required list<string> demoIds (zanzibar.http.ref = "query.demoIds")
+        2: optional DemoType demoType (zanzibar.http.ref = "query.demoType")
     ) throws (
         1: BarException barException (zanzibar.http.status = "403")
     ) (
