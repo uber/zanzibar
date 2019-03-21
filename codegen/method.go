@@ -1030,6 +1030,8 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 		queryMethod = "GetQueryInt16"
 	case *compile.I32Spec:
 		queryMethod = "GetQueryInt32"
+	case *compile.EnumSpec:
+		queryMethod = "GetQueryInt32"
 	case *compile.I64Spec:
 		queryMethod = "GetQueryInt64"
 	case *compile.DoubleSpec:
@@ -1045,6 +1047,8 @@ func getQueryMethodForType(typeSpec compile.TypeSpec) string {
 		case *compile.I16Spec:
 			queryMethod = "GetQueryInt16List"
 		case *compile.I32Spec:
+			queryMethod = "GetQueryInt32List"
+		case *compile.EnumSpec:
 			queryMethod = "GetQueryInt32List"
 		case *compile.I64Spec:
 			queryMethod = "GetQueryInt64List"
@@ -1106,6 +1110,8 @@ func getQueryEncodeExpression(
 		} else {
 			encodeExpression = "%s"
 		}
+	case *compile.EnumSpec:
+		encodeExpression = "strconv.Itoa(int(%s))"
 	case *compile.ListSpec:
 		_, isValueTypedef := t.ValueSpec.(*compile.TypedefSpec)
 		switch compile.RootTypeSpec(t.ValueSpec).(type) {
@@ -1281,6 +1287,14 @@ func (ms *MethodSpec) setParseQueryParamStatements(
 		var err error
 		var typedef string
 		if _, ok := field.Type.(*compile.TypedefSpec); ok {
+			typedef, err = GoType(packageHelper, field.Type)
+			if err != nil {
+				finalError = err
+				return true
+			}
+		}
+
+		if _, ok := field.Type.(*compile.EnumSpec); ok {
 			typedef, err = GoType(packageHelper, field.Type)
 			if err != nil {
 				finalError = err

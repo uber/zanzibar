@@ -152,6 +152,8 @@ func pointerMethodType(typeSpec compile.TypeSpec) string {
 		pointerMethod = "Float64"
 	case *compile.StringSpec:
 		pointerMethod = "String"
+	case *compile.EnumSpec:
+		pointerMethod = "Int32"
 	default:
 		panic(fmt.Sprintf(
 			"Unknown type (%T) %v for allocating a pointer",
