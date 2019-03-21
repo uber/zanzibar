@@ -321,6 +321,39 @@ func TestMakingClientCallWithThriftException(t *testing.T) {
 	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
 }
 
+func TestMakingListAndEnumClientCallWithSuccess(t *testing.T) {
+	gateway, err := benchGateway.CreateGateway(
+		defaultTestConfig,
+		defaultTestOptions,
+		exampleGateway.CreateGateway,
+	)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer gateway.Close()
+
+	bgateway := gateway.(*benchGateway.BenchGateway)
+
+	bgateway.HTTPBackends()["bar"].HandleFunc(
+		"GET", "/bar/list-and-enum",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte(`"test-response"`))
+		},
+	)
+
+	deps := bgateway.Dependencies.(*exampleGateway.DependenciesTree)
+	bClient := deps.Client.Bar
+
+	body, _, err := bClient.ListAndEnum(
+		context.Background(), nil, &clientsBarBar.Bar_ListAndEnum_Args{},
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, body)
+
+	logs := bgateway.AllLogs()
+	assert.Len(t, logs["Finished an outgoing client HTTP request"], 1)
+}
 func TestMakingClientCallWithBadStatusCode(t *testing.T) {
 	gateway, err := benchGateway.CreateGateway(
 		defaultTestConfig,

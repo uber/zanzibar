@@ -1475,6 +1475,177 @@ func (v *BarResponseRecur) GetHeight() (o int32) {
 	return
 }
 
+type DemoType int32
+
+const (
+	DemoTypeFirst  DemoType = 0
+	DemoTypeSecond DemoType = 1
+)
+
+// DemoType_Values returns all recognized values of DemoType.
+func DemoType_Values() []DemoType {
+	return []DemoType{
+		DemoTypeFirst,
+		DemoTypeSecond,
+	}
+}
+
+// UnmarshalText tries to decode DemoType from a byte slice
+// containing its name.
+//
+//   var v DemoType
+//   err := v.UnmarshalText([]byte("FIRST"))
+func (v *DemoType) UnmarshalText(value []byte) error {
+	switch s := string(value); s {
+	case "FIRST":
+		*v = DemoTypeFirst
+		return nil
+	case "SECOND":
+		*v = DemoTypeSecond
+		return nil
+	default:
+		val, err := strconv.ParseInt(s, 10, 32)
+		if err != nil {
+			return fmt.Errorf("unknown enum value %q for %q: %v", s, "DemoType", err)
+		}
+		*v = DemoType(val)
+		return nil
+	}
+}
+
+// MarshalText encodes DemoType to text.
+//
+// If the enum value is recognized, its name is returned. Otherwise,
+// its integer value is returned.
+//
+// This implements the TextMarshaler interface.
+func (v DemoType) MarshalText() ([]byte, error) {
+	switch int32(v) {
+	case 0:
+		return []byte("FIRST"), nil
+	case 1:
+		return []byte("SECOND"), nil
+	}
+	return []byte(strconv.FormatInt(int64(v), 10)), nil
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of DemoType.
+// Enums are logged as objects, where the value is logged with key "value", and
+// if this value's name is known, the name is logged with key "name".
+func (v DemoType) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddInt32("value", int32(v))
+	switch int32(v) {
+	case 0:
+		enc.AddString("name", "FIRST")
+	case 1:
+		enc.AddString("name", "SECOND")
+	}
+	return nil
+}
+
+// Ptr returns a pointer to this enum value.
+func (v DemoType) Ptr() *DemoType {
+	return &v
+}
+
+// ToWire translates DemoType into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// Enums are represented as 32-bit integers over the wire.
+func (v DemoType) ToWire() (wire.Value, error) {
+	return wire.NewValueI32(int32(v)), nil
+}
+
+// FromWire deserializes DemoType from its Thrift-level
+// representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TI32)
+//   if err != nil {
+//     return DemoType(0), err
+//   }
+//
+//   var v DemoType
+//   if err := v.FromWire(x); err != nil {
+//     return DemoType(0), err
+//   }
+//   return v, nil
+func (v *DemoType) FromWire(w wire.Value) error {
+	*v = (DemoType)(w.GetI32())
+	return nil
+}
+
+// String returns a readable string representation of DemoType.
+func (v DemoType) String() string {
+	w := int32(v)
+	switch w {
+	case 0:
+		return "FIRST"
+	case 1:
+		return "SECOND"
+	}
+	return fmt.Sprintf("DemoType(%d)", w)
+}
+
+// Equals returns true if this DemoType value matches the provided
+// value.
+func (v DemoType) Equals(rhs DemoType) bool {
+	return v == rhs
+}
+
+// MarshalJSON serializes DemoType into JSON.
+//
+// If the enum value is recognized, its name is returned. Otherwise,
+// its integer value is returned.
+//
+// This implements json.Marshaler.
+func (v DemoType) MarshalJSON() ([]byte, error) {
+	switch int32(v) {
+	case 0:
+		return ([]byte)("\"FIRST\""), nil
+	case 1:
+		return ([]byte)("\"SECOND\""), nil
+	}
+	return ([]byte)(strconv.FormatInt(int64(v), 10)), nil
+}
+
+// UnmarshalJSON attempts to decode DemoType from its JSON
+// representation.
+//
+// This implementation supports both, numeric and string inputs. If a
+// string is provided, it must be a known enum name.
+//
+// This implements json.Unmarshaler.
+func (v *DemoType) UnmarshalJSON(text []byte) error {
+	d := json.NewDecoder(bytes.NewReader(text))
+	d.UseNumber()
+	t, err := d.Token()
+	if err != nil {
+		return err
+	}
+
+	switch w := t.(type) {
+	case json.Number:
+		x, err := w.Int64()
+		if err != nil {
+			return err
+		}
+		if x > math.MaxInt32 {
+			return fmt.Errorf("enum overflow from JSON %q for %q", text, "DemoType")
+		}
+		if x < math.MinInt32 {
+			return fmt.Errorf("enum underflow from JSON %q for %q", text, "DemoType")
+		}
+		*v = (DemoType)(x)
+		return nil
+	case string:
+		return v.UnmarshalText([]byte(w))
+	default:
+		return fmt.Errorf("invalid JSON value %q (%T) to unmarshal into %q", t, t, "DemoType")
+	}
+}
+
 type Fruit int32
 
 const (

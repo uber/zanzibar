@@ -1,0 +1,13 @@
+clientId: bar
+clientMethod: ListAndEnum
+endpointId: bar
+endpointType: http
+handleId: listAndEnum
+middlewares: []
+reqHeaderMap: {}
+resHeaderMap: {}
+testFixtures: {}
+thriftFile: endpoints/bar/bar.thrift
+thriftFileSha: '{{placeholder}}'
+thriftMethodName: Bar::listAndEnum
+workflowType: httpClient

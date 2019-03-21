@@ -87,6 +87,11 @@ type Client interface {
 		ctx context.Context,
 		reqHeaders map[string]string,
 	) (string, map[string]string, error)
+	ListAndEnum(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ListAndEnum_Args,
+	) (string, map[string]string, error)
 	MissingArg(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -236,6 +241,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithQueryParams",
 				"DeleteFoo",
 				"Hello",
+				"ListAndEnum",
 				"MissingArg",
 				"NoRequest",
 				"Normal",
@@ -1029,6 +1035,93 @@ func (c *barClient) Hello(
 
 	// Generate full URL.
 	fullURL := c.httpClient.BaseURL + "/bar" + "/hello"
+
+	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200, 403})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody string
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+
+		return responseBody, respHeaders, nil
+	case 403:
+		allOptions := []interface{}{
+			&clientsBarBar.BarException{},
+		}
+		v, err := res.ReadAndUnmarshalBodyMultipleOptions(allOptions)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		return defaultRes, respHeaders, v.(error)
+
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// ListAndEnum calls "/bar/list-and-enum" endpoint.
+func (c *barClient) ListAndEnum(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ListAndEnum_Args,
+) (string, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	var defaultRes string
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ListAndEnum", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/list-and-enum"
+
+	queryValues := &url.Values{}
+	for _, value := range r.DemoIds {
+		queryValues.Add("demoIds[]", value)
+	}
+	if r.DemoType != nil {
+		demoTypeQuery := strconv.Itoa(int(*r.DemoType))
+		queryValues.Set("demoType", demoTypeQuery)
+	}
+	fullURL += "?" + queryValues.Encode()
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
 	if err != nil {
