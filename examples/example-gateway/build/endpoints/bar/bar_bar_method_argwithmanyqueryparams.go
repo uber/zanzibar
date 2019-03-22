@@ -257,11 +257,11 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		requestBody.AnOptUUID = (*endpointsBarBar.UUID)(ptr.String(anOptUUIDQuery))
 	}
 
-	aListUUIDOk := req.CheckQueryValue("aListUUID[]")
+	aListUUIDOk := req.CheckQueryValue("aListUUID")
 	if !aListUUIDOk {
 		return
 	}
-	aListUUIDQuery, ok := req.GetQueryValues("aListUUID[]")
+	aListUUIDQuery, ok := req.GetQueryValues("aListUUID")
 	if !ok {
 		return
 	}
@@ -271,9 +271,9 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AListUUID = aListUUIDQueryFinal
 
-	anOptListUUIDOk := req.HasQueryValue("anOptListUUID[]")
+	anOptListUUIDOk := req.HasQueryValue("anOptListUUID")
 	if anOptListUUIDOk {
-		anOptListUUIDQuery, ok := req.GetQueryValues("anOptListUUID[]")
+		anOptListUUIDQuery, ok := req.GetQueryValues("anOptListUUID")
 		if !ok {
 			return
 		}
@@ -284,30 +284,30 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 		requestBody.AnOptListUUID = anOptListUUIDQueryFinal
 	}
 
-	aStringListOk := req.CheckQueryValue("aStringList[]")
+	aStringListOk := req.CheckQueryValue("aStringList")
 	if !aStringListOk {
 		return
 	}
-	aStringListQuery, ok := req.GetQueryValues("aStringList[]")
+	aStringListQuery, ok := req.GetQueryValues("aStringList")
 	if !ok {
 		return
 	}
 	requestBody.AStringList = endpointsBarBar.StringList(aStringListQuery)
 
-	anOptStringListOk := req.HasQueryValue("anOptStringList[]")
+	anOptStringListOk := req.HasQueryValue("anOptStringList")
 	if anOptStringListOk {
-		anOptStringListQuery, ok := req.GetQueryValues("anOptStringList[]")
+		anOptStringListQuery, ok := req.GetQueryValues("anOptStringList")
 		if !ok {
 			return
 		}
 		requestBody.AnOptStringList = endpointsBarBar.StringList(anOptStringListQuery)
 	}
 
-	aUUIDListOk := req.CheckQueryValue("aUUIDList[]")
+	aUUIDListOk := req.CheckQueryValue("aUUIDList")
 	if !aUUIDListOk {
 		return
 	}
-	aUUIDListQuery, ok := req.GetQueryValues("aUUIDList[]")
+	aUUIDListQuery, ok := req.GetQueryValues("aUUIDList")
 	if !ok {
 		return
 	}
@@ -317,9 +317,9 @@ func (h *BarArgWithManyQueryParamsHandler) HandleRequest(
 	}
 	requestBody.AUUIDList = endpointsBarBar.UUIDList(aUUIDListQueryFinal)
 
-	anOptUUIDListOk := req.HasQueryValue("anOptUUIDList[]")
+	anOptUUIDListOk := req.HasQueryValue("anOptUUIDList")
 	if anOptUUIDListOk {
-		anOptUUIDListQuery, ok := req.GetQueryValues("anOptUUIDList[]")
+		anOptUUIDListQuery, ok := req.GetQueryValues("anOptUUIDList")
 		if !ok {
 			return
 		}

@@ -448,6 +448,22 @@ func (mr *MockClientMockRecorder) Hello(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hello", reflect.TypeOf((*MockClient)(nil).Hello), arg0, arg1)
 }
 
+// ListAndEnum mocks base method
+func (m *MockClient) ListAndEnum(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ListAndEnum_Args) (string, map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAndEnum", arg0, arg1, arg2)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListAndEnum indicates an expected call of ListAndEnum
+func (mr *MockClientMockRecorder) ListAndEnum(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAndEnum", reflect.TypeOf((*MockClient)(nil).ListAndEnum), arg0, arg1, arg2)
+}
+
 // MissingArg mocks base method
 func (m *MockClient) MissingArg(arg0 context.Context, arg1 map[string]string) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()

@@ -46,20 +46,20 @@ import (
 	module "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bar/module"
 )
 
-// BarArgWithQueryParamsHandler is the handler for "/bar/argWithQueryParams"
-type BarArgWithQueryParamsHandler struct {
+// BarListAndEnumHandler is the handler for "/bar/list-and-enum"
+type BarListAndEnumHandler struct {
 	Dependencies *module.Dependencies
 	endpoint     *zanzibar.RouterEndpoint
 }
 
-// NewBarArgWithQueryParamsHandler creates a handler
-func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQueryParamsHandler {
-	handler := &BarArgWithQueryParamsHandler{
+// NewBarListAndEnumHandler creates a handler
+func NewBarListAndEnumHandler(deps *module.Dependencies) *BarListAndEnumHandler {
+	handler := &BarListAndEnumHandler{
 		Dependencies: deps,
 	}
 	handler.endpoint = zanzibar.NewRouterEndpoint(
 		deps.Default.ContextExtractor, deps.Default,
-		"bar", "argWithQueryParams",
+		"bar", "listAndEnum",
 		zanzibar.NewStack([]zanzibar.MiddlewareHandle{
 			deps.Middleware.DefaultExample2.NewMiddlewareHandle(
 				defaultExample2.Options{},
@@ -74,15 +74,15 @@ func NewBarArgWithQueryParamsHandler(deps *module.Dependencies) *BarArgWithQuery
 }
 
 // Register adds the http handler to the gateway's http router
-func (h *BarArgWithQueryParamsHandler) Register(g *zanzibar.Gateway) error {
+func (h *BarListAndEnumHandler) Register(g *zanzibar.Gateway) error {
 	return g.HTTPRouter.Handle(
-		"GET", "/bar/argWithQueryParams",
+		"GET", "/bar/list-and-enum",
 		http.HandlerFunc(h.endpoint.HandleRequest),
 	)
 }
 
-// HandleRequest handles "/bar/argWithQueryParams".
-func (h *BarArgWithQueryParamsHandler) HandleRequest(
+// HandleRequest handles "/bar/list-and-enum".
+func (h *BarListAndEnumHandler) HandleRequest(
 	ctx context.Context,
 	req *zanzibar.ServerHTTPRequest,
 	res *zanzibar.ServerHTTPResponse,
@@ -103,45 +103,26 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		}
 	}()
 
-	var requestBody endpointsBarBar.Bar_ArgWithQueryParams_Args
+	var requestBody endpointsBarBar.Bar_ListAndEnum_Args
 
-	nameOk := req.CheckQueryValue("name")
-	if !nameOk {
+	demoIdsOk := req.CheckQueryValue("demoIds")
+	if !demoIdsOk {
 		return
 	}
-	nameQuery, ok := req.GetQueryValue("name")
+	demoIdsQuery, ok := req.GetQueryValues("demoIds")
 	if !ok {
 		return
 	}
-	requestBody.Name = nameQuery
+	requestBody.DemoIds = demoIdsQuery
 
-	userUUIDOk := req.HasQueryValue("userUUID")
-	if userUUIDOk {
-		userUUIDQuery, ok := req.GetQueryValue("userUUID")
+	demoTypeOk := req.HasQueryValue("demoType")
+	if demoTypeOk {
+		demoTypeQuery, ok := req.GetQueryInt32("demoType")
 		if !ok {
 			return
 		}
-		requestBody.UserUUID = ptr.String(userUUIDQuery)
+		requestBody.DemoType = (*endpointsBarBar.DemoType)(ptr.Int32(demoTypeQuery))
 	}
-
-	fooOk := req.HasQueryValue("foo")
-	if fooOk {
-		fooQuery, ok := req.GetQueryValues("foo")
-		if !ok {
-			return
-		}
-		requestBody.Foo = fooQuery
-	}
-
-	barOk := req.CheckQueryValue("bar")
-	if !barOk {
-		return
-	}
-	barQuery, ok := req.GetQueryInt8List("bar")
-	if !ok {
-		return
-	}
-	requestBody.Bar = barQuery
 
 	// log endpoint request to downstream services
 	if ce := h.Dependencies.Default.ContextLogger.Check(zapcore.DebugLevel, "stub"); ce != nil {
@@ -157,7 +138,7 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 		h.Dependencies.Default.ContextLogger.Debug(ctx, "endpoint request to downstream", zfields...)
 	}
 
-	w := workflow.NewBarArgWithQueryParamsWorkflow(h.Dependencies)
+	w := workflow.NewBarListAndEnumWorkflow(h.Dependencies)
 	if span := req.GetSpan(); span != nil {
 		ctx = opentracing.ContextWithSpan(ctx, span)
 	}
@@ -184,10 +165,25 @@ func (h *BarArgWithQueryParamsHandler) HandleRequest(
 	}
 
 	if err != nil {
-		res.SendError(500, "Unexpected server error", err)
-		return
+		switch errValue := err.(type) {
+
+		case *endpointsBarBar.BarException:
+			res.WriteJSON(
+				403, cliRespHeaders, errValue,
+			)
+			return
+
+		default:
+			res.SendError(500, "Unexpected server error", err)
+			return
+		}
 
 	}
 
-	res.WriteJSON(200, cliRespHeaders, response)
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		res.SendError(500, "Unexpected server error", errors.Wrap(err, "Unable to marshal resp json"))
+		return
+	}
+	res.WriteJSONBytes(200, cliRespHeaders, bytes)
 }

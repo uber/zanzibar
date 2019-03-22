@@ -12,6 +12,7 @@ config:
   - normal.yaml
   - too_many_args.yaml
   - hello.yaml
+  - list_and_enum.yaml
   rateLimit: 100
 dependencies:
   client:

@@ -69,6 +69,12 @@ struct ParamsStruct {
     1: required string userUUID (zanzibar.http.ref = "params.user-uuid")
 }
 
+
+enum DemoType {
+    FIRST,
+    SECOND
+}
+
 exception BarException {
     1: required string stringField (zanzibar.http.ref = "headers.another-header-field")
 }
@@ -82,6 +88,18 @@ service Bar {
        zanzibar.http.path = "/bar/hello"
        zanzibar.http.status = "200"
     )
+
+    string listAndEnum (
+        1: required list<string> demoIds (zanzibar.http.ref = "query.demoIds")
+        2: optional DemoType demoType (zanzibar.http.ref = "query.demoType")
+    ) throws (
+        1: BarException barException (zanzibar.http.status = "403")
+    ) (
+       zanzibar.http.method = "GET"
+       zanzibar.http.path = "/bar/list-and-enum"
+       zanzibar.http.status = "200"
+    )
+
     BarResponse normal (
         1: required BarRequest request
     ) throws (

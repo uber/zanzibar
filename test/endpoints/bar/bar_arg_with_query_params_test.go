@@ -66,7 +66,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"bar%5B%5D=1&foo%5B%5D=a&foo%5B%5D=b&name=foo&userUUID=bar",
+				"bar=1&foo=a&foo=b&name=foo&userUUID=bar",
 				r.URL.RawQuery,
 			)
 
@@ -80,7 +80,7 @@ func TestBarWithQueryParamsCall(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo[]=a&foo[]=b&bar[]=1",
+		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo=a&foo=b&bar=1",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -115,7 +115,7 @@ func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
 		"GET", "/bar/argWithQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"bar%5B%5D=1&foo%5B%5D=a&foo%5B%5D=b&name=foo&userUUID=bar",
+				"bar=1&foo=a&foo=b&name=foo&userUUID=bar",
 				r.URL.RawQuery,
 			)
 
@@ -129,7 +129,7 @@ func TestBarWithQueryParamsCallWithRecursiveResponse(t *testing.T) {
 
 	res, err := gateway.MakeRequest(
 		"GET",
-		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo[]=a&foo[]=b&bar[]=1",
+		"/bar/argWithQueryParams?name=foo&userUUID=bar&foo=a&foo=b&bar=1",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -222,8 +222,8 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
 				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&aInt64=4&aInt8=24&"+
-					"aListUUID%5B%5D=a&aListUUID%5B%5D=b&aStr=foo&aStringList%5B%5D=c&aStringList%5B%5D=d&"+
-					"aTs=11111&aUUID=someuuid&aUUIDList%5B%5D=e&aUUIDList%5B%5D=f&anOptBool=false&"+
+					"aListUUID=a&aListUUID=b&aStr=foo&aStringList=c&aStringList=d&"+
+					"aTs=11111&aUUID=someuuid&aUUIDList=e&aUUIDList=f&anOptBool=false&"+
 					"anOptFloat64=-0.4&anOptInt16=-100&anOptInt32=-10&anOptInt64=-1&anOptInt8=-50&anOptStr=bar",
 				r.URL.RawQuery,
 			)
@@ -243,8 +243,8 @@ func TestBarWithManyQueryParamsCall(t *testing.T) {
 			"aInt8=24&anOptInt8=-50&aInt16=48&anOptInt16=-100&"+
 			"aInt32=12&anOptInt32=-10&aInt64=4&anOptInt64=-1&"+
 			"aFloat64=5.1&anOptFloat64=-0.4&aUUID=someuuid&"+
-			"aListUUID[]=a&aListUUID[]=b&aStringList[]=c&aStringList[]=d&"+
-			"aUUIDList[]=e&aUUIDList[]=f&aTs=11111",
+			"aListUUID=a&aListUUID=b&aStringList=c&aStringList=d&"+
+			"aUUIDList=e&aUUIDList=f&aTs=11111",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {
@@ -757,10 +757,10 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
 				"aBoolean=true&aFloat64=5.1&aInt16=48&aInt32=12&aInt64=4&aInt8=24&"+
-					"aListUUID%5B%5D=a&aListUUID%5B%5D=b&aStr=foo&aStringList%5B%5D=c&aStringList%5B%5D=d&"+
-					"aTs=11111&aUUID=a&aUUIDList%5B%5D=e&aUUIDList%5B%5D=f&anOptBool=false&anOptInt8=-50&"+
-					"anOptListUUID%5B%5D=a&anOptListUUID%5B%5D=b&anOptStr=bar&anOptStringList%5B%5D=c&"+
-					"anOptStringList%5B%5D=d&anOptTs=1111&anOptUUID=b&anOptUUIDList%5B%5D=e&anOptUUIDList%5B%5D=f",
+					"aListUUID=a&aListUUID=b&aStr=foo&aStringList=c&aStringList=d&"+
+					"aTs=11111&aUUID=a&aUUIDList=e&aUUIDList=f&anOptBool=false&anOptInt8=-50&"+
+					"anOptListUUID=a&anOptListUUID=b&anOptStr=bar&anOptStringList=c&"+
+					"anOptStringList=d&anOptTs=1111&anOptUUID=b&anOptUUIDList=e&anOptUUIDList=f",
 				r.URL.RawQuery,
 			)
 
@@ -779,9 +779,9 @@ func TestBarWithManyQueryParamsOptionalCall(t *testing.T) {
 			"aInt8=24&anOptInt8=-50&aInt16=48&"+
 			"aInt32=12&aInt64=4&aFloat64=5.1&"+
 			"aUUID=a&anOptUUID=b&"+
-			"aListUUID[]=a&aListUUID[]=b&anOptListUUID[]=a&anOptListUUID[]=b&"+
-			"aStringList[]=c&aStringList[]=d&anOptStringList[]=c&anOptStringList[]=d&"+
-			"aUUIDList[]=e&aUUIDList[]=f&anOptUUIDList[]=e&anOptUUIDList[]=f&"+
+			"aListUUID=a&aListUUID=b&anOptListUUID=a&anOptListUUID=b&"+
+			"aStringList=c&aStringList=d&anOptStringList=c&anOptStringList=d&"+
+			"aUUIDList=e&aUUIDList=f&anOptUUIDList=e&anOptUUIDList=f&"+
 			"aTs=11111&anOptTs=1111",
 		nil, nil,
 	)
@@ -817,7 +817,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.authUUID=auth-uuid&request.foo%5B%5D=hi&request.myuuid=auth-uuid2"+
+				"request.authUUID=auth-uuid&request.foo=hi&request.myuuid=auth-uuid2"+
 					"&request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
@@ -833,7 +833,7 @@ func TestBarWithNestedQueryParams(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
-			"request.name=a-name&request.userUUID=a-uuid&request.foo[]=hi",
+			"request.name=a-name&request.userUUID=a-uuid&request.foo=hi",
 		map[string]string{
 			"x-uuid":  "auth-uuid",
 			"x-uuid2": "auth-uuid2",
@@ -872,7 +872,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
 				"opt.name=b-name&opt.userUUID=b-uuid&request.authUUID=auth-uuid&"+
-					"request.foo%5B%5D=hi&request.myuuid=auth-uuid2&"+
+					"request.foo=hi&request.myuuid=auth-uuid2&"+
 					"request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
@@ -889,7 +889,7 @@ func TestBarWithNestedQueryParamsWithOpts(t *testing.T) {
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
 			"request.name=a-name&request.userUUID=a-uuid&"+
-			"opt.name=b-name&opt.userUUID=b-uuid&request.foo[]=hi",
+			"opt.name=b-name&opt.userUUID=b-uuid&request.foo=hi",
 		map[string]string{
 			"x-uuid":  "auth-uuid",
 			"x-uuid2": "auth-uuid2",
@@ -927,7 +927,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 		"GET", "/bar/argWithNestedQueryParams",
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t,
-				"request.foo%5B%5D=hi&request.name=a-name&request.userUUID=a-uuid",
+				"request.foo=hi&request.name=a-name&request.userUUID=a-uuid",
 				r.URL.RawQuery,
 			)
 
@@ -942,7 +942,7 @@ func TestBarWithNestedQueryParamsWithoutHeaders(t *testing.T) {
 	res, err := gateway.MakeRequest(
 		"GET",
 		"/bar/argWithNestedQueryParams?"+
-			"request.name=a-name&request.userUUID=a-uuid&request.foo[]=hi",
+			"request.name=a-name&request.userUUID=a-uuid&request.foo=hi",
 		nil, nil,
 	)
 	if !assert.NoError(t, err, "got http error") {

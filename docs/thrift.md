@@ -174,9 +174,9 @@ how its serialized for the client ).
 	- list of bool, i8, i16, i32, i64, double or string
 	- struct with fields of bool, i8, i16, i32, i64, double, string, or list of bool, i8, i16, i32, i64, double or string
 
-	If the annotation is on a field of a list and that list is
-	a method argument, the URL query name will be prefixed with the
-	struct's field name plus "[]".
+    If the annotation is on a field of type list, the URL query name/value pair 
+    can be repeated several times with '&' to send multiple values for a 
+    list type.
 
  	If the annotation is on a field of a struct and that struct is
 	a method argument, the URL query name will be prefixed with the
