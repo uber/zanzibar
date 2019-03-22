@@ -14,7 +14,7 @@ import (
 	benchGateway "github.com/uber/zanzibar/test/lib/bench_gateway"
 	testGateway "github.com/uber/zanzibar/test/lib/test_gateway"
 	"github.com/uber/zanzibar/test/lib/util"
-git )
+)
 
 var defaultTestOptions = &testGateway.Options{
 	KnownHTTPBackends: []string{"bar"},
