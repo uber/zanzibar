@@ -208,6 +208,9 @@ func (c *TChannelClient) call(
 
 	reqUUID := RequestUUIDFromCtx(ctx)
 	if reqUUID != "" {
+		if reqHeaders == nil {
+			reqHeaders = make(map[string]string)
+		}
 		reqHeaders[c.requestUUIDHeaderKey] = reqUUID
 	}
 
