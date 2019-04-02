@@ -83,7 +83,7 @@ lint: check-licence eclint-check
 	@echo "Checking printf statements..."
 	@git grep -E 'Fprintf\(os.Std(err|out)' | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking vet..."
-	@$(foreach dir,$(PKG_FILES),go tool vet $(VET_RULES) $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+	@$(foreach dir,$(PKG_FILES),go vet $(VET_RULES) ./$(dir)/... 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking lint..."
 	@go get golang.org/x/lint/golint
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
@@ -151,13 +151,11 @@ test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
 	@ZANZIBAR_CACHE=1 go test -race ./test/health_test.go # preload the binary cache
-	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race \
-		./examples/example-gateway/... \
-		./codegen/... \
-		./runtime/... | \
-		grep -v '\[no test files\]'
-	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... | \
-		grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race ./codegen/... ./runtime/... | grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race $$(go list ./examples/example-gateway/... | grep -v build) | \
+	 grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... ./examples/example-gateway/build/... | \
+	 grep -v '\[no test files\]'
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
