@@ -151,13 +151,11 @@ test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
 	@ZANZIBAR_CACHE=1 go test -race ./test/health_test.go # preload the binary cache
-	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race \
-		./examples/example-gateway/... \
-		./codegen/... \
-		./runtime/... | \
-		grep -v '\[no test files\]'
-	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... | \
-		grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race ./codegen/... ./runtime/... | grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race $$(go list ./examples/example-gateway/... | grep -v build) | \
+	 grep -v '\[no test files\]'
+	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test ./test/... ./examples/example-gateway/build/... | \
+	 grep -v '\[no test files\]'
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "<coverage />" > ./coverage/cobertura-coverage.xml
 
