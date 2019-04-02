@@ -83,7 +83,7 @@ lint: check-licence eclint-check
 	@echo "Checking printf statements..."
 	@git grep -E 'Fprintf\(os.Std(err|out)' | $(FILTER_LINT) | tee -a lint.log
 	@echo "Checking vet..."
-	@$(foreach dir,$(PKG_FILES),go tool vet $(VET_RULES) $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
+	@$(foreach dir,$(PKG_FILES),go vet $(VET_RULES) ./$(dir)/... 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
 	@echo "Checking lint..."
 	@go get golang.org/x/lint/golint
 	@$(foreach dir,$(PKGS),golint $(dir) 2>&1 | $(FILTER_LINT) | tee -a lint.log;)
