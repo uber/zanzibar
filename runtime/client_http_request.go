@@ -110,8 +110,8 @@ func (req *ClientHTTPRequest) CheckHeaders(expected []string) error {
 }
 
 // WriteJSON materialize the HTTP request with given method, url, headers and body.
-// Body is serialized to JSON bytes using the custom MarshalJSON method if it is defined,
-// otherwise it is serialized via the Go stdlib json.Marshal function.
+// Body is serialized to JSON bytes using the stdlib json.Marshal function, which
+// calls the `MarshalJSON` method if the body implements the Marshaler interface.
 func (req *ClientHTTPRequest) WriteJSON(
 	method, url string,
 	headers map[string]string,
@@ -120,16 +120,7 @@ func (req *ClientHTTPRequest) WriteJSON(
 	var httpReq *http.Request
 	var httpErr error
 	if body != nil {
-		var rawBody []byte
-		var err error
-
-		mb, ok := body.(json.Marshaler)
-		if ok {
-			rawBody, err = mb.MarshalJSON()
-		} else {
-			rawBody, err = json.Marshal(body)
-		}
-
+		rawBody, err := json.Marshal(body)
 		if err != nil {
 			req.Logger.Error("Could not serialize request json", zap.Error(err))
 			return errors.Wrapf(

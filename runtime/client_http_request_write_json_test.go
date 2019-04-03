@@ -23,7 +23,6 @@ package zanzibar
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -54,17 +53,15 @@ func (wjs *writeJSONSuit) SetupSuite() {
 
 }
 
-type myType struct {
-	Field string
-}
+type myType struct{}
 
 func (m *myType) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("{\"field\":\"%s\"}", m.Field)
+	s := "{\"field\":\"hello\"}"
 	return []byte(s), nil
 }
 
 func (wjs *writeJSONSuit) TestWriteJSONCustomMarshaler() {
-	m := &myType{"hello"}
+	m := &myType{}
 	err := wjs.req.WriteJSON("POST", "test", nil, m)
 	assert.NoError(wjs.T(), err)
 	assert.Equal(wjs.T(), wjs.expectedRawBody, wjs.req.rawBody)
@@ -81,7 +78,7 @@ func (m *myTypeError) MarshalJSON() ([]byte, error) {
 func (wjs *writeJSONSuit) TestWriteJSONCustomMarshalerError() {
 	m := &myTypeError{"hello"}
 	err := wjs.req.WriteJSON("POST", "test", nil, m)
-	assert.EqualError(wjs.T(), err, "Could not serialize foo.bar request json: can not marshal")
+	assert.EqualError(wjs.T(), err, "Could not serialize foo.bar request json: json: error calling MarshalJSON for type *zanzibar.myTypeError: can not marshal")
 }
 
 type myTypeDefault struct {

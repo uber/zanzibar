@@ -78,7 +78,7 @@ func TestMakingClientWriteJSONWithBadJSON(t *testing.T) {
 	err = req.WriteJSON("GET", "/foo", nil, &failingJsonObj{})
 	assert.NotNil(t, err)
 	assert.Equal(t,
-		"Could not serialize clientID.DoStuff request json: cannot serialize",
+		"Could not serialize clientID.DoStuff request json: json: error calling MarshalJSON for type *zanzibar_test.failingJsonObj: cannot serialize",
 		err.Error(),
 	)
 
