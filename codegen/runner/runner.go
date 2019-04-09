@@ -153,18 +153,16 @@ func main() {
 	fmt.Printf("Generating module system components:\n")
 
 	if *moduleClass != "" && *moduleName != "" {
-		_, err = moduleSystem.GenerateIncrementalBuild(
-			packageHelper.PackageRoot(),
-			configRoot,
-			packageHelper.CodeGenTargetPath(),
-			[]codegen.ModuleDependency{
-				{
-					ClassName:    *moduleClass,
-					InstanceName: *moduleName,
-				},
-			},
-			true,
-		)
+		resolvedModules, err := moduleSystem.ResolveModules(packageHelper.PackageRoot(), configRoot, packageHelper.CodeGenTargetPath())
+		checkError(err, "error resolving modules")
+
+		for _, instance := range resolvedModules[*moduleClass] {
+			if instance.InstanceName == *moduleName {
+				physicalGenDir := filepath.Join(packageHelper.CodeGenTargetPath(), instance.Directory)
+				err := moduleSystem.Build(packageHelper.PackageRoot(), configRoot, physicalGenDir, instance, true)
+				checkError(err, "error generating code")
+			}
+		}
 	} else {
 		//lint:ignore SA1019 Migration to incremental builds is ongoing
 		_, err = moduleSystem.GenerateBuild(

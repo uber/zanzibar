@@ -43,8 +43,6 @@ const (
 	SingleModule moduleClassType = iota
 	// MultiModule defines a module class type with multiple nested directories
 	MultiModule moduleClassType = iota
-
-	serializedModuleTreePath = "zanzibar.tree"
 )
 
 const jsonConfigSuffix = "-config.json"
@@ -1024,222 +1022,86 @@ func (system *ModuleSystem) getSpec(instance *ModuleInstance) (interface{}, bool
 	return spec, true, nil
 }
 
-// tryResolveIncrementalBuild will try to run the codegen for just the module instance(s) provided. If we encounter
-// a module that does not provide getSpec interface, then we will fall back to full build.
-//
-// A key assumption of this method is that the output files for the given module instance will **not** depend on the
-// concrete details of its dependencies. For example, if a service depends on endpoints, details (i.e. endpoint type,
-// or endpoint configuration) of the endpoint will not vary the output of the service's template. This allows us to make
-// a simplifying assumption about running incremental build: we only need to run codegen for module X if the configuration
-// file for X has changed. If the assumption was false, then we would need to run codegen for module X if any of the
-// dependencies of X have changed, which would require pulling the dependencies of X (i.e. the YAML *-config.yaml files
-// ) out into the build system.
-func (system *ModuleSystem) tryResolveIncrementalBuild(instances []ModuleDependency, resolvedModules map[string][]*ModuleInstance) (map[string][]*ModuleInstance, error) {
-	// toBeBuiltModules is the list of module instances affected by this build
-	toBeBuiltModules := make(map[string]map[string]*ModuleInstance, 0)
-	for _, className := range system.classOrder {
-		toBeBuiltModules[className] = make(map[string]*ModuleInstance, 0)
-	}
-
-	for _, className := range system.classOrder {
-		classInstances := resolvedModules[className]
-
-		for _, classInstance := range classInstances {
-			// Some generators require dependent tasks to have computed their specs.
-			spec, ok, err := system.getSpec(classInstance)
-			if err != nil {
-				// Generators must be adapted to the new SpecProvider interface so that
-				// specs can be computed. Fall back to full build if generator errors when
-				// computing the spec or is not adapted to the SpecProvider interface.
-
-				return nil, err
-			}
-
-			if ok {
-				classInstance.genSpec = spec
-			}
-
-			found := false
-			for _, instance := range instances {
-				if classInstance.InstanceName == instance.InstanceName && classInstance.ClassName == instance.ClassName {
-					found = true
-					break
-				}
-			}
-			if !found {
-				fmt.Printf(
-					"Skipping generation of %q %q class of type %q "+
-						"as not needed for incremental build\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
-				)
-				continue
-			}
-
-			toBeBuiltModules[classInstance.ClassName][classInstance.InstanceName] = classInstance
-		}
-	}
-
-	toBeBuiltModulesList := make(map[string][]*ModuleInstance)
-	for _, className := range system.classOrder {
-		toBeBuiltModulesList[className] = make([]*ModuleInstance, 0, len(toBeBuiltModules[className]))
-		for _, classInstance := range toBeBuiltModules[className] {
-			toBeBuiltModulesList[className] = append(toBeBuiltModulesList[className], classInstance)
-		}
-	}
-
-	return toBeBuiltModulesList, nil
-}
-
-// GenerateIncrementalBuild is like GenerateBuild but filtered to only the given
-// module instances.
-func (system *ModuleSystem) GenerateIncrementalBuild(
+// Build invokes the generator for a module instance and optionally writes the files to disk
+func (system *ModuleSystem) Build(
 	packageRoot string,
 	baseDirectory string,
-	targetGenDir string,
-	instances []ModuleDependency,
+	physicalGenDir string,
+	instance *ModuleInstance,
 	commitChange bool,
-) (map[string][]*ModuleInstance, error) {
-	resolvedModules, err := system.ResolveModules(
-		packageRoot,
-		baseDirectory,
-		targetGenDir,
-	)
+) error {
+	classGenerators := system.classes[instance.ClassName]
+	generator := classGenerators.types[instance.ClassType]
 
-	if err != nil {
-		return nil, err
+	if generator == nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Skipping generation of %q %q class of type %q "+
+				"as generator is not defined\n",
+			instance.InstanceName,
+			instance.ClassName,
+			instance.ClassType,
+		)
+		return nil
 	}
 
-	serializedModules, err := yaml.Marshal(resolvedModules)
-	if err != nil {
-		return nil, errors.Wrap(err, "error serializing module tree")
-	}
-	err = writeFile(filepath.Join(targetGenDir, serializedModuleTreePath), serializedModules)
-	if err != nil {
-		return nil, errors.Wrap(err, "error writing serialized module tree")
-	}
+	buildResult, err := generator.Generate(instance)
 
-	moduleCount := 0
-	moduleIndex := 0
-	for _, moduleList := range resolvedModules {
-		moduleCount += len(moduleList)
-	}
-
-	toBeBuiltModulesList, err := system.tryResolveIncrementalBuild(instances, resolvedModules)
 	if err != nil {
 		fmt.Fprintf(
 			os.Stderr,
-			"Falling back to non-incremental full build because an error occurred: %s\n",
+			"Error generating %q %q of type %q:\n%s\n",
+			instance.InstanceName,
+			instance.ClassName,
+			instance.ClassType,
 			err.Error(),
 		)
-		toBeBuiltModulesList = resolvedModules
+		return err
 	}
 
-	for _, className := range system.classOrder {
-		for _, classInstance := range toBeBuiltModulesList[className] {
-			moduleIndex++
-			buildPath := filepath.Join(
-				targetGenDir,
-				classInstance.Directory,
-			)
-			prettyBuildPath := filepath.Join(
-				filepath.Base(targetGenDir),
-				classInstance.Directory,
-			)
-			PrintGenLine(
-				classInstance.ClassType,
-				classInstance.ClassName,
-				classInstance.InstanceName,
-				prettyBuildPath,
-				moduleIndex,
-				moduleCount,
-			)
-
-			classGenerators := system.classes[classInstance.ClassName]
-			generator := classGenerators.types[classInstance.ClassType]
-
-			if generator == nil {
-				fmt.Fprintf(
-					os.Stderr,
-					"Skipping generation of %q %q class of type %q "+
-						"as generator is not defined\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
-				)
-				continue
-			}
-
-			buildResult, err := generator.Generate(classInstance)
-
-			if err != nil {
-				fmt.Fprintf(
-					os.Stderr,
-					"Error generating %q %q of type %q:\n%s\n",
-					classInstance.InstanceName,
-					classInstance.ClassName,
-					classInstance.ClassType,
-					err.Error(),
-				)
-				return nil, err
-			}
-
-			if buildResult == nil {
-				continue
-			}
-			classInstance.genSpec = buildResult.Spec
-			if !commitChange {
-				continue
-			}
-			for filePath, content := range buildResult.Files {
-				filePath = filepath.Clean(filePath)
-
-				resolvedPath := filepath.Join(
-					buildPath,
-					filePath,
-				)
-
-				if err := writeFile(resolvedPath, content); err != nil {
-					return nil, errors.Wrapf(
-						err,
-						"Error writing to file %q",
-						resolvedPath,
-					)
-				}
-
-				// HACK: The module system writer shouldn't
-				// assume that we want to format the files in
-				// this way, but we don't have these formatters
-				// as a library or a custom post build script
-				// for the generators yet.
-				if filepath.Ext(filePath) == ".go" {
-					if err := FormatGoFile(resolvedPath); err != nil {
-						return nil, err
-					}
-				}
-			}
-		}
+	if buildResult == nil {
+		return nil
 	}
+	instance.genSpec = buildResult.Spec
+	if !commitChange {
+		return nil
+	}
+	for filePath, content := range buildResult.Files {
+		filePath = filepath.Clean(filePath)
 
-	for i, hook := range system.postGenHook {
-		if err := hook(toBeBuiltModulesList); err != nil {
-			return resolvedModules, errors.Wrapf(
+		resolvedPath := filepath.Join(
+			physicalGenDir,
+			filePath,
+		)
+
+		if err := writeFile(resolvedPath, content); err != nil {
+			return errors.Wrapf(
 				err,
-				"error running post generation hook number %d",
-				i,
+				"Error writing to file %q",
+				resolvedPath,
 			)
+		}
+
+		// HACK: The module system writer shouldn't
+		// assume that we want to format the files in
+		// this way, but we don't have these formatters
+		// as a library or a custom post build script
+		// for the generators yet.
+		if filepath.Ext(filePath) == ".go" {
+			if err := FormatGoFile(resolvedPath); err != nil {
+				return err
+			}
 		}
 	}
 
-	return resolvedModules, nil
+	return nil
 }
 
 // GenerateBuild will, given a module system configuration directory and a
 // target build directory, run the generators assigned to each type of module
 // and write the generated output to the module build directory if commitChange
 //
-// Deprecated: Use GenerateIncrementalBuild instead.
+// Deprecated: Use Build instead.
 func (system *ModuleSystem) GenerateBuild(
 	packageRoot string,
 	baseDirectory string,
@@ -1256,17 +1118,33 @@ func (system *ModuleSystem) GenerateBuild(
 		return nil, err
 	}
 
-	buildTargets := make([]ModuleDependency, 0, len(resolvedModules))
-	for _, moduleInstances := range resolvedModules {
-		for _, moduleInstance := range moduleInstances {
-			buildTargets = append(buildTargets, ModuleDependency{
-				ClassName:    moduleInstance.ClassName,
-				InstanceName: moduleInstance.InstanceName,
-			})
+	moduleCount := 0
+	moduleIndex := 0
+	for _, moduleList := range resolvedModules {
+		moduleCount += len(moduleList)
+	}
+
+	for _, class := range system.classOrder {
+		for _, moduleInstance := range resolvedModules[class] {
+			moduleIndex++
+
+			physicalGenDir := filepath.Join(targetGenDir, moduleInstance.Directory)
+			prettyDir, _ := filepath.Rel(baseDirectory, physicalGenDir)
+			PrintGenLine(moduleInstance.ClassType, moduleInstance.ClassName, moduleInstance.InstanceName, prettyDir, moduleIndex, moduleCount)
+			err := system.Build(packageRoot, baseDirectory, physicalGenDir, moduleInstance, commitChange)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	return system.GenerateIncrementalBuild(packageRoot, baseDirectory, targetGenDir, buildTargets, commitChange)
+	for i, hook := range system.postGenHook {
+		if err := hook(resolvedModules); err != nil {
+			return resolvedModules, errors.Wrapf(err, "error running %dth post generation hook", i)
+		}
+	}
+
+	return resolvedModules, nil
 }
 
 // PrintGenLine prints the module generation process to stdout
