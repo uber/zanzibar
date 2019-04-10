@@ -1,5 +1,5 @@
-hash: acd0511ffa7005d38d66a1be1578cc68c8888330fb70a3ad28d815932265647a
-updated: 2019-03-06T16:33:35.900424-08:00
+hash: 02666f5303f46d9d34b545c7055fa17744925a3ae106910fe746a26c5843fc91
+updated: 2019-04-10T14:22:03.605990348-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -15,8 +15,6 @@ imports:
   - lib/go/thrift
 - name: github.com/buger/jsonparser
   version: bf1c66bbce23153d89b23f8960071a680dbef54b
-- name: github.com/codahale/hdrhistogram
-  version: 3a0bb77429bd3a61596f5e8a3172445844342120
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -43,7 +41,7 @@ imports:
 - name: github.com/kisielk/gotool
   version: 80517062f582ea3340cd4baf70e86d539ae7d84d
 - name: github.com/mailru/easyjson
-  version: 6243d8e04c3f819e79757e8bc3faa15c3cb27003
+  version: 1ea4449da9834f4d333f1cc461c374aea217d249
   subpackages:
   - bootstrap
   - buffer
@@ -56,7 +54,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/opentracing/opentracing-go
-  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
   - ext
   - log
@@ -90,7 +88,7 @@ imports:
   - m3/thrift
   - m3/thriftudp
 - name: github.com/uber/jaeger-client-go
-  version: 1a782e2da844727691fef1757c72eb190c2909f0
+  version: 2f47546e3facd43297739439600bcf43f44cce5d
   subpackages:
   - config
   - internal/baggage
@@ -110,12 +108,12 @@ imports:
   - transport
   - utils
 - name: github.com/uber/jaeger-lib
-  version: ed3a127ec5fef7ae9ea95b01b542c47fbd999ce5
+  version: 0e30338a695636fe5bcf7301e8030ce8dd2a8530
   subpackages:
   - metrics
   - metrics/tally
 - name: github.com/uber/tchannel-go
-  version: 162ecb0dc97845a0c42aae3899651dba111085e5
+  version: 4e23485fd5de65e8676619a55e711eea7437041e
   subpackages:
   - internal/argreader
   - relay
@@ -129,7 +127,6 @@ imports:
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
-  - internal/cgroups
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
@@ -146,7 +143,7 @@ imports:
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
-  version: 4fe4d5a28a338ad3cc955897e9586021d1732c3f
+  version: 4b5c9b20a122b222281c893c73e8a551aa19fb16
   subpackages:
   - ast
   - compile
@@ -180,7 +177,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: 16b79f2e4e95ea23b2bf9903c9809ff7b013ce85
+  version: b630fd6fe46bcfc98f989005d8b8ec1400e60a6e
   subpackages:
   - bpf
   - context
@@ -189,7 +186,7 @@ imports:
   - ipv4
   - ipv6
 - name: golang.org/x/tools
-  version: 69e0dcfa1121488c38c3c8f9624f7de769003896
+  version: 8a44e74612bcf51f0d4407df3d3a8377cb99c2d8
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
