@@ -39,8 +39,7 @@ import:
   version: ^1.2.0
 - package: github.com/pborman/uuid
   version: ^1.1.0
-- package: honnef.co/go/tools/cmd/staticcheck
-  version: master
+  
 - package: github.com/kisielk/gotool
   version: master
 - package: github.com/kisielk/errcheck
@@ -58,6 +57,12 @@ import:
   version: ^1.2.0
 - package: github.com/afex/hystrix-go
   version: master
+- package: go.uber.org/multierr
+  version: ^1
+
+# https://github.com/uber/zanzibar/issues/583
+- package: honnef.co/go/tools/cmd/staticcheck
+  version: e3ad64cb4ed3e25a30bf42def711f9cb5b004f72
 
 # Build tools / SDKs
 - package: github.com/jteeuwen/go-bindata
