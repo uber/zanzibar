@@ -48,7 +48,7 @@ func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Success == nil {
 					out.Success = new(GetProfileResponse)
 				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in, out.Success)
+				(*out.Success).UnmarshalEasyJSON(in)
 			}
 		case "authErr":
 			if in.IsNull() {
@@ -58,7 +58,7 @@ func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.AuthErr == nil {
 					out.AuthErr = new(AuthErr)
 				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in, out.AuthErr)
+				(*out.AuthErr).UnmarshalEasyJSON(in)
 			}
 		default:
 			in.SkipRecursive()
@@ -82,7 +82,7 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out, *in.Success)
+		(*in.Success).MarshalEasyJSON(out)
 	}
 	if in.AuthErr != nil {
 		const prefix string = ",\"authErr\":"
@@ -92,7 +92,7 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		} else {
 			out.RawString(prefix)
 		}
-		easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out, *in.AuthErr)
+		(*in.AuthErr).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -119,461 +119,6 @@ func (v *SimpleService_GetProfile_Result) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_GetProfile_Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceGetProfile(l, v)
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(in *jlexer.Lexer, out *AuthErr) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var MessageSet bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "message":
-			out.Message = string(in.String())
-			MessageSet = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !MessageSet {
-		in.AddError(fmt.Errorf("key 'message' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz1(out *jwriter.Writer, in AuthErr) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"message\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Message))
-	}
-	out.RawByte('}')
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(in *jlexer.Lexer, out *GetProfileResponse) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var PayloadsSet bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "payloads":
-			if in.IsNull() {
-				in.Skip()
-				out.Payloads = nil
-			} else {
-				in.Delim('[')
-				if out.Payloads == nil {
-					if !in.IsDelim(']') {
-						out.Payloads = make([]*Profile, 0, 8)
-					} else {
-						out.Payloads = []*Profile{}
-					}
-				} else {
-					out.Payloads = (out.Payloads)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v1 *Profile
-					if in.IsNull() {
-						in.Skip()
-						v1 = nil
-					} else {
-						if v1 == nil {
-							v1 = new(Profile)
-						}
-						easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in, v1)
-					}
-					out.Payloads = append(out.Payloads, v1)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
-			PayloadsSet = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !PayloadsSet {
-		in.AddError(fmt.Errorf("key 'payloads' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz(out *jwriter.Writer, in GetProfileResponse) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"payloads\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Payloads == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v2, v3 := range in.Payloads {
-				if v2 > 0 {
-					out.RawByte(',')
-				}
-				if v3 == nil {
-					out.RawString("null")
-				} else {
-					easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out, *v3)
-				}
-			}
-			out.RawByte(']')
-		}
-	}
-	out.RawByte('}')
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(in *jlexer.Lexer, out *Profile) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var Recur1Set bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "recur1":
-			if in.IsNull() {
-				in.Skip()
-				out.Recur1 = nil
-			} else {
-				if out.Recur1 == nil {
-					out.Recur1 = new(Recur1)
-				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in, out.Recur1)
-			}
-			Recur1Set = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !Recur1Set {
-		in.AddError(fmt.Errorf("key 'recur1' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz2(out *jwriter.Writer, in Profile) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"recur1\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Recur1 == nil {
-			out.RawString("null")
-		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out, *in.Recur1)
-		}
-	}
-	out.RawByte('}')
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(in *jlexer.Lexer, out *Recur1) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var Field1Set bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "field1":
-			if in.IsNull() {
-				in.Skip()
-			} else {
-				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Field1 = make(map[UUID]*Recur2)
-				} else {
-					out.Field1 = nil
-				}
-				for !in.IsDelim('}') {
-					key := UUID(in.String())
-					in.WantColon()
-					var v4 *Recur2
-					if in.IsNull() {
-						in.Skip()
-						v4 = nil
-					} else {
-						if v4 == nil {
-							v4 = new(Recur2)
-						}
-						easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(in, v4)
-					}
-					(out.Field1)[key] = v4
-					in.WantComma()
-				}
-				in.Delim('}')
-			}
-			Field1Set = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !Field1Set {
-		in.AddError(fmt.Errorf("key 'field1' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz3(out *jwriter.Writer, in Recur1) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"field1\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Field1 == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
-		} else {
-			out.RawByte('{')
-			v5First := true
-			for v5Name, v5Value := range in.Field1 {
-				if v5First {
-					v5First = false
-				} else {
-					out.RawByte(',')
-				}
-				out.String(string(v5Name))
-				out.RawByte(':')
-				if v5Value == nil {
-					out.RawString("null")
-				} else {
-					easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(out, *v5Value)
-				}
-			}
-			out.RawByte('}')
-		}
-	}
-	out.RawByte('}')
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(in *jlexer.Lexer, out *Recur2) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var Field21Set bool
-	var Field22Set bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "field21":
-			if in.IsNull() {
-				in.Skip()
-				out.Field21 = nil
-			} else {
-				if out.Field21 == nil {
-					out.Field21 = new(Recur3)
-				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(in, out.Field21)
-			}
-			Field21Set = true
-		case "field22":
-			if in.IsNull() {
-				in.Skip()
-				out.Field22 = nil
-			} else {
-				if out.Field22 == nil {
-					out.Field22 = new(Recur3)
-				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(in, out.Field22)
-			}
-			Field22Set = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !Field21Set {
-		in.AddError(fmt.Errorf("key 'field21' is required"))
-	}
-	if !Field22Set {
-		in.AddError(fmt.Errorf("key 'field22' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz4(out *jwriter.Writer, in Recur2) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"field21\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Field21 == nil {
-			out.RawString("null")
-		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field21)
-		}
-	}
-	{
-		const prefix string = ",\"field22\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Field22 == nil {
-			out.RawString("null")
-		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out, *in.Field22)
-		}
-	}
-	out.RawByte('}')
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(in *jlexer.Lexer, out *Recur3) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var Field31Set bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "field31":
-			out.Field31 = UUID(in.String())
-			Field31Set = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !Field31Set {
-		in.AddError(fmt.Errorf("key 'field31' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz5(out *jwriter.Writer, in Recur3) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"field31\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Field31))
-	}
-	out.RawByte('}')
 }
 func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceGetProfile1(in *jlexer.Lexer, out *SimpleService_GetProfile_Args) {
 	isTopLevel := in.IsStart()
@@ -603,7 +148,7 @@ func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 				if out.Request == nil {
 					out.Request = new(GetProfileRequest)
 				}
-				easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(in, out.Request)
+				(*out.Request).UnmarshalEasyJSON(in)
 			}
 			RequestSet = true
 		default:
@@ -634,7 +179,7 @@ func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCo
 		if in.Request == nil {
 			out.RawString("null")
 		} else {
-			easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(out, *in.Request)
+			(*in.Request).MarshalEasyJSON(out)
 		}
 	}
 	out.RawByte('}')
@@ -662,56 +207,4 @@ func (v *SimpleService_GetProfile_Args) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SimpleService_GetProfile_Args) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBazSimpleServiceGetProfile1(l, v)
-}
-func easyjsonAfe3fc6dDecodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(in *jlexer.Lexer, out *GetProfileRequest) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	var TargetSet bool
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "target":
-			out.Target = UUID(in.String())
-			TargetSet = true
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-	if !TargetSet {
-		in.AddError(fmt.Errorf("key 'target' is required"))
-	}
-}
-func easyjsonAfe3fc6dEncodeGithubComUberZanzibarExamplesExampleGatewayBuildGenCodeEndpointsBazBaz6(out *jwriter.Writer, in GetProfileRequest) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"target\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Target))
-	}
-	out.RawByte('}')
 }
