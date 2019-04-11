@@ -21,18 +21,14 @@
 package codegen
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
-	"sync"
-	"sync/atomic"
 
 	"github.com/pkg/errors"
 	"gopkg.in/validator.v2"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -64,6 +60,54 @@ func newMockableClient(raw []byte) (*mockableClient, error) {
 	return config, nil
 }
 
+// simpleHookFunc is a wrapper around a generate function
+type simpleHookFunc struct {
+	h *PackageHelper
+
+	name            string
+	directorySuffix string
+	ShouldRunHook   func(instance *ModuleInstance) bool
+	Generator       func(instance *ModuleInstance) (map[string][]byte, error)
+}
+
+var _ PostGenHook = (*simpleHookFunc)(nil)
+
+func (h *simpleHookFunc) Name() string {
+	return h.name
+}
+
+func (h *simpleHookFunc) Build(instance *ModuleInstance) error {
+	if !h.ShouldRunHook(instance) {
+		return nil
+	}
+
+	files, err := h.Generator(instance)
+	if err != nil {
+		return err
+	}
+
+	outputDir := filepath.Join(h.h.CodeGenTargetPath(), instance.Directory, h.directorySuffix)
+	prettyDir, _ := filepath.Rel(h.h.configRoot, outputDir)
+
+	PrintGenLine(
+		"mock",
+		instance.ClassName,
+		instance.InstanceName,
+		prettyDir,
+		1,
+		1,
+	)
+
+	for path, bytes := range files {
+		err := WriteAndFormat(filepath.Join(outputDir, path), bytes)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ClientMockGenHook returns a PostGenHook to generate client mocks
 func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 	bin, err := NewMockgenBin(h, t)
@@ -71,19 +115,20 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 		return nil, errors.Wrap(err, "error building mockgen binary")
 	}
 
-	return func(instances map[string][]*ModuleInstance) error {
-		clientInstances := instances["client"]
-		mockCount := len(clientInstances)
-		fmt.Printf("Generating %d client mocks:\n", mockCount)
-
-		importPathMap := make(map[string]string, mockCount)
-		fixtureMap := make(map[string]*Fixture, mockCount)
-		pathSymbolMap := make(map[string]string)
-		for _, instance := range clientInstances {
+	return &simpleHookFunc{
+		h:               h,
+		name:            "mock-client",
+		directorySuffix: "mock-client",
+		ShouldRunHook: func(instance *ModuleInstance) bool {
+			return instance.ClassName == "client"
+		},
+		Generator: func(instance *ModuleInstance) (map[string][]byte, error) {
+			fixtureMap := make(map[string]*Fixture)
+			pathSymbolMap := make(map[string]string)
 			key := instance.ClassType + instance.InstanceName
 			client, errClient := newMockableClient(instance.YAMLFileRaw)
 			if errClient != nil {
-				return errors.Wrapf(
+				return nil, errors.Wrapf(
 					err,
 					"error parsing client-config for client %q",
 					instance.InstanceName,
@@ -95,199 +140,89 @@ func ClientMockGenHook(h *PackageHelper, t *Template) (PostGenHook, error) {
 				importPath = client.Config.CustomImportPath
 			}
 
-			importPathMap[key] = importPath
-
 			// gather all modules that need to generate fixture types
 			f := client.Config.Fixture
 			if f != nil && f.Scenarios != nil {
 				pathSymbolMap[importPath] = clientInterface
 				fixtureMap[key] = f
 			}
-		}
 
-		// only run reflect program once to gather interface info for all clients
-		pkgs, err := ReflectInterface("", pathSymbolMap)
-		if err != nil {
-			return errors.Wrap(err, "error parsing Client interfaces")
-		}
+			// only run reflect program once to gather interface info for all clients
+			pkgs, err := ReflectInterface("", pathSymbolMap)
+			if err != nil {
+				return nil, errors.Wrap(err, "error parsing Client interfaces")
+			}
 
-		var idx int32 = 1
-		var files sync.Map
-		var wg sync.WaitGroup
-		ic := make(chan *ModuleInstance)
-		ec := make(chan error, mockCount)
+			files := make(map[string][]byte)
 
-		// cap the num of goroutines to num of CPU, because
-		// bin.GenMock in each goroutine starts a sub process
-		n := runtime.GOMAXPROCS(0)
-		if n > mockCount {
-			n = mockCount
-		}
-		wg.Add(n)
+			// buildDir := h.CodeGenTargetPath()
+			// genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
 
-		for i := 0; i < n; i++ {
-			go func() {
-				defer wg.Done()
+			// generate mock client, this starts a sub process
+			mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"error generating mocks for client %q",
+					instance.InstanceName,
+				)
+			}
+			files["mock_client.go"] = mock
 
-				for {
-					instance, ok := <-ic
-					if !ok {
-						return
-					}
-
-					key := instance.ClassType + instance.InstanceName
-					buildDir := h.CodeGenTargetPath()
-					genDir := filepath.Join(buildDir, instance.Directory, "mock-client")
-
-					importPath := importPathMap[key]
-
-					// generate mock client, this starts a sub process
-					mock, err := bin.GenMock(importPath, "clientmock", clientInterface)
-					if err != nil {
-						ec <- errors.Wrapf(
-							err,
-							"error generating mocks for client %q",
-							instance.InstanceName,
-						)
-						return
-					}
-					files.Store(filepath.Join(genDir, "mock_client.go"), mock)
-
-					// generate fixture types and augmented mock client
-					if f, ok := fixtureMap[key]; ok {
-						types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterface)
-						if err != nil {
-							ec <- errors.Wrapf(
-								err,
-								"error generating fixture types for client %q",
-								instance.InstanceName,
-							)
-							return
-						}
-
-						files.Store(filepath.Join(genDir, "types.go"), types)
-						files.Store(filepath.Join(genDir, "mock_client_with_fixture.go"), augMock)
-					}
-
-					PrintGenLine(
-						"mock",
-						instance.ClassName,
+			// generate fixture types and augmented mock client
+			if f, ok := fixtureMap[key]; ok {
+				types, augMock, err := bin.AugmentMockWithFixture(pkgs[importPath], f, clientInterface)
+				if err != nil {
+					return nil, errors.Wrapf(
+						err,
+						"error generating fixture types for client %q",
 						instance.InstanceName,
-						path.Join(path.Base(buildDir), instance.Directory, "mock-client"),
-						int(atomic.LoadInt32(&idx)), mockCount,
 					)
-					atomic.AddInt32(&idx, 1)
 				}
-			}()
-		}
 
-		for _, instance := range clientInstances {
-			ic <- instance
-		}
-		close(ic)
-		wg.Wait()
-
-		select {
-		case err := <-ec:
-			close(ec)
-			errs := []string{err.Error()}
-			for e := range ec {
-				errs = append(errs, e.Error())
+				files["types.go"] = types
+				files["mock_client_with_fixture.go"] = augMock
 			}
-			return errors.Errorf(
-				"encountered %d errors when generating mock clients:\n%s",
-				len(errs),
-				strings.Join(errs, "\n"),
-			)
-		default:
-		}
 
-		files.Range(func(p, data interface{}) bool {
-			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
-				return false
-			}
-			return true
-		})
-
-		return err
+			return files, nil
+		},
 	}, nil
 }
 
 // ServiceMockGenHook returns a PostGenHook to generate service mocks
 func ServiceMockGenHook(h *PackageHelper, t *Template) PostGenHook {
-	return func(instances map[string][]*ModuleInstance) error {
-		mockCount := len(instances["service"])
-		fmt.Printf("Generating %d service mocks:\n", mockCount)
-		ec := make(chan error, mockCount)
-		var idx int32 = 1
-		var files sync.Map
-		var wg sync.WaitGroup
-		wg.Add(mockCount)
-		for _, instance := range instances["service"] {
-			go func(instance *ModuleInstance) {
-				defer wg.Done()
+	return &simpleHookFunc{
+		h:               h,
+		directorySuffix: "mock-service",
 
-				buildDir := h.CodeGenTargetPath()
-				genDir := filepath.Join(buildDir, instance.Directory, "mock-service")
+		ShouldRunHook: func(instance *ModuleInstance) bool {
+			return instance.ClassName == "service"
+		},
+		Generator: func(instance *ModuleInstance) (map[string][]byte, error) {
+			files := make(map[string][]byte)
 
-				mockInit, err := generateMockInitializer(instance, h, t)
-				if err != nil {
-					ec <- errors.Wrapf(
-						err,
-						"Error generating service mock_init.go for %s",
-						instance.InstanceName,
-					)
-					return
-				}
-				files.Store(filepath.Join(genDir, "mock_init.go"), mockInit)
-
-				mockService, err := generateServiceMock(instance, h, t)
-				if err != nil {
-					ec <- errors.Wrapf(
-						err,
-						"Error generating service mock_service.go for %s",
-						instance.InstanceName,
-					)
-					return
-				}
-				files.Store(filepath.Join(genDir, "mock_service.go"), mockService)
-
-				PrintGenLine(
-					"mock",
-					instance.ClassName,
+			mockInit, err := generateMockInitializer(instance, h, t)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"Error generating service mock_init.go for %s",
 					instance.InstanceName,
-					path.Join(path.Base(buildDir), instance.Directory, "mock-service"),
-					int(atomic.LoadInt32(&idx)), mockCount,
 				)
-				atomic.AddInt32(&idx, 1)
-			}(instance)
-		}
-		wg.Wait()
-
-		select {
-		case err := <-ec:
-			close(ec)
-			errs := []string{err.Error()}
-			for e := range ec {
-				errs = append(errs, e.Error())
 			}
-			return errors.Errorf(
-				"encountered %d errors when generating mock services:\n%s",
-				len(errs),
-				strings.Join(errs, "\n"),
-			)
-		default:
-		}
+			files["mock_init.go"] = mockInit
 
-		var err error
-		files.Range(func(p, data interface{}) bool {
-			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
-				return false
+			mockService, err := generateServiceMock(instance, h, t)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"Error generating service mock_service.go for %s",
+					instance.InstanceName,
+				)
 			}
-			return true
-		})
+			files["mock_service.go"] = mockService
 
-		return err
+			return files, nil
+		},
 	}
 }
 
@@ -353,130 +288,73 @@ func WriteAndFormat(path string, data []byte) error {
 
 // WorkflowMockGenHook returns a PostGenHook to generate endpoint workflow mocks
 func WorkflowMockGenHook(h *PackageHelper, t *Template) PostGenHook {
-	return func(instances map[string][]*ModuleInstance) error {
-		errChanSize := 0
-		shouldGenMap := map[*ModuleInstance][]*EndpointSpec{}
-		for _, instance := range instances["endpoint"] {
-			endpointSpecs := instance.genSpec.([]*EndpointSpec)
-			for _, endpointSpec := range endpointSpecs {
-				if endpointSpec.WorkflowType == "custom" {
-					shouldGenMap[instance] = endpointSpecs
-					errChanSize += len(endpointSpecs)
-					break
-				}
-			}
-		}
+	return &simpleHookFunc{
+		h:               h,
+		directorySuffix: "mock-workflow",
 
-		genEndpointCount := len(shouldGenMap)
-		if genEndpointCount == 0 {
-			return nil
-		}
-		errChanSize += genEndpointCount
-
-		fmt.Printf("Generating %d endpoint mocks:\n", genEndpointCount)
-		ec := make(chan error, errChanSize)
-		var idx int32 = 1
-		var files sync.Map
-		var wg sync.WaitGroup
-		for instance, endpointSpecs := range shouldGenMap {
-			wg.Add(1)
-			go func(instance *ModuleInstance, endpointSpecs []*EndpointSpec) {
-				defer wg.Done()
-
-				buildDir := h.CodeGenTargetPath()
-				genDir := filepath.Join(buildDir, instance.Directory, "mock-workflow")
-
-				cwf, err := FindClientsWithFixture(instance)
-				if err != nil {
-					ec <- errors.Wrapf(
-						err,
-						"Error generating mock endpoint %s",
-						instance.InstanceName,
-					)
-					return
-				}
-
-				var subWg sync.WaitGroup
-
-				subWg.Add(1)
-				go func() {
-					defer subWg.Done()
-
-					mockClientsType, err := generateEndpointMockClientsType(instance, cwf, h, t)
-					if err != nil {
-						ec <- errors.Wrapf(
-							err,
-							"Error generating mock clients type.go for endpoint %s",
-							instance.InstanceName,
-						)
-						return
-					}
-					files.Store(filepath.Join(genDir, "type.go"), mockClientsType)
-				}()
-
-				for _, endpointSpec := range endpointSpecs {
-					if endpointSpec.WorkflowType != "custom" {
-						continue
-					}
-
-					subWg.Add(1)
-
-					go func(espec *EndpointSpec) {
-						defer subWg.Done()
-
-						mockWorkflow, err := generateMockWorkflow(espec, instance, cwf, h, t)
-						if err != nil {
-							ec <- errors.Wrapf(
-								err,
-								"Error generating mock workflow for %s",
-								instance.InstanceName,
-							)
-							return
-						}
-						filename := strings.ToLower(espec.ThriftServiceName) + "_" +
-							strings.ToLower(espec.ThriftMethodName) + "_workflow_mock.go"
-						files.Store(filepath.Join(genDir, filename), mockWorkflow)
-					}(endpointSpec)
-				}
-
-				subWg.Wait()
-				PrintGenLine(
-					"mock",
-					instance.ClassName,
-					instance.InstanceName,
-					path.Join(path.Base(buildDir), instance.Directory, "mock-workflow"),
-					int(atomic.LoadInt32(&idx)), genEndpointCount,
-				)
-				atomic.AddInt32(&idx, 1)
-			}(instance, endpointSpecs)
-		}
-		wg.Wait()
-
-		select {
-		case err := <-ec:
-			close(ec)
-			errs := []string{err.Error()}
-			for e := range ec {
-				errs = append(errs, e.Error())
-			}
-			return errors.Errorf(
-				"encountered %d errors when generating mock endpoint workflows:\n%s",
-				len(errs),
-				strings.Join(errs, "\n"),
-			)
-		default:
-		}
-
-		var err error
-
-		files.Range(func(p, data interface{}) bool {
-			if err = WriteAndFormat(p.(string), data.([]byte)); err != nil {
+		ShouldRunHook: func(instance *ModuleInstance) bool {
+			if instance.ClassName != "endpoint" {
 				return false
 			}
-			return true
-		})
 
-		return err
+			specs := instance.genSpec.([]*EndpointSpec)
+			for _, spec := range specs {
+				if spec.WorkflowType == "custom" {
+					return true
+				}
+			}
+
+			return false
+		},
+
+		Generator: func(instance *ModuleInstance) (map[string][]byte, error) {
+			files := make(map[string][]byte)
+
+			cwf, err := FindClientsWithFixture(instance)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"Error generating mock endpoint %s",
+					instance.InstanceName,
+				)
+			}
+
+			mockClientsType, err := generateEndpointMockClientsType(instance, cwf, h, t)
+			if err != nil {
+				return nil, errors.Wrapf(
+					err,
+					"Error generating mock clients type.go for endpoint %s",
+					instance.InstanceName,
+				)
+			}
+
+			files["type.go"] = mockClientsType
+
+			specs := instance.genSpec.([]*EndpointSpec)
+			var neededSpecs []*EndpointSpec
+
+			for _, spec := range specs {
+				if spec.WorkflowType == "custom" {
+					neededSpecs = append(neededSpecs, spec)
+				}
+			}
+
+			for _, endpointSpec := range neededSpecs {
+				mockWorkflow, err := generateMockWorkflow(endpointSpec, instance, cwf, h, t)
+				if err != nil {
+					return nil, errors.Wrapf(
+						err,
+						"Error generating mock workflow for %s",
+						instance.InstanceName,
+					)
+				}
+				filename := strings.ToLower(endpointSpec.ThriftServiceName) + "_" +
+					strings.ToLower(endpointSpec.ThriftMethodName) + "_workflow_mock.go"
+				files[filename] = mockWorkflow
+			}
+
+			return files, nil
+		},
 	}
 }
 

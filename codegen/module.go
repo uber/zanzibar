@@ -29,9 +29,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
+	"go.uber.org/multierr"
+	"gopkg.in/yaml.v2"
 )
 
 // moduleType enum defines whether a ModuleClass is a singleton or contains
@@ -74,7 +76,10 @@ type ModuleSystem struct {
 
 // PostGenHook provides a way to do work after the build is generated,
 // useful to augment the build, e.g. generate mocks after interfaces are generated
-type PostGenHook func(map[string][]*ModuleInstance) error
+type PostGenHook interface {
+	Name() string
+	Build(*ModuleInstance) error
+}
 
 // RegisterClass defines a class of module in the module system
 // For example, an "Endpoint" class or a "Client" class
@@ -1138,10 +1143,32 @@ func (system *ModuleSystem) GenerateBuild(
 		}
 	}
 
-	for i, hook := range system.postGenHook {
-		if err := hook(resolvedModules); err != nil {
-			return resolvedModules, errors.Wrapf(err, "error running %dth post generation hook", i)
+	// Run the post-gen hooks in parallel
+	var errs error
+	errorMutex := new(sync.Mutex)
+	wg := new(sync.WaitGroup)
+
+	for _, hook := range system.postGenHook {
+		for _, instances := range resolvedModules {
+			for _, instance := range instances {
+				wg.Add(1)
+				go func(instance *ModuleInstance, hook PostGenHook) {
+					defer wg.Done()
+					err := hook.Build(instance)
+					if err != nil {
+						errorMutex.Lock()
+						errs = multierr.Append(errs, errors.Wrapf(err, "error running codegen hook %s for %s %s", hook.Name(), instance.ClassName, instance.InstanceName))
+						errorMutex.Unlock()
+					}
+				}(instance, hook)
+			}
 		}
+	}
+
+	wg.Wait()
+
+	if errs != nil {
+		return nil, errs
 	}
 
 	return resolvedModules, nil

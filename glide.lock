@@ -1,5 +1,5 @@
 hash: 02666f5303f46d9d34b545c7055fa17744925a3ae106910fe746a26c5843fc91
-updated: 2019-04-10T14:22:03.605990348-07:00
+updated: 2019-04-10T16:04:34.185508114-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -177,7 +177,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: b630fd6fe46bcfc98f989005d8b8ec1400e60a6e
+  version: eb5bcb51f2a31c7d5141d810b70815c05d9c9146
   subpackages:
   - bpf
   - context
@@ -186,7 +186,7 @@ imports:
   - ipv4
   - ipv6
 - name: golang.org/x/tools
-  version: 8a44e74612bcf51f0d4407df3d3a8377cb99c2d8
+  version: 2538eef75904eff384a2551359968e40c207d9d2
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
