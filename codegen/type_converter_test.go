@@ -3496,3 +3496,99 @@ func TestNestedListOfListofList(t *testing.T) {
 	}
 	`), lines)
 }
+
+func TestNestedMapOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,map<NestedFoo,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,map<NestedFoo,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<map<NestedFoo,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<map<NestedFoo,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedListOfListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<list<map<NestedFoo,NestedFoo>>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<list<map<NestedFoo,NestedFoo>>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedMapOfListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,list<map<NestedFoo,NestedFoo>>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,list<map<NestedFoo,NestedFoo>>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
