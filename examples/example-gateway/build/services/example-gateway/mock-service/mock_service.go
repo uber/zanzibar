@@ -79,8 +79,18 @@ type mockService struct {
 // - "config/test.yaml" where current dir is the project root
 func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService {
 	if len(testConfigPaths) == 0 {
-		defaultPath := filepath.Join(os.Getenv("GOPATH"), "src", "github.com/uber/zanzibar/examples/example-gateway/config/test.yaml")
-		testConfigPaths = append(testConfigPaths, defaultPath)
+		configPath := filepath.Join("src", "github.com/uber/zanzibar/examples/example-gateway/config/test.yaml")
+		defaultPath := filepath.Join(os.Getenv("GOPATH"), configPath)
+
+		// This is a temporary solution for running tests using bazel
+		// TODO: need long term solution to avoid hardcoding bazel specifics
+		bazelPath := filepath.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), configPath)
+
+		testConfigPaths = append(
+			testConfigPaths,
+			defaultPath,
+			bazelPath,
+		)
 	}
 	c := config.NewRuntimeConfigOrDie(testConfigPaths, nil)
 
