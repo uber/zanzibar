@@ -1992,6 +1992,7 @@ func MustCreateTestService(t *testing.T, testConfigPaths ...string) MockService 
 		defaultPath := filepath.Join(os.Getenv("GOPATH"), configPath)
 
 		// This is a temporary solution for running tests using bazel
+		// see https://docs.bazel.build/versions/master/test-encyclopedia.html for relevant env vars
 		// TODO: need long term solution to avoid hardcoding bazel specifics
 		bazelPath := filepath.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), configPath)
 
@@ -2131,7 +2132,7 @@ func service_mockTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "service_mock.tmpl", size: 5188, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "service_mock.tmpl", size: 5283, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
