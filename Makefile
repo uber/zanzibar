@@ -150,7 +150,7 @@ test: generate lint
 test-only:
 	@rm -f ./test/.cached_binary_test_info.json
 	@echo "Running all tests..."
-	@ZANZIBAR_CACHE=1 go test -race ./test/health_test.go # preload the binary cache
+	@ZANZIBAR_CACHE=1 go test ./test/health_test.go # preload the binary cache
 	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race ./codegen/... ./runtime/... | grep -v '\[no test files\]'
 	@PATH=$(PATH):$(GOIMPORTS) ZANZIBAR_CACHE=1 go test -race $$(go list ./examples/example-gateway/... | grep -v build) | \
 	 grep -v '\[no test files\]'

@@ -168,8 +168,8 @@ func (req *ServerHTTPRequest) start() {
 // CheckHeaders verifies that request contains required headers.
 func (req *ServerHTTPRequest) CheckHeaders(headers []string) bool {
 	for _, headerName := range headers {
-		headerValue := req.httpRequest.Header.Get(headerName)
-		if headerValue == "" {
+		_, ok := req.Header.Get(headerName)
+		if !ok {
 			req.logger.Warn("Got request without mandatory header",
 				zap.String("headerName", headerName),
 			)
