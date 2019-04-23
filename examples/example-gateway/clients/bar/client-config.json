@@ -17,6 +17,7 @@
 			"ArgWithQueryHeader": "Bar::argWithQueryHeader",
 			"ArgWithManyQueryParams": "Bar::argWithManyQueryParams",
 			"ArgWithParams": "Bar::argWithParams",
+			"ArgWithParamsAndDuplicateFields": "Bar::argWithParamsAndDuplicateFields",
 			"Hello": "Bar::helloWorld",
 			"DeleteFoo": "Bar::deleteFoo",
 			"ListAndEnum": "Bar::listAndEnum",

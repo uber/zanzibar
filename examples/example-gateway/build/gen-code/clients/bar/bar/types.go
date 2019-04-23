@@ -2561,6 +2561,190 @@ func (v *QueryParamsStruct) IsSetFoo() bool {
 	return v != nil && v.Foo != nil
 }
 
+type RequestWithDuplicateType struct {
+	Request1 *BarRequest `json:"request1,omitempty"`
+	Request2 *BarRequest `json:"request2,omitempty"`
+}
+
+// ToWire translates a RequestWithDuplicateType struct into a Thrift-level intermediate
+// representation. This intermediate representation may be serialized
+// into bytes using a ThriftRW protocol implementation.
+//
+// An error is returned if the struct or any of its fields failed to
+// validate.
+//
+//   x, err := v.ToWire()
+//   if err != nil {
+//     return err
+//   }
+//
+//   if err := binaryProtocol.Encode(x, writer); err != nil {
+//     return err
+//   }
+func (v *RequestWithDuplicateType) ToWire() (wire.Value, error) {
+	var (
+		fields [2]wire.Field
+		i      int = 0
+		w      wire.Value
+		err    error
+	)
+
+	if v.Request1 != nil {
+		w, err = v.Request1.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 1, Value: w}
+		i++
+	}
+	if v.Request2 != nil {
+		w, err = v.Request2.ToWire()
+		if err != nil {
+			return w, err
+		}
+		fields[i] = wire.Field{ID: 2, Value: w}
+		i++
+	}
+
+	return wire.NewValueStruct(wire.Struct{Fields: fields[:i]}), nil
+}
+
+func _BarRequest_Read(w wire.Value) (*BarRequest, error) {
+	var v BarRequest
+	err := v.FromWire(w)
+	return &v, err
+}
+
+// FromWire deserializes a RequestWithDuplicateType struct from its Thrift-level
+// representation. The Thrift-level representation may be obtained
+// from a ThriftRW protocol implementation.
+//
+// An error is returned if we were unable to build a RequestWithDuplicateType struct
+// from the provided intermediate representation.
+//
+//   x, err := binaryProtocol.Decode(reader, wire.TStruct)
+//   if err != nil {
+//     return nil, err
+//   }
+//
+//   var v RequestWithDuplicateType
+//   if err := v.FromWire(x); err != nil {
+//     return nil, err
+//   }
+//   return &v, nil
+func (v *RequestWithDuplicateType) FromWire(w wire.Value) error {
+	var err error
+
+	for _, field := range w.GetStruct().Fields {
+		switch field.ID {
+		case 1:
+			if field.Value.Type() == wire.TStruct {
+				v.Request1, err = _BarRequest_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		case 2:
+			if field.Value.Type() == wire.TStruct {
+				v.Request2, err = _BarRequest_Read(field.Value)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+	}
+
+	return nil
+}
+
+// String returns a readable string representation of a RequestWithDuplicateType
+// struct.
+func (v *RequestWithDuplicateType) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+
+	var fields [2]string
+	i := 0
+	if v.Request1 != nil {
+		fields[i] = fmt.Sprintf("Request1: %v", v.Request1)
+		i++
+	}
+	if v.Request2 != nil {
+		fields[i] = fmt.Sprintf("Request2: %v", v.Request2)
+		i++
+	}
+
+	return fmt.Sprintf("RequestWithDuplicateType{%v}", strings.Join(fields[:i], ", "))
+}
+
+// Equals returns true if all the fields of this RequestWithDuplicateType match the
+// provided RequestWithDuplicateType.
+//
+// This function performs a deep comparison.
+func (v *RequestWithDuplicateType) Equals(rhs *RequestWithDuplicateType) bool {
+	if v == nil {
+		return rhs == nil
+	} else if rhs == nil {
+		return false
+	}
+	if !((v.Request1 == nil && rhs.Request1 == nil) || (v.Request1 != nil && rhs.Request1 != nil && v.Request1.Equals(rhs.Request1))) {
+		return false
+	}
+	if !((v.Request2 == nil && rhs.Request2 == nil) || (v.Request2 != nil && rhs.Request2 != nil && v.Request2.Equals(rhs.Request2))) {
+		return false
+	}
+
+	return true
+}
+
+// MarshalLogObject implements zapcore.ObjectMarshaler, enabling
+// fast logging of RequestWithDuplicateType.
+func (v *RequestWithDuplicateType) MarshalLogObject(enc zapcore.ObjectEncoder) (err error) {
+	if v == nil {
+		return nil
+	}
+	if v.Request1 != nil {
+		err = multierr.Append(err, enc.AddObject("request1", v.Request1))
+	}
+	if v.Request2 != nil {
+		err = multierr.Append(err, enc.AddObject("request2", v.Request2))
+	}
+	return err
+}
+
+// GetRequest1 returns the value of Request1 if it is set or its
+// zero value if it is unset.
+func (v *RequestWithDuplicateType) GetRequest1() (o *BarRequest) {
+	if v != nil && v.Request1 != nil {
+		return v.Request1
+	}
+
+	return
+}
+
+// IsSetRequest1 returns true if Request1 is not nil.
+func (v *RequestWithDuplicateType) IsSetRequest1() bool {
+	return v != nil && v.Request1 != nil
+}
+
+// GetRequest2 returns the value of Request2 if it is set or its
+// zero value if it is unset.
+func (v *RequestWithDuplicateType) GetRequest2() (o *BarRequest) {
+	if v != nil && v.Request2 != nil {
+		return v.Request2
+	}
+
+	return
+}
+
+// IsSetRequest2 returns true if Request2 is not nil.
+func (v *RequestWithDuplicateType) IsSetRequest2() bool {
+	return v != nil && v.Request2 != nil
+}
+
 type StringList []string
 
 // ToWire translates StringList into a Thrift-level intermediate

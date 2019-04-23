@@ -190,7 +190,8 @@ func walkFieldGroupsInternal(
 		field := fields[i]
 
 		if seen[field] {
-			return true
+			// Skip this field if we have already considered it
+			continue
 		}
 		seen[field] = true
 

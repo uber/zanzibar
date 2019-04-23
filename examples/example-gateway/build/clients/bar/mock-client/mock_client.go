@@ -115,6 +115,22 @@ func (mr *MockClientMockRecorder) ArgWithParams(arg0, arg1, arg2 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithParams", reflect.TypeOf((*MockClient)(nil).ArgWithParams), arg0, arg1, arg2)
 }
 
+// ArgWithParamsAndDuplicateFields mocks base method
+func (m *MockClient) ArgWithParamsAndDuplicateFields(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithParamsAndDuplicateFields_Args) (*bar.BarResponse, map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ArgWithParamsAndDuplicateFields", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*bar.BarResponse)
+	ret1, _ := ret[1].(map[string]string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ArgWithParamsAndDuplicateFields indicates an expected call of ArgWithParamsAndDuplicateFields
+func (mr *MockClientMockRecorder) ArgWithParamsAndDuplicateFields(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArgWithParamsAndDuplicateFields", reflect.TypeOf((*MockClient)(nil).ArgWithParamsAndDuplicateFields), arg0, arg1, arg2)
+}
+
 // ArgWithQueryHeader mocks base method
 func (m *MockClient) ArgWithQueryHeader(arg0 context.Context, arg1 map[string]string, arg2 *bar.Bar_ArgWithQueryHeader_Args) (*bar.BarResponse, map[string]string, error) {
 	m.ctrl.T.Helper()

@@ -864,7 +864,7 @@ func (ms *MethodSpec) setHTTPPath(httpPath string, funcSpec *compile.FunctionSpe
 			}
 
 			if !ok {
-				panic("cannot find params: " + segment)
+				panic(fmt.Sprintf("cannot find params: %s for http path %s", segment, httpPath))
 			}
 			ms.PathSegments[i].BodyIdentifier = fieldSelect
 			ms.PathSegments[i].ParamName = segment[1:]
