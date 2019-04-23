@@ -68,6 +68,11 @@ type Client interface {
 		reqHeaders map[string]string,
 		args *clientsBarBar.Bar_ArgWithParams_Args,
 	) (*clientsBarBar.BarResponse, map[string]string, error)
+	ArgWithParamsAndDuplicateFields(
+		ctx context.Context,
+		reqHeaders map[string]string,
+		args *clientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
+	) (*clientsBarBar.BarResponse, map[string]string, error)
 	ArgWithQueryHeader(
 		ctx context.Context,
 		reqHeaders map[string]string,
@@ -237,6 +242,7 @@ func NewClient(deps *module.Dependencies) Client {
 				"ArgWithManyQueryParams",
 				"ArgWithNestedQueryParams",
 				"ArgWithParams",
+				"ArgWithParamsAndDuplicateFields",
 				"ArgWithQueryHeader",
 				"ArgWithQueryParams",
 				"DeleteFoo",
@@ -753,6 +759,74 @@ func (c *barClient) ArgWithParams(
 	}
 
 	err := req.WriteJSON("GET", fullURL, headers, nil)
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	var res *zanzibar.ClientHTTPResponse
+	if c.circuitBreakerDisabled {
+		res, err = req.Do()
+	} else {
+		err = hystrix.DoC(ctx, "bar", func(ctx context.Context) error {
+			res, err = req.Do()
+			return err
+		}, nil)
+	}
+	if err != nil {
+		return defaultRes, nil, err
+	}
+
+	respHeaders := map[string]string{}
+	for k := range res.Header {
+		respHeaders[k] = res.Header.Get(k)
+	}
+
+	res.CheckOKResponse([]int{200})
+
+	switch res.StatusCode {
+	case 200:
+		var responseBody clientsBarBar.BarResponse
+		err = res.ReadAndUnmarshalBody(&responseBody)
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+		// TODO(jakev): read response headers and put them in body
+
+		return &responseBody, respHeaders, nil
+	default:
+		_, err = res.ReadAll()
+		if err != nil {
+			return defaultRes, respHeaders, err
+		}
+	}
+
+	return defaultRes, respHeaders, &zanzibar.UnexpectedHTTPError{
+		StatusCode: res.StatusCode,
+		RawBody:    res.GetRawBody(),
+	}
+}
+
+// ArgWithParamsAndDuplicateFields calls "/bar/argWithParamsAndDuplicateFields/:uuid/segment" endpoint.
+func (c *barClient) ArgWithParamsAndDuplicateFields(
+	ctx context.Context,
+	headers map[string]string,
+	r *clientsBarBar.Bar_ArgWithParamsAndDuplicateFields_Args,
+) (*clientsBarBar.BarResponse, map[string]string, error) {
+	reqUUID := zanzibar.RequestUUIDFromCtx(ctx)
+	if reqUUID != "" {
+		if headers == nil {
+			headers = make(map[string]string)
+		}
+		headers[c.requestUUIDHeaderKey] = reqUUID
+	}
+
+	var defaultRes *clientsBarBar.BarResponse
+	req := zanzibar.NewClientHTTPRequest(ctx, c.clientID, "ArgWithParamsAndDuplicateFields", c.httpClient)
+
+	// Generate full URL.
+	fullURL := c.httpClient.BaseURL + "/bar" + "/argWithParamsAndDuplicateFields" + "/" + string(r.EntityUUID) + "/segment"
+
+	err := req.WriteJSON("POST", fullURL, headers, r)
 	if err != nil {
 		return defaultRes, nil, err
 	}

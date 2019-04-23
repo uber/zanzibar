@@ -22,6 +22,11 @@ struct BarRequest {
     6: required Long longField
 }
 
+struct RequestWithDuplicateType {
+    1: optional BarRequest request1
+    2: optional BarRequest request2
+}
+
 struct BarResponse {
     1: required string stringField (
         zanzibar.http.ref = "headers.some-header-field"
@@ -251,6 +256,15 @@ service Bar {
        zanzibar.http.method = "DELETE"
        zanzibar.http.path = "/bar/foo"
        zanzibar.http.status = "200"
+    )
+
+    BarResponse argWithParamsAndDuplicateFields(
+        1: required RequestWithDuplicateType request
+        2: required string entityUUID (zanzibar.http.ref = "params.uuid")
+    ) (
+        zanzibar.http.method = "POST"
+        zanzibar.http.path = "/bar/argWithParamsAndDuplicateFields/:uuid/segment"
+        zanzibar.http.status = "200"
     )
 }
 

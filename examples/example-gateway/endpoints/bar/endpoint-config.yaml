@@ -13,6 +13,7 @@ config:
   - too_many_args.yaml
   - hello.yaml
   - list_and_enum.yaml
+  - arg_with_params_and_duplicate_fields.yaml
   rateLimit: 100
 dependencies:
   client:
