@@ -3298,3 +3298,297 @@ func TestConverterRecursiveMixedAll(t *testing.T) {
 		`),
 		lines)
 }
+
+func TestNestedMapOfList(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,list<NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,list<NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make(map[string][]*structs.NestedFoo, len(in.One))
+	for key1, value2 := range in.One {
+	out.One[key1] = make([]*structs.NestedFoo, len(value2))
+	for index3, value4 := range value2 {
+			if value4 != nil {
+				out.One[key1][index3] = &structs.NestedFoo{}
+				out.One[key1][index3].One = string(in.One[key1][index3].One)
+				out.One[key1][index3].Two = (*string)(in.One[key1][index3].Two)
+			} else {
+				out.One[key1][index3] = nil
+			}
+	}
+	}
+	`), lines)
+}
+
+func TestNestedListOfMap(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<map<string,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<map<string,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make([]map[string]*structs.NestedFoo, len(in.One))
+	for index1, value2 := range in.One {
+	out.One[index1] = make(map[string]*structs.NestedFoo, len(value2))
+	for key3, value4 := range value2 {
+			if value4 != nil {
+				out.One[index1][key3] = &structs.NestedFoo{}
+				out.One[index1][key3].One = string(in.One[index1][key3].One)
+				out.One[index1][key3].Two = (*string)(in.One[index1][key3].Two)
+			} else {
+				out.One[index1][key3] = nil
+			}
+	}
+	}
+	`), lines)
+}
+
+func TestNestedMapOfMap(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,map<string,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,map<string,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make(map[string]map[string]*structs.NestedFoo, len(in.One))
+	for key1, value2 := range in.One {
+	out.One[key1] = make(map[string]*structs.NestedFoo, len(value2))
+	for key3, value4 := range value2 {
+			if value4 != nil {
+				out.One[key1][key3] = &structs.NestedFoo{}
+				out.One[key1][key3].One = string(in.One[key1][key3].One)
+				out.One[key1][key3].Two = (*string)(in.One[key1][key3].Two)
+			} else {
+				out.One[key1][key3] = nil
+			}
+	}
+	}
+	`), lines)
+}
+
+func TestNestedListOfList(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<list<NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<list<NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make([][]*structs.NestedFoo, len(in.One))
+	for index1, value2 := range in.One {
+	out.One[index1] = make([]*structs.NestedFoo, len(value2))
+	for index3, value4 := range value2 {
+			if value4 != nil {
+				out.One[index1][index3] = &structs.NestedFoo{}
+				out.One[index1][index3].One = string(in.One[index1][index3].One)
+				out.One[index1][index3].Two = (*string)(in.One[index1][index3].Two)
+			} else {
+				out.One[index1][index3] = nil
+			}
+	}
+	}
+	`), lines)
+}
+
+func TestNestedListOfListofList(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	lines, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<list<list<NestedFoo>>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<list<list<NestedFoo>>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.NoError(t, err)
+	assertPrettyEqual(t, trim(`
+	out.One = make([][][]*structs.NestedFoo, len(in.One))
+	for index1, value2 := range in.One {
+	out.One[index1] = make([][]*structs.NestedFoo, len(value2))
+	for index3, value4 := range value2 {
+	out.One[index1][index3] = make([]*structs.NestedFoo, len(value4))
+	for index5, value6 := range value4 {
+				if value6 != nil {
+					out.One[index1][index3][index5] = &structs.NestedFoo{}
+					out.One[index1][index3][index5].One = string(in.One[index1][index3][index5].One)
+					out.One[index1][index3][index5].Two = (*string)(in.One[index1][index3][index5].Two)
+				} else {
+					out.One[index1][index3][index5] = nil
+				}
+	}
+	}
+	}
+	`), lines)
+}
+
+func TestNestedMapOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,map<NestedFoo,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,map<NestedFoo,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<map<NestedFoo,NestedFoo>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<map<NestedFoo,NestedFoo>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedListOfListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required list<list<map<NestedFoo,NestedFoo>>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required list<list<map<NestedFoo,NestedFoo>>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}
+
+func TestNestedMapOfListOfMapInvalid(t *testing.T) {
+	fieldMap := make(map[string]codegen.FieldMapperEntry)
+
+	_, err := convertTypes(
+		"Foo", "Bar",
+		`struct NestedFoo {
+ 			1: required string one
+ 			2: optional string two
+ 		}
+
+ 		struct Foo {
+ 			1: required map<string,list<map<NestedFoo,NestedFoo>>> one
+ 		}
+
+ 		struct Bar {
+ 			1: required map<string,list<map<NestedFoo,NestedFoo>>> one
+ 		}`,
+		nil,
+		fieldMap,
+	)
+
+	assert.Error(t, err)
+}

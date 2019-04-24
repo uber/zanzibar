@@ -76,6 +76,26 @@ type TypeConverter struct {
 	optionalEntries map[string]FieldMapperEntry
 }
 
+type toFieldParam struct {
+	Type       compile.TypeSpec
+	Name       string
+	Required   bool
+	Identifier string
+}
+
+type fromFieldParam struct {
+	Type            compile.TypeSpec
+	Name            string
+	Identifier      string
+	ValueIdentifier string
+}
+
+type overriddenFieldParam struct {
+	Type       compile.TypeSpec
+	Name       string
+	Identifier string
+}
+
 // NewTypeConverter returns *TypeConverter (tc)
 // @optionalEntries contains Entries that already set for tc fromFields
 // entry set in @optionalEntries, tc will not raise error when this entry
@@ -245,41 +265,40 @@ func (c *TypeConverter) genConverterForStruct(
 }
 
 func (c *TypeConverter) genConverterForList(
-	toFieldType *compile.ListSpec,
-	toField *compile.FieldSpec,
-	fromField *compile.FieldSpec,
-	overriddenField *compile.FieldSpec,
-	toIdentifier string,
-	fromIdentifier string,
-	overriddenIdentifier string,
-	keyPrefix string,
+	toField toFieldParam,
+	fromField fromFieldParam,
+	overriddenField overriddenFieldParam,
 	indent string,
 ) error {
+	toFieldType := toField.Type.(*compile.ListSpec)
+
 	typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
 	if err != nil {
 		return err
 	}
 
-	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
-	sourceIdentifier := fromIdentifier
+	valueStruct, isStruct := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.StructSpec)
+	valueList, isList := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.ListSpec)
+	valueMap, isMap := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.MapSpec)
+	sourceIdentifier := fromField.ValueIdentifier
 	checkOverride := false
 
 	sourceListID := ""
 	isOverriddenID := ""
 
-	if overriddenIdentifier != "" {
+	if overriddenField.Identifier != "" {
 		sourceListID = c.makeUniqIdentifier("sourceList")
 		isOverriddenID = c.makeUniqIdentifier("isOverridden")
 
 		// Determine which map (from or overrride) to use
-		c.appendf("%s := %s", sourceListID, overriddenIdentifier)
+		c.appendf("%s := %s", sourceListID, overriddenField.Identifier)
 		if isStruct {
 			c.appendf("%s := false", isOverriddenID)
 		}
 		// TODO(sindelar): Verify how optional thrift lists are defined.
-		c.appendf("if %s != nil {", fromIdentifier)
+		c.appendf("if %s != nil {", fromField.Identifier)
 
-		c.appendf("\t%s = %s", sourceListID, fromIdentifier)
+		c.appendf("\t%s = %s", sourceListID, fromField.Identifier)
 		if isStruct {
 			c.appendf("\t%s = true", isOverriddenID)
 		}
@@ -292,12 +311,12 @@ func (c *TypeConverter) genConverterForList(
 	if isStruct {
 		c.appendf(
 			"%s = make([]*%s, len(%s))",
-			toIdentifier, typeName, sourceIdentifier,
+			toField.Identifier, typeName, sourceIdentifier,
 		)
 	} else {
 		c.appendf(
 			"%s = make([]%s, len(%s))",
-			toIdentifier, typeName, sourceIdentifier,
+			toField.Identifier, typeName, sourceIdentifier,
 		)
 	}
 
@@ -308,14 +327,10 @@ func (c *TypeConverter) genConverterForList(
 		indexID, valID, sourceIdentifier,
 	)
 
-	if isStruct {
+	if isStruct || isList || isMap {
 		nestedIndent := "\t" + indent
 
-		if checkOverride {
-			nestedIndent = "\t" + nestedIndent
-			c.appendf("\tif %s {", isOverriddenID)
-		}
-		fromFieldType, ok := fromField.Type.(*compile.ListSpec)
+		fromFieldListType, ok := compile.RootTypeSpec(fromField.Type).(*compile.ListSpec)
 		if !ok {
 			return errors.Errorf(
 				"Could not convert field (%s): type is not list",
@@ -323,40 +338,20 @@ func (c *TypeConverter) genConverterForList(
 			)
 		}
 
-		err = c.genConverterForStruct(
-			toField.Name,
-			valueStruct,
-			toField.Required,
-			fromFieldType.ValueSpec,
-			valID,
-			keyPrefix+PascalCase(toField.Name)+"["+indexID+"]",
-			trimAnyPrefix(fromIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
-			nestedIndent,
-			nil,
-			nil,
-		)
-		if err != nil {
-			return err
-		}
-		if checkOverride {
-			c.append("\t", "} else {")
-
-			overriddenFieldType, ok := overriddenField.Type.(*compile.ListSpec)
-			if !ok {
-				return errors.Errorf(
-					"Could not convert field (%s): type is not list",
-					overriddenField.Name,
-				)
+		if isStruct {
+			if checkOverride {
+				nestedIndent = "\t" + nestedIndent
+				c.appendf("\tif %s {", isOverriddenID)
 			}
 
 			err = c.genConverterForStruct(
 				toField.Name,
 				valueStruct,
 				toField.Required,
-				overriddenFieldType.ValueSpec,
+				fromFieldListType.ValueSpec,
 				valID,
-				keyPrefix+PascalCase(toField.Name)+"["+indexID+"]",
-				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+indexID+"]",
+				trimAnyPrefix(toField.Identifier, "out.", "outOriginal.")+"["+indexID+"]",
+				trimAnyPrefix(fromField.Identifier, "in.", "inOriginal.")+"["+indexID+"]",
 				nestedIndent,
 				nil,
 				nil,
@@ -364,12 +359,77 @@ func (c *TypeConverter) genConverterForList(
 			if err != nil {
 				return err
 			}
-			c.append("\t", "}")
+			if checkOverride {
+				c.append("\t", "} else {")
+
+				overriddenFieldListType, ok := overriddenField.Type.(*compile.ListSpec)
+				if !ok {
+					return errors.Errorf(
+						"Could not convert field (%s): type is not list",
+						overriddenField.Name,
+					)
+				}
+
+				err = c.genConverterForStruct(
+					toField.Name,
+					valueStruct,
+					toField.Required,
+					overriddenFieldListType.ValueSpec,
+					valID,
+					trimAnyPrefix(toField.Identifier, "out.", "outOriginal.")+"["+indexID+"]",
+					trimAnyPrefix(overriddenField.Identifier, "in.", "inOriginal.")+"["+indexID+"]",
+					nestedIndent,
+					nil,
+					nil,
+				)
+				if err != nil {
+					return err
+				}
+				c.append("\t", "}")
+			}
+		} else if isList {
+			err = c.genConverterForList(
+				toFieldParam{
+					valueList,
+					toField.Name,
+					toField.Required,
+					toField.Identifier + "[" + indexID + "]",
+				},
+				fromFieldParam{
+					fromFieldListType.ValueSpec,
+					fromField.Name,
+					fromField.Identifier + "[" + indexID + "]",
+					valID,
+				},
+				overriddenField,
+				nestedIndent)
+			if err != nil {
+				return err
+			}
+		} else if isMap {
+			err = c.genConverterForMap(
+				toFieldParam{
+					valueMap,
+					toField.Name,
+					toField.Required,
+					toField.Identifier + "[" + indexID + "]",
+				},
+				fromFieldParam{
+					fromFieldListType.ValueSpec,
+					fromField.Name,
+					fromField.Identifier + "[" + indexID + "]",
+					valID,
+				},
+				overriddenField,
+				nestedIndent)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		c.appendf(
 			"\t%s[%s] = %s(%s)",
-			toIdentifier, indexID, typeName, valID,
+			toField.Identifier, indexID, typeName, valID,
 		)
 	}
 
@@ -378,23 +438,22 @@ func (c *TypeConverter) genConverterForList(
 }
 
 func (c *TypeConverter) genConverterForMap(
-	toFieldType *compile.MapSpec,
-	toField *compile.FieldSpec,
-	fromField *compile.FieldSpec,
-	overriddenField *compile.FieldSpec,
-	toIdentifier string,
-	fromIdentifier string,
-	overriddenIdentifier string,
-	keyPrefix string,
+	toField toFieldParam,
+	fromField fromFieldParam,
+	overriddenField overriddenFieldParam,
 	indent string,
 ) error {
+	toFieldType := toField.Type.(*compile.MapSpec)
+
 	typeName, err := c.getGoTypeName(toFieldType.ValueSpec)
 	if err != nil {
 		return err
 	}
 
-	valueStruct, isStruct := toFieldType.ValueSpec.(*compile.StructSpec)
-	sourceIdentifier := fromIdentifier
+	valueStruct, isStruct := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.StructSpec)
+	valueList, isList := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.ListSpec)
+	valueMap, isMap := compile.RootTypeSpec(toFieldType.ValueSpec).(*compile.MapSpec)
+	sourceIdentifier := fromField.ValueIdentifier
 	_, isStringKey := toFieldType.KeySpec.(*compile.StringSpec)
 	keyType := "string"
 
@@ -412,20 +471,20 @@ func (c *TypeConverter) genConverterForMap(
 	checkOverride := false
 	sourceListID := ""
 	isOverriddenID := ""
-	if overriddenIdentifier != "" {
+	if overriddenField.Identifier != "" {
 		sourceListID = c.makeUniqIdentifier("sourceList")
 		isOverriddenID = c.makeUniqIdentifier("isOverridden")
 
 		// Determine which map (from or overrride) to use
-		c.appendf("%s := %s", sourceListID, overriddenIdentifier)
+		c.appendf("%s := %s", sourceListID, overriddenField.Identifier)
 
 		if isStruct {
 			c.appendf("%s := false", isOverriddenID)
 		}
 		// TODO(sindelar): Verify how optional thrift map are defined.
-		c.appendf("if %s != nil {", fromIdentifier)
+		c.appendf("if %s != nil {", fromField.Identifier)
 
-		c.appendf("\t%s = %s", sourceListID, fromIdentifier)
+		c.appendf("\t%s = %s", sourceListID, fromField.Identifier)
 		if isStruct {
 			c.appendf("\t%s = true", isOverriddenID)
 		}
@@ -437,12 +496,12 @@ func (c *TypeConverter) genConverterForMap(
 	if isStruct {
 		c.appendf(
 			"%s = make(map[%s]*%s, len(%s))",
-			toIdentifier, keyType, typeName, sourceIdentifier,
+			toField.Identifier, keyType, typeName, sourceIdentifier,
 		)
 	} else {
 		c.appendf(
 			"%s = make(map[%s]%s, len(%s))",
-			toIdentifier, keyType, typeName, sourceIdentifier,
+			toField.Identifier, keyType, typeName, sourceIdentifier,
 		)
 	}
 
@@ -453,15 +512,10 @@ func (c *TypeConverter) genConverterForMap(
 		keyID, valID, sourceIdentifier,
 	)
 
-	if isStruct {
+	if isStruct || isList || isMap {
 		nestedIndent := "\t" + indent
 
-		if checkOverride {
-			nestedIndent = "\t" + nestedIndent
-			c.appendf("\tif %s {", isOverriddenID)
-		}
-
-		fromFieldType, ok := fromField.Type.(*compile.MapSpec)
+		fromFieldMapType, ok := compile.RootTypeSpec(fromField.Type).(*compile.MapSpec)
 		if !ok {
 			return errors.Errorf(
 				"Could not convert field (%s): type is not map",
@@ -472,48 +526,26 @@ func (c *TypeConverter) genConverterForMap(
 		toFieldKeyID := keyID
 
 		toTypeKeyName := keyType
-		fromTypeKeyName, _ := c.getGoTypeName(fromFieldType.KeySpec)
+		fromTypeKeyName, _ := c.getGoTypeName(fromFieldMapType.KeySpec)
+
 		if fromTypeKeyName != toTypeKeyName {
 			toFieldKeyID = toTypeKeyName + "(" + keyID + ")"
 		}
-		toKeyPrefix := keyPrefix + PascalCase(toField.Name) + "[" + toFieldKeyID + "]"
-		fromKeyPrefix := trimAnyPrefix(fromIdentifier, "in.", "inOriginal.") + "[" + keyID + "]"
 
-		err = c.genConverterForStruct(
-			toField.Name,
-			valueStruct,
-			toField.Required,
-			fromFieldType.ValueSpec,
-			valID,
-			toKeyPrefix,
-			fromKeyPrefix,
-			nestedIndent,
-			nil,
-			nil,
-		)
-		if err != nil {
-			return err
-		}
-
-		if checkOverride {
-			c.append("\t", "} else {")
-
-			overriddenFieldType, ok := overriddenField.Type.(*compile.MapSpec)
-			if !ok {
-				return errors.Errorf(
-					"Could not convert field (%s): type is not map",
-					overriddenField.Name,
-				)
+		if isStruct {
+			if checkOverride {
+				nestedIndent = "\t" + nestedIndent
+				c.appendf("\tif %s {", isOverriddenID)
 			}
 
 			err = c.genConverterForStruct(
 				toField.Name,
 				valueStruct,
 				toField.Required,
-				overriddenFieldType.ValueSpec,
+				fromFieldMapType.ValueSpec,
 				valID,
-				keyPrefix+PascalCase(toField.Name)+"["+keyID+"]",
-				trimAnyPrefix(overriddenIdentifier, "in.", "inOriginal.")+"["+keyID+"]",
+				trimAnyPrefix(toField.Identifier, "out.", "outOriginal.")+"["+toFieldKeyID+"]",
+				trimAnyPrefix(fromField.Identifier, "in.", "inOriginal.")+"["+keyID+"]",
 				nestedIndent,
 				nil,
 				nil,
@@ -521,19 +553,85 @@ func (c *TypeConverter) genConverterForMap(
 			if err != nil {
 				return err
 			}
-			c.append("\t", "}")
+
+			if checkOverride {
+				c.append("\t", "} else {")
+
+				overriddenFieldMapType, ok := overriddenField.Type.(*compile.MapSpec)
+				if !ok {
+					return errors.Errorf(
+						"Could not convert field (%s): type is not map",
+						overriddenField.Name,
+					)
+				}
+
+				err = c.genConverterForStruct(
+					toField.Name,
+					valueStruct,
+					toField.Required,
+					overriddenFieldMapType.ValueSpec,
+					valID,
+					trimAnyPrefix(toField.Identifier, "out.", "outOriginal.")+"["+toFieldKeyID+"]",
+					trimAnyPrefix(overriddenField.Identifier, "in.", "inOriginal.")+"["+keyID+"]",
+					nestedIndent,
+					nil,
+					nil,
+				)
+				if err != nil {
+					return err
+				}
+				c.append("\t", "}")
+			}
+		} else if isList {
+			err = c.genConverterForList(
+				toFieldParam{
+					valueList,
+					toField.Name,
+					toField.Required,
+					toField.Identifier + "[" + toFieldKeyID + "]",
+				},
+				fromFieldParam{
+					fromFieldMapType.ValueSpec,
+					fromField.Name,
+					fromField.Identifier + "[" + keyID + "]",
+					valID,
+				},
+				overriddenField,
+				nestedIndent)
+			if err != nil {
+				return err
+			}
+		} else if isMap {
+			err = c.genConverterForMap(
+				toFieldParam{
+					valueMap,
+					toField.Name,
+					toField.Required,
+					toField.Identifier + "[" + toFieldKeyID + "]",
+				},
+				fromFieldParam{
+					fromFieldMapType.ValueSpec,
+					fromField.Name,
+					fromField.Identifier + "[" + keyID + "]",
+					valID,
+				},
+				overriddenField,
+				nestedIndent)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		if keyType == "string" {
 			c.appendf(
 				"\t%s[%s] = %s(%s)",
-				toIdentifier, keyID, typeName, valID,
+				toField.Identifier, keyID, typeName, valID,
 			)
 
 		} else {
 			c.appendf(
 				"\t %s[%s(%s)] = %s(%s)",
-				toIdentifier, keyType, keyID, typeName, valID,
+				toField.Identifier, keyType, keyID, typeName, valID,
 			)
 		}
 	}
@@ -675,6 +773,13 @@ func (c *TypeConverter) genStructConverter(
 			prevKeyPrefixes = []string{}
 		}
 
+		var overriddenFieldName string
+		var overriddenFieldType compile.TypeSpec
+		if overriddenField != nil {
+			overriddenFieldName = overriddenField.Name
+			overriddenFieldType = overriddenField.Type
+		}
+
 		// Override thrift type names to avoid naming collisions between endpoint
 		// and client types.
 		switch toFieldType := compile.RootTypeSpec(toField.Type).(type) {
@@ -686,10 +791,9 @@ func (c *TypeConverter) genStructConverter(
 			*compile.EnumSpec,
 			*compile.I64Spec,
 			*compile.DoubleSpec,
-			*compile.StringSpec,
-			*compile.TypedefSpec:
+			*compile.StringSpec:
 
-			err := c.genConverterForPrimitiveOrTypedef(
+			err := c.genConverterForPrimitive(
 				toField,
 				toIdentifier,
 				fromField,
@@ -760,14 +864,23 @@ func (c *TypeConverter) genStructConverter(
 			}
 		case *compile.ListSpec:
 			err := c.genConverterForList(
-				toFieldType,
-				toField,
-				fromField,
-				overriddenField,
-				toIdentifier,
-				fromIdentifier,
-				overriddenIdentifier,
-				keyPrefix,
+				toFieldParam{
+					toFieldType,
+					toField.Name,
+					toField.Required,
+					toIdentifier,
+				},
+				fromFieldParam{
+					fromField.Type,
+					fromField.Name,
+					fromIdentifier,
+					fromIdentifier,
+				},
+				overriddenFieldParam{
+					overriddenFieldType,
+					overriddenFieldName,
+					overriddenIdentifier,
+				},
 				indent,
 			)
 			if err != nil {
@@ -775,14 +888,23 @@ func (c *TypeConverter) genStructConverter(
 			}
 		case *compile.MapSpec:
 			err := c.genConverterForMap(
-				toFieldType,
-				toField,
-				fromField,
-				overriddenField,
-				toIdentifier,
-				fromIdentifier,
-				overriddenIdentifier,
-				keyPrefix,
+				toFieldParam{
+					toFieldType,
+					toField.Name,
+					toField.Required,
+					toIdentifier,
+				},
+				fromFieldParam{
+					fromField.Type,
+					fromField.Name,
+					fromIdentifier,
+					fromIdentifier,
+				},
+				overriddenFieldParam{
+					overriddenFieldType,
+					overriddenFieldName,
+					overriddenIdentifier,
+				},
 				indent,
 			)
 			if err != nil {
@@ -999,7 +1121,7 @@ func (c *TypeConverter) assignWithOverride(
 	c.append(defaultAssign.Generate(indent, c.uninitialized, prevKeyPrefixes, c.useRecurGen))
 }
 
-func (c *TypeConverter) genConverterForPrimitiveOrTypedef(
+func (c *TypeConverter) genConverterForPrimitive(
 	toField *compile.FieldSpec,
 	toIdentifier string,
 	fromField *compile.FieldSpec,
