@@ -39,7 +39,7 @@ import:
   version: ^1.2.0
 - package: github.com/pborman/uuid
   version: ^1.1.0
-  
+
 - package: github.com/kisielk/gotool
   version: master
 - package: github.com/kisielk/errcheck
@@ -70,3 +70,6 @@ import:
 
 # Transitive dependency of fx
 - package: go.uber.org/dig
+
+- package: go.uber.org/yarpc
+  version: ^1.37.4
