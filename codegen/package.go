@@ -239,6 +239,11 @@ func (p PackageHelper) DefaultMiddlewareSpecs() map[string]*MiddlewareSpec {
 	return p.defaultMiddlewareSpecs
 }
 
+// GenCodePackage returns the file path to the idl generated code folder
+func (p PackageHelper) GenCodePackage() string {
+	return p.genCodePackage
+}
+
 // TypeImportPath returns the Go import path for types defined in a thrift file.
 func (p PackageHelper) TypeImportPath(thrift string) (string, error) {
 	if !strings.HasSuffix(thrift, ".thrift") {

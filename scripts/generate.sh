@@ -8,7 +8,7 @@ ANNOPREFIX=${1:-zanzibar}
 bash ./codegen/runner/pre-steps.sh "$PREFIX/build" "$PREFIX" "$ANNOPREFIX"
 
 start=$(cat .TMP_ZANZIBAR_TIMESTAMP_FILE.txt)
-if [ -f "$PREFIX/build.yaml" ]; then
+if [[ -f "$PREFIX/build.yaml" ]]; then
     go run codegen/runner/runner.go -config="$PREFIX/build.yaml"
 else
     go run codegen/runner/runner.go -config="$PREFIX/build.json"

@@ -36,14 +36,17 @@ import (
 	"time"
 
 	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/uber-go/tally"
 	"github.com/uber-go/tally/m3"
 	jaegerConfig "github.com/uber/jaeger-client-go/config"
 	jaegerLibTally "github.com/uber/jaeger-lib/metrics/tally"
-	tchannel "github.com/uber/tchannel-go"
+	"github.com/uber/tchannel-go"
 	"github.com/uber/zanzibar/runtime/plugins"
+	"go.uber.org/yarpc"
+	"go.uber.org/yarpc/api/transport"
+	"go.uber.org/yarpc/transport/grpc"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -100,6 +103,9 @@ type Gateway struct {
 	TChannelRouter   *TChannelRouter
 	Tracer           opentracing.Tracer
 
+	// Yarpc client dispatcher for yarpc client lifecycle management
+	YAPRCClientDispatcher *yarpc.Dispatcher
+
 	atomLevel       *zap.AtomicLevel
 	loggerFile      *os.File
 	scopeCloser     io.Closer
@@ -130,6 +136,9 @@ type DefaultDependencies struct {
 	Tracer  opentracing.Tracer
 	Config  *StaticConfig
 	Channel *tchannel.Channel
+
+	// dispatcher for managing yarpc(grpc) clients
+	YARPCClientDispatcher *yarpc.Dispatcher
 }
 
 // CreateGateway func
@@ -216,6 +225,11 @@ func CreateGateway(
 		return nil, err
 	}
 
+	// setup YARPC client dispatcher afrer metrics, logger and tracer
+	if err := gateway.setupYARPCClientDispatcher(config); err != nil {
+		return nil, err
+	}
+
 	gateway.registerPredefined()
 
 	return gateway, nil
@@ -279,6 +293,13 @@ func (gateway *Gateway) Bootstrap() error {
 	}
 
 	gateway.RootScope.Counter("startup.success").Inc(1)
+
+	err = gateway.YAPRCClientDispatcher.Start()
+	if err != nil {
+		gateway.Logger.Error("Error starting YARPC client dispatcher", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 
@@ -337,7 +358,7 @@ func (gateway *Gateway) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), gateway.ShutdownTimeout())
 	defer cancel()
 
-	ec := make(chan error, 3)
+	ec := make(chan error, 4)
 
 	if gateway.localHTTPServer != gateway.httpServer {
 		swg.Add(1)
@@ -364,6 +385,24 @@ func (gateway *Gateway) Shutdown() {
 		defer swg.Done()
 		if err := gateway.shutdownTChannelServer(ctx); err != nil {
 			ec <- errors.Wrap(err, "error shutting down tchannel server")
+		}
+	}()
+
+	// shutdown tchannel server
+	swg.Add(1)
+	go func() {
+		defer swg.Done()
+		if err := gateway.shutdownTChannelServer(ctx); err != nil {
+			ec <- errors.Wrap(err, "error shutting down tchannel server")
+		}
+	}()
+
+	// stop all grpc clients
+	swg.Add(1)
+	go func() {
+		defer swg.Done()
+		if err := gateway.YAPRCClientDispatcher.Stop(); err != nil {
+			ec <- errors.Wrap(err, "error stopping yarpc client dispatcher")
 		}
 	}()
 
@@ -736,6 +775,44 @@ func (gateway *Gateway) setupTChannel(config *StaticConfig) error {
 	gateway.tchannelServer = channel
 	gateway.TChannelRouter = NewTChannelRouter(channel, gateway)
 
+	return nil
+}
+
+func (gateway *Gateway) setupYARPCClientDispatcher(config *StaticConfig) error {
+	ip := config.MustGetString("sidecarRouter.default.grpc.ip")
+	port := config.MustGetInt("sidecarRouter.default.grpc.port")
+	address := fmt.Sprintf("%s:%d", ip, port)
+
+	clientServiceNameMapping := make(map[string]string)
+	config.MustGetStruct("grpc.clientServiceNameMapping", &clientServiceNameMapping)
+
+	// TODO: no op if there is no YARPC clients
+	outbounds := make(yarpc.Outbounds, len(clientServiceNameMapping))
+	for key, value := range clientServiceNameMapping {
+		outbounds[key] = transport.Outbounds{
+			ServiceName: value,
+			// TODO: this setup opens one TCP connection to the sidecar router per client
+			//       Is it better to share the same TCP connection among the clients?
+			Unary: grpc.NewTransport(
+				grpc.Logger(gateway.Logger),
+				grpc.Tracer(gateway.Tracer),
+			).NewSingleOutbound(address),
+		}
+	}
+
+	dispatcher := yarpc.NewDispatcher(yarpc.Config{
+		Name:      config.MustGetString("serviceName"),
+		Outbounds: outbounds,
+		Logging: yarpc.LoggingConfig{
+			Zap: gateway.Logger,
+			// TODO: set proper extractors
+		},
+		Metrics: yarpc.MetricsConfig{
+			// TODO: contextual scope
+			Tally: gateway.RootScope,
+		},
+	})
+	gateway.YAPRCClientDispatcher = dispatcher
 	return nil
 }
 
