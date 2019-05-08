@@ -53,6 +53,8 @@ metrics.m3.includeHost: false
 service.env.config: {}
 serviceName: example-gateway
 shutdown.pollInterval: 10
+sidecarRouter.default.grpc.ip: 127.0.0.1
+sidecarRouter.default.grpc.port: 4998
 sidecarRouter.default.http.calleeHeader: RPC-Service
 sidecarRouter.default.http.callerHeader: RPC-Caller
 sidecarRouter.default.http.ip: 127.0.0.1
@@ -64,3 +66,6 @@ tchannel.processName: example-gateway
 tchannel.serviceName: example-gateway
 tchannel.clients.requestUUIDHeaderKey: x-request-uuid
 useDatacenter: false
+
+gprc.clientServiceNameMapping:
+  echo: echo
