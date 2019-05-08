@@ -24,20 +24,29 @@
 package module
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
+	echoclientgenerated "github.com/uber/zanzibar/examples/example-gateway/build/clients/echo"
+	defaultexamplemiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example"
+	defaultexample2middlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example2"
+	defaultexampletchannelmiddlewaregenerated "github.com/uber/zanzibar/examples/example-gateway/build/middlewares/default/default_example_tchannel"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
 )
 
-// Dependencies contains dependencies for the echo-gateway service module
+// Dependencies contains dependencies for the bounce endpoint module
 type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
+	Default    *zanzibar.DefaultDependencies
+	Client     *ClientDependencies
+	Middleware *MiddlewareDependencies
 }
 
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bounce bounceendpointgenerated.Endpoint
-	Echo   echoendpointgenerated.Endpoint
+// ClientDependencies contains client dependencies
+type ClientDependencies struct {
+	Echo echoclientgenerated.Client
+}
+
+// MiddlewareDependencies contains middleware dependencies
+type MiddlewareDependencies struct {
+	DefaultExample         defaultexamplemiddlewaregenerated.Middleware
+	DefaultExample2        defaultexample2middlewaregenerated.Middleware
+	DefaultExampleTchannel defaultexampletchannelmiddlewaregenerated.Middleware
 }

@@ -21,23 +21,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package module
+package workflow
 
 import (
-	bounceendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/bounce"
-	echoendpointgenerated "github.com/uber/zanzibar/examples/example-gateway/build/endpoints/tchannel/echo"
+	"context"
 
 	zanzibar "github.com/uber/zanzibar/runtime"
+
+	endpointsBounceBounce "github.com/uber/zanzibar/examples/example-gateway/build/gen-code/endpoints/bounce/bounce"
 )
 
-// Dependencies contains dependencies for the echo-gateway service module
-type Dependencies struct {
-	Default  *zanzibar.DefaultDependencies
-	Endpoint *EndpointDependencies
-}
-
-// EndpointDependencies contains endpoint dependencies
-type EndpointDependencies struct {
-	Bounce bounceendpointgenerated.Endpoint
-	Echo   echoendpointgenerated.Endpoint
+// BounceBounceWorkflow defines the interface for BounceBounce workflow
+type BounceBounceWorkflow interface {
+	Handle(
+		ctx context.Context,
+		reqHeaders zanzibar.Header,
+		r *endpointsBounceBounce.Bounce_Bounce_Args,
+	) (string, zanzibar.Header, error)
 }
