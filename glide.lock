@@ -1,5 +1,5 @@
 hash: 02666f5303f46d9d34b545c7055fa17744925a3ae106910fe746a26c5843fc91
-updated: 2019-04-10T14:22:03.605990348-07:00
+updated: 2019-05-09T09:31:12.360957-07:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -22,7 +22,7 @@ imports:
 - name: github.com/fatih/structtag
   version: 76ae1d6d2117609598c7d4e8f3e938145f204e8f
 - name: github.com/golang/mock
-  version: 51421b967af1f557f93a59e0057aaf15ca02e29c
+  version: 9fa652df1129bef0e734c9cf9bf6dbae9ef3b9fa
   subpackages:
   - gomock
   - mockgen/model
@@ -77,7 +77,7 @@ imports:
   - require
   - suite
 - name: github.com/uber-go/atomic
-  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+  version: df976f2515e274675050de7b3f42545de80594fd
   subpackages:
   - utils
 - name: github.com/uber-go/tally
@@ -123,10 +123,11 @@ imports:
   - trand
   - typed
 - name: go.uber.org/atomic
-  version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
+  version: df976f2515e274675050de7b3f42545de80594fd
 - name: go.uber.org/automaxprocs
   version: 946a8391268aea0a60a86403988ff3ab4b604a83
   subpackages:
+  - internal/cgroups
   - internal/runtime
   - maxprocs
 - name: go.uber.org/dig
@@ -143,7 +144,7 @@ imports:
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/thriftrw
-  version: 4b5c9b20a122b222281c893c73e8a551aa19fb16
+  version: 8c0d4168d718dcf453a5a9538725f6e4ecf6ee3d
   subpackages:
   - ast
   - compile
@@ -168,7 +169,7 @@ imports:
   - version
   - wire
 - name: go.uber.org/zap
-  version: ff33455a0e382e8a81d14dd7c922020b6b5e7982
+  version: 27376062155ad36be76b0f12cf1572a221d3a48c
   subpackages:
   - buffer
   - internal/bufferpool
@@ -177,7 +178,7 @@ imports:
   - zapcore
   - zaptest/observer
 - name: golang.org/x/net
-  version: b630fd6fe46bcfc98f989005d8b8ec1400e60a6e
+  version: f4e77d36d62c17c2336347bb2670ddbd02d092b7
   subpackages:
   - bpf
   - context
@@ -186,7 +187,7 @@ imports:
   - ipv4
   - ipv6
 - name: golang.org/x/tools
-  version: 8a44e74612bcf51f0d4407df3d3a8377cb99c2d8
+  version: 73554e0f78058c37e5421bc48273a72400172221
   subpackages:
   - cmd/goimports
 - name: gopkg.in/validator.v2
