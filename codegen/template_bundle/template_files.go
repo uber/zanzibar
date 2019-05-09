@@ -24,6 +24,7 @@
 // codegen/templates/workflow.tmpl
 // codegen/templates/workflow_mock.tmpl
 // codegen/templates/workflow_mock_clients_type.tmpl
+// codegen/templates/yarpc_client.tmpl
 // DO NOT EDIT!
 
 package templates
@@ -3306,6 +3307,42 @@ func workflow_mock_clients_typeTmpl() (*asset, error) {
 	return a, nil
 }
 
+var _yarpc_clientTmpl = []byte(`{{- $instance := .Instance }}
+{{- $genPkg := .GenPkg }}
+{{- $clientID := $instance.InstanceName -}}
+
+package {{$instance.PackageInfo.PackageName}}
+
+import (
+	module "{{$instance.PackageInfo.ModulePackagePath}}"
+	gen "{{$genPkg}}"
+)
+
+// Client defines the {{$clientID}} client interface.
+type Client = gen.{{pascal $clientID}}YARPCClient
+
+// NewClient creates a now {{$clientID}} grpc client, panics if config for {{$clientID}} is missing.
+func NewClient(deps *module.Dependencies) Client{
+	oc := deps.Default.YARPCClientDispatcher.MustOutboundConfig("{{$clientID}}")
+	return gen.New{{pascal $clientID}}YARPCClient(oc)
+}
+`)
+
+func yarpc_clientTmplBytes() ([]byte, error) {
+	return _yarpc_clientTmpl, nil
+}
+
+func yarpc_clientTmpl() (*asset, error) {
+	bytes, err := yarpc_clientTmplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "yarpc_client.tmpl", size: 620, mode: os.FileMode(420), modTime: time.Unix(1, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -3382,6 +3419,7 @@ var _bindata = map[string]func() (*asset, error){
 	"workflow.tmpl":                      workflowTmpl,
 	"workflow_mock.tmpl":                 workflow_mockTmpl,
 	"workflow_mock_clients_type.tmpl":    workflow_mock_clients_typeTmpl,
+	"yarpc_client.tmpl":                  yarpc_clientTmpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -3449,6 +3487,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"workflow.tmpl":                      {workflowTmpl, map[string]*bintree{}},
 	"workflow_mock.tmpl":                 {workflow_mockTmpl, map[string]*bintree{}},
 	"workflow_mock_clients_type.tmpl":    {workflow_mock_clients_typeTmpl, map[string]*bintree{}},
+	"yarpc_client.tmpl":                  {yarpc_clientTmpl, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

@@ -23,6 +23,7 @@ package codegen
 import (
 	"encoding/json"
 	"net/textproto"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -301,6 +302,16 @@ func NewDefaultModuleSystem(
 		return nil, errors.Wrapf(
 			err,
 			"Error registering custom client class type",
+		)
+	}
+
+	if err := system.RegisterClassType("client", "grpc", &YarpcClientGenerator{
+		templates:     tmpl,
+		packageHelper: h,
+	}); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error registering grpc client class type",
 		)
 	}
 
@@ -769,6 +780,106 @@ func (g *CustomClientGenerator) Generate(
 	return &BuildResult{
 		Files: files,
 		Spec:  clientSpec,
+	}, nil
+}
+
+/*
+ * yarpc client generator
+ */
+
+// YarpcClientGenerator generates grpc clients.
+type YarpcClientGenerator struct {
+	templates     *Template
+	packageHelper *PackageHelper
+}
+
+// ComputeSpec returns the spec for a yarpc client
+func (g *YarpcClientGenerator) ComputeSpec(
+	instance *ModuleInstance,
+) (interface{}, error) {
+	return (*ClientSpec)(nil), nil
+}
+
+// Generate returns the yarpc client build result, which contains the files and
+// the generated client spec
+func (g *YarpcClientGenerator) Generate(
+	instance *ModuleInstance,
+) (*BuildResult, error) {
+	clientConfig := &ClassConfig{}
+	if err := yaml.Unmarshal(instance.YAMLFileRaw, &clientConfig); err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error reading yarpc client %q YAML config",
+			instance.InstanceName,
+		)
+	}
+
+	data := &struct {
+		Instance *ModuleInstance
+		GenPkg   string
+	}{
+		Instance: instance,
+	}
+
+	v, ok := clientConfig.Config["protoFile"]
+	if !ok {
+		return nil, errors.Errorf(
+			"Missing \"protoFile\" field in %q YAML config",
+			instance.InstanceName,
+		)
+	}
+	protoFile := v.(string)
+	parts := strings.Split(protoFile, "/")
+	genDir := strings.Join(parts[0:len(parts)-1], "/")
+
+	data.GenPkg = path.Join(
+		g.packageHelper.GenCodePackage(),
+		genDir,
+	)
+
+	client, err := g.templates.ExecTemplate(
+		"yarpc_client.tmpl",
+		data,
+		g.packageHelper,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error executing YARPC client template for %q",
+			instance.InstanceName,
+		)
+	}
+
+	// When it is possible to generate structs for all module types, the
+	// module system will do this transparently. For now we are opting in
+	// on a per-generator basis.
+	dependencies, err := GenerateDependencyStruct(
+		instance,
+		g.packageHelper,
+		g.templates,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Error generating dependencies struct for %q %q",
+			instance.ClassName,
+			instance.InstanceName,
+		)
+	}
+
+	baseName := filepath.Base(instance.Directory)
+	clientFilePath := baseName + ".go"
+
+	files := map[string][]byte{
+		clientFilePath: client,
+	}
+
+	if dependencies != nil {
+		files["module/dependencies.go"] = dependencies
+	}
+	return &BuildResult{
+		Files: files,
+		Spec:  (*ClientSpec)(nil),
 	}, nil
 }
 
